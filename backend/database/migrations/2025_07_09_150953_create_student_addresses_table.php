@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('guardian_addresses', function (Blueprint $table) {
-            $table->id('guardian_address_id');
-            $table->unsignedBigInteger('guardian_id');
+        Schema::create('student_addresses', function (Blueprint $table) {
+            $table->id('student_address_id');
+            $table->string('student_id', 30)->nullable(); 
             $table->string('street', 100)->nullable();
             $table->string('village', 100)->nullable();
             $table->string('district', 100)->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('province', 100)->nullable();
             $table->string('postal_code', 10)->nullable();
             $table->text('other')->nullable();
-            $table->foreign('guardian_id')->references('guardian_id')->on('guardians')->onDelete('cascade');
+            $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
         });
     }
 
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('guardian_addresses');
+        Schema::dropIfExists('student_addresses');
     }
 };

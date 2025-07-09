@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('parents', function (Blueprint $table) {
-            $table->dropForeign(['father_city_id']);
-            $table->dropForeign(['mother_city_id']);
-            $table->dropColumn(['father_address', 'father_city_id', 'mother_address', 'mother_city_id']);
+        Schema::create('residence_halls', function (Blueprint $table) {
+            $table->id('residence_id');
+            $table->enum('type', ['BOYS DORMITORY', 'GIRLS DORMITORY', 'NON RESIDENCE HALL']);
+            $table->enum('policy_signed', ['SIGNED', 'NOT SIGNED']);
         });
     }
 
@@ -23,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('parents', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('residence_halls');
     }
 };

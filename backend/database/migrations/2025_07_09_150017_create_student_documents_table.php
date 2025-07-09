@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('student_documents', function (Blueprint $table) {
             $table->id('document_id');
-            $table->unsignedBigInteger('enrollment_id');
+            $table->unsignedBigInteger('enrollment_id')->nullable();
             $table->string('file_path', 255);
             $table->string('document_type', 50);
             $table->timestamp('uploaded_at')->useCurrent();
-            $table->foreign('enrollment_id')->references('enrollment_id')->on('enrollments')->onDelete('cascade');
+            $table->foreign('enrollment_id')->references('enrollment_id')->on('enrollments')->onDelete('set null');
         });
     }
 

@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('residence_halls', function (Blueprint $table) {
-            $table->id('residence_id');
-            $table->enum('type', ['BOYS DORMITORY','GIRLS DORMITORY','NON RESIDENCE HALL']);
-            $table->enum('policy_signed', ['SIGNED','NOT SIGNED']);
+        Schema::create('transportations', function (Blueprint $table) {
+            $table->id('transport_id');
+            $table->enum('type', ['OWN CAR', 'SCHOOL BUS']);
+            $table->text('pickup_point')->nullable();
+            $table->enum('policy_signed', ['SIGNED', 'NOT SIGNED']);
         });
     }
 
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('residence_halls');
+        Schema::dropIfExists('transportations');
     }
 };

@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('class_id');
             $table->string('class_name', 10);
             $table->string('level', 20);
-            $table->unsignedBigInteger('section_id');
-            $table->foreign('section_id')->references('section_id')->on('sections')->onDelete('cascade');
+            $table->unsignedBigInteger('section_id')->nullable();
+            $table->foreign('section_id')->references('section_id')->on('sections')->onDelete('set null');
         });
     }
 

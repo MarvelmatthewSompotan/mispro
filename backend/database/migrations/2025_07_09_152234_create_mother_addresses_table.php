@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('mother_addresses', function (Blueprint $table) {
             $table->id('mother_address_id');
-            $table->unsignedBigInteger('parent_id');
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('street', 100)->nullable();
             $table->string('village', 100)->nullable();
             $table->string('district', 100)->nullable();
@@ -22,8 +22,7 @@ return new class extends Migration
             $table->string('province', 100)->nullable();
             $table->string('postal_code', 10)->nullable();
             $table->text('other')->nullable();
-
-            $table->foreign('parent_id')->references('parent_id')->on('parents')->onDelete('cascade');
+            $table->foreign('parent_id')->references('parent_id')->on('parents')->onDelete('set null');
         });
     }
 

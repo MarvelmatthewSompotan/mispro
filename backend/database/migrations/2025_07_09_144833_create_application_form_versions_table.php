@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('application_form_versions', function (Blueprint $table) {
             $table->id('version_id');
-            $table->unsignedBigInteger('application_id');
-            $table->dateTime('updated_at');
+            $table->unsignedBigInteger('application_id')->nullable();
+            $table->integer('version')->default(1); 
+            $table->dateTime('updated_at')->nullable();
             $table->string('updated_by', 100)->nullable();
             $table->text('notes')->nullable();
-            $table->json('data_snapshot');
-            $table->foreign('application_id')->references('application_id')->on('application_forms')->onDelete('cascade');
+            $table->json('data_snapshot')->nullable();
+            $table->foreign('application_id')->references('application_id')->on('application_forms')->onDelete('set null');
         });
     }
 
