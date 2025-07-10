@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('student_discount_id');
             $table->unsignedBigInteger('enrollment_id')->nullable();
             $table->unsignedBigInteger('discount_type_id')->nullable();
-            $table->decimal('value_percentage', 5, 2);
             $table->text('notes')->nullable();
             $table->foreign('enrollment_id')->references('enrollment_id')->on('enrollments')->onDelete('set null');
             $table->foreign('discount_type_id')->references('discount_type_id')->on('discount_types')->onDelete('set null');

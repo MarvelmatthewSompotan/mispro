@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('discount_types', function (Blueprint $table) {
-            $table->id('discount_type_id');
-            $table->string('name', 100);
-            $table->text('notes')->nullable();
+        Schema::create('majors', function (Blueprint $table) {
+            $table->id('major_id');
+            $table->enum('name', ['No Major', 'Social', 'Science']);
         });
     }
 
@@ -23,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('discount_types');
+        Schema::dropIfExists('majors');
     }
 };
