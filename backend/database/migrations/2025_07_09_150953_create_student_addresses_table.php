@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('street', 100)->nullable();
             $table->string('village', 100)->nullable();
             $table->string('district', 100)->nullable();
-            $table->string('rt_rw', 20)->nullable();
+            $table->string('rt', 20)->nullable();
+            $table->string('rw', 20)->nullable();
             $table->string('city_regency', 100)->nullable();
             $table->string('province', 100)->nullable();
             $table->string('postal_code', 10)->nullable();
