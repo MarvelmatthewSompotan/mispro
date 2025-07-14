@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id('class_id');
-            $table->string('class_name', 10);
-            $table->string('level', 20);
+            $table->string('class_name', 25);
+            $table->unsignedTinyInteger('grade')->nullable();
             $table->unsignedBigInteger('section_id')->nullable();
+            $table->unsignedBigInteger('major_id')->nullable();
             $table->foreign('section_id')->references('section_id')->on('sections')->onDelete('set null');
+            $table->foreign('major_id')->references('major_id')->on('majors')->onDelete('set null');
         });
     }
 

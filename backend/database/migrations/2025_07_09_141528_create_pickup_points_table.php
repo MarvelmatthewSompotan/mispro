@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transportations', function (Blueprint $table) {
-            $table->id('transport_id');
-            $table->enum('type', ['OWN CAR', 'SCHOOL BUS']);
-            $table->text('pickup_point')->nullable();
-            $table->enum('policy_signed', ['SIGNED', 'NOT SIGNED']);
+        Schema::create('pickup_points', function (Blueprint $table) {
+            $table->id('pickup_point_id');
+            $table->string('name', 200);
         });
     }
 
@@ -24,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transportations');
+        Schema::dropIfExists('pickup_points');
     }
 };
