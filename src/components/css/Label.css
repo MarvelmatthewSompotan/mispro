@@ -1,0 +1,12 @@
+.atom-label {
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+  display: block;
+  color: #222;
+}
+@media (max-width: 600px) {
+  .atom-label {
+    font-size: 1rem;
+  }
+}

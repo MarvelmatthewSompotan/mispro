@@ -1,0 +1,28 @@
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 32px;
+}
+.logo-img {
+  width: 90%;
+  align-self: stretch;
+  height: 77px;
+  object-fit: contain;
+  aspect-ratio: 400/77.73;
+  display: block;
+}
+@media (max-width: 900px) {
+  .logo-container {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .logo-img {
+    max-width: 120px;
+  }
+}
+@media (max-width: 600px) {
+  .logo-img {
+    max-width: 90px;
+  }
+}
