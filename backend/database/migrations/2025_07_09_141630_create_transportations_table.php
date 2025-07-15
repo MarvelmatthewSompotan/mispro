@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transportations', function (Blueprint $table) {
             $table->id('transport_id');
-            $table->enum('type', ['Own Car', 'School Bus']);
+            $table->enum('type', ['Own car', 'School bus']);
             $table->unsignedBigInteger('pickup_point_id')->nullable();
             $table->enum('Transportation policy', ['Signed', 'Not Signed']);
             $table->foreign('pickup_point_id')->references('pickup_point_id')->on('pickup_points')->onDelete('set null');
