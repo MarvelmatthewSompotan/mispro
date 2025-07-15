@@ -17,8 +17,7 @@ class Program extends Model
     protected $fillable = [
         'program_id',
         'name',
-        'mode',
-        'notes',
+        'other'
     ];
 
     public function enrollments() : HasMany

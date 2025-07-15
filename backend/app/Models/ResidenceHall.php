@@ -16,7 +16,6 @@ class ResidenceHall extends Model
     protected $fillable = [
         'residence_id',
         'type',
-        'policy_signed'
     ];
 
     public function enrollments() : HasMany

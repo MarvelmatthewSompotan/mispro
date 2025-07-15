@@ -16,9 +16,8 @@ class Transportation extends Model
 
     protected $fillable = [
         'transport_id',
-        'type',
-        'pickup_point',
-        'policy_signed',
+        'pickup_point_id',
+        'type'
     ];
 
     public function students() : HasManyThrough
@@ -39,6 +38,15 @@ class Transportation extends Model
             Enrollment::class,
             'transport_id',
             'transport_id',
+        );
+    }
+
+    public function pickupPoint(): BelongsTo
+    {
+        return $this->belongsTo(
+            PickupPoint::class, 
+            'pickup_point_id', 
+            'pickup_point_id'
         );
     }
 }

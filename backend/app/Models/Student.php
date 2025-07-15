@@ -58,10 +58,11 @@ class Student extends Model
         'email', 
         'previous_school', 
         'religion', 
-        'registration_number', 
+        'registration_id', 
         'student_status', 
         'academic_status', 
-        'account_status'
+        'enrollment_status',
+        'age'
     ];
 
     // Direct Relationships
@@ -283,6 +284,11 @@ class Student extends Model
     public function getMajorAttribute()
     {
         return $this->schoolClass->map->major->unique('major_id');
+    }
+
+    public function getPickupPointAttribute()
+    {
+        return $this->transportations->map->pickupPoint->unique('pickup_point_id');
     }
 
 };

@@ -17,7 +17,6 @@ class StudentDiscount extends Model
         'student_discount_id',
         'enrollment_id',
         'discount_type_id',
-        'value_percentage',
         'notes',
     ];
 
