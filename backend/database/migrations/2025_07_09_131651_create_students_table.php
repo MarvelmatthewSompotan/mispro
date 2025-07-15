@@ -22,15 +22,15 @@ return new class extends Migration
             $table->string('citizenship', 100)->nullable();
             $table->string('place_of_birth', 100);
             $table->date('date_of_birth');
-            $table->enum('gender', ['Male', 'Female']);
+            $table->enum('gender', ['MALE', 'FEMALE']);
             $table->string('phone_number', 20)->nullable();
             $table->string('email', 100)->nullable();
             $table->string('previous_school', 100);
             $table->string('religion', 30)->nullable();
             $table->string('registration_number', 100)->nullable();
-            $table->enum('enrollment_status', ['Active','Transferee','Graduate','Unregister']);
+            $table->enum('enrollment_status', ['ACTIVE','TRANSFEREE','GRADUATE','UNREGISTER']);
             $table->enum('student_status', ['New','Old','Transferee']);
-            $table->enum('academic_status', ['Regular','Sit-in','Other']);
+            $table->enum('academic_status', ['REGULAR','SIT-IN','OTHER']);
             $table->timestamp('registration_date')->useCurrent();
         });
     }
