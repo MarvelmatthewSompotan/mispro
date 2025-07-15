@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('school_years', function (Blueprint $table) {
             $table->id('school_year_id');
-            $table->string('academic_year', 9);
+            $table->year('start_year');
+            $table->year('end_year',);
         });
     }
 

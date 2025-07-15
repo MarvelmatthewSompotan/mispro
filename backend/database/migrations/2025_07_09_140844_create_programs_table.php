@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('programs', function (Blueprint $table) {
             $table->id('program_id');
-            $table->enum('name', ['UAN','A BEKA','CAMBRIDGE','OTHERS']);
+            $table->enum('name', ['UAN','A Beka','Cambrige','Others']);
             $table->string('mode', 20)->nullable();
             $table->text('notes')->nullable();
         });
