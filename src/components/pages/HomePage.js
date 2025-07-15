@@ -12,6 +12,7 @@ const HomePage = () => (
     <Sidebar />
     <div className="home-main">
       <div className="home-inner">
+        {/* <HeaderHome /> */}
         <div className="header-home">
           <div className="header-home-text">
             <div className="header-home-title">Hello Sarah!</div>

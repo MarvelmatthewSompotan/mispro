@@ -1,12 +1,56 @@
 import React from "react";
+import homeIcon from "../../../assets/image/Home.png";
+import studentIcon from "../../../assets/image/StudentList.png";
+import teacherIcon from "../../../assets/image/TeacherList.png";
+import homeroomIcon from "../../../assets/image/HomeroomList.png";
+import registrationIcon from "../../../assets/image/Registration.png";
 import "../../css/Sidebar.css";
 
 const menu = [
-  { icon: "🏠", label: "Home" },
-  { icon: "👨‍🎓", label: "Student List" },
-  { icon: "👩‍🏫", label: "Teacher List" },
-  { icon: "🏫", label: "Homeroom List" },
-  { icon: "📝", label: "Registration" },
+  {
+    icon: <img src={homeIcon} alt="Home" style={{ width: 24, height: 24 }} />,
+    label: "Home",
+  },
+  {
+    icon: (
+      <img
+        src={studentIcon}
+        alt="Student List"
+        style={{ width: 24, height: 24 }}
+      />
+    ),
+    label: "Student List",
+  },
+  {
+    icon: (
+      <img
+        src={teacherIcon}
+        alt="Teacher List"
+        style={{ width: 24, height: 24 }}
+      />
+    ),
+    label: "Teacher List",
+  },
+  {
+    icon: (
+      <img
+        src={homeroomIcon}
+        alt="Homeroom List"
+        style={{ width: 24, height: 24 }}
+      />
+    ),
+    label: "Homeroom List",
+  },
+  {
+    icon: (
+      <img
+        src={registrationIcon}
+        alt="Registration"
+        style={{ width: 24, height: 24 }}
+      />
+    ),
+    label: "Registration",
+  },
 ];
 
 const Sidebar = () => (
