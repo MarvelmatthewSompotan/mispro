@@ -19,32 +19,23 @@ class Major extends Model
         'name',
     ];
 
-    /**
-     * Relasi: major (1) → many classes
-     */
     public function schoolClasses(): HasMany
     {
         return $this->hasMany(SchoolClass::class, 'major_id', 'major_id');
     }
 
-    /**
-     * Relasi: major (1) → many enrollments melalui classes
-     */
     public function enrollments(): HasManyThrough
     {
         return $this->hasManyThrough(
             Enrollment::class,
             SchoolClass::class,
-            'major_id', // FK di SchoolClass
-            'class_id', // FK di Enrollment
-            'major_id', // PK di Major
-            'class_id'  // PK di SchoolClass
+            'major_id', 
+            'class_id', 
+            'major_id', 
+            'class_id'  
         );
     }
 
-    /**
-     * Accessor: Ambil semua student yang terkait dengan major ini
-     */
     public function getStudentsAttribute()
     {
         return Student::whereIn(

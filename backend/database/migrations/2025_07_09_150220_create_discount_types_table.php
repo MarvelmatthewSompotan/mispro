@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('discount_types', function (Blueprint $table) {
             $table->id('discount_type_id');
             $table->string('name', 100);
-            $table->text('notes')->nullable();
         });
     }
 
