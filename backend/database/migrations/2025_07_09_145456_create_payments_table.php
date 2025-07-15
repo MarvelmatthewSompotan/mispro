@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('student_id', 30)->nullable();
             $table->enum('type', ['Tuition Fee', 'Residence Hall']);
             $table->enum('method', ['Full Payment', 'Installment']);
-            $table->enum('financial_policy & Contract', ['Signed', 'Not Signed']);
+            $table->enum('financial_policy_contract', ['Signed', 'Not Signed']);
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
         });
     }
