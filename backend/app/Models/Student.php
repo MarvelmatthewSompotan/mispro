@@ -70,7 +70,7 @@ class Student extends Model
         return $this->hasMany(Enrollment::class, 'student_id', 'student_id');
     }
 
-    public function parent() : HasOne 
+    public function studentParent() : HasOne 
     {
         return $this->hasOne(StudentParent::class, 'student_id', 'student_id');
     }
