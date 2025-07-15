@@ -1,24 +1,31 @@
-import logo from './logo.svg';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import SidebarMenu from './components/molecules/SidebarMenu';
+import Home from './components/pages/Home';
 import './App.css';
+
+// Placeholder pages
+const StudentList = () => <div style={{ padding: 32 }}>Student List Page</div>;
+const TeacherList = () => <div style={{ padding: 32 }}>Teacher List Page</div>;
+const HomeroomList = () => <div style={{ padding: 32 }}>Homeroom List Page</div>;
+const Registration = () => <div style={{ padding: 32 }}>Registration Page</div>;
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#fafbff' }}>
+        <SidebarMenu />
+        <main style={{ flex: 1, padding: 32, position: 'relative' }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/students" element={<StudentList />} />
+            <Route path="/teachers" element={<TeacherList />} />
+            <Route path="/homerooms" element={<HomeroomList />} />
+            <Route path="/registration" element={<Registration />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 
