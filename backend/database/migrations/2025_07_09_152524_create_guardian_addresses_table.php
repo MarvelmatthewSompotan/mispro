@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('rw', 20)->nullable();
             $table->string('city_regency', 100)->nullable();
             $table->string('province', 100)->nullable();
-            $table->string('postal_code', 10)->nullable();
             $table->text('other')->nullable();
             $table->foreign('guardian_id')->references('guardian_id')->on('guardians')->onDelete('set null');
         });
