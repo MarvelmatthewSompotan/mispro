@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Section;
 use App\Models\Enrollment;
+use App\Models\Major;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,9 +18,8 @@ class SchoolClass extends Model
 
     protected $fillable = [
         'class_id',
-        'class_name',
-        'level',
         'section_id',
+        'grade',
     ];
 
     public function enrollment() : HasMany
@@ -50,6 +50,6 @@ class SchoolClass extends Model
             'class_id',
             'student_id',
         );
-    }
+    } 
 
 }
