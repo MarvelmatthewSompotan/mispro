@@ -2,13 +2,14 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SidebarMenu from './components/molecules/SidebarMenu';
 import Home from './components/pages/Home';
+import Print from './components/pages/Print';
+import Registration from './components/pages/Registration';
 import './App.css';
 
 // Placeholder pages
 const StudentList = () => <div style={{ padding: 32 }}>Student List Page</div>;
 const TeacherList = () => <div style={{ padding: 32 }}>Teacher List Page</div>;
 const HomeroomList = () => <div style={{ padding: 32 }}>Homeroom List Page</div>;
-const Registration = () => <div style={{ padding: 32 }}>Registration Page</div>;
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/teachers" element={<TeacherList />} />
             <Route path="/homerooms" element={<HomeroomList />} />
             <Route path="/registration" element={<Registration />} />
+            <Route path="/print" element={<Print />} />
           </Routes>
         </main>
       </div>
