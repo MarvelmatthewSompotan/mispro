@@ -20,6 +20,8 @@ return new class extends Migration
             $table->unsignedBigInteger('program_id')->nullable();
             $table->unsignedBigInteger('residence_id')->nullable();
             $table->unsignedBigInteger('transport_id')->nullable();
+            $table->enum('residence_hall_policy', ['Signed', 'Not Signed']);
+            $table->enum('transportation_policy', ['Signed', 'Not Signed']);
             $table->boolean('is_active')->default(true);
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
             $table->foreign('class_id')->references('class_id')->on('classes')->onDelete('set null');

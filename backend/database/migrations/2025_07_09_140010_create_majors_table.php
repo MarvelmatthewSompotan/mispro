@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('majors', function (Blueprint $table) {
             $table->id('major_id');
-            $table->enum('name', ['No Major', 'Social', 'Science']);
+            $table->enum('name', ['NO MAJOR', 'SOCIAL', 'SCIENCE']);
         });
     }
 

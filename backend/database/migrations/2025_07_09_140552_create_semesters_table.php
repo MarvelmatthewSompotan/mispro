@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('semesters', function (Blueprint $table) {
             $table->id('semester_id');
-            $table->enum('name', ['ODD', 'EVEN']);
-            $table->tinyInteger('number');
+            $table->enum('name', ['One','Two']);
+            $table->enum('number', ['1','2']);
         });
     }
 

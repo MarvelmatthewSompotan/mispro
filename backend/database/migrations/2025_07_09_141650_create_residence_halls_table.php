@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('residence_halls', function (Blueprint $table) {
             $table->id('residence_id');
-            $table->enum('type', ['BOYS DORMITORY', 'GIRLS DORMITORY', 'NON RESIDENCE HALL']);
-            $table->enum('policy_signed', ['SIGNED', 'NOT SIGNED']);
+            $table->enum('type', ['Boys dormitory', 'Girls dormitory', 'Non-Residence hall']);
         });
     }
 

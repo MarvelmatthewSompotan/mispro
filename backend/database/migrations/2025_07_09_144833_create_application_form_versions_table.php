@@ -17,7 +17,6 @@ return new class extends Migration
             $table->integer('version')->default(1); 
             $table->dateTime('updated_at')->nullable();
             $table->string('updated_by', 100)->nullable();
-            $table->text('notes')->nullable();
             $table->json('data_snapshot')->nullable();
             $table->foreign('application_id')->references('application_id')->on('application_forms')->onDelete('set null');
         });
