@@ -52,4 +52,15 @@ class SchoolClass extends Model
         );
     } 
 
+    public function major(): BelongsTo 
+    {
+        return $this->belongsTo(
+            Major::class,
+            'major_id',
+            'major_id',
+
+        );
+
+    }
+
 }

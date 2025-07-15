@@ -113,4 +113,9 @@ class Enrollment extends Model
         return $this->schoolClass ? $this->schoolClass->section : null;
     }
 
+    public function getMajorAttribute()
+    {
+        return $this->schoolClass ? $this->schoolClass->major : null;
+    }
+
 }

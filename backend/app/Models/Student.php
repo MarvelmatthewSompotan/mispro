@@ -280,5 +280,9 @@ class Student extends Model
         );
     }
 
+    public function getMajorAttribute()
+    {
+        return $this->schoolClass->map->major->unique('major_id');
+    }
 
 };
