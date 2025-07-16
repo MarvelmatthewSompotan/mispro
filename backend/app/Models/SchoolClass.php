@@ -20,10 +20,10 @@ class SchoolClass extends Model
         'class_id',
         'section_id',
         'grade',
-        'major_id',
+        'major_id'
     ];
 
-    public function enrollments() : HasMany
+    public function enrollment() : HasMany
     {
         return $this->hasMany(
             Enrollment::class,
