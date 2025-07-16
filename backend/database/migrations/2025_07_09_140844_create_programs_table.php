@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('programs', function (Blueprint $table) {
             $table->id('program_id');
-            $table->enum('name', ['UAN','A Beka','Cambrige','Oxford', 'Other']);
-            $table->string('other', 50)->nullable();
+            $table->string('name', 50);
         });
     }
 
