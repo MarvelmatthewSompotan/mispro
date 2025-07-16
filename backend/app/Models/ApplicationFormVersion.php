@@ -20,7 +20,6 @@ class ApplicationFormVersion extends Model
         'application_id',
         'version',
         'updated_by',
-        'notes',
         'data_snapshot'
     ];
 

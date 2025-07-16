@@ -35,7 +35,9 @@ class Enrollment extends Model
         'program_id',
         'transport_id',
         'residence_id',
-        'is_active',
+        'residence_hall_policy',
+        'transportation_policy',
+        'is_active'
     ];
 
     public function applicationForm() : HasOne
@@ -111,6 +113,16 @@ class Enrollment extends Model
     public function getSectionAttribute()
     {
         return $this->schoolClass ? $this->schoolClass->section : null;
+    }
+
+    public function getMajorAttribute()
+    {
+        return $this->schoolClass ? $this->schoolClass->major : null;
+    }
+
+    public function getPickupPoint()
+    {
+        return $this->transportation ? $this->transportation->pickupPoint : null;
     }
 
 }

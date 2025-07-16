@@ -18,10 +18,10 @@ class StudentAddress extends Model
         'street',
         'village',
         'district',
-        'rt_rw',
+        'rt',
+        'rw',
         'city_regency',
         'province',
-        'postal_code',
         'other'
     ];
 

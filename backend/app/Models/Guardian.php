@@ -20,7 +20,8 @@ class Guardian extends Model
         'guardian_id',
         'guardian_name',
         'relation_to_student',
-        'phone_number'
+        'phone_number',
+        'guardian_email'
     ];
 
     public function students() : BelongsToMany

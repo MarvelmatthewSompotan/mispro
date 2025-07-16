@@ -19,7 +19,8 @@ class StudentPhoto extends Model
         'photo_id',
         'enrollment_id',
         'file_path',
-        'document_type',
+        'is_active',
+        'document_type'
     ];
     
     public function enrollment() : BelongsTo

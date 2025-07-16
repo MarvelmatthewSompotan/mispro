@@ -12,14 +12,14 @@ class StudentDocument extends Model
     protected $primaryKey = 'document_id';
     public $timestamps = true;
 
-    const CREATED_AT = null;
-    const UPDATED_AT = 'updated_at';
+    const CREATED_AT = 'uploaded_at';
+    const UPDATED_AT = 'uploaded_at';
 
     protected $fillable = [
         'document_id',
         'enrollment_id ',
         'file_path',
-        'document_type',
+        'document_type'
     ];
     
     public function enrollment() : BelongsTo

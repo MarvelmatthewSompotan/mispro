@@ -17,8 +17,7 @@ class Payment extends Model
         'student_id',
         'type',
         'method',
-        'amount',
-        'policy_signed'
+        'financial_policy_contract'
     ];
 
     public function student() : BelongsTo
