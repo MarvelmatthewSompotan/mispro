@@ -13,11 +13,5 @@ Route::get('/students/{id}', [RegistrationController::class, 'show']);
 
 Route::get('/students/{id}/history', [RegistrationController::class, 'history']);
 
-Route::prefix('master')->group(function () {
-  Route::get('/sections', [MasterDataController::class, 'getSections']);
-  Route::get('/programs', [MasterDataController::class, 'getPrograms']);
-  Route::get('/majors', [MasterDataController::class, 'getMajors']);
-  Route::get('/transportations', [MasterDataController::class, 'getTransportations']);
-  Route::get('/residences', [MasterDataController::class, 'getResidenceHalls']);
-})
+Route::get('/registration-option', [MasterDataController::class, 'getRegistrationOption']);
 ?>

@@ -11,28 +11,22 @@ use App\Models\Transportation;
 
 class MasterDataController extends Controller
 {
-    public function getSections()
+    public function getRegistrationOption()
     {
-        return response()->json(Section::all());
-    }
-
-    public function getPrograms()
-    {
-        return response()->json(Program::all());
-    }
-
-    public function getMajors()
-    {
-        return response()->json(Major::all());
-    }
-
-    public function getTransportations()
-    {
-        return response()->json(Transportation::all());
-    }
-
-    public function getResidenceHalls()
-    {
-        return response()->json(ResidenceHall::all());
+        return response()->json([
+            'programs' => Program::all(),
+            'sections' => Section::all(),
+            'majors' => Major::all(),
+            'transportations' => Transportation::select('transport_id', 'type')->get(),
+            'residence_halls' => ResidenceHall::all(),
+            'student_status' => ['New', 'Old', 'Transferee'],
+            'academic_status' => ['REGULAR', 'SIT-IN', 'OTHER'],
+            'gender' => ['MALE', 'FEMALE'],
+            'transportation_policy' => ['Signed', 'Not Signed'],
+            'residence_hall_policy' => ['Signed', 'Not Signed'],
+            'payment_type' => ['Tuition Fee', 'Residence Hall'],
+            'payment_method' => ['Full Payment', 'Installment'],
+            'financial_policy_contract' => ['Signed', 'Not Signed'],
+        ]);
     }
 }
