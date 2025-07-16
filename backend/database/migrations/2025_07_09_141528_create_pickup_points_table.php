@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pickup_points', function (Blueprint $table) {
             $table->id('pickup_point_id');
-            $table->string('name', 200);
+            $table->string('name', 200)->nullable();
         });
     }
 
