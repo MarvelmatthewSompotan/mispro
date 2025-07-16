@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('sections', function (Blueprint $table) {
             $table->id('section_id');
-            $table->enum('name', ['ECP', 'Elementary School', 'Middle School', 'Hight School']);
+            $table->enum('name', ['ECP', 'Elementary School', 'Middle School', 'High School']);
         });
     }
 
