@@ -19,6 +19,7 @@ class StudentPhoto extends Model
         'photo_id',
         'enrollment_id',
         'file_path',
+        'is_active',
         'document_type'
     ];
     
