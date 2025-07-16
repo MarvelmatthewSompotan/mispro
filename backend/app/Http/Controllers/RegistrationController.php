@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Major;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\Guardian;
+use App\Models\PickupPoint;
 use App\Models\SchoolClass;
 use App\Models\DiscountType;
 use Illuminate\Http\Request;
@@ -60,7 +62,7 @@ class RegistrationController extends Controller
                 'district' => 'required|string',
                 'city_regency' => 'required|string',
                 'province' => 'required|string',
-                'other' => 'nullable|text',
+                'other' => 'nullable|string',
 
                 // program, class, major
                 'section_id' => 'required|exists:sections,section_id',
@@ -94,7 +96,7 @@ class RegistrationController extends Controller
                 'father_address_district' => 'nullable|string',
                 'father_address_city_regency' => 'nullable|string',
                 'father_address_province' => 'nullable|string',
-                'father_address_other' => 'nullable|text',
+                'father_address_other' => 'nullable|string',
 
                 // student parent (mother)
                 'mother_name' => 'nullable|string',
@@ -109,12 +111,12 @@ class RegistrationController extends Controller
                 'mother_address_district' => 'nullable|string',
                 'mother_address_city_regency' => 'nullable|string',
                 'mother_address_province' => 'nullable|string',
-                'mother_address_other' => 'nullable|text',
+                'mother_address_other' => 'nullable|string',
 
                 // student parent (guardian)
                 'guardian_name' => 'nullable|string',
                 'relation_to_student' => 'nullable|string',
-                'phone_number' => 'nullable|string',
+                'guardian_phone' => 'nullable|string',
                 'guardian_email' => 'nullable|email',
                 'guardian_address_street' => 'nullable|string',
                 'guardian_address_rt' => 'nullable|string',
@@ -123,7 +125,7 @@ class RegistrationController extends Controller
                 'guardian_address_district' => 'nullable|string',
                 'guardian_address_city_regency' => 'nullable|string',
                 'guardian_address_province' => 'nullable|string',
-                'guardian_address_other' => 'nullable|text',
+                'guardian_address_other' => 'nullable|string',
                 
                 // payment
                 'payment_type' => 'required|in:Tuition Fee,Residence Hall',
@@ -132,7 +134,7 @@ class RegistrationController extends Controller
 
                 // discount
                 'discount_name' => 'nullable|string',
-                'discount_notes' => 'nullable|text',
+                'discount_notes' => 'nullable|string',
                 
                 // school year, semester, registration date
                 'school_year_id' => 'required|integer',
@@ -164,8 +166,11 @@ class RegistrationController extends Controller
                 $transportation->save();
             }
 
+            
             // student
+            $generatedId = Student::max('student_id') + 1;
             $student = Student::create([
+                'student_id' => $generatedId,
                 'student_status' => $validated['student_status'],
                 'first_name' => $validated['first_name'],
                 'middle_name' => $validated['middle_name'],
@@ -289,7 +294,9 @@ class RegistrationController extends Controller
             }   
 
             // data application form
-            $nextVersion = ApplicationForm::where('student_id', $student->student_id)->max('version') + 1;
+            $enrollmentIdS = $student->enrollments()->pluck('enrollment_id');
+            $maxVersion = ApplicationForm::whereIn('enrollment_id', $enrollmentIdS)->max('version');
+            $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
             $applicationForm = ApplicationForm::create([
                 'enrollment_id' => $enrollment->enrollment_id,
                 'status' => 'Submitted',
