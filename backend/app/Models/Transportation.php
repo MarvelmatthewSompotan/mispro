@@ -43,7 +43,7 @@ class Transportation extends Model
         );
     }
 
-       public function pickupPoint(): BelongsTo
+    public function pickupPoint(): BelongsTo
     {
         return $this->belongsTo(
             PickupPoint::class,
