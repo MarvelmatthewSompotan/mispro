@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Major;
 use App\Models\Program;
 use App\Models\Section;
+use App\Models\Semester;
+use App\Models\SchoolYear;
 use App\Models\ResidenceHall;
 use App\Models\Transportation;
 use Illuminate\Database\Seeder;
@@ -40,6 +42,25 @@ class MasterDataSeeder extends Seeder
         // residence
         foreach(['Boys dormitory', 'Girls dormitory', 'Non-Residence hall'] as $type) {
             ResidenceHall::create(['type' => $type]);
+        }
+
+        // semester
+        $semesters = [
+            ['name' => 'One', 'number' => '1'],
+            ['name' => 'Two', 'number' => '2'],
+        ];
+
+        foreach ($semesters as $data) {
+            Semester::create($data);
+        }
+
+        // school year
+        $years = [
+            ['start_year' => '2024', 'end_year' => '2025'],
+            ['start_year' => '2025', 'end_year' => '2026'],
+        ];
+        foreach($years as $year) {
+            SchoolYear::create($year);
         }
     }
 }
