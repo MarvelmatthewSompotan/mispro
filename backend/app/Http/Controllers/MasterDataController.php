@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Major;
 use App\Models\Program;
 use App\Models\Section;
+use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use App\Models\ResidenceHall;
 use App\Models\Transportation;
@@ -19,6 +20,7 @@ class MasterDataController extends Controller
             'majors' => Major::all(),
             'transportations' => Transportation::select('transport_id', 'type')->get(),
             'residence_halls' => ResidenceHall::all(),
+            'class' => SchoolClass::with(['section', 'major'])->get(),
             'student_status' => ['New', 'Old', 'Transferee'],
             'academic_status' => ['REGULAR', 'SIT-IN', 'OTHER'],
             'gender' => ['MALE', 'FEMALE'],
