@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './Print.module.css';
 import kop from '../../assets/LogoMIS_Print.png';
+import StudentsInformation_Content from '../Print_Content/StudentsInformation_Content/StudentsInformation_Content';
 
 function Print() {
   return (
@@ -46,7 +47,7 @@ function Print() {
           <div className={styles.header1}>
             <b className={styles.applicationForm}>STUDENT’S INFORMATION</b>
           </div>
-          {/* <StudentInformationSection /> */}
+          <StudentsInformation_Content />
         </div>
       </div>
     </div>
