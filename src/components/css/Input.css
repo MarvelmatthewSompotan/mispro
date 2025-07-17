@@ -10,10 +10,34 @@
   transition: border 0.2s;
   box-sizing: border-box;
 }
+
 .atom-input:focus {
   border: 1.5px solid #2a4374;
   background: #eaf2fb;
 }
+
+.atom-input,
+.registration-input {
+  border-bottom: none !important;
+}
+
+.atom-input:focus,
+.registration-input:focus {
+  border-bottom: none !important;
+}
+
+.login-form input.registration-input,
+.login-form .atom-input {
+  border-bottom: none !important;
+  border-radius: 5px !important;
+}
+
+.login-form input.registration-input:focus,
+.login-form .atom-input:focus {
+  border-bottom: none !important;
+  border-radius: 5px !important;
+}
+
 @media (max-width: 600px) {
   .atom-input {
     font-size: 0.95rem;

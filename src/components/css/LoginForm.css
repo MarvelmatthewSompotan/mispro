@@ -7,7 +7,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
   box-sizing: border-box;
   align-items: flex-start;
   align-self: stretch;
@@ -31,4 +31,25 @@
     padding: 10px 2px 10px 2px;
     font-size: 0.95rem;
   }
+}
+.login-form input[type="email"].registration-input:placeholder-shown,
+.login-form input[type="password"].registration-input:placeholder-shown {
+  background-color: #e4eefa !important;
+}
+.login-form input.registration-input:placeholder-shown {
+  background-color: #e4eefa !important;
+}
+.login-form input.registration-input {
+  width: 100% !important;
+  height: 50px !important;
+  box-sizing: border-box;
+  padding-left: 16px !important;
+}
+.login-form input.registration-input::placeholder {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  color: #bbb;
+  opacity: 1;
+  text-decoration: none !important;
+  border-bottom: none !important;
 }

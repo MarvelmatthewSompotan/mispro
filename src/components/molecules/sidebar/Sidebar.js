@@ -1,4 +1,5 @@
 import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import homeIcon from "../../../assets/image/Home.png";
 import studentIcon from "../../../assets/image/StudentList.png";
 import teacherIcon from "../../../assets/image/TeacherList.png";
@@ -10,6 +11,7 @@ const menu = [
   {
     icon: <img src={homeIcon} alt="Home" style={{ width: 24, height: 24 }} />,
     label: "Home",
+    path: "/home",
   },
   {
     icon: (
@@ -20,6 +22,7 @@ const menu = [
       />
     ),
     label: "Student List",
+    path: "/students",
   },
   {
     icon: (
@@ -30,6 +33,7 @@ const menu = [
       />
     ),
     label: "Teacher List",
+    path: "/teachers",
   },
   {
     icon: (
@@ -40,6 +44,7 @@ const menu = [
       />
     ),
     label: "Homeroom List",
+    path: "/homerooms",
   },
   {
     icon: (
@@ -50,23 +55,30 @@ const menu = [
       />
     ),
     label: "Registration",
+    path: "/registration",
   },
 ];
 
-const Sidebar = () => (
-  <aside className="sidebar">
-    <nav className="sidebar-menu">
-      {menu.map((item, idx) => (
-        <div
-          className={`sidebar-menu-item${idx === 0 ? " active" : ""}`}
-          key={item.label}
-        >
-          <span className="sidebar-menu-icon">{item.icon}</span>
-          <span className="sidebar-menu-label">{item.label}</span>
-        </div>
-      ))}
-    </nav>
-  </aside>
-);
+const Sidebar = () => {
+  const location = useLocation();
+  return (
+    <aside className="sidebar">
+      <nav className="sidebar-menu">
+        {menu.map((item) => (
+          <Link
+            to={item.path}
+            key={item.label}
+            className={`sidebar-menu-item${
+              location.pathname === item.path ? " active" : ""
+            }`}
+          >
+            <span className="sidebar-menu-icon">{item.icon}</span>
+            <span className="sidebar-menu-label">{item.label}</span>
+          </Link>
+        ))}
+      </nav>
+    </aside>
+  );
+};
 
 export default Sidebar;

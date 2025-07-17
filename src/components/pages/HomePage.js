@@ -1,5 +1,5 @@
 import React from "react";
-import HeaderBar from "../molecules/header/HeaderBar";
+
 import Sidebar from "../molecules/sidebar/Sidebar";
 import StatCard from "../molecules/statCard/StatCard";
 import ColorGrid from "../molecules/colorGrid/ColorGrid";
@@ -8,7 +8,7 @@ import "../css/HomePage.css";
 
 const HomePage = () => (
   <div className="home-root">
-    <HeaderBar />
+  
     <Sidebar />
     <div className="home-main">
       <div className="home-inner">

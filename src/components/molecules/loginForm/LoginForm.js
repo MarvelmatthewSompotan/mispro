@@ -4,6 +4,7 @@ import Checkbox from "../../atoms/checkbox/Checkbox";
 import Button from "../../atoms/button/Button";
 import Label from "../../atoms/label/Label";
 import "../../css/LoginForm.css";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const [form, setForm] = useState({
@@ -11,6 +12,8 @@ const LoginForm = () => {
     password: "",
     staySignedIn: false,
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -22,7 +25,7 @@ const LoginForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: handle login
+    navigate("/home"); // redirect ke halaman utama setelah login
   };
 
   return (

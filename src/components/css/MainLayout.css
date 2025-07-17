@@ -1,0 +1,43 @@
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  flex-shrink: 0;
+}
+
+.main-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.main-content {
+  flex: 1;
+  padding: 32px 24px 24px 24px; /* Atas, kanan, bawah, kiri */
+  margin-top: 64px; /* Jika header fixed, beri margin-top setinggi header */
+  box-sizing: border-box;
+  background: #f9f9f9;
+  min-height: 100vh;
+}
+
+.page-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 32px 24px;
+  box-sizing: border-box;
+}
+@media (max-width: 900px) {
+  .page-container {
+    padding: 16px 4px;
+    max-width: 100%;
+  }
+}
