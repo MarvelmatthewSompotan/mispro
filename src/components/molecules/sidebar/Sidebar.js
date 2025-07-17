@@ -59,10 +59,18 @@ const menu = [
   },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ open, onClose }) => {
   const location = useLocation();
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${open ? " sidebar-open" : ""}`}>
+      {/* Tombol close hanya muncul di mobile */}
+      <button
+        className="sidebar-close-btn"
+        onClick={onClose}
+        aria-label="Close sidebar"
+      >
+        &times;
+      </button>
       <nav className="sidebar-menu">
         {menu.map((item) => (
           <Link
