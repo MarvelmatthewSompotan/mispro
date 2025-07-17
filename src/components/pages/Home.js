@@ -2,12 +2,9 @@ import React from 'react';
 import WelcomeBanner from '../molecules/WelcomeBanner';
 import StatCard from '../molecules/StatCard';
 import ColorGrid from '../molecules/ColorGrid';
-import Avatar from '../atoms/Avatar';
-import userAvatar from '../../assets/user.png'; // Placeholder, ganti jika ada gambar user
 
 const Home = () => (
   <>
-    {/* Avatar user kanan atas dihilangkan karena sudah ada di HeaderBar */}
     <div style={{ maxWidth: 1200, margin: '0 auto', paddingTop: 90 }}>
       <div style={{ marginBottom: 32 }}>
         <WelcomeBanner name="Sarah" />

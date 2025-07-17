@@ -14,9 +14,9 @@ const HomeroomList = () => <div style={{ padding: 32 }}>Homeroom List Page</div>
 const Main = () => {
   const location = useLocation();
   if (location.pathname === '/print') {
-    // Render Print tanpa wrapper/flex agar tidak responsif
     return <Print />;
   }
+
   return (
     <div>
       <HeaderBar />
