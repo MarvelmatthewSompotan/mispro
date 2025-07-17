@@ -17,8 +17,7 @@ class SchoolYear extends Model
 
     protected $fillable = [
         'school_year_id',
-        'start_year',
-        'end_year'
+        'year',
     ];
 
     public function students() : HasManyThrough 
