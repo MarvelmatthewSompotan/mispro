@@ -7,6 +7,7 @@ use App\Models\Program;
 use App\Models\Section;
 use App\Models\Semester;
 use App\Models\SchoolYear;
+use App\Models\SchoolClass;
 use App\Models\ResidenceHall;
 use App\Models\Transportation;
 use Illuminate\Database\Seeder;
@@ -55,12 +56,59 @@ class MasterDataSeeder extends Seeder
         }
 
         // school year
-        $years = [
-            ['start_year' => '2024', 'end_year' => '2025'],
-            ['start_year' => '2025', 'end_year' => '2026'],
-        ];
+        $years = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030'];
         foreach($years as $year) {
-            SchoolYear::create($year);
+            SchoolYear::create(['year' => $year]);
+        }
+
+        $grades = ['N', 'K1', 'K2', '1','2','3','4','5','6','7','8','9','10','11','12'];
+        foreach ($grades as $grade) {
+            // Konversi angka string jadi integer (jika bisa)
+            $gradeInt = is_numeric($grade) ? (int)$grade : null;
+
+            if (in_array($grade, ['N', 'K1', 'K2'])) {
+                // TK (Section ID: 1, Major ID: 1)
+                SchoolClass::firstOrCreate([
+                    'grade' => $grade,
+                    'section_id' => 1,
+                    'major_id' => 1,
+                ]);
+            } elseif ($gradeInt >= 1 && $gradeInt <= 6) {
+                // SD (Section ID: 2, Major ID: 1)
+                SchoolClass::firstOrCreate([
+                    'grade' => $grade,
+                    'section_id' => 2,
+                    'major_id' => 1,
+                ]);
+            } elseif ($gradeInt >= 7 && $gradeInt <= 8) {
+                // Middle School (7–8) (Section ID: 3, Major ID: 1)
+                SchoolClass::firstOrCreate([
+                    'grade' => $grade,
+                    'section_id' => 3,
+                    'major_id' => 1,
+                ]);
+            } elseif ($gradeInt === 9) {
+                // Grade 9 (Section ID: 3, Major ID: 2 & 3)
+                foreach ([2, 3] as $majorId) {
+                    SchoolClass::firstOrCreate([
+                        'grade' => $grade,
+                        'section_id' => 3,
+                        'major_id' => $majorId,
+                    ]);
+                }
+            } elseif ($gradeInt >= 10 && $gradeInt <= 12) {
+                // High School (Section ID: 4, Major ID: 2 & 3)
+                foreach ([2, 3] as $majorId) {
+                    SchoolClass::firstOrCreate([
+                        'grade' => $grade,
+                        'section_id' => 4,
+                        'major_id' => $majorId,
+                    ]);
+                }
+            }
         }
     }
+
+
 }
+
