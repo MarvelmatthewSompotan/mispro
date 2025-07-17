@@ -1,8 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import Icon from '../atoms/Icon';
-import logo from '../../assets/logo.png';
-import logoMis from '../../assets/logo-mis-f.png';
 import homeIcon from '../../assets/Home-icon.png';
 import studentIcon from '../../assets/StudentList-icon.png';
 import teacherIcon from '../../assets/TeacherList-icon.png';
@@ -20,10 +18,6 @@ const menus = [
 
 const SidebarMenu = () => (
   <aside className="sidebar-menu">
-    <div className="sidebar-menu-logo">
-      <Icon src={logo} alt="Logo" style={{ width: 48, marginRight: 12 }} />
-      <img src={logoMis} alt="Logo MIS" style={{ width: 200, height: 48, objectFit: 'contain' }} />
-    </div>
     <nav>
       <ul className="sidebar-menu-list">
         {menus.map((menu) => (

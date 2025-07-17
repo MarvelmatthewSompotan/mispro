@@ -7,11 +7,8 @@ import userAvatar from '../../assets/user.png'; // Placeholder, ganti jika ada g
 
 const Home = () => (
   <>
-    {/* Avatar user kanan atas */}
-    <div style={{ position: 'absolute', top: 32, right: 32 }}>
-      <Avatar src={userAvatar} alt="User" size={48} />
-    </div>
-    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+    {/* Avatar user kanan atas dihilangkan karena sudah ada di HeaderBar */}
+    <div style={{ maxWidth: 1200, margin: '0 auto', paddingTop: 90 }}>
       <div style={{ marginBottom: 32 }}>
         <WelcomeBanner name="Sarah" />
       </div>

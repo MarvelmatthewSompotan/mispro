@@ -1,25 +1,56 @@
 import React from 'react';
-import kop from '../../assets/KOP.png';
 import styles from './Print.module.css';
+import kop from '../../assets/LogoMIS_Print.png';
 
-const Print = () => {
+function Print() {
   return (
-    <div style={{ padding: 32 }}>
-      <img src={kop} alt="Header KOP" className={styles.headerKop} />
-      <div className={styles.title}>
-        APPLICATION FORM
+    <div className={styles.printPageA4}>
+      <div className={styles.header}>
+        <div className={styles.headerRow}>
+          <img src={kop} alt="Header KOP" className={styles.headerKop} />
+          <div className={styles.schoolInfo}>
+            <div className={styles.schoolName}><b>MANADO INDEPENDENT SCHOOL</b></div>
+            <div className={styles.schoolAddress}>Jl. Walanda Maramis, Kolongan, North Minahasa 95371, North Sulawesi, Indonesia.</div>
+            <div className={styles.schoolAddress}>PO BOX 1627 Manado 95016. Telp: +62 (431) 892-252, 893-300; Fax +62 (431) 892-678</div>
+            <div className={styles.schoolAddress}>Website: www.mis-mdo.sch.id; Email: info@mis-mdo.sch.id</div>
+          </div>
+        </div>
+        <div className={styles.title}>
+          <b className={styles.applicationForm}>APPLICATION FORM</b>
+        </div>
+        <div className={styles.formInfo}>
+          <div className={styles.dateParent}>
+            <b className={styles.applicationForm}>Date:</b>
+            <b className={styles.applicationForm}>12 September 2025</b>
+          </div>
+          <div className={styles.semesterParent}>
+            <b className={styles.applicationForm}>Semester:</b>
+            <b className={styles.applicationForm}>1 (One)</b>
+          </div>
+          <div className={styles.semesterParent}>
+            <b className={styles.applicationForm}>School Year:</b>
+            <b className={styles.applicationForm}>2025/2026</b>
+          </div>
+          <div className={styles.semesterParent}>
+            <b className={styles.applicationForm}>Registration Number:</b>
+            <b className={styles.applicationForm}>7466</b>
+          </div>
+          <div className={styles.registrationIdParent}>
+            <b className={styles.applicationForm}>Registration ID:</b>
+            <b className={styles.applicationForm}>001/RF NO-HS/XI-25</b>
+          </div>
+        </div>
       </div>
-      <div className={styles.infoBar}>
-        <span>Date: <span>12 September 2025</span></span>
-        <span>Semester: <span>1 (One)</span></span>
-        <span>School Year: <span>2025/2026</span></span>
-        <span>Registration Number: <span>7466</span></span>
-        <span>Registration ID: <span>001/RF NO-HS/XI-25</span></span>
+      <div className={styles.form}>
+        <div className={styles.studentsInformation}>
+          <div className={styles.header1}>
+            <b className={styles.applicationForm}>STUDENT’S INFORMATION</b>
+          </div>
+          {/* <StudentInformationSection /> */}
+        </div>
       </div>
-      <h1>Print Page</h1>
-      <p>This is the Print page content.</p>
     </div>
   );
-};
+}
 
 export default Print; 

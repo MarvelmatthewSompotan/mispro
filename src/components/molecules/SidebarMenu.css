@@ -4,6 +4,8 @@
   padding: 24px;
   min-height: 100vh;
   box-sizing: border-box;
+  margin-top: 76px;
+  width: 280px;
 }
 .sidebar-menu-logo {
   display: flex;
