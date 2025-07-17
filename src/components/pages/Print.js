@@ -4,6 +4,7 @@ import kop from '../../assets/LogoMIS_Print.png';
 import StudentsInformationContent from '../Print_Content/StudentsInformation_Content/StudentsInformation_Content';
 import ProgramContent from '../Print_Content/Program_Content/Program_Content';
 import FacilitiesContent from '../Print_Content/Facilities_Content/Facilities_Content';
+import ParentsGuardianInformationContent from '../Print_Content/ParentsGuardianInformation_Content/ParentsGuardianInformation_Content';
 
 function Print() {
   return (
@@ -62,6 +63,24 @@ function Print() {
             <b className={styles.applicationForm}>FACILITIES</b>
           </div>
           <FacilitiesContent />
+        </div>
+        <div className={styles.parentsguardianInformation}>
+          <div className={styles.header1}>
+            <b className={styles.applicationForm}>PARENT / GUARDIAN INFORMATION</b>
+          </div>
+          <ParentsGuardianInformationContent />
+        </div>
+        <div className={styles.termOfPayment}>
+          <div className={styles.header1}>
+            <b className={styles.applicationForm}>TERM OF PAYMENT</b>
+          </div>
+          {/* Tambahkan konten term of payment di sini */}
+        </div>
+        <div className={styles.pledge}>
+          <div className={styles.header1}>
+            <b className={styles.applicationForm}>PLEDGE</b>
+          </div>
+          {/* Tambahkan konten pledge di sini */}
         </div>
       </div>
     </div>
