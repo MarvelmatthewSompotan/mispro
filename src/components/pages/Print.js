@@ -5,6 +5,7 @@ import StudentsInformationContent from '../Print_Content/StudentsInformation_Con
 import ProgramContent from '../Print_Content/Program_Content/Program_Content';
 import FacilitiesContent from '../Print_Content/Facilities_Content/Facilities_Content';
 import ParentsGuardianInformationContent from '../Print_Content/ParentsGuardianInformation_Content/ParentsGuardianInformation_Content';
+import TermofPaymentContent from '../Print_Content/TermofPayment_Content/TermofPayment_Content';
 
 function Print() {
   return (
@@ -74,7 +75,7 @@ function Print() {
           <div className={styles.header1}>
             <b className={styles.applicationForm}>TERM OF PAYMENT</b>
           </div>
-          {/* Tambahkan konten term of payment di sini */}
+          <TermofPaymentContent />
         </div>
         <div className={styles.pledge}>
           <div className={styles.header1}>
