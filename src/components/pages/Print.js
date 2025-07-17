@@ -3,6 +3,7 @@ import styles from './Print.module.css';
 import kop from '../../assets/LogoMIS_Print.png';
 import StudentsInformationContent from '../Print_Content/StudentsInformation_Content/StudentsInformation_Content';
 import ProgramContent from '../Print_Content/Program_Content/Program_Content';
+import FacilitiesContent from '../Print_Content/Facilities_Content/Facilities_Content';
 
 function Print() {
   return (
@@ -55,6 +56,12 @@ function Print() {
             <b className={styles.applicationForm}>PROGRAM</b>
           </div>
           <ProgramContent />
+        </div>
+        <div className={styles.facilities}>
+          <div className={styles.header1}>
+            <b className={styles.applicationForm}>FACILITIES</b>
+          </div>
+          <FacilitiesContent />
         </div>
       </div>
     </div>
