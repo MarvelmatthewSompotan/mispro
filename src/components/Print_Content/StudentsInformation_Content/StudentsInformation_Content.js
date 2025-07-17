@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './StudentsInformation_Content.module.css';
 
-function StudentsInformation_Content() {
+function StudentsInformationContent() {
   return (
     <div className={styles.content}>
       <div className={styles.sec1}>
@@ -114,4 +114,4 @@ function StudentsInformation_Content() {
   );
 }
 
-export default StudentsInformation_Content; 
+export default StudentsInformationContent; 

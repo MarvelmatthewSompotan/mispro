@@ -1051,3 +1051,12 @@
   color: #000;
   font-family: Inter;
 } 
+
+.program {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+} 
