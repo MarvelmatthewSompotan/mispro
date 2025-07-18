@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './Print.module.css';
 import kop from '../../assets/LogoMIS_Print.png';
+import footer from '../../assets/Footer.png';
 import StudentsInformationContent from '../Print_Content/StudentsInformation_Content/StudentsInformation_Content';
 import ProgramContent from '../Print_Content/Program_Content/Program_Content';
 import FacilitiesContent from '../Print_Content/Facilities_Content/Facilities_Content';
@@ -8,6 +9,7 @@ import ParentsGuardianInformationContent from '../Print_Content/ParentsGuardianI
 import TermofPaymentContent from '../Print_Content/TermofPayment_Content/TermofPayment_Content';
 import PledgeContent from '../Print_Content/Pledge_Content/Pledge_Content';
 import SignatureContent from '../Print_Content/Signature_Content/Signature_Content';
+import OtherDetailContent from '../Print_Content/OtherDetail_Content/OtherDetail_Content';
 
 function Print() {
   return (
@@ -87,6 +89,14 @@ function Print() {
         </div>
         <div className={styles.signature}>
           <SignatureContent />
+        </div>
+        <div className={styles.otherDetail}>
+          <OtherDetailContent />
+        </div>
+      </div>
+      <div className={styles.footer}>
+        <div className={styles.footerRow}>
+          <img src={footer} alt="Footer" className={styles.footerImg} />
         </div>
       </div>
     </div>
