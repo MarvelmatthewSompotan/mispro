@@ -21,8 +21,10 @@ const PopUpForm = ({ onClose, onCreate }) => {
         <div className={styles.createNewRegistration}>
           Create new registration form
         </div>
+
         <div className={styles.frameParent}>
-          <div className={styles.schoolYearWrapper}>
+          {/* School Year Field */}
+          <div className={styles.fieldWrapper}>
             <select
               className={styles.schoolYear}
               value={schoolYear}
@@ -34,7 +36,9 @@ const PopUpForm = ({ onClose, onCreate }) => {
               <option value="2024/2025">2024/2025</option>
             </select>
           </div>
-          <div className={styles.schoolYearWrapper}>
+
+          {/* Semester Field */}
+          <div className={styles.fieldWrapper}>
             <select
               className={styles.semester}
               value={semester}
@@ -46,9 +50,11 @@ const PopUpForm = ({ onClose, onCreate }) => {
               <option value="Semester 2">Semester 2</option>
             </select>
           </div>
-          <div className={styles.schoolYearWrapper}>
+
+          {/* Date Field */}
+          <div className={styles.fieldWrapper}>
             <input
-              className={styles.schoolYear}
+              className={styles.dateField}
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -56,6 +62,7 @@ const PopUpForm = ({ onClose, onCreate }) => {
             />
           </div>
         </div>
+
         <div className={styles.bAddSubjectParent}>
           <div
             className={styles.bAddSubject}

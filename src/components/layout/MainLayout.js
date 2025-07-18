@@ -15,8 +15,12 @@ const MainLayout = ({ children }) => {
       {sidebarOpen && (
         <div className="sidebar-overlay" onClick={closeSidebar} />
       )}
-      <Sidebar open={sidebarOpen} onClose={closeSidebar} />
-      <div className="main-area">
+      <Sidebar
+        open={sidebarOpen}
+        onClose={closeSidebar}
+        closed={!sidebarOpen}
+      />
+      <div className={`main-area${!sidebarOpen ? " sidebar-closed" : ""}`}>
         <HeaderBar onHamburgerClick={toggleSidebar} />
         <div className="main-content">
           <div className="main-layout-container">{children}</div>

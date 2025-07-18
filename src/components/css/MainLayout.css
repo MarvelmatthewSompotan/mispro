@@ -19,7 +19,7 @@
 .main-content {
   flex: 1;
   padding: 0;
-  margin-top: 76px; /* Tetap beri margin-top sesuai tinggi header-bar agar tidak ketutup */
+  margin-top: 20px; /* Reduced from 76px to bring content closer to top */
   box-sizing: border-box;
   background: #f9f9f9;
   min-height: 100vh;
@@ -32,13 +32,6 @@
   .sidebar {
     width: 60px;
     min-width: 60px;
-  }
-  .main-area {
-    width: 100vw;
-  }
-  .main-content {
-    margin-left: 0;
-    width: 100vw;
   }
 }
 @media (max-width: 768px) {

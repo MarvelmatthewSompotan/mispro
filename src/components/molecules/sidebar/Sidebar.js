@@ -59,10 +59,14 @@ const menu = [
   },
 ];
 
-const Sidebar = ({ open, onClose }) => {
+const Sidebar = ({ open, onClose, closed }) => {
   const location = useLocation();
   return (
-    <aside className={`sidebar${open ? " sidebar-open" : ""}`}>
+    <aside
+      className={`sidebar${open ? " sidebar-open" : ""}${
+        closed ? " sidebar-closed" : ""
+      }`}
+    >
       {/* Tombol close hanya muncul di mobile */}
       <button
         className="sidebar-close-btn"
