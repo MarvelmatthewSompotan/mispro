@@ -62,7 +62,9 @@ class Student extends Model
         'student_status', 
         'academic_status', 
         'enrollment_status',
-        'age'
+        'age',
+        'nik',
+        'kitas',
     ];
 
     // Direct Relationships

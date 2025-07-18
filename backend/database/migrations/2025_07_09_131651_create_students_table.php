@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('nickname', 20)->nullable();
             $table->string('family_rank', 10)->nullable();
             $table->string('citizenship', 100)->nullable();
+            $table->bigInteger('nik')->nullable();
+            $table->string('kitas', 11)->nullable();
             $table->string('place_of_birth', 100);
             $table->date('date_of_birth');
             $table->unsignedTinyInteger('age')->nullable();
