@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use session;
+use Carbon\Carbon;
 use App\Models\Major;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\Guardian;
+use App\Models\Enrollment;
+use App\Models\SchoolYear;
 use App\Models\PickupPoint;
 use App\Models\SchoolClass;
 use App\Models\DiscountType;
@@ -17,6 +21,8 @@ use App\Models\Transportation;
 use App\Models\ApplicationForm;
 use Illuminate\Support\Facades\DB;
 use App\Models\ApplicationFormVersion;
+use Illuminate\Support\Facades\Validator;
+
 
 class RegistrationController extends Controller
 {
@@ -29,15 +35,156 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Start registration process with initial context
      */
+    public function startRegistration(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'start_year' => 'required|string',
+            'end_year' => 'required|string',
+            'semester_id' => 'required|integer|exists:semesters,semester_id',
+            'registration_date' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        session([
+            'registration_context' => $validated
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Initial registration context saved successfully.',
+            'data' => $validated
+        ], 200);
+    }
+
+    /**
+     * Get current registration context
+     */
+    public function getRegistrationContext()
+    {
+        $context = session('registration_context');
+
+        if (!$context) {
+            return response()->json([
+                'success' => false,
+                'error' => 'No registration context found. Please complete Step 1 first.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $context
+        ], 200);
+    }
+
+    /**
+     * Clear registration context
+     */
+    public function clearRegistrationContext()
+    {
+        session()->forget('registration_context');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration context cleared successfully.'
+        ], 200);
+    }
+
+
+    private function generateStudentId($schoolYearId, $sectionId, $majorId)
+    {
+        $schoolYear = SchoolYear::findOrFail($schoolYearId);
+        $startYear = explode('/', $schoolYear->year)[0]; // contoh: "2025/2026" => "2025"
+        $yearCode = substr($startYear, -2);              // "25"
+
+        $prefix = "{$yearCode}{$sectionId}{$majorId}";   // contoh: 2511 (25, section 1, major 1)
+
+        // Ambil student_id terakhir yang memakai prefix ini
+        $latest = Student::where('student_id', 'LIKE', "{$prefix}%")
+            ->orderByDesc('student_id')
+            ->value('student_id');
+
+        if ($latest) {
+            // Ambil nomor urut dari belakang (4 digit terakhir)
+            $lastNumber = (int)substr($latest, -4);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        $number = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        return "{$prefix}{$number}"; // hasil akhir misal: 25110001
+    }
+
+
+    private function getSectionRegistrationNumber($section_id)
+    {
+        $count = DB::transaction(function () use ($section_id) {
+            return DB::table('students')
+                ->join('enrollments', 'students.student_id', '=', 'enrollments.student_id')
+                ->join('classes', 'enrollments.class_id', '=', 'classes.class_id')
+                ->where('classes.section_id', $section_id)
+                ->lockForUpdate()
+                ->count();
+        });
+
+        $number = ($count % 999) + 1;
+
+        return str_pad($number, 3, '0', STR_PAD_LEFT);
+    }
+
+    private function formatRegistrationId($number, $section_id, $registration_date)
+    {
+        $sectionCodes = [
+            1 => 'ECP',
+            2 => 'ES',
+            3 => 'MS',
+            4 => 'HS',
+        ];
+
+        $romanMonths = [
+            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
+            7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
+        ];
+
+        $date = Carbon::parse($registration_date);
+        $month = $date->month;
+        $year = $date->year;
+        $yearShort = substr($year, -2);
+
+        $sectionCode = $sectionCodes[$section_id] ?? 'XX';
+        $romanMonth = $romanMonths[$month];
+
+        return "{$number}/RF.No-{$sectionCode}/{$romanMonth}-{$yearShort}";
+    }
+
     public function store(Request $request)
     {
         DB::beginTransaction();
         try {
+            // $context = session('registration_context');
+
+            // if (!$context) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'error' => 'No registration context found. Please complete Step 1 first.'
+            //     ], 400);
+            // }
+
+            // validate request
             $validated = $request->validate([
                 // student
                 'student_status' => 'required|in:New,Old,Transferee',
+                'input_student_id' => 'nullable|string',
                 'first_name' => 'required|string',
                 'middle_name' => 'nullable|string',
                 'last_name' => 'required|string',
@@ -67,7 +214,7 @@ class RegistrationController extends Controller
                 // program, class, major
                 'section_id' => 'required|exists:sections,section_id',
                 'program_id' => 'required|exists:programs,program_id',
-                'grade' => 'required|integer',
+                'class_id' => 'required|exists:classes,class_id',
                 'major_id' => 'required|exists:majors,major_id',
                 'program_other' => function ($attribute, $value, $fail) use ($request) {
                     $program = Program::find($request->input('program_id'));
@@ -135,25 +282,61 @@ class RegistrationController extends Controller
                 // discount
                 'discount_name' => 'nullable|string',
                 'discount_notes' => 'nullable|string',
-                
-                // school year, semester, registration date
+
+                // create
                 'school_year_id' => 'required|integer',
                 'semester_id' => 'required|integer',
-                'registration_date' => 'required|date',
-
+                'registration_date' => 'required|date'
             ]);
+            
+            // Merge context with validated data
+            // $validated = array_merge($validated, $context);
             
             // data master
             $section = Section::findOrFail($validated['section_id']);
             $program = Program::findOrFail($validated['program_id']);
             $major = Major::findOrFail($validated['major_id']);
+            $schoolClass = SchoolClass::findOrFail($validated['class_id']);
             $transportation = Transportation::findOrFail($validated['transportation_id']);
             $residenceHall = ResidenceHall::findOrFail($validated['residence_id']);
 
+            $status = $validated['student_status'];
+            if ($status === 'Old') {
+                $inputId = $validated['input_student_id'] ?? null;
+                if (!$inputId) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Missing student ID for returning student.'
+                    ], 422);
+                }
+
+                $latestVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment.student', function ($q) use ($inputId) {
+                    $q->where('student_id', $inputId);
+                })
+                ->orderByDesc('updated_at')
+                ->first();
+
+                if (!$latestVersion || !$latestVersion->student) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'No data found for the given student ID.'
+                    ], 404);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Existing student data retrieved.',
+                    'data' => [
+                        'student' => $latestVersion->student,
+                        'application_form_version' => $latestVersion,
+                    ]
+                ]);
+            }
+
             // program 
-            if ($program->name == 'Other') {
-                $program->other = $validated['program_other'];
-                $program->save();
+            if ($program->name == 'Other' && !empty($validated['program_other'])) {
+                $customProgram = Program::firstOrCreate(['name' => $validated['program_other']]);
+                $program = $customProgram; 
             }
 
             // pickup point 
@@ -166,12 +349,25 @@ class RegistrationController extends Controller
                 $transportation->save();
             }
 
+            // registration id
+            $number = $this->getSectionRegistrationNumber($validated['section_id']);
+            $registrationId = $this->formatRegistrationId(
+                $number,
+                $validated['section_id'],
+                $validated['registration_date']
+            );
             
             // student
-            $generatedId = Student::max('student_id') + 1;
+            $generatedId = $this->generateStudentId(
+                $validated['school_year_id'],  
+                $validated['section_id'], 
+                $validated['major_id']
+            );
+
             $student = Student::create([
                 'student_id' => $generatedId,
                 'student_status' => $validated['student_status'],
+                'registration_id' => $registrationId,
                 'first_name' => $validated['first_name'],
                 'middle_name' => $validated['middle_name'],
                 'last_name' => $validated['last_name'],
@@ -190,6 +386,32 @@ class RegistrationController extends Controller
                 'registration_date' => $validated['registration_date'],
                 'enrollment_status' => 'ACTIVE',
             ]);
+
+            // enrollment
+            $enrollment = $student->enrollments()->create([
+                'class_id' => $schoolClass->class_id,
+                'semester_id' => $validated['semester_id'],
+                'school_year_id' => $validated['school_year_id'],
+                'program_id' => $program->program_id,
+                'transport_id' => $transportation->transport_id,
+                'residence_id' => $residenceHall->residence_id,
+                'residence_hall_policy' => $validated['residence_hall_policy'], 
+                'transportation_policy' => $validated['transportation_policy'],
+                'is_active' => true,
+            ]);
+
+            // data application form
+            $enrollmentIdS = $student->enrollments()->pluck('enrollment_id');
+            $maxVersion = ApplicationForm::whereIn('enrollment_id', $enrollmentIdS)->max('version');
+            $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
+            $applicationForm = ApplicationForm::create([
+                'enrollment_id' => $enrollment->enrollment_id,
+                'status' => 'Submitted',
+                'submitted_at' => now(),
+                'version' => $nextVersion,
+                'created_at' => now(),
+            ]);
+
 
             // student address
             $student->studentAddress()->create([
@@ -256,25 +478,6 @@ class RegistrationController extends Controller
                 'other' => $validated['guardian_address_other'],
             ]);
 
-            // school class
-            $schoolClass = SchoolClass::firstOrCreate([
-                'grade' => $validated['grade'],
-                'section_id' => $section->section_id,
-                'major_id' => $major->major_id,
-            ]);
-
-            // enrollment
-            $enrollment = $student->enrollments()->create([
-                'class_id' => $schoolClass->class_id,
-                'semester_id' => $validated['semester_id'],
-                'school_year_id' => $validated['school_year_id'],
-                'program_id' => $program->program_id,
-                'transport_id' => $transportation->transport_id,
-                'residence_id' => $residenceHall->residence_id,
-                'residence_hall_policy' => $validated['residence_hall_policy'], 
-                'transportation_policy' => $validated['transportation_policy'],
-                'is_active' => true,
-            ]);
 
             // payment
             Payment::create([
@@ -293,32 +496,41 @@ class RegistrationController extends Controller
                 ]);
             }   
 
-            // data application form
-            $enrollmentIdS = $student->enrollments()->pluck('enrollment_id');
-            $maxVersion = ApplicationForm::whereIn('enrollment_id', $enrollmentIdS)->max('version');
-            $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
-            $applicationForm = ApplicationForm::create([
-                'enrollment_id' => $enrollment->enrollment_id,
-                'status' => 'Submitted',
-                'submitted_at' => now(),
-                'version' => $nextVersion,
-                'created_at' => now(),
-                'student_id' => $student->student_id,
-            ]);
-
             // data application form version
+            $dataSnapshot = [
+                'student_id' => $student->student_id,
+                'enrollment_id' => $enrollment->enrollment_id,
+                'application_id' => $applicationForm->application_id,
+                'request_data' => $validated,
+            ];
             ApplicationFormVersion::create([
                 'application_id' => $applicationForm->application_id,
                 'version' => 1,
                 'updated_by' => 'system',
-                'data_snapshot' => json_encode($validated),
+                'data_snapshot' => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
             ]);
 
+            // Clear session after successful registration
+            session()->forget('registration_context');
+
             DB::commit();
-            return response()->json(['success' => true, 'message' => 'Registration completed successfully'], 200);
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Registration completed successfully',
+                'data' => [
+                    'student_id' => $student->student_id,
+                    'registration_id' => $registrationId,
+                    'application_id' => $applicationForm->application_id,
+                    'enrollment_id' => $enrollment->enrollment_id
+                ]
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'success' => false, 
+                'error' => 'Registration failed: ' . $e->getMessage()
+            ], 500);
         }
     }
 
