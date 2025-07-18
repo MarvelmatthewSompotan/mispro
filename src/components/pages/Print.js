@@ -7,6 +7,7 @@ import FacilitiesContent from '../Print_Content/Facilities_Content/Facilities_Co
 import ParentsGuardianInformationContent from '../Print_Content/ParentsGuardianInformation_Content/ParentsGuardianInformation_Content';
 import TermofPaymentContent from '../Print_Content/TermofPayment_Content/TermofPayment_Content';
 import PledgeContent from '../Print_Content/Pledge_Content/Pledge_Content';
+import SignatureContent from '../Print_Content/Signature_Content/Signature_Content';
 
 function Print() {
   return (
@@ -83,6 +84,9 @@ function Print() {
             <b className={styles.applicationForm}>PLEDGE</b>
           </div>
           <PledgeContent />
+        </div>
+        <div className={styles.signature}>
+          <SignatureContent />
         </div>
       </div>
     </div>
