@@ -6,10 +6,10 @@ import studentIcon from '../../assets/StudentList-icon.png';
 import teacherIcon from '../../assets/TeacherList-icon.png';
 import homeroomIcon from '../../assets/HomeroomList-icon.png';
 import registrationIcon from '../../assets/Registration-icon.png';
-import './SidebarMenu.css';
+import '../styles/SidebarMenu.css';
 
 const menus = [
-  { icon: <Icon src={homeIcon} alt="Home" style={{ width: 24, height: 24 }} />, label: 'Home', to: '/' },
+  { icon: <Icon src={homeIcon} alt="Home" style={{ width: 24, height: 24 }} />, label: 'Home', to: '/home' },
   { icon: <Icon src={studentIcon} alt="Student List" style={{ width: 24, height: 24 }} />, label: 'Student List', to: '/students' },
   { icon: <Icon src={teacherIcon} alt="Teacher List" style={{ width: 24, height: 24 }} />, label: 'Teacher List', to: '/teachers' },
   { icon: <Icon src={homeroomIcon} alt="Homeroom List" style={{ width: 24, height: 24 }} />, label: 'Homeroom List', to: '/homerooms' },
@@ -27,7 +27,6 @@ const SidebarMenu = () => (
               className={({ isActive }) =>
                 'sidebar-menu-item' + (isActive ? ' active' : '')
               }
-              end={menu.to === '/'}
             >
               <span className="sidebar-menu-icon">{menu.icon}</span>
               {menu.label}

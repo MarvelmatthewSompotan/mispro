@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Pledge_Content.module.css';
+import styles from '../../styles/Pledge_Content.module.css';
 
 function PledgeContent() {
   return (

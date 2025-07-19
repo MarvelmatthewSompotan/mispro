@@ -1,5 +1,5 @@
 import React from 'react';
-import './Icon.css';
+import '../styles/Icon.css';
 
 const Icon = ({ src, alt, style, className }) => (
   <img

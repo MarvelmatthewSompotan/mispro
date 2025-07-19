@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './ParentsGuardianInformation_Content.module.css';
+import styles from '../../styles/ParentsGuardianInformation_Content.module.css';
 
 function ParentsGuardianInformationContent() {
   return (

@@ -2,7 +2,7 @@ import React from 'react';
 import Card from '../atoms/Card';
 import Avatar from '../atoms/Avatar';
 import mascot from '../../assets/mascot.png';
-import './StatCard.css';
+import '../styles/StatCard.css';
 
 const StatCard = ({ value, label }) => (
   <Card className="stat-card">

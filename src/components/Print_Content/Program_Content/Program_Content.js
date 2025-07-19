@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Program_Content.module.css';
+import styles from '../../styles/Program_Content.module.css';
 
 function ProgramContent() {
   return (

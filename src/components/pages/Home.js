@@ -1,28 +1,26 @@
 import React from 'react';
-import WelcomeBanner from '../molecules/WelcomeBanner';
 import StatCard from '../molecules/StatCard';
-import ColorGrid from '../molecules/ColorGrid';
+import WelcomeBanner from '../molecules/WelcomeBanner';
 
 const Home = () => (
-  <>
-    <div style={{ maxWidth: 1200, margin: '0 auto', paddingTop: 90 }}>
-      <div style={{ marginBottom: 32 }}>
-        <WelcomeBanner name="Sarah" />
-      </div>
-      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 24 }}>
-        <div style={{ flex: 2, minWidth: 320 }}>
-          <ColorGrid />
-        </div>
-        <div style={{ flex: 1, minWidth: 240 }}>
-          <StatCard value="1200" label="Total active students" />
-        </div>
-      </div>
-      <div style={{ minHeight: 120 }}>
-        {/* Placeholder untuk card kosong kanan bawah */}
-        <div style={{ background: '#fff', borderRadius: 20, minHeight: 120, boxShadow: '0 2px 12px #0001' }} />
+  <div style={{ padding: 32, backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
+    <WelcomeBanner name="Admin" />
+    
+    <div style={{ marginTop: 24 }}>
+      <h2>Dashboard Statistics</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16, marginTop: 16 }}>
+        <StatCard value="150" label="Total Students" />
+        <StatCard value="25" label="Total Teachers" />
+        <StatCard value="8" label="Homerooms" />
+        <StatCard value="95%" label="Attendance Rate" />
       </div>
     </div>
-  </>
+    
+    <div style={{ background: '#fff', padding: 20, borderRadius: 8, marginTop: 32 }}>
+      <h2>Dashboard Content</h2>
+      <p>This is the main content area of the home page.</p>
+    </div>
+  </div>
 );
 
 export default Home; 

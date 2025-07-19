@@ -1,37 +1,16 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
 import HeaderBar from '../molecules/HeaderBar';
 import SidebarMenu from '../molecules/SidebarMenu';
-import Home from '../pages/Home';
-import Registration from '../pages/Registration';
-import Print from '../pages/Print';
 
-// Placeholder pages
-const StudentList = () => <div style={{ padding: 32 }}>Student List Page</div>;
-const TeacherList = () => <div style={{ padding: 32 }}>Teacher List Page</div>;
-const HomeroomList = () => <div style={{ padding: 32 }}>Homeroom List Page</div>;
-
-const Main = () => {
-  const location = useLocation();
-  if (location.pathname === '/print') {
-    return <Print />;
-  }
-
+const Main = ({ children }) => {
   return (
-    <div>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <HeaderBar />
-      <div className="main-layout" style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <SidebarMenu />
-        <div style={{ flex: 1, paddingTop: 76 }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/students" element={<StudentList />} />
-            <Route path="/teachers" element={<TeacherList />} />
-            <Route path="/homerooms" element={<HomeroomList />} />
-            <Route path="/registration" element={<Registration />} />
-            <Route path="/print" element={<Print />} />
-          </Routes>
-        </div>
+        <main style={{ flex: 1, padding: '24px', overflowY: 'auto', backgroundColor: '#f5f5f5', marginTop: '76px' }}>
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import Card from '../atoms/Card';
 import Avatar from '../atoms/Avatar';
 import mascot from '../../assets/mascot.png';
-import './WelcomeBanner.css';
+import '../styles/WelcomeBanner.css';
 
 const WelcomeBanner = ({ name = 'Sarah' }) => (
   <Card className="welcome-banner">

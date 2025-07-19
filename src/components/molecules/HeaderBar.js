@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "../../assets/logo-mis-f.png";
-import "./HeaderBar.css";
+import "../styles/HeaderBar.css";
 
 const HeaderBar = () => (
   <header className="header-bar">

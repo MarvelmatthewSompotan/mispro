@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './TermofPayment_Content.module.css';
+import styles from '../../styles/TermofPayment_Content.module.css';
 
 function TermofPaymentContent() {
   return (

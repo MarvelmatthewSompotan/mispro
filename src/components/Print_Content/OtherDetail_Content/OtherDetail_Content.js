@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './OtherDetail_Content.module.css';
+import styles from '../../styles/OtherDetail_Content.module.css';
 
 function OtherDetail_Content() {
   return (

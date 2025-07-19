@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../atoms/Button';
-import styles from './Registration.module.css';
+import styles from '../styles/Registration.module.css';
 import searchIcon from '../../assets/Search-icon.png';
 
 const registrationData = [
@@ -21,13 +21,8 @@ const Registration = () => {
   const [year, setYear] = useState('2025/2026');
   const [semester, setSemester] = useState('Semester 1');
 
-  const handlePrintClick = () => {
-    navigate('/print');
-  };
-
   const handleNewForm = () => {
-    // Implement new form navigation or modal
-    alert('New Form Clicked!');
+    navigate('/registration-form');
   };
 
   const handleFilterChange = (key) => {
@@ -67,7 +62,7 @@ const Registration = () => {
                 checked={filters[key]}
                 onChange={() => handleFilterChange(key)}
               />
-              <span className={styles['custom-checkbox']}></span>
+              <span className={styles.customCheckbox}></span>
               {key}
             </label>
           ))}

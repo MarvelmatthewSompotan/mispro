@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Print.module.css';
+import styles from '../styles/Print.module.css';
 import kop from '../../assets/LogoMIS_Print.png';
 import footer from '../../assets/Footer.png';
 import StudentsInformationContent from '../Print_Content/StudentsInformation_Content/StudentsInformation_Content';

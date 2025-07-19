@@ -30,13 +30,13 @@
   margin-bottom: 24px;
   position: relative;
   width: 500px;
+  border: 2px solid #5F84FE;
+  border-radius: 5px;
 }
 
 .searchInput {
   flex: 1;
   padding: 12px 48px 12px 20px;
-  border-radius: 5px;
-  border: 2px solid #5F84FE;
   font-size: 16px;
   margin-right: 0;
   box-sizing: border-box;
@@ -97,10 +97,9 @@
   position: relative;
   z-index: 2;
   cursor: pointer;
-  width: 5px;
 }
 
-.filterCheckboxLabel .custom-checkbox {
+.customCheckbox {
   width: 22px;
   height: 22px;
   border: 2px solid #5F84FE;
@@ -112,12 +111,12 @@
   margin-right: 8px;
 }
 
-.filterCheckboxLabel input[type='checkbox']:checked + .custom-checkbox {
+input[type='checkbox']:checked + .customCheckbox {
   background: #5F84FE;
   border-color: #5F84FE;
 }
 
-.filterCheckboxLabel input[type='checkbox']:checked + .custom-checkbox::after {
+input[type='checkbox']:checked + .customCheckbox::after {
   content: '';
   display: block;
   position: absolute;
