@@ -11,15 +11,30 @@ textarea {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+  font-family: "Poppins", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: rgba(128, 128, 128, 0.6);
+  transition: all 0.2s ease;
+}
+
+input:focus,
+input.hasValue,
+select:focus,
+select.hasValue,
+textarea:focus,
+textarea.hasValue {
+  font-weight: bold;
+  color: #000;
 }
 
 input::placeholder,
 select::placeholder,
 textarea::placeholder {
   font-family: Poppins, Arial, sans-serif;
-  font-weight: bold;
+  font-weight: 400;
   font-size: 16px;
-  color: #bdbdbd;
+  color: rgba(128, 128, 128, 0.6);
 }
 
 .headerTitle {

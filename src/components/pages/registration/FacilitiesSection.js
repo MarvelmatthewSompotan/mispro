@@ -1,16 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./FacilitiesSection.module.css";
 import checkBoxIcon from "../../../assets/CheckBox.png";
 
 const FacilitiesSection = () => {
   // State untuk transportation
   const [transportation, setTransportation] = useState("schoolBus");
-  const [pickupPoint, setPickupPoint] = useState("GIRIAN");
+  const [pickupPoint, setPickupPoint] = useState("");
   const [transportationPolicy, setTransportationPolicy] = useState(true);
 
   // State untuk residence hall
   const [residenceHall, setResidenceHall] = useState("nonResidence");
   const [residenceHallPolicy, setResidenceHallPolicy] = useState(true);
+
+  // Add hasValue class when pickup point field has value
+  useEffect(() => {
+    const pickupInput = document.querySelector(`.${styles.pickupPointInput}`);
+    if (pickupInput) {
+      if (pickupPoint && pickupPoint.trim() !== "") {
+        pickupInput.classList.add(styles.hasValue);
+      } else {
+        pickupInput.classList.remove(styles.hasValue);
+      }
+    }
+  }, [pickupPoint, styles]);
 
   return (
     <div className={styles.container}>

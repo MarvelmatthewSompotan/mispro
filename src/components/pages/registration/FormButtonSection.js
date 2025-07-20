@@ -1,8 +1,13 @@
 import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import PopUpConfirm from "../PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
 
 const FormButtonSection = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleReset = () => {
     // Reset semua form data
@@ -11,12 +16,35 @@ const FormButtonSection = () => {
   };
 
   const handleSubmit = () => {
+    // Tampilkan popup confirmation terlebih dahulu
+    setShowConfirmation(true);
+  };
+
+  const handleCancelConfirmation = () => {
+    setShowConfirmation(false);
+  };
+
+  const handleConfirmSubmit = () => {
+    setShowConfirmation(false);
     setIsSubmitting(true);
+
     // Submit form data
-    console.log("Submit form");
-    // Di sini bisa ditambahkan logic untuk submit form
+    console.log("Submit form confirmed");
+    // Di sini bisa ditambahkan logic untuk submit form ke API
+
+    // Collect form data (dari popup form dan form registrasi)
+    const formData = {
+      // Data dari popup form
+      ...location.state,
+      // Data dari form registrasi (bisa ditambahkan state management di sini)
+      submittedAt: new Date().toISOString(),
+      registrationId: `REG${Date.now()}`, // Generate registration ID
+    };
+
     setTimeout(() => {
       setIsSubmitting(false);
+      // Navigate ke halaman print dengan data form
+      navigate("/print", { state: formData });
     }, 2000);
   };
 
@@ -50,11 +78,19 @@ const FormButtonSection = () => {
           className={styles.submitButton}
           onClick={handleSubmit}
           disabled={isSubmitting}
-          type="submit"
+          type="button"
         >
           {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </div>
+
+      {/* Popup Confirmation */}
+      {showConfirmation && (
+        <PopUpConfirm
+          onCancel={handleCancelConfirmation}
+          onConfirm={handleConfirmSubmit}
+        />
+      )}
     </div>
   );
 };
