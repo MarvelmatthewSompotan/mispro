@@ -1,10 +1,41 @@
-import React, { useState } from "react";
-import styles from "./PopUpForm.module.css";
+import React, { useState, useEffect } from "react";
+import styles from "../styles/PopUpForm.module.css";
 
 const PopUpForm = ({ onClose, onCreate }) => {
   const [schoolYear, setSchoolYear] = useState("");
   const [semester, setSemester] = useState("");
   const [date, setDate] = useState("");
+
+  // Add hasValue class when fields have values
+  useEffect(() => {
+    const schoolYearSelect = document.querySelector(`.${styles.schoolYear}`);
+    const semesterSelect = document.querySelector(`.${styles.semester}`);
+    const dateInput = document.querySelector(`.${styles.dateField}`);
+
+    if (schoolYearSelect) {
+      if (schoolYear) {
+        schoolYearSelect.classList.add(styles.hasValue);
+      } else {
+        schoolYearSelect.classList.remove(styles.hasValue);
+      }
+    }
+
+    if (semesterSelect) {
+      if (semester) {
+        semesterSelect.classList.add(styles.hasValue);
+      } else {
+        semesterSelect.classList.remove(styles.hasValue);
+      }
+    }
+
+    if (dateInput) {
+      if (date) {
+        dateInput.classList.add(styles.hasValue);
+      } else {
+        dateInput.classList.remove(styles.hasValue);
+      }
+    }
+  }, [schoolYear, semester, date, styles]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

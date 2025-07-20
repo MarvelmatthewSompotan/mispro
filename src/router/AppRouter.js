@@ -1,21 +1,26 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../components/pages/LoginPage";
-import HomePage from "../components/pages/HomePage";
-import StudentListPage from "../components/pages/StudentListPage";
-import TeacherListPage from "../components/pages/TeacherListPage";
-import HomeroomListPage from "../components/pages/HomeroomListPage";
-import RegistrationPage from "../components/pages/RegistrationPage";
-import MainLayout from "../components/layout/MainLayout";
+import Home from "../components/pages/Home";
+import StudentList from "../components/pages/StudentList";
+import TeacherList from "../components/pages/TeacherList";
+import HomeroomList from "../components/pages/HomeroomList";
+import Registration from "../components/pages/Registration";
+import RegistrationPage from "../components/pages/RegistrationForm";
+import Print from "../components/pages/Print";
+import MainLayout from "../components/layout/Main";
 
 const AppRouter = () => (
   <Routes>
+    {/* Public routes */}
     <Route path="/login" element={<LoginPage />} />
+    
+    {/* Protected routes with MainLayout */}
     <Route
       path="/home"
       element={
         <MainLayout>
-          <HomePage />
+          <Home />
         </MainLayout>
       }
     />
@@ -23,7 +28,7 @@ const AppRouter = () => (
       path="/students"
       element={
         <MainLayout>
-          <StudentListPage />
+          <StudentList />
         </MainLayout>
       }
     />
@@ -31,7 +36,7 @@ const AppRouter = () => (
       path="/teachers"
       element={
         <MainLayout>
-          <TeacherListPage />
+          <TeacherList />
         </MainLayout>
       }
     />
@@ -39,7 +44,7 @@ const AppRouter = () => (
       path="/homerooms"
       element={
         <MainLayout>
-          <HomeroomListPage />
+          <HomeroomList />
         </MainLayout>
       }
     />
@@ -47,10 +52,20 @@ const AppRouter = () => (
       path="/registration"
       element={
         <MainLayout>
-          <RegistrationPage />
+          <Registration />
         </MainLayout>
       }
     />
+    <Route
+      path="/registration-form"
+      element={<RegistrationPage />}
+    />
+    <Route
+      path="/print"
+      element={<Print />}
+    />
+    
+    {/* Default redirects */}
     <Route path="/" element={<Navigate to="/login" replace />} />
     <Route path="*" element={<Navigate to="/login" replace />} />
   </Routes>

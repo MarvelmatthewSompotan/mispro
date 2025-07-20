@@ -1,0 +1,208 @@
+.fathersInformation {
+  position: relative;
+  line-height: 100%;
+  font-weight: 600;
+}
+.txtFather {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.johnDoe {
+  align-self: stretch;
+  position: relative;
+  line-height: 100%;
+}
+.name {
+  align-self: stretch;
+  flex: 1;
+  border-bottom: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px 0px;
+  gap: 10px;
+}
+.first {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.companyName {
+  position: relative;
+  line-height: 100%;
+}
+.fieldManager {
+  width: 100%;
+  position: relative;
+  line-height: 100%;
+  display: inline-block;
+  max-width: 228.5px;
+}
+.second {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 27px;
+}
+.johndoehebatgmailcom {
+  width: 100%;
+  position: relative;
+  line-height: 100%;
+  display: inline-block;
+  max-width: 357.5px;
+}
+.b1 {
+  width: 5px;
+  position: relative;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.b3 {
+  align-self: stretch;
+  width: 8px;
+  position: relative;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+}
+.address {
+  width: 830px;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 12px 0px;
+  gap: 10px;
+}
+.fourth {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.fatherInfo {
+  align-self: stretch;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px 12px;
+}
+.father {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.father1 {
+  width: 854px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.parent {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.uncle {
+  flex: 1;
+  position: relative;
+  line-height: 100%;
+}
+.relation {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+}
+.left {
+  flex: 1;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px 0px;
+}
+.address4 {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  height: 74px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 12px 0px;
+  gap: 10px;
+}
+.right {
+  align-self: stretch;
+  flex: 0.9718;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: center;
+  padding: 6px 12px;
+}
+.guardian {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.content {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  text-align: left;
+  font-size: 20px;
+  color: #000;
+  font-family: Poppins;
+} 

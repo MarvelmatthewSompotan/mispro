@@ -1,0 +1,20 @@
+.stat-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+  padding: 24px 32px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px #0001;
+}
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #7b7bfa;
+}
+.stat-card-label {
+  font-size: 16px;
+  color: #7b7bfa;
+  font-weight: 500;
+} 
