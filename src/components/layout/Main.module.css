@@ -13,13 +13,21 @@
 .sidebar {
   width: 280px;
   position: fixed;
-  top: 76px;
+  top: 0px;
   left: 0;
   z-index: 100;
   background-color: white;
   height: calc(100vh - 76px);
-  overflow-y: auto;
+  /* overflow-y: auto; */
   transition: transform 0.3s ease;
+}
+
+.header-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 200 !important;
 }
 
 .mainContent {
@@ -34,6 +42,12 @@
   box-sizing: border-box;
 }
 
+.mainContentFull {
+  margin-left: 0 !important;
+  width: 100% !important;
+  transition: margin-left 0.3s, width 0.3s;
+}
+
 .overlay {
   display: none;
   position: fixed;
@@ -46,16 +60,7 @@
 }
 
 /* Responsive design untuk mobile */
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-    width: 280px;
-  }
-
-  .sidebarOpen {
-    transform: translateX(0);
-  }
-
+@media (max-width: 1000px) {
   .mainContent {
     margin-left: 0;
     width: 100%;

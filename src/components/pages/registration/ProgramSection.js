@@ -47,6 +47,18 @@ const ProgramSection = () => {
     }
   };
 
+  // Dropdown grade options
+  let gradeOptions = [];
+  if (selectedSection === "ECP") {
+    gradeOptions = ["N", "K1", "K2"];
+  } else if (selectedSection === "Elementary school") {
+    gradeOptions = ["1", "2", "3", "4", "5", "6"];
+  } else if (selectedSection === "Middle School") {
+    gradeOptions = ["7", "8", "9"];
+  } else if (selectedSection === "High School") {
+    gradeOptions = ["10", "11", "12"];
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.sectionHeader}>
@@ -95,16 +107,20 @@ const ProgramSection = () => {
             <label className={styles.label} htmlFor="grade">
               Grade
             </label>
-            <input
+            <select
               id="grade"
               className={styles.label}
-              type="number"
               value={grade}
-              onChange={handleGradeChange}
-              placeholder="1"
-              min="1"
-              max="12"
-            />
+              onChange={(e) => setGrade(e.target.value)}
+              disabled={!selectedSection}
+            >
+              <option value="">Select grade</option>
+              {gradeOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
           </div>
           {showMajor && (
             <div className={styles.majorField}>

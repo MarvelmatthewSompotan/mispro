@@ -30,7 +30,9 @@ const LoginForm = () => {
 
   return (
     <form className="login-form" onSubmit={handleSubmit}>
-      <Label htmlFor="username">Login to your account</Label>
+      <Label htmlFor="username" className="login-title">
+        Login to your account
+      </Label>
       <Input
         type="text"
         placeholder="Username or Email"

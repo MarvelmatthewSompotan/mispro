@@ -2,10 +2,14 @@ import React from "react";
 import logo from "../../assets/logo-mis-f.png";
 import "../styles/HeaderBar.css";
 
-const HeaderBar = () => (
+const HeaderBar = ({ onHamburgerClick }) => (
   <header className="header-bar">
     <div className="header-bar-left">
-      <button className="header-bar-hamburger" aria-label="Open menu">
+      <button
+        className="header-bar-hamburger"
+        aria-label="Open menu"
+        onClick={onHamburgerClick}
+      >
         <span className="hamburger-line" />
         <span className="hamburger-line" />
         <span className="hamburger-line" />
@@ -22,4 +26,4 @@ const HeaderBar = () => (
   </header>
 );
 
-export default HeaderBar; 
+export default HeaderBar;

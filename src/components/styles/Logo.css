@@ -18,11 +18,11 @@
     margin-bottom: 18px;
   }
   .logo-img {
-    max-width: 120px;
+    max-width: 300px;
   }
 }
 @media (max-width: 600px) {
   .logo-img {
-    max-width: 90px;
+    max-width: 220px;
   }
 }
