@@ -16,6 +16,7 @@ class Major extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'major_id',
         'name',
     ];
 

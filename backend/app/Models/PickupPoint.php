@@ -16,6 +16,7 @@ class PickupPoint extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'pickup_point_id',
         'name',
     ];
 
