@@ -534,6 +534,39 @@ class RegistrationController extends Controller
         }
     }
 
+    public function showPreview($applicationId)
+    {
+        try {
+            $application = ApplicationForm::with([
+                'enrollment.student.studentAddress',
+                'enrollment.schoolClass',
+                'enrollment.program',
+                'enrollment.transportation',
+                'enrollment.residenceHall',
+                'enrollment.studentDiscount.discountType',
+                'enrollment.student.studentParent.fatherAddress',
+                'enrollment.student.studentParent.motherAddress',
+                'enrollment.student.studentGuardian.guardian.guardianAddress',
+            ])->findOrFail($applicationId);
+
+            $registrationNumber = ApplicationForm::where('application_id', '<=', $application->application_id)->count();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Preview data saved to session',
+                'data' => [
+                    'application' => $application,
+                    'registration_number' => $registrationNumber
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Preview failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Display the specified resource.
      */

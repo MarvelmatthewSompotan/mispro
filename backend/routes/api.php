@@ -9,6 +9,7 @@ Route::post('/registration/start', [RegistrationController::class, 'startRegistr
 Route::get('/registration/context', [RegistrationController::class, 'getRegistrationContext']);
 Route::delete('/registration/context', [RegistrationController::class, 'clearRegistrationContext']);
 Route::post('/registration/submit', [RegistrationController::class, 'store']);
+Route::get('/registration/preview/{applicationId}', [RegistrationController::class, 'showPreview']);
 
 // Route::get('/students', [RegistrationController::class, 'index']);
 
