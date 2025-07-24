@@ -1,12 +1,11 @@
-import React from 'react';
 import styles from '../../styles/ParentsGuardianInformation_Content.module.css';
 
-const ParentsGuardianInformationContent = () => {
+const CONTENT = () => {
   return (
     <div className={styles.content}>
       <div className={styles.father}>
         <div className={styles.txtFather}>
-          <div className={styles.fathersInformation}>Father's Information</div>
+          <div className={styles.fathersInformation}>Father’s Information</div>
         </div>
         <div className={styles.first}>
           <div className={styles.left}>
@@ -63,7 +62,7 @@ const ParentsGuardianInformationContent = () => {
       </div>
       <div className={styles.father}>
         <div className={styles.txtFather}>
-          <div className={styles.fathersInformation}>Mother's Information</div>
+          <div className={styles.fathersInformation}>Mother’s Information</div>
         </div>
         <div className={styles.first}>
           <div className={styles.left}>
@@ -120,12 +119,12 @@ const ParentsGuardianInformationContent = () => {
       </div>
       <div className={styles.father}>
         <div className={styles.txtFather}>
-          <div className={styles.fathersInformation}>Authorized Guardian's Information</div>
+          <div className={styles.fathersInformation}>Authorized Guardian’s Information</div>
         </div>
-        <div className={styles.guardianInfo}>
+        <div className={styles.first}>
           <div className={styles.left1}>
-            <div className={styles.top1}>
-              <div className={styles.relation}>
+            <div className={styles.first}>
+              <div className={styles.name4}>
                 <div className={styles.johnDoe}>{`Name `}</div>
                 <b className={styles.uncle}>{`JOHN DOE `}</b>
               </div>
@@ -134,12 +133,12 @@ const ParentsGuardianInformationContent = () => {
                 <b className={styles.uncle}>UNCLE</b>
               </div>
             </div>
-            <div className={styles.top1}>
-              <div className={styles.relation}>
+            <div className={styles.first}>
+              <div className={styles.name4}>
                 <div className={styles.johnDoe}>Phone number</div>
                 <b className={styles.uncle}>082176543890</b>
               </div>
-              <div className={styles.relation}>
+              <div className={styles.name4}>
                 <div className={styles.johnDoe}>Email</div>
                 <b className={styles.uncle}>JOHNDOE@GMAIL.COM</b>
               </div>
@@ -177,4 +176,4 @@ const ParentsGuardianInformationContent = () => {
   );
 };
 
-export default ParentsGuardianInformationContent; 
+export default CONTENT; 

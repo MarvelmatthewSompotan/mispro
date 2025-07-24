@@ -1,7 +1,7 @@
-import React from 'react';
+import { FunctionComponent } from 'react';
 import styles from '../../styles/StudentsInformation_Content.module.css';
 
-const StudentsInformationContent = () => {
+const CONTENT = () => {
   return (
     <div className={styles.content}>
       <div className={styles.left}>
@@ -16,6 +16,14 @@ const StudentsInformationContent = () => {
         <div className={styles.fullName}>
           <div className={styles.jhoanne}>Student ID</div>
           <b className={styles.regular}>S25420001</b>
+        </div>
+        <div className={styles.fullName}>
+          <div className={styles.jhoanne}>NIK</div>
+          <b className={styles.regular}>9999999999</b>
+        </div>
+        <div className={styles.fullName}>
+          <div className={styles.jhoanne}>KITAS</div>
+          <b className={styles.regular}>9999999999</b>
         </div>
         <div className={styles.fullName}>
           <div className={styles.jhoanne}>Academic status</div>
@@ -69,22 +77,22 @@ const StudentsInformationContent = () => {
             </div>
             <div className={styles.fullName}>
               <div className={styles.jhoanne}>Age</div>
-              <b className={styles.b3}>16</b>
+              <b className={styles.b5}>16</b>
             </div>
             <div className={styles.rankInFamily}>
               <div className={styles.jhoanne}>Rank in the family</div>
-              <b className={styles.b3}>1</b>
+              <b className={styles.b5}>1</b>
             </div>
           </div>
         </div>
-        <div className={styles.bottom}>
+        <div className={styles.top}>
           <div className={styles.address}>
             <div className={styles.jhoanne}>Address</div>
             <b className={styles.jhoanne}>JL. SARUNDAJANG 01</b>
             <b className={styles.jhoanne}>,</b>
             <div className={styles.parent}>
               <b className={styles.jhoanne}>001</b>
-              <b className={styles.b7}>/</b>
+              <b className={styles.b9}>/</b>
               <b className={styles.jhoanne}>002</b>
             </div>
             <b className={styles.jhoanne}>,</b>
@@ -108,4 +116,4 @@ const StudentsInformationContent = () => {
   );
 };
 
-export default StudentsInformationContent; 
+export default CONTENT; 
