@@ -14,18 +14,18 @@ return new class extends Migration
         Schema::create('parents', function (Blueprint $table) {
             $table->id('parent_id');
             $table->string('student_id', 30)->nullable(); 
-            $table->string('father_name', 100);
-            $table->string('father_occupation', 100);
-            $table->string('father_company', 100);
-            $table->string('father_phone', 20);
-            $table->string('father_email', 100);
-            $table->string('mother_name', 100);
-            $table->string('mother_occupation', 100);
-            $table->string('mother_company', 100);
-            $table->string('mother_phone', 20);
-            $table->string('mother_email', 100);
-            $table->string('father_company_addresses');
-            $table->string('mother_company_addresses');
+            $table->string('father_name', 100)->nullable();
+            $table->string('father_occupation', 100)->nullable();
+            $table->string('father_company', 100)->nullable();
+            $table->string('father_phone', 20)->nullable();
+            $table->string('father_email', 100)->nullable();
+            $table->string('mother_name', 100)->nullable();
+            $table->string('mother_occupation', 100)->nullable();
+            $table->string('mother_company', 100)->nullable();
+            $table->string('mother_phone', 20)->nullable();
+            $table->string('mother_email', 100)->nullable();
+            $table->string('father_company_addresses')->nullable();
+            $table->string('mother_company_addresses')->nullable();
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
         });
     }
