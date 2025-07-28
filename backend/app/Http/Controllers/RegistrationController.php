@@ -208,6 +208,9 @@ class RegistrationController extends Controller
                 'academic_status' => 'required|in:REGULAR,SIT-IN,OTHER',
                 'gender' => 'required|in:MALE,FEMALE',
                 'family_rank' => 'required|string',
+                'nisn' => 'required|string',
+                'nik' => 'required|numeric',
+                'kitas' => 'required|string',
 
                 // student address
                 'street' => 'required|string',
@@ -252,6 +255,7 @@ class RegistrationController extends Controller
                 'father_address_city_regency' => 'nullable|string',
                 'father_address_province' => 'nullable|string',
                 'father_address_other' => 'nullable|string',
+                'father_company_addresses' => 'nullable|string',
 
                 // student parent (mother)
                 'mother_name' => 'nullable|string',
@@ -267,6 +271,7 @@ class RegistrationController extends Controller
                 'mother_address_city_regency' => 'nullable|string',
                 'mother_address_province' => 'nullable|string',
                 'mother_address_other' => 'nullable|string',
+                'mother_company_addresses' => 'nullable|string',
 
                 // student parent (guardian)
                 'guardian_name' => 'nullable|string',
