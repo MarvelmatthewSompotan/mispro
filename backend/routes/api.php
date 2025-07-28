@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
 
@@ -18,4 +19,6 @@ Route::get('/registration/preview/{applicationId}', [RegistrationController::cla
 // Route::get('/students/{id}/history', [RegistrationController::class, 'history']);
 
 Route::get('/registration-option', [MasterDataController::class, 'getRegistrationOption']);
+Route::get('/students/search', [StudentController::class, 'searchStudents']);
+Route::get('/students/{student_id}/latest-application', [StudentController::class, 'getLatestApplication']);
 ?>
