@@ -51,6 +51,7 @@ class Student extends Model
         'nickname', 
         'family_rank', 
         'citizenship', 
+        'country',
         'place_of_birth', 
         'date_of_birth', 
         'gender', 

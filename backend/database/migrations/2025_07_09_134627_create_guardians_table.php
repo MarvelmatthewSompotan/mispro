@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('guardian_id');
             $table->string('guardian_name', 100);
             $table->string('relation_to_student', 50);
-            $table->string('phone_number', 20)->nullable();
-            $table->string('guardian_email', 100)->nullable();
+            $table->string('phone_number', 20);
+            $table->string('guardian_email', 100);
         });
     }
 
