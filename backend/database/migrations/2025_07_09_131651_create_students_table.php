@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->string('student_id', 30)->primary();
-            $table->string('nisn', 20)->nullable();
+            $table->string('nisn', 10)->nullable();
             $table->string('first_name', 50);
             $table->string('middle_name', 50)->nullable();
             $table->string('last_name', 50)->default('-');
             $table->string('nickname', 20)->nullable();
             $table->string('family_rank', 10)->nullable();
             $table->string('citizenship', 100)->nullable();
+            $table->bigInteger('nik')->nullable();
+            $table->string('kitas', 11)->nullable();
             $table->string('place_of_birth', 100);
             $table->date('date_of_birth');
-            $table->unsignedTinyInteger('age')->nullable();
+            $table->string('age', 25)->nullable();
             $table->enum('gender', ['MALE', 'FEMALE']);
             $table->string('phone_number', 20)->nullable();
             $table->string('email', 100)->nullable();
