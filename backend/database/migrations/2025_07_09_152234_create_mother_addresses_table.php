@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('mother_addresses', function (Blueprint $table) {
             $table->id('mother_address_id');
-            $table->unsignedBigInteger('parent_id');
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('street', 100);
             $table->string('village', 100);
             $table->string('district', 100);

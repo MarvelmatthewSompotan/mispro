@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id('payment_id');
-            $table->string('student_id', 30);
+            $table->string('student_id', 30)->nullable();
             $table->enum('type', ['Tuition Fee', 'Residence Hall']);
             $table->enum('method', ['Full Payment', 'Installment']);
             $table->enum('financial_policy_contract', ['Signed', 'Not Signed']);
