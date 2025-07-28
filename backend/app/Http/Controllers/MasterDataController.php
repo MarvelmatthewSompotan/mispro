@@ -14,13 +14,26 @@ class MasterDataController extends Controller
 {
     public function getRegistrationOption()
     {
+        $sections = Section::select('section_id', 'name')->get();
+        $majors = Major::select('major_id', 'name')->get();
+        $classes = SchoolClass::with(['section', 'major'])->get()->map(function ($class){
+            return [
+                'class_id' => $class->class_id,
+                'grade' => $class->grade,
+                'section_id' => $class->section_id,
+                'section_name' => $class->section->name,
+                'major_id' => $class->major_id,
+                'major_name' => $class->major->name,
+            ];
+        });
+        
         return response()->json([
+            'sections' => $sections,
+            'majors' => $majors,
+            'classes' => $classes,
             'programs' => Program::all(),
-            'sections' => Section::all(),
-            'majors' => Major::all(),
             'transportations' => Transportation::select('transport_id', 'type')->get(),
             'residence_halls' => ResidenceHall::all(),
-            'class' => SchoolClass::with(['section', 'major'])->get(),
             'student_status' => ['New', 'Old', 'Transferee'],
             'academic_status' => ['REGULAR', 'SIT-IN', 'OTHER'],
             'gender' => ['MALE', 'FEMALE'],
