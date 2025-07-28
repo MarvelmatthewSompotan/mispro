@@ -22,6 +22,7 @@ use App\Models\ApplicationForm;
 use Illuminate\Support\Facades\DB;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\ApplicationPreviewResource;
 
 
 class RegistrationController extends Controller
@@ -103,18 +104,16 @@ class RegistrationController extends Controller
     private function generateStudentId($schoolYearId, $sectionId, $majorId)
     {
         $schoolYear = SchoolYear::findOrFail($schoolYearId);
-        $startYear = explode('/', $schoolYear->year)[0]; // contoh: "2025/2026" => "2025"
-        $yearCode = substr($startYear, -2);              // "25"
+        $startYear = explode('/', $schoolYear->year)[0]; 
+        $yearCode = substr($startYear, -2);              
 
-        $prefix = "{$yearCode}{$sectionId}{$majorId}";   // contoh: 2511 (25, section 1, major 1)
+        $prefix = "{$yearCode}{$sectionId}{$majorId}";   
 
-        // Ambil student_id terakhir yang memakai prefix ini
         $latest = Student::where('student_id', 'LIKE', "{$prefix}%")
             ->orderByDesc('student_id')
             ->value('student_id');
 
         if ($latest) {
-            // Ambil nomor urut dari belakang (4 digit terakhir)
             $lastNumber = (int)substr($latest, -4);
             $nextNumber = $lastNumber + 1;
         } else {
@@ -122,17 +121,23 @@ class RegistrationController extends Controller
         }
 
         $number = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-        return "{$prefix}{$number}"; // hasil akhir misal: 25110001
+        return "{$prefix}{$number}"; 
     }
 
 
-    private function getSectionRegistrationNumber($section_id)
+    private function getSectionRegistrationNumber($section_id, $registration_date)
     {
-        $count = DB::transaction(function () use ($section_id) {
+        $date = Carbon::parse($registration_date);
+        $month = $date->month;
+        $year = $date->year;
+
+        $count = DB::transaction(function () use ($section_id, $month, $year) {
             return DB::table('students')
                 ->join('enrollments', 'students.student_id', '=', 'enrollments.student_id')
                 ->join('classes', 'enrollments.class_id', '=', 'classes.class_id')
                 ->where('classes.section_id', $section_id)
+                ->whereMonth('students.registration_date', $month)
+                ->whereYear('students.registration_date', $year)
                 ->lockForUpdate()
                 ->count();
         });
@@ -184,7 +189,11 @@ class RegistrationController extends Controller
             $validated = $request->validate([
                 // student
                 'student_status' => 'required|in:New,Old,Transferee',
-                'input_student_id' => 'nullable|string',
+                'input_name' => [
+                    'required_if:student_status,Old',
+                    'string',
+                    'exists:students,student_id',
+                ],
                 'first_name' => 'required|string',
                 'middle_name' => 'nullable|string',
                 'last_name' => 'required|string',
@@ -199,7 +208,9 @@ class RegistrationController extends Controller
                 'academic_status' => 'required|in:REGULAR,SIT-IN,OTHER',
                 'gender' => 'required|in:MALE,FEMALE',
                 'family_rank' => 'required|string',
-                'age' => 'required|integer',
+                'nisn' => 'required|string',
+                'nik' => 'required|numeric',
+                'kitas' => 'required|string',
 
                 // student address
                 'street' => 'required|string',
@@ -244,6 +255,7 @@ class RegistrationController extends Controller
                 'father_address_city_regency' => 'nullable|string',
                 'father_address_province' => 'nullable|string',
                 'father_address_other' => 'nullable|string',
+                'father_company_addresses' => 'nullable|string',
 
                 // student parent (mother)
                 'mother_name' => 'nullable|string',
@@ -259,6 +271,7 @@ class RegistrationController extends Controller
                 'mother_address_city_regency' => 'nullable|string',
                 'mother_address_province' => 'nullable|string',
                 'mother_address_other' => 'nullable|string',
+                'mother_company_addresses' => 'nullable|string',
 
                 // student parent (guardian)
                 'guardian_name' => 'nullable|string',
@@ -300,39 +313,6 @@ class RegistrationController extends Controller
             $transportation = Transportation::findOrFail($validated['transportation_id']);
             $residenceHall = ResidenceHall::findOrFail($validated['residence_id']);
 
-            $status = $validated['student_status'];
-            if ($status === 'Old') {
-                $inputId = $validated['input_student_id'] ?? null;
-                if (!$inputId) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'Missing student ID for returning student.'
-                    ], 422);
-                }
-
-                $latestVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment.student', function ($q) use ($inputId) {
-                    $q->where('student_id', $inputId);
-                })
-                ->orderByDesc('updated_at')
-                ->first();
-
-                if (!$latestVersion || !$latestVersion->student) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'No data found for the given student ID.'
-                    ], 404);
-                }
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Existing student data retrieved.',
-                    'data' => [
-                        'student' => $latestVersion->student,
-                        'application_form_version' => $latestVersion,
-                    ]
-                ]);
-            }
-
             // program 
             if ($program->name == 'Other' && !empty($validated['program_other'])) {
                 $customProgram = Program::firstOrCreate(['name' => $validated['program_other']]);
@@ -350,7 +330,7 @@ class RegistrationController extends Controller
             }
 
             // registration id
-            $number = $this->getSectionRegistrationNumber($validated['section_id']);
+            $number = $this->getSectionRegistrationNumber($validated['section_id'], $validated['registration_date']);
             $registrationId = $this->formatRegistrationId(
                 $number,
                 $validated['section_id'],
@@ -358,12 +338,41 @@ class RegistrationController extends Controller
             );
             
             // student
-            $generatedId = $this->generateStudentId(
-                $validated['school_year_id'],  
-                $validated['section_id'], 
-                $validated['major_id']
-            );
+            $status = $validated['student_status'];
+            if ($status === 'New'|| $status === 'Transferee') {
+                $existingStudent = Student::where('first_name', $validated['first_name'])
+                ->where('middle_name', $validated['middle_name'])
+                ->where('last_name', $validated['last_name'])
+                ->where('date_of_birth', $validated['date_of_birth'])
+                ->where('place_of_birth', $validated['place_of_birth'])
+                ->where('previous_school', $validated['previous_school'])
+                ->first();
+                if ($existingStudent) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Student already exists, please select Old status and input student name'
+                    ], 422);
+                } 
+                $generatedId = $this->generateStudentId(
+                    $validated['school_year_id'],  
+                    $validated['section_id'], 
+                    $validated['major_id']
+                );
+            } else if ($status === 'Old') {
+                $generatedId = $validated['input_name'] ?? null;
+                if (!$generatedId) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Student name is required for Old student'
+                    ], 422);
+                }
+            }
 
+            // calculate age
+            $dateOfBirth = Carbon::parse($validated['date_of_birth']);
+            $diff = $dateOfBirth->diff(Carbon::now());
+            $calculatedAge = "{$diff->y} years {$diff->m} months";
+            
             $student = Student::create([
                 'student_id' => $generatedId,
                 'student_status' => $validated['student_status'],
@@ -373,7 +382,7 @@ class RegistrationController extends Controller
                 'last_name' => $validated['last_name'],
                 'nickname' => $validated['nickname'],
                 'gender' => $validated['gender'],
-                'age' => $validated['age'],
+                'age' => $calculatedAge,
                 'family_rank' => $validated['family_rank'],
                 'citizenship' => $validated['citizenship'],
                 'religion' => $validated['religion'],
@@ -547,17 +556,13 @@ class RegistrationController extends Controller
                 'enrollment.student.studentParent.fatherAddress',
                 'enrollment.student.studentParent.motherAddress',
                 'enrollment.student.studentGuardian.guardian.guardianAddress',
+                'enrollment.student.payments',
             ])->findOrFail($applicationId);
-
-            $registrationNumber = ApplicationForm::where('application_id', '<=', $application->application_id)->count();
             
             return response()->json([
                 'success' => true,
                 'message' => 'Preview data saved to session',
-                'data' => [
-                    'application' => $application,
-                    'registration_number' => $registrationNumber
-                ]
+                'data' => new ApplicationPreviewResource($application)
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
