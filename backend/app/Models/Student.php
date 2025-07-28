@@ -86,7 +86,7 @@ class Student extends Model
         return $this->hasOne(StudentGuardian::class, 'student_id', 'student_id');
     }
 
-    public function payment() : HasMany 
+    public function payments() : HasMany 
     {
         return $this->hasMany(Payment::class, 'student_id', 'student_id');
     }
