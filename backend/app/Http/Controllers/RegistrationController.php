@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use session;
+use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 use App\Models\Major;
 use App\Models\Payment;
@@ -111,6 +111,7 @@ class RegistrationController extends Controller
 
         $latest = Student::where('student_id', 'LIKE', "{$prefix}%")
             ->orderByDesc('student_id')
+            ->lockForUpdate()
             ->value('student_id');
 
         if ($latest) {
@@ -209,8 +210,8 @@ class RegistrationController extends Controller
                 'gender' => 'required|in:MALE,FEMALE',
                 'family_rank' => 'required|string',
                 'nisn' => 'required|string',
-                'nik' => 'required|numeric',
-                'kitas' => 'required|string',
+                'nik' => 'nullable|numeric',
+                'kitas' => 'nullable|string',
 
                 // student address
                 'street' => 'required|string',
