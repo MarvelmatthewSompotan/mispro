@@ -20,9 +20,9 @@ return new class extends Migration
             $table->string('nickname', 20)->nullable();
             $table->string('family_rank', 10);
             $table->enum('citizenship', ['Indonesia', 'Non Indonesia']);
-            $table->string('country', 100);
-            $table->bigInteger('nik');
-            $table->string('kitas', 11);
+            $table->string('country', 100)->nullable();
+            $table->unsignedBigInteger('nik')->nullable();
+            $table->string('kitas', 11)->nullable();
             $table->string('place_of_birth', 100);
             $table->date('date_of_birth');
             $table->string('age', 25);
