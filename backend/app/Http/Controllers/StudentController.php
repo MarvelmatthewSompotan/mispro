@@ -18,7 +18,8 @@ class StudentController extends Controller
 
         $students = Student::select('student_id', DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"))
             ->where(function ($query) use ($keyword) {
-                $query->where('first_name', 'like', "%$keyword%")
+                $query->where('student_id', 'like', "%$keyword%")
+                    ->orWhere('first_name', 'like', "%$keyword%")
                     ->orWhere('middle_name', 'like', "%$keyword%")
                     ->orWhere('last_name', 'like', "%$keyword%")
                     ->orWhere(DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name)"), 'like', "%$keyword%");
