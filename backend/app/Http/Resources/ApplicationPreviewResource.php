@@ -32,6 +32,7 @@ class ApplicationPreviewResource extends JsonResource
                 'last_name' => $student->last_name,
                 'nickname' => $student->nickname,
                 'citizenship' => $student->citizenship,
+                'country' => $student->country,
                 'religion' => $student->religion,
                 'place_of_birth' => $student->place_of_birth,
                 'date_of_birth' => $student->date_of_birth,
@@ -39,9 +40,13 @@ class ApplicationPreviewResource extends JsonResource
                 'phone_number' => $student->phone_number,
                 'previous_school' => $student->previous_school,
                 'academic_status' => $student->academic_status,
+                'academic_status_other' => $student->academic_status_other,
                 'gender' => $student->gender,
                 'family_rank' => $student->family_rank,
                 'age' => $student->age,
+                'nisn' =>$student->nisn,
+                'nik' =>$student->nik,
+                'kitas' =>$student->kitas,
             ],
             'address' => optional($student->studentAddress)->only([
                 'street',
@@ -63,32 +68,33 @@ class ApplicationPreviewResource extends JsonResource
                 'program_name' => $enrollment->program->name,
                 'residence' => $enrollment->residenceHall->type,
                 'transportation' => $enrollment->transportation->type,
+                'pickup_point' => optional($enrollment->transportation->pickupPoint)->name,
                 'policies' => [
                     'residence_hall' => $enrollment->residence_hall_policy,
                     'transportation' => $enrollment->transportation_policy,
                 ],
             ],
-            'parent' => [
-                'father' => [
-                    'name' => $student->studentParent->father_name ?? null,
-                    'occupation' => $student->studentParent->father_occupation ?? null,
-                    'company' => $student->studentParent->father_company ?? null,
-                    'phone' => $student->studentParent->father_phone ?? null,
-                    'email' => $student->studentParent->father_email ?? null,
-                    'address' => optional($student->studentParent->fatherAddress)->only([
-                        'street', 'rt', 'rw', 'village', 'district', 'city_regency', 'province', 'other'
-                    ]),
-                ],
-                'mother' => [
-                    'name' => $student->studentParent->mother_name ?? null,
-                    'occupation' => $student->studentParent->mother_occupation ?? null,
-                    'company' => $student->studentParent->mother_company ?? null,
-                    'phone' => $student->studentParent->mother_phone ?? null,
-                    'email' => $student->studentParent->mother_email ?? null,
-                    'address' => optional($student->studentParent->motherAddress)->only([
-                        'street', 'rt', 'rw', 'village', 'district', 'city_regency', 'province', 'other'
-                    ]),
-                ]
+            'father' => [
+                'name' => $student->studentParent->father_name ?? null,
+                'occupation' => $student->studentParent->father_occupation ?? null,
+                'company' => $student->studentParent->father_company ?? null,
+                'phone' => $student->studentParent->father_phone ?? null,
+                'email' => $student->studentParent->father_email ?? null,
+                'company_addresses' => $student->studentParent->father_company_addresses ?? null,
+                'address' => optional($student->studentParent->fatherAddress)->only([
+                    'street', 'rt', 'rw', 'village', 'district', 'city_regency', 'province', 'other'
+                ]),
+            ],
+            'mother' => [
+                'name' => $student->studentParent->mother_name ?? null,
+                'occupation' => $student->studentParent->mother_occupation ?? null,
+                'company' => $student->studentParent->mother_company ?? null,
+                'phone' => $student->studentParent->mother_phone ?? null,
+                'email' => $student->studentParent->mother_email ?? null,
+                'company_addresses' => $student->studentParent->mother_company_addresses ?? null,
+                'address' => optional($student->studentParent->motherAddress)->only([
+                    'street', 'rt', 'rw', 'village', 'district', 'city_regency', 'province', 'other'
+                ]),
             ],
             'guardian' => [
                 'name' => optional(optional($student->studentGuardian)->guardian)->guardian_name,
