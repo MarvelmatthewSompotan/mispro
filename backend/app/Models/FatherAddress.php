@@ -24,7 +24,6 @@ class FatherAddress extends Model
         'rw',
         'city_regency',
         'province',
-        'postal_code',
         'other',
     ];
 

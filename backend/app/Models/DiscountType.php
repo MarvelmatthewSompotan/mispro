@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Student;
 use App\Models\Enrollment;
 use App\Models\StudentDiscount;
 use Illuminate\Database\Eloquent\Model;
