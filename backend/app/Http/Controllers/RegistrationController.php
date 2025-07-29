@@ -39,12 +39,6 @@ class RegistrationController extends Controller
      */
     public function startRegistration(Request $request)
     {
-        // === DEBUG START ===
-        \Log::info('=== START REGISTRATION DEBUG ===');
-        \Log::info('Session ID: ' . session()->getId());
-        \Log::info('Request IP: ' . $request->ip());
-        \Log::info('Request Headers: ', $request->headers->all());
-        \Log::info('Cookie Header: ' . $request->header('Cookie', 'No cookie'));
         
         $validator = Validator::make($request->all(), [
             'school_year_id' => 'required|integer|exists:school_years,school_year_id',
@@ -53,7 +47,6 @@ class RegistrationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            \Log::error('Validation failed: ', $validator->errors()->toArray());
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -62,8 +55,6 @@ class RegistrationController extends Controller
 
         $validated = $validator->validated();
 
-        // Prevent session regeneration
-        config(['session.regenerate_on_login' => false]);
 
         session([
             'registration_context' => $validated
@@ -71,57 +62,12 @@ class RegistrationController extends Controller
 
         session()->save();
 
-
-        // === DEBUG SESSION AFTER SAVE ===
-        \Log::info('Session data after save: ', session()->all());
-        \Log::info('Registration context stored: ', session('registration_context'));
-
-        // Check database session storage
-        $sessionId = session()->getId();
-        $dbSession = \DB::table('sessions')->where('id', $sessionId)->first();
-
-        if ($dbSession) {
-            \Log::info('DB Session found - ID: ' . $dbSession->id);
-            \Log::info('DB Session last_activity: ' . $dbSession->last_activity);
-            \Log::info('DB Session payload length: ' . strlen($dbSession->payload));
-            \Log::info('DB Session user_agent: ' . ($dbSession->user_agent ?? 'null'));
-            \Log::info('DB Session ip_address: ' . ($dbSession->ip_address ?? 'null'));
-        } else {
-            \Log::error('DB Session NOT FOUND for session ID: ' . $sessionId);
-        }
-
-        // Count total sessions in database
-        $totalSessions = \DB::table('sessions')->count();
-        \Log::info('Total sessions in database: ' . $totalSessions);
-        
-        \Log::info('=== END START REGISTRATION DEBUG ===');
-
-        $response = response()->json([
+        return $response = response()->json([
             'success' => true,
             'message' => 'Initial registration context saved successfully.',
             'data' => $validated,
-            'debug' => [
-                'session_id' => $sessionId,
-                'session_exists_in_db' => $dbSession ? true : false,
-                'total_sessions' => $totalSessions
-            ]
         ], 200);
         
-        // Force set session cookie in response
-        $cookieName = config('session.cookie');
-        $response->withCookie(cookie(
-            $cookieName,
-            $sessionId,
-            config('session.lifetime'),
-            config('session.path'),
-            config('session.domain'),
-            config('session.secure'),
-            config('session.http_only'),
-            false,
-            config('session.same_site')
-        ));
-        
-        return $response;
     }
 
     /**
@@ -129,76 +75,18 @@ class RegistrationController extends Controller
      */
     public function getRegistrationContext()
     {
-        // === DEBUG START ===
-        \Log::info('=== GET REGISTRATION CONTEXT DEBUG ===');
-        \Log::info('Session ID: ' . session()->getId());
-        \Log::info('Request IP: ' . request()->ip());
-        \Log::info('Cookie Header: ' . request()->header('Cookie', 'No cookie'));
-
-        
-        // Check all session data
-        $allSessionData = session()->all();
-        \Log::info('All session data: ', $allSessionData);
-        \Log::info('Session keys available: ', array_keys($allSessionData));
-        
-        // Check database session
-        $sessionId = session()->getId();
-        $dbSession = \DB::table('sessions')->where('id', $sessionId)->first();
-        
-        if ($dbSession) {
-            \Log::info('DB Session found - ID: ' . $dbSession->id);
-            \Log::info('DB Session last_activity: ' . $dbSession->last_activity);
-            \Log::info('DB Session payload length: ' . strlen($dbSession->payload));
-            
-            // Decode session payload to see raw data
-            try {
-                $payload = base64_decode($dbSession->payload);
-                \Log::info('DB Session payload (first 200 chars): ' . substr($payload, 0, 200));
-            } catch (\Exception $e) {
-                \Log::error('Failed to decode session payload: ' . $e->getMessage());
-            }
-        } else {
-            \Log::error('DB Session NOT FOUND for session ID: ' . $sessionId);
-            
-            // Show all sessions in database for debugging
-            $allSessions = \DB::table('sessions')
-                ->select('id', 'last_activity', 'ip_address', 'user_agent')
-                ->orderBy('last_activity', 'desc')
-                ->limit(5)
-                ->get();
-            \Log::info('Recent sessions in database: ', $allSessions->toArray());
-        }
-        
-        // Check specific registration context
         $context = session('registration_context');
-        if ($context) {
-            \Log::info('Registration context from session: ', $context);
-        } else {
-            \Log::info('Registration context from session: NULL');
-        }
-        
-        \Log::info('=== END GET REGISTRATION CONTEXT DEBUG ===');
         
         if (!$context) {
             return response()->json([
                 'success' => false,
                 'error' => 'No registration context found. Please complete Step 1 first.',
-                'debug' => [
-                    'session_id' => $sessionId,
-                    'session_exists_in_db' => $dbSession ? true : false,
-                    'available_session_keys' => array_keys($allSessionData),
-                    'total_session_data_count' => count($allSessionData)
-                ]
             ], 404);
         }
 
         return response()->json([
             'success' => true,
             'data' => $context,
-            'debug' => [
-                'session_id' => $sessionId,
-                'session_exists_in_db' => $dbSession ? true : false
-            ]
         ], 200);
     }
 
@@ -207,16 +95,9 @@ class RegistrationController extends Controller
      */
     public function clearRegistrationContext()
     {
-        \Log::info('=== CLEAR REGISTRATION CONTEXT ===');
-        \Log::info('Session ID before clear: ' . session()->getId());
-        \Log::info('Session data before clear: ', session()->all());
-        
         session()->forget('registration_context');
         session()->save();
         
-        \Log::info('Session data after clear: ', session()->all());
-        \Log::info('=== END CLEAR REGISTRATION CONTEXT ===');
-
         return response()->json([
             'success' => true,
             'message' => 'Registration context cleared successfully.'
@@ -298,18 +179,11 @@ class RegistrationController extends Controller
 
     public function store(Request $request)
     {
-        // === DEBUG START ===
-        \Log::info('=== STORE REGISTRATION DEBUG ===');
-        \Log::info('Session ID: ' . session()->getId());
-        \Log::info('Session data: ', session()->all());
-
         DB::beginTransaction();
         try {
             $context = session('registration_context');
-            \Log::info('Context from session: ', $context ? $context : 'NULL');
 
             if (!$context) {
-                \Log::error('No registration context found in store method');
                 return response()->json([
                     'success' => false,
                     'error' => 'No registration context found. Please complete Step 1 first.'
@@ -697,8 +571,6 @@ class RegistrationController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Store method exception: ' . $e->getMessage());
-            \Log::error('Store method stack trace: ' . $e->getTraceAsString());
             return response()->json([
                 'success' => false, 
                 'error' => 'Registration failed: ' . $e->getMessage()

@@ -38,7 +38,7 @@ class MasterDataController extends Controller
             'programs' => Program::all(),
             'transportations' => Transportation::select('transport_id', 'type')->get(),
             'residence_halls' => ResidenceHall::all(),
-            'dicount_types' => DiscountType::select('discount_type_id', 'name')->get(),
+            'discount_types' => DiscountType::select('discount_type_id', 'name')->get(),
             'student_status' => ['New', 'Old', 'Transferee'],
             'academic_status' => ['REGULAR', 'SIT-IN', 'OTHER'],
             'gender' => ['MALE', 'FEMALE'],
