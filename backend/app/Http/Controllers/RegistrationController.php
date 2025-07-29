@@ -24,7 +24,6 @@ use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ApplicationPreviewResource;
 
-
 class RegistrationController extends Controller
 {
     /**
@@ -40,14 +39,21 @@ class RegistrationController extends Controller
      */
     public function startRegistration(Request $request)
     {
+        // === DEBUG START ===
+        \Log::info('=== START REGISTRATION DEBUG ===');
+        \Log::info('Session ID: ' . session()->getId());
+        \Log::info('Request IP: ' . $request->ip());
+        \Log::info('Request Headers: ', $request->headers->all());
+        \Log::info('Cookie Header: ' . $request->header('Cookie', 'No cookie'));
+        
         $validator = Validator::make($request->all(), [
-            'start_year' => 'required|string',
-            'end_year' => 'required|string',
+            'school_year_id' => 'required|integer|exists:school_years,school_year_id',
             'semester_id' => 'required|integer|exists:semesters,semester_id',
             'registration_date' => 'required|date',
         ]);
 
         if ($validator->fails()) {
+            \Log::error('Validation failed: ', $validator->errors()->toArray());
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -56,15 +62,66 @@ class RegistrationController extends Controller
 
         $validated = $validator->validated();
 
+        // Prevent session regeneration
+        config(['session.regenerate_on_login' => false]);
+
         session([
             'registration_context' => $validated
         ]);
 
-        return response()->json([
+        session()->save();
+
+
+        // === DEBUG SESSION AFTER SAVE ===
+        \Log::info('Session data after save: ', session()->all());
+        \Log::info('Registration context stored: ', session('registration_context'));
+
+        // Check database session storage
+        $sessionId = session()->getId();
+        $dbSession = \DB::table('sessions')->where('id', $sessionId)->first();
+
+        if ($dbSession) {
+            \Log::info('DB Session found - ID: ' . $dbSession->id);
+            \Log::info('DB Session last_activity: ' . $dbSession->last_activity);
+            \Log::info('DB Session payload length: ' . strlen($dbSession->payload));
+            \Log::info('DB Session user_agent: ' . ($dbSession->user_agent ?? 'null'));
+            \Log::info('DB Session ip_address: ' . ($dbSession->ip_address ?? 'null'));
+        } else {
+            \Log::error('DB Session NOT FOUND for session ID: ' . $sessionId);
+        }
+
+        // Count total sessions in database
+        $totalSessions = \DB::table('sessions')->count();
+        \Log::info('Total sessions in database: ' . $totalSessions);
+        
+        \Log::info('=== END START REGISTRATION DEBUG ===');
+
+        $response = response()->json([
             'success' => true,
             'message' => 'Initial registration context saved successfully.',
-            'data' => $validated
+            'data' => $validated,
+            'debug' => [
+                'session_id' => $sessionId,
+                'session_exists_in_db' => $dbSession ? true : false,
+                'total_sessions' => $totalSessions
+            ]
         ], 200);
+        
+        // Force set session cookie in response
+        $cookieName = config('session.cookie');
+        $response->withCookie(cookie(
+            $cookieName,
+            $sessionId,
+            config('session.lifetime'),
+            config('session.path'),
+            config('session.domain'),
+            config('session.secure'),
+            config('session.http_only'),
+            false,
+            config('session.same_site')
+        ));
+        
+        return $response;
     }
 
     /**
@@ -72,18 +129,76 @@ class RegistrationController extends Controller
      */
     public function getRegistrationContext()
     {
-        $context = session('registration_context');
+        // === DEBUG START ===
+        \Log::info('=== GET REGISTRATION CONTEXT DEBUG ===');
+        \Log::info('Session ID: ' . session()->getId());
+        \Log::info('Request IP: ' . request()->ip());
+        \Log::info('Cookie Header: ' . request()->header('Cookie', 'No cookie'));
 
+        
+        // Check all session data
+        $allSessionData = session()->all();
+        \Log::info('All session data: ', $allSessionData);
+        \Log::info('Session keys available: ', array_keys($allSessionData));
+        
+        // Check database session
+        $sessionId = session()->getId();
+        $dbSession = \DB::table('sessions')->where('id', $sessionId)->first();
+        
+        if ($dbSession) {
+            \Log::info('DB Session found - ID: ' . $dbSession->id);
+            \Log::info('DB Session last_activity: ' . $dbSession->last_activity);
+            \Log::info('DB Session payload length: ' . strlen($dbSession->payload));
+            
+            // Decode session payload to see raw data
+            try {
+                $payload = base64_decode($dbSession->payload);
+                \Log::info('DB Session payload (first 200 chars): ' . substr($payload, 0, 200));
+            } catch (\Exception $e) {
+                \Log::error('Failed to decode session payload: ' . $e->getMessage());
+            }
+        } else {
+            \Log::error('DB Session NOT FOUND for session ID: ' . $sessionId);
+            
+            // Show all sessions in database for debugging
+            $allSessions = \DB::table('sessions')
+                ->select('id', 'last_activity', 'ip_address', 'user_agent')
+                ->orderBy('last_activity', 'desc')
+                ->limit(5)
+                ->get();
+            \Log::info('Recent sessions in database: ', $allSessions->toArray());
+        }
+        
+        // Check specific registration context
+        $context = session('registration_context');
+        if ($context) {
+            \Log::info('Registration context from session: ', $context);
+        } else {
+            \Log::info('Registration context from session: NULL');
+        }
+        
+        \Log::info('=== END GET REGISTRATION CONTEXT DEBUG ===');
+        
         if (!$context) {
             return response()->json([
                 'success' => false,
-                'error' => 'No registration context found. Please complete Step 1 first.'
+                'error' => 'No registration context found. Please complete Step 1 first.',
+                'debug' => [
+                    'session_id' => $sessionId,
+                    'session_exists_in_db' => $dbSession ? true : false,
+                    'available_session_keys' => array_keys($allSessionData),
+                    'total_session_data_count' => count($allSessionData)
+                ]
             ], 404);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $context
+            'data' => $context,
+            'debug' => [
+                'session_id' => $sessionId,
+                'session_exists_in_db' => $dbSession ? true : false
+            ]
         ], 200);
     }
 
@@ -92,7 +207,15 @@ class RegistrationController extends Controller
      */
     public function clearRegistrationContext()
     {
+        \Log::info('=== CLEAR REGISTRATION CONTEXT ===');
+        \Log::info('Session ID before clear: ' . session()->getId());
+        \Log::info('Session data before clear: ', session()->all());
+        
         session()->forget('registration_context');
+        session()->save();
+        
+        \Log::info('Session data after clear: ', session()->all());
+        \Log::info('=== END CLEAR REGISTRATION CONTEXT ===');
 
         return response()->json([
             'success' => true,
@@ -175,16 +298,23 @@ class RegistrationController extends Controller
 
     public function store(Request $request)
     {
+        // === DEBUG START ===
+        \Log::info('=== STORE REGISTRATION DEBUG ===');
+        \Log::info('Session ID: ' . session()->getId());
+        \Log::info('Session data: ', session()->all());
+
         DB::beginTransaction();
         try {
-            // $context = session('registration_context');
+            $context = session('registration_context');
+            \Log::info('Context from session: ', $context ? $context : 'NULL');
 
-            // if (!$context) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'error' => 'No registration context found. Please complete Step 1 first.'
-            //     ], 400);
-            // }
+            if (!$context) {
+                \Log::error('No registration context found in store method');
+                return response()->json([
+                    'success' => false,
+                    'error' => 'No registration context found. Please complete Step 1 first.'
+                ], 400);
+            }
 
             // validate request
             $validated = $request->validate([
@@ -199,18 +329,28 @@ class RegistrationController extends Controller
                 'middle_name' => 'nullable|string',
                 'last_name' => 'required|string',
                 'nickname' => 'nullable|string',
-                'citizenship' => 'required|string',
+                'citizenship' => 'required|in:Indonesia,Non Indonesia',
+                'country' => function ($attribute, $value, $fail) use ($request) {
+                    if ($request->citizenship === 'Non Indonesia' && empty($value)) {
+                        $fail('The country field is required when selecting "Non-Indonesia" as the citizenship.');
+                    }
+                },
                 'religion' => 'required|string',
                 'place_of_birth' => 'required|string',
                 'date_of_birth' => 'required|date',
-                'email' => 'nullable|email',
-                'phone_number' => 'nullable|string',
+                'email' => 'required|email',
+                'phone_number' => 'required|string',
                 'previous_school' => 'required|string',
                 'academic_status' => 'required|in:REGULAR,SIT-IN,OTHER',
+                'academic_status_other' => function ($attribute, $value, $fail) use ($request) {
+                    if ($request->academic_status === 'OTHER' && empty($value)) {
+                        $fail('The academic_status_other field is required when selecting "OTHER" as the academic status.');
+                    }
+                },
                 'gender' => 'required|in:MALE,FEMALE',
                 'family_rank' => 'required|string',
                 'nisn' => 'required|string',
-                'nik' => 'nullable|numeric',
+                'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
 
                 // student address
@@ -237,7 +377,8 @@ class RegistrationController extends Controller
                 
                 // Facilities
                 'transportation_id' => 'required|exists:transportations,transport_id',
-                'pickup_point' => 'nullable|string',
+                'pickup_point_id' => 'nullable|integer|exists:pickup_points,pickup_point_id',
+                'pickup_point_custom' => 'nullable|string|max:255',
                 'transportation_policy' => 'required|in:Signed,Not Signed',
                 'residence_id' => 'required|exists:residence_halls,residence_id',
                 'residence_hall_policy' => 'required|in:Signed,Not Signed',
@@ -297,19 +438,13 @@ class RegistrationController extends Controller
                 'discount_name' => 'nullable|string',
                 'discount_notes' => 'nullable|string',
 
-                // create
-                'school_year_id' => 'required|integer',
-                'semester_id' => 'required|integer',
-                'registration_date' => 'required|date'
             ]);
             
             // Merge context with validated data
-            // $validated = array_merge($validated, $context);
+            $validated = array_merge($validated, $context);
             
             // data master
-            $section = Section::findOrFail($validated['section_id']);
             $program = Program::findOrFail($validated['program_id']);
-            $major = Major::findOrFail($validated['major_id']);
             $schoolClass = SchoolClass::findOrFail($validated['class_id']);
             $transportation = Transportation::findOrFail($validated['transportation_id']);
             $residenceHall = ResidenceHall::findOrFail($validated['residence_id']);
@@ -322,10 +457,15 @@ class RegistrationController extends Controller
 
             // pickup point 
             $pickupPoint = null;
-            if ($validated['pickup_point']) {
+            if ($validated['pickup_point_id']) {
+                $pickupPoint = PickupPoint::findOrFail($validated['pickup_point_id']);
+            } elseif ($validated['pickup_point_custom']) {
                 $pickupPoint = PickupPoint::firstOrCreate([
-                    'name' => $validated['pickup_point'],
+                    'name' => $validated['pickup_point_custom'],
                 ]);
+            }
+            
+            if ($pickupPoint) {
                 $transportation->pickup_point_id = $pickupPoint->pickup_point_id;
                 $transportation->save();
             }
@@ -341,13 +481,26 @@ class RegistrationController extends Controller
             // student
             $status = $validated['student_status'];
             if ($status === 'New'|| $status === 'Transferee') {
-                $existingStudent = Student::where('first_name', $validated['first_name'])
-                ->where('middle_name', $validated['middle_name'])
-                ->where('last_name', $validated['last_name'])
-                ->where('date_of_birth', $validated['date_of_birth'])
-                ->where('place_of_birth', $validated['place_of_birth'])
-                ->where('previous_school', $validated['previous_school'])
-                ->first();
+                $existingStudent = Student::where(function($query) use ($validated) {
+                        $query->where('first_name', $validated['first_name'])
+                            ->where('last_name', $validated['last_name'])
+                            ->where('date_of_birth', $validated['date_of_birth'])
+                            ->where('place_of_birth', $validated['place_of_birth'])
+                            ->where('previous_school', $validated['previous_school']);
+                    })
+                    // Atau berdasarkan NIK (jika diisi)
+                    ->orWhere(function($query) use ($validated) {
+                        if (!empty($validated['nik'])) {
+                            $query->where('nik', $validated['nik']);
+                        }
+                    })
+                    // Atau berdasarkan KITAS (jika diisi)
+                    ->orWhere(function($query) use ($validated) {
+                        if (!empty($validated['kitas'])) {
+                            $query->where('kitas', $validated['kitas']);
+                        }
+                    })
+                    ->first();
                 if ($existingStudent) {
                     return response()->json([
                         'success' => false,
@@ -386,6 +539,7 @@ class RegistrationController extends Controller
                 'age' => $calculatedAge,
                 'family_rank' => $validated['family_rank'],
                 'citizenship' => $validated['citizenship'],
+                'country' => $validated['citizenship'] === 'Non Indonesia' ? $validated['country'] : null,
                 'religion' => $validated['religion'],
                 'place_of_birth' => $validated['place_of_birth'],
                 'date_of_birth' => $validated['date_of_birth'],
@@ -393,8 +547,12 @@ class RegistrationController extends Controller
                 'previous_school' => $validated['previous_school'],
                 'phone_number' => $validated['phone_number'],
                 'academic_status' => $validated['academic_status'],
+                'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
                 'registration_date' => $validated['registration_date'],
                 'enrollment_status' => 'ACTIVE',
+                'nik' => $validated['nik'],
+                'kitas' => $validated['kitas'],
+                'nisn' => $validated['nisn'],
             ]);
 
             // enrollment
@@ -447,6 +605,7 @@ class RegistrationController extends Controller
                 'mother_occupation' => $validated['mother_occupation'],
                 'mother_phone' => $validated['mother_phone'],
                 'mother_email' => $validated['mother_email'],
+                'mother_company_addresses' => $validated['mother_company_addresses'],
             ]);
             $studentParent->fatherAddress()->create([
                 'street' => $validated['father_address_street'],
@@ -457,6 +616,7 @@ class RegistrationController extends Controller
                 'city_regency' => $validated['father_address_city_regency'],
                 'province' => $validated['father_address_province'],
                 'other' => $validated['father_address_other'],
+                'father_company_addresses' => $validated['father_company_addresses'],
             ]);
             $studentParent->motherAddress()->create([
                 'street' => $validated['mother_address_street'],
@@ -537,6 +697,8 @@ class RegistrationController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Store method exception: ' . $e->getMessage());
+            \Log::error('Store method stack trace: ' . $e->getTraceAsString());
             return response()->json([
                 'success' => false, 
                 'error' => 'Registration failed: ' . $e->getMessage()
