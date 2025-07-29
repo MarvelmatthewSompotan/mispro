@@ -12,7 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->append([
+            \Illuminate\Http\Middleware\HandleCors::class, // CORS
+            \Illuminate\Session\Middleware\StartSession::class, // session
+            \Illuminate\Cookie\Middleware\EncryptCookies::class, // Cookie
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class, // Cookie
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class, // Flash data
+            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, // CSRF protection
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
