@@ -142,6 +142,7 @@
   justify-content: flex-start;
   gap: 24px;
   font-size: 16px;
+  background-color: #fffaec;
 }
 .container {
   width: 100%;

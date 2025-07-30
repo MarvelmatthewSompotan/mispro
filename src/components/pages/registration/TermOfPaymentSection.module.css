@@ -13,6 +13,7 @@
   color: #000;
   font-family: Poppins;
   margin-top: 24px;
+  background-color: #fffaec;
 }
 
 .sectionHeader {
@@ -39,9 +40,11 @@
   align-self: stretch;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 12px;
+  background-color: #fffaec;
 }
 
 .paymentSection {
@@ -130,8 +133,8 @@
   bottom: -4.17%;
   left: -4.17%;
   border-radius: 4px;
-  background-color: #5f84fe;
-  border: 2px solid #5f84fe;
+  background-color: #ffffff;
+  border: 3px solid #5f84fe;
   box-sizing: border-box;
 }
 
@@ -154,15 +157,6 @@
   font-family: Poppins, Arial, sans-serif;
   font-weight: 400;
   font-size: 16px;
-}
-
-.discountSection {
-  align-self: stretch;
-  height: 68px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
 }
 
 /* Responsive design */
@@ -258,4 +252,26 @@ select::placeholder,
 textarea::placeholder {
   font-weight: 400;
   color: rgba(128, 128, 128, 0.6);
+}
+
+.dropdownSelect {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: "Poppins", Arial, sans-serif;
+
+  font-size: 16px;
+  color: rgba(128, 128, 128, 0.6);
+  padding: 5px 0px 0px 0px;
+  margin: 0;
+  cursor: pointer;
+}
+.dropdownSelect:focus,
+.dropdownSelect.hasValue {
+  font-weight: bold;
+  color: #000;
+}
+.dropdownSelect option {
+  background: white;
+  color: #000;
 }

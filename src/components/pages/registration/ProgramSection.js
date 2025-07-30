@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styles from "./ProgramSection.module.css";
+import Select from "react-select";
 
 const sectionOptions = [
   "ECP",
@@ -50,14 +51,37 @@ const ProgramSection = () => {
   // Dropdown grade options
   let gradeOptions = [];
   if (selectedSection === "ECP") {
-    gradeOptions = ["N", "K1", "K2"];
+    gradeOptions = [
+      { value: "N", label: "N" },
+      { value: "K1", label: "K1" },
+      { value: "K2", label: "K2" },
+    ];
   } else if (selectedSection === "Elementary school") {
-    gradeOptions = ["1", "2", "3", "4", "5", "6"];
+    gradeOptions = [
+      { value: "1", label: "1" },
+      { value: "2", label: "2" },
+      { value: "3", label: "3" },
+      { value: "4", label: "4" },
+      { value: "5", label: "5" },
+      { value: "6", label: "6" },
+    ];
   } else if (selectedSection === "Middle School") {
-    gradeOptions = ["7", "8", "9"];
+    gradeOptions = [
+      { value: "7", label: "7" },
+      { value: "8", label: "8" },
+      { value: "9", label: "9" },
+    ];
   } else if (selectedSection === "High School") {
-    gradeOptions = ["10", "11", "12"];
+    gradeOptions = [
+      { value: "10", label: "10" },
+      { value: "11", label: "11" },
+      { value: "12", label: "12" },
+    ];
   }
+  const majorSelectOptions = majorOptions.map((opt) => ({
+    value: opt,
+    label: opt,
+  }));
 
   return (
     <div className={styles.container}>
@@ -103,49 +127,79 @@ const ProgramSection = () => {
               </label>
             </div>
           ))}
-          <div className={styles.gradeField}>
-            <label className={styles.label} htmlFor="grade">
-              Grade
-            </label>
-            <select
-              id="grade"
-              className={styles.label}
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-              disabled={!selectedSection}
-            >
-              <option value="">Select grade</option>
-              {gradeOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
+          <div className={styles.sectionTitle}>
+            <div className={styles.sectionTitleText}>Grade</div>
           </div>
+          <Select
+            id="grade"
+            options={gradeOptions}
+            placeholder="Select grade"
+            value={
+              grade ? gradeOptions.find((opt) => opt.value === grade) : null
+            }
+            onChange={(opt) => setGrade(opt ? opt.value : "")}
+            isClearable
+            styles={{
+              control: (base) => ({
+                ...base,
+                fontWeight: grade ? "bold" : "400",
+                color: grade ? "#000" : "rgba(128,128,128,0.6)",
+                border: "none",
+                boxShadow: "none",
+                borderRadius: 0,
+                borderBottom: "1px solid #000",
+                background: "transparent",
+              }),
+              singleValue: (base) => ({
+                ...base,
+                fontWeight: grade ? "bold" : "400",
+                color: grade ? "#000" : "rgba(128,128,128,0.6)",
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: "rgba(128,128,128,0.6)",
+              }),
+            }}
+          />
           {showMajor && (
-            <div className={styles.majorField}>
-              <label className={styles.label} htmlFor="major">
-                Major
-              </label>
-              <select
+            <>
+              <div className={styles.sectionTitle}>
+                <div className={styles.sectionTitleText}>Major</div>
+              </div>
+              <Select
                 id="major"
-                className={styles.valueRegular}
-                value={major}
-                onChange={(e) => setMajor(e.target.value)}
-              >
-                <option value="">Select major</option>
-                {majorOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-              <img
-                className={styles.majorDropdownIcon}
-                alt=""
-                src="Polygon 2.svg"
+                options={majorSelectOptions}
+                placeholder="Select major"
+                value={
+                  major
+                    ? majorSelectOptions.find((opt) => opt.value === major)
+                    : null
+                }
+                onChange={(opt) => setMajor(opt ? opt.value : "")}
+                isClearable
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    fontWeight: major ? "bold" : "400",
+                    color: major ? "#000" : "rgba(128,128,128,0.6)",
+                    border: "none",
+                    boxShadow: "none",
+                    borderRadius: 0,
+                    borderBottom: "1px solid #000",
+                    background: "transparent",
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    fontWeight: major ? "bold" : "400",
+                    color: major ? "#000" : "rgba(128,128,128,0.6)",
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: "rgba(128,128,128,0.6)",
+                  }),
+                }}
               />
-            </div>
+            </>
           )}
         </div>
         <div className={styles.programSection}>
@@ -197,7 +251,7 @@ const ProgramSection = () => {
                     value={otherProgram}
                     onChange={(e) => setOtherProgram(e.target.value)}
                     placeholder="Enter other program"
-                    style={{ marginLeft: 12 }}
+                    style={{ marginLeft: 12, padding: 0 }}
                   />
                 )}
               </label>

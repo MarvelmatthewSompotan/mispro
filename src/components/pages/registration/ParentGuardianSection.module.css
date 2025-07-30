@@ -41,6 +41,7 @@
   justify-content: flex-start;
   gap: 36px;
   font-size: 16px;
+  background-color: #fffaec;
 }
 
 .parentSection {
@@ -165,6 +166,7 @@ input[type="email"] {
   padding: 0 0 4px 0;
   outline: none;
   display: block;
+  transition: color 0.2s ease, font-weight 0.2s ease;
 }
 
 .value::placeholder,
@@ -172,6 +174,36 @@ input[type="tel"]::placeholder,
 input[type="email"]::placeholder {
   font-weight: 400;
   color: rgba(128, 128, 128, 0.6);
+}
+
+/* Memastikan border bottom tetap ada untuk semua input dalam ParentGuardianSection */
+.container .value,
+.container input[type="text"],
+.container input[type="tel"],
+.container input[type="email"],
+.container input[type="number"] {
+  border-bottom: 1px solid #000 !important;
+}
+
+/* Memastikan border bottom tetap ada saat focus dan filled dalam ParentGuardianSection */
+.container .value:focus,
+.container .value.filled,
+.container .value.hasValue,
+.container input[type="text"]:focus,
+.container input[type="text"].filled,
+.container input[type="text"].hasValue,
+.container input[type="tel"]:focus,
+.container input[type="tel"].filled,
+.container input[type="tel"].hasValue,
+.container input[type="email"]:focus,
+.container input[type="email"].filled,
+.container input[type="email"].hasValue,
+.container input[type="number"]:focus,
+.container input[type="number"].filled,
+.container input[type="number"].hasValue {
+  border-bottom: 1px solid #000 !important;
+  color: #000 !important;
+  font-weight: bold !important;
 }
 
 .inputField,
@@ -190,26 +222,30 @@ textarea {
   transition: all 0.2s ease;
 }
 
-.inputField:focus,
-.inputField.hasValue,
-.dropdownSelect:focus,
-.dropdownSelect.hasValue,
-.textareaField:focus,
-.textareaField.hasValue,
-input[type="text"]:focus,
-input[type="text"].hasValue,
-input[type="number"]:focus,
-input[type="number"].hasValue,
-input[type="email"]:focus,
-input[type="email"].hasValue,
-input[type="tel"]:focus,
-input[type="tel"].hasValue,
-select:focus,
-select.hasValue,
-textarea:focus,
-textarea.hasValue {
+.container .inputField:focus,
+.container .inputField.hasValue,
+.container .dropdownSelect:focus,
+.container .dropdownSelect.hasValue,
+.container .textareaField:focus,
+.container .textareaField.hasValue,
+.container input[type="text"]:focus,
+.container input[type="text"].hasValue,
+.container input[type="number"]:focus,
+.container input[type="number"].hasValue,
+.container input[type="email"]:focus,
+.container input[type="email"].hasValue,
+.container input[type="tel"]:focus,
+.container input[type="tel"].hasValue,
+.container select:focus,
+.container select.hasValue,
+.container textarea:focus,
+.container textarea.hasValue,
+.container .value:focus,
+.container .value.filled,
+.container .value.hasValue {
   font-weight: bold;
   color: #000;
+  border-bottom: 1px solid #000 !important;
 }
 
 .inputField::placeholder,
@@ -223,6 +259,24 @@ select::placeholder,
 textarea::placeholder {
   font-weight: 400;
   color: rgba(128, 128, 128, 0.6);
+}
+
+/* Memastikan input dengan nilai tetap terlihat jelas dalam ParentGuardianSection */
+.container input:not(:placeholder-shown),
+.container textarea:not(:placeholder-shown) {
+  color: #000 !important;
+  font-weight: bold !important;
+  border-bottom: 1px solid #000 !important;
+}
+
+/* Styling untuk input fields dengan nilai dalam ParentGuardianSection */
+.container input.hasValue,
+.container textarea.hasValue,
+.container .value.hasValue,
+.container .value.filled {
+  color: #000 !important;
+  font-weight: bold !important;
+  border-bottom: 1px solid #000 !important;
 }
 
 .addressSection {
@@ -250,7 +304,7 @@ textarea::placeholder {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 12px 100px 12px 12px;
+  padding: 12px 0px 10px 0px;
   gap: 10px;
 }
 

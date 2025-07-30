@@ -163,44 +163,32 @@ const TermOfPaymentSection = () => {
                 )}
               </div>
               <select
-                className={styles.dropdownSelect}
+                className={`${styles.dropdownSelect} ${
+                  waiverType ? styles.hasValue : ""
+                }`}
                 value={waiverType}
                 onChange={(e) => setWaiverType(e.target.value)}
               >
                 <option value="">Select waiver type</option>
-                <option value="Academic Excellence">Academic Excellence</option>
-                <option value="Sibling Discount">Sibling Discount</option>
-                <option value="Staff Child">Staff Child</option>
-                <option value="Early Bird">Early Bird</option>
-                <option value="Loyalty Program">Loyalty Program</option>
+                <option value="Beasiswa">Beasiswa</option>
+                <option value="Spesial Diskon">Spesial Diskon</option>
+                <option value="Staff">Staff</option>
+                <option value="Weiver">Weiver</option>
+                <option value="IP">IP</option>
               </select>
             </label>
           </div>
           <div className={`${styles.optionItem} ${styles.othersOption}`}>
             <label className={styles.radioLabel}>
-              <input
-                type="radio"
-                name="discount"
-                value="special"
-                checked={discount === "special"}
-                onChange={(e) => setDiscount(e.target.value)}
-                className={styles.hiddenRadio}
-              />
-              <div className={styles.radioButton}>
-                <div className={styles.radioButtonCircle} />
-                {discount === "special" && (
-                  <div className={styles.radioButtonSelected} />
-                )}
-              </div>
               <span className={styles.label}>Other</span>
-              {discount === "special" && (
+              {discount === "waiver" && waiverType && (
                 <input
                   className={styles.valueRegular}
                   type="text"
                   value={otherDiscount}
                   onChange={(e) => setOtherDiscount(e.target.value)}
-                  placeholder="Enter discount type"
-                  style={{ marginLeft: 12 }}
+                  placeholder="Enter discount amount"
+                  style={{ margin: 0, padding: 0 }}
                 />
               )}
             </label>

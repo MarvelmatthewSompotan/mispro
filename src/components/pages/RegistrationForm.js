@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import Main from "../layout/Main";
 import StudentStatusSection from "./registration/StudentStatusSection";
@@ -14,6 +14,33 @@ import styles from "./RegistrationForm.module.css";
 const RegistrationForm = () => {
   const location = useLocation();
   const formData = location.state || {};
+
+  // State untuk validasi
+  const [validationState, setValidationState] = useState({});
+  const [errors, setErrors] = useState({});
+  const [forceError, setForceError] = useState({});
+
+  // Handler untuk menerima status validasi dari child components
+  const handleValidationChange = (sectionName, validationData) => {
+    setValidationState((prev) => ({
+      ...prev,
+      [sectionName]: validationData,
+    }));
+  };
+
+  // Handler untuk mengatur error state
+  const handleSetErrors = (sectionName, errorData) => {
+    setErrors((prev) => ({
+      ...prev,
+      [sectionName]: errorData,
+    }));
+
+    // Set forceError untuk memastikan error state ditampilkan
+    setForceError((prev) => ({
+      ...prev,
+      [sectionName]: errorData,
+    }));
+  };
 
   return (
     <Main>
@@ -34,13 +61,22 @@ const RegistrationForm = () => {
         )}
 
         <StudentStatusSection />
-        <StudentInformationSection />
+        <StudentInformationSection
+          onValidationChange={(validationData) =>
+            handleValidationChange("studentInfo", validationData)
+          }
+          setErrors={errors.studentInfo}
+          forceError={forceError.studentInfo}
+        />
         <ProgramSection />
         <FacilitiesSection />
         <ParentGuardianSection />
         <TermOfPaymentSection />
         <OtherDetailSection />
-        <FormButtonSection />
+        <FormButtonSection
+          validationState={validationState}
+          onSetErrors={handleSetErrors}
+        />
       </div>
     </Main>
   );

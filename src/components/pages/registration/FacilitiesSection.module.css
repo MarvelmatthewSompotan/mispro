@@ -50,6 +50,7 @@
   justify-content: flex-start;
   gap: 24px;
   font-size: 16px;
+  background-color: #fffaec;
 }
 
 .transportationSection {
@@ -86,12 +87,11 @@
   font-size: 16px;
 }
 
-.optionItem {
+.optionItem,
+.schoolBusWrapper {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
-  padding: 12px;
   gap: 10px;
 }
 
@@ -167,11 +167,6 @@
   transition: all 0.2s ease;
 }
 
-.checkboxLabel:hover {
-  background-color: rgba(95, 132, 254, 0.05);
-  border-radius: 4px;
-}
-
 .checkBox {
   width: 24px;
   position: relative;
@@ -188,8 +183,8 @@
   bottom: -4.17%;
   left: -4.17%;
   border-radius: 4px;
-  background-color: #5f84fe;
-  border: 2px solid #5f84fe;
+  background-color: #ffffff;
+  border: 3px solid #5f84fe;
   box-sizing: border-box;
   transition: all 0.2s ease;
 }
@@ -209,11 +204,14 @@
 }
 
 .schoolBusWrapper {
-  width: 540px;
+
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .pickupPointField {
@@ -224,7 +222,8 @@
   align-items: center;
   justify-content: flex-start;
   padding: 12px;
-  gap: 10px;
+
+
 }
 
 .pickupPointInput {
@@ -304,23 +303,33 @@ textarea::placeholder {
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
-  .transportationSection,
-  .residenceHallSection {
-    flex-direction: column;
+@media (max-width: 1000px) {
+  .transportationSection {
+    flex-direction: column !important;
     align-items: flex-start;
     height: auto;
     gap: 12px;
   }
-
+  .optionItem,
   .schoolBusWrapper {
     width: 100%;
-    flex-direction: column;
+    
     align-items: flex-start;
+    display: block;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pickupPointField {
+   
+    margin-top: 8px;
+    flex: 1;
+    min-width: 200px;
   }
 
-  .pickupPointField {
+  .sectionTitle,
+  .sectionTitleText {
     width: 100%;
-    margin-top: 8px;
+    min-width: 0;
   }
 }

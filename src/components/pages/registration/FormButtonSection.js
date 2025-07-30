@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PopUpConfirm from "../PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
 
-const FormButtonSection = () => {
+const FormButtonSection = ({ validationState, onSetErrors }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -16,7 +16,34 @@ const FormButtonSection = () => {
   };
 
   const handleSubmit = () => {
-    // Tampilkan popup confirmation terlebih dahulu
+    // Validasi form sebelum submit
+    const errors = {};
+
+    // Validasi Student Information Section
+    if (validationState.studentInfo) {
+      if (!validationState.studentInfo.firstName) {
+        errors.studentInfo = { firstName: true };
+      }
+      if (!validationState.studentInfo.citizenship) {
+        errors.studentInfo = {
+          ...errors.studentInfo,
+          citizenship: true,
+        };
+      }
+    } else {
+      // Jika validationState.studentInfo belum ada, set error untuk firstName dan citizenship
+      errors.studentInfo = { firstName: true, citizenship: true };
+    }
+
+    // Jika ada error, tampilkan error dan jangan lanjut ke confirmation
+    if (Object.keys(errors).length > 0) {
+      if (onSetErrors) {
+        onSetErrors("studentInfo", errors.studentInfo);
+      }
+      return;
+    }
+
+    // Jika tidak ada error, tampilkan popup confirmation
     setShowConfirmation(true);
   };
 

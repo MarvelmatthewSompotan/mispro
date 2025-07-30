@@ -3,7 +3,7 @@ import styles from "./StudentStatusSection.module.css";
 
 const statusOptions = [
   { value: "new", label: "New" },
-  { value: "new_international", label: "New (International)" },
+
   { value: "transferee", label: "Transferee" },
   { value: "old", label: "Old" },
 ];
@@ -75,6 +75,8 @@ const StudentStatusSection = () => {
                       fontFamily: "Poppins, Arial, sans-serif",
                       fontWeight: "bold",
                       fontSize: 16,
+                      padding: 3,
+                      margin: 0,
                     }}
                   />
                 </div>

@@ -12,6 +12,34 @@ const FacilitiesSection = () => {
   const [residenceHall, setResidenceHall] = useState("nonResidence");
   const [residenceHallPolicy, setResidenceHallPolicy] = useState(true);
 
+  // Tambahkan array pickupPoints setelah deklarasi state
+  const pickupPoints = [
+    "Bitung 1: Bus #10 - Pusat Kota",
+    "Bitung 2: Bus #11 - Pelabuhan",
+    "Bitung 3: Bus #12 - Wangurer",
+    "Bitung 4: Bus #13 - Girian",
+    "Bitung 5: Bus #23 - Girian",
+    "Bitung 6: Bus #14 - Pusat Kota",
+    "Kema/Minawerot: Bus #15 - Kema 3",
+    "Airmadidi/Agape/Unklab",
+    "Tatelu: Bus #37 Pertigaan Pinily Tatelu",
+    "Maumbi: Walanda Maramis - Maumbi",
+    "Pemda/Kawangkoan/Asabri/Rizky",
+    "Sunflower/Perkamil: SF Paal Dua - Martadinata",
+    "MGP/Lapangan: MGP 1 - Bus #27 - Tamansari",
+    "MGP/Lapangan: MGP 2 - Bus #28 - Adipura",
+    "MGP/Lapangan: MGP 3 - Bus #26 - Lippo Plaza",
+    "Tuminting/Kombos: Bus #25 & #38 - Gereja Torsina",
+    "Bank Mandiri Sudirman (Manado): Bus #19 & #20",
+    "Winangun/Teling/Karombasan: RS Advent Teling",
+    "Citraland/Kantor Pemasaran Citraland",
+    "Bank Niaga 1: Bus #21 - Starphoto",
+    "Bank Niaga 2: Bus #22 - Starphoto",
+    "Malalayang 1: Bus #30 - Lapangan Bantik",
+    "Malalayang 2: Bus #31 - Lapangan Bantik",
+    "Malalayang 3: Bus #32 - Lapangan Bantik",
+  ];
+
   // Add hasValue class when pickup point field has value
   useEffect(() => {
     const pickupInput = document.querySelector(`.${styles.pickupPointInput}`);
@@ -82,13 +110,18 @@ const FacilitiesSection = () => {
             {transportation === "schoolBus" && (
               <div className={styles.pickupPointField}>
                 <div className={styles.label}>Pickup point</div>
-                <input
-                  type="text"
+                <select
                   value={pickupPoint}
                   onChange={(e) => setPickupPoint(e.target.value)}
-                  className={styles.pickupPointInput}
-                  placeholder="Enter pickup point"
-                />
+                  className={styles.pickupPointSelect}
+                >
+                  <option value="">Select pickup point</option>
+                  {pickupPoints.map((point, index) => (
+                    <option key={index} value={point}>
+                      {point}
+                    </option>
+                  ))}
+                </select>
                 <img
                   className={styles.pickupPointIcon}
                   alt=""

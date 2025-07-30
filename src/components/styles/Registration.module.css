@@ -30,7 +30,7 @@
   margin-bottom: 24px;
   position: relative;
   width: 500px;
-  border: 2px solid #5F84FE;
+  border: 2px solid #5f84fe;
   border-radius: 5px;
 }
 
@@ -43,7 +43,7 @@
 }
 
 .searchInput::placeholder {
-  color: #5F84FE;
+  color: #5f84fe;
   opacity: 0.8;
 }
 
@@ -89,7 +89,7 @@
   cursor: pointer;
 }
 
-.filterCheckboxLabel input[type='checkbox'] {
+.filterCheckboxLabel input[type="checkbox"] {
   opacity: 0;
   width: 22px;
   height: 22px;
@@ -102,7 +102,7 @@
 .customCheckbox {
   width: 22px;
   height: 22px;
-  border: 2px solid #5F84FE;
+  border: 2px solid #5f84fe;
   border-radius: 4px;
   display: inline-block;
   position: relative;
@@ -111,13 +111,13 @@
   margin-right: 8px;
 }
 
-input[type='checkbox']:checked + .customCheckbox {
-  background: #5F84FE;
-  border-color: #5F84FE;
+input[type="checkbox"]:checked + .customCheckbox {
+  background: #5f84fe;
+  border-color: #5f84fe;
 }
 
-input[type='checkbox']:checked + .customCheckbox::after {
-  content: '';
+input[type="checkbox"]:checked + .customCheckbox::after {
+  content: "";
   display: block;
   position: absolute;
   left: 6px;
@@ -129,7 +129,8 @@ input[type='checkbox']:checked + .customCheckbox::after {
   transform: rotate(45deg);
 }
 
-.yearSelect, .semesterSelect {
+.yearSelect,
+.semesterSelect {
   padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid #b6c6fa;
@@ -181,7 +182,7 @@ input[type='checkbox']:checked + .customCheckbox::after {
 }
 
 .tableRow:hover {
-  background-color: #A0B6FF;
+  background-color: #a0b6ff;
 }
 
 .tableCell {
@@ -199,4 +200,4 @@ input[type='checkbox']:checked + .customCheckbox::after {
   font-weight: 700;
   padding: 6px 18px !important;
   font-size: 16px !important;
-} 
+}

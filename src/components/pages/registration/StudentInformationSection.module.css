@@ -1,5 +1,4 @@
 /* CSS khusus untuk StudentInformationSection */
-
 input,
 select,
 textarea {
@@ -15,17 +14,66 @@ textarea {
   font-weight: 400;
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
-  transition: all 0.2s ease;
+  padding: 12px 0 8px 0;
+  padding-bottom: 2px;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+/* Error state styling */
+.errorFieldWrapper {
+  background-color: #ff0000 !important;
+  border-radius: 4px 4px 0 0 !important;
+  padding: 11px !important;
+  margin: 0 !important;
+  z-index: 1;
+  pointer-events: none !important;
+}
+
+.errorContainer {
+  background-color: transparent;
+  border-radius: 0;
+  padding: 18px 0px 0px 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 67px;
+  justify-content: center;
+  width: 100%;
+  align-items: flex-start;
+  box-sizing: border-box;
+  pointer-events: none !important;
+}
+
+.errorLabel {
+  color: #ffffff;
+  font-family: "Poppins", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.2;
+  text-align: left;
+  width: 100%;
+}
+
+.errorMessage {
+  color: #ffffff;
+  font-family: "Poppins", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-align: left;
+  width: 100%;
 }
 
 input:focus,
-input.hasValue,
-select:focus,
-select.hasValue,
-textarea:focus,
-textarea.hasValue {
-  font-weight: bold;
+textarea:focus {
+  outline: none;
+  border: none;
+  background: transparent;
   color: #000;
+  font-weight: bold;
 }
 
 input::placeholder,
@@ -35,6 +83,31 @@ textarea::placeholder {
   font-weight: 400;
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
+}
+
+/* Memastikan input dengan nilai tetap terlihat jelas */
+input:not(:placeholder-shown),
+textarea:not(:placeholder-shown) {
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+/* Styling untuk input fields dengan nilai */
+input.hasValue,
+textarea.hasValue,
+.valueRegular.hasValue,
+.valueHighlight.hasValue,
+.valueSmall.hasValue,
+.label.hasValue {
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+/* Memastikan input tidak kembali ke placeholder style */
+input[value]:not([value=""]),
+textarea[value]:not([value=""]) {
+  color: #000 !important;
+  font-weight: bold !important;
 }
 
 .headerTitle {
@@ -66,20 +139,37 @@ textarea::placeholder {
   flex: 1;
   border-bottom: 1px solid #000;
   box-sizing: border-box;
-  height: 66px;
+  height: 75px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
-  padding: 12px;
-  gap: 10px;
+  justify-content: flex-end;
+  padding: 11px;
+  margin: 0;
+}
+
+.nicknameField,
+.genderField,
+.citizenshipField,
+.districtField,
+.academicStatusField {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0px;
+  margin: 0px;
 }
 .row,
 .topRow {
   align-self: stretch;
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: flex-start;
   gap: 12px;
 }
@@ -91,31 +181,51 @@ textarea::placeholder {
 .nicknameField {
   align-self: stretch;
   flex: 1;
-  border-bottom: 1px solid #000;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   padding: 12px;
   gap: 10px;
+}
+.nicknameField label {
+  margin-bottom: -5px;
+}
+.nicknameField label[for="email"] {
+  margin-bottom: 5px;
 }
 .genderField {
   flex: 1;
   border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  height: 75px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: flex-end;
   padding: 12px;
-  gap: 10px;
+  margin: 0;
+  gap: 5px;
+  min-width: 0;
+}
+
+/* Memastikan field street dan village memiliki width yang sama */
+.addressRow .genderField {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 .valueSmall {
-  width: 30px;
+  min-width: 120px;
+  max-width: 180px;
+  width: 100%;
   position: relative;
   line-height: 100%;
   display: flex;
   align-items: center;
-  max-width: 30px;
 }
 .citizenshipField {
   align-self: stretch;
@@ -134,6 +244,91 @@ textarea::placeholder {
   height: 24px;
   overflow: hidden;
   flex-shrink: 0;
+  color: #000;
+  pointer-events: none;
+}
+
+.dateInputWrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.dateInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: "Poppins", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: rgba(128, 128, 128, 0.6);
+  padding: 12px 0 8px 0;
+  padding-bottom: 2px;
+  padding-right: 30px;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+/* Menyembunyikan icon kalender default browser */
+.dateInput::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+  opacity: 0;
+}
+
+.dateInput::-webkit-datetime-edit {
+  padding: 0;
+}
+
+.dateInput::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+.dateInput::-webkit-datetime-edit-text {
+  padding: 0;
+}
+
+.dateInput::-webkit-datetime-edit-month-field,
+.dateInput::-webkit-datetime-edit-day-field,
+.dateInput::-webkit-datetime-edit-year-field {
+  padding: 0;
+}
+
+.dateInput:focus {
+  outline: none;
+  border: none;
+  background: transparent;
+  color: #000;
+  font-weight: bold;
+}
+
+.dateInput.hasValue {
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+.dateInput::placeholder {
+  font-family: Poppins, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: rgba(128, 128, 128, 0.6);
+}
+
+.dateInputWrapper .calendarIcon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 .dateOfBirthWrapper {
   align-self: stretch;
@@ -154,7 +349,7 @@ textarea::placeholder {
 }
 .infoSection {
   align-self: stretch;
-  border: 1px solid #000;
+  background-color: #fffaec;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -176,27 +371,96 @@ textarea::placeholder {
   flex: 1;
   border-bottom: 1px solid #000;
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: flex-start;
   padding: 12px;
   gap: 10px;
 }
+
+.academicStatusOptions {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+}
+
+.academicStatusOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.otherLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 16px;
+  color: rgba(128, 128, 128, 0.6);
+}
+
+.hiddenRadio {
+  display: none;
+}
+
+.otherText {
+  font-weight: 200;
+  color: #000;
+}
+
+.otherInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: "Poppins", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: rgba(128, 128, 128, 0.6);
+  padding: 0;
+
+  transition: color 0.2s ease, font-weight 0.2s ease;
+  min-width: 200px;
+}
+
+.otherInput:focus {
+  outline: none;
+  color: #000;
+  font-weight: bold;
+}
+
+.otherInput:not(:placeholder-shown) {
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
 .rtField {
+  flex: 1;
   border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  height: 75px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 12px 100px 12px 12px;
-  gap: 10px;
+  padding: 12px;
+  margin: 0;
+  gap: 2px;
+  min-width: 0;
 }
 .rtrwGroup {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 27px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex: 1;
+  width: calc(50% - 8px);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 .addressRow,
 .first {
@@ -205,7 +469,11 @@ textarea::placeholder {
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 27px;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0px 12px;
 }
 .districtField {
   flex: 1;
@@ -216,6 +484,9 @@ textarea::placeholder {
   justify-content: center;
   padding: 12px;
   gap: 10px;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0;
 }
 .bracket {
   align-self: stretch;
@@ -261,15 +532,21 @@ textarea::placeholder {
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 12px;
+  gap: 16px;
   min-width: 422px;
   font-size: 16px;
   box-sizing: border-box;
   overflow: hidden;
   width: 100%;
 }
+
+.row,
+.topRow,
+.bottomRow {
+  gap: 16px;
+  margin: 0;
+}
+
 .container {
   width: 100%;
   position: relative;
@@ -286,6 +563,191 @@ textarea::placeholder {
   overflow: hidden;
 }
 
+.react-select__control {
+  border: none !important;
+  border-bottom: 1px solid #000 !important;
+  box-shadow: none !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  background: transparent !important;
+  padding: 0 !important;
+  padding-bottom: 2px !important;
+}
+
+.react-select__indicators,
+.react-select__indicator-separator {
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+:global(.react-select__indicator-separator),
+:global([class*="indicatorSeparator"]) {
+  display: none !important;
+  border: none !important;
+  background: none !important;
+}
+
+.react-datepicker__input-container > div {
+  border: none;
+  border-bottom: 1px solid #000;
+  min-height: 40px;
+  height: 40px;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  padding-bottom: 2px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* Override agar select dan option tidak pernah bold, warnanya tetap abu/transparan */
+select {
+  font-weight: 400;
+  color: rgba(128, 128, 128, 0.6);
+}
+select.hasValue {
+  font-weight: bold;
+  color: #000;
+}
+
+input,
+select,
+textarea,
+.valueSmall,
+.valueHighlight,
+.valueRegular,
+.apartementUnit,
+.react-select__control,
+.react-datepicker__input-container > div {
+  padding-bottom: 2px !important;
+}
+
+/* Memastikan DatePicker input tidak terpengaruh styling global */
+.react-datepicker__input-container input {
+  border: none !important;
+  border-bottom: 1px solid #000 !important;
+  background: transparent !important;
+  font-family: "Poppins", Arial, sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 16px !important;
+  color: rgba(128, 128, 128, 0.6) !important;
+  padding: 12px 0 8px 0 !important;
+  padding-bottom: 2px !important;
+  width: 100% !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 999 !important;
+}
+
+.react-datepicker__input-container input:focus {
+  outline: none !important;
+  border: none !important;
+  background: transparent !important;
+  border-bottom: 1px solid #000 !important;
+}
+
+.react-datepicker__input-container input.hasValue {
+  font-weight: bold !important;
+  color: #000 !important;
+}
+
+/* Memastikan DatePicker wrapper tidak memblokir interaksi */
+.react-datepicker-wrapper {
+  position: relative !important;
+  z-index: 999 !important;
+  pointer-events: auto !important;
+  width: 100% !important;
+  cursor: pointer !important;
+}
+
+.react-datepicker__input-container {
+  position: relative !important;
+  z-index: 999 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  width: 100% !important;
+}
+
+/* Memastikan DatePicker bisa diklik */
+.react-datepicker-wrapper {
+  width: 100%;
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 999;
+}
+
+.react-datepicker__input-container {
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 999;
+}
+
+.react-datepicker__input-container > div {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 999;
+}
+
+.react-datepicker__input-container input {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* Memastikan DatePicker popup muncul di atas error state */
+.react-datepicker-popper {
+  z-index: 1000 !important;
+  position: absolute !important;
+}
+
+.react-datepicker {
+  font-family: "Poppins", Arial, sans-serif !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.citizenshipField label,
+.genderField label {
+  margin-bottom: -5px;
+}
+
+.ageField {
+  height: 56px;
+  gap: 25px;
+  padding: 11px;
+  margin: 0;
+  align-items: flex-start;
+  justify-content: flex-end;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.rankField {
+  height: 56px;
+  gap: 10px;
+  padding: 11px;
+  margin: 0;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+#age {
+  min-height: 24px;
+  display: flex;
+  align-items: flex-end;
+}
+
 @media (max-width: 1000px) {
   .row,
   .addressRow,
@@ -293,18 +755,98 @@ textarea::placeholder {
     flex-direction: column;
     gap: 8px;
   }
+
   .nameField,
   .nicknameField,
   .genderField,
   .citizenshipField,
   .academicStatusField,
   .districtField,
-  .rtField {
+  .rtField,
+  .rtrwGroup {
     min-width: 0;
     width: 100%;
   }
+
+  /* Memastikan semua field address responsive */
+  .addressRow .genderField {
+    width: 100%;
+  }
+
+  .rtrwGroup {
+    width: 100%;
+    gap: 16px;
+  }
+
+  .rtField {
+    width: calc(50% - 8px);
+  }
+
+  .districtField {
+    width: 100%;
+  }
+
   .contentWrapper {
     min-width: 0;
     width: 100%;
+  }
+
+  /* Memastikan input fields responsive */
+  input,
+  select,
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Breakpoint untuk tablet */
+@media (max-width: 1000px) {
+  .row,
+  .addressRow,
+  .topRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .nameField,
+  .nicknameField,
+  .genderField,
+  .citizenshipField,
+  .academicStatusField,
+  .districtField,
+  .rtField,
+  .rtrwGroup {
+    width: 100%;
+  }
+
+  .rtrwGroup {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rtField {
+    width: 100%;
+  }
+
+  .contentWrapper {
+    padding: 0 8px;
+  }
+}
+
+/* Breakpoint untuk mobile */
+@media (max-width: 480px) {
+  .row,
+  .addressRow,
+  .topRow {
+    gap: 16px;
+  }
+
+  .contentWrapper {
+    padding: 0 4px;
+  }
+
+  .infoSection {
+    padding: 4px 8px;
   }
 }
