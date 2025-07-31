@@ -35,4 +35,13 @@ class SchoolYear extends Model
     {
         return $this->hasMany(Enrollment::class, 'school_year_id', 'school_year_id');
     }
+
+    public function drafts() : HasMany
+    {
+        return $this->hasMany(
+            Draft::class,
+            'school_year_id',
+            'school_year_id'
+        );
+    }
 }

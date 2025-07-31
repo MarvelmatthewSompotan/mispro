@@ -40,4 +40,13 @@ class Semester extends Model
             'semester_id',
         );
     }
+
+    public function drafts() : HasMany
+    {
+        return $this->hasMany(
+            Draft::class,
+            'semester_id',
+            'semester_id'
+        );
+    }
 }
