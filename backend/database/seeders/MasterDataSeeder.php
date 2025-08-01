@@ -49,9 +49,9 @@ class MasterDataSeeder extends Seeder
 
         $discountTypes = [
             'Beasiswa',
-            'Special Diskon',
+            'Special Discount',
             'Staff',
-            'Weiver',
+            'Waiver',
             'IP'
         ];
         foreach ($discountTypes as $discount) {
