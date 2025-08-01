@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Major;
 use App\Models\Program;
 use App\Models\Section;
+use App\Models\Semester;
+use App\Models\SchoolYear;
 use App\Models\PickupPoint;
 use App\Models\SchoolClass;
 use App\Models\DiscountType;
@@ -36,6 +38,8 @@ class MasterDataController extends Controller
             'majors' => $majors,
             'classes' => $classes,
             'programs' => Program::all(),
+            'school_years' => SchoolYear::select('school_year_id', 'year')->get(),
+            'semesters' => Semester::select('semester_id', 'name')->get(),
             'transportations' => Transportation::select('transport_id', 'type')->get(),
             'residence_halls' => ResidenceHall::all(),
             'discount_types' => DiscountType::select('discount_type_id', 'name')->get(),
@@ -48,6 +52,7 @@ class MasterDataController extends Controller
             'payment_method' => ['Full Payment', 'Installment'],
             'financial_policy_contract' => ['Signed', 'Not Signed'],
             'pickup_points' => $pickupPoints,
+
         ]);
     }
 }
