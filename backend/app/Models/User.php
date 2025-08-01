@@ -23,4 +23,13 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    public function drafts() : HasMany
+    {
+        return $this->hasMany(
+            Draft::class,
+            'user_id',
+            'user_id'
+        );
+    }
 }
