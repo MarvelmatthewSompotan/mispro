@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 use App\Models\Major;
 use App\Models\Payment;
@@ -14,6 +13,7 @@ use App\Models\Enrollment;
 use App\Models\SchoolYear;
 use App\Models\PickupPoint;
 use App\Models\SchoolClass;
+use Illuminate\Support\Str;
 use App\Models\DiscountType;
 use Illuminate\Http\Request;
 use App\Models\ResidenceHall;
@@ -52,15 +52,18 @@ class RegistrationController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
+        
         $validated = $validator->validated();
 
+        $uuid = Str::uuid();
 
-        session([
-            'registration_context' => $validated
+        $draft = RegistrationDraft::create([
+            'draft_id' => $uuid,
+            'registrar_id' => auth()->id(),
+            'school_year_id' => $validated->school_year_id,
+            'semester_id' => $validated->semester_id,
+            'registration_date' => $validated->registration_date,
         ]);
-
-        session()->save();
 
         return $response = response()->json([
             'success' => true,
@@ -73,37 +76,28 @@ class RegistrationController extends Controller
     /**
      * Get current registration context
      */
-    public function getRegistrationContext()
+    public function getRegistrationContext($draft_id)
     {
-        $context = session('registration_context');
+        $draft = RegistrationDraft::where('draft_id', $draft_id)
+            ->where('registrar_id', auth()->id())
+            ->first();
         
-        if (!$context) {
+        if (!$draft) {
             return response()->json([
                 'success' => false,
-                'error' => 'No registration context found. Please complete Step 1 first.',
+                'error' => 'Draft not found or unauthorized access.',
             ], 404);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $context,
+            'data' => [
+                'school_year' => $draft->school_year,
+                'semester' => $draft->semester,
+                'registration_date' => $draft->registration_date,
+            ],
         ], 200);
     }
-
-    /**
-     * Clear registration context
-     */
-    public function clearRegistrationContext()
-    {
-        session()->forget('registration_context');
-        session()->save();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Registration context cleared successfully.'
-        ], 200);
-    }
-
 
     private function generateStudentId($schoolYearId, $sectionId, $majorId)
     {
@@ -177,17 +171,19 @@ class RegistrationController extends Controller
         return "{$number}/RF.No-{$sectionCode}/{$romanMonth}-{$yearShort}";
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $draft_id)
     {
         DB::beginTransaction();
         try {
-            $context = session('registration_context');
-
-            if (!$context) {
+            $draft = RegistrationDraft::where('draft_id', $draft_id)
+                ->where('registrar_id', auth()->id())
+                ->first();
+            
+            if (!$draft) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'No registration context found. Please complete Step 1 first.'
-                ], 400);
+                    'message' => 'Draft not found or unauthorized.',
+                ], 404);
             }
 
             // validate request
@@ -314,9 +310,6 @@ class RegistrationController extends Controller
 
             ]);
             
-            // Merge context with validated data
-            $validated = array_merge($validated, $context);
-            
             // data master
             $program = Program::findOrFail($validated['program_id']);
             $schoolClass = SchoolClass::findOrFail($validated['class_id']);
@@ -349,7 +342,7 @@ class RegistrationController extends Controller
             $registrationId = $this->formatRegistrationId(
                 $number,
                 $validated['section_id'],
-                $validated['registration_date']
+                $draft->registration_date
             );
             
             // student
@@ -382,7 +375,7 @@ class RegistrationController extends Controller
                     ], 422);
                 } 
                 $generatedId = $this->generateStudentId(
-                    $validated['school_year_id'],  
+                    $draft->school_year_id,  
                     $validated['section_id'], 
                     $validated['major_id']
                 );
@@ -422,7 +415,7 @@ class RegistrationController extends Controller
                 'phone_number' => $validated['phone_number'],
                 'academic_status' => $validated['academic_status'],
                 'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
-                'registration_date' => $validated['registration_date'],
+                'registration_date' => $draft->registration_date,
                 'enrollment_status' => 'ACTIVE',
                 'nik' => $validated['nik'],
                 'kitas' => $validated['kitas'],
@@ -432,8 +425,8 @@ class RegistrationController extends Controller
             // enrollment
             $enrollment = $student->enrollments()->create([
                 'class_id' => $schoolClass->class_id,
-                'semester_id' => $validated['semester_id'],
-                'school_year_id' => $validated['school_year_id'],
+                'semester_id' => $draft->semester_id,
+                'school_year_id' => $draft->school_year_id,
                 'program_id' => $program->program_id,
                 'transport_id' => $transportation->transport_id,
                 'residence_id' => $residenceHall->residence_id,
@@ -522,7 +515,6 @@ class RegistrationController extends Controller
                 'other' => $validated['guardian_address_other'],
             ]);
 
-
             // payment
             Payment::create([
                 'student_id' => $student->student_id,
@@ -550,12 +542,12 @@ class RegistrationController extends Controller
             ApplicationFormVersion::create([
                 'application_id' => $applicationForm->application_id,
                 'version' => 1,
-                'updated_by' => 'system',
+                'updated_by' => auth()->id(),
                 'data_snapshot' => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
             ]);
 
-            // Clear session after successful registration
-            session()->forget('registration_context');
+            // Clear draft after successful registration
+            $draft->delete();
 
             DB::commit();
             
