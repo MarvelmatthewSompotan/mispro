@@ -13,12 +13,19 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append([
-            \Illuminate\Http\Middleware\HandleCors::class, // CORS
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \App\Http\Middleware\CorsMiddleware::class, // Custom CORS
+            \Illuminate\Http\Middleware\HandleCors::class, // Laravel CORS
             \Illuminate\Session\Middleware\StartSession::class, // session
             \Illuminate\Cookie\Middleware\EncryptCookies::class, // Cookie
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class, // Cookie
             \Illuminate\View\Middleware\ShareErrorsFromSession::class, // Flash data
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, // CSRF protection
+        ]);
+
+        // CSRF protection
+        $middleware->alias([
+            'csrf' => \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
