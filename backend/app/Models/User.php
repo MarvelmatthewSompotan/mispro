@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
-
+    use HasApiTokens;
+    
     protected $primaryKey = 'user_id';
     public $timestamps = false;
 
