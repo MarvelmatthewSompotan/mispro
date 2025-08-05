@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Draft;
 use App\Models\Major;
 use App\Models\Payment;
 use App\Models\Program;
@@ -57,12 +58,12 @@ class RegistrationController extends Controller
 
         $uuid = Str::uuid();
 
-        $draft = RegistrationDraft::create([
+        $draft = Draft::create([
             'draft_id' => $uuid,
-            'registrar_id' => auth()->id(),
-            'school_year_id' => $validated->school_year_id,
-            'semester_id' => $validated->semester_id,
-            'registration_date' => $validated->registration_date,
+            'user_id' => auth()->id(),
+            'school_year_id' => $validated['school_year_id'],
+            'semester_id' => $validated['semester_id'],
+            'registration_date_draft' => $validated['registration_date'],
         ]);
 
         return $response = response()->json([
@@ -78,8 +79,8 @@ class RegistrationController extends Controller
      */
     public function getRegistrationContext($draft_id)
     {
-        $draft = RegistrationDraft::where('draft_id', $draft_id)
-            ->where('registrar_id', auth()->id())
+        $draft = Draft::where('draft_id', $draft_id)
+            ->where('user_id', auth()->id())
             ->first();
         
         if (!$draft) {
@@ -92,9 +93,9 @@ class RegistrationController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'school_year' => $draft->school_year,
-                'semester' => $draft->semester,
-                'registration_date' => $draft->registration_date,
+                'school_year' => $draft->school_year_id,
+                'semester' => $draft->semester_id,
+                'registration_date' => $draft->registration_date_draft,
             ],
         ], 200);
     }
@@ -175,8 +176,8 @@ class RegistrationController extends Controller
     {
         DB::beginTransaction();
         try {
-            $draft = RegistrationDraft::where('draft_id', $draft_id)
-                ->where('registrar_id', auth()->id())
+            $draft = Draft::where('draft_id', $draft_id)
+                ->where('user_id', auth()->id())
                 ->first();
             
             if (!$draft) {
@@ -338,11 +339,11 @@ class RegistrationController extends Controller
             }
 
             // registration id
-            $number = $this->getSectionRegistrationNumber($validated['section_id'], $validated['registration_date']);
+            $number = $this->getSectionRegistrationNumber($validated['section_id'], $draft->registration_date_draft);
             $registrationId = $this->formatRegistrationId(
                 $number,
                 $validated['section_id'],
-                $draft->registration_date
+                $draft->registration_date_draft
             );
             
             // student
@@ -415,7 +416,7 @@ class RegistrationController extends Controller
                 'phone_number' => $validated['phone_number'],
                 'academic_status' => $validated['academic_status'],
                 'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
-                'registration_date' => $draft->registration_date,
+                'registration_date' => $draft->registration_date_draft,
                 'enrollment_status' => 'ACTIVE',
                 'nik' => $validated['nik'],
                 'kitas' => $validated['kitas'],
