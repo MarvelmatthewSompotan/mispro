@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Draft;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
