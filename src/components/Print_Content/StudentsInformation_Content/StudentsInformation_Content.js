@@ -1,4 +1,3 @@
-import { FunctionComponent } from 'react';
 import styles from '../../styles/StudentsInformation_Content.module.css';
 
 const CONTENT = () => {

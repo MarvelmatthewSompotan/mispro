@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import styles from '../styles/Print.module.css';
 import kop from '../../assets/LogoMIS_Print.png';
 import footer from '../../assets/Footer.png';
@@ -12,8 +14,32 @@ import SignatureContent from '../Print_Content/Signature_Content/Signature_Conte
 import OtherDetailContent from '../Print_Content/OtherDetail_Content/OtherDetail_Content';
 
 function Print() {
+  const printRef = useRef();
+
+  useEffect(() => {
+    const downloadPDF = async () => {
+      const element = printRef.current;
+
+      // Ambil nama student dari preview
+      let studentName = document.querySelector('#student-name')?.textContent || 'Student_Name';
+      studentName = studentName.replace(/[\\?%*:|"<>]/g, '-'); // bersihkan karakter ilegal untuk nama file
+
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${studentName}_Application_Form.pdf`);
+    };
+
+    downloadPDF();
+  }, []);
+
   return (
-    <div className={styles.printPageA4}>
+    <div ref={printRef} className={styles.printPageA4}>
       <div className={styles.header}>
         <div className={styles.headerRow}>
           <img src={kop} alt="Header KOP" className={styles.headerKop} />
@@ -29,61 +55,64 @@ function Print() {
         </div>
         <div className={styles.formInfo}>
           <div className={styles.dateParent}>
-            <b className={styles.applicationForm}>Date:</b>
-            <b className={styles.applicationForm}>12 September 2025</b>
+            <b>Date:</b>
+            <b>12 September 2025</b>
           </div>
           <div className={styles.semesterParent}>
-            <b className={styles.applicationForm}>Semester:</b>
-            <b className={styles.applicationForm}>1 (One)</b>
+            <b>Semester:</b>
+            <b>1 (One)</b>
           </div>
           <div className={styles.semesterParent}>
-            <b className={styles.applicationForm}>School Year:</b>
-            <b className={styles.applicationForm}>2025/2026</b>
+            <b>School Year:</b>
+            <b>2025/2026</b>
           </div>
           <div className={styles.semesterParent}>
-            <b className={styles.applicationForm}>Registration Number:</b>
-            <b className={styles.applicationForm}>7466</b>
+            <b>Registration Number:</b>
+            <b>7466</b>
           </div>
           <div className={styles.registrationIdParent}>
-            <b className={styles.applicationForm}>Registration ID:</b>
-            <b className={styles.applicationForm}>001/RF NO-HS/XI-25</b>
+            <b>Registration ID:</b>
+            <b>001/RF NO-HS/XI-25</b>
           </div>
         </div>
       </div>
+
       <div className={styles.form}>
         <div className={styles.studentsInformation}>
           <div className={styles.header1}>
-            <b className={styles.applicationForm}>STUDENT’S INFORMATION</b>
+            <b>STUDENT’S INFORMATION</b>
           </div>
+          {/* Pastikan ada id student-name supaya bisa dibaca */}
+          <div id="student-name" style={{ display: 'none' }}>John Doe</div>
           <StudentsInformationContent />
         </div>
         <div className={styles.program}>
           <div className={styles.header1}>
-            <b className={styles.applicationForm}>PROGRAM</b>
+            <b>PROGRAM</b>
           </div>
           <ProgramContent />
         </div>
         <div className={styles.facilities}>
           <div className={styles.header1}>
-            <b className={styles.applicationForm}>FACILITIES</b>
+            <b>FACILITIES</b>
           </div>
           <FacilitiesContent />
         </div>
         <div className={styles.parentsguardianInformation}>
           <div className={styles.header1}>
-            <b className={styles.applicationForm}>PARENT / GUARDIAN INFORMATION</b>
+            <b>PARENT / GUARDIAN INFORMATION</b>
           </div>
           <ParentsGuardianInformationContent />
         </div>
         <div className={styles.termOfPayment}>
           <div className={styles.header1}>
-            <b className={styles.applicationForm}>TERM OF PAYMENT</b>
+            <b>TERM OF PAYMENT</b>
           </div>
           <TermofPaymentContent />
         </div>
         <div className={styles.pledge}>
           <div className={styles.header1}>
-            <b className={styles.applicationForm}>PLEDGE</b>
+            <b>PLEDGE</b>
           </div>
           <PledgeContent />
         </div>
@@ -94,6 +123,7 @@ function Print() {
           <OtherDetailContent />
         </div>
       </div>
+
       <div className={styles.footer}>
         <div className={styles.footerRow}>
           <img src={footer} alt="Footer" className={styles.footerImg} />
@@ -103,4 +133,4 @@ function Print() {
   );
 }
 
-export default Print; 
+export default Print;

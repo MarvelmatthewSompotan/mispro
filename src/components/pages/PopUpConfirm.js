@@ -1,7 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../styles/PopUpConfirm.module.css";
 
-const PopUpConfirm = ({ onCancel, onConfirm }) => {
+const PopUpConfirm = ({ onCancel }) => {
+  const navigate = useNavigate();
+
+  const handleConfirm = () => {
+    navigate("/print", { state: { studentName: "John Doe" } }); // kirim nama student
+  };
+
   return (
     <div className={styles.overlay}>
       <div className={styles.popUpConfirm}>
@@ -10,8 +17,7 @@ const PopUpConfirm = ({ onCancel, onConfirm }) => {
         </div>
         <div className={styles.pleaseDoubleCheckThatContainer}>
           <p className={styles.pleaseDoubleCheckThat}>
-            Please double-check that all the information you've entered is
-            correct.
+            Please double-check that all the information you've entered is correct.
           </p>
           <p className={styles.pleaseDoubleCheckThat}>&nbsp;</p>
           <p className={styles.pleaseDoubleCheckThat}>
@@ -31,7 +37,7 @@ const PopUpConfirm = ({ onCancel, onConfirm }) => {
           </button>
           <button
             className={styles.bAddSubject}
-            onClick={onConfirm}
+            onClick={handleConfirm}
             type="button"
           >
             Yes, I’m sure
