@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../atoms/Button";
 import PopUpForm from "./PopUpForm";
 import styles from "../styles/Registration.module.css";
 import searchIcon from "../../assets/Search-icon.png";
+import ApiService from "../../services/api";
 
 const registrationData = [
   {
@@ -27,6 +28,23 @@ const Registration = () => {
   const [year, setYear] = useState("2025/2026");
   const [semester, setSemester] = useState("Semester 1");
   const [showPopupForm, setShowPopupForm] = useState(false);
+  const [registrationOptions, setRegistrationOptions] = useState({});
+
+  // Fetch registration options on component mount
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const response = await ApiService.getRegistrationOptions();
+        if (response && response.school_years && response.semesters) {
+          setRegistrationOptions(response);
+        }
+      } catch (error) {
+        console.error("Error fetching registration options:", error);
+      }
+    };
+
+    fetchOptions();
+  }, []);
 
   const handleNewForm = () => {
     setShowPopupForm(true);
@@ -41,8 +59,13 @@ const Registration = () => {
     // Di sini bisa ditambahkan logic untuk membuat form baru
     // Misalnya API call atau state management
     setShowPopupForm(false);
-    // Navigate ke form registrasi dengan data yang dipilih
-    navigate("/registration-form", { state: formData });
+    // Navigate ke form registrasi dengan data yang dipilih dan registration options
+    navigate("/registration-form", {
+      state: {
+        ...formData,
+        registrationOptions: registrationOptions,
+      },
+    });
   };
 
   const handleFilterChange = (key) => {
@@ -143,7 +166,11 @@ const Registration = () => {
 
       {/* Popup Form */}
       {showPopupForm && (
-        <PopUpForm onClose={handleClosePopup} onCreate={handleCreateForm} />
+        <PopUpForm
+          onClose={handleClosePopup}
+          onCreate={handleCreateForm}
+          registrationOptions={registrationOptions}
+        />
       )}
     </div>
   );

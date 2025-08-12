@@ -3,7 +3,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PopUpConfirm from "../PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
 
-const FormButtonSection = ({ validationState, onSetErrors }) => {
+const FormButtonSection = ({
+  validationState,
+  onSetErrors,
+  onSubmitRegistration,
+  submitLoading = false,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -13,6 +18,7 @@ const FormButtonSection = ({ validationState, onSetErrors }) => {
     // Reset semua form data
     console.log("Reset form");
     // Di sini bisa ditambahkan logic untuk reset semua form
+    window.location.reload(); // Simple reset by reloading the page
   };
 
   const handleSubmit = () => {
@@ -51,28 +57,39 @@ const FormButtonSection = ({ validationState, onSetErrors }) => {
     setShowConfirmation(false);
   };
 
-  const handleConfirmSubmit = () => {
+  const handleConfirmSubmit = async () => {
     setShowConfirmation(false);
     setIsSubmitting(true);
 
-    // Submit form data
-    console.log("Submit form confirmed");
-    // Di sini bisa ditambahkan logic untuk submit form ke API
+    try {
+      // Collect form data (dari popup form dan form registrasi)
+      const formData = {
+        // Data dari popup form
+        ...location.state,
+        // Data dari form registrasi (bisa ditambahkan state management di sini)
+        submittedAt: new Date().toISOString(),
+        registrationId: `REG${Date.now()}`, // Generate registration ID
+      };
 
-    // Collect form data (dari popup form dan form registrasi)
-    const formData = {
-      // Data dari popup form
-      ...location.state,
-      // Data dari form registrasi (bisa ditambahkan state management di sini)
-      submittedAt: new Date().toISOString(),
-      registrationId: `REG${Date.now()}`, // Generate registration ID
-    };
+      // Submit ke API
+      if (onSubmitRegistration) {
+        await onSubmitRegistration(formData);
+      } else {
+        // Fallback jika tidak ada onSubmitRegistration
+        console.log("Submit form confirmed", formData);
 
-    setTimeout(() => {
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Navigate ke halaman print dengan data form
+        navigate("/print", { state: formData });
+      }
+    } catch (error) {
+      console.error("Error submitting registration:", error);
+      // Handle error - bisa ditampilkan toast atau alert
+    } finally {
       setIsSubmitting(false);
-      // Navigate ke halaman print dengan data form
-      navigate("/print", { state: formData });
-    }, 2000);
+    }
   };
 
   return (
@@ -98,16 +115,17 @@ const FormButtonSection = ({ validationState, onSetErrors }) => {
           className={styles.resetButton}
           onClick={handleReset}
           type="button"
+          disabled={isSubmitting || submitLoading}
         >
           Reset
         </button>
         <button
           className={styles.submitButton}
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || submitLoading}
           type="button"
         >
-          {isSubmitting ? "Submitting..." : "Submit"}
+          {isSubmitting || submitLoading ? "Submitting..." : "Submit"}
         </button>
       </div>
 

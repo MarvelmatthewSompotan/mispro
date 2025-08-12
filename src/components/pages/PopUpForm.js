@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import styles from "../styles/PopUpForm.module.css";
+import ApiService from "../../services/api";
 
-const PopUpForm = ({ onClose, onCreate }) => {
+const PopUpForm = ({ onClose, onCreate, registrationOptions = {} }) => {
   const [schoolYear, setSchoolYear] = useState("");
   const [semester, setSemester] = useState("");
   const [date, setDate] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Add hasValue class when fields have values
   useEffect(() => {
@@ -37,12 +40,47 @@ const PopUpForm = ({ onClose, onCreate }) => {
     }
   }, [schoolYear, semester, date, styles]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (schoolYear && semester && date) {
-      onCreate({ schoolYear, semester, date });
-    } else {
-      alert("Please fill all fields");
+    if (!schoolYear || !semester || !date) {
+      setError("Please fill all fields");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const formData = {
+        school_year_id: parseInt(schoolYear),
+        semester_id: parseInt(semester),
+        registration_date: date,
+      };
+
+      const response = await ApiService.startRegistration(formData);
+
+      if (response.success) {
+        // Find the display values for school year and semester
+        const selectedSchoolYear = registrationOptions.school_years?.find(
+          (year) => year.school_year_id === parseInt(schoolYear)
+        );
+        const selectedSemester = registrationOptions.semesters?.find(
+          (sem) => sem.semester_id === parseInt(semester)
+        );
+
+        onCreate({
+          schoolYear: selectedSchoolYear?.year || schoolYear,
+          semester: selectedSemester?.name || semester,
+          date,
+          draftId: response.data.draft_id,
+        });
+      } else {
+        setError(response.message || "Failed to create registration");
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,6 +90,19 @@ const PopUpForm = ({ onClose, onCreate }) => {
         <div className={styles.createNewRegistration}>
           Create new registration form
         </div>
+
+        {error && (
+          <div
+            style={{
+              color: "red",
+              marginBottom: "10px",
+              fontSize: "14px",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        )}
 
         <div className={styles.frameParent}>
           {/* School Year Field */}
@@ -63,8 +114,11 @@ const PopUpForm = ({ onClose, onCreate }) => {
               required
             >
               <option value="">Select year</option>
-              <option value="2025/2026">2025/2026</option>
-              <option value="2024/2025">2024/2025</option>
+              {registrationOptions.school_years?.map((year) => (
+                <option key={year.school_year_id} value={year.school_year_id}>
+                  {year.year}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -77,8 +131,11 @@ const PopUpForm = ({ onClose, onCreate }) => {
               required
             >
               <option value="">Select semester</option>
-              <option value="Semester 1">Semester 1</option>
-              <option value="Semester 2">Semester 2</option>
+              {registrationOptions.semesters?.map((sem) => (
+                <option key={sem.semester_id} value={sem.semester_id}>
+                  {sem.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -105,9 +162,12 @@ const PopUpForm = ({ onClose, onCreate }) => {
           <button
             className={styles.bAddSubject1}
             type="submit"
-            style={{ cursor: "pointer" }}
+            disabled={loading}
+            style={{ cursor: loading ? "not-allowed" : "pointer" }}
           >
-            <div className={styles.cancel}>Create</div>
+            <div className={styles.cancel}>
+              {loading ? "Creating..." : "Create"}
+            </div>
           </button>
         </div>
       </form>

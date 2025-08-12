@@ -3,16 +3,21 @@ import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
 import { differenceInYears, addYears, differenceInMonths } from "date-fns";
 
-const genderOptions = ["Male", "Female"];
-const citizenshipOptions = ["Indonesia", "Non Indonesia"];
-const religionOptions = ["Christian", "Islam", "Hindu", "Buddha", "Other"];
-const academicStatusOptions = ["Regular", "Sit in", "Other"];
-
 const StudentInformationSection = ({
   onValidationChange,
   setErrors,
   forceError,
+  options = {},
 }) => {
+  // Use options from API or fallback to default values
+  const genderOptions = options.gender || ["MALE", "FEMALE"];
+  const citizenshipOptions = ["Indonesia", "Non Indonesia"]; // Not in API, keep default
+  const religionOptions = ["Christian", "Islam", "Hindu", "Buddha", "Other"]; // Not in API, keep default
+  const academicStatusOptions = options.academic_status || [
+    "REGULAR",
+    "SIT-IN",
+    "OTHER",
+  ];
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(false);
   const [citizenshipError, setCitizenshipError] = useState(false);
@@ -98,7 +103,7 @@ const StudentInformationSection = ({
     firstName,
     citizenshipError,
     citizenship,
-    onValidationChange,
+    // Remove onValidationChange from dependencies to prevent infinite loop
   ]);
 
   // Terima error state dari parent component
@@ -306,15 +311,37 @@ const StudentInformationSection = ({
               <label className={styles.label} htmlFor="religion">
                 Religion
               </label>
-              <input
+              <Select
                 id="religion"
-                className={`${styles.valueHighlight} ${
-                  religion ? "hasValue" : ""
-                }`}
-                type="text"
-                value={religion}
-                onChange={(e) => setReligion(e.target.value)}
-                placeholder="Religion"
+                options={religionOptions.map((opt) => ({
+                  value: opt,
+                  label: opt,
+                }))}
+                placeholder="Select religion"
+                value={religion ? { value: religion, label: religion } : null}
+                onChange={(opt) => setReligion(opt ? opt.value : "")}
+                isClearable
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    fontWeight: religion ? "bold" : "400",
+                    color: religion ? "#000" : "rgba(128,128,128,0.6)",
+                    border: "none",
+                    boxShadow: "none",
+                    borderRadius: 0,
+                    borderBottom: "none",
+                    background: "transparent",
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    fontWeight: religion ? "bold" : "400",
+                    color: religion ? "#000" : "rgba(128,128,128,0.6)",
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: "rgba(128,128,128,0.6)",
+                  }),
+                }}
               />
             </div>
             <div className={styles.citizenshipField}>

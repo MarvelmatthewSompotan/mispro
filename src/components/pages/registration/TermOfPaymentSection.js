@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styles from "./TermOfPaymentSection.module.css";
 import checkBoxIcon from "../../../assets/CheckBox.png";
 
-const TermOfPaymentSection = () => {
+const TermOfPaymentSection = ({ options = {} }) => {
   // State untuk payment options
   const [tuitionFee, setTuitionFee] = useState("fullPayment");
   const [residenceHall, setResidenceHall] = useState("fullPayment");
@@ -13,6 +13,11 @@ const TermOfPaymentSection = () => {
   const [waiverType, setWaiverType] = useState("");
   // State untuk input field other
   const [otherDiscount, setOtherDiscount] = useState("");
+
+  // Use options from API or fallback to default values
+  const waiverOptions = options.discount_types?.map(
+    (discount) => discount.name
+  ) || ["Beasiswa", "Spesial Diskon", "Staff", "Weiver", "IP"];
 
   return (
     <div className={styles.container}>
@@ -170,11 +175,11 @@ const TermOfPaymentSection = () => {
                 onChange={(e) => setWaiverType(e.target.value)}
               >
                 <option value="">Select waiver type</option>
-                <option value="Beasiswa">Beasiswa</option>
-                <option value="Spesial Diskon">Spesial Diskon</option>
-                <option value="Staff">Staff</option>
-                <option value="Weiver">Weiver</option>
-                <option value="IP">IP</option>
+                {waiverOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </label>
           </div>

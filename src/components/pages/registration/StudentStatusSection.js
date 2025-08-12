@@ -1,16 +1,65 @@
 import React, { useState } from "react";
 import styles from "./StudentStatusSection.module.css";
+import Select from "react-select";
 
 const statusOptions = [
   { value: "new", label: "New" },
-
   { value: "transferee", label: "Transferee" },
   { value: "old", label: "Old" },
 ];
 
-const StudentStatusSection = () => {
+const StudentStatusSection = ({
+  searchResults = [],
+  searchLoading = false,
+  onSearchStudent,
+  onSelectStudent,
+  onValidationChange,
+  setErrors,
+  forceError,
+}) => {
   const [status, setStatus] = useState("");
   const [studentId, setStudentId] = useState("");
+
+  // Handle status change and validation
+  const handleStatusChange = (newStatus) => {
+    setStatus(newStatus);
+
+    // Validate and notify parent
+    const isValid = newStatus !== "";
+    onValidationChange?.({
+      isValid,
+      data: { status: newStatus, studentId },
+    });
+  };
+
+  // Handle student ID change with search
+  const handleStudentIdChange = (e) => {
+    const value = e.target.value;
+    setStudentId(value);
+
+    // Call search API if user types 2 or more characters
+    if (onSearchStudent && value.trim().length >= 2) {
+      onSearchStudent(value);
+    }
+
+    // Validate and notify parent
+    const isValid = status !== "" && (status !== "old" || value.trim() !== "");
+    onValidationChange?.({
+      isValid,
+      data: { status, studentId: value },
+    });
+  };
+
+  // Handle select student from search results
+  const handleSelectStudent = (student) => {
+    const displayName =
+      student.name || `${student.first_name} ${student.last_name}`;
+    setStudentId(displayName);
+
+    if (onSelectStudent) {
+      onSelectStudent(student.student_id);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -40,7 +89,7 @@ const StudentStatusSection = () => {
                   name="studentStatus"
                   value={option.value}
                   checked={status === option.value}
-                  onChange={() => setStatus(option.value)}
+                  onChange={() => handleStatusChange(option.value)}
                   style={{
                     opacity: 0,
                     position: "absolute",
@@ -61,22 +110,71 @@ const StudentStatusSection = () => {
                   <label htmlFor="studentId" className={styles.statusLabel}>
                     Student ID
                   </label>
-                  <input
+                  <Select
                     id="studentId"
-                    className={styles.studentIdValue}
-                    type="text"
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    placeholder="Enter Student ID"
-                    style={{
-                      border: "none",
-                      outline: "none",
-                      background: "transparent",
-                      fontFamily: "Poppins, Arial, sans-serif",
-                      fontWeight: "bold",
-                      fontSize: 16,
-                      padding: 3,
-                      margin: 0,
+                    options={searchResults.map((student) => ({
+                      value: student.student_id,
+                      label: `${
+                        student.name ||
+                        `${student.first_name} ${student.last_name}`
+                      } (ID: ${student.student_id})`,
+                    }))}
+                    placeholder="Search by name or ID"
+                    value={
+                      studentId ? { value: studentId, label: studentId } : null
+                    }
+                    onChange={(opt) => {
+                      if (opt) {
+                        const selectedStudent = searchResults.find(
+                          (s) => s.student_id === opt.value
+                        );
+                        if (selectedStudent) {
+                          handleSelectStudent(selectedStudent);
+                        }
+                      } else {
+                        setStudentId("");
+                      }
+                    }}
+                    onInputChange={(inputValue) => {
+                      if (onSearchStudent && inputValue.trim().length >= 2) {
+                        onSearchStudent(inputValue);
+                      }
+                    }}
+                    isLoading={searchLoading}
+                    isClearable
+                    noOptionsMessage={() => "No students found"}
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        fontWeight: studentId ? "bold" : "400",
+                        color: studentId ? "#000" : "rgba(128,128,128,0.6)",
+                        border: "none",
+                        boxShadow: "none",
+                        borderRadius: 0,
+                        borderBottom: "none",
+                        background: "transparent",
+                      }),
+                      singleValue: (base) => ({
+                        ...base,
+                        fontWeight: studentId ? "bold" : "400",
+                        color: studentId ? "#000" : "rgba(128,128,128,0.6)",
+                      }),
+                      placeholder: (base) => ({
+                        ...base,
+                        color: "rgba(128,128,128,0.6)",
+                      }),
+                      menu: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+                      dropdownIndicator: (base) => ({
+                        ...base,
+                        display: "none",
+                      }),
+                      indicatorSeparator: (base) => ({
+                        ...base,
+                        display: "none",
+                      }),
                     }}
                   />
                 </div>
