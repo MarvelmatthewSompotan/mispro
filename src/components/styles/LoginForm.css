@@ -1,0 +1,66 @@
+.login-form {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px 0 rgba(34, 51, 107, 0.08);
+  padding: 32px 28px 24px 28px;
+  width: 400px;
+  height: 354px;
+  max-width: unset;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-sizing: border-box;
+  align-items: flex-start;
+  align-self: stretch;
+}
+.login-form-options {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  margin-top: 2px;
+  align-self: stretch;
+}
+.login-title {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: #222;
+}
+@media (max-width: 900px) {
+  .login-form {
+    width: 100% !important;
+    max-width: 100vw !important;
+    height: auto;
+    min-width: 0;
+  }
+}
+@media (max-width: 600px) {
+  .login-form {
+    width: 100% !important;
+    max-width: 100vw !important;
+    height: auto;
+    min-width: 0;
+  }
+}
+.login-form input[type="email"].registration-input:placeholder-shown,
+.login-form input[type="password"].registration-input:placeholder-shown {
+  background-color: #e4eefa !important;
+}
+.login-form input.registration-input:placeholder-shown {
+  background-color: #e4eefa !important;
+}
+.login-form input.registration-input {
+  width: 100% !important;
+  height: 50px !important;
+  box-sizing: border-box;
+  padding-left: 16px !important;
+}
+.login-form input.registration-input::placeholder {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  color: #bbb;
+  opacity: 1;
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
