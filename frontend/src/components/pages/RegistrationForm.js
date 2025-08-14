@@ -47,14 +47,16 @@ const RegistrationForm = () => {
   }, []);
 
   const handleSectionDataChange = useCallback((sectionName, data) => {
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+      console.error(`Data untuk ${sectionName} harus berupa objek`, data);
+      return;
+    }
+
     setFormSections((prev) => {
-      // ✅ Cek apakah data benar-benar berubah
       const currentSection = prev[sectionName] || {};
       const newSection = { ...currentSection, ...data };
-
-      // ✅ Hanya update jika ada perubahan
       if (JSON.stringify(currentSection) === JSON.stringify(newSection)) {
-        return prev; // Tidak ada perubahan, return state yang sama
+        return prev;
       }
 
       return {
@@ -63,6 +65,59 @@ const RegistrationForm = () => {
       };
     });
   }, []);
+
+  // Buat semua callback functions di level atas
+  const handleStudentStatusDataChange = useCallback(
+    (data) => {
+      // Pastikan data lengkap sebelum dikirim
+      const completeData = {
+        student_status: data.student_status || 'New',
+        input_name: data.input_name || '',
+      };
+
+      handleSectionDataChange('studentStatus', completeData);
+    },
+    [handleSectionDataChange]
+  );
+
+  const handleStudentInfoDataChange = useCallback(
+    (data) => {
+      handleSectionDataChange('studentInfo', data);
+    },
+    [handleSectionDataChange]
+  );
+
+  const handleStudentInfoValidationChange = useCallback((validationData) => {
+    handleValidationChange('studentInfo', validationData);
+  }, []);
+
+  const handleProgramDataChange = useCallback(
+    (data) => {
+      handleSectionDataChange('program', data);
+    },
+    [handleSectionDataChange]
+  );
+
+  const handleFacilitiesDataChange = useCallback(
+    (data) => {
+      handleSectionDataChange('facilities', data);
+    },
+    [handleSectionDataChange]
+  );
+
+  const handleParentGuardianDataChange = useCallback(
+    (data) => {
+      handleSectionDataChange('parentGuardian', data);
+    },
+    [handleSectionDataChange]
+  );
+
+  const handleTermOfPaymentDataChange = useCallback(
+    (data) => {
+      handleSectionDataChange('termOfPayment', data);
+    },
+    [handleSectionDataChange]
+  );
 
   const handleSelectOldStudent = (latestData) => {
     // Prefill semua form sections dengan data dari backend
@@ -143,6 +198,9 @@ const RegistrationForm = () => {
     );
   }
 
+  // Extract draft ID from formData
+  const draftId = formData.draftId;
+
   return (
     <Main>
       <div className={styles.formContainer}>
@@ -158,51 +216,48 @@ const RegistrationForm = () => {
             <p>
               <strong>Date:</strong> {formData.date}
             </p>
+            {draftId && (
+              <p>
+                <strong>Draft ID:</strong> {draftId}
+              </p>
+            )}
           </div>
         )}
 
         <StudentStatusSection
           onSelectOldStudent={handleSelectOldStudent}
-          onDataChange={(data) =>
-            handleSectionDataChange('studentStatus', data)
-          }
+          onDataChange={handleStudentStatusDataChange}
           sharedData={sharedData}
         />
         <StudentInformationSection
           prefill={prefilledData.student_info || {}}
-          onValidationChange={(validationData) =>
-            handleValidationChange('studentInfo', validationData)
-          }
-          onDataChange={(data) => handleSectionDataChange('studentInfo', data)}
+          onValidationChange={handleStudentInfoValidationChange}
+          onDataChange={handleStudentInfoDataChange}
           errors={errors.studentInfo || {}}
           forceError={forceError.studentInfo || {}}
           sharedData={sharedData}
         />
         <ProgramSection
-          onDataChange={(data) => handleSectionDataChange('program', data)}
+          onDataChange={handleProgramDataChange}
           sharedData={sharedData}
         />
         <FacilitiesSection
-          onDataChange={(data) => handleSectionDataChange('facilities', data)}
+          onDataChange={handleFacilitiesDataChange}
           sharedData={sharedData}
         />
         <ParentGuardianSection
-          onDataChange={(data) =>
-            handleSectionDataChange('parentGuardian', data)
-          }
+          onDataChange={handleParentGuardianDataChange}
           // ParentGuardianSection tidak memerlukan sharedData
         />
         <TermOfPaymentSection
-          onDataChange={(data) =>
-            handleSectionDataChange('termOfPayment', data)
-          }
+          onDataChange={handleTermOfPaymentDataChange}
           sharedData={sharedData}
         />
         <OtherDetailSection />
         <FormButtonSection
           validationState={validationState}
           onSetErrors={handleSetErrors}
-          draftId={formData.draftId}
+          draftId={draftId}
           allFormData={formSections}
           onReset={handleResetForm}
         />

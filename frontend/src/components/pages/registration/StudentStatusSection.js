@@ -34,14 +34,26 @@ const StudentStatusSection = ({ onSelectOldStudent, onDataChange, sharedData }) 
     setStudentSearch('');
     setSearchResults([]);
 
-    // Kirim data ke parent component
+    // Kirim data ke parent component dengan input_name
     if (onDataChange) {
-      onDataChange({ student_status: option });
+      onDataChange({ 
+        student_status: option,
+        input_name: option === 'Old' ? '' : null // Tambahkan input_name
+      });
     }
   };
 
   const handleSearchChange = async (value) => {
     setStudentSearch(value);
+    
+    // Update input_name setiap kali user mengetik
+    if (onDataChange) {
+      onDataChange({ 
+        student_status: 'Old',
+        input_name: value // Update input_name dengan value yang diketik
+      });
+    }
+    
     if (value.length > 2) {
       setIsSearching(true);
       try {
@@ -68,6 +80,14 @@ const StudentStatusSection = ({ onSelectOldStudent, onDataChange, sharedData }) 
       if (latestData.success) {
         // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
+        
+        // Update input_name dengan nama student yang dipilih
+        if (onDataChange) {
+          onDataChange({ 
+            student_status: 'Old',
+            input_name: student.full_name || student.student_id // Set input_name
+          });
+        }
       }
     } catch (err) {
       console.error('Error getting latest application:', err);

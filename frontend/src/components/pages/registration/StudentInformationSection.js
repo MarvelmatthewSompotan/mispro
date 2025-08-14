@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './StudentInformationSection.module.css';
 import Select from 'react-select';
 import { getRegistrationOptions } from '../../../services/api';
@@ -22,7 +22,7 @@ const StudentInformationSection = ({
   const [lastName, setLastName] = useState('');
   const [nickname, setNickname] = useState('');
   const [nisn, setNisn] = useState('');
-  const [nkk, setNkk] = useState('');
+  const [nik, setNik] = useState('');
   const [kitas, setKitas] = useState('');
   const [foreignCountry, setForeignCountry] = useState('');
   const [gender, setGender] = useState('');
@@ -56,9 +56,145 @@ const StudentInformationSection = ({
       });
   }, []);
 
-  const handleChange = (value) => {
+  const handleAcademicStatus = (value) => {
     setAcademicStatus(value);
-    onDataChange('studentInfo', { academic_status: value }); // pastikan tersimpan di parent
+    onDataChange({ academic_status: value });
+  };
+
+  const handleAcademicStatusOther = () => {
+    setAcademicStatusOther('');
+    onDataChange({ academic_status_other: '' });
+  };
+
+  const handleFirstName = (value) => {
+    setFirstName(value);
+    onDataChange({ first_name: value });
+  };
+
+  const handleMiddleName = (value) => {
+    setMiddleName(value);
+    onDataChange({ middle_name: value });
+  };
+
+  const handleLastName = (value) => {
+    setLastName(value);
+    onDataChange({ last_name: value });
+  };
+
+  const handleNickname = (value) => {
+    setNickname(value);
+    onDataChange({ nickname: value });
+  };
+
+  const handleNisn = (value) => {
+    setNisn(value);
+    onDataChange({ nisn: value });
+  };
+
+  const handleNik = (value) => {
+    setNik(value);
+    onDataChange({ nik: value });
+  };
+
+  const handleKitas = (value) => {
+    setKitas(value);
+    onDataChange({ kitas: value });
+  };
+
+  const handleForeignCountry = (value) => {
+    setForeignCountry(value);
+    onDataChange({ country: value });
+  };
+
+  const handleGender = (value) => {
+    setGender(value);
+    onDataChange({ gender: value });
+  };
+
+  const handleAge = (value) => {
+    setAge(value);
+    onDataChange({ age: value });
+  };
+
+  const handleFamilyRank = (value) => {
+    setRank(value);
+    onDataChange({ family_rank: value });
+  };
+
+  const handleCitizenship = (opt) => {
+    const value = opt ? opt.value : '';
+    setCitizenship(value);
+    onDataChange({ citizenship: value });
+  };
+
+  const handleReligion = (value) => {
+    setReligion(value);
+    onDataChange({ religion: value });
+  };
+
+  const handlePlaceOfBirth = (value) => {
+    setPlaceOfBirth(value);
+    onDataChange({ place_of_birth: value });
+  };
+
+  const handleDateOfBirth = (value) => {
+    setDateOfBirth(value);
+    onDataChange({ date_of_birth: value });
+  };
+
+  const handleEmail = (value) => {
+    setEmail(value);
+    onDataChange({ email: value });
+  };
+
+  const handlePreviousSchool = (value) => {
+    setPreviousSchool(value);
+    onDataChange({ previous_school: value });
+  };
+
+  const handlePhone = (value) => {
+    setPhone(value);
+    onDataChange({ phone_number: value });
+  };
+
+  const handleStreet = (value) => {
+    setStreet(value);
+    onDataChange({ street: value });
+  };
+
+  const handleRt = (value) => {
+    setRt(value);
+    onDataChange({ rt: value });
+  };
+
+  const handleRw = (value) => {
+    setRw(value);
+    onDataChange({ rw: value });
+  };
+
+  const handleVillage = (value) => {
+    setVillage(value);
+    onDataChange({ village: value });
+  };
+
+  const handleDistrict = (value) => {
+    setDistrict(value);
+    onDataChange({ district: value });
+  };
+
+  const handleCity = (value) => {
+    setCity(value);
+    onDataChange({ city: value });
+  };
+
+  const handleProvince = (value) => {
+    setProvince(value);
+    onDataChange({ province: value });
+  };
+
+  const handleOtherAddress = (value) => {
+    setOtherAddress(value);
+    onDataChange({ other: value });
   };
 
   // Kirim status validasi ke parent component
@@ -114,23 +250,26 @@ const StudentInformationSection = ({
         }
 
         // Hitung umur dalam tahun dan bulan (sementara, nanti akan diganti backend)
-        const years = now.getFullYear() - dob.getFullYear();
-        const months = now.getMonth() - dob.getMonth();
+        let years = now.getFullYear() - dob.getFullYear(); // Ubah const menjadi let
+        let months = now.getMonth() - dob.getMonth(); // Ubah const menjadi let
 
         if (months < 0 || (months === 0 && now.getDate() < dob.getDate())) {
-          years--;
-          months += 12;
+          years--; // Sekarang bisa diubah
+          months += 12; // Sekarang bisa diubah
         }
 
-        setAge(`${years} Tahun, ${months} Bulan`);
+        const calculatedAge = `${years} Tahun, ${months} Bulan`;
+        setAge(calculatedAge);
+        onDataChange({ age: calculatedAge });
       } catch (error) {
         console.error('Error calculating age:', error);
         setAge('');
       }
     } else {
       setAge('');
+      onDataChange({ age: '' });
     }
-  }, [dateOfBirth]);
+  }, [dateOfBirth, onDataChange]); // Tambahkan onDataChange ke dependency array
 
   return (
     <div className={styles.container}>
@@ -174,10 +313,7 @@ const StudentInformationSection = ({
                     type='text'
                     value={firstName}
                     onChange={(e) => {
-                      setFirstName(e.target.value);
-                      onDataChange('studentInfo', {
-                        first_name: e.target.value,
-                      });
+                      handleFirstName(e.target.value);
                       if (firstNameError && e.target.value.trim()) {
                         setFirstNameError(false);
                       }
@@ -201,10 +337,7 @@ const StudentInformationSection = ({
                 className={`${styles.label} ${middleName ? 'hasValue' : ''}`}
                 type='text'
                 value={middleName}
-                onChange={(e) => {
-                  setMiddleName(e.target.value);
-                  onDataChange('studentInfo', { middle_name: e.target.value });
-                }}
+                onChange={(e) => handleMiddleName(e.target.value)}
                 placeholder='Middle name'
               />
             </div>
@@ -219,10 +352,7 @@ const StudentInformationSection = ({
                 className={`${styles.label} ${lastName ? 'hasValue' : ''}`}
                 type='text'
                 value={lastName}
-                onChange={(e) => {
-                  setLastName(e.target.value);
-                  onDataChange('studentInfo', { last_name: e.target.value });
-                }}
+                onChange={(e) => handleLastName(e.target.value)}
                 placeholder='Last name'
               />
             </div>
@@ -237,10 +367,7 @@ const StudentInformationSection = ({
                 }`}
                 type='text'
                 value={nickname}
-                onChange={(e) => {
-                  setNickname(e.target.value);
-                  onDataChange('studentInfo', { nickname: e.target.value });
-                }}
+                onChange={(e) => handleNickname(e.target.value)}
                 placeholder='Nickname'
               />
             </div>
@@ -287,10 +414,7 @@ const StudentInformationSection = ({
                         : null
                     }
                     onChange={(opt) => {
-                      setCitizenship(opt ? opt.value : '');
-                      onDataChange('studentInfo', {
-                        citizenship: opt ? opt.value : '',
-                      });
+                      handleCitizenship(opt);
                       if (citizenshipError && opt) {
                         setCitizenshipError(false);
                       }
@@ -337,10 +461,7 @@ const StudentInformationSection = ({
                 }`}
                 type='text'
                 value={religion}
-                onChange={(e) => {
-                  setReligion(e.target.value);
-                  onDataChange('studentInfo', { religion: e.target.value });
-                }}
+                onChange={(e) => handleReligion(e.target.value)}
                 placeholder='Religion'
               />
             </div>
@@ -355,12 +476,7 @@ const StudentInformationSection = ({
                 }`}
                 type='text'
                 value={placeOfBirth}
-                onChange={(e) => {
-                  setPlaceOfBirth(e.target.value);
-                  onDataChange('studentInfo', {
-                    place_of_birth: e.target.value,
-                  });
-                }}
+                onChange={(e) => handlePlaceOfBirth(e.target.value)}
                 placeholder='Place of birth'
               />
             </div>
@@ -373,13 +489,7 @@ const StudentInformationSection = ({
                   id='dateOfBirth'
                   type='date'
                   value={dateOfBirth}
-                  onChange={(e) => {
-                    const selectedDate = e.target.value;
-                    setDateOfBirth(selectedDate);
-                    onDataChange('studentInfo', {
-                      date_of_birth: e.target.value,
-                    });
-                  }}
+                  onChange={(e) => handleDateOfBirth(e.target.value)}
                   className={`${styles.dateInput} ${
                     dateOfBirth ? 'hasValue' : ''
                   }`}
@@ -419,10 +529,7 @@ const StudentInformationSection = ({
                   }`}
                   type='text'
                   value={foreignCountry}
-                  onChange={(e) => {
-                    setForeignCountry(e.target.value);
-                    onDataChange('studentInfo', { country: e.target.value });
-                  }}
+                  onChange={(e) => handleForeignCountry(e.target.value)}
                   placeholder='Country of Origin'
                 />
               </div>
@@ -441,10 +548,7 @@ const StudentInformationSection = ({
                   }`}
                   type='text'
                   value={kitas}
-                  onChange={(e) => {
-                    setKitas(e.target.value);
-                    onDataChange('studentInfo', { kitas: e.target.value });
-                  }}
+                  onChange={(e) => handleKitas(e.target.value)}
                   placeholder='KITAS'
                 />
               </div>
@@ -458,27 +562,21 @@ const StudentInformationSection = ({
                 className={`${styles.label} ${nisn ? 'hasValue' : ''}`}
                 type='text'
                 value={nisn}
-                onChange={(e) => {
-                  setNisn(e.target.value);
-                  onDataChange('studentInfo', { nisn: e.target.value });
-                }}
+                onChange={(e) => handleNisn(e.target.value)}
                 placeholder='NISN'
               />
             </div>
             {citizenship === 'Indonesia' && (
               <div className={styles.nicknameField}>
-                <label className={styles.label} htmlFor='nkk'>
+                <label className={styles.label} htmlFor='nik'>
                   Nomor Induk Kependudukan (NIK)
                 </label>
                 <input
-                  id='nkk'
-                  className={`${styles.label} ${nkk ? 'hasValue' : ''}`}
+                  id='nik'
+                  className={`${styles.label} ${nik ? 'hasValue' : ''}`}
                   type='text'
-                  value={nkk}
-                  onChange={(e) => {
-                    setNkk(e.target.value);
-                    onDataChange('studentInfo', { nik: e.target.value });
-                  }}
+                  value={nik}
+                  onChange={(e) => handleNik(e.target.value)}
                   placeholder='NIK'
                 />
               </div>
@@ -497,10 +595,7 @@ const StudentInformationSection = ({
                 }))}
                 placeholder='Select gender'
                 value={gender ? { value: gender, label: gender } : null}
-                onChange={(opt) => {
-                  setGender(opt ? opt.value : '');
-                  onDataChange('studentInfo', { gender: opt ? opt.value : '' });
-                }}
+                onChange={(opt) => handleGender(opt ? opt.value : '')}
                 isClearable
                 styles={{
                   control: (base) => ({
@@ -534,16 +629,7 @@ const StudentInformationSection = ({
                 className={`${styles.valueSmall} ${rank ? 'hasValue' : ''}`}
                 type='number'
                 value={rank}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  const numValue = parseInt(value);
-                  onDataChange('studentInfo', { family_rank: e.target.value });
-
-                  // Hanya terima angka 1 ke atas
-                  if (value === '' || (numValue >= 1 && numValue <= 99)) {
-                    setRank(value);
-                  }
-                }}
+                onChange={(e) => handleFamilyRank(e.target.value)}
                 placeholder='1'
                 min='1'
                 max='99'
@@ -575,10 +661,7 @@ const StudentInformationSection = ({
                 }`}
                 type='email'
                 value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  onDataChange('studentInfo', { email: e.target.value });
-                }}
+                onChange={(e) => handleEmail(e.target.value)}
                 placeholder='Email address'
                 style={{ borderBottom: 'none', boxShadow: 'none' }}
               />
@@ -594,12 +677,7 @@ const StudentInformationSection = ({
                 }`}
                 type='text'
                 value={previousSchool}
-                onChange={(e) => {
-                  setPreviousSchool(e.target.value);
-                  onDataChange('studentInfo', {
-                    previous_school: e.target.value,
-                  });
-                }}
+                onChange={(e) => handlePreviousSchool(e.target.value)}
                 placeholder='Previous School'
               />
             </div>
@@ -616,10 +694,7 @@ const StudentInformationSection = ({
                 }`}
                 type='text'
                 value={phone}
-                onChange={(e) => {
-                  setPhone(e.target.value);
-                  onDataChange('studentInfo', { phone_number: e.target.value });
-                }}
+                onChange={(e) => handlePhone(e.target.value)}
                 placeholder='Phone number'
               />
             </div>
@@ -645,15 +720,11 @@ const StudentInformationSection = ({
                     }
                     onChange={(opt) => {
                       const selectedValue = opt ? opt.value : '';
-                      setAcademicStatus(selectedValue);
 
                       if (selectedValue !== 'OTHER') {
-                        setAcademicStatusOther('');
-                        onDataChange('studentInfo', {
-                          academic_status_other: '',
-                        });
+                        handleAcademicStatusOther();
                       }
-                      handleChange(selectedValue);
+                      handleAcademicStatus(selectedValue);
                     }}
                     isClearable
                     styles={{
@@ -702,10 +773,7 @@ const StudentInformationSection = ({
                         if (e.target.checked) {
                           setAcademicStatus('OTHER');
                           // Clear academic_status_other saat switch ke OTHER
-                          setAcademicStatusOther('');
-                          onDataChange('studentInfo', {
-                            academic_status_other: '',
-                          });
+                          handleAcademicStatusOther();
                         }
                       }}
                       className={styles.hiddenRadio}
@@ -718,7 +786,7 @@ const StudentInformationSection = ({
                         value={academicStatusOther}
                         onChange={(e) => {
                           setAcademicStatusOther(e.target.value);
-                          onDataChange('studentInfo', {
+                          onDataChange({
                             academic_status_other: e.target.value,
                           });
                         }}
@@ -745,10 +813,7 @@ const StudentInformationSection = ({
                   }`}
                   type='text'
                   value={street}
-                  onChange={(e) => {
-                    setStreet(e.target.value);
-                    onDataChange('studentInfo', { street: e.target.value });
-                  }}
+                  onChange={(e) => handleStreet(e.target.value)}
                   placeholder='Street'
                 />
               </div>
@@ -762,10 +827,7 @@ const StudentInformationSection = ({
                     className={`${styles.label} ${rt ? 'hasValue' : ''}`}
                     type='text'
                     value={rt}
-                    onChange={(e) => {
-                      setRt(e.target.value);
-                      onDataChange('studentInfo', { rt: e.target.value });
-                    }}
+                    onChange={(e) => handleRt(e.target.value)}
                     placeholder='RT'
                   />
                 </div>
@@ -778,10 +840,7 @@ const StudentInformationSection = ({
                     className={`${styles.label} ${rw ? 'hasValue' : ''}`}
                     type='text'
                     value={rw}
-                    onChange={(e) => {
-                      setRw(e.target.value);
-                      onDataChange('studentInfo', { rw: e.target.value });
-                    }}
+                    onChange={(e) => handleRw(e.target.value)}
                     placeholder='RW'
                   />
                 </div>
@@ -799,10 +858,7 @@ const StudentInformationSection = ({
                   }`}
                   type='text'
                   value={village}
-                  onChange={(e) => {
-                    setVillage(e.target.value);
-                    onDataChange('studentInfo', { village: e.target.value });
-                  }}
+                  onChange={(e) => handleVillage(e.target.value)}
                   placeholder='Village'
                 />
               </div>
@@ -817,10 +873,7 @@ const StudentInformationSection = ({
                   }`}
                   type='text'
                   value={district}
-                  onChange={(e) => {
-                    setDistrict(e.target.value);
-                    onDataChange('studentInfo', { district: e.target.value });
-                  }}
+                  onChange={(e) => handleDistrict(e.target.value)}
                   placeholder='District'
                 />
               </div>
@@ -837,12 +890,7 @@ const StudentInformationSection = ({
                   }`}
                   type='text'
                   value={city}
-                  onChange={(e) => {
-                    setCity(e.target.value);
-                    onDataChange('studentInfo', {
-                      city_regency: e.target.value,
-                    });
-                  }}
+                  onChange={(e) => handleCity(e.target.value)}
                   placeholder='City/Regency'
                 />
               </div>
@@ -857,10 +905,7 @@ const StudentInformationSection = ({
                   }`}
                   type='text'
                   value={province}
-                  onChange={(e) => {
-                    setProvince(e.target.value);
-                    onDataChange('studentInfo', { province: e.target.value });
-                  }}
+                  onChange={(e) => handleProvince(e.target.value)}
                   placeholder='Province'
                 />
               </div>
@@ -879,10 +924,7 @@ const StudentInformationSection = ({
                     }`}
                     type='text'
                     value={otherAddress}
-                    onChange={(e) => {
-                      setOtherAddress(e.target.value);
-                      onDataChange('studentInfo', { other: e.target.value });
-                    }}
+                    onChange={(e) => handleOtherAddress(e.target.value)}
                     placeholder='Other address'
                   />
                   <span className={styles.bracket}>)</span>

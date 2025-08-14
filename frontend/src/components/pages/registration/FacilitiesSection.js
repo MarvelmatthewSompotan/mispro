@@ -39,7 +39,7 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
   const handleTransportationChange = (value) => {
     setSelectedTransportation(value);
     setSelectedPickupPoint('');
-    
+
     onDataChange({
       transportation_id: value,
       pickup_point_id: '',

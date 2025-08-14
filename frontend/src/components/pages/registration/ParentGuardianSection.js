@@ -110,7 +110,7 @@ const ParentGuardianSection = ({ onDataChange }) => {
       if (guardian.other) allData.guardian_address_other = guardian.other;
 
       // Kirim semua data sekaligus
-      onDataChange('parentGuardian', allData);
+      onDataChange(allData);
     }
   };
 
@@ -168,7 +168,7 @@ const ParentGuardianSection = ({ onDataChange }) => {
         allData.guardian_address_province = guardian.province;
       if (guardian.other) allData.guardian_address_other = guardian.other;
 
-      onDataChange('parentGuardian', allData);
+      onDataChange(allData);
     }
   }, [father, mother, guardian, onDataChange]);
 

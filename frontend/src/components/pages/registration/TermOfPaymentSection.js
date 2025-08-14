@@ -38,31 +38,31 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
 
   const handlePaymentTypeChange = (value) => {
     setPaymentType(value);
-    onDataChange('termOfPayment', { payment_type: value });
+    onDataChange({ payment_type: value });
   };
 
   const handlePaymentMethodChange = (value) => {
     setPaymentMethod(value);
-    onDataChange('termOfPayment', { payment_method: value });
+    onDataChange({ payment_method: value });
   };
 
   const handleFinancialPolicyChange = (e) => {
     const value = e.target.checked;
     setFinancialPolicy(value);
-    onDataChange('termOfPayment', {
+    onDataChange({
       financial_policy_contract: value ? 'Signed' : 'Not Signed',
     });
   };
 
   const handleDiscountNameChange = (value) => {
     setDiscountName(value);
-    onDataChange('termOfPayment', { discount_name: value });
+    onDataChange({ discount_name: value });
   };
 
   const handleDiscountNotesChange = (e) => {
     const value = e.target.value;
     setDiscountNotes(value);
-    onDataChange('termOfPayment', { discount_notes: value });
+    onDataChange({ discount_notes: value });
   };
 
   return (

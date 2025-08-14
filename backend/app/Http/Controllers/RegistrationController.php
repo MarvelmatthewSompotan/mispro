@@ -69,7 +69,12 @@ class RegistrationController extends Controller
         return $response = response()->json([
             'success' => true,
             'message' => 'Initial registration context saved successfully.',
-            'data' => $validated,
+            'data' => [
+                'draft_id' => $uuid, 
+                'school_year_id' => $validated['school_year_id'],
+                'semester_id' => $validated['semester_id'],
+                'registration_date' => $validated['registration_date'],
+            ],
         ], 200);
         
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from '../styles/PopUpForm.module.css';
-import { getRegistrationOptions } from '../../services/api';
+import { getRegistrationOptions, startRegistration } from '../../services/api';
 
 const PopUpForm = ({ onClose, onCreate }) => {
   const [schoolYear, setSchoolYear] = useState('');
@@ -41,7 +41,37 @@ const PopUpForm = ({ onClose, onCreate }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (schoolYear && semester && date) {
-      onCreate({ schoolYear, semester, date });
+      console.log('Submitting with data:', { schoolYear, semester, date }); // Debug log
+
+      // Call startRegistration to generate draft ID
+      startRegistration(schoolYear, semester, date)
+        .then((response) => {
+          console.log('Success response:', response); // Debug log
+          if (response.success) {
+            // Pass the draft ID along with other data to onCreate
+            onCreate({
+              schoolYear,
+              semester,
+              date,
+              draftId: response.data.draft_id,
+            });
+          } else {
+            alert(
+              'Failed to start registration: ' +
+                (response.error || 'Unknown error')
+            );
+          }
+        })
+        .catch((error) => {
+          console.error('Error starting registration:', error);
+          // Tambahkan detail error yang lebih spesifik
+          if (error.response) {
+            console.error('Error response:', error.response);
+            console.error('Error status:', error.response.status);
+            console.error('Error data:', error.response.data);
+          }
+          alert('Failed to start registration: ' + error.message);
+        });
     } else {
       alert('Please fill all fields');
     }

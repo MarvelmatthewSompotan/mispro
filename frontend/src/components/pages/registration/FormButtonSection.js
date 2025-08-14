@@ -26,7 +26,10 @@ const FormButtonSection = ({
     const errors = {};
 
     // Validasi Student Status Section
-    if (!allFormData.studentStatus || !allFormData.studentStatus.student_status) {
+    if (
+      !allFormData.studentStatus ||
+      !allFormData.studentStatus.student_status
+    ) {
       errors.studentStatus = { student_status: true };
     }
 
@@ -56,15 +59,24 @@ const FormButtonSection = ({
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };
     }
-    if (!allFormData.facilities || !allFormData.facilities.transportation_policy) {
+    if (
+      !allFormData.facilities ||
+      !allFormData.facilities.transportation_policy
+    ) {
       errors.facilities = { ...errors.facilities, transportation_policy: true };
     }
-    if (!allFormData.facilities || !allFormData.facilities.residence_hall_policy) {
+    if (
+      !allFormData.facilities ||
+      !allFormData.facilities.residence_hall_policy
+    ) {
       errors.facilities = { ...errors.facilities, residence_hall_policy: true };
     }
 
     // Validasi Parent Guardian Section - minimal father name required
-    if (!allFormData.parentGuardian || !allFormData.parentGuardian.father_name) {
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_name
+    ) {
       errors.parentGuardian = { ...errors.parentGuardian, father_name: true };
     }
 
