@@ -37,22 +37,18 @@ class MasterDataController extends Controller
             'sections' => $sections,
             'majors' => $majors,
             'classes' => $classes,
-            'programs' => Program::all(),
+            'programs' => Program::select('program_id', 'name')->get(),
             'school_years' => SchoolYear::select('school_year_id', 'year')->get(),
             'semesters' => Semester::select('semester_id', 'name')->get(),
             'transportations' => Transportation::select('transport_id', 'type')->get(),
-            'residence_halls' => ResidenceHall::all(),
+            'residence_halls' => ResidenceHall::select('residence_id', 'type')->get(),
             'discount_types' => DiscountType::select('discount_type_id', 'name')->get(),
             'student_status' => ['New', 'Old', 'Transferee'],
             'academic_status' => ['REGULAR', 'SIT-IN', 'OTHER'],
-            'gender' => ['MALE', 'FEMALE'],
-            'transportation_policy' => ['Signed', 'Not Signed'],
-            'residence_hall_policy' => ['Signed', 'Not Signed'],
             'payment_type' => ['Tuition Fee', 'Residence Hall'],
             'payment_method' => ['Full Payment', 'Installment'],
             'financial_policy_contract' => ['Signed', 'Not Signed'],
             'pickup_points' => $pickupPoints,
-
         ]);
     }
 }
