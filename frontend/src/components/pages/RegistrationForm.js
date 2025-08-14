@@ -1,0 +1,214 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
+import Main from '../layout/Main';
+import StudentStatusSection from './registration/StudentStatusSection';
+import StudentInformationSection from './registration/StudentInformationSection';
+import ProgramSection from './registration/ProgramSection';
+import FacilitiesSection from './registration/FacilitiesSection';
+import ParentGuardianSection from './registration/ParentGuardianSection';
+import TermOfPaymentSection from './registration/TermOfPaymentSection';
+import OtherDetailSection from './registration/OtherDetailSection';
+import FormButtonSection from './registration/FormButtonSection';
+import styles from './RegistrationForm.module.css';
+import { getRegistrationOptions } from '../../services/api';
+
+const RegistrationForm = () => {
+  const location = useLocation();
+  const formData = location.state || {};
+  const [prefilledData, setPrefilledData] = useState({});
+  const [formSections, setFormSections] = useState({
+    studentStatus: {},
+    studentInfo: {},
+    program: {},
+    facilities: {},
+    parentGuardian: {},
+    termOfPayment: {},
+  });
+
+  // Add shared data state to avoid multiple API calls
+  const [sharedData, setSharedData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch all registration options once at the top level
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getRegistrationOptions();
+        setSharedData(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch registration options:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSectionDataChange = useCallback((sectionName, data) => {
+    setFormSections((prev) => {
+      // ✅ Cek apakah data benar-benar berubah
+      const currentSection = prev[sectionName] || {};
+      const newSection = { ...currentSection, ...data };
+
+      // ✅ Hanya update jika ada perubahan
+      if (JSON.stringify(currentSection) === JSON.stringify(newSection)) {
+        return prev; // Tidak ada perubahan, return state yang sama
+      }
+
+      return {
+        ...prev,
+        [sectionName]: newSection,
+      };
+    });
+  }, []);
+
+  const handleSelectOldStudent = (latestData) => {
+    // Prefill semua form sections dengan data dari backend
+    if (latestData) {
+      // Prefill Student Information
+      if (latestData.studentInfo) {
+        handleSectionDataChange('studentInfo', latestData.studentInfo);
+      }
+
+      // Prefill Program
+      if (latestData.program) {
+        handleSectionDataChange('program', latestData.program);
+      }
+
+      // Prefill Facilities
+      if (latestData.facilities) {
+        handleSectionDataChange('facilities', latestData.facilities);
+      }
+
+      // Prefill Parent Guardian
+      if (latestData.parentGuardian) {
+        handleSectionDataChange('parentGuardian', latestData.parentGuardian);
+      }
+
+      // Prefill Term of Payment
+      if (latestData.termOfPayment) {
+        handleSectionDataChange('termOfPayment', latestData.termOfPayment);
+      }
+    }
+
+    setPrefilledData((prev) => ({ ...prev, ...latestData }));
+  };
+
+  // State untuk validasi
+  const [validationState, setValidationState] = useState({});
+  const [errors, setErrors] = useState({});
+  const [forceError, setForceError] = useState({});
+
+  // Handler untuk menerima status validasi dari child components
+  const handleValidationChange = useCallback((sectionName, validationData) => {
+    setValidationState((prev) => ({
+      ...prev,
+      [sectionName]: validationData,
+    }));
+  }, []);
+
+  // Handler untuk mengatur error state
+  const handleSetErrors = useCallback((sectionName, errorData) => {
+    setErrors((prev) => ({
+      ...prev,
+      [sectionName]: errorData,
+    }));
+
+    // ✅ Set forceError dengan pengecekan yang sama
+    setForceError((prev) => ({
+      ...prev,
+      [sectionName]: errorData,
+    }));
+  }, []);
+
+  const handleResetForm = () => {
+    setPrefilledData({});
+    setValidationState({});
+    setErrors({});
+    setForceError({});
+  };
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <Main>
+        <div className={styles.formContainer}>
+          <div style={{ textAlign: 'center', padding: '50px' }}>
+            <p>Loading registration form...</p>
+          </div>
+        </div>
+      </Main>
+    );
+  }
+
+  return (
+    <Main>
+      <div className={styles.formContainer}>
+        {/* Display form data if available */}
+        {formData.schoolYear && (
+          <div className={styles.formInfo}>
+            <p>
+              <strong>School Year:</strong> {formData.schoolYear}
+            </p>
+            <p>
+              <strong>Semester:</strong> {formData.semester}
+            </p>
+            <p>
+              <strong>Date:</strong> {formData.date}
+            </p>
+          </div>
+        )}
+
+        <StudentStatusSection
+          onSelectOldStudent={handleSelectOldStudent}
+          onDataChange={(data) =>
+            handleSectionDataChange('studentStatus', data)
+          }
+          sharedData={sharedData}
+        />
+        <StudentInformationSection
+          prefill={prefilledData.student_info || {}}
+          onValidationChange={(validationData) =>
+            handleValidationChange('studentInfo', validationData)
+          }
+          onDataChange={(data) => handleSectionDataChange('studentInfo', data)}
+          errors={errors.studentInfo || {}}
+          forceError={forceError.studentInfo || {}}
+          sharedData={sharedData}
+        />
+        <ProgramSection
+          onDataChange={(data) => handleSectionDataChange('program', data)}
+          sharedData={sharedData}
+        />
+        <FacilitiesSection
+          onDataChange={(data) => handleSectionDataChange('facilities', data)}
+          sharedData={sharedData}
+        />
+        <ParentGuardianSection
+          onDataChange={(data) =>
+            handleSectionDataChange('parentGuardian', data)
+          }
+          // ParentGuardianSection tidak memerlukan sharedData
+        />
+        <TermOfPaymentSection
+          onDataChange={(data) =>
+            handleSectionDataChange('termOfPayment', data)
+          }
+          sharedData={sharedData}
+        />
+        <OtherDetailSection />
+        <FormButtonSection
+          validationState={validationState}
+          onSetErrors={handleSetErrors}
+          draftId={formData.draftId}
+          allFormData={formSections}
+          onReset={handleResetForm}
+        />
+      </div>
+    </Main>
+  );
+};
+
+export default RegistrationForm;
