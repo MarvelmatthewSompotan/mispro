@@ -5,8 +5,6 @@ import { submitRegistrationForm } from '../../services/api';
 const PopUpConfirm = React.memo(
   ({ onCancel, onConfirm, draftId, allFormData, locationState, navigate }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // Hapus console.log yang berlebihan
-    // console.log('Draft ID:', draftId);
 
     const handleConfirm = async () => {
       try {
@@ -54,12 +52,18 @@ const PopUpConfirm = React.memo(
     const transformFormData = (formData) => {
       console.log('Original form data:', formData);
 
-      // Transform data sesuai dengan yang diharapkan backend
-      // HAPUS field metadata yang tidak diperlukan backend
+      // ✅ PERBAIKAN: Validasi input_name untuk Old student
+      const studentStatus = formData.studentStatus?.student_status || 'New';
+      const inputName = formData.studentStatus?.input_name || '';
+
+      if (studentStatus === 'Old' && !inputName) {
+        throw new Error('Student ID is required for Old student status');
+      }
+
       const transformed = {
-        // Student status - Pastikan input_name selalu string
-        student_status: formData.studentStatus?.student_status || 'New',
-        input_name: formData.studentStatus?.input_name || '', // Ubah dari null ke empty string
+        // Student status - Pastikan input_name berisi student_id untuk Old student
+        student_status: studentStatus,
+        input_name: inputName, // Akan berisi student_id untuk Old student
 
         // Student information
         first_name: formData.studentInfo?.first_name || '',

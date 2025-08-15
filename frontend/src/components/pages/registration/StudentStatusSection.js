@@ -6,7 +6,11 @@ import {
 } from '../../../services/api';
 import styles from './StudentStatusSection.module.css';
 
-const StudentStatusSection = ({ onSelectOldStudent, onDataChange, sharedData }) => {
+const StudentStatusSection = ({
+  onSelectOldStudent,
+  onDataChange,
+  sharedData,
+}) => {
   const [status, setStatus] = useState('');
   const [statusOptions, setStatusOptions] = useState([]);
   const [studentSearch, setStudentSearch] = useState('');
@@ -36,24 +40,24 @@ const StudentStatusSection = ({ onSelectOldStudent, onDataChange, sharedData }) 
 
     // Kirim data ke parent component dengan input_name
     if (onDataChange) {
-      onDataChange({ 
+      onDataChange({
         student_status: option,
-        input_name: option === 'Old' ? '' : null // Tambahkan input_name
+        input_name: option === 'Old' ? '' : null, // Tambahkan input_name
       });
     }
   };
 
   const handleSearchChange = async (value) => {
     setStudentSearch(value);
-    
+
     // Update input_name setiap kali user mengetik
     if (onDataChange) {
-      onDataChange({ 
+      onDataChange({
         student_status: 'Old',
-        input_name: value // Update input_name dengan value yang diketik
+        input_name: '', // Update input_name dengan value yang diketik
       });
     }
-    
+
     if (value.length > 2) {
       setIsSearching(true);
       try {
@@ -80,12 +84,12 @@ const StudentStatusSection = ({ onSelectOldStudent, onDataChange, sharedData }) 
       if (latestData.success) {
         // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
-        
+
         // Update input_name dengan nama student yang dipilih
         if (onDataChange) {
-          onDataChange({ 
+          onDataChange({
             student_status: 'Old',
-            input_name: student.full_name || student.student_id // Set input_name
+            input_name: student.student_id, // Set input_name
           });
         }
       }

@@ -184,7 +184,7 @@ const StudentInformationSection = ({
 
   const handleCity = (value) => {
     setCity(value);
-    onDataChange({ city: value });
+    onDataChange({ city_regency: value });
   };
 
   const handleProvince = (value) => {
