@@ -23,6 +23,7 @@ use App\Models\ApplicationForm;
 use Illuminate\Support\Facades\DB;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ApplicationPreviewResource;
 
 class RegistrationController extends Controller
@@ -196,11 +197,7 @@ class RegistrationController extends Controller
             $validated = $request->validate([
                 // student
                 'student_status' => 'required|in:New,Old,Transferee',
-                'input_name' => [
-                    'required_if:student_status,Old',
-                    'string',
-                    'exists:students,student_id',
-                ],
+                'input_name' => 'nullable|string',
                 'first_name' => 'required|string',
                 'middle_name' => 'nullable|string',
                 'last_name' => 'required|string',
@@ -351,210 +348,141 @@ class RegistrationController extends Controller
                 $draft->registration_date_draft
             );
             
-            // student
             $status = $validated['student_status'];
-            if ($status === 'New'|| $status === 'Transferee') {
+            $student = null;
+            
+            if ($status === 'New' || $status === 'Transferee') {
+                // Check existing student
                 $existingStudent = Student::where(function($query) use ($validated) {
-                        $query->where('first_name', $validated['first_name'])
-                            ->where('last_name', $validated['last_name'])
-                            ->where('date_of_birth', $validated['date_of_birth'])
-                            ->where('place_of_birth', $validated['place_of_birth'])
-                            ->where('previous_school', $validated['previous_school']);
-                    })
-                    // Atau berdasarkan NIK (jika diisi)
-                    ->orWhere(function($query) use ($validated) {
-                        if (!empty($validated['nik'])) {
-                            $query->where('nik', $validated['nik']);
-                        }
-                    })
-                    // Atau berdasarkan KITAS (jika diisi)
-                    ->orWhere(function($query) use ($validated) {
-                        if (!empty($validated['kitas'])) {
-                            $query->where('kitas', $validated['kitas']);
-                        }
-                    })
-                    ->first();
+                    $query->where('first_name', $validated['first_name'])
+                        ->where('last_name', $validated['last_name'])
+                        ->where('date_of_birth', $validated['date_of_birth'])
+                        ->where('place_of_birth', $validated['place_of_birth'])
+                        ->where('previous_school', $validated['previous_school']);
+                })
+                ->orWhere(function($query) use ($validated) {
+                    if (!empty($validated['nik'])) {
+                        $query->where('nik', $validated['nik']);
+                    }
+                })
+                ->orWhere(function($query) use ($validated) {
+                    if (!empty($validated['kitas'])) {
+                        $query->where('kitas', $validated['kitas']);
+                    }
+                })
+                ->first();
+                
                 if ($existingStudent) {
                     return response()->json([
                         'success' => false,
                         'error' => 'Student already exists, please select Old status and input student name'
                     ], 422);
-                } 
+                }
+                
+                // Generate new student ID
                 $generatedId = $this->generateStudentId(
                     $draft->school_year_id,  
                     $validated['section_id'], 
                     $validated['major_id']
                 );
+                
+                // Create new student
+                $student = Student::create([
+                    'student_id' => $generatedId,
+                    'student_status' => $validated['student_status'],
+                    'registration_id' => $registrationId,
+                    'first_name' => $validated['first_name'],
+                    'middle_name' => $validated['middle_name'],
+                    'last_name' => $validated['last_name'],
+                    'nickname' => $validated['nickname'],
+                    'gender' => $validated['gender'],
+                    'age' => $this->calculateAge($validated['date_of_birth']),
+                    'family_rank' => $validated['family_rank'],
+                    'citizenship' => $validated['citizenship'],
+                    'country' => $validated['citizenship'] === 'Non Indonesia' ? $validated['country'] : null,
+                    'religion' => $validated['religion'],
+                    'place_of_birth' => $validated['place_of_birth'],
+                    'date_of_birth' => $validated['date_of_birth'],
+                    'email' => $validated['email'],
+                    'previous_school' => $validated['previous_school'],
+                    'phone_number' => $validated['phone_number'],
+                    'academic_status' => $validated['academic_status'],
+                    'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
+                    'registration_date' => $draft->registration_date_draft,
+                    'enrollment_status' => 'ACTIVE',
+                    'nik' => $validated['nik'],
+                    'kitas' => $validated['kitas'],
+                    'nisn' => $validated['nisn'],
+                ]);
+                // Create enrollment (sama untuk New dan Old)
+                $enrollment = $student->enrollments()->create([
+                    'class_id' => $schoolClass->class_id,
+                    'semester_id' => $draft->semester_id,
+                    'school_year_id' => $draft->school_year_id,
+                    'program_id' => $program->program_id,
+                    'transport_id' => $transportation->transport_id,
+                    'residence_id' => $residenceHall->residence_id,
+                    'residence_hall_policy' => $validated['residence_hall_policy'], 
+                    'transportation_policy' => $validated['transportation_policy'],
+                    'is_active' => true,
+                ]);
+                
+                // Create application form
+                $applicationForm = $this->createApplicationForm($enrollment);
+                
+                // Create application form version dengan data snapshot
+                $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
+
+                // Create student address, parent, guardian for new student
+                $this->createStudentRelatedData($student, $validated, $enrollment);
+                
             } else if ($status === 'Old') {
-                $generatedId = $validated['input_name'] ?? null;
-                if (!$generatedId) {
+                // ✅ PERBAIKAN: Gunakan student yang sudah ada
+                $existingStudentId = $validated['input_name'];
+                if (!$existingStudentId) {
                     return response()->json([
                         'success' => false,
-                        'error' => 'Student name is required for Old student'
+                        'error' => 'Student ID is required for Old student'
                     ], 422);
                 }
-            }
-
-            // calculate age
-            $dateOfBirth = Carbon::parse($validated['date_of_birth']);
-            $diff = $dateOfBirth->diff(Carbon::now());
-            $calculatedAge = "{$diff->y} years {$diff->m} months";
-            
-            $student = Student::create([
-                'student_id' => $generatedId,
-                'student_status' => $validated['student_status'],
-                'registration_id' => $registrationId,
-                'first_name' => $validated['first_name'],
-                'middle_name' => $validated['middle_name'],
-                'last_name' => $validated['last_name'],
-                'nickname' => $validated['nickname'],
-                'gender' => $validated['gender'],
-                'age' => $calculatedAge,
-                'family_rank' => $validated['family_rank'],
-                'citizenship' => $validated['citizenship'],
-                'country' => $validated['citizenship'] === 'Non Indonesia' ? $validated['country'] : null,
-                'religion' => $validated['religion'],
-                'place_of_birth' => $validated['place_of_birth'],
-                'date_of_birth' => $validated['date_of_birth'],
-                'email' => $validated['email'],
-                'previous_school' => $validated['previous_school'],
-                'phone_number' => $validated['phone_number'],
-                'academic_status' => $validated['academic_status'],
-                'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
-                'registration_date' => $draft->registration_date_draft,
-                'enrollment_status' => 'ACTIVE',
-                'nik' => $validated['nik'],
-                'kitas' => $validated['kitas'],
-                'nisn' => $validated['nisn'],
-            ]);
-
-            // enrollment
-            $enrollment = $student->enrollments()->create([
-                'class_id' => $schoolClass->class_id,
-                'semester_id' => $draft->semester_id,
-                'school_year_id' => $draft->school_year_id,
-                'program_id' => $program->program_id,
-                'transport_id' => $transportation->transport_id,
-                'residence_id' => $residenceHall->residence_id,
-                'residence_hall_policy' => $validated['residence_hall_policy'], 
-                'transportation_policy' => $validated['transportation_policy'],
-                'is_active' => true,
-            ]);
-
-            // data application form
-            $enrollmentIdS = $student->enrollments()->pluck('enrollment_id');
-            $maxVersion = ApplicationForm::whereIn('enrollment_id', $enrollmentIdS)->max('version');
-            $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
-            $applicationForm = ApplicationForm::create([
-                'enrollment_id' => $enrollment->enrollment_id,
-                'status' => 'Submitted',
-                'submitted_at' => now(),
-                'version' => $nextVersion,
-                'created_at' => now(),
-            ]);
-
-
-            // student address
-            $student->studentAddress()->create([
-                'street' => $validated['street'],
-                'rt' => $validated['rt'],
-                'rw' => $validated['rw'],
-                'village' => $validated['village'],
-                'district' => $validated['district'],
-                'city_regency' => $validated['city_regency'],
-                'province' => $validated['province'],
-                'other' => $validated['other'],
-            ]);
-
-            // student parent & address
-            $studentParent = $student->studentParent()->create([
-                'father_name' => $validated['father_name'],
-                'father_company' => $validated['father_company'],
-                'father_occupation' => $validated['father_occupation'],
-                'father_phone' => $validated['father_phone'],
-                'father_email' => $validated['father_email'],
-                'mother_name' => $validated['mother_name'],
-                'mother_company' => $validated['mother_company'],
-                'mother_occupation' => $validated['mother_occupation'],
-                'mother_phone' => $validated['mother_phone'],
-                'mother_email' => $validated['mother_email'],
-                'mother_company_addresses' => $validated['mother_company_addresses'],
-            ]);
-            $studentParent->fatherAddress()->create([
-                'street' => $validated['father_address_street'],
-                'rt' => $validated['father_address_rt'],
-                'rw' => $validated['father_address_rw'],
-                'village' => $validated['father_address_village'],
-                'district' => $validated['father_address_district'],
-                'city_regency' => $validated['father_address_city_regency'],
-                'province' => $validated['father_address_province'],
-                'other' => $validated['father_address_other'],
-                'father_company_addresses' => $validated['father_company_addresses'],
-            ]);
-            $studentParent->motherAddress()->create([
-                'street' => $validated['mother_address_street'],
-                'rt' => $validated['mother_address_rt'],
-                'rw' => $validated['mother_address_rw'],
-                'village' => $validated['mother_address_village'],
-                'district' => $validated['mother_address_district'],
-                'city_regency' => $validated['mother_address_city_regency'],
-                'province' => $validated['mother_address_province'],
-                'other' => $validated['mother_address_other'],
-            ]);
-
-            // guardian & address
-            $guardian = Guardian::create([
-                'guardian_name' => $validated['guardian_name'],
-                'relation_to_student' => $validated['relation_to_student'],
-                'phone_number' => $validated['guardian_phone'],
-                'guardian_email' => $validated['guardian_email'],
-            ]);
-            $studentGuardian = $student->studentGuardian()->create(['guardian_id' => $guardian->guardian_id]);
-            $guardian->guardianAddress()->create([
-                'street' => $validated['guardian_address_street'],
-                'rt' => $validated['guardian_address_rt'],
-                'rw' => $validated['guardian_address_rw'],
-                'village' => $validated['guardian_address_village'],
-                'district' => $validated['guardian_address_district'],
-                'city_regency' => $validated['guardian_address_city_regency'],
-                'province' => $validated['guardian_address_province'],
-                'other' => $validated['guardian_address_other'],
-            ]);
-
-            // payment
-            Payment::create([
-                'student_id' => $student->student_id,
-                'type' => $validated['payment_type'],
-                'method' => $validated['payment_method'],
-                'financial_policy_contract' => $validated['financial_policy_contract'],
-            ]);
-
-            // discount
-            if ($validated['discount_name']) {
-                $discountType = DiscountType::firstOrCreate(['name' => $validated['discount_name']]);
-                $enrollment->studentDiscount()->create([
-                    'discount_type_id' => $discountType->discount_type_id,
-                    'notes' => $validated['discount_notes'],
+                
+                // Find existing student
+                $student = Student::find($existingStudentId);
+                if (!$student) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Student not found'
+                    ], 404);
+                }
+                // Create enrollment (sama untuk New dan Old)
+                $enrollment = $student->enrollments()->create([
+                    'class_id' => $schoolClass->class_id,
+                    'semester_id' => $draft->semester_id,
+                    'school_year_id' => $draft->school_year_id,
+                    'program_id' => $program->program_id,
+                    'transport_id' => $transportation->transport_id,
+                    'residence_id' => $residenceHall->residence_id,
+                    'residence_hall_policy' => $validated['residence_hall_policy'], 
+                    'transportation_policy' => $validated['transportation_policy'],
+                    'is_active' => true,
                 ]);
-            }   
+                
+                // Create application form
+                $applicationForm = $this->createApplicationForm($student, $enrollment);
+                
+                // Create application form version dengan data snapshot
+                $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
-            // data application form version
-            $dataSnapshot = [
-                'student_id' => $student->student_id,
-                'enrollment_id' => $enrollment->enrollment_id,
-                'application_id' => $applicationForm->application_id,
-                'request_data' => $validated,
-            ];
-            ApplicationFormVersion::create([
-                'application_id' => $applicationForm->application_id,
-                'version' => 1,
-                'updated_by' => auth()->id(),
-                'data_snapshot' => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
-            ]);
-
-            // Clear draft after successful registration
+                // ✅ PERBAIKAN: Update student data jika ada perubahan
+                $this->updateStudentData($student, $validated, $registrationId, $draft);
+                
+                // ✅ PERBAIKAN: Update atau create related data
+                $this->updateStudentRelatedData($student, $validated, $enrollment);
+            }
+            
+            // Clear draft
             $draft->delete();
-
+            
             DB::commit();
             
             return response()->json([
@@ -567,6 +495,7 @@ class RegistrationController extends Controller
                     'enrollment_id' => $enrollment->enrollment_id
                 ]
             ], 200);
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -627,5 +556,289 @@ class RegistrationController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    // Helper methods
+    private function calculateAge($dateOfBirth)
+    {
+        $dateOfBirth = Carbon::parse($dateOfBirth);
+        $diff = $dateOfBirth->diff(Carbon::now());
+        return "{$diff->y} years {$diff->m} months";
+    }
+
+    private function createStudentRelatedData($student, $validated, $enrollment)
+    {
+        // Create student address
+        $student->studentAddress()->create([
+            'street' => $validated['street'],
+            'rt' => $validated['rt'],
+            'rw' => $validated['rw'],
+            'village' => $validated['village'],
+            'district' => $validated['district'],
+            'city_regency' => $validated['city_regency'],
+            'province' => $validated['province'],
+            'other' => $validated['other'],
+        ]);
+        
+        // Create student parent & addresses
+        $studentParent = $student->studentParent()->create([
+            'father_name' => $validated['father_name'],
+            'father_company' => $validated['father_company'],
+            'father_occupation' => $validated['father_occupation'],
+            'father_phone' => $validated['father_phone'],
+            'father_email' => $validated['father_email'],
+            'mother_name' => $validated['mother_name'],
+            'mother_company' => $validated['mother_company'],
+            'mother_occupation' => $validated['mother_occupation'],
+            'mother_phone' => $validated['mother_phone'],
+            'mother_email' => $validated['mother_email'],
+            'mother_company_addresses' => $validated['mother_company_addresses'],
+        ]);
+        
+        // Create addresses
+        $this->createParentAddresses($studentParent, $validated);
+        $this->createGuardianData($student, $validated);
+        $this->createPayment($student, $validated, $enrollment);
+    }
+
+    private function createParentAddresses($studentParent, $validated)
+    {
+        $studentParent->fatherAddress()->create([
+            'street' => $validated['father_address_street'],
+            'rt' => $validated['father_address_rt'],
+            'rw' => $validated['father_address_rw'],
+            'village' => $validated['father_address_village'],
+            'district' => $validated['father_address_district'],
+            'city_regency' => $validated['father_address_city_regency'],
+            'province' => $validated['father_address_province'],
+            'other' => $validated['father_address_other'],
+            'father_company_addresses' => $validated['father_company_addresses'],
+        ]);
+        $studentParent->motherAddress()->create([
+            'street' => $validated['mother_address_street'],
+            'rt' => $validated['mother_address_rt'],
+            'rw' => $validated['mother_address_rw'],
+            'village' => $validated['mother_address_village'],
+            'district' => $validated['mother_address_district'],
+            'city_regency' => $validated['mother_address_city_regency'],
+            'province' => $validated['mother_address_province'],
+            'other' => $validated['mother_address_other'],
+        ]);
+    }
+
+    private function createGuardianData($student, $validated)
+    {
+        $guardian = Guardian::create([
+            'guardian_name' => $validated['guardian_name'],
+            'relation_to_student' => $validated['relation_to_student'],
+            'phone_number' => $validated['guardian_phone'],
+            'guardian_email' => $validated['guardian_email'],
+        ]);
+        $studentGuardian = $student->studentGuardian()->create(['guardian_id' => $guardian->guardian_id]);
+        $guardian->guardianAddress()->create([
+            'street' => $validated['guardian_address_street'],
+            'rt' => $validated['guardian_address_rt'],
+            'rw' => $validated['guardian_address_rw'],
+            'village' => $validated['guardian_address_village'],
+            'district' => $validated['guardian_address_district'],
+            'city_regency' => $validated['guardian_address_city_regency'],
+            'province' => $validated['guardian_address_province'],
+            'other' => $validated['guardian_address_other'],
+        ]);
+    }
+
+    private function createPayment($student, $validated, $enrollment)
+    {
+        Payment::create([
+            'student_id' => $student->student_id,
+            'type' => $validated['payment_type'],
+            'method' => $validated['payment_method'],
+            'financial_policy_contract' => $validated['financial_policy_contract'],
+        ]);
+
+        // discount
+        if ($validated['discount_name']) {
+            $discountType = DiscountType::firstOrCreate(['name' => $validated['discount_name']]);
+            $enrollment->studentDiscount()->create([
+                'discount_type_id' => $discountType->discount_type_id,
+                'notes' => $validated['discount_notes'],
+            ]);
+        }  
+    }
+
+    private function updateStudentData($student, $validated, $registrationId, $draft)
+    {
+        // Update student data jika ada perubahan
+        $student->update([
+            'student_status' => $validated['student_status'],
+            'registration_id' => $registrationId,
+            'first_name' => $validated['first_name'],
+            'middle_name' => $validated['middle_name'],
+            'last_name' => $validated['last_name'],
+            'nickname' => $validated['nickname'],
+            'gender' => $validated['gender'],
+            'age' => $this->calculateAge($validated['date_of_birth']),
+            'family_rank' => $validated['family_rank'],
+            'citizenship' => $validated['citizenship'],
+            'country' => $validated['citizenship'] === 'Non Indonesia' ? $validated['country'] : null,
+            'religion' => $validated['religion'],
+            'place_of_birth' => $validated['place_of_birth'],
+            'date_of_birth' => $validated['date_of_birth'],
+            'email' => $validated['email'],
+            'previous_school' => $validated['previous_school'],
+            'phone_number' => $validated['phone_number'],
+            'academic_status' => $validated['academic_status'],
+            'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
+            'registration_date' => $draft->registration_date_draft,
+            'enrollment_status' => 'ACTIVE',
+            'nik' => $validated['nik'],
+            'kitas' => $validated['kitas'],
+            'nisn' => $validated['nisn'],
+        ]);
+    }
+
+    private function updateStudentRelatedData($student, $validated, $enrollment)
+    {
+        // Update atau create address
+        $student->studentAddress()->updateOrCreate(
+            ['student_id' => $student->student_id],
+            [
+                'street' => $validated['street'],
+                'rt' => $validated['rt'],
+                'rw' => $validated['rw'],
+                'village' => $validated['village'],
+                'district' => $validated['district'],
+                'city_regency' => $validated['city_regency'],
+                'province' => $validated['province'],
+                'other' => $validated['other'],
+            ]
+        );
+        
+        // Update atau create parent data
+        $student->studentParent()->updateOrCreate(
+            ['student_id' => $student->student_id],
+            [
+                'father_name' => $validated['father_name'],
+                'father_company' => $validated['father_company'],
+                'father_occupation' => $validated['father_occupation'],
+                'father_phone' => $validated['father_phone'],
+                'father_email' => $validated['father_email'],
+                'mother_name' => $validated['mother_name'],
+                'mother_company' => $validated['mother_company'],
+                'mother_occupation' => $validated['mother_occupation'],
+                'mother_phone' => $validated['mother_phone'],
+                'mother_email' => $validated['mother_email'],
+                'mother_company_addresses' => $validated['mother_company_addresses'],
+            ]
+        );
+        
+        // Update addresses
+        $this->updateParentAddresses($student, $validated);
+        $this->updateGuardianData($student, $validated);
+        $this->updatePayment($student, $validated, $enrollment);
+    }
+
+    private function updateParentAddresses($student, $validated)
+    {
+        $student->studentParent()->fatherAddress()->updateOrCreate(
+            ['student_id' => $student->student_id],
+            [
+                'street' => $validated['father_address_street'],
+                'rt' => $validated['father_address_rt'],
+                'rw' => $validated['father_address_rw'],
+                'village' => $validated['father_address_village'],
+                'district' => $validated['father_address_district'],
+                'city_regency' => $validated['father_address_city_regency'],
+                'province' => $validated['father_address_province'],
+                'other' => $validated['father_address_other'],
+                'father_company_addresses' => $validated['father_company_addresses'],
+            ]
+        );
+
+        $student->studentParent()->motherAddress()->updateOrCreate(
+            ['student_id' => $student->student_id],
+            [
+                'street' => $validated['mother_address_street'],
+                'rt' => $validated['mother_address_rt'],
+                'rw' => $validated['mother_address_rw'],
+                'village' => $validated['mother_address_village'],
+                'district' => $validated['mother_address_district'],
+                'city_regency' => $validated['mother_address_city_regency'],
+                'province' => $validated['mother_address_province'],
+                'other' => $validated['mother_address_other'],
+            ]
+        );
+    }
+
+    private function updateGuardianData($student, $validated)
+    {
+        $guardian = Guardian::updateOrCreate([
+            'guardian_name' => $validated['guardian_name'],
+            'relation_to_student' => $validated['relation_to_student'],
+            'phone_number' => $validated['guardian_phone'],
+            'guardian_email' => $validated['guardian_email'],
+        ]);
+        $studentGuardian = $student->studentGuardian()->updateOrCreate(['guardian_id' => $guardian->guardian_id]);
+        $guardian->guardianAddress()->updateOrCreate([
+            'street' => $validated['guardian_address_street'],
+            'rt' => $validated['guardian_address_rt'],
+            'rw' => $validated['guardian_address_rw'],
+            'village' => $validated['guardian_address_village'],
+            'district' => $validated['guardian_address_district'],
+            'city_regency' => $validated['guardian_address_city_regency'],
+            'province' => $validated['guardian_address_province'],
+            'other' => $validated['guardian_address_other'],
+        ]);
+    }
+
+    private function updatePayment($student, $validated, $enrollment)
+    {
+        Payment::updateOrCreate([
+            'student_id' => $student->student_id,
+            'type' => $validated['payment_type'],
+            'method' => $validated['payment_method'],
+            'financial_policy_contract' => $validated['financial_policy_contract'],
+        ]);
+
+        // discount
+        if ($validated['discount_name']) {
+            $discountType = DiscountType::updateOrCreate(['name' => $validated['discount_name']]);
+            $enrollment->studentDiscount()->create([
+                'discount_type_id' => $discountType->discount_type_id,
+                'notes' => $validated['discount_notes'],
+            ]);
+        }
+    }
+
+    private function createApplicationForm($enrollment)
+    {
+        $maxVersion = ApplicationForm::where('enrollment_id', $enrollment->enrollment_id)->max('version');
+        $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
+        return ApplicationForm::create([
+            'enrollment_id' => $enrollment->enrollment_id,
+            'status' => 'Submitted',
+            'submitted_at' => now(),
+            'version' => $nextVersion,
+            'created_by' => auth()->id(),
+        ]);
+    }
+
+    private function createApplicationFormVersion($applicationForm, $validated, $student, $enrollment)
+    {
+        $dataSnapshot = [
+            'student_id' => $student->student_id,
+            'enrollment_id' => $enrollment->enrollment_id,
+            'application_id' => $applicationForm->application_id,
+            'request_data' => $validated,
+            'timestamp' => now(),
+            'action' => 'registration'
+        ];
+        
+        ApplicationFormVersion::create([
+            'application_id' => $applicationForm->application_id,
+            'version' => 1,
+            'updated_by' => auth()->id(),
+            'data_snapshot' => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
+        ]);
     }
 }
