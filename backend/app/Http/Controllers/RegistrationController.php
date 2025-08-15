@@ -179,6 +179,13 @@ class RegistrationController extends Controller
 
     public function store(Request $request, $draft_id)
     {
+        // Tambahkan logging untuk debug
+        \Log::info('Registration store called', [
+            'draft_id' => $draft_id,
+            'request_data' => $request->all(),
+            'user_id' => auth()->id()
+        ]);
+
         DB::beginTransaction();
         try {
             $draft = Draft::where('draft_id', $draft_id)
@@ -197,9 +204,17 @@ class RegistrationController extends Controller
                 // student
                 'student_status' => 'required|in:New,Old,Transferee',
                 'input_name' => [
-                    'required_if:student_status,Old',
+                    'nullable',
                     'string',
-                    'exists:students,student_id',
+                    function ($attribute, $value, $fail) use ($request) {
+                        // Hanya validasi exists jika student_status adalah Old dan input_name tidak kosong
+                        if ($request->student_status === 'Old' && !empty($value)) {
+                            $exists = \App\Models\Student::where('student_id', $value)->exists();
+                            if (!$exists) {
+                                $fail('The selected student does not exist.');
+                            }
+                        }
+                    },
                 ],
                 'first_name' => 'required|string',
                 'middle_name' => 'nullable|string',
@@ -229,21 +244,21 @@ class RegistrationController extends Controller
                 'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
 
-                // student address
+                // student address - Pastikan semua field wajib terisi
                 'street' => 'required|string',
                 'rt' => 'nullable|string',
                 'rw' => 'nullable|string',
                 'village' => 'required|string',
                 'district' => 'required|string',
-                'city_regency' => 'required|string',
+                'city_regency' => 'required|string', // Pastikan required
                 'province' => 'required|string',
                 'other' => 'nullable|string',
 
                 // program, class, major
-                'section_id' => 'required|exists:sections,section_id',
-                'program_id' => 'required|exists:programs,program_id',
-                'class_id' => 'required|exists:classes,class_id',
-                'major_id' => 'required|exists:majors,major_id',
+                'section_id' => 'required|integer|exists:sections,section_id',
+                'program_id' => 'required|integer|exists:programs,program_id',
+                'class_id' => 'required|integer|exists:classes,class_id',
+                'major_id' => 'required|integer|exists:majors,major_id',
                 'program_other' => function ($attribute, $value, $fail) use ($request) {
                     $program = Program::find($request->input('program_id'));
                     if ($program && $program->name === 'Other' && empty($value)) {
@@ -252,11 +267,11 @@ class RegistrationController extends Controller
                 },
                 
                 // Facilities
-                'transportation_id' => 'required|exists:transportations,transport_id',
+                'transportation_id' => 'required|integer|exists:transportations,transport_id',
                 'pickup_point_id' => 'nullable|integer|exists:pickup_points,pickup_point_id',
                 'pickup_point_custom' => 'nullable|string|max:255',
                 'transportation_policy' => 'required|in:Signed,Not Signed',
-                'residence_id' => 'required|exists:residence_halls,residence_id',
+                'residence_id' => 'required|integer|exists:residence_halls,residence_id',
                 'residence_hall_policy' => 'required|in:Signed,Not Signed',
 
                 // student parent (father)
@@ -264,7 +279,7 @@ class RegistrationController extends Controller
                 'father_company' => 'nullable|string',
                 'father_occupation' => 'nullable|string',
                 'father_phone' => 'nullable|string',
-                'father_email' => 'nullable|email',
+                'father_email' => 'nullable|email', // Perbaiki email validation
                 'father_address_street' => 'nullable|string',
                 'father_address_rt' => 'nullable|string',
                 'father_address_rw' => 'nullable|string',
@@ -280,7 +295,7 @@ class RegistrationController extends Controller
                 'mother_company' => 'nullable|string',
                 'mother_occupation' => 'nullable|string',
                 'mother_phone' => 'nullable|string',
-                'mother_email' => 'nullable|email',
+                'mother_email' => 'nullable|email', // Perbaiki email validation
                 'mother_address_street' => 'nullable|string',
                 'mother_address_rt' => 'nullable|string',
                 'mother_address_rw' => 'nullable|string',
@@ -295,7 +310,7 @@ class RegistrationController extends Controller
                 'guardian_name' => 'nullable|string',
                 'relation_to_student' => 'nullable|string',
                 'guardian_phone' => 'nullable|string',
-                'guardian_email' => 'nullable|email',
+                'guardian_email' => 'nullable|email', // Perbaiki email validation
                 'guardian_address_street' => 'nullable|string',
                 'guardian_address_rt' => 'nullable|string',
                 'guardian_address_rw' => 'nullable|string',
@@ -315,6 +330,11 @@ class RegistrationController extends Controller
                 'discount_notes' => 'nullable|string',
 
             ]);
+            
+            // Convert empty strings to null for database
+            $validated = array_map(function($value) {
+                return $value === '' ? null : $value;
+            }, $validated);
             
             // data master
             $program = Program::findOrFail($validated['program_id']);
@@ -559,16 +579,31 @@ class RegistrationController extends Controller
             
             return response()->json([
                 'success' => true, 
-                'message' => 'Registration completed successfully',
+                'message' => 'Registration submitted successfully.',
                 'data' => [
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
-                    'application_id' => $applicationForm->application_id,
-                    'enrollment_id' => $enrollment->enrollment_id
-                ]
+                ],
             ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollback();
+            \Log::error('Validation error in registration', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
-            DB::rollBack();
+            DB::rollback();
+            \Log::error('Registration store error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false, 
                 'error' => 'Registration failed: ' . $e->getMessage()

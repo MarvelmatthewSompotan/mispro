@@ -41,7 +41,7 @@ const FormButtonSection = ({
       errors.studentInfo = { ...errors.studentInfo, citizenship: true };
     }
 
-    // Validasi Program Section
+    // Validasi Program Section - Perbaiki validasi ini
     if (!allFormData.program || !allFormData.program.section_id) {
       errors.program = { ...errors.program, section_id: true };
     }
@@ -50,6 +50,9 @@ const FormButtonSection = ({
     }
     if (!allFormData.program || !allFormData.program.class_id) {
       errors.program = { ...errors.program, class_id: true };
+    }
+    if (!allFormData.program || !allFormData.program.major_id) {
+      errors.program = { ...errors.program, major_id: true };
     }
 
     // Validasi Facilities Section

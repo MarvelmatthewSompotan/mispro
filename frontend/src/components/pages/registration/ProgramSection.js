@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import styles from './ProgramSection.module.css';
-import Select from 'react-select';
-import { getRegistrationOptions } from '../../../services/api';
+import React, { useState, useEffect, useCallback } from "react";
+import styles from "./ProgramSection.module.css";
+import Select from "react-select";
+import { getRegistrationOptions } from "../../../services/api";
 
 const ProgramSection = ({ onDataChange, sharedData }) => {
   const [sections, setSections] = useState([]);
@@ -9,12 +9,13 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
   const [classes, setClasses] = useState([]);
   const [programs, setPrograms] = useState([]);
 
-  const [selectedSection, setSelectedSection] = useState('');
-  const [selectedMajor, setSelectedMajor] = useState('');
-  const [selectedClass, setSelectedClass] = useState('');
-  const [selectedProgram, setSelectedProgram] = useState('');
-  const [programOther, setProgramOther] = useState('');
+  const [selectedSection, setSelectedSection] = useState("");
+  const [selectedMajor, setSelectedMajor] = useState("");
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState("");
+  const [programOther, setProgramOther] = useState("");
 
+  // Fetch data only once when component mounts
   useEffect(() => {
     if (sharedData) {
       setSections(sharedData.sections || []);
@@ -30,73 +31,142 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
           setPrograms(data.programs || []);
         })
         .catch((err) => {
-          console.error('Failed to fetch program options:', err);
+          console.error("Failed to fetch program options:", err);
         });
     }
   }, [sharedData]);
 
-  const handleSectionChange = (opt) => {
-    const value = opt ? opt.value : '';
-    setSelectedSection(value);
-    setSelectedMajor('');
-    setSelectedClass('');
+  // Memoize the data change callback to prevent infinite loops
+  const updateParentData = useCallback(
+    (data) => {
+      onDataChange(data);
+    },
+    [onDataChange]
+  );
 
-    onDataChange({
-      section_id: value,
-      major_id: '',
-      class_id: '',
-      program_id: selectedProgram,
-      program_other: programOther,
-    });
-  };
+  const handleSectionChange = useCallback(
+    (opt) => {
+      const value = opt ? opt.value : "";
+      setSelectedSection(value);
+      setSelectedMajor("");
+      setSelectedClass("");
 
-  const handleMajorChange = (opt) => {
-    const value = opt ? opt.value : '';
-    setSelectedMajor(value);
-    onDataChange({
-      section_id: selectedSection,
-      major_id: value,
-      class_id: selectedClass,
-      program_id: selectedProgram,
-      program_other: programOther,
-    });
-  };
+      updateParentData({
+        section_id: value,
+        major_id: "",
+        class_id: "",
+        program_id: selectedProgram,
+        program_other: programOther,
+      });
+    },
+    [selectedProgram, programOther, updateParentData]
+  );
 
-  const handleClassChange = (opt) => {
-    const value = opt ? opt.value : '';
-    setSelectedClass(value);
+  const handleMajorChange = useCallback(
+    (opt) => {
+      const value = opt ? opt.value : "";
+      setSelectedMajor(value);
+      updateParentData({
+        section_id: selectedSection,
+        major_id: value,
+        class_id: selectedClass,
+        program_id: selectedProgram,
+        program_other: programOther,
+      });
+    },
+    [
+      selectedSection,
+      selectedClass,
+      selectedProgram,
+      programOther,
+      updateParentData,
+    ]
+  );
 
-    const selectedClassData = classes.find((c) => c.class_id === value);
-    if (selectedClassData) {
-      const gradeNum = parseInt(selectedClassData.grade);
-      if (gradeNum < 9) {
-        setSelectedMajor(1); // default ke No Major
+  const handleClassChange = useCallback(
+    (opt) => {
+      const value = opt ? opt.value : "";
+      setSelectedClass(value);
+
+      // Check if we need to set default major for grades < 9
+      const selectedClassData = classes.find((c) => c.class_id === value);
+      if (selectedClassData) {
+        const gradeNum = parseInt(selectedClassData.grade);
+        if (gradeNum < 9 && selectedMajor !== 1) {
+          setSelectedMajor(1); // default ke No Major
+          updateParentData({
+            section_id: selectedSection,
+            major_id: 1,
+            class_id: value,
+            program_id: selectedProgram,
+            program_other: programOther,
+          });
+          return; // Exit early to avoid double update
+        }
       }
-    }
 
-    onDataChange({
-      section_id: selectedSection,
-      major_id: selectedMajor,
-      class_id: value,
-      program_id: selectedProgram,
-      program_other: programOther,
-    });
-  };
+      updateParentData({
+        section_id: selectedSection,
+        major_id: selectedMajor,
+        class_id: value,
+        program_id: selectedProgram,
+        program_other: programOther,
+      });
+    },
+    [
+      selectedSection,
+      selectedMajor,
+      selectedProgram,
+      programOther,
+      classes,
+      updateParentData,
+    ]
+  );
 
-  const handleProgramChange = (opt) => {
-    const value = opt ? opt.value : '';
-    setSelectedProgram(value);
-    onDataChange({
-      section_id: selectedSection,
-      major_id: selectedMajor,
-      class_id: selectedClass,
-      program_id: value,
-      program_other: value === 'Other' ? programOther : '',
-    });
-    if (value !== 'Other') {
-      setProgramOther('');
-    }
-  };
+  const handleProgramChange = useCallback(
+    (opt) => {
+      const value = opt ? opt.value : "";
+      setSelectedProgram(value);
+      updateParentData({
+        section_id: selectedSection,
+        major_id: selectedMajor,
+        class_id: selectedClass,
+        program_id: value,
+        program_other: value === "Other" ? programOther : "",
+      });
+      if (value !== "Other") {
+        setProgramOther("");
+      }
+    },
+    [
+      selectedSection,
+      selectedMajor,
+      selectedClass,
+      programOther,
+      updateParentData,
+    ]
+  );
+
+  const handleProgramOtherChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      setProgramOther(value);
+      updateParentData({
+        section_id: selectedSection,
+        major_id: selectedMajor,
+        class_id: selectedClass,
+        program_id: selectedProgram,
+        program_other: value,
+      });
+    },
+    [
+      selectedSection,
+      selectedMajor,
+      selectedClass,
+      selectedProgram,
+      updateParentData,
+    ]
+  );
 
   const sectionOptions = sections.map((sec) => ({
     value: sec.section_id,
@@ -104,7 +174,7 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
   }));
 
   const programOptions = programs.map((prog) => ({
-    value: prog.name === 'Other' ? 'Other' : prog.program_id,
+    value: prog.name === "Other" ? "Other" : prog.program_id,
     label: prog.name,
   }));
 
@@ -123,7 +193,7 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
       return unique;
     }, [])
     .sort((a, b) => {
-      const gradeOrder = ['N', 'K1', 'K2'];
+      const gradeOrder = ["N", "K1", "K2"];
       const idxA = gradeOrder.indexOf(a.label);
       const idxB = gradeOrder.indexOf(b.label);
       if (idxA !== -1 || idxB !== -1) {
@@ -162,22 +232,22 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
             <div key={option.value} className={styles.optionItem}>
               <label
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                   gap: 8,
-                  cursor: 'pointer',
-                  position: 'relative',
+                  cursor: "pointer",
+                  position: "relative",
                 }}
               >
                 <input
-                  type='radio'
-                  name='section'
+                  type="radio"
+                  name="section"
                   value={option.value}
                   checked={selectedSection === option.value}
                   onChange={() => handleSectionChange({ value: option.value })}
                   style={{
                     opacity: 0,
-                    position: 'absolute',
+                    position: "absolute",
                     width: 0,
                     height: 0,
                   }}
@@ -197,9 +267,9 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
             <div className={styles.sectionTitleText}>Grade</div>
           </div>
           <Select
-            id='grade'
+            id="grade"
             options={gradeOptions}
-            placeholder='Select grade'
+            placeholder="Select grade"
             value={
               selectedClass
                 ? gradeOptions.find((opt) => opt.value === selectedClass)
@@ -215,9 +285,9 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
                 <div className={styles.sectionTitleText}>Major</div>
               </div>
               <Select
-                id='major'
+                id="major"
                 options={majorSelectOptions}
-                placeholder='Select major'
+                placeholder="Select major"
                 value={
                   selectedMajor
                     ? majorSelectOptions.find(
@@ -230,9 +300,7 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
               />
             </>
           )}
-        </div>
 
-        <div className={styles.programSection}>
           <div className={styles.sectionTitle}>
             <div className={styles.sectionTitleText}>Program</div>
           </div>
@@ -240,22 +308,22 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
             <div key={option.value} className={styles.optionItem}>
               <label
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                   gap: 8,
-                  cursor: 'pointer',
-                  position: 'relative',
+                  cursor: "pointer",
+                  position: "relative",
                 }}
               >
                 <input
-                  type='radio'
-                  name='program'
+                  type="radio"
+                  name="program"
                   value={option.value}
                   checked={selectedProgram === option.value}
                   onChange={() => handleProgramChange({ value: option.value })}
                   style={{
                     opacity: 0,
-                    position: 'absolute',
+                    position: "absolute",
                     width: 0,
                     height: 0,
                   }}
@@ -267,24 +335,14 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
                   )}
                 </span>
                 <span className={styles.label}>{option.label}</span>
-                {option.label === 'Other' &&
+                {option.label === "Other" &&
                   selectedProgram === option.value && (
                     <input
                       className={styles.valueRegular}
-                      type='text'
+                      type="text"
                       value={programOther}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setProgramOther(value);
-                        onDataChange({
-                          section_id: selectedSection,
-                          major_id: selectedMajor,
-                          class_id: selectedClass,
-                          program_id: selectedProgram,
-                          program_other: value,
-                        });
-                      }}
-                      placeholder='Enter other program'
+                      onChange={handleProgramOtherChange}
+                      placeholder="Enter other program"
                       style={{ marginLeft: 12, padding: 0 }}
                     />
                   )}
