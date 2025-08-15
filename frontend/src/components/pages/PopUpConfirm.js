@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import styles from "../styles/PopUpConfirm.module.css";
 import { submitRegistrationForm } from "../../services/api";
 
@@ -6,18 +6,64 @@ const PopUpConfirm = React.memo(
   ({ onCancel, onConfirm, draftId, allFormData, locationState, navigate }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Memoize the transform function to prevent infinite loops
-    const transformFormData = useCallback((formData) => {
+    const handleConfirm = async () => {
+      try {
+        setIsSubmitting(true);
+
+        const transformedData = transformFormData(allFormData);
+
+        // Kurangi console.log yang berlebihan
+        console.log("=== SUBMIT DEBUG INFO ===");
+        console.log("Draft ID:", draftId);
+        console.log("Data keys:", Object.keys(transformedData));
+        console.log("========================");
+
+        const response = await submitRegistrationForm(draftId, transformedData);
+
+        if (response.success) {
+          onConfirm();
+        } else {
+          alert("Registration failed: " + (response.error || "Unknown error"));
+        }
+      } catch (error) {
+        console.error("=== ERROR DEBUG INFO ===");
+        console.error("Error message:", error.message);
+        if (error.response) {
+          console.error("HTTP Status:", error.response.status);
+        }
+        console.error("========================");
+
+        if (error.data && error.data.errors) {
+          const errorMessages = Object.values(error.data.errors)
+            .flat()
+            .join(", ");
+          alert("Validation errors: " + errorMessages);
+        } else if (error.data && error.data.message) {
+          alert("Registration failed: " + error.data.message);
+        } else {
+          alert("Registration failed: " + error.message);
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    // Fungsi untuk transform data dengan field mapping yang benar
+    const transformFormData = (formData) => {
       console.log("Original form data:", formData);
 
-      // Transform data sesuai dengan yang diharapkan backend
+      // ✅ PERBAIKAN: Validasi input_name untuk Old student
+      const studentStatus = formData.studentStatus?.student_status || "New";
+      const inputName = formData.studentStatus?.input_name || "";
+
+      if (studentStatus === "Old" && !inputName) {
+        throw new Error("Student ID is required for Old student status");
+      }
+
       const transformed = {
-        // Student status - Perbaiki input_name logic
-        student_status: formData.studentStatus?.student_status || "New",
-        input_name:
-          formData.studentStatus?.student_status === "Old"
-            ? formData.studentStatus?.input_name || ""
-            : "", // Ubah dari null ke empty string untuk konsistensi
+        // Student status - Pastikan input_name berisi student_id untuk Old student
+        student_status: studentStatus,
+        input_name: inputName, // Akan berisi student_id untuk Old student
 
         // Student information
         first_name: formData.studentInfo?.first_name || "",
@@ -28,7 +74,7 @@ const PopUpConfirm = React.memo(
         country:
           formData.studentInfo?.citizenship === "Non Indonesia"
             ? formData.studentInfo?.country || ""
-            : "",
+            : null,
         religion: formData.studentInfo?.religion || "",
         place_of_birth: formData.studentInfo?.place_of_birth || "",
         date_of_birth: formData.studentInfo?.date_of_birth || "",
@@ -39,37 +85,37 @@ const PopUpConfirm = React.memo(
         academic_status_other:
           formData.studentInfo?.academic_status === "OTHER"
             ? formData.studentInfo?.academic_status_other || ""
-            : "",
+            : null,
         gender: formData.studentInfo?.gender || "MALE",
         family_rank: formData.studentInfo?.family_rank || "",
         nisn: formData.studentInfo?.nisn || "",
         nik: formData.studentInfo?.nik || null,
-        kitas: formData.studentInfo?.kitas || "",
+        kitas: formData.studentInfo?.kitas || null,
 
-        // Student address - Pastikan semua field terisi
+        // Student address
         street: formData.studentInfo?.street || "",
-        rt: formData.studentInfo?.rt || "",
-        rw: formData.studentInfo?.rw || "",
+        rt: formData.studentInfo?.rt || null,
+        rw: formData.studentInfo?.rw || null,
         village: formData.studentInfo?.village || "",
         district: formData.studentInfo?.district || "",
-        city_regency: formData.studentInfo?.city_regency || "", // Pastikan tidak null
+        city_regency: formData.studentInfo?.city_regency || "",
         province: formData.studentInfo?.province || "",
-        other: formData.studentInfo?.other || "",
+        other: formData.studentInfo?.other || null,
 
-        // Program, class, major - Pastikan semua integer
+        // Program, class, major
         section_id: parseInt(formData.program?.section_id) || 1,
         program_id: parseInt(formData.program?.program_id) || 1,
         class_id: parseInt(formData.program?.class_id) || 1,
         major_id: parseInt(formData.program?.major_id) || 1,
-        program_other: formData.program?.program_other || "",
+        program_other: formData.program?.program_other || null,
 
-        // Facilities - Pastikan semua integer
+        // Facilities
         transportation_id:
           parseInt(formData.facilities?.transportation_id) || 1,
         pickup_point_id: formData.facilities?.pickup_point_id
           ? parseInt(formData.facilities.pickup_point_id)
           : null,
-        pickup_point_custom: formData.facilities?.pickup_point_custom || "",
+        pickup_point_custom: formData.facilities?.pickup_point_custom || null,
         transportation_policy:
           formData.facilities?.transportation_policy || "Not Signed",
         residence_id: parseInt(formData.facilities?.residence_id) || 1,
@@ -77,78 +123,73 @@ const PopUpConfirm = React.memo(
           formData.facilities?.residence_hall_policy || "Not Signed",
 
         // Parent/Guardian (father)
-        father_name: formData.parentGuardian?.father_name || "",
-        father_company: formData.parentGuardian?.father_company || "",
-        father_occupation: formData.parentGuardian?.father_occupation || "",
-        father_phone: formData.parentGuardian?.father_phone || "",
-        father_email: formData.parentGuardian?.father_email || "",
+        father_name: formData.parentGuardian?.father_name || null,
+        father_company: formData.parentGuardian?.father_company || null,
+        father_occupation: formData.parentGuardian?.father_occupation || null,
+        father_phone: formData.parentGuardian?.father_phone || null,
+        father_email: formData.parentGuardian?.father_email || null,
         father_address_street:
-          formData.parentGuardian?.father_address_street || "",
-        father_address_rt: formData.parentGuardian?.father_address_rt || "",
-        father_address_rw: formData.parentGuardian?.father_address_rw || "",
+          formData.parentGuardian?.father_address_street || null,
+        father_address_rt: formData.parentGuardian?.father_address_rt || null,
+        father_address_rw: formData.parentGuardian?.father_address_rw || null,
         father_address_village:
-          formData.parentGuardian?.father_address_village || "",
+          formData.parentGuardian?.father_address_village || null,
         father_address_district:
-          formData.parentGuardian?.father_address_district || "",
+          formData.parentGuardian?.father_address_district || null,
         father_address_city_regency:
-          formData.parentGuardian?.father_address_city_regency || "",
+          formData.parentGuardian?.father_address_city_regency || null,
         father_address_province:
-          formData.parentGuardian?.father_address_province || "",
+          formData.parentGuardian?.father_address_province || null,
         father_address_other:
-          formData.parentGuardian?.father_address_other || "",
+          formData.parentGuardian?.father_address_other || null,
         father_company_addresses:
-          formData.parentGuardian?.father_company_addresses || "",
+          formData.parentGuardian?.father_company_addresses || null,
 
-        // Parent/Guardian (mother) - Perbaiki email validation
-        mother_name: formData.parentGuardian?.mother_name || "",
-        mother_company: formData.parentGuardian?.mother_company || "",
-        mother_occupation: formData.parentGuardian?.mother_occupation || "",
-        mother_phone: formData.parentGuardian?.mother_phone || "",
-        mother_email:
-          formData.parentGuardian?.mother_email &&
-          formData.parentGuardian?.mother_email.trim() !== ""
-            ? formData.parentGuardian?.mother_email
-            : null, // Set null jika kosong atau whitespace
+        // Parent/Guardian (mother)
+        mother_name: formData.parentGuardian?.mother_name || null,
+        mother_company: formData.parentGuardian?.mother_company || null,
+        mother_occupation: formData.parentGuardian?.mother_occupation || null,
+        mother_phone: formData.parentGuardian?.mother_phone || null,
+        mother_email: formData.parentGuardian?.mother_email || null,
         mother_address_street:
-          formData.parentGuardian?.mother_address_street || "",
-        mother_address_rt: formData.parentGuardian?.mother_address_rt || "",
-        mother_address_rw: formData.parentGuardian?.mother_address_rw || "",
+          formData.parentGuardian?.mother_address_street || null,
+        mother_address_rt: formData.parentGuardian?.mother_address_rt || null,
+        mother_address_rw: formData.parentGuardian?.mother_address_rw || null,
         mother_address_village:
-          formData.parentGuardian?.mother_address_village || "",
+          formData.parentGuardian?.mother_address_village || null,
         mother_address_district:
-          formData.parentGuardian?.mother_address_district || "",
+          formData.parentGuardian?.mother_address_district || null,
         mother_address_city_regency:
-          formData.parentGuardian?.mother_address_city_regency || "",
+          formData.parentGuardian?.mother_address_city_regency || null,
         mother_address_province:
-          formData.parentGuardian?.mother_address_province || "",
+          formData.parentGuardian?.mother_address_province || null,
         mother_address_other:
-          formData.parentGuardian?.mother_address_other || "",
+          formData.parentGuardian?.mother_address_other || null,
         mother_company_addresses:
-          formData.parentGuardian?.mother_company_addresses || "",
+          formData.parentGuardian?.mother_company_addresses || null,
 
         // Guardian
-        guardian_name: formData.parentGuardian?.guardian_name || "",
-        relation_to_student: formData.parentGuardian?.relation_to_student || "",
-        guardian_phone: formData.parentGuardian?.guardian_phone || "",
-        guardian_email:
-          formData.parentGuardian?.guardian_email &&
-          formData.parentGuardian?.guardian_email.trim() !== ""
-            ? formData.parentGuardian?.guardian_email
-            : null, // Set null jika kosong atau whitespace
+        guardian_name: formData.parentGuardian?.guardian_name || null,
+        relation_to_student:
+          formData.parentGuardian?.relation_to_student || null,
+        guardian_phone: formData.parentGuardian?.guardian_phone || null,
+        guardian_email: formData.parentGuardian?.guardian_email || null,
         guardian_address_street:
-          formData.parentGuardian?.guardian_address_street || "",
-        guardian_address_rt: formData.parentGuardian?.guardian_address_rt || "",
-        guardian_address_rw: formData.parentGuardian?.guardian_address_rw || "",
+          formData.parentGuardian?.guardian_address_street || null,
+        guardian_address_rt:
+          formData.parentGuardian?.guardian_address_rt || null,
+        guardian_address_rw:
+          formData.parentGuardian?.guardian_address_rw || null,
         guardian_address_village:
-          formData.parentGuardian?.guardian_address_village || "",
+          formData.parentGuardian?.guardian_address_village || null,
         guardian_address_district:
-          formData.parentGuardian?.guardian_address_district || "",
+          formData.parentGuardian?.guardian_address_district || null,
         guardian_address_city_regency:
-          formData.parentGuardian?.guardian_address_city_regency || "",
+          formData.parentGuardian?.guardian_address_city_regency || null,
         guardian_address_province:
-          formData.parentGuardian?.guardian_address_province || "",
+          formData.parentGuardian?.guardian_address_province || null,
         guardian_address_other:
-          formData.parentGuardian?.guardian_address_other || "",
+          formData.parentGuardian?.guardian_address_other || null,
 
         // Payment
         payment_type: formData.termOfPayment?.payment_type || "Tuition Fee",
@@ -158,8 +199,8 @@ const PopUpConfirm = React.memo(
           formData.termOfPayment?.financial_policy_contract || "Not Signed",
 
         // Discount
-        discount_name: formData.termOfPayment?.discount_name || "",
-        discount_notes: formData.termOfPayment?.discount_notes || "",
+        discount_name: formData.termOfPayment?.discount_name || null,
+        discount_notes: formData.termOfPayment?.discount_notes || null,
       };
 
       // HAPUS field yang tidak diperlukan backend
@@ -170,69 +211,7 @@ const PopUpConfirm = React.memo(
 
       console.log("Transformed form data (cleaned):", transformed);
       return transformed;
-    }, []);
-
-    const handleConfirm = useCallback(async () => {
-      try {
-        setIsSubmitting(true);
-
-        const transformedData = transformFormData(allFormData);
-
-        // Debug: log data yang akan dikirim
-        console.log("=== SUBMIT DEBUG INFO ===");
-        console.log("Draft ID:", draftId);
-        console.log("Data keys:", Object.keys(transformedData));
-        console.log(
-          "Student Info:",
-          transformedData.first_name,
-          transformedData.last_name
-        );
-        console.log("City Regency:", transformedData.city_regency);
-        console.log("Province:", transformedData.province);
-        console.log("Mother Email:", transformedData.mother_email);
-        console.log("========================");
-
-        const response = await submitRegistrationForm(draftId, transformedData);
-
-        if (response.success) {
-          alert("Registration successful!");
-          onConfirm();
-          navigate("/"); // Redirect ke home
-        } else {
-          alert("Registration failed: " + (response.error || "Unknown error"));
-        }
-      } catch (error) {
-        console.error("=== ERROR DEBUG INFO ===");
-        console.error("Error message:", error.message);
-        if (error.response) {
-          console.error("HTTP Status:", error.response.status);
-        }
-        console.error("Full error object:", error);
-        console.error("Error data:", error.data);
-        console.error("========================");
-
-        if (error.data && error.data.errors) {
-          // Tampilkan semua validation errors
-          const errorMessages = [];
-          Object.entries(error.data.errors).forEach(([field, messages]) => {
-            if (Array.isArray(messages)) {
-              messages.forEach((msg) => {
-                errorMessages.push(`${field}: ${msg}`);
-              });
-            } else {
-              errorMessages.push(`${field}: ${messages}`);
-            }
-          });
-          alert("Validation errors:\n" + errorMessages.join("\n"));
-        } else if (error.data && error.data.error) {
-          alert("Registration failed: " + error.data.error);
-        } else {
-          alert("Registration failed: " + error.message);
-        }
-      } finally {
-        setIsSubmitting(false);
-      }
-    }, [draftId, allFormData, transformFormData, onConfirm, navigate]);
+    };
 
     return (
       <div className={styles.overlay}>
