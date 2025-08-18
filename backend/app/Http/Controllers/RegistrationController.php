@@ -322,7 +322,12 @@ class RegistrationController extends Controller
             // data master
             $program = Program::findOrFail($validated['program_id']);
             $schoolClass = SchoolClass::findOrFail($validated['class_id']);
-            $transportation = Transportation::findOrFail($validated['transportation_id']);
+
+            $transportation = null;
+            if (!empty($validated['transportation_id'])) {
+                $transportation = Transportation::findOrFail($validated['transportation_id']);
+            }
+
             $residenceHall = ResidenceHall::findOrFail($validated['residence_id']);
 
             // // program 
@@ -331,7 +336,6 @@ class RegistrationController extends Controller
             //     $program = $customProgram; 
             // }
 
-            // pickup point 
             $pickupPoint = null;
             if ($validated['pickup_point_id']) {
                 $pickupPoint = PickupPoint::findOrFail($validated['pickup_point_id']);
@@ -341,7 +345,7 @@ class RegistrationController extends Controller
                 ]);
             }
             
-            if ($pickupPoint) {
+            if ($pickupPoint && $transportation) {
                 $transportation->pickup_point_id = $pickupPoint->pickup_point_id;
                 $transportation->save();
             }
@@ -426,7 +430,7 @@ class RegistrationController extends Controller
                     'semester_id' => $draft->semester_id,
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
-                    'transport_id' => $transportation->transport_id,
+                    'transport_id' => $transportation ? $transportation->transport_id : null,
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
@@ -466,7 +470,7 @@ class RegistrationController extends Controller
                     'semester_id' => $draft->semester_id,
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
-                    'transport_id' => $transportation->transport_id,
+                    'transport_id' => $transportation ? $transportation->transport_id : null,
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
