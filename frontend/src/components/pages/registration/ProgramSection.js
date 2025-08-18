@@ -114,7 +114,7 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
   }));
 
   const programOptions = programs.map((prog) => ({
-    value: prog.name === 'Other' ? 'Other' : prog.program_id,
+    value: prog.name === 'Other' ? '' : prog.program_id,
     label: prog.name,
   }));
 

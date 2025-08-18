@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './StudentInformationSection.module.css';
 import Select from 'react-select';
 import { getRegistrationOptions } from '../../../services/api';
@@ -56,16 +56,6 @@ const StudentInformationSection = ({
       });
   }, []);
 
-  const handleAcademicStatus = (value) => {
-    setAcademicStatus(value);
-    onDataChange({ academic_status: value });
-  };
-
-  const handleAcademicStatusOther = () => {
-    setAcademicStatusOther('');
-    onDataChange({ academic_status_other: '' });
-  };
-
   const handleFirstName = (value) => {
     setFirstName(value);
     onDataChange({ first_name: value });
@@ -109,11 +99,6 @@ const StudentInformationSection = ({
   const handleGender = (value) => {
     setGender(value);
     onDataChange({ gender: value });
-  };
-
-  const handleAge = (value) => {
-    setAge(value);
-    onDataChange({ age: value });
   };
 
   const handleFamilyRank = (value) => {
@@ -250,12 +235,12 @@ const StudentInformationSection = ({
         }
 
         // Hitung umur dalam tahun dan bulan (sementara, nanti akan diganti backend)
-        let years = now.getFullYear() - dob.getFullYear(); // Ubah const menjadi let
-        let months = now.getMonth() - dob.getMonth(); // Ubah const menjadi let
+        let years = now.getFullYear() - dob.getFullYear();
+        let months = now.getMonth() - dob.getMonth();
 
         if (months < 0 || (months === 0 && now.getDate() < dob.getDate())) {
-          years--; // Sekarang bisa diubah
-          months += 12; // Sekarang bisa diubah
+          years--;
+          months += 12;
         }
 
         const calculatedAge = `${years} Tahun, ${months} Bulan`;
@@ -269,18 +254,7 @@ const StudentInformationSection = ({
       setAge('');
       onDataChange({ age: '' });
     }
-  }, [dateOfBirth, onDataChange]); // Tambahkan onDataChange ke dependency array
-
-  // ✅ Tambahkan useEffect untuk validasi academic_status_other
-  // useEffect(() => {
-  //   if (
-  //     academicStatus === 'OTHER' &&
-  //     (!academicStatusOther || !academicStatusOther.trim())
-  //   ) {
-  //     // Tampilkan error atau warning bahwa field other harus diisi
-  //     console.warn('Academic status other is required when selecting OTHER');
-  //   }
-  // }, [academicStatus, academicStatusOther]);
+  }, [dateOfBirth, onDataChange]);
 
   return (
     <div className={styles.container}>
