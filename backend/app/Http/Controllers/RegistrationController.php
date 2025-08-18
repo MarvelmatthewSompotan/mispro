@@ -222,6 +222,7 @@ class RegistrationController extends Controller
                 },
                 'gender' => 'required|in:MALE,FEMALE',
                 'family_rank' => 'required|string',
+                'age' => 'required|string',
                 'nisn' => 'required|string',
                 'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
@@ -238,18 +239,17 @@ class RegistrationController extends Controller
 
                 // program, class, major
                 'section_id' => 'required|exists:sections,section_id',
-                'program_id' => 'required|exists:programs,program_id',
+                'program_id' => 'nullable|exists:programs,program_id',
                 'class_id' => 'required|exists:classes,class_id',
                 'major_id' => 'required|exists:majors,major_id',
                 'program_other' => function ($attribute, $value, $fail) use ($request) {
-                    $program = Program::find($request->input('program_id'));
-                    if ($program && $program->name === 'Other' && empty($value)) {
+                    if (empty($request->program_id) && empty($value)) {
                         $fail('The program_other field is required when selecting "Other" as the program.');
                     }
                 },
                 
                 // Facilities
-                'transportation_id' => 'required|exists:transportations,transport_id',
+                'transportation_id' => 'nullable|exists:transportations,transport_id',
                 'pickup_point_id' => 'nullable|integer|exists:pickup_points,pickup_point_id',
                 'pickup_point_custom' => 'nullable|string|max:255',
                 'transportation_policy' => 'required|in:Signed,Not Signed',
@@ -310,8 +310,14 @@ class RegistrationController extends Controller
                 // discount
                 'discount_name' => 'nullable|string',
                 'discount_notes' => 'nullable|string',
-
             ]);
+
+            if (empty($validated['program_id']) && !empty($validated['program_other'])) {
+                $program = Program::create([
+                    'name' => $validated['program_other'],
+                ]);
+                $validated['program_id'] = $program->program_id;
+            }
             
             // data master
             $program = Program::findOrFail($validated['program_id']);
@@ -319,11 +325,11 @@ class RegistrationController extends Controller
             $transportation = Transportation::findOrFail($validated['transportation_id']);
             $residenceHall = ResidenceHall::findOrFail($validated['residence_id']);
 
-            // program 
-            if ($program->name == 'Other' && !empty($validated['program_other'])) {
-                $customProgram = Program::firstOrCreate(['name' => $validated['program_other']]);
-                $program = $customProgram; 
-            }
+            // // program 
+            // if ($program->name == 'Other' && !empty($validated['program_other'])) {
+            //     $customProgram = Program::firstOrCreate(['name' => $validated['program_other']]);
+            //     $program = $customProgram; 
+            // }
 
             // pickup point 
             $pickupPoint = null;
@@ -396,7 +402,7 @@ class RegistrationController extends Controller
                     'last_name' => $validated['last_name'],
                     'nickname' => $validated['nickname'],
                     'gender' => $validated['gender'],
-                    'age' => $this->calculateAge($validated['date_of_birth']),
+                    'age' => $validated['age'] ?: $this->calculateAge($validated['date_of_birth']),
                     'family_rank' => $validated['family_rank'],
                     'citizenship' => $validated['citizenship'],
                     'country' => $validated['citizenship'] === 'Non Indonesia' ? $validated['country'] : null,
@@ -677,7 +683,7 @@ class RegistrationController extends Controller
             'last_name' => $validated['last_name'],
             'nickname' => $validated['nickname'],
             'gender' => $validated['gender'],
-            'age' => $this->calculateAge($validated['date_of_birth']),
+            'age' => $validated['age'] ?: $this->calculateAge($validated['date_of_birth']),
             'family_rank' => $validated['family_rank'],
             'citizenship' => $validated['citizenship'],
             'country' => $validated['citizenship'] === 'Non Indonesia' ? $validated['country'] : null,

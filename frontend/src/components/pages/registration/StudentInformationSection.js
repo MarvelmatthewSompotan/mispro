@@ -271,6 +271,17 @@ const StudentInformationSection = ({
     }
   }, [dateOfBirth, onDataChange]); // Tambahkan onDataChange ke dependency array
 
+  // ✅ Tambahkan useEffect untuk validasi academic_status_other
+  // useEffect(() => {
+  //   if (
+  //     academicStatus === 'OTHER' &&
+  //     (!academicStatusOther || !academicStatusOther.trim())
+  //   ) {
+  //     // Tampilkan error atau warning bahwa field other harus diisi
+  //     console.warn('Academic status other is required when selecting OTHER');
+  //   }
+  // }, [academicStatus, academicStatusOther]);
+
   return (
     <div className={styles.container}>
       <div className={styles.sectionHeader}>
@@ -706,38 +717,46 @@ const StudentInformationSection = ({
                 <div className={styles.academicStatusOption}>
                   <Select
                     id='academicStatus'
-                    options={academicStatusOptions
-                      .filter((opt) => opt !== 'OTHER')
-                      .map((opt) => ({
-                        value: opt,
-                        label: opt,
-                      }))}
+                    options={academicStatusOptions.map((opt) => ({
+                      value: opt,
+                      label: opt,
+                    }))}
                     placeholder='Select status'
                     value={
-                      academicStatus && academicStatus !== 'OTHER'
+                      // ✅ PERBAIKAN: Hapus kondisi academicStatus !== 'OTHER'
+                      academicStatus
                         ? { value: academicStatus, label: academicStatus }
                         : null
                     }
                     onChange={(opt) => {
                       const selectedValue = opt ? opt.value : '';
 
-                      if (selectedValue !== 'OTHER') {
-                        handleAcademicStatusOther();
+                      // ✅ PERBAIKAN: Handle semua kasus termasuk 'OTHER'
+                      if (selectedValue === 'OTHER') {
+                        setAcademicStatus('OTHER');
+                        // setAcademicStatusOther(''); // ← Hapus baris ini
+                        onDataChange({
+                          academic_status: 'OTHER',
+                          academic_status_other: academicStatusOther, // ← Gunakan nilai yang sudah ada
+                        });
+                      } else {
+                        // Jika pilih status lain, clear OTHER
+                        setAcademicStatus(selectedValue);
+                        setAcademicStatusOther('');
+                        onDataChange({
+                          academic_status: selectedValue,
+                          academic_status_other: '',
+                        });
                       }
-                      handleAcademicStatus(selectedValue);
                     }}
                     isClearable
                     styles={{
                       control: (base) => ({
                         ...base,
-                        fontWeight:
-                          academicStatus && academicStatus !== 'Other'
-                            ? 'bold'
-                            : '400',
-                        color:
-                          academicStatus && academicStatus !== 'Other'
-                            ? '#000'
-                            : 'rgba(128,128,128,0.6)',
+                        fontWeight: academicStatus ? 'bold' : '400', // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
+                        color: academicStatus
+                          ? '#000'
+                          : 'rgba(128,128,128,0.6)',
                         border: 'none',
                         boxShadow: 'none',
                         borderRadius: 0,
@@ -746,14 +765,10 @@ const StudentInformationSection = ({
                       }),
                       singleValue: (base) => ({
                         ...base,
-                        fontWeight:
-                          academicStatus && academicStatus !== 'Other'
-                            ? 'bold'
-                            : '400',
-                        color:
-                          academicStatus && academicStatus !== 'Other'
-                            ? '#000'
-                            : 'rgba(128,128,128,0.6)',
+                        fontWeight: academicStatus ? 'bold' : '400', // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
+                        color: academicStatus
+                          ? '#000'
+                          : 'rgba(128,128,128,0.6)',
                       }),
                       placeholder: (base) => ({
                         ...base,
@@ -772,22 +787,31 @@ const StudentInformationSection = ({
                       onChange={(e) => {
                         if (e.target.checked) {
                           setAcademicStatus('OTHER');
-                          // Clear academic_status_other saat switch ke OTHER
-                          handleAcademicStatusOther();
+                          // setAcademicStatusOther(''); // ← Hapus baris ini
+                          onDataChange({
+                            academic_status: 'OTHER',
+                            academic_status_other: academicStatusOther, // ← Gunakan nilai yang sudah ada
+                          });
                         }
                       }}
                       className={styles.hiddenRadio}
                     />
                     <span className={styles.otherText}>Other</span>
+
+                    {/* ✅ Tampilkan input field jika OTHER dipilih */}
                     {academicStatus === 'OTHER' && (
                       <input
                         className={styles.otherInput}
                         type='text'
                         value={academicStatusOther}
                         onChange={(e) => {
-                          setAcademicStatusOther(e.target.value);
+                          const value = e.target.value;
+                          setAcademicStatusOther(value);
+
+                          // ✅ Kirim kedua field sekaligus
                           onDataChange({
-                            academic_status_other: e.target.value,
+                            academic_status: 'OTHER',
+                            academic_status_other: value,
                           });
                         }}
                         placeholder='Enter academic status'

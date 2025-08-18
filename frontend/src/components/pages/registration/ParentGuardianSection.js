@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './ParentGuardianSection.module.css';
 
 const ParentGuardianSection = ({ onDataChange }) => {
@@ -113,64 +113,6 @@ const ParentGuardianSection = ({ onDataChange }) => {
       onDataChange(allData);
     }
   };
-
-  // Kirim data ke parent setiap kali ada perubahan
-  useEffect(() => {
-    if (onDataChange) {
-      const allData = {};
-
-      // Father data dengan field mapping yang benar
-      if (father.name) allData.father_name = father.name;
-      if (father.company) allData.father_company = father.company;
-      if (father.occupation) allData.father_occupation = father.occupation;
-      if (father.phone) allData.father_phone = father.phone;
-      if (father.email) allData.father_email = father.email;
-      if (father.street) allData.father_address_street = father.street;
-      if (father.rt) allData.father_address_rt = father.rt;
-      if (father.rw) allData.father_address_rw = father.rw;
-      if (father.village) allData.father_address_village = father.village;
-      if (father.district) allData.father_address_district = father.district;
-      if (father.city) allData.father_address_city_regency = father.city;
-      if (father.province) allData.father_address_province = father.province;
-      if (father.other) allData.father_address_other = father.other;
-      if (father.company) allData.father_company_addresses = father.company;
-
-      // Mother data dengan field mapping yang benar
-      if (mother.name) allData.mother_name = mother.name;
-      if (mother.company) allData.mother_company = mother.company;
-      if (mother.occupation) allData.mother_occupation = mother.occupation;
-      if (mother.phone) allData.mother_phone = mother.phone;
-      if (mother.email) allData.mother_email = mother.email;
-      if (mother.street) allData.mother_address_street = mother.street;
-      if (mother.rt) allData.mother_address_rt = mother.rt;
-      if (mother.rw) allData.mother_address_rw = mother.rw;
-      if (mother.village) allData.mother_address_village = mother.village;
-      if (mother.district) allData.mother_address_district = mother.district;
-      if (mother.city) allData.mother_address_city_regency = mother.city;
-      if (mother.province) allData.mother_address_province = mother.province;
-      if (mother.other) allData.mother_address_other = mother.other;
-      if (mother.company) allData.mother_company_addresses = mother.company;
-
-      // Guardian data dengan field mapping yang benar
-      if (guardian.name) allData.guardian_name = guardian.name;
-      if (guardian.relationship)
-        allData.relation_to_student = guardian.relationship;
-      if (guardian.phone) allData.guardian_phone = guardian.phone;
-      if (guardian.email) allData.guardian_email = guardian.email;
-      if (guardian.street) allData.guardian_address_street = guardian.street;
-      if (guardian.rt) allData.guardian_address_rt = guardian.rt;
-      if (guardian.rw) allData.guardian_address_rw = guardian.rw;
-      if (guardian.village) allData.guardian_address_village = guardian.village;
-      if (guardian.district)
-        allData.guardian_address_district = guardian.district;
-      if (guardian.city) allData.guardian_address_city_regency = guardian.city;
-      if (guardian.province)
-        allData.guardian_address_province = guardian.province;
-      if (guardian.other) allData.guardian_address_other = guardian.other;
-
-      onDataChange(allData);
-    }
-  }, [father, mother, guardian, onDataChange]);
 
   return (
     <div className={styles.container}>

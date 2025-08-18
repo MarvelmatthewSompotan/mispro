@@ -86,15 +86,25 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
   const handleProgramChange = (opt) => {
     const value = opt ? opt.value : '';
     setSelectedProgram(value);
-    onDataChange({
-      section_id: selectedSection,
-      major_id: selectedMajor,
-      class_id: selectedClass,
-      program_id: value,
-      program_other: value === 'Other' ? programOther : '',
-    });
+
     if (value !== 'Other') {
       setProgramOther('');
+      onDataChange({
+        section_id: selectedSection,
+        major_id: selectedMajor,
+        class_id: selectedClass,
+        program_id: value,
+        program_other: '',
+      });
+    } else {
+      setProgramOther(value);
+      onDataChange({
+        section_id: selectedSection,
+        major_id: selectedMajor,
+        class_id: selectedClass,
+        program_id: null,
+        program_other: programOther,
+      });
     }
   };
 
@@ -280,7 +290,7 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
                           section_id: selectedSection,
                           major_id: selectedMajor,
                           class_id: selectedClass,
-                          program_id: selectedProgram,
+                          program_id: null,
                           program_other: value,
                         });
                       }}

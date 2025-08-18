@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import styles from '../styles/PopUpConfirm.module.css';
 import { submitRegistrationForm } from '../../services/api';
 
@@ -12,7 +12,6 @@ const PopUpConfirm = React.memo(
 
         const transformedData = transformFormData(allFormData);
 
-        // Kurangi console.log yang berlebihan
         console.log('=== SUBMIT DEBUG INFO ===');
         console.log('Draft ID:', draftId);
         console.log('Data keys:', Object.keys(transformedData));
@@ -52,7 +51,6 @@ const PopUpConfirm = React.memo(
     const transformFormData = (formData) => {
       console.log('Original form data:', formData);
 
-      // ✅ PERBAIKAN: Validasi input_name untuk Old student
       const studentStatus = formData.studentStatus?.student_status || 'New';
       const inputName = formData.studentStatus?.input_name || '';
 
@@ -61,9 +59,8 @@ const PopUpConfirm = React.memo(
       }
 
       const transformed = {
-        // Student status - Pastikan input_name berisi student_id untuk Old student
         student_status: studentStatus,
-        input_name: inputName, // Akan berisi student_id untuk Old student
+        input_name: inputName,
 
         // Student information
         first_name: formData.studentInfo?.first_name || '',
@@ -81,13 +78,14 @@ const PopUpConfirm = React.memo(
         email: formData.studentInfo?.email || '',
         phone_number: formData.studentInfo?.phone_number || '',
         previous_school: formData.studentInfo?.previous_school || '',
-        academic_status: formData.studentInfo?.academic_status || 'REGULAR',
+        academic_status: formData.studentInfo?.academic_status || 'OTHER',
         academic_status_other:
           formData.studentInfo?.academic_status === 'OTHER'
             ? formData.studentInfo?.academic_status_other || ''
             : null,
-        gender: formData.studentInfo?.gender || 'MALE',
+        gender: formData.studentInfo?.gender || '',
         family_rank: formData.studentInfo?.family_rank || '',
+        age: formData.studentInfo?.age || '',
         nisn: formData.studentInfo?.nisn || '',
         nik: formData.studentInfo?.nik || null,
         kitas: formData.studentInfo?.kitas || null,
@@ -103,22 +101,22 @@ const PopUpConfirm = React.memo(
         other: formData.studentInfo?.other || null,
 
         // Program, class, major
-        section_id: parseInt(formData.program?.section_id) || 1,
-        program_id: parseInt(formData.program?.program_id) || 1,
-        class_id: parseInt(formData.program?.class_id) || 1,
-        major_id: parseInt(formData.program?.major_id) || 1,
+        section_id: parseInt(formData.program?.section_id),
+        program_id: parseInt(formData.program?.program_id),
+        class_id: parseInt(formData.program?.class_id),
+        major_id: parseInt(formData.program?.major_id),
         program_other: formData.program?.program_other || null,
 
         // Facilities
         transportation_id:
-          parseInt(formData.facilities?.transportation_id) || 1,
+          parseInt(formData.facilities?.transportation_id) || null,
         pickup_point_id: formData.facilities?.pickup_point_id
           ? parseInt(formData.facilities.pickup_point_id)
           : null,
         pickup_point_custom: formData.facilities?.pickup_point_custom || null,
         transportation_policy:
           formData.facilities?.transportation_policy || 'Not Signed',
-        residence_id: parseInt(formData.facilities?.residence_id) || 1,
+        residence_id: parseInt(formData.facilities?.residence_id) || 3,
         residence_hall_policy:
           formData.facilities?.residence_hall_policy || 'Not Signed',
 
