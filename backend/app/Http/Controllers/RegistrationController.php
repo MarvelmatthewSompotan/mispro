@@ -477,8 +477,6 @@ class RegistrationController extends Controller
                     'is_active' => true,
                 ]);
                 
-                // Create application form
-                $applicationForm = $this->createApplicationForm($student, $enrollment);
                 
                 // Create application form version dengan data snapshot
                 $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
@@ -750,34 +748,41 @@ class RegistrationController extends Controller
 
     private function updateParentAddresses($student, $validated)
     {
-        $student->studentParent()->fatherAddress()->updateOrCreate(
-            ['student_id' => $student->student_id],
-            [
-                'street' => $validated['father_address_street'],
-                'rt' => $validated['father_address_rt'],
-                'rw' => $validated['father_address_rw'],
-                'village' => $validated['father_address_village'],
-                'district' => $validated['father_address_district'],
-                'city_regency' => $validated['father_address_city_regency'],
-                'province' => $validated['father_address_province'],
-                'other' => $validated['father_address_other'],
-                'father_company_addresses' => $validated['father_company_addresses'],
-            ]
-        );
+        // Dapatkan studentParent terlebih dahulu
+        $studentParent = $student->studentParent;
+        
+        if ($studentParent) {
+            // Update father address
+            $studentParent->fatherAddress()->updateOrCreate(
+                ['parent_id' => $studentParent->parent_id],
+                [
+                    'street' => $validated['father_address_street'],
+                    'rt' => $validated['father_address_rt'],
+                    'rw' => $validated['father_address_rw'],
+                    'village' => $validated['father_address_village'],
+                    'district' => $validated['father_address_district'],
+                    'city_regency' => $validated['father_address_city_regency'],
+                    'province' => $validated['father_address_province'],
+                    'other' => $validated['father_address_other'],
+                    'father_company_addresses' => $validated['father_company_addresses'],
+                ]
+            );
 
-        $student->studentParent()->motherAddress()->updateOrCreate(
-            ['student_id' => $student->student_id],
-            [
-                'street' => $validated['mother_address_street'],
-                'rt' => $validated['mother_address_rt'],
-                'rw' => $validated['mother_address_rw'],
-                'village' => $validated['mother_address_village'],
-                'district' => $validated['mother_address_district'],
-                'city_regency' => $validated['mother_address_city_regency'],
-                'province' => $validated['mother_address_province'],
-                'other' => $validated['mother_address_other'],
-            ]
-        );
+            // Update mother address
+            $studentParent->motherAddress()->updateOrCreate(
+                ['parent_id' => $studentParent->parent_id],
+                [
+                    'street' => $validated['mother_address_street'],
+                    'rt' => $validated['mother_address_rt'],
+                    'rw' => $validated['mother_address_rw'],
+                    'village' => $validated['mother_address_village'],
+                    'district' => $validated['mother_address_district'],
+                    'city_regency' => $validated['mother_address_city_regency'],
+                    'province' => $validated['mother_address_province'],
+                    'other' => $validated['mother_address_other'],
+                ]
+            );
+        }
     }
 
     private function updateGuardianData($student, $validated)

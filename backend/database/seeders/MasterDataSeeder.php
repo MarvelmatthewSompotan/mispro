@@ -23,7 +23,7 @@ class MasterDataSeeder extends Seeder
     public function run(): void
     {
         // program
-        foreach(['UAN', 'A Beka', 'Cambrige', 'Oxford'] as $program) {
+        foreach(['UAN', 'A Beka', 'Cambrige', 'Oxford', 'Other'] as $program) {
             Program::create(['name' => $program]);
         }
 
