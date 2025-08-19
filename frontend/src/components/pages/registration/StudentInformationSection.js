@@ -7,6 +7,7 @@ const genderOptions = ['MALE', 'FEMALE'];
 const citizenshipOptions = ['Indonesia', 'Non Indonesia'];
 
 const StudentInformationSection = ({
+  prefill,
   onDataChange,
   onValidationChange,
   errors,
@@ -55,6 +56,41 @@ const StudentInformationSection = ({
         console.error('Failed to fetch academic status options:', err);
       });
   }, []);
+
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log('Prefilling StudentInformationSection with:', prefill);
+
+      if (prefill.first_name) setFirstName(prefill.first_name);
+      if (prefill.middle_name) setMiddleName(prefill.middle_name);
+      if (prefill.last_name) setLastName(prefill.last_name);
+      if (prefill.nickname) setNickname(prefill.nickname);
+      if (prefill.nisn) setNisn(prefill.nisn);
+      if (prefill.nik) setNik(prefill.nik);
+      if (prefill.kitas) setKitas(prefill.kitas);
+      if (prefill.country) setForeignCountry(prefill.country);
+      if (prefill.gender) setGender(prefill.gender);
+      if (prefill.family_rank) setRank(prefill.family_rank);
+      if (prefill.citizenship) setCitizenship(prefill.citizenship);
+      if (prefill.religion) setReligion(prefill.religion);
+      if (prefill.place_of_birth) setPlaceOfBirth(prefill.place_of_birth);
+      if (prefill.date_of_birth) setDateOfBirth(prefill.date_of_birth);
+      if (prefill.email) setEmail(prefill.email);
+      if (prefill.previous_school) setPreviousSchool(prefill.previous_school);
+      if (prefill.phone_number) setPhone(prefill.phone_number);
+      if (prefill.academic_status) setAcademicStatus(prefill.academic_status);
+      if (prefill.academic_status_other)
+        setAcademicStatusOther(prefill.academic_status_other);
+      if (prefill.street) setStreet(prefill.street);
+      if (prefill.rt) setRt(prefill.rt);
+      if (prefill.rw) setRw(prefill.rw);
+      if (prefill.village) setVillage(prefill.village);
+      if (prefill.district) setDistrict(prefill.district);
+      if (prefill.city_regency) setCity(prefill.city_regency);
+      if (prefill.province) setProvince(prefill.province);
+      if (prefill.other) setOtherAddress(prefill.other);
+    }
+  }, [prefill]);
 
   const handleFirstName = (value) => {
     setFirstName(value);

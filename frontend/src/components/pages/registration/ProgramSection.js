@@ -3,7 +3,7 @@ import styles from './ProgramSection.module.css';
 import Select from 'react-select';
 import { getRegistrationOptions } from '../../../services/api';
 
-const ProgramSection = ({ onDataChange, sharedData }) => {
+const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
   const [sections, setSections] = useState([]);
   const [majors, setMajors] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -34,6 +34,18 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
         });
     }
   }, [sharedData]);
+
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log('Prefilling ProgramSection with:', prefill);
+
+      if (prefill.section_id) setSelectedSection(prefill.section_id);
+      if (prefill.major_id) setSelectedMajor(prefill.major_id);
+      if (prefill.class_id) setSelectedClass(prefill.class_id);
+      if (prefill.program_id) setSelectedProgram(prefill.program_id);
+      if (prefill.program_other) setProgramOther(prefill.program_other);
+    }
+  }, [prefill]);
 
   const handleSectionChange = (opt) => {
     const value = opt ? opt.value : '';
