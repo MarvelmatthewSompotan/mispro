@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import styles from './FacilitiesSection.module.css';
-import checkBoxIcon from '../../../assets/CheckBox.png';
-import { getRegistrationOptions } from '../../../services/api';
+import React, { useState, useEffect, useRef } from "react";
+import styles from "./FacilitiesSection.module.css";
+import checkBoxIcon from "../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../services/api";
 
 const FacilitiesSection = ({ onDataChange, sharedData }) => {
   const [transportations, setTransportations] = useState([]);
   const [pickupPoints, setPickupPoints] = useState([]);
   const [residenceHalls, setResidenceHalls] = useState([]);
 
-  const [selectedTransportation, setSelectedTransportation] = useState('');
-  const [selectedPickupPoint, setSelectedPickupPoint] = useState('');
-  const [pickupPointCustom, setPickupPointCustom] = useState('');
-  const [transportationPolicy, setTransportationPolicy] = useState('');
-  const [selectedResidence, setSelectedResidence] = useState('');
-  const [residencePolicy, setResidencePolicy] = useState('');
+  const [selectedTransportation, setSelectedTransportation] = useState("");
+  const [selectedPickupPoint, setSelectedPickupPoint] = useState("");
+  const [pickupPointCustom, setPickupPointCustom] = useState("");
+  const [transportationPolicy, setTransportationPolicy] = useState("");
+  const [selectedResidence, setSelectedResidence] = useState("");
+  const [residencePolicy, setResidencePolicy] = useState("");
+
+  const pickupInputRef = useRef(null);
 
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
@@ -25,59 +27,109 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
       // Fallback to individual API call if shared data not available
       getRegistrationOptions()
         .then((data) => {
-          console.log('Facilities data received:', data);
+          console.log("Facilities data received:", data);
           setTransportations(data.transportations || []);
           setPickupPoints(data.pickup_points || []);
           setResidenceHalls(data.residence_halls || []);
         })
         .catch((err) => {
-          console.error('Failed to fetch facilities options:', err);
+          console.error("Failed to fetch facilities options:", err);
         });
     }
   }, [sharedData]);
 
+  // 1) Derive selected transportation object & isSchoolBus
+  const selectedTransportObj = transportations.find(
+    (t) => t.transport_id === selectedTransportation
+  );
+  const isSchoolBus = selectedTransportObj?.type === "School bus";
+
+  // 2) Update handleTransportationChange: clear pickup fields when not School bus, and use nulls
   const handleTransportationChange = (value) => {
     setSelectedTransportation(value);
-    setSelectedPickupPoint('');
+
+    const nextTransport = transportations.find((t) => t.transport_id === value);
+    const nextIsSchoolBus = nextTransport?.type === "School bus";
+
+    const nextPickupPointId = nextIsSchoolBus ? "" : null;
+    const nextPickupPointCustom = nextIsSchoolBus ? "" : null;
+
+    if (!nextIsSchoolBus) {
+      setSelectedPickupPoint("");
+      setPickupPointCustom("");
+    }
 
     onDataChange({
       transportation_id: value,
-      pickup_point_id: '',
-      pickup_point_custom: '',
-      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      pickup_point_id: nextPickupPointId,
+      pickup_point_custom: nextPickupPointCustom,
+      transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
       residence_id: selectedResidence,
-      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
+      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
     });
   };
 
+  // 3) Tampilkan Pickup Point hanya untuk School bus
+  {
+    isSchoolBus && (
+      <div ref={pickupInputRef} className={`${styles.pickupPointField}`}>
+        <div className={styles.label}>Pickup point</div>
+        <select
+          value={selectedPickupPoint}
+          onChange={(e) => handlePickupPointChange(e.target.value)}
+          className={styles.pickupPointSelect}
+        >
+          <option value="">Select pickup point</option>
+          {pickupPoints.map((point) => (
+            <option key={point.pickup_point_id} value={point.pickup_point_id}>
+              {point.name}
+            </option>
+          ))}
+        </select>
+        <img className={styles.pickupPointIcon} alt="" src="Polygon 2.svg" />
+      </div>
+    );
+  }
+
+  // 4) Perbaiki .trim() bug pada useEffect
+  useEffect(() => {
+    if (pickupInputRef.current) {
+      const strVal = String(selectedPickupPoint ?? "");
+      if (strVal.trim() !== "") {
+        pickupInputRef.current.classList.add(styles.hasValue);
+      } else {
+        pickupInputRef.current.classList.remove(styles.hasValue);
+      }
+    }
+  }, [selectedPickupPoint]);
+
+  // 5) Konsisten kirim null untuk id yang tidak terisi
   const handlePickupPointChange = (value) => {
     setSelectedPickupPoint(value);
-    setPickupPointCustom('');
+    setPickupPointCustom("");
 
-    // Send data immediately
     onDataChange({
       transportation_id: selectedTransportation,
-      pickup_point_id: value,
-      pickup_point_custom: '',
-      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      pickup_point_id: value ? parseInt(value, 10) : null,
+      pickup_point_custom: "",
+      transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
       residence_id: selectedResidence,
-      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
+      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
     });
   };
 
   const handlePickupPointCustom = (e) => {
     const value = e.target.value;
     setPickupPointCustom(value);
-    setSelectedPickupPoint('');
+    setSelectedPickupPoint("");
 
-    // Send data immediately
     onDataChange({
       transportation_id: selectedTransportation,
       pickup_point_id: null,
-      pickup_point_custom: value,
-      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      pickup_point_custom: value || null,
+      transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
       residence_id: selectedResidence,
-      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
+      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
     });
   };
 
@@ -90,9 +142,9 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
       transportation_id: selectedTransportation,
       pickup_point_id: selectedPickupPoint,
       pickup_point_custom: pickupPointCustom,
-      transportation_policy: value ? 'Signed' : 'Not Signed',
+      transportation_policy: value ? "Signed" : "Not Signed",
       residence_id: selectedResidence,
-      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
+      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
     });
   };
 
@@ -104,9 +156,9 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
       transportation_id: selectedTransportation,
       pickup_point_id: selectedPickupPoint,
       pickup_point_custom: pickupPointCustom,
-      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
       residence_id: value,
-      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
+      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
     });
   };
 
@@ -119,23 +171,11 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
       transportation_id: selectedTransportation,
       pickup_point_id: selectedPickupPoint,
       pickup_point_custom: pickupPointCustom,
-      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
       residence_id: selectedResidence,
-      residence_hall_policy: value ? 'Signed' : 'Not Signed',
+      residence_hall_policy: value ? "Signed" : "Not Signed",
     });
   };
-
-  const pickupInputRef = useRef(null);
-
-  useEffect(() => {
-    if (pickupInputRef.current) {
-      if (selectedPickupPoint && selectedPickupPoint.trim() !== '') {
-        pickupInputRef.current.classList.add(styles.hasValue);
-      } else {
-        pickupInputRef.current.classList.remove(styles.hasValue);
-      }
-    }
-  }, [selectedPickupPoint]);
 
   return (
     <div className={styles.container}>
@@ -153,8 +193,8 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
             <div key={transport.transport_id} className={styles.optionItem}>
               <label className={styles.radioLabel}>
                 <input
-                  type='radio'
-                  name='transportation'
+                  type="radio"
+                  name="transportation"
                   value={transport.transport_id}
                   checked={selectedTransportation === transport.transport_id}
                   onChange={() =>
@@ -174,7 +214,7 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
           ))}
 
           {/* Pickup Point Field - Show only for school bus type */}
-          {selectedTransportation && (
+          {isSchoolBus && (
             <div ref={pickupInputRef} className={`${styles.pickupPointField}`}>
               <div className={styles.label}>Pickup point</div>
               <select
@@ -182,7 +222,7 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
                 onChange={(e) => handlePickupPointChange(e.target.value)}
                 className={styles.pickupPointSelect}
               >
-                <option value=''>Select pickup point</option>
+                <option value="">Select pickup point</option>
                 {pickupPoints.map((point) => (
                   <option
                     key={point.pickup_point_id}
@@ -194,8 +234,8 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
               </select>
               <img
                 className={styles.pickupPointIcon}
-                alt=''
-                src='Polygon 2.svg'
+                alt=""
+                src="Polygon 2.svg"
               />
             </div>
           )}
@@ -204,10 +244,10 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
           <div className={styles.optionItem}>
             <label className={styles.label}>Custom Pickup Point</label>
             <input
-              type='text'
+              type="text"
               value={pickupPointCustom}
               onChange={handlePickupPointCustom}
-              placeholder='Enter custom pickup point'
+              placeholder="Enter custom pickup point"
               className={styles.customInput}
             />
           </div>
@@ -216,7 +256,7 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
           <div className={styles.optionItem}>
             <label className={styles.checkboxLabel}>
               <input
-                type='checkbox'
+                type="checkbox"
                 checked={transportationPolicy}
                 onChange={handleTransportationPolicy}
                 className={styles.hiddenCheckbox}
@@ -226,7 +266,7 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
                 {transportationPolicy && (
                   <img
                     className={styles.checkBoxIcon}
-                    alt=''
+                    alt=""
                     src={checkBoxIcon}
                   />
                 )}
@@ -247,8 +287,8 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
             <div key={residence.residence_id} className={styles.optionItem}>
               <label className={styles.radioLabel}>
                 <input
-                  type='radio'
-                  name='residenceHall'
+                  type="radio"
+                  name="residenceHall"
                   value={residence.residence_id}
                   checked={selectedResidence === residence.residence_id}
                   onChange={() => handleResidenceChange(residence.residence_id)}
@@ -269,7 +309,7 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
           <div className={styles.optionItem}>
             <label className={styles.checkboxLabel}>
               <input
-                type='checkbox'
+                type="checkbox"
                 checked={residencePolicy}
                 onChange={handleResidencePolicy}
                 className={styles.hiddenCheckbox}
@@ -279,7 +319,7 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
                 {residencePolicy && (
                   <img
                     className={styles.checkBoxIcon}
-                    alt=''
+                    alt=""
                     src={checkBoxIcon}
                   />
                 )}

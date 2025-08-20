@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import styles from './TermOfPaymentSection.module.css';
-import checkBoxIcon from '../../../assets/CheckBox.png';
-import { getRegistrationOptions } from '../../../services/api';
+import React, { useState, useEffect } from "react";
+import styles from "./TermOfPaymentSection.module.css";
+import checkBoxIcon from "../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../services/api";
 
 const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
   // State untuk payment options
-  const [paymentType, setPaymentType] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentType, setPaymentType] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
-  const [discountName, setDiscountName] = useState('');
-  const [discountNotes, setDiscountNotes] = useState('');
+  const [discountName, setDiscountName] = useState("");
+  const [discountNotes, setDiscountNotes] = useState("");
 
   // State untuk dropdown options dari backend
   const [paymentTypeOptions, setPaymentTypeOptions] = useState([]);
   const [paymentMethodOptions, setPaymentMethodOptions] = useState([]);
   const [discountTypeOptions, setDiscountTypeOptions] = useState([]);
+
+  // State untuk mengakumulasi semua data
+  const [allPaymentData, setAllPaymentData] = useState({});
 
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
@@ -31,38 +34,46 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
           setDiscountTypeOptions(data.discount_types || []);
         })
         .catch((err) => {
-          console.error('Failed to fetch payment options:', err);
+          console.error("Failed to fetch payment options:", err);
         });
     }
   }, [sharedData]);
 
+  // Function untuk mengupdate data dan mengirim ke parent
+  const updateAndSendData = (field, value) => {
+    const newData = { ...allPaymentData, [field]: value };
+    setAllPaymentData(newData);
+    onDataChange("termOfPayment", newData);
+  };
+
   const handlePaymentTypeChange = (value) => {
     setPaymentType(value);
-    onDataChange({ payment_type: value });
+    updateAndSendData("payment_type", value);
   };
 
   const handlePaymentMethodChange = (value) => {
     setPaymentMethod(value);
-    onDataChange({ payment_method: value });
+    updateAndSendData("payment_method", value);
   };
 
   const handleFinancialPolicyChange = (e) => {
     const value = e.target.checked;
     setFinancialPolicy(value);
-    onDataChange({
-      financial_policy_contract: value ? 'Signed' : 'Not Signed',
-    });
+    updateAndSendData(
+      "financial_policy_contract",
+      value ? "Signed" : "Not Signed"
+    );
   };
 
   const handleDiscountNameChange = (value) => {
     setDiscountName(value);
-    onDataChange({ discount_name: value });
+    updateAndSendData("discount_name", value);
   };
 
   const handleDiscountNotesChange = (e) => {
     const value = e.target.value;
     setDiscountNotes(value);
-    onDataChange({ discount_notes: value });
+    updateAndSendData("discount_notes", value);
   };
 
   return (
@@ -80,8 +91,8 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
-                    type='radio'
-                    name='paymentType'
+                    type="radio"
+                    name="paymentType"
                     value={option}
                     checked={paymentType === option}
                     onChange={(e) => handlePaymentTypeChange(e.target.value)}
@@ -109,8 +120,8 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
-                    type='radio'
-                    name='paymentMethod'
+                    type="radio"
+                    name="paymentMethod"
                     value={option}
                     checked={paymentMethod === option}
                     onChange={(e) => handlePaymentMethodChange(e.target.value)}
@@ -139,7 +150,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
             <div className={styles.optionItem}>
               <label className={styles.checkboxLabel}>
                 <input
-                  type='checkbox'
+                  type="checkbox"
                   checked={financialPolicy}
                   onChange={handleFinancialPolicyChange}
                   className={styles.hiddenCheckbox}
@@ -149,7 +160,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
                   {financialPolicy && (
                     <img
                       className={styles.checkBoxIcon}
-                      alt=''
+                      alt=""
                       src={checkBoxIcon}
                     />
                   )}
@@ -171,12 +182,12 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
               <div className={styles.label}>Discount Type</div>
               <select
                 className={`${styles.dropdownSelect} ${
-                  discountName ? styles.hasValue : ''
+                  discountName ? styles.hasValue : ""
                 }`}
                 value={discountName}
                 onChange={(e) => handleDiscountNameChange(e.target.value)}
               >
-                <option value=''>Select discount type</option>
+                <option value="">Select discount type</option>
                 {discountTypeOptions.map((discount) => (
                   <option key={discount.discount_type_id} value={discount.name}>
                     {discount.name}
@@ -192,10 +203,10 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
                 <span className={styles.label}>Notes</span>
                 <input
                   className={styles.valueRegular}
-                  type='text'
+                  type="text"
                   value={discountNotes}
                   onChange={handleDiscountNotesChange}
-                  placeholder='Enter discount notes'
+                  placeholder="Enter discount notes"
                   style={{ margin: 0, padding: 0 }}
                 />
               </label>

@@ -47,16 +47,26 @@ const RegistrationForm = () => {
   }, []);
 
   const handleSectionDataChange = useCallback((sectionName, data) => {
-    if (typeof data !== "object" || data === null || Array.isArray(data)) {
-      console.error(`Data untuk ${sectionName} harus berupa objek`, data);
-      return;
-    }
+    console.log(`RegistrationForm - Received data for ${sectionName}:`, data);
+    console.log(
+      `RegistrationForm - Data type for ${sectionName}:`,
+      typeof data
+    );
 
     setFormSections((prev) => {
+      // ✅ Cek apakah data benar-benar berubah
       const currentSection = prev[sectionName] || {};
       const newSection = { ...currentSection, ...data };
+
+      console.log(
+        `RegistrationForm - Current section ${sectionName}:`,
+        currentSection
+      );
+      console.log(`RegistrationForm - New section ${sectionName}:`, newSection);
+
+      // ✅ Hanya update jika ada perubahan
       if (JSON.stringify(currentSection) === JSON.stringify(newSection)) {
-        return prev;
+        return prev; // Tidak ada perubahan, return state yang sama
       }
 
       return {
@@ -66,90 +76,32 @@ const RegistrationForm = () => {
     });
   }, []);
 
-  // Buat semua callback functions di level atas
-  const handleStudentStatusDataChange = useCallback(
-    (data) => {
-      // Pastikan data lengkap sebelum dikirim
-      const completeData = {
-        student_status: data.student_status || "New",
-        input_name: data.input_name || "",
-      };
-
-      handleSectionDataChange("studentStatus", completeData);
-    },
-    [handleSectionDataChange]
-  );
-
-  const handleStudentInfoDataChange = useCallback(
-    (data) => {
-      handleSectionDataChange("studentInfo", data);
-    },
-    [handleSectionDataChange]
-  );
-
-  const handleStudentInfoValidationChange = useCallback((validationData) => {
-    handleValidationChange("studentInfo", validationData);
-  }, []);
-
-  const handleProgramDataChange = useCallback(
-    (data) => {
-      console.log("Program data change:", data);
-      handleSectionDataChange("program", data);
-    },
-    [handleSectionDataChange]
-  );
-
-  const handleFacilitiesDataChange = useCallback(
-    (data) => {
-      handleSectionDataChange("facilities", data);
-    },
-    [handleSectionDataChange]
-  );
-
-  const handleParentGuardianDataChange = useCallback(
-    (data) => {
-      handleSectionDataChange("parentGuardian", data);
-    },
-    [handleSectionDataChange]
-  );
-
-  const handleTermOfPaymentDataChange = useCallback(
-    (data) => {
-      handleSectionDataChange("termOfPayment", data);
-    },
-    [handleSectionDataChange]
-  );
-
   const handleSelectOldStudent = (latestData) => {
     // Prefill semua form sections dengan data dari backend
     if (latestData) {
-      // Support both camelCase and snake_case keys
-      const studentInfoData = latestData.studentInfo || latestData.student_info;
-      if (studentInfoData) {
-        handleSectionDataChange("studentInfo", studentInfoData);
+      // Prefill Student Information
+      if (latestData.studentInfo) {
+        handleSectionDataChange("studentInfo", latestData.studentInfo);
       }
 
-      const programData = latestData.program || latestData.program_info;
-      if (programData) {
-        handleSectionDataChange("program", programData);
+      // Prefill Program
+      if (latestData.program) {
+        handleSectionDataChange("program", latestData.program);
       }
 
-      const facilitiesData =
-        latestData.facilities || latestData.facilities_info;
-      if (facilitiesData) {
-        handleSectionDataChange("facilities", facilitiesData);
+      // Prefill Facilities
+      if (latestData.facilities) {
+        handleSectionDataChange("facilities", latestData.facilities);
       }
 
-      const parentGuardianData =
-        latestData.parentGuardian || latestData.parent_guardian;
-      if (parentGuardianData) {
-        handleSectionDataChange("parentGuardian", parentGuardianData);
+      // Prefill Parent Guardian
+      if (latestData.parentGuardian) {
+        handleSectionDataChange("parentGuardian", latestData.parentGuardian);
       }
 
-      const termOfPaymentData =
-        latestData.termOfPayment || latestData.term_of_payment;
-      if (termOfPaymentData) {
-        handleSectionDataChange("termOfPayment", termOfPaymentData);
+      // Prefill Term of Payment
+      if (latestData.termOfPayment) {
+        handleSectionDataChange("termOfPayment", latestData.termOfPayment);
       }
     }
 
@@ -203,9 +155,6 @@ const RegistrationForm = () => {
     );
   }
 
-  // Extract draft ID from formData
-  const draftId = formData.draftId;
-
   return (
     <Main>
       <div className={styles.formContainer}>
@@ -221,60 +170,51 @@ const RegistrationForm = () => {
             <p>
               <strong>Date:</strong> {formData.date}
             </p>
-            {draftId && (
-              <p>
-                <strong>Draft ID:</strong> {draftId}
-              </p>
-            )}
           </div>
         )}
 
         <StudentStatusSection
           onSelectOldStudent={handleSelectOldStudent}
-          onDataChange={handleStudentStatusDataChange}
+          onDataChange={(data) =>
+            handleSectionDataChange("studentStatus", data)
+          }
           sharedData={sharedData}
         />
         <StudentInformationSection
-          prefill={
-            prefilledData.student_info || prefilledData.studentInfo || {}
+          prefill={prefilledData.student_info || {}}
+          onValidationChange={(validationData) =>
+            handleValidationChange("studentInfo", validationData)
           }
-          onValidationChange={handleStudentInfoValidationChange}
-          onDataChange={handleStudentInfoDataChange}
+          onDataChange={(data) => handleSectionDataChange("studentInfo", data)}
           errors={errors.studentInfo || {}}
           forceError={forceError.studentInfo || {}}
           sharedData={sharedData}
         />
         <ProgramSection
-          prefill={prefilledData.program || prefilledData.program_info || {}}
-          onDataChange={handleProgramDataChange}
+          onDataChange={(data) => handleSectionDataChange("program", data)}
           sharedData={sharedData}
         />
         <FacilitiesSection
-          prefill={
-            prefilledData.facilities || prefilledData.facilities_info || {}
-          }
-          onDataChange={handleFacilitiesDataChange}
+          onDataChange={(data) => handleSectionDataChange("facilities", data)}
           sharedData={sharedData}
         />
         <ParentGuardianSection
-          prefill={
-            prefilledData.parentGuardian || prefilledData.parent_guardian || {}
+          onDataChange={(data) =>
+            handleSectionDataChange("parentGuardian", data)
           }
-          onDataChange={handleParentGuardianDataChange}
           // ParentGuardianSection tidak memerlukan sharedData
         />
         <TermOfPaymentSection
-          prefill={
-            prefilledData.termOfPayment || prefilledData.term_of_payment || {}
+          onDataChange={(data) =>
+            handleSectionDataChange("termOfPayment", data)
           }
-          onDataChange={handleTermOfPaymentDataChange}
           sharedData={sharedData}
         />
         <OtherDetailSection />
         <FormButtonSection
           validationState={validationState}
           onSetErrors={handleSetErrors}
-          draftId={draftId}
+          draftId={formData.draftId}
           allFormData={formSections}
           onReset={handleResetForm}
         />

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import PopUpConfirm from '../PopUpConfirm';
-import styles from './FormButtonSection.module.css';
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import PopUpConfirm from "../PopUpConfirm";
+import styles from "./FormButtonSection.module.css";
 
 const FormButtonSection = ({
   validationState,
@@ -20,8 +20,8 @@ const FormButtonSection = ({
 
   const handleSubmit = () => {
     // Debug: log semua data untuk memeriksa
-    console.log('All Form Data:', allFormData);
-    console.log('Validation State:', validationState);
+    console.log("All Form Data:", allFormData);
+    console.log("Validation State:", validationState);
 
     const errors = {};
 
@@ -37,11 +37,15 @@ const FormButtonSection = ({
     if (!allFormData.studentInfo || !allFormData.studentInfo.first_name) {
       errors.studentInfo = { ...errors.studentInfo, first_name: true };
     }
-    if (!allFormData.studentInfo || !allFormData.studentInfo.citizenship) {
+    if (
+      !allFormData.studentInfo ||
+      allFormData.studentInfo.citizenship === undefined ||
+      allFormData.studentInfo.citizenship === null
+    ) {
       errors.studentInfo = { ...errors.studentInfo, citizenship: true };
     }
 
-    // Validasi Program Section - Perbaiki validasi ini
+    // Validasi Program Section
     if (!allFormData.program || !allFormData.program.section_id) {
       errors.program = { ...errors.program, section_id: true };
     }
@@ -50,9 +54,6 @@ const FormButtonSection = ({
     }
     if (!allFormData.program || !allFormData.program.class_id) {
       errors.program = { ...errors.program, class_id: true };
-    }
-    if (!allFormData.program || !allFormData.program.major_id) {
-      errors.program = { ...errors.program, major_id: true };
     }
 
     // Validasi Facilities Section
@@ -89,7 +90,7 @@ const FormButtonSection = ({
     }
 
     // Debug: log errors
-    console.log('Validation Errors:', errors);
+    console.log("Validation Errors:", errors);
 
     // Cek jika ada error
     const hasErrors = Object.values(errors).some(
@@ -124,13 +125,13 @@ const FormButtonSection = ({
         <div className={styles.noteLabel}>Note: </div>
         <div className={styles.noteText}>
           <span className={styles.noteContent}>
-            Please make sure all the data above are accurate before pressing{' '}
+            Please make sure all the data above are accurate before pressing{" "}
           </span>
           <b>Done</b>
         </div>
         <div className={styles.noteText}>
           <span className={styles.noteContent}>
-            Please keep in mind that this action cannot be{' '}
+            Please keep in mind that this action cannot be{" "}
           </span>
           <b>undone</b>
           <span className={styles.noteContent}>.</span>
@@ -140,14 +141,14 @@ const FormButtonSection = ({
         <button
           className={styles.resetButton}
           onClick={handleReset}
-          type='button'
+          type="button"
         >
           Reset
         </button>
         <button
           className={styles.submitButton}
           onClick={handleSubmit}
-          type='button'
+          type="button"
         >
           Submit
         </button>

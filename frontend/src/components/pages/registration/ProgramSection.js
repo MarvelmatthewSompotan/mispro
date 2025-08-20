@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./ProgramSection.module.css";
 import Select from "react-select";
 import { getRegistrationOptions } from "../../../services/api";
 
-const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
+const ProgramSection = ({ onDataChange, sharedData }) => {
   const [sections, setSections] = useState([]);
   const [majors, setMajors] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -15,7 +15,6 @@ const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
   const [selectedProgram, setSelectedProgram] = useState("");
   const [programOther, setProgramOther] = useState("");
 
-  // Fetch data only once when component mounts
   useEffect(() => {
     if (sharedData) {
       setSections(sharedData.sections || []);
@@ -36,161 +35,114 @@ const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
     }
   }, [sharedData]);
 
-  // Apply prefill to local state when provided
-  useEffect(() => {
-    if (!prefill || typeof prefill !== "object") return;
-    if (prefill.section_id !== undefined)
-      setSelectedSection(prefill.section_id || "");
-    if (prefill.major_id !== undefined)
-      setSelectedMajor(prefill.major_id || "");
-    if (prefill.class_id !== undefined)
-      setSelectedClass(prefill.class_id || "");
-    if (prefill.program_id !== undefined)
-      setSelectedProgram(prefill.program_id || "");
-    if (prefill.program_other !== undefined)
-      setProgramOther(prefill.program_other || "");
+  // Mapping section ID ke default grade
+  const getDefaultGradeForSection = (sectionId) => {
+    switch (parseInt(sectionId)) {
+      case 1: // ECP
+        return "N";
+      case 2: // Elementary School
+        return "1";
+      case 3: // Middle School
+        return "7";
+      case 4: // High School
+        return "10";
+      default:
+        return null;
+    }
+  };
 
-    // Notify parent so parent state stays in sync
+  // Auto-select grade berdasarkan section
+  const autoSelectGradeForSection = (sectionId) => {
+    const defaultGrade = getDefaultGradeForSection(sectionId);
+    if (defaultGrade) {
+      const defaultClass = classes.find(
+        (cls) =>
+          cls.section_id === parseInt(sectionId) && cls.grade === defaultGrade
+      );
+      if (defaultClass) {
+        setSelectedClass(defaultClass.class_id);
+        return defaultClass.class_id;
+      }
+    }
+    return null;
+  };
+
+  const handleSectionChange = (opt) => {
+    const value = opt ? opt.value : "";
+    setSelectedSection(value);
+    setSelectedMajor("");
+
+    // Auto-select grade berdasarkan section
+    const autoSelectedClassId = autoSelectGradeForSection(value);
+
     onDataChange({
-      section_id: prefill.section_id || "",
-      major_id: prefill.major_id || "",
-      class_id: prefill.class_id || "",
-      program_id: prefill.program_id || "",
-      program_other: prefill.program_other || "",
+      section_id: value,
+      major_id: "",
+      class_id: autoSelectedClassId || "",
+      program_id: selectedProgram,
+      program_other: programOther,
     });
-  }, [prefill, onDataChange]);
+  };
 
-  // Memoize the data change callback to prevent infinite loops
-  const updateParentData = useCallback(
-    (data) => {
-      onDataChange(data);
-    },
-    [onDataChange]
-  );
+  const handleMajorChange = (opt) => {
+    const value = opt ? opt.value : "";
+    setSelectedMajor(value);
+    onDataChange({
+      section_id: selectedSection,
+      major_id: value,
+      class_id: selectedClass,
+      program_id: selectedProgram,
+      program_other: programOther,
+    });
+  };
 
-  const handleSectionChange = useCallback(
-    (opt) => {
-      const value = opt ? opt.value : "";
-      setSelectedSection(value);
-      setSelectedMajor("");
-      setSelectedClass("");
+  const handleClassChange = (opt) => {
+    const value = opt ? opt.value : "";
+    setSelectedClass(value);
 
-      updateParentData({
-        section_id: value,
-        major_id: "",
-        class_id: "",
-        program_id: selectedProgram,
-        program_other: programOther,
-      });
-    },
-    [selectedProgram, programOther, updateParentData]
-  );
-
-  const handleMajorChange = useCallback(
-    (opt) => {
-      const value = opt ? opt.value : "";
-      setSelectedMajor(value);
-      updateParentData({
-        section_id: selectedSection,
-        major_id: value,
-        class_id: selectedClass,
-        program_id: selectedProgram,
-        program_other: programOther,
-      });
-    },
-    [
-      selectedSection,
-      selectedClass,
-      selectedProgram,
-      programOther,
-      updateParentData,
-    ]
-  );
-
-  const handleClassChange = useCallback(
-    (opt) => {
-      const value = opt ? opt.value : "";
-      setSelectedClass(value);
-
-      // Check if we need to set default major for grades < 9
+    // Auto-select major untuk grade 9+ jika belum dipilih
+    if (value) {
       const selectedClassData = classes.find((c) => c.class_id === value);
       if (selectedClassData) {
         const gradeNum = parseInt(selectedClassData.grade);
-        if (gradeNum < 9 && selectedMajor !== 1) {
-          setSelectedMajor(1); // default ke No Major
-          updateParentData({
+        if (gradeNum >= 9 && !selectedMajor) {
+          // Default ke Social (major_id: 2) untuk grade 9+
+          setSelectedMajor(2);
+          onDataChange({
             section_id: selectedSection,
-            major_id: 1,
+            major_id: 2,
             class_id: value,
             program_id: selectedProgram,
             program_other: programOther,
           });
-          return; // Exit early to avoid double update
+          return;
         }
       }
+    }
 
-      updateParentData({
-        section_id: selectedSection,
-        major_id: selectedMajor,
-        class_id: value,
-        program_id: selectedProgram,
-        program_other: programOther,
-      });
-    },
-    [
-      selectedSection,
-      selectedMajor,
-      selectedProgram,
-      programOther,
-      classes,
-      updateParentData,
-    ]
-  );
+    onDataChange({
+      section_id: selectedSection,
+      major_id: selectedMajor,
+      class_id: value,
+      program_id: selectedProgram,
+      program_other: programOther,
+    });
+  };
 
-  const handleProgramChange = useCallback(
-    (opt) => {
-      const value = opt ? opt.value : "";
-      setSelectedProgram(value);
-      updateParentData({
-        section_id: selectedSection,
-        major_id: selectedMajor,
-        class_id: selectedClass,
-        program_id: value,
-        program_other: value === "Other" ? programOther : "",
-      });
-      if (value !== "Other") {
-        setProgramOther("");
-      }
-    },
-    [
-      selectedSection,
-      selectedMajor,
-      selectedClass,
-      programOther,
-      updateParentData,
-    ]
-  );
-
-  const handleProgramOtherChange = useCallback(
-    (e) => {
-      const value = e.target.value;
-      setProgramOther(value);
-      updateParentData({
-        section_id: selectedSection,
-        major_id: selectedMajor,
-        class_id: selectedClass,
-        program_id: selectedProgram,
-        program_other: value,
-      });
-    },
-    [
-      selectedSection,
-      selectedMajor,
-      selectedClass,
-      selectedProgram,
-      updateParentData,
-    ]
-  );
+  const handleProgramChange = (opt) => {
+    const value = opt ? opt.value : "";
+    setSelectedProgram(value);
+    onDataChange({
+      section_id: selectedSection,
+      major_id: selectedMajor,
+      class_id: selectedClass,
+      program_id: value,
+      program_other: value === "Other" ? programOther : "",
+    });
+    if (value !== "Other") {
+      setProgramOther("");
+    }
+  };
 
   const sectionOptions = sections.map((sec) => ({
     value: sec.section_id,
@@ -202,11 +154,21 @@ const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
     label: prog.name,
   }));
 
-  // Filter kelas berdasarkan section_id saja dan hilangkan duplikat grade
+  // Filter kelas berdasarkan section_id dan major_id
   const gradeOptions = classes
-    .filter((cls) =>
-      selectedSection ? cls.section_id === selectedSection : true
-    )
+    .filter((cls) => {
+      if (!selectedSection) return true;
+
+      // Filter berdasarkan section
+      if (cls.section_id !== parseInt(selectedSection)) return false;
+
+      // Jika ada major yang dipilih, filter berdasarkan major juga
+      if (selectedMajor) {
+        return cls.major_id === parseInt(selectedMajor);
+      }
+
+      return true;
+    })
     .reduce((unique, cls) => {
       if (!unique.find((item) => item.label === cls.grade)) {
         unique.push({
@@ -226,8 +188,25 @@ const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
       return parseInt(a.label) - parseInt(b.label);
     });
 
+  // Filter major berdasarkan grade yang dipilih
   const majorSelectOptions = majors
-    .filter((mjr) => [2, 3].includes(mjr.major_id))
+    .filter((mjr) => {
+      if (!selectedClass) return true;
+
+      const selectedClassData = classes.find(
+        (c) => c.class_id === selectedClass
+      );
+      if (!selectedClassData) return true;
+
+      const gradeNum = parseInt(selectedClassData.grade);
+
+      // Major hanya untuk grade 9+
+      if (gradeNum >= 9) {
+        return [2, 3].includes(mjr.major_id); // SOCIAL dan SCIENCE
+      }
+
+      return false;
+    })
     .map((mjr) => ({
       value: mjr.major_id,
       label: mjr.name,
@@ -324,7 +303,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
               />
             </>
           )}
+        </div>
 
+        <div className={styles.programSection}>
           <div className={styles.sectionTitle}>
             <div className={styles.sectionTitleText}>Program</div>
           </div>
@@ -365,7 +346,17 @@ const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
                       className={styles.valueRegular}
                       type="text"
                       value={programOther}
-                      onChange={handleProgramOtherChange}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setProgramOther(value);
+                        onDataChange({
+                          section_id: selectedSection,
+                          major_id: selectedMajor,
+                          class_id: selectedClass,
+                          program_id: selectedProgram,
+                          program_other: value,
+                        });
+                      }}
                       placeholder="Enter other program"
                       style={{ marginLeft: 12, padding: 0 }}
                     />
