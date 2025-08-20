@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./ProgramSection.module.css";
 import Select from "react-select";
-import { getRegistrationOptions } from "../../../services/api";
 
-const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
+const ProgramSection = ({ onDataChange, sharedData }) => {
   const [sections, setSections] = useState([]);
   const [majors, setMajors] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -15,50 +14,16 @@ const ProgramSection = ({ onDataChange, sharedData, prefill = {} }) => {
   const [selectedProgram, setSelectedProgram] = useState("");
   const [programOther, setProgramOther] = useState("");
 
-  // Fetch data only once when component mounts
+  // Fetch dropdown data
   useEffect(() => {
     if (sharedData) {
+      console.log("ProgramSection received sharedData:", sharedData); // Debug log
       setSections(sharedData.sections || []);
       setMajors(sharedData.majors || []);
       setClasses(sharedData.classes || []);
       setPrograms(sharedData.programs || []);
-    } else {
-      getRegistrationOptions()
-        .then((data) => {
-          setSections(data.sections || []);
-          setMajors(data.majors || []);
-          setClasses(data.classes || []);
-          setPrograms(data.programs || []);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch program options:", err);
-        });
     }
   }, [sharedData]);
-
-  // Apply prefill to local state when provided
-  useEffect(() => {
-    if (!prefill || typeof prefill !== "object") return;
-    if (prefill.section_id !== undefined)
-      setSelectedSection(prefill.section_id || "");
-    if (prefill.major_id !== undefined)
-      setSelectedMajor(prefill.major_id || "");
-    if (prefill.class_id !== undefined)
-      setSelectedClass(prefill.class_id || "");
-    if (prefill.program_id !== undefined)
-      setSelectedProgram(prefill.program_id || "");
-    if (prefill.program_other !== undefined)
-      setProgramOther(prefill.program_other || "");
-
-    // Notify parent so parent state stays in sync
-    onDataChange({
-      section_id: prefill.section_id || "",
-      major_id: prefill.major_id || "",
-      class_id: prefill.class_id || "",
-      program_id: prefill.program_id || "",
-      program_other: prefill.program_other || "",
-    });
-  }, [prefill, onDataChange]);
 
   // Memoize the data change callback to prevent infinite loops
   const updateParentData = useCallback(

@@ -3,7 +3,6 @@ import Select from "react-select";
 import {
   searchStudent,
   getStudentLatestApplication,
-  getRegistrationOptions,
 } from "../../../services/api";
 import styles from "./StudentStatusSection.module.css";
 
@@ -31,16 +30,8 @@ const StudentStatusSection = ({
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
+      console.log("StudentStatusSection received sharedData:", sharedData); // Debug log
       setStatusOptions(sharedData.student_status || []);
-    } else {
-      // Fallback to individual API call if shared data not available
-      getRegistrationOptions()
-        .then((data) => {
-          setStatusOptions(data.student_status || []);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch student status options:", err);
-        });
     }
   }, [sharedData]);
 

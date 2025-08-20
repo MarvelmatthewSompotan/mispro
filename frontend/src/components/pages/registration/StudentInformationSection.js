@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
-import { getRegistrationOptions } from "../../../services/api";
 
 const genderOptions = ["MALE", "FEMALE"];
 const citizenshipOptions = ["Indonesia", "Non Indonesia"];
@@ -11,7 +10,7 @@ const StudentInformationSection = ({
   onValidationChange,
   errors,
   forceError,
-  prefill = {},
+  sharedData,
 }) => {
   const [academicStatusOptions, setAcademicStatusOptions] = useState([]);
   const [academicStatus, setAcademicStatus] = useState("");
@@ -48,81 +47,10 @@ const StudentInformationSection = ({
 
   // Fetch dropdown data
   useEffect(() => {
-    getRegistrationOptions()
-      .then((data) => {
-        setAcademicStatusOptions(data.academic_status || []);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch academic status options:", err);
-      });
-  }, []);
-
-  // Hydrate local state from prefill when provided
-  useEffect(() => {
-    if (!prefill || typeof prefill !== "object") return;
-    setFirstName(prefill.first_name || "");
-    setMiddleName(prefill.middle_name || "");
-    setLastName(prefill.last_name || "");
-    setNickname(prefill.nickname || "");
-    setNisn(prefill.nisn || "");
-    setNik(prefill.nik || "");
-    setKitas(prefill.kitas || "");
-    setForeignCountry(prefill.country || "");
-    setGender(prefill.gender || "");
-    setAge(prefill.age || "");
-    setRank(prefill.family_rank || "");
-    setCitizenship(prefill.citizenship || "");
-    setReligion(prefill.religion || "");
-    setPlaceOfBirth(prefill.place_of_birth || "");
-    setDateOfBirth(prefill.date_of_birth || "");
-    setEmail(prefill.email || "");
-    setPreviousSchool(prefill.previous_school || "");
-    setPhone(prefill.phone_number || "");
-    setStreet(prefill.street || "");
-    setRt(prefill.rt || "");
-    setRw(prefill.rw || "");
-    setVillage(prefill.village || "");
-    setDistrict(prefill.district || "");
-    setCity(prefill.city_regency || "");
-    setProvince(prefill.province || "");
-    setOtherAddress(prefill.other || "");
-
-    // Academic status
-    setAcademicStatus(prefill.academic_status || "");
-    setAcademicStatusOther(prefill.academic_status_other || "");
-
-    // Notify parent with current values so formSections syncs as well
-    onDataChange({
-      first_name: prefill.first_name || "",
-      middle_name: prefill.middle_name || "",
-      last_name: prefill.last_name || "",
-      nickname: prefill.nickname || "",
-      nisn: prefill.nisn || "",
-      nik: prefill.nik || "",
-      kitas: prefill.kitas || "",
-      country: prefill.country || "",
-      gender: prefill.gender || "",
-      age: prefill.age || "",
-      family_rank: prefill.family_rank || "",
-      citizenship: prefill.citizenship || "",
-      religion: prefill.religion || "",
-      place_of_birth: prefill.place_of_birth || "",
-      date_of_birth: prefill.date_of_birth || "",
-      email: prefill.email || "",
-      previous_school: prefill.previous_school || "",
-      phone_number: prefill.phone_number || "",
-      street: prefill.street || "",
-      rt: prefill.rt || "",
-      rw: prefill.rw || "",
-      village: prefill.village || "",
-      district: prefill.district || "",
-      city_regency: prefill.city_regency || "",
-      province: prefill.province || "",
-      other: prefill.other || "",
-      academic_status: prefill.academic_status || "",
-      academic_status_other: prefill.academic_status_other || "",
-    });
-  }, [prefill, onDataChange]);
+    if (sharedData) {
+      setAcademicStatusOptions(sharedData.academic_status || []);
+    }
+  }, [sharedData]);
 
   const handleAcademicStatus = (value) => {
     setAcademicStatus(value);

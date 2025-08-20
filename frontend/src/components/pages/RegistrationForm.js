@@ -123,33 +123,29 @@ const RegistrationForm = () => {
   const handleSelectOldStudent = (latestData) => {
     // Prefill semua form sections dengan data dari backend
     if (latestData) {
-      // Support both camelCase and snake_case keys
-      const studentInfoData = latestData.studentInfo || latestData.student_info;
-      if (studentInfoData) {
-        handleSectionDataChange("studentInfo", studentInfoData);
+      // Prefill Student Information
+      if (latestData.studentInfo) {
+        handleSectionDataChange("studentInfo", latestData.studentInfo);
       }
 
-      const programData = latestData.program || latestData.program_info;
-      if (programData) {
-        handleSectionDataChange("program", programData);
+      // Prefill Program
+      if (latestData.program) {
+        handleSectionDataChange("program", latestData.program);
       }
 
-      const facilitiesData =
-        latestData.facilities || latestData.facilities_info;
-      if (facilitiesData) {
-        handleSectionDataChange("facilities", facilitiesData);
+      // Prefill Facilities
+      if (latestData.facilities) {
+        handleSectionDataChange("facilities", latestData.facilities);
       }
 
-      const parentGuardianData =
-        latestData.parentGuardian || latestData.parent_guardian;
-      if (parentGuardianData) {
-        handleSectionDataChange("parentGuardian", parentGuardianData);
+      // Prefill Parent Guardian
+      if (latestData.parentGuardian) {
+        handleSectionDataChange("parentGuardian", latestData.parentGuardian);
       }
 
-      const termOfPaymentData =
-        latestData.termOfPayment || latestData.term_of_payment;
-      if (termOfPaymentData) {
-        handleSectionDataChange("termOfPayment", termOfPaymentData);
+      // Prefill Term of Payment
+      if (latestData.termOfPayment) {
+        handleSectionDataChange("termOfPayment", latestData.termOfPayment);
       }
     }
 
@@ -235,9 +231,7 @@ const RegistrationForm = () => {
           sharedData={sharedData}
         />
         <StudentInformationSection
-          prefill={
-            prefilledData.student_info || prefilledData.studentInfo || {}
-          }
+          prefill={prefilledData.student_info || {}}
           onValidationChange={handleStudentInfoValidationChange}
           onDataChange={handleStudentInfoDataChange}
           errors={errors.studentInfo || {}}
@@ -245,28 +239,18 @@ const RegistrationForm = () => {
           sharedData={sharedData}
         />
         <ProgramSection
-          prefill={prefilledData.program || prefilledData.program_info || {}}
           onDataChange={handleProgramDataChange}
           sharedData={sharedData}
         />
         <FacilitiesSection
-          prefill={
-            prefilledData.facilities || prefilledData.facilities_info || {}
-          }
           onDataChange={handleFacilitiesDataChange}
           sharedData={sharedData}
         />
         <ParentGuardianSection
-          prefill={
-            prefilledData.parentGuardian || prefilledData.parent_guardian || {}
-          }
           onDataChange={handleParentGuardianDataChange}
           // ParentGuardianSection tidak memerlukan sharedData
         />
         <TermOfPaymentSection
-          prefill={
-            prefilledData.termOfPayment || prefilledData.term_of_payment || {}
-          }
           onDataChange={handleTermOfPaymentDataChange}
           sharedData={sharedData}
         />
