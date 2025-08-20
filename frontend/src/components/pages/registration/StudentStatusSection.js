@@ -20,12 +20,17 @@ const StudentStatusSection = ({
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
-      setStatusOptions(sharedData.student_status || []);
+      const opts = sharedData.student_status || [];
+      // Ensure order: New, Transferee, Old
+      const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+      setStatusOptions(ordered);
     } else {
       // Fallback to individual API call if shared data not available
       getRegistrationOptions()
         .then((data) => {
-          setStatusOptions(data.student_status || []);
+          const opts = data.student_status || [];
+          const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+          setStatusOptions(ordered);
         })
         .catch((err) => {
           console.error('Failed to fetch student status options:', err);
@@ -164,7 +169,7 @@ const StudentStatusSection = ({
                 <span className={styles.statusLabel}>{option}</span>
               </label>
 
-              {/* Show search field only for Old student status */}
+              {/* Show dropdown-like field (input with datalist) only for Old student status */}
               {option === 'Old' && status === 'Old' && (
                 <div className={styles.studentIdField}>
                   <label htmlFor='studentSearch' className={styles.statusLabel}>
@@ -186,23 +191,32 @@ const StudentStatusSection = ({
                       fontSize: 16,
                       padding: 3,
                       margin: 0,
+                      width: 'auto',
+                      minWidth: 240,
+                      maxWidth: '100%'
                     }}
                   />
                   {isSearching && (
                     <div className={styles.searching}>Searching...</div>
                   )}
                   {searchResults.length > 0 && (
-                    <ul className={styles.searchDropdown}>
+                    <select
+                      className={styles.searchResultsSelect}
+                      value=""
+                      onChange={(e) => {
+                        const picked = searchResults.find((s) => s.student_id === e.target.value);
+                        if (picked) handleSelectStudent(picked);
+                      }}
+                    >
+                      <option value="" disabled>
+                        Select a student
+                      </option>
                       {searchResults.map((student) => (
-                        <li
-                          key={student.student_id}
-                          onClick={() => handleSelectStudent(student)}
-                          className={styles.searchItem}
-                        >
-                          {student.full_name} ({student.student_id})
-                        </li>
+                        <option key={student.student_id} value={student.student_id}>
+                          {`${student.full_name} (${student.student_id})`}
+                        </option>
                       ))}
-                    </ul>
+                    </select>
                   )}
                 </div>
               )}

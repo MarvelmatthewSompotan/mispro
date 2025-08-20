@@ -61,7 +61,7 @@
   gap: 10px;
 }
 .studentIdValue {
-  flex: 1;
+  flex: 0 1 auto;
   position: relative;
   line-height: 100%;
   font-family: "Poppins", Arial, sans-serif;
@@ -69,6 +69,8 @@
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
   transition: all 0.2s ease;
+  white-space: nowrap;
+  width: auto;
 }
 
 .studentIdValue:focus,
@@ -85,7 +87,7 @@
 }
 .studentIdField {
   align-self: stretch;
-  width: 400px;
+  width: auto;
   border-bottom: 1px solid #000;
   box-sizing: border-box;
   display: flex;
@@ -94,6 +96,19 @@
   justify-content: flex-start;
   padding: 12px;
   gap: 10px;
+}
+
+/* Dropdown results select that grows horizontally based on content */
+.searchResultsSelect {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  background: #fff;
+  width: auto;
+  max-width: 100%;
 }
 .optionOld {
   display: flex;

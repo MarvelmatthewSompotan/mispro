@@ -24,6 +24,7 @@ const RegistrationForm = () => {
     parentGuardian: {},
     termOfPayment: {},
   });
+  const [prefillTrigger, setPrefillTrigger] = useState(0);
 
   // Add shared data state to avoid multiple API calls
   const [sharedData, setSharedData] = useState(null);
@@ -168,6 +169,8 @@ const RegistrationForm = () => {
     }
 
     setPrefilledData((prev) => ({ ...prev, ...latestData }));
+    // Signal children to apply prefill just once
+    setPrefillTrigger((prev) => prev + 1);
   };
 
   // State untuk validasi
@@ -234,11 +237,6 @@ const RegistrationForm = () => {
             <p>
               <strong>Date:</strong> {formData.date}
             </p>
-            {draftId && (
-              <p>
-                <strong>Draft ID:</strong> {draftId}
-              </p>
-            )}
           </div>
         )}
 
@@ -268,6 +266,7 @@ const RegistrationForm = () => {
         <ParentGuardianSection
           prefill={formSections.parentGuardian || {}}
           onDataChange={handleParentGuardianDataChange}
+          prefillTrigger={prefillTrigger}
           // ParentGuardianSection tidak memerlukan sharedData
         />
         <TermOfPaymentSection
