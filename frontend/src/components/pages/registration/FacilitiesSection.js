@@ -156,7 +156,8 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
 
   useEffect(() => {
     if (pickupInputRef.current) {
-      if (selectedPickupPoint && selectedPickupPoint.trim() !== '') {
+      // Fix: Add proper type checking before calling trim()
+      if (selectedPickupPoint && typeof selectedPickupPoint === 'string' && selectedPickupPoint.trim() !== '') {
         pickupInputRef.current.classList.add(styles.hasValue);
       } else {
         pickupInputRef.current.classList.remove(styles.hasValue);

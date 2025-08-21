@@ -53,29 +53,41 @@ const RegistrationForm = () => {
       return;
     }
 
+    console.log(`Updating ${sectionName}:`, data); // Debug log
+
     setFormSections((prev) => {
       const currentSection = prev[sectionName] || {};
       const newSection = { ...currentSection, ...data };
+      
+      console.log(`Previous ${sectionName}:`, currentSection); // Debug log
+      console.log(`New ${sectionName}:`, newSection); // Debug log
+      
       if (JSON.stringify(currentSection) === JSON.stringify(newSection)) {
         return prev;
       }
 
-      return {
+      const updated = {
         ...prev,
         [sectionName]: newSection,
       };
+      
+      console.log('Updated formSections:', updated); // Debug log
+      return updated;
     });
   }, []);
 
   // Buat semua callback functions di level atas
   const handleStudentStatusDataChange = useCallback(
     (data) => {
+      console.log('StudentStatusDataChange received:', data); // Debug log
+      
       // Pastikan data lengkap sebelum dikirim
       const completeData = {
         student_status: data.student_status || 'New',
         input_name: data.input_name || '',
       };
 
+      console.log('Complete studentStatus data:', completeData); // Debug log
       handleSectionDataChange('studentStatus', completeData);
     },
     [handleSectionDataChange]
@@ -166,6 +178,18 @@ const RegistrationForm = () => {
         console.log('Prefilling termOfPayment:', latestData.termOfPayment);
         handleSectionDataChange('termOfPayment', latestData.termOfPayment);
       }
+    }
+
+    // IMPORTANT: Update studentStatus dengan input_name dari student yang dipilih
+    // Kita perlu mendapatkan student_id dari data yang diterima
+    if (latestData && latestData.studentInfo && latestData.studentInfo.student_id) {
+      const studentId = latestData.studentInfo.student_id;
+      console.log('Updating studentStatus with student_id:', studentId);
+      
+      handleSectionDataChange('studentStatus', {
+        student_status: 'Old',
+        input_name: studentId
+      });
     }
 
     setPrefilledData((prev) => ({ ...prev, ...latestData }));
