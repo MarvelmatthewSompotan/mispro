@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./FacilitiesSection.module.css";
 import checkBoxIcon from "../../../assets/CheckBox.png";
-import Select from "react-select";
+import { getRegistrationOptions } from "../../../services/api";
 
 const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
   const [transportations, setTransportations] = useState([]);
@@ -15,13 +15,24 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
   const [selectedResidence, setSelectedResidence] = useState("");
   const [residencePolicy, setResidencePolicy] = useState(false);
 
-  // Fetch dropdown data
+  // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
-      console.log("FacilitiesSection received sharedData:", sharedData); // Debug log
       setTransportations(sharedData.transportations || []);
       setPickupPoints(sharedData.pickup_points || []);
       setResidenceHalls(sharedData.residence_halls || []);
+    } else {
+      // Fallback to individual API call if shared data not available
+      getRegistrationOptions()
+        .then((data) => {
+          console.log("Facilities data received:", data);
+          setTransportations(data.transportations || []);
+          setPickupPoints(data.pickup_points || []);
+          setResidenceHalls(data.residence_halls || []);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch facilities options:", err);
+        });
     }
   }, [sharedData]);
 

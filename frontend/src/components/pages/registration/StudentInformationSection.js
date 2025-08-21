@@ -12,7 +12,6 @@ const StudentInformationSection = ({
   onValidationChange,
   errors,
   forceError,
-  sharedData,
 }) => {
   const [academicStatusOptions, setAcademicStatusOptions] = useState([]);
   const [academicStatus, setAcademicStatus] = useState("");

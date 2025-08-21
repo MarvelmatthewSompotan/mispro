@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import Select from "react-select";
 import {
   searchStudent,
   getStudentLatestApplication,
+  getRegistrationOptions,
 } from "../../../services/api";
 import styles from "./StudentStatusSection.module.css";
 
@@ -13,46 +13,39 @@ const StudentStatusSection = ({
 }) => {
   const [status, setStatus] = useState("");
   const [statusOptions, setStatusOptions] = useState([]);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [studentOptions, setStudentOptions] = useState([]);
-  const [isLoadingStudents, setIsLoadingStudents] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Search effect
-  useEffect(() => {
-    if (searchTerm.length > 2) {
-      handleStudentSearch(searchTerm);
-    } else {
-      setStudentOptions([]);
-    }
-  }, [searchTerm]);
+  const [studentSearch, setStudentSearch] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
       const opts = sharedData.student_status || [];
       // Ensure order: New, Transferee, Old
-      const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+      const ordered = ["New", "Transferee", "Old"].filter((o) =>
+        opts.includes(o)
+      );
       setStatusOptions(ordered);
     } else {
       // Fallback to individual API call if shared data not available
       getRegistrationOptions()
         .then((data) => {
           const opts = data.student_status || [];
-          const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+          const ordered = ["New", "Transferee", "Old"].filter((o) =>
+            opts.includes(o)
+          );
           setStatusOptions(ordered);
         })
         .catch((err) => {
-          console.error('Failed to fetch student status options:', err);
+          console.error("Failed to fetch student status options:", err);
         });
     }
   }, [sharedData]);
 
   const handleStatusChange = (option) => {
     setStatus(option);
-    setSelectedStudent(null);
-    setStudentOptions([]);
-    setSearchTerm(""); // Clear search term when status changes
+    setStudentSearch("");
+    setSearchResults([]);
 
     // Kirim data ke parent component dengan input_name
     if (onDataChange) {
@@ -63,74 +56,37 @@ const StudentStatusSection = ({
     }
   };
 
-  const handleStudentSearch = async (term) => {
-    if (term.length > 2) {
-      setIsLoadingStudents(true);
+  const handleSearchChange = async (value) => {
+    setStudentSearch(value);
+
+    // Update input_name setiap kali user mengetik
+    if (onDataChange) {
+      onDataChange({
+        student_status: "Old",
+        input_name: "", // Update input_name dengan value yang diketik
+      });
+    }
+
+    if (value.length > 2) {
+      setIsSearching(true);
       try {
-        const response = await searchStudent(term);
-
-        // Ensure we have a valid array of students
-        let students = [];
-        if (Array.isArray(response)) {
-          students = response;
-        } else if (response && Array.isArray(response.data)) {
-          students = response.data;
-        } else if (
-          response &&
-          response.students &&
-          Array.isArray(response.students)
-        ) {
-          students = response.students;
-        }
-
-        // Create options with strict validation
-        const options = students
-          .filter((student) => {
-            // Ensure student is a valid object
-            return (
-              student &&
-              typeof student === "object" &&
-              !(student instanceof Promise) &&
-              (student.student_id || student.id) &&
-              (student.full_name || student.name)
-            );
-          })
-          .map((student) => {
-            const id = student.student_id || student.id || "";
-            const name = student.full_name || student.name || "Unknown";
-            return {
-              value: id,
-              label: `${name} (${id})`,
-              student: student,
-            };
-          });
-
-        setStudentOptions(options);
+        const results = await searchStudent(value);
+        setSearchResults(results);
       } catch (err) {
         console.error("Error searching student:", err);
-        setStudentOptions([]);
+        setSearchResults([]);
       } finally {
-        setIsLoadingStudents(false);
+        setIsSearching(false);
       }
     } else {
-      setStudentOptions([]);
+      setSearchResults([]);
     }
   };
 
-  const handleStudentSelect = async (option) => {
-    if (!option) {
-      setSelectedStudent(null);
-      if (onDataChange) {
-        onDataChange({
-          student_status: "Old",
-          input_name: "",
-        });
-      }
-      return;
-    }
-
-    setSelectedStudent(option);
-    setIsLoadingStudents(true);
+  const handleSelectStudent = async (student) => {
+    setStudentSearch(student.full_name || student.student_id);
+    setSearchResults([]);
+    setIsSearching(true);
 
     try {
       const latestData = await getStudentLatestApplication(student.student_id);
@@ -170,7 +126,7 @@ const StudentStatusSection = ({
         });
       }
     } finally {
-      setIsLoadingStudents(false);
+      setIsSearching(false);
     }
   };
 
@@ -184,26 +140,26 @@ const StudentStatusSection = ({
           {statusOptions.map((option) => (
             <div
               key={option}
-              className={option === 'Old' ? styles.optionOld : styles.optionNew}
+              className={option === "Old" ? styles.optionOld : styles.optionNew}
             >
               <label
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                   gap: 8,
-                  cursor: 'pointer',
-                  position: 'relative',
+                  cursor: "pointer",
+                  position: "relative",
                 }}
               >
                 <input
-                  type='radio'
-                  name='studentStatus'
+                  type="radio"
+                  name="studentStatus"
                   value={option}
                   checked={status === option}
                   onChange={() => handleStatusChange(option)}
                   style={{
                     opacity: 0,
-                    position: 'absolute',
+                    position: "absolute",
                     width: 0,
                     height: 0,
                   }}
@@ -218,29 +174,30 @@ const StudentStatusSection = ({
               </label>
 
               {/* Show dropdown-like field (input with datalist) only for Old student status */}
-              {option === 'Old' && status === 'Old' && (
+              {option === "Old" && status === "Old" && (
                 <div className={styles.studentIdField}>
-                  <label htmlFor='studentSearch' className={styles.statusLabel}>
+                  <label htmlFor="studentSearch" className={styles.statusLabel}>
                     Search Student
                   </label>
                   <input
-                    type="radio"
-                    name="studentStatus"
-                    value="Old"
-                    checked={status === "Old"}
-                    onChange={() => handleStatusChange("Old")}
+                    id="studentSearch"
+                    className={styles.studentIdValue}
+                    type="text"
+                    value={studentSearch}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    placeholder="Enter Name or ID"
                     style={{
-                      border: 'none',
-                      outline: 'none',
-                      background: 'transparent',
-                      fontFamily: 'Poppins, Arial, sans-serif',
-                      fontWeight: 'bold',
+                      border: "none",
+                      outline: "none",
+                      background: "transparent",
+                      fontFamily: "Poppins, Arial, sans-serif",
+                      fontWeight: "bold",
                       fontSize: 16,
                       padding: 3,
                       margin: 0,
-                      width: 'auto',
+                      width: "auto",
                       minWidth: 240,
-                      maxWidth: '100%'
+                      maxWidth: "100%",
                     }}
                   />
                   {isSearching && (
@@ -251,7 +208,9 @@ const StudentStatusSection = ({
                       className={styles.searchResultsSelect}
                       value=""
                       onChange={(e) => {
-                        const picked = searchResults.find((s) => s.student_id === e.target.value);
+                        const picked = searchResults.find(
+                          (s) => s.student_id === e.target.value
+                        );
                         if (picked) handleSelectStudent(picked);
                       }}
                     >
@@ -259,7 +218,10 @@ const StudentStatusSection = ({
                         Select a student
                       </option>
                       {searchResults.map((student) => (
-                        <option key={student.student_id} value={student.student_id}>
+                        <option
+                          key={student.student_id}
+                          value={student.student_id}
+                        >
                           {`${student.full_name} (${student.student_id})`}
                         </option>
                       ))}
@@ -268,7 +230,7 @@ const StudentStatusSection = ({
                 </div>
               )}
             </div>
-          )}
+          ))}
         </div>
 
         <div className={styles.noteSection}>

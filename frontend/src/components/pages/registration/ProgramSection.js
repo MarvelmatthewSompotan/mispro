@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import styles from './ProgramSection.module.css';
-import Select from 'react-select';
-import { getRegistrationOptions } from '../../../services/api';
+import React, { useState, useEffect, useRef } from "react";
+import styles from "./ProgramSection.module.css";
+import Select from "react-select";
+import { getRegistrationOptions } from "../../../services/api";
 
 const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
   const [sections, setSections] = useState([]);
@@ -9,11 +9,11 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
   const [classes, setClasses] = useState([]);
   const [programs, setPrograms] = useState([]);
 
-  const [selectedSection, setSelectedSection] = useState('');
-  const [selectedMajor, setSelectedMajor] = useState('');
-  const [selectedClass, setSelectedClass] = useState('');
-  const [selectedProgram, setSelectedProgram] = useState('');
-  const [programOther, setProgramOther] = useState('');
+  const [selectedSection, setSelectedSection] = useState("");
+  const [selectedMajor, setSelectedMajor] = useState("");
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState("");
+  const [programOther, setProgramOther] = useState("");
 
   // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
   const isInitialPrefill = useRef(true);
@@ -21,11 +21,21 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
 
   useEffect(() => {
     if (sharedData) {
-      console.log("ProgramSection received sharedData:", sharedData); // Debug log
       setSections(sharedData.sections || []);
       setMajors(sharedData.majors || []);
       setClasses(sharedData.classes || []);
       setPrograms(sharedData.programs || []);
+    } else {
+      getRegistrationOptions()
+        .then((data) => {
+          setSections(data.sections || []);
+          setMajors(data.majors || []);
+          setClasses(data.classes || []);
+          setPrograms(data.programs || []);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch program options:", err);
+        });
     }
   }, [sharedData]);
 
@@ -34,120 +44,90 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
     if (prefill && Object.keys(prefill).length > 0) {
       // Jika ini prefill pertama kali atau prefill berubah signifikan
       if (isInitialPrefill.current || !hasInitialized.current) {
-        console.log('Initial prefilling ProgramSection with:', prefill);
+        console.log("Initial prefilling ProgramSection with:", prefill);
 
         if (prefill.section_id) setSelectedSection(prefill.section_id);
         if (prefill.major_id) setSelectedMajor(prefill.major_id);
         if (prefill.class_id) setSelectedClass(prefill.class_id);
         if (prefill.program_id) setSelectedProgram(prefill.program_id);
         if (prefill.program_other) setProgramOther(prefill.program_other);
-        
+
         hasInitialized.current = true;
         isInitialPrefill.current = false;
       }
     } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
       // Jika prefill menjadi empty object (reset form), reset semua field
-      console.log('Resetting ProgramSection form');
-      setSelectedSection('');
-      setSelectedMajor('');
-      setSelectedClass('');
-      setSelectedProgram('');
-      setProgramOther('');
-      
+      console.log("Resetting ProgramSection form");
+      setSelectedSection("");
+      setSelectedMajor("");
+      setSelectedClass("");
+      setSelectedProgram("");
+      setProgramOther("");
+
       hasInitialized.current = false;
     }
   }, [prefill]);
 
   const handleSectionChange = (opt) => {
-    const value = opt ? opt.value : '';
+    const value = opt ? opt.value : "";
     setSelectedSection(value);
-    setSelectedMajor('');
-    setSelectedClass('');
+    setSelectedMajor("");
+    setSelectedClass("");
 
-      updateParentData({
-        section_id: value,
-        major_id: "",
-        class_id: "",
-        program_id: selectedProgram,
-        program_other: programOther,
-      });
-    },
-    [selectedProgram, programOther, updateParentData]
-  );
+    onDataChange({
+      section_id: value,
+      major_id: "",
+      class_id: "",
+      program_id: selectedProgram,
+      program_other: programOther,
+    });
+  };
 
-  const handleMajorChange = useCallback(
-    (opt) => {
-      const value = opt ? opt.value : "";
-      setSelectedMajor(value);
-      updateParentData({
-        section_id: selectedSection,
-        major_id: value,
-        class_id: selectedClass,
-        program_id: selectedProgram,
-        program_other: programOther,
-      });
-    },
-    [
-      selectedSection,
-      selectedClass,
-      selectedProgram,
-      programOther,
-      updateParentData,
-    ]
-  );
+  const handleMajorChange = (opt) => {
+    const value = opt ? opt.value : "";
+    setSelectedMajor(value);
+    onDataChange({
+      section_id: selectedSection,
+      major_id: value,
+      class_id: selectedClass,
+      program_id: selectedProgram,
+      program_other: programOther,
+    });
+  };
 
-  const handleClassChange = useCallback(
-    (opt) => {
-      const value = opt ? opt.value : "";
-      setSelectedClass(value);
+  const handleClassChange = (opt) => {
+    const value = opt ? opt.value : "";
+    setSelectedClass(value);
 
-      // Check if we need to set default major for grades < 9
-      const selectedClassData = classes.find((c) => c.class_id === value);
-      if (selectedClassData) {
-        const gradeNum = parseInt(selectedClassData.grade);
-        if (gradeNum < 9 && selectedMajor !== 1) {
-          setSelectedMajor(1); // default ke No Major
-          updateParentData({
-            section_id: selectedSection,
-            major_id: 1,
-            class_id: value,
-            program_id: selectedProgram,
-            program_other: programOther,
-          });
-          return; // Exit early to avoid double update
-        }
+    const selectedClassData = classes.find((c) => c.class_id === value);
+    if (selectedClassData) {
+      const gradeNum = parseInt(selectedClassData.grade);
+      if (gradeNum < 9) {
+        setSelectedMajor(1); // default ke No Major
       }
+    }
 
-      updateParentData({
-        section_id: selectedSection,
-        major_id: selectedMajor,
-        class_id: value,
-        program_id: selectedProgram,
-        program_other: programOther,
-      });
-    },
-    [
-      selectedSection,
-      selectedMajor,
-      selectedProgram,
-      programOther,
-      classes,
-      updateParentData,
-    ]
-  );
+    onDataChange({
+      section_id: selectedSection,
+      major_id: selectedMajor,
+      class_id: value,
+      program_id: selectedProgram,
+      program_other: programOther,
+    });
+  };
 
   const handleProgramChange = (opt) => {
-    const value = opt ? opt.value : '';
+    const value = opt ? opt.value : "";
     setSelectedProgram(value);
 
-    if (value !== 'Other') {
-      setProgramOther('');
+    if (value !== "Other") {
+      setProgramOther("");
       onDataChange({
         section_id: selectedSection,
         major_id: selectedMajor,
         class_id: selectedClass,
         program_id: value,
-        program_other: '',
+        program_other: "",
       });
     } else {
       setProgramOther(value);
@@ -167,7 +147,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
   }));
 
   const programOptions = programs.map((prog) => ({
-    value: prog.name === 'Other' ? '' : prog.program_id,
+    value: prog.name === "Other" ? "" : prog.program_id,
     label: prog.name,
   }));
 
@@ -293,7 +273,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
               />
             </>
           )}
+        </div>
 
+        <div className={styles.programSection}>
           <div className={styles.sectionTitle}>
             <div className={styles.sectionTitleText}>Program</div>
           </div>
@@ -345,7 +327,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
                           program_other: value,
                         });
                       }}
-                      placeholder='Enter other program'
+                      placeholder="Enter other program"
                       style={{ marginLeft: 12, padding: 0 }}
                     />
                   )}

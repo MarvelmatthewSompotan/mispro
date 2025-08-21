@@ -23,10 +23,20 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
-      console.log("TermOfPaymentSection received sharedData:", sharedData); // Debug log
       setPaymentTypeOptions(sharedData.payment_type || []);
       setPaymentMethodOptions(sharedData.payment_method || []);
       setDiscountTypeOptions(sharedData.discount_types || []);
+    } else {
+      // Fallback to individual API call if shared data not available
+      getRegistrationOptions()
+        .then((data) => {
+          setPaymentTypeOptions(data.payment_type || []);
+          setPaymentMethodOptions(data.payment_method || []);
+          setDiscountTypeOptions(data.discount_types || []);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch payment options:", err);
+        });
     }
   }, [sharedData]);
 
