@@ -30,8 +30,21 @@ const StudentStatusSection = ({
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
-      console.log("StudentStatusSection received sharedData:", sharedData); // Debug log
-      setStatusOptions(sharedData.student_status || []);
+      const opts = sharedData.student_status || [];
+      // Ensure order: New, Transferee, Old
+      const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+      setStatusOptions(ordered);
+    } else {
+      // Fallback to individual API call if shared data not available
+      getRegistrationOptions()
+        .then((data) => {
+          const opts = data.student_status || [];
+          const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+          setStatusOptions(ordered);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch student status options:', err);
+        });
     }
   }, [sharedData]);
 
@@ -168,66 +181,48 @@ const StudentStatusSection = ({
       </div>
       <div className={styles.contentWrapper}>
         <div className={styles.statusOptions}>
-          {statusOptions.map((option) => {
-            // Skip rendering "Old" here, we'll render it after "Transferee"
-            if (option === "Old") return null;
-
-            return (
-              <div
-                key={option}
-                className={
-                  option === "Transferee" ? styles.optionOld : styles.optionNew
-                }
+          {statusOptions.map((option) => (
+            <div
+              key={option}
+              className={option === 'Old' ? styles.optionOld : styles.optionNew}
+            >
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'pointer',
+                  position: 'relative',
+                }}
               >
-                <label
+                <input
+                  type='radio'
+                  name='studentStatus'
+                  value={option}
+                  checked={status === option}
+                  onChange={() => handleStatusChange(option)}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    cursor: "pointer",
-                    position: "relative",
+                    opacity: 0,
+                    position: 'absolute',
+                    width: 0,
+                    height: 0,
                   }}
-                >
-                  <input
-                    type="radio"
-                    name="studentStatus"
-                    value={option}
-                    checked={status === option}
-                    onChange={() => handleStatusChange(option)}
-                    style={{
-                      opacity: 0,
-                      position: "absolute",
-                      width: 0,
-                      height: 0,
-                    }}
-                  />
-                  <span className={styles.radioButton}>
-                    <span className={styles.radioButtonCircle} />
-                    {status === option && (
-                      <span className={styles.radioButtonSelected} />
-                    )}
-                  </span>
-                  <span className={styles.statusLabel}>{option}</span>
-                </label>
-              </div>
-            );
-          })}
+                />
+                <span className={styles.radioButton}>
+                  <span className={styles.radioButtonCircle} />
+                  {status === option && (
+                    <span className={styles.radioButtonSelected} />
+                  )}
+                </span>
+                <span className={styles.statusLabel}>{option}</span>
+              </label>
 
-          {/* Render "Old" option after "Transferee" */}
-          {statusOptions.includes("Old") && (
-            <div key="Old" className={styles.optionOld}>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "16px" }}
-              >
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    cursor: "pointer",
-                    position: "relative",
-                  }}
-                >
+              {/* Show dropdown-like field (input with datalist) only for Old student status */}
+              {option === 'Old' && status === 'Old' && (
+                <div className={styles.studentIdField}>
+                  <label htmlFor='studentSearch' className={styles.statusLabel}>
+                    Search Student
+                  </label>
                   <input
                     type="radio"
                     name="studentStatus"
@@ -235,112 +230,43 @@ const StudentStatusSection = ({
                     checked={status === "Old"}
                     onChange={() => handleStatusChange("Old")}
                     style={{
-                      opacity: 0,
-                      position: "absolute",
-                      width: 0,
-                      height: 0,
+                      border: 'none',
+                      outline: 'none',
+                      background: 'transparent',
+                      fontFamily: 'Poppins, Arial, sans-serif',
+                      fontWeight: 'bold',
+                      fontSize: 16,
+                      padding: 3,
+                      margin: 0,
+                      width: 'auto',
+                      minWidth: 240,
+                      maxWidth: '100%'
                     }}
                   />
-                  <span className={styles.radioButton}>
-                    <span className={styles.radioButtonCircle} />
-                    {status === "Old" && (
-                      <span className={styles.radioButtonSelected} />
-                    )}
-                  </span>
-                  <span className={styles.statusLabel}>Old</span>
-                </label>
-
-                {/* Show dropdown field only for Old student status, aligned horizontally */}
-                {status === "Old" && (
-                  <div
-                    className={styles.studentIdField}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <label className={styles.statusLabel}>Search Student</label>
-                    <div
-                      style={{ position: "relative", display: "inline-block" }}
+                  {isSearching && (
+                    <div className={styles.searching}>Searching...</div>
+                  )}
+                  {searchResults.length > 0 && (
+                    <select
+                      className={styles.searchResultsSelect}
+                      value=""
+                      onChange={(e) => {
+                        const picked = searchResults.find((s) => s.student_id === e.target.value);
+                        if (picked) handleSelectStudent(picked);
+                      }}
                     >
-                      <Select
-                        options={studentOptions}
-                        value={selectedStudent}
-                        onChange={handleStudentSelect}
-                        onInputChange={(newValue) => {
-                          setSearchTerm(newValue);
-                          return newValue; // Important: return the value
-                        }}
-                        placeholder="Enter Name or ID"
-                        isLoading={isLoadingStudents}
-                        isClearable
-                        isSearchable
-                        noOptionsMessage={() => "No students found"}
-                        loadingMessage={() => "Searching..."}
-                        filterOption={() => true} // Disable built-in filtering since we're doing custom search
-                        menuPlacement="bottom"
-                        styles={{
-                          control: (base) => ({
-                            ...base,
-                            fontWeight: selectedStudent ? "bold" : "400",
-                            color: selectedStudent
-                              ? "#000"
-                              : "rgba(128,128,128,0.6)",
-                            border: "none",
-                            boxShadow: "none",
-                            borderRadius: 0,
-                            borderBottom: "none",
-                            background: "transparent",
-                            fontFamily: "Poppins, Arial, sans-serif",
-                            fontSize: 16,
-                            padding: 3,
-                            margin: 0,
-                            minWidth: "200px", // Minimum width
-                          }),
-                          singleValue: (base) => ({
-                            ...base,
-                            fontWeight: selectedStudent ? "bold" : "400",
-                            color: selectedStudent
-                              ? "#000"
-                              : "rgba(128,128,128,0.6)",
-                            fontFamily: "Poppins, Arial, sans-serif",
-                            fontSize: 16,
-                          }),
-                          placeholder: (base) => ({
-                            ...base,
-                            color: "rgba(128,128,128,0.6)",
-                            fontFamily: "Poppins, Arial, sans-serif",
-                            fontSize: 16,
-                          }),
-                          input: (base) => ({
-                            ...base,
-                            fontFamily: "Poppins, Arial, sans-serif",
-                            fontSize: 16,
-                          }),
-                          menu: (base) => ({
-                            ...base,
-                            width: "auto", // Auto width based on content
-                            minWidth: "100%", // At least as wide as the control
-                          }),
-                          option: (base, state) => ({
-                            ...base,
-                            backgroundColor: state.isSelected
-                              ? "#007bff"
-                              : state.isFocused
-                              ? "#f8f9fa"
-                              : "white",
-                            color: state.isSelected ? "white" : "black",
-                            fontFamily: "Poppins, Arial, sans-serif",
-                            fontSize: 14,
-                            whiteSpace: "nowrap", // Prevent text wrapping
-                          }),
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+                      <option value="" disabled>
+                        Select a student
+                      </option>
+                      {searchResults.map((student) => (
+                        <option key={student.student_id} value={student.student_id}>
+                          {`${student.full_name} (${student.student_id})`}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './ParentGuardianSection.module.css';
 
-const ParentGuardianSection = ({ onDataChange, prefill }) => {
+const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger }) => {
   // State untuk Father
   const [father, setFather] = useState({
     name: '',
@@ -55,70 +55,77 @@ const ParentGuardianSection = ({ onDataChange, prefill }) => {
   // Helper untuk handle input change dan kirim data ke parent
   const handleChange = (setter, field, section) => (e) => {
     const value = e.target.value;
+
+    // Hitung next state untuk section yang sedang diedit agar tidak pakai state lama
+    const nextFather = section === 'father' ? { ...father, [field]: value } : father;
+    const nextMother = section === 'mother' ? { ...mother, [field]: value } : mother;
+    const nextGuardian = section === 'guardian' ? { ...guardian, [field]: value } : guardian;
+
+    // Update local state
     setter((prev) => ({ ...prev, [field]: value }));
 
     // Kirim data ke parent component dengan format yang benar
     if (onDataChange) {
-      // Buat object yang berisi semua data yang sudah diisi
       const allData = {};
 
-      // Tambahkan data father dengan field mapping yang benar
-      if (father.name) allData.father_name = father.name;
-      if (father.company) allData.father_company = father.company;
-      if (father.occupation) allData.father_occupation = father.occupation;
-      if (father.phone) allData.father_phone = father.phone;
-      if (father.email) allData.father_email = father.email;
-      if (father.street) allData.father_address_street = father.street;
-      if (father.rt) allData.father_address_rt = father.rt;
-      if (father.rw) allData.father_address_rw = father.rw;
-      if (father.village) allData.father_address_village = father.village;
-      if (father.district) allData.father_address_district = father.district;
-      if (father.city) allData.father_address_city_regency = father.city;
-      if (father.province) allData.father_address_province = father.province;
-      if (father.other) allData.father_address_other = father.other;
-      if (father.company) allData.father_company_addresses = father.company;
+      // Father
+      if (nextFather.name) allData.father_name = nextFather.name;
+      if (nextFather.company) allData.father_company = nextFather.company;
+      if (nextFather.occupation) allData.father_occupation = nextFather.occupation;
+      if (nextFather.phone) allData.father_phone = nextFather.phone;
+      if (nextFather.email) allData.father_email = nextFather.email;
+      if (nextFather.street) allData.father_address_street = nextFather.street;
+      if (nextFather.rt !== undefined && nextFather.rt !== '') allData.father_address_rt = nextFather.rt;
+      if (nextFather.rw !== undefined && nextFather.rw !== '') allData.father_address_rw = nextFather.rw;
+      if (nextFather.village) allData.father_address_village = nextFather.village;
+      if (nextFather.district) allData.father_address_district = nextFather.district;
+      if (nextFather.city) allData.father_address_city_regency = nextFather.city;
+      if (nextFather.province) allData.father_address_province = nextFather.province;
+      if (nextFather.other) allData.father_address_other = nextFather.other;
+      if (nextFather.company) allData.father_company_addresses = nextFather.company;
 
-      // Tambahkan data mother dengan field mapping yang benar
-      if (mother.name) allData.mother_name = mother.name;
-      if (mother.company) allData.mother_company = mother.company;
-      if (mother.occupation) allData.mother_occupation = mother.occupation;
-      if (mother.phone) allData.mother_phone = mother.phone;
-      if (mother.email) allData.mother_email = mother.email;
-      if (mother.street) allData.mother_address_street = mother.street;
-      if (mother.rt) allData.mother_address_rt = mother.rt;
-      if (mother.rw) allData.mother_address_rw = mother.rw;
-      if (mother.village) allData.mother_address_village = mother.village;
-      if (mother.district) allData.mother_address_district = mother.district;
-      if (mother.city) allData.mother_address_city_regency = mother.city;
-      if (mother.province) allData.mother_address_province = mother.province;
-      if (mother.other) allData.mother_address_other = mother.other;
-      if (mother.company) allData.mother_company_addresses = mother.company;
+      // Mother
+      if (nextMother.name) allData.mother_name = nextMother.name;
+      if (nextMother.company) allData.mother_company = nextMother.company;
+      if (nextMother.occupation) allData.mother_occupation = nextMother.occupation;
+      if (nextMother.phone) allData.mother_phone = nextMother.phone;
+      if (nextMother.email) allData.mother_email = nextMother.email;
+      if (nextMother.street) allData.mother_address_street = nextMother.street;
+      if (nextMother.rt !== undefined && nextMother.rt !== '') allData.mother_address_rt = nextMother.rt;
+      if (nextMother.rw !== undefined && nextMother.rw !== '') allData.mother_address_rw = nextMother.rw;
+      if (nextMother.village) allData.mother_address_village = nextMother.village;
+      if (nextMother.district) allData.mother_address_district = nextMother.district;
+      if (nextMother.city) allData.mother_address_city_regency = nextMother.city;
+      if (nextMother.province) allData.mother_address_province = nextMother.province;
+      if (nextMother.other) allData.mother_address_other = nextMother.other;
+      if (nextMother.company) allData.mother_company_addresses = nextMother.company;
 
-      // Tambahkan data guardian dengan field mapping yang benar
-      if (guardian.name) allData.guardian_name = guardian.name;
-      if (guardian.relationship)
-        allData.relation_to_student = guardian.relationship;
-      if (guardian.phone) allData.guardian_phone = guardian.phone;
-      if (guardian.email) allData.guardian_email = guardian.email;
-      if (guardian.street) allData.guardian_address_street = guardian.street;
-      if (guardian.rt) allData.guardian_address_rt = guardian.rt;
-      if (guardian.rw) allData.guardian_address_rw = guardian.rw;
-      if (guardian.village) allData.guardian_address_village = guardian.village;
-      if (guardian.district)
-        allData.guardian_address_district = guardian.district;
-      if (guardian.city) allData.guardian_address_city_regency = guardian.city;
-      if (guardian.province)
-        allData.guardian_address_province = guardian.province;
-      if (guardian.other) allData.guardian_address_other = guardian.other;
+      // Guardian
+      if (nextGuardian.name) allData.guardian_name = nextGuardian.name;
+      if (nextGuardian.relationship) allData.relation_to_student = nextGuardian.relationship;
+      if (nextGuardian.phone) allData.guardian_phone = nextGuardian.phone;
+      if (nextGuardian.email) allData.guardian_email = nextGuardian.email;
+      if (nextGuardian.street) allData.guardian_address_street = nextGuardian.street;
+      if (nextGuardian.rt !== undefined && nextGuardian.rt !== '') allData.guardian_address_rt = nextGuardian.rt;
+      if (nextGuardian.rw !== undefined && nextGuardian.rw !== '') allData.guardian_address_rw = nextGuardian.rw;
+      if (nextGuardian.village) allData.guardian_address_village = nextGuardian.village;
+      if (nextGuardian.district) allData.guardian_address_district = nextGuardian.district;
+      if (nextGuardian.city) allData.guardian_address_city_regency = nextGuardian.city;
+      if (nextGuardian.province) allData.guardian_address_province = nextGuardian.province;
+      if (nextGuardian.other) allData.guardian_address_other = nextGuardian.other;
 
-      // Kirim semua data sekaligus
       onDataChange(allData);
     }
   };
 
-  // ✅ Perbaiki useEffect untuk prefill data
+  // ✅ Perbaiki useEffect untuk prefill data: hanya apply saat berbeda signifikan
+  const lastTriggerRef = useRef(0);
+
   useEffect(() => {
-    if (prefill && Object.keys(prefill).length > 0) {
+    if (!prefill || Object.keys(prefill).length === 0) return;
+    if (prefillTrigger === lastTriggerRef.current) return;
+
+    {
       console.log('Prefilling ParentGuardianSection with:', prefill);
 
       // ✅ Mapping data father dari backend ke state local
@@ -228,8 +235,10 @@ const ParentGuardianSection = ({ onDataChange, prefill }) => {
 
         onDataChange(allData);
       }
+
+      lastTriggerRef.current = prefillTrigger;
     }
-  }, [prefill, onDataChange]);
+  }, [prefill, prefillTrigger, onDataChange]);
 
   return (
     <div className={styles.container}>
