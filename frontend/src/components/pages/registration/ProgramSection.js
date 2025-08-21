@@ -51,7 +51,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
         if (prefill.class_id) setSelectedClass(prefill.class_id);
         if (prefill.program_id) setSelectedProgram(prefill.program_id);
         if (prefill.program_other) setProgramOther(prefill.program_other);
-        
+
         hasInitialized.current = true;
         isInitialPrefill.current = false;
       }
@@ -63,7 +63,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
       setSelectedClass('');
       setSelectedProgram('');
       setProgramOther('');
-      
+
       hasInitialized.current = false;
     }
   }, [prefill]);
