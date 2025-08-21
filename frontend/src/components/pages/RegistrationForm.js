@@ -121,30 +121,49 @@ const RegistrationForm = () => {
   );
 
   const handleSelectOldStudent = (latestData) => {
+    console.log("Received latest data for prefill:", latestData); // Debug log
+
     // Prefill semua form sections dengan data dari backend
     if (latestData) {
       // Prefill Student Information
-      if (latestData.studentInfo) {
+      if (
+        latestData.studentInfo &&
+        Object.keys(latestData.studentInfo).length > 0
+      ) {
+        console.log("Prefilling studentInfo:", latestData.studentInfo);
         handleSectionDataChange("studentInfo", latestData.studentInfo);
       }
 
       // Prefill Program
-      if (latestData.program) {
+      if (latestData.program && Object.keys(latestData.program).length > 0) {
+        console.log("Prefilling program:", latestData.program);
         handleSectionDataChange("program", latestData.program);
       }
 
       // Prefill Facilities
-      if (latestData.facilities) {
+      if (
+        latestData.facilities &&
+        Object.keys(latestData.facilities).length > 0
+      ) {
+        console.log("Prefilling facilities:", latestData.facilities);
         handleSectionDataChange("facilities", latestData.facilities);
       }
 
       // Prefill Parent Guardian
-      if (latestData.parentGuardian) {
+      if (
+        latestData.parentGuardian &&
+        Object.keys(latestData.parentGuardian).length > 0
+      ) {
+        console.log("Prefilling parentGuardian:", latestData.parentGuardian);
         handleSectionDataChange("parentGuardian", latestData.parentGuardian);
       }
 
       // Prefill Term of Payment
-      if (latestData.termOfPayment) {
+      if (
+        latestData.termOfPayment &&
+        Object.keys(latestData.termOfPayment).length > 0
+      ) {
+        console.log("Prefilling termOfPayment:", latestData.termOfPayment);
         handleSectionDataChange("termOfPayment", latestData.termOfPayment);
       }
     }
@@ -172,7 +191,6 @@ const RegistrationForm = () => {
       [sectionName]: errorData,
     }));
 
-    // ✅ Set forceError dengan pengecekan yang sama
     setForceError((prev) => ({
       ...prev,
       [sectionName]: errorData,
@@ -231,7 +249,7 @@ const RegistrationForm = () => {
           sharedData={sharedData}
         />
         <StudentInformationSection
-          prefill={prefilledData.student_info || {}}
+          prefill={formSections.studentInfo || {}}
           onValidationChange={handleStudentInfoValidationChange}
           onDataChange={handleStudentInfoDataChange}
           errors={errors.studentInfo || {}}
@@ -239,18 +257,22 @@ const RegistrationForm = () => {
           sharedData={sharedData}
         />
         <ProgramSection
+          prefill={formSections.program || {}}
           onDataChange={handleProgramDataChange}
           sharedData={sharedData}
         />
         <FacilitiesSection
+          prefill={formSections.facilities || {}}
           onDataChange={handleFacilitiesDataChange}
           sharedData={sharedData}
         />
         <ParentGuardianSection
+          prefill={formSections.parentGuardian || {}}
           onDataChange={handleParentGuardianDataChange}
           // ParentGuardianSection tidak memerlukan sharedData
         />
         <TermOfPaymentSection
+          prefill={formSections.termOfPayment || {}}
           onDataChange={handleTermOfPaymentDataChange}
           sharedData={sharedData}
         />

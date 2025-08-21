@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import styles from "./ProgramSection.module.css";
 import Select from "react-select";
 
-const ProgramSection = ({ onDataChange, sharedData }) => {
+const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
   const [sections, setSections] = useState([]);
   const [majors, setMajors] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -25,20 +25,23 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
     }
   }, [sharedData]);
 
-  // Memoize the data change callback to prevent infinite loops
-  const updateParentData = useCallback(
-    (data) => {
-      onDataChange(data);
-    },
-    [onDataChange]
-  );
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log('Prefilling ProgramSection with:', prefill);
 
-  const handleSectionChange = useCallback(
-    (opt) => {
-      const value = opt ? opt.value : "";
-      setSelectedSection(value);
-      setSelectedMajor("");
-      setSelectedClass("");
+      if (prefill.section_id) setSelectedSection(prefill.section_id);
+      if (prefill.major_id) setSelectedMajor(prefill.major_id);
+      if (prefill.class_id) setSelectedClass(prefill.class_id);
+      if (prefill.program_id) setSelectedProgram(prefill.program_id);
+      if (prefill.program_other) setProgramOther(prefill.program_other);
+    }
+  }, [prefill]);
+
+  const handleSectionChange = (opt) => {
+    const value = opt ? opt.value : '';
+    setSelectedSection(value);
+    setSelectedMajor('');
+    setSelectedClass('');
 
       updateParentData({
         section_id: value,
@@ -112,50 +115,30 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
     ]
   );
 
-  const handleProgramChange = useCallback(
-    (opt) => {
-      const value = opt ? opt.value : "";
-      setSelectedProgram(value);
-      updateParentData({
+  const handleProgramChange = (opt) => {
+    const value = opt ? opt.value : '';
+    setSelectedProgram(value);
+
+    if (value !== 'Other') {
+      setProgramOther('');
+      onDataChange({
         section_id: selectedSection,
         major_id: selectedMajor,
         class_id: selectedClass,
         program_id: value,
-        program_other: value === "Other" ? programOther : "",
+        program_other: '',
       });
-      if (value !== "Other") {
-        setProgramOther("");
-      }
-    },
-    [
-      selectedSection,
-      selectedMajor,
-      selectedClass,
-      programOther,
-      updateParentData,
-    ]
-  );
-
-  const handleProgramOtherChange = useCallback(
-    (e) => {
-      const value = e.target.value;
+    } else {
       setProgramOther(value);
-      updateParentData({
+      onDataChange({
         section_id: selectedSection,
         major_id: selectedMajor,
         class_id: selectedClass,
-        program_id: selectedProgram,
-        program_other: value,
+        program_id: null,
+        program_other: programOther,
       });
-    },
-    [
-      selectedSection,
-      selectedMajor,
-      selectedClass,
-      selectedProgram,
-      updateParentData,
-    ]
-  );
+    }
+  };
 
   const sectionOptions = sections.map((sec) => ({
     value: sec.section_id,
@@ -163,7 +146,7 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
   }));
 
   const programOptions = programs.map((prog) => ({
-    value: prog.name === "Other" ? "Other" : prog.program_id,
+    value: prog.name === 'Other' ? '' : prog.program_id,
     label: prog.name,
   }));
 
@@ -330,8 +313,18 @@ const ProgramSection = ({ onDataChange, sharedData }) => {
                       className={styles.valueRegular}
                       type="text"
                       value={programOther}
-                      onChange={handleProgramOtherChange}
-                      placeholder="Enter other program"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setProgramOther(value);
+                        onDataChange({
+                          section_id: selectedSection,
+                          major_id: selectedMajor,
+                          class_id: selectedClass,
+                          program_id: null,
+                          program_other: value,
+                        });
+                      }}
+                      placeholder='Enter other program'
                       style={{ marginLeft: 12, padding: 0 }}
                     />
                   )}

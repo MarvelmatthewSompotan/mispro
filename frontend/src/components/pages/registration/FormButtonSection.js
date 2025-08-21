@@ -45,9 +45,26 @@ const FormButtonSection = ({
     if (!allFormData.program || !allFormData.program.section_id) {
       errors.program = { ...errors.program, section_id: true };
     }
-    if (!allFormData.program || !allFormData.program.program_id) {
+
+    if (!allFormData.program) {
       errors.program = { ...errors.program, program_id: true };
+    } else {
+      if (
+        !allFormData.program.program_id &&
+        !allFormData.program.program_other
+      ) {
+        // dua-duanya kosong → invalid
+        errors.program = { ...errors.program, program_id: true };
+      }
+
+      if (
+        allFormData.program.program_id === null &&
+        !allFormData.program.program_other
+      ) {
+        errors.program = { ...errors.program, program_other: true };
+      }
     }
+
     if (!allFormData.program || !allFormData.program.class_id) {
       errors.program = { ...errors.program, class_id: true };
     }
@@ -56,9 +73,6 @@ const FormButtonSection = ({
     }
 
     // Validasi Facilities Section
-    if (!allFormData.facilities || !allFormData.facilities.transportation_id) {
-      errors.facilities = { ...errors.facilities, transportation_id: true };
-    }
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };
     }
@@ -75,7 +89,7 @@ const FormButtonSection = ({
       errors.facilities = { ...errors.facilities, residence_hall_policy: true };
     }
 
-    // Validasi Parent Guardian Section - minimal father name required
+    // Validasi Parent Guardian Section
     if (
       !allFormData.parentGuardian ||
       !allFormData.parentGuardian.father_name

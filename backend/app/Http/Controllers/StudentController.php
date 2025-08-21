@@ -32,12 +32,12 @@ class StudentController extends Controller
 
     public function getLatestApplication($student_id)
     {
-        $latestVersion = ApplicationFormVersion::with(['applicationForm.enrollment.student',])
-        ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
-            $q->where('student_id', $student_id);
-        })
-        ->orderByDesc('updated_at')
-        ->first();
+        $latestVersion = ApplicationFormVersion::with(['applicationForm.enrollment.student'])
+            ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
+                $q->where('student_id', $student_id);
+            })
+            ->orderByDesc('updated_at')
+            ->first();
 
         if (!$latestVersion) {
             return response()->json([
@@ -46,12 +46,114 @@ class StudentController extends Controller
             ], 404);
         }
 
-        $data = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
+        $dataSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
+        
+        // Extract request_data dari snapshot
+        $requestData = $dataSnapshot['request_data'] ?? [];
+        
+        // Mapping data sesuai dengan struktur yang diharapkan frontend
+        $formattedData = [
+            'studentInfo' => [
+                'first_name' => $requestData['first_name'] ?? '',
+                'middle_name' => $requestData['middle_name'] ?? '',
+                'last_name' => $requestData['last_name'] ?? '',
+                'nickname' => $requestData['nickname'] ?? '',
+                'citizenship' => $requestData['citizenship'] ?? '',
+                'country' => $requestData['country'] ?? '',
+                'religion' => $requestData['religion'] ?? '',
+                'place_of_birth' => $requestData['place_of_birth'] ?? '',
+                'date_of_birth' => $requestData['date_of_birth'] ?? '',
+                'email' => $requestData['email'] ?? '',
+                'phone_number' => $requestData['phone_number'] ?? '',
+                'previous_school' => $requestData['previous_school'] ?? '',
+                'academic_status' => $requestData['academic_status'] ?? '',
+                'academic_status_other' => $requestData['academic_status_other'] ?? '',
+                'gender' => $requestData['gender'] ?? '',
+                'family_rank' => $requestData['family_rank'] ?? '',
+                'nisn' => $requestData['nisn'] ?? '',
+                'nik' => $requestData['nik'] ?? '',
+                'kitas' => $requestData['kitas'] ?? '',
+                'street' => $requestData['street'] ?? '',
+                'rt' => $requestData['rt'] ?? '',
+                'rw' => $requestData['rw'] ?? '',
+                'village' => $requestData['village'] ?? '',
+                'district' => $requestData['district'] ?? '',
+                'city_regency' => $requestData['city_regency'] ?? '',
+                'province' => $requestData['province'] ?? '',
+                'other' => $requestData['other'] ?? '',
+            ],
+            'program' => [
+                'section_id' => $requestData['section_id'] ?? '',
+                'program_id' => $requestData['program_id'] ?? '',
+                'class_id' => $requestData['class_id'] ?? '',
+                'major_id' => $requestData['major_id'] ?? '',
+                'program_other' => $requestData['program_other'] ?? '',
+            ],
+            'facilities' => [
+                'transportation_id' => $requestData['transportation_id'] ?? '',
+                'pickup_point_id' => $requestData['pickup_point_id'] ?? '',
+                'pickup_point_custom' => $requestData['pickup_point_custom'] ?? '',
+                'transportation_policy' => $requestData['transportation_policy'] ?? '',
+                'residence_id' => $requestData['residence_id'] ?? '',
+                'residence_hall_policy' => $requestData['residence_hall_policy'] ?? '',
+            ],
+            'parentGuardian' => [
+                'father_name' => $requestData['father_name'] ?? '',
+                'father_company' => $requestData['father_company'] ?? '',
+                'father_occupation' => $requestData['father_occupation'] ?? '',
+                'father_phone' => $requestData['father_phone'] ?? '',
+                'father_email' => $requestData['father_email'] ?? '',
+                'father_address_street' => $requestData['father_address_street'] ?? '',
+                'father_address_rt' => $requestData['father_address_rt'] ?? '',
+                'father_address_rw' => $requestData['father_address_rw'] ?? '',
+                'father_address_village' => $requestData['father_address_village'] ?? '',
+                'father_address_district' => $requestData['father_address_district'] ?? '',
+                'father_address_city_regency' => $requestData['father_address_city_regency'] ?? '',
+                'father_address_province' => $requestData['father_address_province'] ?? '',
+                'father_address_other' => $requestData['father_address_other'] ?? '',
+                'father_company_addresses' => $requestData['father_company_addresses'] ?? '',
+                'mother_name' => $requestData['mother_name'] ?? '',
+                'mother_company' => $requestData['mother_company'] ?? '',
+                'mother_occupation' => $requestData['mother_occupation'] ?? '',
+                'mother_phone' => $requestData['mother_phone'] ?? '',
+                'mother_email' => $requestData['mother_email'] ?? '',
+                'mother_address_street' => $requestData['mother_address_street'] ?? '',
+                'mother_address_rt' => $requestData['mother_address_rt'] ?? '',
+                'mother_address_rw' => $requestData['mother_address_rw'] ?? '',
+                'mother_address_village' => $requestData['mother_address_village'] ?? '',
+                'mother_address_district' => $requestData['mother_address_district'] ?? '',
+                'mother_address_city_regency' => $requestData['mother_address_city_regency'] ?? '',
+                'mother_address_province' => $requestData['mother_address_province'] ?? '',
+                'mother_address_other' => $requestData['mother_address_other'] ?? '',
+                'mother_company_addresses' => $requestData['mother_company_addresses'] ?? '',
+                'guardian_name' => $requestData['guardian_name'] ?? '',
+                'relation_to_student' => $requestData['relation_to_student'] ?? '',
+                'guardian_phone' => $requestData['guardian_phone'] ?? '',
+                'guardian_email' => $requestData['guardian_email'] ?? '',
+                'guardian_address_street' => $requestData['guardian_address_street'] ?? '',
+                'guardian_address_rt' => $requestData['guardian_address_rt'] ?? '',
+                'guardian_address_rw' => $requestData['guardian_address_rw'] ?? '',
+                'guardian_address_village' => $requestData['guardian_address_village'] ?? '',
+                'guardian_address_district' => $requestData['guardian_address_district'] ?? '',
+                'guardian_address_city_regency' => $requestData['guardian_address_city_regency'] ?? '',
+                'guardian_address_province' => $requestData['guardian_address_province'] ?? '',
+                'guardian_address_other' => $requestData['guardian_address_other'] ?? '',
+            ],
+            'termOfPayment' => [
+                'payment_type' => $requestData['payment_type'] ?? '',
+                'payment_method' => $requestData['payment_method'] ?? '',
+                'financial_policy_contract' => $requestData['financial_policy_contract'] ?? '',
+                'discount_name' => $requestData['discount_name'] ?? '',
+                'discount_notes' => $requestData['discount_notes'] ?? '',
+            ],
+            'student_status' => 'Old',
+            'input_name' => $student_id
+        ];
 
         return response()->json([
             'success' => true,
-            'data' => $data,
-            'student' => $latestVersion->student,
+            'data' => $formattedData,
+            'student' => $latestVersion->applicationForm->enrollment->student ?? null,
         ]);
     }
 }

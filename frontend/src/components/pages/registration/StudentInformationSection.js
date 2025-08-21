@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
+import { getRegistrationOptions } from "../../../services/api";
 
 const genderOptions = ["MALE", "FEMALE"];
 const citizenshipOptions = ["Indonesia", "Non Indonesia"];
 
 const StudentInformationSection = ({
+  prefill,
   onDataChange,
   onValidationChange,
   errors,
@@ -52,15 +54,40 @@ const StudentInformationSection = ({
     }
   }, [sharedData]);
 
-  const handleAcademicStatus = (value) => {
-    setAcademicStatus(value);
-    onDataChange({ academic_status: value });
-  };
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log("Prefilling StudentInformationSection with:", prefill);
 
-  const handleAcademicStatusOther = () => {
-    setAcademicStatusOther("");
-    onDataChange({ academic_status_other: "" });
-  };
+      if (prefill.first_name) setFirstName(prefill.first_name);
+      if (prefill.middle_name) setMiddleName(prefill.middle_name);
+      if (prefill.last_name) setLastName(prefill.last_name);
+      if (prefill.nickname) setNickname(prefill.nickname);
+      if (prefill.nisn) setNisn(prefill.nisn);
+      if (prefill.nik) setNik(prefill.nik);
+      if (prefill.kitas) setKitas(prefill.kitas);
+      if (prefill.country) setForeignCountry(prefill.country);
+      if (prefill.gender) setGender(prefill.gender);
+      if (prefill.family_rank) setRank(prefill.family_rank);
+      if (prefill.citizenship) setCitizenship(prefill.citizenship);
+      if (prefill.religion) setReligion(prefill.religion);
+      if (prefill.place_of_birth) setPlaceOfBirth(prefill.place_of_birth);
+      if (prefill.date_of_birth) setDateOfBirth(prefill.date_of_birth);
+      if (prefill.email) setEmail(prefill.email);
+      if (prefill.previous_school) setPreviousSchool(prefill.previous_school);
+      if (prefill.phone_number) setPhone(prefill.phone_number);
+      if (prefill.academic_status) setAcademicStatus(prefill.academic_status);
+      if (prefill.academic_status_other)
+        setAcademicStatusOther(prefill.academic_status_other);
+      if (prefill.street) setStreet(prefill.street);
+      if (prefill.rt) setRt(prefill.rt);
+      if (prefill.rw) setRw(prefill.rw);
+      if (prefill.village) setVillage(prefill.village);
+      if (prefill.district) setDistrict(prefill.district);
+      if (prefill.city_regency) setCity(prefill.city_regency);
+      if (prefill.province) setProvince(prefill.province);
+      if (prefill.other) setOtherAddress(prefill.other);
+    }
+  }, [prefill]);
 
   const handleFirstName = (value) => {
     setFirstName(value);
@@ -105,11 +132,6 @@ const StudentInformationSection = ({
   const handleGender = (value) => {
     setGender(value);
     onDataChange({ gender: value });
-  };
-
-  const handleAge = (value) => {
-    setAge(value);
-    onDataChange({ age: value });
   };
 
   const handleFamilyRank = (value) => {
@@ -246,12 +268,12 @@ const StudentInformationSection = ({
         }
 
         // Hitung umur dalam tahun dan bulan (sementara, nanti akan diganti backend)
-        let years = now.getFullYear() - dob.getFullYear(); // Ubah const menjadi let
-        let months = now.getMonth() - dob.getMonth(); // Ubah const menjadi let
+        let years = now.getFullYear() - dob.getFullYear();
+        let months = now.getMonth() - dob.getMonth();
 
         if (months < 0 || (months === 0 && now.getDate() < dob.getDate())) {
-          years--; // Sekarang bisa diubah
-          months += 12; // Sekarang bisa diubah
+          years--;
+          months += 12;
         }
 
         const calculatedAge = `${years} Tahun, ${months} Bulan`;
@@ -265,7 +287,7 @@ const StudentInformationSection = ({
       setAge("");
       onDataChange({ age: "" });
     }
-  }, [dateOfBirth, onDataChange]); // Tambahkan onDataChange ke dependency array
+  }, [dateOfBirth, onDataChange]);
 
   return (
     <div className={styles.container}>
@@ -702,38 +724,46 @@ const StudentInformationSection = ({
                 <div className={styles.academicStatusOption}>
                   <Select
                     id="academicStatus"
-                    options={academicStatusOptions
-                      .filter((opt) => opt !== "OTHER")
-                      .map((opt) => ({
-                        value: opt,
-                        label: opt,
-                      }))}
+                    options={academicStatusOptions.map((opt) => ({
+                      value: opt,
+                      label: opt,
+                    }))}
                     placeholder="Select status"
                     value={
-                      academicStatus && academicStatus !== "OTHER"
+                      // ✅ PERBAIKAN: Hapus kondisi academicStatus !== 'OTHER'
+                      academicStatus
                         ? { value: academicStatus, label: academicStatus }
                         : null
                     }
                     onChange={(opt) => {
                       const selectedValue = opt ? opt.value : "";
 
-                      if (selectedValue !== "OTHER") {
-                        handleAcademicStatusOther();
+                      // ✅ PERBAIKAN: Handle semua kasus termasuk 'OTHER'
+                      if (selectedValue === "OTHER") {
+                        setAcademicStatus("OTHER");
+                        // setAcademicStatusOther(''); // ← Hapus baris ini
+                        onDataChange({
+                          academic_status: "OTHER",
+                          academic_status_other: academicStatusOther, // ← Gunakan nilai yang sudah ada
+                        });
+                      } else {
+                        // Jika pilih status lain, clear OTHER
+                        setAcademicStatus(selectedValue);
+                        setAcademicStatusOther("");
+                        onDataChange({
+                          academic_status: selectedValue,
+                          academic_status_other: "",
+                        });
                       }
-                      handleAcademicStatus(selectedValue);
                     }}
                     isClearable
                     styles={{
                       control: (base) => ({
                         ...base,
-                        fontWeight:
-                          academicStatus && academicStatus !== "Other"
-                            ? "bold"
-                            : "400",
-                        color:
-                          academicStatus && academicStatus !== "Other"
-                            ? "#000"
-                            : "rgba(128,128,128,0.6)",
+                        fontWeight: academicStatus ? "bold" : "400", // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
+                        color: academicStatus
+                          ? "#000"
+                          : "rgba(128,128,128,0.6)",
                         border: "none",
                         boxShadow: "none",
                         borderRadius: 0,
@@ -742,14 +772,10 @@ const StudentInformationSection = ({
                       }),
                       singleValue: (base) => ({
                         ...base,
-                        fontWeight:
-                          academicStatus && academicStatus !== "Other"
-                            ? "bold"
-                            : "400",
-                        color:
-                          academicStatus && academicStatus !== "Other"
-                            ? "#000"
-                            : "rgba(128,128,128,0.6)",
+                        fontWeight: academicStatus ? "bold" : "400", // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
+                        color: academicStatus
+                          ? "#000"
+                          : "rgba(128,128,128,0.6)",
                       }),
                       placeholder: (base) => ({
                         ...base,
@@ -768,22 +794,31 @@ const StudentInformationSection = ({
                       onChange={(e) => {
                         if (e.target.checked) {
                           setAcademicStatus("OTHER");
-                          // Clear academic_status_other saat switch ke OTHER
-                          handleAcademicStatusOther();
+                          // setAcademicStatusOther(''); // ← Hapus baris ini
+                          onDataChange({
+                            academic_status: "OTHER",
+                            academic_status_other: academicStatusOther, // ← Gunakan nilai yang sudah ada
+                          });
                         }
                       }}
                       className={styles.hiddenRadio}
                     />
                     <span className={styles.otherText}>Other</span>
+
+                    {/* ✅ Tampilkan input field jika OTHER dipilih */}
                     {academicStatus === "OTHER" && (
                       <input
                         className={styles.otherInput}
                         type="text"
                         value={academicStatusOther}
                         onChange={(e) => {
-                          setAcademicStatusOther(e.target.value);
+                          const value = e.target.value;
+                          setAcademicStatusOther(value);
+
+                          // ✅ Kirim kedua field sekaligus
                           onDataChange({
-                            academic_status_other: e.target.value,
+                            academic_status: "OTHER",
+                            academic_status_other: value,
                           });
                         }}
                         placeholder="Enter academic status"

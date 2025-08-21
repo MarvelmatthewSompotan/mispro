@@ -3,7 +3,7 @@ import styles from "./TermOfPaymentSection.module.css";
 import checkBoxIcon from "../../../assets/CheckBox.png";
 import Select from "react-select";
 
-const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
+const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   // State untuk payment options
   const [paymentType, setPaymentType] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -25,6 +25,24 @@ const TermOfPaymentSection = ({ onDataChange, sharedData }) => {
       setDiscountTypeOptions(sharedData.discount_types || []);
     }
   }, [sharedData]);
+
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log('Prefilling TermOfPaymentSection with:', prefill);
+
+      if (prefill.payment_type) setPaymentType(prefill.payment_type);
+      if (prefill.payment_method) setPaymentMethod(prefill.payment_method);
+      if (prefill.financial_policy_contract) {
+        setFinancialPolicy(prefill.financial_policy_contract === 'Signed');
+      }
+
+      if (prefill.discount_name) setDiscountName(prefill.discount_name);
+
+      if (prefill.discount_notes) {
+        setDiscountNotes(prefill.discount_notes);
+      }
+    }
+  }, [prefill]);
 
   const handlePaymentTypeChange = (value) => {
     setPaymentType(value);

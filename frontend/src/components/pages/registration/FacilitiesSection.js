@@ -3,7 +3,7 @@ import styles from "./FacilitiesSection.module.css";
 import checkBoxIcon from "../../../assets/CheckBox.png";
 import Select from "react-select";
 
-const FacilitiesSection = ({ onDataChange, sharedData }) => {
+const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
   const [transportations, setTransportations] = useState([]);
   const [pickupPoints, setPickupPoints] = useState([]);
   const [residenceHalls, setResidenceHalls] = useState([]);
@@ -11,9 +11,9 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
   const [selectedTransportation, setSelectedTransportation] = useState("");
   const [selectedPickupPoint, setSelectedPickupPoint] = useState("");
   const [pickupPointCustom, setPickupPointCustom] = useState("");
-  const [transportationPolicy, setTransportationPolicy] = useState("");
+  const [transportationPolicy, setTransportationPolicy] = useState(false);
   const [selectedResidence, setSelectedResidence] = useState("");
-  const [residencePolicy, setResidencePolicy] = useState("");
+  const [residencePolicy, setResidencePolicy] = useState(false);
 
   // Fetch dropdown data
   useEffect(() => {
@@ -24,6 +24,29 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
       setResidenceHalls(sharedData.residence_halls || []);
     }
   }, [sharedData]);
+
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log("Prefilling FacilitiesSection with:", prefill);
+
+      if (prefill.transportation_id)
+        setSelectedTransportation(prefill.transportation_id);
+      if (prefill.pickup_point_id)
+        setSelectedPickupPoint(prefill.pickup_point_id);
+      if (prefill.pickup_point_custom)
+        setPickupPointCustom(prefill.pickup_point_custom);
+
+      if (prefill.transportation_policy) {
+        setTransportationPolicy(prefill.transportation_policy === "Signed");
+      }
+
+      if (prefill.residence_id) setSelectedResidence(prefill.residence_id);
+
+      if (prefill.residence_hall_policy) {
+        setResidencePolicy(prefill.residence_hall_policy === "Signed");
+      }
+    }
+  }, [prefill]);
 
   const handleTransportationChange = (value) => {
     setSelectedTransportation(value);
@@ -74,6 +97,8 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
     const value = e.target.checked;
     setTransportationPolicy(value);
 
+    console.log("Transportation policy changed to:", value);
+
     // Send data immediately
     onDataChange({
       transportation_id: selectedTransportation,
@@ -102,6 +127,8 @@ const FacilitiesSection = ({ onDataChange, sharedData }) => {
   const handleResidencePolicy = (e) => {
     const value = e.target.checked;
     setResidencePolicy(value);
+
+    console.log("Residence policy changed to:", value);
 
     // Send data immediately
     onDataChange({
