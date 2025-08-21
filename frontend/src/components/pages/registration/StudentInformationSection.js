@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
 import { getRegistrationOptions } from "../../../services/api";
@@ -39,21 +39,30 @@ const StudentInformationSection = ({
   const [phone, setPhone] = useState("");
   const [academicStatusOther, setAcademicStatusOther] = useState("");
   const [street, setStreet] = useState("");
-  const [rt, setRt] = useState("");
-  const [rw, setRw] = useState("");
+  const [rt, setRt] = useState("0");
+  const [rw, setRw] = useState("0");
   const [village, setVillage] = useState("");
   const [district, setDistrict] = useState("");
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
   const [otherAddress, setOtherAddress] = useState("");
 
+  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
+  const isInitialPrefill = useRef(true);
+  const hasInitialized = useRef(false);
+
   // Fetch dropdown data
   useEffect(() => {
-    if (sharedData) {
-      setAcademicStatusOptions(sharedData.academic_status || []);
-    }
-  }, [sharedData]);
+    getRegistrationOptions()
+      .then((data) => {
+        setAcademicStatusOptions(data.academic_status || []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch academic status options:", err);
+      });
+  }, []);
 
+  // Prefill hanya sekali saat component pertama kali mount atau saat prefill berubah signifikan
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
       console.log("Prefilling StudentInformationSection with:", prefill);
@@ -86,6 +95,37 @@ const StudentInformationSection = ({
       if (prefill.city_regency) setCity(prefill.city_regency);
       if (prefill.province) setProvince(prefill.province);
       if (prefill.other) setOtherAddress(prefill.other);
+    } else if (Object.keys(prefill).length === 0) {
+      // Jika prefill menjadi empty object (reset form), reset semua field
+      console.log("Resetting StudentInformationSection form");
+      setFirstName("");
+      setMiddleName("");
+      setLastName("");
+      setNickname("");
+      setNisn("");
+      setNik("");
+      setKitas("");
+      setForeignCountry("");
+      setGender("");
+      setAge("");
+      setRank("");
+      setCitizenship("");
+      setReligion("");
+      setPlaceOfBirth("");
+      setDateOfBirth("");
+      setEmail("");
+      setPreviousSchool("");
+      setPhone("");
+      setAcademicStatus("");
+      setAcademicStatusOther("");
+      setStreet("");
+      setRt("0");
+      setRw("0");
+      setVillage("");
+      setDistrict("");
+      setCity("");
+      setProvince("");
+      setOtherAddress("");
     }
   }, [prefill]);
 
@@ -182,12 +222,14 @@ const StudentInformationSection = ({
 
   const handleRt = (value) => {
     setRt(value);
-    onDataChange({ rt: value });
+    // Kirim "0" jika value kosong, otherwise kirim value asli
+    onDataChange({ rt: value.trim() === "" ? "0" : value });
   };
 
   const handleRw = (value) => {
     setRw(value);
-    onDataChange({ rw: value });
+    // Kirim "0" jika value kosong, otherwise kirim value asli
+    onDataChange({ rw: value.trim() === "" ? "0" : value });
   };
 
   const handleVillage = (value) => {
@@ -248,6 +290,14 @@ const StudentInformationSection = ({
     }
   }, [forceError]);
 
+  const updateAge = useCallback(
+    (newAge) => {
+      setAge(newAge);
+      onDataChange({ age: newAge });
+    },
+    [onDataChange]
+  );
+
   // Tambahkan useEffect untuk menampilkan age otomatis
   useEffect(() => {
     if (dateOfBirth) {
@@ -257,13 +307,13 @@ const StudentInformationSection = ({
 
         // Pastikan tanggal valid
         if (isNaN(dob.getTime())) {
-          setAge("");
+          updateAge("");
           return;
         }
 
         // Pastikan tanggal tidak di masa depan
         if (dob > now) {
-          setAge("");
+          updateAge("");
           return;
         }
 
@@ -277,17 +327,15 @@ const StudentInformationSection = ({
         }
 
         const calculatedAge = `${years} Tahun, ${months} Bulan`;
-        setAge(calculatedAge);
-        onDataChange({ age: calculatedAge });
+        updateAge(calculatedAge);
       } catch (error) {
         console.error("Error calculating age:", error);
-        setAge("");
+        updateAge("");
       }
     } else {
-      setAge("");
-      onDataChange({ age: "" });
+      updateAge("");
     }
-  }, [dateOfBirth, onDataChange]);
+  }, [dateOfBirth, updateAge]);
 
   return (
     <div className={styles.container}>
