@@ -30,6 +30,7 @@ return new class extends Migration
             $table->foreign('program_id')->references('program_id')->on('programs')->onDelete('set null');
             $table->foreign('residence_id')->references('residence_id')->on('residence_halls')->onDelete('set null');
             $table->foreign('transport_id')->references('transport_id')->on('transportations')->onDelete('set null');
+            $table->foreign('pickup_point_id')->references('pickup_point_id')->on('pickup_points')->onDelete('set null');
         });
     }
 

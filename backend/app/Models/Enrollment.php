@@ -11,6 +11,7 @@ use App\Models\DiscountType;
 use App\Models\StudentPhoto;
 use App\Models\ResidenceHall;
 use App\Models\Transportation;
+use App\Models\PickupPoint;
 use App\Models\ApplicationForm;
 use App\Models\StudentDiscount;
 use App\Models\StudentDocument;
@@ -34,6 +35,7 @@ class Enrollment extends Model
         'school_year_id',
         'program_id',
         'transport_id',
+        'pickup_point_id',
         'residence_id',
         'residence_hall_policy',
         'transportation_policy',
@@ -78,6 +80,11 @@ class Enrollment extends Model
     public function program() : BelongsTo
     {
         return $this->belongsTo(Program::class, 'program_id', 'program_id');
+    }
+
+    public function pickupPoint(): BelongsTo
+    {
+        return $this->belongsTo(PickupPoint::class, 'pickup_point_id', 'pickup_point_id');
     }
 
     public function studentDiscount() : HasMany
