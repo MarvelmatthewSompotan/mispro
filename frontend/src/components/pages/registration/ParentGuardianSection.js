@@ -10,8 +10,8 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger }) => {
     phone: '',
     email: '',
     street: '',
-    rt: 0,
-    rw: 0,
+    rt: '0',
+    rw: '0',
     village: '',
     district: '',
     city: '',
@@ -27,8 +27,8 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger }) => {
     phone: '',
     email: '',
     street: '',
-    rt: 0,
-    rw: 0,
+    rt: '0',
+    rw: '0',
     village: '',
     district: '',
     city: '',
@@ -43,8 +43,8 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger }) => {
     phone: '',
     email: '',
     street: '',
-    rt: 0,
-    rw: 0,
+    rt: '0',
+    rw: '0',
     village: '',
     district: '',
     city: '',
@@ -57,9 +57,12 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger }) => {
     const value = e.target.value;
 
     // Hitung next state untuk section yang sedang diedit agar tidak pakai state lama
-    const nextFather = section === 'father' ? { ...father, [field]: value } : father;
-    const nextMother = section === 'mother' ? { ...mother, [field]: value } : mother;
-    const nextGuardian = section === 'guardian' ? { ...guardian, [field]: value } : guardian;
+    const nextFather =
+      section === 'father' ? { ...father, [field]: value } : father;
+    const nextMother =
+      section === 'mother' ? { ...mother, [field]: value } : mother;
+    const nextGuardian =
+      section === 'guardian' ? { ...guardian, [field]: value } : guardian;
 
     // Update local state
     setter((prev) => ({ ...prev, [field]: value }));
@@ -68,177 +71,232 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger }) => {
     if (onDataChange) {
       const allData = {};
 
+      // Helper function untuk handle rt/rw fields
+      const handleRtRw = (value) => {
+        return value.trim() === '' ? '0' : value;
+      };
+
       // Father
       if (nextFather.name) allData.father_name = nextFather.name;
       if (nextFather.company) allData.father_company = nextFather.company;
-      if (nextFather.occupation) allData.father_occupation = nextFather.occupation;
+      if (nextFather.occupation)
+        allData.father_occupation = nextFather.occupation;
       if (nextFather.phone) allData.father_phone = nextFather.phone;
       if (nextFather.email) allData.father_email = nextFather.email;
       if (nextFather.street) allData.father_address_street = nextFather.street;
-      if (nextFather.rt !== undefined && nextFather.rt !== '') allData.father_address_rt = nextFather.rt;
-      if (nextFather.rw !== undefined && nextFather.rw !== '') allData.father_address_rw = nextFather.rw;
-      if (nextFather.village) allData.father_address_village = nextFather.village;
-      if (nextFather.district) allData.father_address_district = nextFather.district;
-      if (nextFather.city) allData.father_address_city_regency = nextFather.city;
-      if (nextFather.province) allData.father_address_province = nextFather.province;
+      // Handle rt/rw dengan nilai default "0"
+      allData.father_address_rt = handleRtRw(nextFather.rt);
+      allData.father_address_rw = handleRtRw(nextFather.rw);
+      if (nextFather.village)
+        allData.father_address_village = nextFather.village;
+      if (nextFather.district)
+        allData.father_address_district = nextFather.district;
+      if (nextFather.city)
+        allData.father_address_city_regency = nextFather.city;
+      if (nextFather.province)
+        allData.father_address_province = nextFather.province;
       if (nextFather.other) allData.father_address_other = nextFather.other;
-      if (nextFather.company) allData.father_company_addresses = nextFather.company;
+      if (nextFather.company)
+        allData.father_company_addresses = nextFather.company;
 
       // Mother
       if (nextMother.name) allData.mother_name = nextMother.name;
       if (nextMother.company) allData.mother_company = nextMother.company;
-      if (nextMother.occupation) allData.mother_occupation = nextMother.occupation;
+      if (nextMother.occupation)
+        allData.mother_occupation = nextMother.occupation;
       if (nextMother.phone) allData.mother_phone = nextMother.phone;
       if (nextMother.email) allData.mother_email = nextMother.email;
       if (nextMother.street) allData.mother_address_street = nextMother.street;
-      if (nextMother.rt !== undefined && nextMother.rt !== '') allData.mother_address_rt = nextMother.rt;
-      if (nextMother.rw !== undefined && nextMother.rw !== '') allData.mother_address_rw = nextMother.rw;
-      if (nextMother.village) allData.mother_address_village = nextMother.village;
-      if (nextMother.district) allData.mother_address_district = nextMother.district;
-      if (nextMother.city) allData.mother_address_city_regency = nextMother.city;
-      if (nextMother.province) allData.mother_address_province = nextMother.province;
+      // Handle rt/rw dengan nilai default "0"
+      allData.mother_address_rt = handleRtRw(nextMother.rt);
+      allData.mother_address_rw = handleRtRw(nextMother.rw);
+      if (nextMother.village)
+        allData.mother_address_village = nextMother.village;
+      if (nextMother.district)
+        allData.mother_address_district = nextMother.district;
+      if (nextMother.city)
+        allData.mother_address_city_regency = nextMother.city;
+      if (nextMother.province)
+        allData.mother_address_province = nextMother.province;
       if (nextMother.other) allData.mother_address_other = nextMother.other;
-      if (nextMother.company) allData.mother_company_addresses = nextMother.company;
+      if (nextMother.company)
+        allData.mother_company_addresses = nextMother.company;
 
       // Guardian
       if (nextGuardian.name) allData.guardian_name = nextGuardian.name;
-      if (nextGuardian.relationship) allData.relation_to_student = nextGuardian.relationship;
+      if (nextGuardian.relationship)
+        allData.relation_to_student = nextGuardian.relationship;
       if (nextGuardian.phone) allData.guardian_phone = nextGuardian.phone;
       if (nextGuardian.email) allData.guardian_email = nextGuardian.email;
-      if (nextGuardian.street) allData.guardian_address_street = nextGuardian.street;
-      if (nextGuardian.rt !== undefined && nextGuardian.rt !== '') allData.guardian_address_rt = nextGuardian.rt;
-      if (nextGuardian.rw !== undefined && nextGuardian.rw !== '') allData.guardian_address_rw = nextGuardian.rw;
-      if (nextGuardian.village) allData.guardian_address_village = nextGuardian.village;
-      if (nextGuardian.district) allData.guardian_address_district = nextGuardian.district;
-      if (nextGuardian.city) allData.guardian_address_city_regency = nextGuardian.city;
-      if (nextGuardian.province) allData.guardian_address_province = nextGuardian.province;
-      if (nextGuardian.other) allData.guardian_address_other = nextGuardian.other;
+      if (nextGuardian.street)
+        allData.guardian_address_street = nextGuardian.street;
+      // Handle rt/rw dengan nilai default "0"
+      allData.guardian_address_rt = handleRtRw(nextGuardian.rt);
+      allData.guardian_address_rw = handleRtRw(nextGuardian.rw);
+      if (nextGuardian.village)
+        allData.guardian_address_village = nextGuardian.village;
+      if (nextGuardian.district)
+        allData.guardian_address_district = nextGuardian.district;
+      if (nextGuardian.city)
+        allData.guardian_address_city_regency = nextGuardian.city;
+      if (nextGuardian.province)
+        allData.guardian_address_province = nextGuardian.province;
+      if (nextGuardian.other)
+        allData.guardian_address_other = nextGuardian.other;
 
       onDataChange(allData);
     }
   };
 
+  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
+  const isInitialPrefill = useRef(true);
+  const hasInitialized = useRef(false);
+
   // ✅ Perbaiki useEffect untuk prefill data: hanya apply saat berbeda signifikan
-  const lastTriggerRef = useRef(0);
-
   useEffect(() => {
-    if (!prefill || Object.keys(prefill).length === 0) return;
-    if (prefillTrigger === lastTriggerRef.current) return;
+    if (prefill && Object.keys(prefill).length > 0) {
+      // Jika ini prefill pertama kali atau prefill berubah signifikan
+      if (isInitialPrefill.current || !hasInitialized.current) {
+        console.log('Initial prefilling ParentGuardianSection with:', prefill);
 
-    {
-      console.log('Prefilling ParentGuardianSection with:', prefill);
-
-      // ✅ Mapping data father dari backend ke state local
-      const fatherData = {
-        name: prefill.father_name || '',
-        company: prefill.father_company || '',
-        occupation: prefill.father_occupation || '',
-        phone: prefill.father_phone || '',
-        email: prefill.father_email || '',
-        street: prefill.father_address_street || '',
-        rt: prefill.father_address_rt || 0,
-        rw: prefill.father_address_rw || 0,
-        village: prefill.father_address_village || '',
-        district: prefill.father_address_district || '',
-        city: prefill.father_address_city_regency || '',
-        province: prefill.father_address_province || '',
-        other: prefill.father_address_other || '',
-      };
-
-      // ✅ Mapping data mother dari backend ke state local
-      const motherData = {
-        name: prefill.mother_name || '',
-        company: prefill.mother_company || '',
-        occupation: prefill.mother_occupation || '',
-        phone: prefill.mother_phone || '',
-        email: prefill.mother_email || '',
-        street: prefill.mother_address_street || '',
-        rt: prefill.mother_address_rt || 0,
-        rw: prefill.mother_address_rw || 0,
-        village: prefill.mother_address_village || '',
-        district: prefill.mother_address_district || '',
-        city: prefill.mother_address_city_regency || '',
-        province: prefill.mother_address_province || '',
-        other: prefill.mother_address_other || '',
-      };
-
-      // ✅ Mapping data guardian dari backend ke state local
-      const guardianData = {
-        name: prefill.guardian_name || '',
-        relationship: prefill.relation_to_student || '',
-        phone: prefill.guardian_phone || '',
-        email: prefill.guardian_email || '',
-        street: prefill.guardian_address_street || '',
-        rt: prefill.guardian_address_rt || 0,
-        rw: prefill.guardian_address_rw || 0,
-        village: prefill.guardian_address_village || '',
-        district: prefill.guardian_address_district || '',
-        city: prefill.guardian_address_city_regency || '',
-        province: prefill.guardian_address_province || '',
-        other: prefill.guardian_address_other || '',
-      };
-
-      // ✅ Set state dengan data yang sudah di-mapping
-      setFather(fatherData);
-      setMother(motherData);
-      setGuardian(guardianData);
-
-      // ✅ Kirim data ke parent component setelah prefill
-      if (onDataChange) {
-        const allData = {
-          // Father data
-          father_name: fatherData.name,
-          father_company: fatherData.company,
-          father_occupation: fatherData.occupation,
-          father_phone: fatherData.phone,
-          father_email: fatherData.email,
-          father_address_street: fatherData.street,
-          father_address_rt: fatherData.rt,
-          father_address_rw: fatherData.rw,
-          father_address_village: fatherData.village,
-          father_address_district: fatherData.district,
-          father_address_city_regency: fatherData.city,
-          father_address_province: fatherData.province,
-          father_address_other: fatherData.other,
-          father_company_addresses: fatherData.company,
-
-          // Mother data
-          mother_name: motherData.name,
-          mother_company: motherData.company,
-          mother_occupation: motherData.occupation,
-          mother_phone: motherData.phone,
-          mother_email: motherData.email,
-          mother_address_street: motherData.street,
-          mother_address_rt: motherData.rt,
-          mother_address_rw: motherData.rw,
-          mother_address_village: motherData.village,
-          mother_address_district: motherData.district,
-          mother_address_city_regency: motherData.city,
-          mother_address_province: motherData.province,
-          mother_address_other: motherData.other,
-          mother_company_addresses: motherData.company,
-
-          // Guardian data
-          guardian_name: guardianData.name,
-          relation_to_student: guardianData.relationship,
-          guardian_phone: guardianData.phone,
-          guardian_email: guardianData.email,
-          guardian_address_street: guardianData.street,
-          guardian_address_rt: guardianData.rt,
-          guardian_address_rw: guardianData.rw,
-          guardian_address_village: guardianData.village,
-          guardian_address_district: guardianData.district,
-          guardian_address_city_regency: guardianData.city,
-          guardian_address_province: guardianData.province,
-          guardian_address_other: guardianData.other,
+        // ✅ Mapping data father dari backend ke state local
+        const fatherData = {
+          name: prefill.father_name || '',
+          company: prefill.father_company || '',
+          occupation: prefill.father_occupation || '',
+          phone: prefill.father_phone || '',
+          email: prefill.father_email || '',
+          street: prefill.father_address_street || '',
+          rt: prefill.father_address_rt || '0',
+          rw: prefill.father_address_rw || '0',
+          village: prefill.father_address_village || '',
+          district: prefill.father_address_district || '',
+          city: prefill.father_address_city_regency || '',
+          province: prefill.father_address_province || '',
+          other: prefill.father_address_other || '',
         };
 
-        onDataChange(allData);
-      }
+        // ✅ Mapping data mother dari backend ke state local
+        const motherData = {
+          name: prefill.mother_name || '',
+          company: prefill.mother_company || '',
+          occupation: prefill.mother_occupation || '',
+          phone: prefill.mother_phone || '',
+          email: prefill.mother_email || '',
+          street: prefill.mother_address_street || '',
+          rt: prefill.mother_address_rt || '0',
+          rw: prefill.mother_address_rw || '0',
+          village: prefill.mother_address_village || '',
+          district: prefill.mother_address_district || '',
+          city: prefill.mother_address_city_regency || '',
+          province: prefill.mother_address_province || '',
+          other: prefill.mother_address_other || '',
+        };
 
-      lastTriggerRef.current = prefillTrigger;
+        // ✅ Mapping data guardian dari backend ke state local
+        const guardianData = {
+          name: prefill.guardian_name || '',
+          relationship: prefill.relation_to_student || '',
+          phone: prefill.guardian_phone || '',
+          email: prefill.guardian_email || '',
+          street: prefill.guardian_address_street || '',
+          rt: prefill.guardian_address_rt || '0',
+          rw: prefill.guardian_address_rw || '0',
+          village: prefill.guardian_address_village || '',
+          district: prefill.guardian_address_district || '',
+          city: prefill.guardian_address_city_regency || '',
+          province: prefill.guardian_address_province || '',
+          other: prefill.guardian_address_other || '',
+        };
+
+        // ✅ Set state dengan data yang sudah di-mapping
+        setFather(fatherData);
+        setMother(motherData);
+        setGuardian(guardianData);
+
+        // ✅ Kirim data ke parent component setelah prefill
+        if (onDataChange) {
+          const allData = {
+            // Father data
+            father_name: fatherData.name,
+            father_company: fatherData.company,
+            father_occupation: fatherData.occupation,
+            father_phone: fatherData.phone,
+            father_email: fatherData.email,
+            father_address_street: fatherData.street,
+            father_address_rt: fatherData.rt,
+            father_address_rw: fatherData.rw,
+            father_address_village: fatherData.village,
+            father_address_district: fatherData.district,
+            father_address_city_regency: fatherData.city,
+            father_address_province: fatherData.province,
+            father_address_other: fatherData.other,
+            father_company_addresses: fatherData.company,
+
+            // Mother data
+            mother_name: motherData.name,
+            mother_company: motherData.company,
+            mother_occupation: motherData.occupation,
+            mother_phone: motherData.phone,
+            mother_email: motherData.email,
+            mother_address_street: motherData.street,
+            mother_address_rt: motherData.rt,
+            mother_address_rw: motherData.rw,
+            mother_address_village: motherData.village,
+            mother_address_district: motherData.district,
+            mother_address_city_regency: motherData.city,
+            mother_address_province: motherData.province,
+            mother_address_other: motherData.other,
+            mother_company_addresses: motherData.company,
+
+            // Guardian data
+            guardian_name: guardianData.name,
+            relation_to_student: guardianData.relationship,
+            guardian_phone: guardianData.phone,
+            guardian_email: guardianData.email,
+            guardian_address_street: guardianData.street,
+            guardian_address_rt: guardianData.rt,
+            guardian_address_rw: guardianData.rw,
+            guardian_address_village: guardianData.village,
+            guardian_address_district: guardianData.district,
+            guardian_address_city_regency: guardianData.city,
+            guardian_address_province: guardianData.province,
+            guardian_address_other: guardianData.other,
+          };
+
+          onDataChange(allData);
+        }
+
+        hasInitialized.current = true;
+        isInitialPrefill.current = false;
+      }
+    } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
+      // Jika prefill menjadi empty object (reset form), reset semua field
+      console.log('Resetting ParentGuardianSection form');
+
+      const emptyData = {
+        name: '',
+        company: '',
+        occupation: '',
+        phone: '',
+        email: '',
+        street: '',
+        rt: '0',
+        rw: '0',
+        village: '',
+        district: '',
+        city: '',
+        province: '',
+        other: '',
+      };
+
+      setFather(emptyData);
+      setMother(emptyData);
+      setGuardian({ ...emptyData, relationship: '' });
+
+      hasInitialized.current = false;
     }
-  }, [prefill, prefillTrigger, onDataChange]);
+  }, [prefill, onDataChange]);
 
   return (
     <div className={styles.container}>

@@ -36,26 +36,48 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
     }
   }, [sharedData]);
 
+  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
+  const isInitialPrefill = useRef(true);
+  const hasInitialized = useRef(false);
+
+  // Prefill hanya sekali saat component pertama kali mount atau saat prefill berubah signifikan
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-      console.log('Prefilling FacilitiesSection with:', prefill);
+      // Jika ini prefill pertama kali atau prefill berubah signifikan
+      if (isInitialPrefill.current || !hasInitialized.current) {
+        console.log('Initial prefilling FacilitiesSection with:', prefill);
 
-      if (prefill.transportation_id)
-        setSelectedTransportation(prefill.transportation_id);
-      if (prefill.pickup_point_id)
-        setSelectedPickupPoint(prefill.pickup_point_id);
-      if (prefill.pickup_point_custom)
-        setPickupPointCustom(prefill.pickup_point_custom);
+        if (prefill.transportation_id)
+          setSelectedTransportation(prefill.transportation_id);
+        if (prefill.pickup_point_id)
+          setSelectedPickupPoint(prefill.pickup_point_id);
+        if (prefill.pickup_point_custom)
+          setPickupPointCustom(prefill.pickup_point_custom);
 
-      if (prefill.transportation_policy) {
-        setTransportationPolicy(prefill.transportation_policy === 'Signed');
+        if (prefill.transportation_policy) {
+          setTransportationPolicy(prefill.transportation_policy === 'Signed');
+        }
+
+        if (prefill.residence_id) setSelectedResidence(prefill.residence_id);
+
+        if (prefill.residence_hall_policy) {
+          setResidencePolicy(prefill.residence_hall_policy === 'Signed');
+        }
+        
+        hasInitialized.current = true;
+        isInitialPrefill.current = false;
       }
-
-      if (prefill.residence_id) setSelectedResidence(prefill.residence_id);
-
-      if (prefill.residence_hall_policy) {
-        setResidencePolicy(prefill.residence_hall_policy === 'Signed');
-      }
+    } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
+      // Jika prefill menjadi empty object (reset form), reset semua field
+      console.log('Resetting FacilitiesSection form');
+      setSelectedTransportation('');
+      setSelectedPickupPoint('');
+      setPickupPointCustom('');
+      setTransportationPolicy(false);
+      setSelectedResidence('');
+      setResidencePolicy(false);
+      
+      hasInitialized.current = false;
     }
   }, [prefill]);
 
