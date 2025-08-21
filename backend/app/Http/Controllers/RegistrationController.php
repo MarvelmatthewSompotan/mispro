@@ -477,7 +477,22 @@ class RegistrationController extends Controller
                     'is_active' => true,
                 ]);
                 
+                // Create enrollment (sama untuk New dan Old)
+                $enrollment = $student->enrollments()->create([
+                    'class_id' => $schoolClass->class_id,
+                    'semester_id' => $draft->semester_id,
+                    'school_year_id' => $draft->school_year_id,
+                    'program_id' => $program->program_id,
+                    'transport_id' => $transportation ? $transportation->transport_id : null,
+                    'residence_id' => $residenceHall->residence_id,
+                    'residence_hall_policy' => $validated['residence_hall_policy'], 
+                    'transportation_policy' => $validated['transportation_policy'],
+                    'is_active' => true,
+                ]);
                 
+                // Create application form
+                $applicationForm = $this->createApplicationForm($enrollment);
+
                 // Create application form version dengan data snapshot
                 $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
