@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './TermOfPaymentSection.module.css';
 import checkBoxIcon from '../../../assets/CheckBox.png';
 import { getRegistrationOptions } from '../../../services/api';
@@ -15,6 +15,10 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   const [paymentTypeOptions, setPaymentTypeOptions] = useState([]);
   const [paymentMethodOptions, setPaymentMethodOptions] = useState([]);
   const [discountTypeOptions, setDiscountTypeOptions] = useState([]);
+
+  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
+  const isInitialPrefill = useRef(true);
+  const hasInitialized = useRef(false);
 
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
@@ -36,21 +40,34 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
     }
   }, [sharedData]);
 
+  // Prefill hanya sekali saat component pertama kali mount atau saat prefill berubah signifikan
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-      console.log('Prefilling TermOfPaymentSection with:', prefill);
+      // Jika ini prefill pertama kali atau prefill berubah signifikan
+      if (isInitialPrefill.current || !hasInitialized.current) {
+        console.log('Initial prefilling TermOfPaymentSection with:', prefill);
 
-      if (prefill.payment_type) setPaymentType(prefill.payment_type);
-      if (prefill.payment_method) setPaymentMethod(prefill.payment_method);
-      if (prefill.financial_policy_contract) {
-        setFinancialPolicy(prefill.financial_policy_contract === 'Signed');
+        if (prefill.payment_type) setPaymentType(prefill.payment_type);
+        if (prefill.payment_method) setPaymentMethod(prefill.payment_method);
+        if (prefill.financial_policy_contract) {
+          setFinancialPolicy(prefill.financial_policy_contract === 'Signed');
+        }
+        if (prefill.discount_name) setDiscountName(prefill.discount_name);
+        if (prefill.discount_notes) setDiscountNotes(prefill.discount_notes);
+        
+        hasInitialized.current = true;
+        isInitialPrefill.current = false;
       }
-
-      if (prefill.discount_name) setDiscountName(prefill.discount_name);
-
-      if (prefill.discount_notes) {
-        setDiscountNotes(prefill.discount_notes);
-      }
+    } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
+      // Jika prefill menjadi empty object (reset form), reset semua field
+      console.log('Resetting TermOfPaymentSection form');
+      setPaymentType('');
+      setPaymentMethod('');
+      setFinancialPolicy(false);
+      setDiscountName('');
+      setDiscountNotes('');
+      
+      hasInitialized.current = false;
     }
   }, [prefill]);
 

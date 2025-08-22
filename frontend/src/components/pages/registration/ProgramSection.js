@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './ProgramSection.module.css';
 import Select from 'react-select';
 import { getRegistrationOptions } from '../../../services/api';
@@ -14,6 +14,10 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
   const [programOther, setProgramOther] = useState('');
+
+  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
+  const isInitialPrefill = useRef(true);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
     if (sharedData) {
@@ -35,15 +39,32 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
     }
   }, [sharedData]);
 
+  // Prefill hanya sekali saat component pertama kali mount atau saat prefill berubah signifikan
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-      console.log('Prefilling ProgramSection with:', prefill);
+      // Jika ini prefill pertama kali atau prefill berubah signifikan
+      if (isInitialPrefill.current || !hasInitialized.current) {
+        console.log('Initial prefilling ProgramSection with:', prefill);
 
-      if (prefill.section_id) setSelectedSection(prefill.section_id);
-      if (prefill.major_id) setSelectedMajor(prefill.major_id);
-      if (prefill.class_id) setSelectedClass(prefill.class_id);
-      if (prefill.program_id) setSelectedProgram(prefill.program_id);
-      if (prefill.program_other) setProgramOther(prefill.program_other);
+        if (prefill.section_id) setSelectedSection(prefill.section_id);
+        if (prefill.major_id) setSelectedMajor(prefill.major_id);
+        if (prefill.class_id) setSelectedClass(prefill.class_id);
+        if (prefill.program_id) setSelectedProgram(prefill.program_id);
+        if (prefill.program_other) setProgramOther(prefill.program_other);
+
+        hasInitialized.current = true;
+        isInitialPrefill.current = false;
+      }
+    } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
+      // Jika prefill menjadi empty object (reset form), reset semua field
+      console.log('Resetting ProgramSection form');
+      setSelectedSection('');
+      setSelectedMajor('');
+      setSelectedClass('');
+      setSelectedProgram('');
+      setProgramOther('');
+
+      hasInitialized.current = false;
     }
   }, [prefill]);
 

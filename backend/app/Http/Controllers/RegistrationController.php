@@ -476,8 +476,9 @@ class RegistrationController extends Controller
                     'transportation_policy' => $validated['transportation_policy'],
                     'is_active' => true,
                 ]);
-                
-                
+                // Create application form
+                $applicationForm = $this->createApplicationForm($enrollment);
+
                 // Create application form version dengan data snapshot
                 $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
