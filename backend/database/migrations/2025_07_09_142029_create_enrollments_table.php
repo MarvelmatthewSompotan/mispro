@@ -34,6 +34,7 @@ return new class extends Migration
             $table->foreign('pickup_point_id')->references('pickup_point_id')->on('pickup_points')->onDelete('set null');
         });
     }
+    
 
     /**
      * Reverse the migrations.

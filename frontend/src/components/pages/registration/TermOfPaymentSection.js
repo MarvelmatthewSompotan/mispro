@@ -72,13 +72,43 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   }, [prefill]);
 
   const handlePaymentTypeChange = (value) => {
-    setPaymentType(value);
-    onDataChange({ payment_type: value });
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (paymentType === value) {
+      setPaymentType("");
+
+      onDataChange({
+        payment_type: "",
+        // ... other fields
+      });
+    } else {
+      // Jika user memilih option baru
+      setPaymentType(value);
+
+      onDataChange({
+        payment_type: value,
+        // ... other fields
+      });
+    }
   };
 
   const handlePaymentMethodChange = (value) => {
-    setPaymentMethod(value);
-    onDataChange({ payment_method: value });
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (paymentMethod === value) {
+      setPaymentMethod("");
+
+      onDataChange({
+        payment_method: "",
+        // ... other fields
+      });
+    } else {
+      // Jika user memilih option baru
+      setPaymentMethod(value);
+
+      onDataChange({
+        payment_method: value,
+        // ... other fields
+      });
+    }
   };
 
   const handleFinancialPolicyChange = (e) => {
@@ -90,8 +120,23 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   };
 
   const handleDiscountNameChange = (value) => {
-    setDiscountName(value);
-    onDataChange({ discount_name: value });
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (discountName === value) {
+      setDiscountName("");
+
+      onDataChange({
+        discount_name: "",
+        // ... other fields
+      });
+    } else {
+      // Jika user memilih option baru
+      setDiscountName(value);
+
+      onDataChange({
+        discount_name: value,
+        // ... other fields
+      });
+    }
   };
 
   const handleDiscountNotesChange = (e) => {
@@ -120,6 +165,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
                     value={option}
                     checked={paymentType === option}
                     onChange={(e) => handlePaymentTypeChange(e.target.value)}
+                    onClick={() => handlePaymentTypeChange(option)}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
@@ -149,6 +195,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
                     value={option}
                     checked={paymentMethod === option}
                     onChange={(e) => handlePaymentMethodChange(e.target.value)}
+                    onClick={() => handlePaymentMethodChange(option)}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
