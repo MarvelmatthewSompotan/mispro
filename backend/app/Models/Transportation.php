@@ -18,7 +18,6 @@ class Transportation extends Model
 
     protected $fillable = [
         'transport_id',
-        'pickup_point_id',
         'type'
     ];
 
@@ -40,15 +39,6 @@ class Transportation extends Model
             Enrollment::class,
             'transport_id',
             'transport_id',
-        );
-    }
-
-    public function pickupPoint(): BelongsTo
-    {
-        return $this->belongsTo(
-            PickupPoint::class,
-            'pickup_point_id',
-            'pickup_point_id'
         );
     }
 }
