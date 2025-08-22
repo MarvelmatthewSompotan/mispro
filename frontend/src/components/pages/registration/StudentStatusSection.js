@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   searchStudent,
   getStudentLatestApplication,
@@ -16,6 +16,8 @@ const StudentStatusSection = ({
   const [studentSearch, setStudentSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef(null);
 
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
@@ -72,20 +74,24 @@ const StudentStatusSection = ({
       try {
         const results = await searchStudent(value);
         setSearchResults(results);
+        setShowDropdown(true);
       } catch (err) {
         console.error("Error searching student:", err);
         setSearchResults([]);
+        setShowDropdown(false);
       } finally {
         setIsSearching(false);
       }
     } else {
       setSearchResults([]);
+      setShowDropdown(false);
     }
   };
 
   const handleSelectStudent = async (student) => {
     setStudentSearch(student.full_name || student.student_id);
     setSearchResults([]);
+    setShowDropdown(false);
     setIsSearching(true);
 
     try {
@@ -128,6 +134,35 @@ const StudentStatusSection = ({
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Calculate dropdown width based on content
+  const getDropdownWidth = () => {
+    if (searchResults.length === 0) return "auto";
+
+    // Find the longest text to determine width
+    const longestText = searchResults.reduce((longest, student) => {
+      const text = `${student.full_name} (${student.student_id})`;
+      return text.length > longest.length ? text : longest;
+    }, "");
+
+    // Estimate width based on character count (roughly 8px per character)
+    const estimatedWidth = Math.max(longestText.length * 8, 300); // Minimum 300px
+    return `${estimatedWidth}px`;
   };
 
   return (
@@ -173,60 +208,66 @@ const StudentStatusSection = ({
                 <span className={styles.statusLabel}>{option}</span>
               </label>
 
-              {/* Show dropdown-like field (input with datalist) only for Old student status */}
+              {/* Show unified search field with popup dropdown for Old student status */}
               {option === "Old" && status === "Old" && (
-                <div className={styles.studentIdField}>
+                <div className={styles.studentIdField} ref={searchRef}>
                   <label htmlFor="studentSearch" className={styles.statusLabel}>
                     Search Student
                   </label>
-                  <input
-                    id="studentSearch"
-                    className={styles.studentIdValue}
-                    type="text"
-                    value={studentSearch}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    placeholder="Enter Name or ID"
-                    style={{
-                      border: "none",
-                      outline: "none",
-                      background: "transparent",
-                      fontFamily: "Poppins, Arial, sans-serif",
-                      fontWeight: "bold",
-                      fontSize: 16,
-                      padding: 3,
-                      margin: 0,
-                      width: "auto",
-                      minWidth: 240,
-                      maxWidth: "100%",
-                    }}
-                  />
-                  {isSearching && (
-                    <div className={styles.searching}>Searching...</div>
-                  )}
-                  {searchResults.length > 0 && (
-                    <select
-                      className={styles.searchResultsSelect}
-                      value=""
-                      onChange={(e) => {
-                        const picked = searchResults.find(
-                          (s) => s.student_id === e.target.value
-                        );
-                        if (picked) handleSelectStudent(picked);
-                      }}
-                    >
-                      <option value="" disabled>
-                        Select a student
-                      </option>
-                      {searchResults.map((student) => (
-                        <option
-                          key={student.student_id}
-                          value={student.student_id}
-                        >
-                          {`${student.full_name} (${student.student_id})`}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  <div className={styles.searchContainer}>
+                    <div className={styles.searchInputRow}>
+                      <input
+                        id="studentSearch"
+                        className={styles.studentIdValue}
+                        type="text"
+                        value={studentSearch}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        onFocus={() =>
+                          searchResults.length > 0 && setShowDropdown(true)
+                        }
+                        placeholder="Enter Name or ID"
+                        style={{
+                          border: "none",
+                          outline: "none",
+                          background: "transparent",
+                          fontFamily: "Poppins, Arial, sans-serif",
+                          fontWeight: "bold",
+                          fontSize: 16,
+                          padding: 3,
+                          margin: 0,
+                          width: "auto",
+                          minWidth: 240,
+                          maxWidth: "100%",
+                        }}
+                      />
+                      {isSearching && (
+                        <div className={styles.searching}>Searching...</div>
+                      )}
+                    </div>
+
+                    {/* Popup Dropdown */}
+                    {showDropdown && searchResults.length > 0 && (
+                      <div
+                        className={styles.searchDropdown}
+                        style={{ width: getDropdownWidth() }}
+                      >
+                        {searchResults.map((student) => (
+                          <div
+                            key={student.student_id}
+                            className={styles.dropdownItem}
+                            onClick={() => handleSelectStudent(student)}
+                          >
+                            <span className={styles.studentName}>
+                              {student.full_name}
+                            </span>
+                            <span className={styles.studentId}>
+                              ({student.student_id})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

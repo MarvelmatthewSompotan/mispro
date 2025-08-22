@@ -19,6 +19,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
   const isInitialPrefill = useRef(true);
   const hasInitialized = useRef(false);
 
+  // add near top-level of the component
+  const OTHER = "OTHER";
+
   useEffect(() => {
     if (sharedData) {
       setSections(sharedData.sections || []);
@@ -49,7 +52,11 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
         if (prefill.section_id) setSelectedSection(prefill.section_id);
         if (prefill.major_id) setSelectedMajor(prefill.major_id);
         if (prefill.class_id) setSelectedClass(prefill.class_id);
-        if (prefill.program_id) setSelectedProgram(prefill.program_id);
+        if (prefill.program_id) {
+          setSelectedProgram(prefill.program_id);
+        } else if (prefill.program_other) {
+          setSelectedProgram(OTHER);
+        }
         if (prefill.program_other) setProgramOther(prefill.program_other);
 
         hasInitialized.current = true;
@@ -70,17 +77,67 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
 
   const handleSectionChange = (opt) => {
     const value = opt ? opt.value : "";
-    setSelectedSection(value);
-    setSelectedMajor("");
-    setSelectedClass("");
 
-    onDataChange({
-      section_id: value,
-      major_id: "",
-      class_id: "",
-      program_id: selectedProgram,
-      program_other: programOther,
-    });
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (selectedSection === value) {
+      setSelectedSection("");
+      setSelectedMajor("");
+      setSelectedClass("");
+
+      onDataChange({
+        section_id: value,
+        major_id: "",
+        class_id: "",
+        program_id: selectedProgram === OTHER ? null : selectedProgram,
+        program_other: programOther,
+      });
+    } else {
+      // Jika user memilih option baru
+      setSelectedSection(value);
+
+      // Auto-select grade berdasarkan section
+      let autoGrade = "";
+      const selectedSectionData = sections.find(
+        (sec) => sec.section_id === value
+      );
+
+      if (selectedSectionData) {
+        const sectionName = selectedSectionData.name;
+        if (sectionName === "ECP") {
+          autoGrade = "N";
+        } else if (sectionName === "Elementary School") {
+          autoGrade = "1";
+        } else if (sectionName === "Middle School") {
+          autoGrade = "7";
+        } else if (sectionName === "High School") {
+          autoGrade = "10";
+        }
+      }
+
+      // Cari class_id yang sesuai dengan section dan grade
+      let autoClass = "";
+      if (autoGrade && value) {
+        const autoClassData = classes.find(
+          (cls) => cls.section_id === value && cls.grade === autoGrade
+        );
+        if (autoClassData) {
+          autoClass = autoClassData.class_id;
+          setSelectedClass(autoClassData.class_id);
+        }
+      } else {
+        setSelectedClass("");
+      }
+
+      setSelectedMajor("");
+
+      onDataChange({
+        section_id: value,
+        major_id: "",
+        class_id: autoClass,
+        program_id: selectedProgram === OTHER ? null : selectedProgram,
+        program_other: programOther,
+      });
+    }
   };
 
   const handleMajorChange = (opt) => {
@@ -90,7 +147,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
       section_id: selectedSection,
       major_id: value,
       class_id: selectedClass,
-      program_id: selectedProgram,
+      program_id: selectedProgram === OTHER ? null : selectedProgram,
       program_other: programOther,
     });
   };
@@ -111,33 +168,46 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
       section_id: selectedSection,
       major_id: selectedMajor,
       class_id: value,
-      program_id: selectedProgram,
+      program_id: selectedProgram === OTHER ? null : selectedProgram,
       program_other: programOther,
     });
   };
 
   const handleProgramChange = (opt) => {
     const value = opt ? opt.value : "";
-    setSelectedProgram(value);
 
-    if (value !== "Other") {
+    // deselect if clicking the same radio
+    if (selectedProgram === value) {
+      setSelectedProgram("");
       setProgramOther("");
       onDataChange({
         section_id: selectedSection,
         major_id: selectedMajor,
         class_id: selectedClass,
-        program_id: value,
+        program_id: "",
         program_other: "",
       });
     } else {
-      setProgramOther(value);
-      onDataChange({
-        section_id: selectedSection,
-        major_id: selectedMajor,
-        class_id: selectedClass,
-        program_id: null,
-        program_other: programOther,
-      });
+      setSelectedProgram(value);
+
+      if (value !== OTHER) {
+        setProgramOther("");
+        onDataChange({
+          section_id: selectedSection,
+          major_id: selectedMajor,
+          class_id: selectedClass,
+          program_id: value,
+          program_other: "",
+        });
+      } else {
+        onDataChange({
+          section_id: selectedSection,
+          major_id: selectedMajor,
+          class_id: selectedClass,
+          program_id: null,
+          program_other: programOther,
+        });
+      }
     }
   };
 
@@ -147,7 +217,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
   }));
 
   const programOptions = programs.map((prog) => ({
-    value: prog.name === "Other" ? "" : prog.program_id,
+    value: prog.name === "Other" ? OTHER : prog.program_id,
     label: prog.name,
   }));
 
@@ -218,6 +288,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
                   value={option.value}
                   checked={selectedSection === option.value}
                   onChange={() => handleSectionChange({ value: option.value })}
+                  onClick={() => handleSectionChange({ value: option.value })}
                   style={{
                     opacity: 0,
                     position: "absolute",
@@ -296,6 +367,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
                   value={option.value}
                   checked={selectedProgram === option.value}
                   onChange={() => handleProgramChange({ value: option.value })}
+                  onClick={() => handleProgramChange({ value: option.value })}
                   style={{
                     opacity: 0,
                     position: "absolute",

@@ -83,17 +83,35 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
   }, [prefill]);
 
   const handleTransportationChange = (value) => {
-    setSelectedTransportation(String(value));
-    setSelectedPickupPoint("");
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (selectedTransportation === String(value)) {
+      setSelectedTransportation("");
+      setSelectedPickupPoint("");
+      setPickupPointCustom("");
 
-    onDataChange({
-      transportation_id: value != null ? Number(value) : null,
-      pickup_point_id: null,
-      pickup_point_custom: "",
-      transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
-      residence_id: selectedResidence ? Number(selectedResidence) : null,
-      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
-    });
+      onDataChange({
+        transportation_id: null,
+        pickup_point_id: null,
+        pickup_point_custom: "",
+        transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
+        residence_id: selectedResidence ? Number(selectedResidence) : null,
+        residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
+      });
+    } else {
+      // Jika user memilih option baru
+      setSelectedTransportation(String(value));
+      setSelectedPickupPoint("");
+      setPickupPointCustom("");
+
+      onDataChange({
+        transportation_id: value != null ? Number(value) : null,
+        pickup_point_id: null,
+        pickup_point_custom: "",
+        transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
+        residence_id: selectedResidence ? Number(selectedResidence) : null,
+        residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
+      });
+    }
   };
 
   const handlePickupPointChange = (value) => {
@@ -153,22 +171,41 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
   };
 
   const handleResidenceChange = (value) => {
-    setSelectedResidence(String(value));
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (selectedResidence === String(value)) {
+      setSelectedResidence("");
 
-    // Send data immediately
-    onDataChange({
-      transportation_id: selectedTransportation
-        ? Number(selectedTransportation)
-        : null,
-      pickup_point_id:
-        selectedPickupPoint && String(selectedPickupPoint).trim() !== ""
-          ? Number(selectedPickupPoint)
+      onDataChange({
+        transportation_id: selectedTransportation
+          ? Number(selectedTransportation)
           : null,
-      pickup_point_custom: pickupPointCustom,
-      transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
-      residence_id: value != null ? Number(value) : null,
-      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
-    });
+        pickup_point_id:
+          selectedPickupPoint && String(selectedPickupPoint).trim() !== ""
+            ? Number(selectedPickupPoint)
+            : null,
+        pickup_point_custom: pickupPointCustom,
+        transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
+        residence_id: null,
+        residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
+      });
+    } else {
+      // Jika user memilih option baru
+      setSelectedResidence(String(value));
+
+      onDataChange({
+        transportation_id: selectedTransportation
+          ? Number(selectedTransportation)
+          : null,
+        pickup_point_id:
+          selectedPickupPoint && String(selectedPickupPoint).trim() !== ""
+            ? Number(selectedPickupPoint)
+            : null,
+        pickup_point_custom: pickupPointCustom,
+        transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
+        residence_id: value != null ? Number(value) : null,
+        residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
+      });
+    }
   };
 
   const handleResidencePolicy = (e) => {
@@ -234,6 +271,9 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
                   onChange={() =>
                     handleTransportationChange(transport.transport_id)
                   }
+                  onClick={() =>
+                    handleTransportationChange(transport.transport_id)
+                  }
                   className={styles.hiddenRadio}
                 />
                 <div className={styles.radioButton}>
@@ -249,7 +289,14 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
           ))}
 
           {/* Pickup Point Field - Show only for school bus type */}
-          {selectedTransportation && (
+          {(() => {
+            if (!selectedTransportation) return false;
+            const selectedTransport = transportations.find(
+              (t) => t.transport_id === Number(selectedTransportation)
+            );
+            if (!selectedTransport) return false;
+            return selectedTransport.type !== "Own car";
+          })() && (
             <div ref={pickupInputRef} className={`${styles.pickupPointField}`}>
               <div className={styles.label}>Pickup point</div>
               <select
@@ -275,17 +322,26 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
             </div>
           )}
 
-          {/* Custom Pickup Point Input */}
-          <div className={styles.optionItem}>
-            <label className={styles.label}>Custom Pickup Point</label>
-            <input
-              type="text"
-              value={pickupPointCustom}
-              onChange={handlePickupPointCustom}
-              placeholder="Enter custom pickup point"
-              className={styles.customInput}
-            />
-          </div>
+          {/* Custom Pickup Point Input - Show only for school bus type */}
+          {(() => {
+            if (!selectedTransportation) return false;
+            const selectedTransport = transportations.find(
+              (t) => t.transport_id === Number(selectedTransportation)
+            );
+            if (!selectedTransport) return false;
+            return selectedTransport.type !== "Own car";
+          })() && (
+            <div className={styles.optionItem}>
+              <label className={styles.label}>Custom Pickup Point</label>
+              <input
+                type="text"
+                value={pickupPointCustom}
+                onChange={handlePickupPointCustom}
+                placeholder="Enter custom pickup point"
+                className={styles.customInput}
+              />
+            </div>
+          )}
 
           {/* Transportation Policy Checkbox */}
           <div className={styles.optionItem}>
@@ -327,6 +383,7 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
                   value={String(residence.residence_id)}
                   checked={selectedResidence === String(residence.residence_id)}
                   onChange={() => handleResidenceChange(residence.residence_id)}
+                  onClick={() => handleResidenceChange(residence.residence_id)}
                   className={styles.hiddenRadio}
                 />
                 <div className={styles.radioButton}>
