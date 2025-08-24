@@ -3,20 +3,19 @@ import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
 import { getRegistrationOptions } from "../../../services/api";
 
+const genderOptions = ["MALE", "FEMALE"];
+const citizenshipOptions = ["Indonesia", "Non Indonesia"];
+
 const StudentInformationSection = ({
+  prefill,
   onDataChange,
   onValidationChange,
   errors,
   forceError,
-  sharedData, // Tambahkan prop sharedData
 }) => {
-  // State untuk dropdown options dari API
   const [academicStatusOptions, setAcademicStatusOptions] = useState([]);
-  const [genderOptions, setGenderOptions] = useState([]);
-  const [citizenshipOptions, setCitizenshipOptions] = useState([]);
-
-  // State untuk form fields
   const [academicStatus, setAcademicStatus] = useState("");
+
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(false);
   const [citizenshipError, setCitizenshipError] = useState(false);
@@ -24,7 +23,7 @@ const StudentInformationSection = ({
   const [lastName, setLastName] = useState("");
   const [nickname, setNickname] = useState("");
   const [nisn, setNisn] = useState("");
-  const [nkk, setNkk] = useState("");
+  const [nik, setNik] = useState("");
   const [kitas, setKitas] = useState("");
   const [foreignCountry, setForeignCountry] = useState("");
   const [gender, setGender] = useState("");
@@ -47,40 +46,176 @@ const StudentInformationSection = ({
   const [province, setProvince] = useState("");
   const [otherAddress, setOtherAddress] = useState("");
 
-  // State untuk mengakumulasi semua data
-  const [allStudentData, setAllStudentData] = useState({});
-
-  // Fetch dropdown data dari API
+  // Fetch dropdown data
   useEffect(() => {
-    if (sharedData) {
-      // Gunakan shared data jika tersedia
-      setAcademicStatusOptions(sharedData.academic_status || []);
-      setGenderOptions(["MALE", "FEMALE"]); // Hardcoded karena tidak ada di API
-      setCitizenshipOptions(["Indonesia", "Non Indonesia"]); // Hardcoded karena tidak ada di API
-    } else {
-      // Fallback ke API call jika shared data tidak tersedia
-      getRegistrationOptions()
-        .then((data) => {
-          setAcademicStatusOptions(data.academic_status || []);
-          setGenderOptions(["MALE", "FEMALE"]);
-          setCitizenshipOptions(["Indonesia", "Non Indonesia"]);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch registration options:", err);
-        });
-    }
-  }, [sharedData]);
+    getRegistrationOptions()
+      .then((data) => {
+        setAcademicStatusOptions(data.academic_status || []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch academic status options:", err);
+      });
+  }, []);
 
-  // Function untuk mengupdate data dan mengirim ke parent
-  const updateAndSendData = (field, value) => {
-    const newData = { ...allStudentData, [field]: value };
-    setAllStudentData(newData);
-    onDataChange("studentInfo", newData);
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log("Prefilling StudentInformationSection with:", prefill);
+
+      if (prefill.first_name) setFirstName(prefill.first_name);
+      if (prefill.middle_name) setMiddleName(prefill.middle_name);
+      if (prefill.last_name) setLastName(prefill.last_name);
+      if (prefill.nickname) setNickname(prefill.nickname);
+      if (prefill.nisn) setNisn(prefill.nisn);
+      if (prefill.nik) setNik(prefill.nik);
+      if (prefill.kitas) setKitas(prefill.kitas);
+      if (prefill.country) setForeignCountry(prefill.country);
+      if (prefill.gender) setGender(prefill.gender);
+      if (prefill.family_rank) setRank(prefill.family_rank);
+      if (prefill.citizenship) setCitizenship(prefill.citizenship);
+      if (prefill.religion) setReligion(prefill.religion);
+      if (prefill.place_of_birth) setPlaceOfBirth(prefill.place_of_birth);
+      if (prefill.date_of_birth) setDateOfBirth(prefill.date_of_birth);
+      if (prefill.email) setEmail(prefill.email);
+      if (prefill.previous_school) setPreviousSchool(prefill.previous_school);
+      if (prefill.phone_number) setPhone(prefill.phone_number);
+      if (prefill.academic_status) setAcademicStatus(prefill.academic_status);
+      if (prefill.academic_status_other)
+        setAcademicStatusOther(prefill.academic_status_other);
+      if (prefill.street) setStreet(prefill.street);
+      if (prefill.rt) setRt(prefill.rt);
+      if (prefill.rw) setRw(prefill.rw);
+      if (prefill.village) setVillage(prefill.village);
+      if (prefill.district) setDistrict(prefill.district);
+      if (prefill.city_regency) setCity(prefill.city_regency);
+      if (prefill.province) setProvince(prefill.province);
+      if (prefill.other) setOtherAddress(prefill.other);
+    }
+  }, [prefill]);
+
+  const handleFirstName = (value) => {
+    setFirstName(value);
+    onDataChange({ first_name: value });
   };
 
-  const handleChange = (value) => {
-    setAcademicStatus(value);
-    updateAndSendData("academic_status", value);
+  const handleMiddleName = (value) => {
+    setMiddleName(value);
+    onDataChange({ middle_name: value });
+  };
+
+  const handleLastName = (value) => {
+    setLastName(value);
+    onDataChange({ last_name: value });
+  };
+
+  const handleNickname = (value) => {
+    setNickname(value);
+    onDataChange({ nickname: value });
+  };
+
+  const handleNisn = (value) => {
+    setNisn(value);
+    onDataChange({ nisn: value });
+  };
+
+  const handleNik = (value) => {
+    setNik(value);
+    onDataChange({ nik: value });
+  };
+
+  const handleKitas = (value) => {
+    setKitas(value);
+    onDataChange({ kitas: value });
+  };
+
+  const handleForeignCountry = (value) => {
+    setForeignCountry(value);
+    onDataChange({ country: value });
+  };
+
+  const handleGender = (value) => {
+    setGender(value);
+    onDataChange({ gender: value });
+  };
+
+  const handleFamilyRank = (value) => {
+    setRank(value);
+    onDataChange({ family_rank: value });
+  };
+
+  const handleCitizenship = (opt) => {
+    const value = opt ? opt.value : "";
+    setCitizenship(value);
+    onDataChange({ citizenship: value });
+  };
+
+  const handleReligion = (value) => {
+    setReligion(value);
+    onDataChange({ religion: value });
+  };
+
+  const handlePlaceOfBirth = (value) => {
+    setPlaceOfBirth(value);
+    onDataChange({ place_of_birth: value });
+  };
+
+  const handleDateOfBirth = (value) => {
+    setDateOfBirth(value);
+    onDataChange({ date_of_birth: value });
+  };
+
+  const handleEmail = (value) => {
+    setEmail(value);
+    onDataChange({ email: value });
+  };
+
+  const handlePreviousSchool = (value) => {
+    setPreviousSchool(value);
+    onDataChange({ previous_school: value });
+  };
+
+  const handlePhone = (value) => {
+    setPhone(value);
+    onDataChange({ phone_number: value });
+  };
+
+  const handleStreet = (value) => {
+    setStreet(value);
+    onDataChange({ street: value });
+  };
+
+  const handleRt = (value) => {
+    setRt(value);
+    onDataChange({ rt: value });
+  };
+
+  const handleRw = (value) => {
+    setRw(value);
+    onDataChange({ rw: value });
+  };
+
+  const handleVillage = (value) => {
+    setVillage(value);
+    onDataChange({ village: value });
+  };
+
+  const handleDistrict = (value) => {
+    setDistrict(value);
+    onDataChange({ district: value });
+  };
+
+  const handleCity = (value) => {
+    setCity(value);
+    onDataChange({ city_regency: value });
+  };
+
+  const handleProvince = (value) => {
+    setProvince(value);
+    onDataChange({ province: value });
+  };
+
+  const handleOtherAddress = (value) => {
+    setOtherAddress(value);
+    onDataChange({ other: value });
   };
 
   // Kirim status validasi ke parent component
@@ -136,23 +271,26 @@ const StudentInformationSection = ({
         }
 
         // Hitung umur dalam tahun dan bulan (sementara, nanti akan diganti backend)
-        const years = now.getFullYear() - dob.getFullYear();
-        const months = now.getMonth() - dob.getMonth();
+        let years = now.getFullYear() - dob.getFullYear();
+        let months = now.getMonth() - dob.getMonth();
 
         if (months < 0 || (months === 0 && now.getDate() < dob.getDate())) {
           years--;
           months += 12;
         }
 
-        setAge(`${years} Tahun, ${months} Bulan`);
+        const calculatedAge = `${years} Tahun, ${months} Bulan`;
+        setAge(calculatedAge);
+        onDataChange({ age: calculatedAge });
       } catch (error) {
         console.error("Error calculating age:", error);
         setAge("");
       }
     } else {
       setAge("");
+      onDataChange({ age: "" });
     }
-  }, [dateOfBirth]);
+  }, [dateOfBirth, onDataChange]);
 
   return (
     <div className={styles.container}>
@@ -196,8 +334,7 @@ const StudentInformationSection = ({
                     type="text"
                     value={firstName}
                     onChange={(e) => {
-                      setFirstName(e.target.value);
-                      updateAndSendData("first_name", e.target.value);
+                      handleFirstName(e.target.value);
                       if (firstNameError && e.target.value.trim()) {
                         setFirstNameError(false);
                       }
@@ -221,10 +358,7 @@ const StudentInformationSection = ({
                 className={`${styles.label} ${middleName ? "hasValue" : ""}`}
                 type="text"
                 value={middleName}
-                onChange={(e) => {
-                  setMiddleName(e.target.value);
-                  updateAndSendData("middle_name", e.target.value);
-                }}
+                onChange={(e) => handleMiddleName(e.target.value)}
                 placeholder="Middle name"
               />
             </div>
@@ -239,10 +373,7 @@ const StudentInformationSection = ({
                 className={`${styles.label} ${lastName ? "hasValue" : ""}`}
                 type="text"
                 value={lastName}
-                onChange={(e) => {
-                  setLastName(e.target.value);
-                  updateAndSendData("last_name", e.target.value);
-                }}
+                onChange={(e) => handleLastName(e.target.value)}
                 placeholder="Last name"
               />
             </div>
@@ -257,10 +388,7 @@ const StudentInformationSection = ({
                 }`}
                 type="text"
                 value={nickname}
-                onChange={(e) => {
-                  setNickname(e.target.value);
-                  updateAndSendData("nickname", e.target.value);
-                }}
+                onChange={(e) => handleNickname(e.target.value)}
                 placeholder="Nickname"
               />
             </div>
@@ -307,8 +435,7 @@ const StudentInformationSection = ({
                         : null
                     }
                     onChange={(opt) => {
-                      setCitizenship(opt ? opt.value : "");
-                      updateAndSendData("citizenship", opt ? opt.value : "");
+                      handleCitizenship(opt);
                       if (citizenshipError && opt) {
                         setCitizenshipError(false);
                       }
@@ -355,10 +482,7 @@ const StudentInformationSection = ({
                 }`}
                 type="text"
                 value={religion}
-                onChange={(e) => {
-                  setReligion(e.target.value);
-                  updateAndSendData("religion", e.target.value);
-                }}
+                onChange={(e) => handleReligion(e.target.value)}
                 placeholder="Religion"
               />
             </div>
@@ -373,10 +497,7 @@ const StudentInformationSection = ({
                 }`}
                 type="text"
                 value={placeOfBirth}
-                onChange={(e) => {
-                  setPlaceOfBirth(e.target.value);
-                  updateAndSendData("place_of_birth", e.target.value);
-                }}
+                onChange={(e) => handlePlaceOfBirth(e.target.value)}
                 placeholder="Place of birth"
               />
             </div>
@@ -389,11 +510,7 @@ const StudentInformationSection = ({
                   id="dateOfBirth"
                   type="date"
                   value={dateOfBirth}
-                  onChange={(e) => {
-                    const selectedDate = e.target.value;
-                    setDateOfBirth(selectedDate);
-                    updateAndSendData("date_of_birth", e.target.value);
-                  }}
+                  onChange={(e) => handleDateOfBirth(e.target.value)}
                   className={`${styles.dateInput} ${
                     dateOfBirth ? "hasValue" : ""
                   }`}
@@ -433,10 +550,7 @@ const StudentInformationSection = ({
                   }`}
                   type="text"
                   value={foreignCountry}
-                  onChange={(e) => {
-                    setForeignCountry(e.target.value);
-                    updateAndSendData("country", e.target.value);
-                  }}
+                  onChange={(e) => handleForeignCountry(e.target.value)}
                   placeholder="Country of Origin"
                 />
               </div>
@@ -455,10 +569,7 @@ const StudentInformationSection = ({
                   }`}
                   type="text"
                   value={kitas}
-                  onChange={(e) => {
-                    setKitas(e.target.value);
-                    updateAndSendData("kitas", e.target.value);
-                  }}
+                  onChange={(e) => handleKitas(e.target.value)}
                   placeholder="KITAS"
                 />
               </div>
@@ -472,27 +583,21 @@ const StudentInformationSection = ({
                 className={`${styles.label} ${nisn ? "hasValue" : ""}`}
                 type="text"
                 value={nisn}
-                onChange={(e) => {
-                  setNisn(e.target.value);
-                  updateAndSendData("nisn", e.target.value);
-                }}
+                onChange={(e) => handleNisn(e.target.value)}
                 placeholder="NISN"
               />
             </div>
             {citizenship === "Indonesia" && (
               <div className={styles.nicknameField}>
-                <label className={styles.label} htmlFor="nkk">
+                <label className={styles.label} htmlFor="nik">
                   Nomor Induk Kependudukan (NIK)
                 </label>
                 <input
-                  id="nkk"
-                  className={`${styles.label} ${nkk ? "hasValue" : ""}`}
+                  id="nik"
+                  className={`${styles.label} ${nik ? "hasValue" : ""}`}
                   type="text"
-                  value={nkk}
-                  onChange={(e) => {
-                    setNkk(e.target.value);
-                    updateAndSendData("nik", e.target.value);
-                  }}
+                  value={nik}
+                  onChange={(e) => handleNik(e.target.value)}
                   placeholder="NIK"
                 />
               </div>
@@ -511,10 +616,7 @@ const StudentInformationSection = ({
                 }))}
                 placeholder="Select gender"
                 value={gender ? { value: gender, label: gender } : null}
-                onChange={(opt) => {
-                  setGender(opt ? opt.value : "");
-                  updateAndSendData("gender", opt ? opt.value : "");
-                }}
+                onChange={(opt) => handleGender(opt ? opt.value : "")}
                 isClearable
                 styles={{
                   control: (base) => ({
@@ -548,16 +650,7 @@ const StudentInformationSection = ({
                 className={`${styles.valueSmall} ${rank ? "hasValue" : ""}`}
                 type="number"
                 value={rank}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  const numValue = parseInt(value);
-                  updateAndSendData("family_rank", value);
-
-                  // Hanya terima angka 1 ke atas
-                  if (value === "" || (numValue >= 1 && numValue <= 99)) {
-                    setRank(value);
-                  }
-                }}
+                onChange={(e) => handleFamilyRank(e.target.value)}
                 placeholder="1"
                 min="1"
                 max="99"
@@ -589,10 +682,7 @@ const StudentInformationSection = ({
                 }`}
                 type="email"
                 value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  updateAndSendData("email", e.target.value);
-                }}
+                onChange={(e) => handleEmail(e.target.value)}
                 placeholder="Email address"
                 style={{ borderBottom: "none", boxShadow: "none" }}
               />
@@ -608,10 +698,7 @@ const StudentInformationSection = ({
                 }`}
                 type="text"
                 value={previousSchool}
-                onChange={(e) => {
-                  setPreviousSchool(e.target.value);
-                  updateAndSendData("previous_school", e.target.value);
-                }}
+                onChange={(e) => handlePreviousSchool(e.target.value)}
                 placeholder="Previous School"
               />
             </div>
@@ -628,10 +715,7 @@ const StudentInformationSection = ({
                 }`}
                 type="text"
                 value={phone}
-                onChange={(e) => {
-                  setPhone(e.target.value);
-                  updateAndSendData("phone_number", e.target.value);
-                }}
+                onChange={(e) => handlePhone(e.target.value)}
                 placeholder="Phone number"
               />
             </div>
@@ -643,40 +727,46 @@ const StudentInformationSection = ({
                 <div className={styles.academicStatusOption}>
                   <Select
                     id="academicStatus"
-                    options={academicStatusOptions
-                      .filter((opt) => opt !== "OTHER")
-                      .map((opt) => ({
-                        value: opt,
-                        label: opt,
-                      }))}
+                    options={academicStatusOptions.map((opt) => ({
+                      value: opt,
+                      label: opt,
+                    }))}
                     placeholder="Select status"
                     value={
-                      academicStatus && academicStatus !== "OTHER"
+                      // ✅ PERBAIKAN: Hapus kondisi academicStatus !== 'OTHER'
+                      academicStatus
                         ? { value: academicStatus, label: academicStatus }
                         : null
                     }
                     onChange={(opt) => {
                       const selectedValue = opt ? opt.value : "";
-                      setAcademicStatus(selectedValue);
 
-                      if (selectedValue !== "OTHER") {
+                      // ✅ PERBAIKAN: Handle semua kasus termasuk 'OTHER'
+                      if (selectedValue === "OTHER") {
+                        setAcademicStatus("OTHER");
+                        // setAcademicStatusOther(''); // ← Hapus baris ini
+                        onDataChange({
+                          academic_status: "OTHER",
+                          academic_status_other: academicStatusOther, // ← Gunakan nilai yang sudah ada
+                        });
+                      } else {
+                        // Jika pilih status lain, clear OTHER
+                        setAcademicStatus(selectedValue);
                         setAcademicStatusOther("");
-                        updateAndSendData("academic_status_other", "");
+                        onDataChange({
+                          academic_status: selectedValue,
+                          academic_status_other: "",
+                        });
                       }
-                      handleChange(selectedValue);
                     }}
                     isClearable
                     styles={{
                       control: (base) => ({
                         ...base,
-                        fontWeight:
-                          academicStatus && academicStatus !== "Other"
-                            ? "bold"
-                            : "400",
-                        color:
-                          academicStatus && academicStatus !== "Other"
-                            ? "#000"
-                            : "rgba(128,128,128,0.6)",
+                        fontWeight: academicStatus ? "bold" : "400", // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
+                        color: academicStatus
+                          ? "#000"
+                          : "rgba(128,128,128,0.6)",
                         border: "none",
                         boxShadow: "none",
                         borderRadius: 0,
@@ -685,14 +775,10 @@ const StudentInformationSection = ({
                       }),
                       singleValue: (base) => ({
                         ...base,
-                        fontWeight:
-                          academicStatus && academicStatus !== "Other"
-                            ? "bold"
-                            : "400",
-                        color:
-                          academicStatus && academicStatus !== "Other"
-                            ? "#000"
-                            : "rgba(128,128,128,0.6)",
+                        fontWeight: academicStatus ? "bold" : "400", // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
+                        color: academicStatus
+                          ? "#000"
+                          : "rgba(128,128,128,0.6)",
                       }),
                       placeholder: (base) => ({
                         ...base,
@@ -711,25 +797,32 @@ const StudentInformationSection = ({
                       onChange={(e) => {
                         if (e.target.checked) {
                           setAcademicStatus("OTHER");
-                          // Clear academic_status_other saat switch ke OTHER
-                          setAcademicStatusOther("");
-                          updateAndSendData("academic_status_other", "");
+                          // setAcademicStatusOther(''); // ← Hapus baris ini
+                          onDataChange({
+                            academic_status: "OTHER",
+                            academic_status_other: academicStatusOther, // ← Gunakan nilai yang sudah ada
+                          });
                         }
                       }}
                       className={styles.hiddenRadio}
                     />
                     <span className={styles.otherText}>Other</span>
+
+                    {/* ✅ Tampilkan input field jika OTHER dipilih */}
                     {academicStatus === "OTHER" && (
                       <input
                         className={styles.otherInput}
                         type="text"
                         value={academicStatusOther}
                         onChange={(e) => {
-                          setAcademicStatusOther(e.target.value);
-                          updateAndSendData(
-                            "academic_status_other",
-                            e.target.value
-                          );
+                          const value = e.target.value;
+                          setAcademicStatusOther(value);
+
+                          // ✅ Kirim kedua field sekaligus
+                          onDataChange({
+                            academic_status: "OTHER",
+                            academic_status_other: value,
+                          });
                         }}
                         placeholder="Enter academic status"
                       />
@@ -754,10 +847,7 @@ const StudentInformationSection = ({
                   }`}
                   type="text"
                   value={street}
-                  onChange={(e) => {
-                    setStreet(e.target.value);
-                    updateAndSendData("street", e.target.value);
-                  }}
+                  onChange={(e) => handleStreet(e.target.value)}
                   placeholder="Street"
                 />
               </div>
@@ -771,10 +861,7 @@ const StudentInformationSection = ({
                     className={`${styles.label} ${rt ? "hasValue" : ""}`}
                     type="text"
                     value={rt}
-                    onChange={(e) => {
-                      setRt(e.target.value);
-                      updateAndSendData("rt", e.target.value);
-                    }}
+                    onChange={(e) => handleRt(e.target.value)}
                     placeholder="RT"
                   />
                 </div>
@@ -787,10 +874,7 @@ const StudentInformationSection = ({
                     className={`${styles.label} ${rw ? "hasValue" : ""}`}
                     type="text"
                     value={rw}
-                    onChange={(e) => {
-                      setRw(e.target.value);
-                      updateAndSendData("rw", e.target.value);
-                    }}
+                    onChange={(e) => handleRw(e.target.value)}
                     placeholder="RW"
                   />
                 </div>
@@ -808,10 +892,7 @@ const StudentInformationSection = ({
                   }`}
                   type="text"
                   value={village}
-                  onChange={(e) => {
-                    setVillage(e.target.value);
-                    updateAndSendData("village", e.target.value);
-                  }}
+                  onChange={(e) => handleVillage(e.target.value)}
                   placeholder="Village"
                 />
               </div>
@@ -826,10 +907,7 @@ const StudentInformationSection = ({
                   }`}
                   type="text"
                   value={district}
-                  onChange={(e) => {
-                    setDistrict(e.target.value);
-                    updateAndSendData("district", e.target.value);
-                  }}
+                  onChange={(e) => handleDistrict(e.target.value)}
                   placeholder="District"
                 />
               </div>
@@ -846,10 +924,7 @@ const StudentInformationSection = ({
                   }`}
                   type="text"
                   value={city}
-                  onChange={(e) => {
-                    setCity(e.target.value);
-                    updateAndSendData("city_regency", e.target.value);
-                  }}
+                  onChange={(e) => handleCity(e.target.value)}
                   placeholder="City/Regency"
                 />
               </div>
@@ -864,10 +939,7 @@ const StudentInformationSection = ({
                   }`}
                   type="text"
                   value={province}
-                  onChange={(e) => {
-                    setProvince(e.target.value);
-                    updateAndSendData("province", e.target.value);
-                  }}
+                  onChange={(e) => handleProvince(e.target.value)}
                   placeholder="Province"
                 />
               </div>
@@ -886,10 +958,7 @@ const StudentInformationSection = ({
                     }`}
                     type="text"
                     value={otherAddress}
-                    onChange={(e) => {
-                      setOtherAddress(e.target.value);
-                      updateAndSendData("other", e.target.value);
-                    }}
+                    onChange={(e) => handleOtherAddress(e.target.value)}
                     placeholder="Other address"
                   />
                   <span className={styles.bracket}>)</span>

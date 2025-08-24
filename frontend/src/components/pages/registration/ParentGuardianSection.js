@@ -1,53 +1,55 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ParentGuardianSection.module.css";
 
-const ParentGuardianSection = ({ onDataChange }) => {
+const ParentGuardianSection = ({ onDataChange, prefill }) => {
   // State untuk Father
   const [father, setFather] = useState({
-    name: "",
-    company: "",
-    occupation: "",
-    phone: "",
-    email: "",
-    street: "",
-    rt: "",
-    rw: "",
-    village: "",
-    district: "",
-    city: "",
-    province: "",
-    other: "",
+    name: '',
+    company: '',
+    occupation: '',
+    phone: '',
+    email: '',
+    street: '',
+    rt: 0,
+    rw: 0,
+    village: '',
+    district: '',
+    city: '',
+    province: '',
+    other: '',
   });
+
   // State untuk Mother
   const [mother, setMother] = useState({
-    name: "",
-    company: "",
-    occupation: "",
-    phone: "",
-    email: "",
-    street: "",
-    rt: "",
-    rw: "",
-    village: "",
-    district: "",
-    city: "",
-    province: "",
-    other: "",
+    name: '',
+    company: '',
+    occupation: '',
+    phone: '',
+    email: '',
+    street: '',
+    rt: 0,
+    rw: 0,
+    village: '',
+    district: '',
+    city: '',
+    province: '',
+    other: '',
   });
+
   // State untuk Guardian
   const [guardian, setGuardian] = useState({
-    name: "",
-    relationship: "",
-    phone: "",
-    email: "",
-    street: "",
-    rt: "",
-    rw: "",
-    village: "",
-    district: "",
-    city: "",
-    province: "",
-    other: "",
+    name: '',
+    relationship: '',
+    phone: '',
+    email: '',
+    street: '',
+    rt: 0,
+    rw: 0,
+    village: '',
+    district: '',
+    city: '',
+    province: '',
+    other: '',
   });
 
   // State untuk mengakumulasi semua data
@@ -113,12 +115,180 @@ const ParentGuardianSection = ({ onDataChange }) => {
   const handleChange = (setter, field, section) => (e) => {
     const value = e.target.value;
     setter((prev) => ({ ...prev, [field]: value }));
+
+    // Kirim data ke parent component dengan format yang benar
+    if (onDataChange) {
+      // Buat object yang berisi semua data yang sudah diisi
+      const allData = {};
+
+      // Tambahkan data father dengan field mapping yang benar
+      if (father.name) allData.father_name = father.name;
+      if (father.company) allData.father_company = father.company;
+      if (father.occupation) allData.father_occupation = father.occupation;
+      if (father.phone) allData.father_phone = father.phone;
+      if (father.email) allData.father_email = father.email;
+      if (father.street) allData.father_address_street = father.street;
+      if (father.rt) allData.father_address_rt = father.rt;
+      if (father.rw) allData.father_address_rw = father.rw;
+      if (father.village) allData.father_address_village = father.village;
+      if (father.district) allData.father_address_district = father.district;
+      if (father.city) allData.father_address_city_regency = father.city;
+      if (father.province) allData.father_address_province = father.province;
+      if (father.other) allData.father_address_other = father.other;
+      if (father.company) allData.father_company_addresses = father.company;
+
+      // Tambahkan data mother dengan field mapping yang benar
+      if (mother.name) allData.mother_name = mother.name;
+      if (mother.company) allData.mother_company = mother.company;
+      if (mother.occupation) allData.mother_occupation = mother.occupation;
+      if (mother.phone) allData.mother_phone = mother.phone;
+      if (mother.email) allData.mother_email = mother.email;
+      if (mother.street) allData.mother_address_street = mother.street;
+      if (mother.rt) allData.mother_address_rt = mother.rt;
+      if (mother.rw) allData.mother_address_rw = mother.rw;
+      if (mother.village) allData.mother_address_village = mother.village;
+      if (mother.district) allData.mother_address_district = mother.district;
+      if (mother.city) allData.mother_address_city_regency = mother.city;
+      if (mother.province) allData.mother_address_province = mother.province;
+      if (mother.other) allData.mother_address_other = mother.other;
+      if (mother.company) allData.mother_company_addresses = mother.company;
+
+      // Tambahkan data guardian dengan field mapping yang benar
+      if (guardian.name) allData.guardian_name = guardian.name;
+      if (guardian.relationship)
+        allData.relation_to_student = guardian.relationship;
+      if (guardian.phone) allData.guardian_phone = guardian.phone;
+      if (guardian.email) allData.guardian_email = guardian.email;
+      if (guardian.street) allData.guardian_address_street = guardian.street;
+      if (guardian.rt) allData.guardian_address_rt = guardian.rt;
+      if (guardian.rw) allData.guardian_address_rw = guardian.rw;
+      if (guardian.village) allData.guardian_address_village = guardian.village;
+      if (guardian.district)
+        allData.guardian_address_district = guardian.district;
+      if (guardian.city) allData.guardian_address_city_regency = guardian.city;
+      if (guardian.province)
+        allData.guardian_address_province = guardian.province;
+      if (guardian.other) allData.guardian_address_other = guardian.other;
+
+      // Kirim semua data sekaligus
+      onDataChange(allData);
+    }
   };
 
-  // Kirim data ke parent setiap kali ada perubahan
+  // ✅ Perbaiki useEffect untuk prefill data
   useEffect(() => {
-    updateAndSendData();
-  }, [father, mother, guardian]);
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log('Prefilling ParentGuardianSection with:', prefill);
+
+      // ✅ Mapping data father dari backend ke state local
+      const fatherData = {
+        name: prefill.father_name || '',
+        company: prefill.father_company || '',
+        occupation: prefill.father_occupation || '',
+        phone: prefill.father_phone || '',
+        email: prefill.father_email || '',
+        street: prefill.father_address_street || '',
+        rt: prefill.father_address_rt || 0,
+        rw: prefill.father_address_rw || 0,
+        village: prefill.father_address_village || '',
+        district: prefill.father_address_district || '',
+        city: prefill.father_address_city_regency || '',
+        province: prefill.father_address_province || '',
+        other: prefill.father_address_other || '',
+      };
+
+      // ✅ Mapping data mother dari backend ke state local
+      const motherData = {
+        name: prefill.mother_name || '',
+        company: prefill.mother_company || '',
+        occupation: prefill.mother_occupation || '',
+        phone: prefill.mother_phone || '',
+        email: prefill.mother_email || '',
+        street: prefill.mother_address_street || '',
+        rt: prefill.mother_address_rt || 0,
+        rw: prefill.mother_address_rw || 0,
+        village: prefill.mother_address_village || '',
+        district: prefill.mother_address_district || '',
+        city: prefill.mother_address_city_regency || '',
+        province: prefill.mother_address_province || '',
+        other: prefill.mother_address_other || '',
+      };
+
+      // ✅ Mapping data guardian dari backend ke state local
+      const guardianData = {
+        name: prefill.guardian_name || '',
+        relationship: prefill.relation_to_student || '',
+        phone: prefill.guardian_phone || '',
+        email: prefill.guardian_email || '',
+        street: prefill.guardian_address_street || '',
+        rt: prefill.guardian_address_rt || 0,
+        rw: prefill.guardian_address_rw || 0,
+        village: prefill.guardian_address_village || '',
+        district: prefill.guardian_address_district || '',
+        city: prefill.guardian_address_city_regency || '',
+        province: prefill.guardian_address_province || '',
+        other: prefill.guardian_address_other || '',
+      };
+
+      // ✅ Set state dengan data yang sudah di-mapping
+      setFather(fatherData);
+      setMother(motherData);
+      setGuardian(guardianData);
+
+      // ✅ Kirim data ke parent component setelah prefill
+      if (onDataChange) {
+        const allData = {
+          // Father data
+          father_name: fatherData.name,
+          father_company: fatherData.company,
+          father_occupation: fatherData.occupation,
+          father_phone: fatherData.phone,
+          father_email: fatherData.email,
+          father_address_street: fatherData.street,
+          father_address_rt: fatherData.rt,
+          father_address_rw: fatherData.rw,
+          father_address_village: fatherData.village,
+          father_address_district: fatherData.district,
+          father_address_city_regency: fatherData.city,
+          father_address_province: fatherData.province,
+          father_address_other: fatherData.other,
+          father_company_addresses: fatherData.company,
+
+          // Mother data
+          mother_name: motherData.name,
+          mother_company: motherData.company,
+          mother_occupation: motherData.occupation,
+          mother_phone: motherData.phone,
+          mother_email: motherData.email,
+          mother_address_street: motherData.street,
+          mother_address_rt: motherData.rt,
+          mother_address_rw: motherData.rw,
+          mother_address_village: motherData.village,
+          mother_address_district: motherData.district,
+          mother_address_city_regency: motherData.city,
+          mother_address_province: motherData.province,
+          mother_address_other: motherData.other,
+          mother_company_addresses: motherData.company,
+
+          // Guardian data
+          guardian_name: guardianData.name,
+          relation_to_student: guardianData.relationship,
+          guardian_phone: guardianData.phone,
+          guardian_email: guardianData.email,
+          guardian_address_street: guardianData.street,
+          guardian_address_rt: guardianData.rt,
+          guardian_address_rw: guardianData.rw,
+          guardian_address_village: guardianData.village,
+          guardian_address_district: guardianData.district,
+          guardian_address_city_regency: guardianData.city,
+          guardian_address_province: guardianData.province,
+          guardian_address_other: guardianData.other,
+        };
+
+        onDataChange(allData);
+      }
+    }
+  }, [prefill, onDataChange]);
 
   return (
     <div className={styles.container}>

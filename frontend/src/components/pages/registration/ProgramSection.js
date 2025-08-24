@@ -1,373 +1,323 @@
-import React, { useState, useEffect } from "react";
-import styles from "./ProgramSection.module.css";
-import Select from "react-select";
-import { getRegistrationOptions } from "../../../services/api";
+import React, { useState, useEffect, useRef } from 'react';
+import styles from './FacilitiesSection.module.css';
+import checkBoxIcon from '../../../assets/CheckBox.png';
+import { getRegistrationOptions } from '../../../services/api';
 
-const ProgramSection = ({ onDataChange, sharedData }) => {
-  const [sections, setSections] = useState([]);
-  const [majors, setMajors] = useState([]);
-  const [classes, setClasses] = useState([]);
-  const [programs, setPrograms] = useState([]);
+const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
+  const [transportations, setTransportations] = useState([]);
+  const [pickupPoints, setPickupPoints] = useState([]);
+  const [residenceHalls, setResidenceHalls] = useState([]);
 
-  const [selectedSection, setSelectedSection] = useState("");
-  const [selectedMajor, setSelectedMajor] = useState("");
-  const [selectedClass, setSelectedClass] = useState("");
-  const [selectedProgram, setSelectedProgram] = useState("");
-  const [programOther, setProgramOther] = useState("");
+  const [selectedTransportation, setSelectedTransportation] = useState('');
+  const [selectedPickupPoint, setSelectedPickupPoint] = useState('');
+  const [pickupPointCustom, setPickupPointCustom] = useState('');
+  const [transportationPolicy, setTransportationPolicy] = useState(false);
+  const [selectedResidence, setSelectedResidence] = useState('');
+  const [residencePolicy, setResidencePolicy] = useState(false);
 
+  // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
-      setSections(sharedData.sections || []);
-      setMajors(sharedData.majors || []);
-      setClasses(sharedData.classes || []);
-      setPrograms(sharedData.programs || []);
+      setTransportations(sharedData.transportations || []);
+      setPickupPoints(sharedData.pickup_points || []);
+      setResidenceHalls(sharedData.residence_halls || []);
     } else {
+      // Fallback to individual API call if shared data not available
       getRegistrationOptions()
         .then((data) => {
-          setSections(data.sections || []);
-          setMajors(data.majors || []);
-          setClasses(data.classes || []);
-          setPrograms(data.programs || []);
+          console.log('Facilities data received:', data);
+          setTransportations(data.transportations || []);
+          setPickupPoints(data.pickup_points || []);
+          setResidenceHalls(data.residence_halls || []);
         })
         .catch((err) => {
-          console.error("Failed to fetch program options:", err);
+          console.error('Failed to fetch facilities options:', err);
         });
     }
   }, [sharedData]);
 
-  // Mapping section ID ke default grade
-  const getDefaultGradeForSection = (sectionId) => {
-    switch (parseInt(sectionId)) {
-      case 1: // ECP
-        return "N";
-      case 2: // Elementary School
-        return "1";
-      case 3: // Middle School
-        return "7";
-      case 4: // High School
-        return "10";
-      default:
-        return null;
-    }
-  };
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      console.log('Prefilling FacilitiesSection with:', prefill);
 
-  // Auto-select grade berdasarkan section
-  const autoSelectGradeForSection = (sectionId) => {
-    const defaultGrade = getDefaultGradeForSection(sectionId);
-    if (defaultGrade) {
-      const defaultClass = classes.find(
-        (cls) =>
-          cls.section_id === parseInt(sectionId) && cls.grade === defaultGrade
-      );
-      if (defaultClass) {
-        setSelectedClass(defaultClass.class_id);
-        return defaultClass.class_id;
+      if (prefill.transportation_id)
+        setSelectedTransportation(prefill.transportation_id);
+      if (prefill.pickup_point_id)
+        setSelectedPickupPoint(prefill.pickup_point_id);
+      if (prefill.pickup_point_custom)
+        setPickupPointCustom(prefill.pickup_point_custom);
+
+      if (prefill.transportation_policy) {
+        setTransportationPolicy(prefill.transportation_policy === 'Signed');
+      }
+
+      if (prefill.residence_id) setSelectedResidence(prefill.residence_id);
+
+      if (prefill.residence_hall_policy) {
+        setResidencePolicy(prefill.residence_hall_policy === 'Signed');
       }
     }
-    return null;
-  };
+  }, [prefill]);
 
-  const handleSectionChange = (opt) => {
-    const value = opt ? opt.value : "";
-    setSelectedSection(value);
-    setSelectedMajor("");
-
-    // Auto-select grade berdasarkan section
-    const autoSelectedClassId = autoSelectGradeForSection(value);
+  const handleTransportationChange = (value) => {
+    setSelectedTransportation(value);
+    setSelectedPickupPoint('');
 
     onDataChange({
-      section_id: value,
-      major_id: "",
-      class_id: autoSelectedClassId || "",
-      program_id: selectedProgram,
-      program_other: programOther,
+      transportation_id: value,
+      pickup_point_id: '',
+      pickup_point_custom: '',
+      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      residence_id: selectedResidence,
+      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
     });
   };
 
-  const handleMajorChange = (opt) => {
-    const value = opt ? opt.value : "";
-    setSelectedMajor(value);
+  const handlePickupPointChange = (value) => {
+    setSelectedPickupPoint(value);
+    setPickupPointCustom('');
+
+    // Send data immediately
     onDataChange({
-      section_id: selectedSection,
-      major_id: value,
-      class_id: selectedClass,
-      program_id: selectedProgram,
-      program_other: programOther,
+      transportation_id: selectedTransportation,
+      pickup_point_id: value,
+      pickup_point_custom: '',
+      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      residence_id: selectedResidence,
+      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
     });
   };
 
-  const handleClassChange = (opt) => {
-    const value = opt ? opt.value : "";
-    setSelectedClass(value);
+  const handlePickupPointCustom = (e) => {
+    const value = e.target.value;
+    setPickupPointCustom(value);
+    setSelectedPickupPoint('');
 
-    // Auto-select major untuk grade 9+ jika belum dipilih
-    if (value) {
-      const selectedClassData = classes.find((c) => c.class_id === value);
-      if (selectedClassData) {
-        const gradeNum = parseInt(selectedClassData.grade);
-        if (gradeNum >= 9 && !selectedMajor) {
-          // Default ke Social (major_id: 2) untuk grade 9+
-          setSelectedMajor(2);
-          onDataChange({
-            section_id: selectedSection,
-            major_id: 2,
-            class_id: value,
-            program_id: selectedProgram,
-            program_other: programOther,
-          });
-          return;
-        }
+    // Send data immediately
+    onDataChange({
+      transportation_id: selectedTransportation,
+      pickup_point_id: null,
+      pickup_point_custom: value,
+      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      residence_id: selectedResidence,
+      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
+    });
+  };
+
+  const handleTransportationPolicy = (e) => {
+    const value = e.target.checked;
+    setTransportationPolicy(value);
+
+    console.log('Transportation policy changed to:', value);
+
+    // Send data immediately
+    onDataChange({
+      transportation_id: selectedTransportation,
+      pickup_point_id: selectedPickupPoint,
+      pickup_point_custom: pickupPointCustom,
+      transportation_policy: value ? 'Signed' : 'Not Signed',
+      residence_id: selectedResidence,
+      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
+    });
+  };
+
+  const handleResidenceChange = (value) => {
+    setSelectedResidence(value);
+
+    // Send data immediately
+    onDataChange({
+      transportation_id: selectedTransportation,
+      pickup_point_id: selectedPickupPoint,
+      pickup_point_custom: pickupPointCustom,
+      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      residence_id: value,
+      residence_hall_policy: residencePolicy ? 'Signed' : 'Not Signed',
+    });
+  };
+
+  const handleResidencePolicy = (e) => {
+    const value = e.target.checked;
+    setResidencePolicy(value);
+
+    console.log('Residence policy changed to:', value);
+
+    // Send data immediately
+    onDataChange({
+      transportation_id: selectedTransportation,
+      pickup_point_id: selectedPickupPoint,
+      pickup_point_custom: pickupPointCustom,
+      transportation_policy: transportationPolicy ? 'Signed' : 'Not Signed',
+      residence_id: selectedResidence,
+      residence_hall_policy: value ? 'Signed' : 'Not Signed',
+    });
+  };
+
+  const pickupInputRef = useRef(null);
+
+  useEffect(() => {
+    if (pickupInputRef.current) {
+      if (selectedPickupPoint && selectedPickupPoint.trim() !== '') {
+        pickupInputRef.current.classList.add(styles.hasValue);
+      } else {
+        pickupInputRef.current.classList.remove(styles.hasValue);
       }
     }
-
-    onDataChange({
-      section_id: selectedSection,
-      major_id: selectedMajor,
-      class_id: value,
-      program_id: selectedProgram,
-      program_other: programOther,
-    });
-  };
-
-  const handleProgramChange = (opt) => {
-    const value = opt ? opt.value : "";
-    setSelectedProgram(value);
-    onDataChange({
-      section_id: selectedSection,
-      major_id: selectedMajor,
-      class_id: selectedClass,
-      program_id: value,
-      program_other: value === "Other" ? programOther : "",
-    });
-    if (value !== "Other") {
-      setProgramOther("");
-    }
-  };
-
-  const sectionOptions = sections.map((sec) => ({
-    value: sec.section_id,
-    label: sec.name,
-  }));
-
-  const programOptions = programs.map((prog) => ({
-    value: prog.name === "Other" ? "Other" : prog.program_id,
-    label: prog.name,
-  }));
-
-  // Filter kelas berdasarkan section_id dan major_id
-  const gradeOptions = classes
-    .filter((cls) => {
-      if (!selectedSection) return true;
-
-      // Filter berdasarkan section
-      if (cls.section_id !== parseInt(selectedSection)) return false;
-
-      // Jika ada major yang dipilih, filter berdasarkan major juga
-      if (selectedMajor) {
-        return cls.major_id === parseInt(selectedMajor);
-      }
-
-      return true;
-    })
-    .reduce((unique, cls) => {
-      if (!unique.find((item) => item.label === cls.grade)) {
-        unique.push({
-          value: cls.class_id,
-          label: cls.grade,
-        });
-      }
-      return unique;
-    }, [])
-    .sort((a, b) => {
-      const gradeOrder = ["N", "K1", "K2"];
-      const idxA = gradeOrder.indexOf(a.label);
-      const idxB = gradeOrder.indexOf(b.label);
-      if (idxA !== -1 || idxB !== -1) {
-        return idxA - idxB;
-      }
-      return parseInt(a.label) - parseInt(b.label);
-    });
-
-  // Filter major berdasarkan grade yang dipilih
-  const majorSelectOptions = majors
-    .filter((mjr) => {
-      if (!selectedClass) return true;
-
-      const selectedClassData = classes.find(
-        (c) => c.class_id === selectedClass
-      );
-      if (!selectedClassData) return true;
-
-      const gradeNum = parseInt(selectedClassData.grade);
-
-      // Major hanya untuk grade 9+
-      if (gradeNum >= 9) {
-        return [2, 3].includes(mjr.major_id); // SOCIAL dan SCIENCE
-      }
-
-      return false;
-    })
-    .map((mjr) => ({
-      value: mjr.major_id,
-      label: mjr.name,
-    }));
-
-  const showMajor = (() => {
-    const selectedClassData = classes.find((c) => c.class_id === selectedClass);
-    if (selectedClassData) {
-      const gradeNum = parseInt(selectedClassData.grade);
-      return gradeNum >= 9;
-    }
-    return false;
-  })();
+  }, [selectedPickupPoint]);
 
   return (
     <div className={styles.container}>
       <div className={styles.sectionHeader}>
-        <span className={styles.headerTitle}>PROGRAM</span>
+        <span className={styles.headerText}>FACILITIES</span>
       </div>
       <div className={styles.contentWrapper}>
-        <div className={styles.programSection}>
+        <div className={styles.transportationSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Section</div>
+            <div className={styles.sectionTitleText}>Transportation</div>
           </div>
-          {sectionOptions.map((option) => (
-            <div key={option.value} className={styles.optionItem}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  cursor: "pointer",
-                  position: "relative",
-                }}
-              >
+
+          {/* Transportation Options from Backend */}
+          {transportations.map((transport) => (
+            <div key={transport.transport_id} className={styles.optionItem}>
+              <label className={styles.radioLabel}>
                 <input
-                  type="radio"
-                  name="section"
-                  value={option.value}
-                  checked={selectedSection === option.value}
-                  onChange={() => handleSectionChange({ value: option.value })}
-                  style={{
-                    opacity: 0,
-                    position: "absolute",
-                    width: 0,
-                    height: 0,
-                  }}
+                  type='radio'
+                  name='transportation'
+                  value={transport.transport_id}
+                  checked={selectedTransportation === transport.transport_id}
+                  onChange={() =>
+                    handleTransportationChange(transport.transport_id)
+                  }
+                  className={styles.hiddenRadio}
                 />
-                <span className={styles.radioButton}>
-                  <span className={styles.radioButtonCircle} />
-                  {selectedSection === option.value && (
-                    <span className={styles.radioButtonSelected} />
+                <div className={styles.radioButton}>
+                  <div className={styles.radioButtonCircle} />
+                  {selectedTransportation === transport.transport_id && (
+                    <div className={styles.radioButtonSelected} />
                   )}
-                </span>
-                <span className={styles.label}>{option.label}</span>
+                </div>
+                <div className={styles.label}>{transport.type}</div>
               </label>
             </div>
           ))}
 
-          <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Grade</div>
-          </div>
-          <Select
-            id="grade"
-            options={gradeOptions}
-            placeholder="Select grade"
-            value={
-              selectedClass
-                ? gradeOptions.find((opt) => opt.value === selectedClass)
-                : null
-            }
-            onChange={(opt) => handleClassChange(opt)}
-            isClearable
-          />
-
-          {showMajor && (
-            <>
-              <div className={styles.sectionTitle}>
-                <div className={styles.sectionTitleText}>Major</div>
-              </div>
-              <Select
-                id="major"
-                options={majorSelectOptions}
-                placeholder="Select major"
-                value={
-                  selectedMajor
-                    ? majorSelectOptions.find(
-                        (opt) => opt.value === selectedMajor
-                      )
-                    : null
-                }
-                onChange={(opt) => handleMajorChange(opt)}
-                isClearable
+          {/* Pickup Point Field - Show only for school bus type */}
+          {selectedTransportation && (
+            <div ref={pickupInputRef} className={`${styles.pickupPointField}`}>
+              <div className={styles.label}>Pickup point</div>
+              <select
+                value={selectedPickupPoint}
+                onChange={(e) => handlePickupPointChange(e.target.value)}
+                className={styles.pickupPointSelect}
+              >
+                <option value=''>Select pickup point</option>
+                {pickupPoints.map((point) => (
+                  <option
+                    key={point.pickup_point_id}
+                    value={point.pickup_point_id}
+                  >
+                    {point.name}
+                  </option>
+                ))}
+              </select>
+              <img
+                className={styles.pickupPointIcon}
+                alt=''
+                src='Polygon 2.svg'
               />
-            </>
+            </div>
           )}
+
+          {/* Custom Pickup Point Input */}
+          <div className={styles.optionItem}>
+            <label className={styles.label}>Custom Pickup Point</label>
+            <input
+              type='text'
+              value={pickupPointCustom}
+              onChange={handlePickupPointCustom}
+              placeholder='Enter custom pickup point'
+              className={styles.customInput}
+            />
+          </div>
+
+          {/* Transportation Policy Checkbox */}
+          <div className={styles.optionItem}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type='checkbox'
+                checked={transportationPolicy}
+                onChange={handleTransportationPolicy}
+                className={styles.hiddenCheckbox}
+              />
+              <div className={styles.checkBox}>
+                <div className={styles.checkBoxSquare} />
+                {transportationPolicy && (
+                  <img
+                    className={styles.checkBoxIcon}
+                    alt=''
+                    src={checkBoxIcon}
+                  />
+                )}
+              </div>
+              <div className={styles.label}>Transportation policy</div>
+            </label>
+          </div>
         </div>
 
-        <div className={styles.programSection}>
+        {/* Residence Hall Section */}
+        <div className={styles.residenceHallSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Program</div>
+            <div className={styles.sectionTitleText}>Residence Hall</div>
           </div>
-          {programOptions.map((option) => (
-            <div key={option.value} className={styles.optionItem}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  cursor: "pointer",
-                  position: "relative",
-                }}
-              >
+
+          {/* Residence Hall Options from Backend */}
+          {residenceHalls.map((residence) => (
+            <div key={residence.residence_id} className={styles.optionItem}>
+              <label className={styles.radioLabel}>
                 <input
-                  type="radio"
-                  name="program"
-                  value={option.value}
-                  checked={selectedProgram === option.value}
-                  onChange={() => handleProgramChange({ value: option.value })}
-                  style={{
-                    opacity: 0,
-                    position: "absolute",
-                    width: 0,
-                    height: 0,
-                  }}
+                  type='radio'
+                  name='residenceHall'
+                  value={residence.residence_id}
+                  checked={selectedResidence === residence.residence_id}
+                  onChange={() => handleResidenceChange(residence.residence_id)}
+                  className={styles.hiddenRadio}
                 />
-                <span className={styles.radioButton}>
-                  <span className={styles.radioButtonCircle} />
-                  {selectedProgram === option.value && (
-                    <span className={styles.radioButtonSelected} />
+                <div className={styles.radioButton}>
+                  <div className={styles.radioButtonCircle} />
+                  {selectedResidence === residence.residence_id && (
+                    <div className={styles.radioButtonSelected} />
                   )}
-                </span>
-                <span className={styles.label}>{option.label}</span>
-                {option.label === "Other" &&
-                  selectedProgram === option.value && (
-                    <input
-                      className={styles.valueRegular}
-                      type="text"
-                      value={programOther}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setProgramOther(value);
-                        onDataChange({
-                          section_id: selectedSection,
-                          major_id: selectedMajor,
-                          class_id: selectedClass,
-                          program_id: selectedProgram,
-                          program_other: value,
-                        });
-                      }}
-                      placeholder="Enter other program"
-                      style={{ marginLeft: 12, padding: 0 }}
-                    />
-                  )}
+                </div>
+                <div className={styles.label}>{residence.type}</div>
               </label>
             </div>
           ))}
+
+          {/* Residence Hall Policy Checkbox */}
+          <div className={styles.optionItem}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type='checkbox'
+                checked={residencePolicy}
+                onChange={handleResidencePolicy}
+                className={styles.hiddenCheckbox}
+              />
+              <div className={styles.checkBox}>
+                <div className={styles.checkBoxSquare} />
+                {residencePolicy && (
+                  <img
+                    className={styles.checkBoxIcon}
+                    alt=''
+                    src={checkBoxIcon}
+                  />
+                )}
+              </div>
+              <div className={styles.label}>Residence Hall policy</div>
+            </label>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default ProgramSection;
+export default FacilitiesSection;

@@ -72,20 +72,41 @@ const StudentStatusSection = ({
 
     try {
       const latestData = await getStudentLatestApplication(student.student_id);
-      if (latestData.success) {
+      if (latestData.success && latestData.data) {
+        console.log('Received application data:', latestData.data); // Debug log
+
         // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
 
         // Kirim input_name ke parent component
         if (onDataChange) {
           onDataChange({
-            student_status: "Old",
-            input_name: student.student_id, // Kirim student_id sebagai input_name
+            student_status: 'Old',
+            input_name: student.student_id,
+          });
+        }
+      } else {
+        console.error(
+          'No application data found for student:',
+          student.student_id
+        );
+        // Handle case ketika tidak ada data application
+        if (onDataChange) {
+          onDataChange({
+            student_status: 'Old',
+            input_name: student.student_id,
           });
         }
       }
     } catch (err) {
-      console.error("Error getting latest application:", err);
+      console.error('Error getting latest application:', err);
+      // Handle error case
+      if (onDataChange) {
+        onDataChange({
+          student_status: 'Old',
+          input_name: student.student_id,
+        });
+      }
     } finally {
       setIsSearching(false);
     }

@@ -229,6 +229,7 @@ class RegistrationController extends Controller
                 },
                 'gender' => 'required|in:MALE,FEMALE',
                 'family_rank' => 'required|string',
+                'age' => 'required|string',
                 'nisn' => 'required|string',
                 'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
@@ -244,19 +245,18 @@ class RegistrationController extends Controller
                 'other' => 'nullable|string',
 
                 // program, class, major
-                'section_id' => 'required|integer|exists:sections,section_id',
-                'program_id' => 'required|integer|exists:programs,program_id',
-                'class_id' => 'required|integer|exists:classes,class_id',
-                'major_id' => 'required|integer|exists:majors,major_id',
+                'section_id' => 'required|exists:sections,section_id',
+                'program_id' => 'nullable|exists:programs,program_id',
+                'class_id' => 'required|exists:classes,class_id',
+                'major_id' => 'required|exists:majors,major_id',
                 'program_other' => function ($attribute, $value, $fail) use ($request) {
-                    $program = Program::find($request->input('program_id'));
-                    if ($program && $program->name === 'Other' && empty($value)) {
+                    if (empty($request->program_id) && empty($value)) {
                         $fail('The program_other field is required when selecting "Other" as the program.');
                     }
                 },
                 
                 // Facilities
-                'transportation_id' => 'required|integer|exists:transportations,transport_id',
+                'transportation_id' => 'nullable|exists:transportations,transport_id',
                 'pickup_point_id' => 'nullable|integer|exists:pickup_points,pickup_point_id',
                 'pickup_point_custom' => 'nullable|string|max:255',
                 'transportation_policy' => 'required|in:Signed,Not Signed',
@@ -317,27 +317,32 @@ class RegistrationController extends Controller
                 // discount
                 'discount_name' => 'nullable|string',
                 'discount_notes' => 'nullable|string',
-
             ]);
-            
-            // Convert empty strings to null for database
-            $validated = array_map(function($value) {
-                return $value === '' ? null : $value;
-            }, $validated);
+
+            if (empty($validated['program_id']) && !empty($validated['program_other'])) {
+                $program = Program::create([
+                    'name' => $validated['program_other'],
+                ]);
+                $validated['program_id'] = $program->program_id;
+            }
             
             // data master
             $program = Program::findOrFail($validated['program_id']);
             $schoolClass = SchoolClass::findOrFail($validated['class_id']);
-            $transportation = Transportation::findOrFail($validated['transportation_id']);
-            $residenceHall = ResidenceHall::findOrFail($validated['residence_id']);
 
-            // program 
-            if ($program->name == 'Other' && !empty($validated['program_other'])) {
-                $customProgram = Program::firstOrCreate(['name' => $validated['program_other']]);
-                $program = $customProgram; 
+            $transportation = null;
+            if (!empty($validated['transportation_id'])) {
+                $transportation = Transportation::findOrFail($validated['transportation_id']);
             }
 
-            // pickup point 
+            $residenceHall = ResidenceHall::findOrFail($validated['residence_id']);
+
+            // // program 
+            // if ($program->name == 'Other' && !empty($validated['program_other'])) {
+            //     $customProgram = Program::firstOrCreate(['name' => $validated['program_other']]);
+            //     $program = $customProgram; 
+            // }
+
             $pickupPoint = null;
             if ($validated['pickup_point_id']) {
                 $pickupPoint = PickupPoint::findOrFail($validated['pickup_point_id']);
@@ -347,7 +352,7 @@ class RegistrationController extends Controller
                 ]);
             }
             
-            if ($pickupPoint) {
+            if ($pickupPoint && $transportation) {
                 $transportation->pickup_point_id = $pickupPoint->pickup_point_id;
                 $transportation->save();
             }
@@ -408,7 +413,7 @@ class RegistrationController extends Controller
                     'last_name' => $validated['last_name'],
                     'nickname' => $validated['nickname'],
                     'gender' => $validated['gender'],
-                    'age' => $this->calculateAge($validated['date_of_birth']),
+                    'age' => $validated['age'] ?: $this->calculateAge($validated['date_of_birth']),
                     'family_rank' => $validated['family_rank'],
                     'citizenship' => $validated['citizenship'],
                     'country' => $validated['citizenship'] === 'Non Indonesia' ? $validated['country'] : null,
@@ -432,7 +437,7 @@ class RegistrationController extends Controller
                     'semester_id' => $draft->semester_id,
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
-                    'transport_id' => $transportation->transport_id,
+                    'transport_id' => $transportation ? $transportation->transport_id : null,
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
@@ -472,15 +477,13 @@ class RegistrationController extends Controller
                     'semester_id' => $draft->semester_id,
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
-                    'transport_id' => $transportation->transport_id,
+                    'transport_id' => $transportation ? $transportation->transport_id : null,
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
                     'is_active' => true,
                 ]);
                 
-                // Create application form
-                $applicationForm = $this->createApplicationForm($student, $enrollment);
                 
                 // Create application form version dengan data snapshot
                 $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
@@ -692,7 +695,7 @@ class RegistrationController extends Controller
             'last_name' => $validated['last_name'],
             'nickname' => $validated['nickname'],
             'gender' => $validated['gender'],
-            'age' => $this->calculateAge($validated['date_of_birth']),
+            'age' => $validated['age'] ?: $this->calculateAge($validated['date_of_birth']),
             'family_rank' => $validated['family_rank'],
             'citizenship' => $validated['citizenship'],
             'country' => $validated['citizenship'] === 'Non Indonesia' ? $validated['country'] : null,
@@ -755,34 +758,41 @@ class RegistrationController extends Controller
 
     private function updateParentAddresses($student, $validated)
     {
-        $student->studentParent()->fatherAddress()->updateOrCreate(
-            ['student_id' => $student->student_id],
-            [
-                'street' => $validated['father_address_street'],
-                'rt' => $validated['father_address_rt'],
-                'rw' => $validated['father_address_rw'],
-                'village' => $validated['father_address_village'],
-                'district' => $validated['father_address_district'],
-                'city_regency' => $validated['father_address_city_regency'],
-                'province' => $validated['father_address_province'],
-                'other' => $validated['father_address_other'],
-                'father_company_addresses' => $validated['father_company_addresses'],
-            ]
-        );
+        // Dapatkan studentParent terlebih dahulu
+        $studentParent = $student->studentParent;
+        
+        if ($studentParent) {
+            // Update father address
+            $studentParent->fatherAddress()->updateOrCreate(
+                ['parent_id' => $studentParent->parent_id],
+                [
+                    'street' => $validated['father_address_street'],
+                    'rt' => $validated['father_address_rt'],
+                    'rw' => $validated['father_address_rw'],
+                    'village' => $validated['father_address_village'],
+                    'district' => $validated['father_address_district'],
+                    'city_regency' => $validated['father_address_city_regency'],
+                    'province' => $validated['father_address_province'],
+                    'other' => $validated['father_address_other'],
+                    'father_company_addresses' => $validated['father_company_addresses'],
+                ]
+            );
 
-        $student->studentParent()->motherAddress()->updateOrCreate(
-            ['student_id' => $student->student_id],
-            [
-                'street' => $validated['mother_address_street'],
-                'rt' => $validated['mother_address_rt'],
-                'rw' => $validated['mother_address_rw'],
-                'village' => $validated['mother_address_village'],
-                'district' => $validated['mother_address_district'],
-                'city_regency' => $validated['mother_address_city_regency'],
-                'province' => $validated['mother_address_province'],
-                'other' => $validated['mother_address_other'],
-            ]
-        );
+            // Update mother address
+            $studentParent->motherAddress()->updateOrCreate(
+                ['parent_id' => $studentParent->parent_id],
+                [
+                    'street' => $validated['mother_address_street'],
+                    'rt' => $validated['mother_address_rt'],
+                    'rw' => $validated['mother_address_rw'],
+                    'village' => $validated['mother_address_village'],
+                    'district' => $validated['mother_address_district'],
+                    'city_regency' => $validated['mother_address_city_regency'],
+                    'province' => $validated['mother_address_province'],
+                    'other' => $validated['mother_address_other'],
+                ]
+            );
+        }
     }
 
     private function updateGuardianData($student, $validated)
