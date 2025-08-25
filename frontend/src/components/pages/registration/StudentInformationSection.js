@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import styles from './StudentInformationSection.module.css';
-import Select from 'react-select';
-import { getRegistrationOptions } from '../../../services/api';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import styles from "./StudentInformationSection.module.css";
+import Select from "react-select";
+import { getRegistrationOptions } from "../../../services/api";
 
-const genderOptions = ['MALE', 'FEMALE'];
-const citizenshipOptions = ['Indonesia', 'Non Indonesia'];
+const genderOptions = ["MALE", "FEMALE"];
+const citizenshipOptions = ["Indonesia", "Non Indonesia"];
 
 const StudentInformationSection = ({
   prefill,
@@ -14,37 +14,37 @@ const StudentInformationSection = ({
   forceError,
 }) => {
   const [academicStatusOptions, setAcademicStatusOptions] = useState([]);
-  const [academicStatus, setAcademicStatus] = useState('');
+  const [academicStatus, setAcademicStatus] = useState("");
 
-  const [firstName, setFirstName] = useState('');
+  const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(false);
   const [citizenshipError, setCitizenshipError] = useState(false);
-  const [middleName, setMiddleName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [nisn, setNisn] = useState('');
-  const [nik, setNik] = useState('');
-  const [kitas, setKitas] = useState('');
-  const [foreignCountry, setForeignCountry] = useState('');
-  const [gender, setGender] = useState('');
-  const [age, setAge] = useState('');
-  const [rank, setRank] = useState('');
-  const [citizenship, setCitizenship] = useState('');
-  const [religion, setReligion] = useState('');
-  const [placeOfBirth, setPlaceOfBirth] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [email, setEmail] = useState('');
-  const [previousSchool, setPreviousSchool] = useState('');
-  const [phone, setPhone] = useState('');
-  const [academicStatusOther, setAcademicStatusOther] = useState('');
-  const [street, setStreet] = useState('');
-  const [rt, setRt] = useState('0');
-  const [rw, setRw] = useState('0');
-  const [village, setVillage] = useState('');
-  const [district, setDistrict] = useState('');
-  const [city, setCity] = useState('');
-  const [province, setProvince] = useState('');
-  const [otherAddress, setOtherAddress] = useState('');
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [nisn, setNisn] = useState("");
+  const [nik, setNik] = useState("");
+  const [kitas, setKitas] = useState("");
+  const [foreignCountry, setForeignCountry] = useState("");
+  const [gender, setGender] = useState("");
+  const [age, setAge] = useState("");
+  const [rank, setRank] = useState("");
+  const [citizenship, setCitizenship] = useState("");
+  const [religion, setReligion] = useState("");
+  const [placeOfBirth, setPlaceOfBirth] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [email, setEmail] = useState("");
+  const [previousSchool, setPreviousSchool] = useState("");
+  const [phone, setPhone] = useState("");
+  const [academicStatusOther, setAcademicStatusOther] = useState("");
+  const [street, setStreet] = useState("");
+  const [rt, setRt] = useState("0");
+  const [rw, setRw] = useState("0");
+  const [village, setVillage] = useState("");
+  const [district, setDistrict] = useState("");
+  const [city, setCity] = useState("");
+  const [province, setProvince] = useState("");
+  const [otherAddress, setOtherAddress] = useState("");
 
   // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
   const isInitialPrefill = useRef(true);
@@ -57,17 +57,14 @@ const StudentInformationSection = ({
         setAcademicStatusOptions(data.academic_status || []);
       })
       .catch((err) => {
-        console.error('Failed to fetch academic status options:', err);
+        console.error("Failed to fetch academic status options:", err);
       });
   }, []);
 
   // Prefill hanya sekali saat component pertama kali mount atau saat prefill berubah signifikan
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-      console.log(
-        'Prefilling StudentInformationSection with:',
-        prefill
-      );
+      console.log("Prefilling StudentInformationSection with:", prefill);
 
       if (prefill.first_name) setFirstName(prefill.first_name);
       if (prefill.middle_name) setMiddleName(prefill.middle_name);
@@ -99,35 +96,35 @@ const StudentInformationSection = ({
       if (prefill.other) setOtherAddress(prefill.other);
     } else if (Object.keys(prefill).length === 0) {
       // Jika prefill menjadi empty object (reset form), reset semua field
-      console.log('Resetting StudentInformationSection form');
-      setFirstName('');
-      setMiddleName('');
-      setLastName('');
-      setNickname('');
-      setNisn('');
-      setNik('');
-      setKitas('');
-      setForeignCountry('');
-      setGender('');
-      setAge('');
-      setRank('');
-      setCitizenship('');
-      setReligion('');
-      setPlaceOfBirth('');
-      setDateOfBirth('');
-      setEmail('');
-      setPreviousSchool('');
-      setPhone('');
-      setAcademicStatus('');
-      setAcademicStatusOther('');
-      setStreet('');
-      setRt('0'); 
-      setRw('0'); 
-      setVillage('');
-      setDistrict('');
-      setCity('');
-      setProvince('');
-      setOtherAddress('');
+      console.log("Resetting StudentInformationSection form");
+      setFirstName("");
+      setMiddleName("");
+      setLastName("");
+      setNickname("");
+      setNisn("");
+      setNik("");
+      setKitas("");
+      setForeignCountry("");
+      setGender("");
+      setAge("");
+      setRank("");
+      setCitizenship("");
+      setReligion("");
+      setPlaceOfBirth("");
+      setDateOfBirth("");
+      setEmail("");
+      setPreviousSchool("");
+      setPhone("");
+      setAcademicStatus("");
+      setAcademicStatusOther("");
+      setStreet("");
+      setRt("0");
+      setRw("0");
+      setVillage("");
+      setDistrict("");
+      setCity("");
+      setProvince("");
+      setOtherAddress("");
     }
   }, [prefill]);
 
@@ -182,7 +179,7 @@ const StudentInformationSection = ({
   };
 
   const handleCitizenship = (opt) => {
-    const value = opt ? opt.value : '';
+    const value = opt ? opt.value : "";
     setCitizenship(value);
     onDataChange({ citizenship: value });
   };
@@ -225,13 +222,13 @@ const StudentInformationSection = ({
   const handleRt = (value) => {
     setRt(value);
     // Kirim "0" jika value kosong, otherwise kirim value asli
-    onDataChange({ rt: value.trim() === '' ? '0' : value });
+    onDataChange({ rt: value.trim() === "" ? "0" : value });
   };
 
   const handleRw = (value) => {
     setRw(value);
     // Kirim "0" jika value kosong, otherwise kirim value asli
-    onDataChange({ rw: value.trim() === '' ? '0' : value });
+    onDataChange({ rw: value.trim() === "" ? "0" : value });
   };
 
   const handleVillage = (value) => {
@@ -263,8 +260,8 @@ const StudentInformationSection = ({
   React.useEffect(() => {
     if (onValidationChange) {
       onValidationChange({
-        firstName: !firstNameError && firstName.trim() !== '',
-        citizenship: !citizenshipError && citizenship !== '',
+        firstName: !firstNameError && firstName.trim() !== "",
+        citizenship: !citizenshipError && citizenship !== "",
         // Tambahkan field lain sesuai kebutuhan
       });
     }
@@ -309,13 +306,13 @@ const StudentInformationSection = ({
 
         // Pastikan tanggal valid
         if (isNaN(dob.getTime())) {
-          updateAge('');
+          updateAge("");
           return;
         }
 
         // Pastikan tanggal tidak di masa depan
         if (dob > now) {
-          updateAge('');
+          updateAge("");
           return;
         }
 
@@ -331,11 +328,11 @@ const StudentInformationSection = ({
         const calculatedAge = `${years} Tahun, ${months} Bulan`;
         updateAge(calculatedAge);
       } catch (error) {
-        console.error('Error calculating age:', error);
-        updateAge('');
+        console.error("Error calculating age:", error);
+        updateAge("");
       }
     } else {
-      updateAge('');
+      updateAge("");
     }
   }, [dateOfBirth, updateAge]);
 
@@ -349,7 +346,7 @@ const StudentInformationSection = ({
           <div className={styles.row}>
             <div
               className={`${styles.nameField} ${
-                firstNameError ? styles.errorFieldWrapper : ''
+                firstNameError ? styles.errorFieldWrapper : ""
               }`}
             >
               {firstNameError ? (
@@ -357,13 +354,13 @@ const StudentInformationSection = ({
                   className={styles.errorContainer}
                   onClick={() => setFirstNameError(false)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    if (e.key === "Enter" || e.key === " ") {
                       setFirstNameError(false);
                     }
                   }}
                   tabIndex={0}
-                  role='button'
-                  style={{ cursor: 'pointer' }}
+                  role="button"
+                  style={{ cursor: "pointer" }}
                 >
                   <div className={styles.errorLabel}>First name</div>
                   <div className={styles.errorMessage}>
@@ -372,13 +369,13 @@ const StudentInformationSection = ({
                 </div>
               ) : (
                 <>
-                  <label className={styles.label} htmlFor='firstName'>
+                  <label className={styles.label} htmlFor="firstName">
                     First name
                   </label>
                   <input
-                    id='firstName'
-                    className={`${styles.label} ${firstName ? 'hasValue' : ''}`}
-                    type='text'
+                    id="firstName"
+                    className={`${styles.label} ${firstName ? "hasValue" : ""}`}
+                    type="text"
                     value={firstName}
                     onChange={(e) => {
                       handleFirstName(e.target.value);
@@ -391,59 +388,59 @@ const StudentInformationSection = ({
                         setFirstNameError(false);
                       }
                     }}
-                    placeholder='First name'
+                    placeholder="First name"
                   />
                 </>
               )}
             </div>
             <div className={styles.nameField}>
-              <label className={styles.label} htmlFor='middleName'>
+              <label className={styles.label} htmlFor="middleName">
                 Middle name
               </label>
               <input
-                id='middleName'
-                className={`${styles.label} ${middleName ? 'hasValue' : ''}`}
-                type='text'
+                id="middleName"
+                className={`${styles.label} ${middleName ? "hasValue" : ""}`}
+                type="text"
                 value={middleName}
                 onChange={(e) => handleMiddleName(e.target.value)}
-                placeholder='Middle name'
+                placeholder="Middle name"
               />
             </div>
           </div>
           <div className={styles.row}>
             <div className={styles.nicknameField}>
-              <label className={styles.label} htmlFor='lastName'>
+              <label className={styles.label} htmlFor="lastName">
                 Last name
               </label>
               <input
-                id='lastName'
-                className={`${styles.label} ${lastName ? 'hasValue' : ''}`}
-                type='text'
+                id="lastName"
+                className={`${styles.label} ${lastName ? "hasValue" : ""}`}
+                type="text"
                 value={lastName}
                 onChange={(e) => handleLastName(e.target.value)}
-                placeholder='Last name'
+                placeholder="Last name"
               />
             </div>
             <div className={styles.nicknameField}>
-              <label className={styles.label} htmlFor='nickname'>
+              <label className={styles.label} htmlFor="nickname">
                 Nickname
               </label>
               <input
-                id='nickname'
+                id="nickname"
                 className={`${styles.valueHighlight} ${
-                  nickname ? 'hasValue' : ''
+                  nickname ? "hasValue" : ""
                 }`}
-                type='text'
+                type="text"
                 value={nickname}
                 onChange={(e) => handleNickname(e.target.value)}
-                placeholder='Nickname'
+                placeholder="Nickname"
               />
             </div>
           </div>
           <div className={styles.row}>
             <div
               className={`${styles.citizenshipField} ${
-                citizenshipError ? styles.errorFieldWrapper : ''
+                citizenshipError ? styles.errorFieldWrapper : ""
               }`}
             >
               {citizenshipError ? (
@@ -451,13 +448,13 @@ const StudentInformationSection = ({
                   className={styles.errorContainer}
                   onClick={() => setCitizenshipError(false)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    if (e.key === "Enter" || e.key === " ") {
                       setCitizenshipError(false);
                     }
                   }}
                   tabIndex={0}
-                  role='button'
-                  style={{ cursor: 'pointer' }}
+                  role="button"
+                  style={{ cursor: "pointer" }}
                 >
                   <div className={styles.errorLabel}>Citizenship</div>
                   <div className={styles.errorMessage}>
@@ -466,16 +463,16 @@ const StudentInformationSection = ({
                 </div>
               ) : (
                 <>
-                  <label className={styles.label} htmlFor='citizenship'>
+                  <label className={styles.label} htmlFor="citizenship">
                     Citizenship
                   </label>
                   <Select
-                    id='citizenship'
+                    id="citizenship"
                     options={citizenshipOptions.map((opt) => ({
                       value: opt,
                       label: opt,
                     }))}
-                    placeholder='Select citizenship'
+                    placeholder="Select citizenship"
                     value={
                       citizenship
                         ? { value: citizenship, label: citizenship }
@@ -496,22 +493,22 @@ const StudentInformationSection = ({
                     styles={{
                       control: (base) => ({
                         ...base,
-                        fontWeight: citizenship ? 'bold' : '400',
-                        color: citizenship ? '#000' : 'rgba(128,128,128,0.6)',
-                        border: 'none',
-                        boxShadow: 'none',
+                        fontWeight: citizenship ? "bold" : "400",
+                        color: citizenship ? "#000" : "rgba(128,128,128,0.6)",
+                        border: "none",
+                        boxShadow: "none",
                         borderRadius: 0,
-                        borderBottom: 'none',
-                        background: 'transparent',
+                        borderBottom: "none",
+                        background: "transparent",
                       }),
                       singleValue: (base) => ({
                         ...base,
-                        fontWeight: citizenship ? 'bold' : '400',
-                        color: citizenship ? '#000' : 'rgba(128,128,128,0.6)',
+                        fontWeight: citizenship ? "bold" : "400",
+                        color: citizenship ? "#000" : "rgba(128,128,128,0.6)",
                       }),
                       placeholder: (base) => ({
                         ...base,
-                        color: 'rgba(128,128,128,0.6)',
+                        color: "rgba(128,128,128,0.6)",
                       }),
                     }}
                   />
@@ -519,197 +516,197 @@ const StudentInformationSection = ({
               )}
             </div>
             <div className={styles.citizenshipField}>
-              <label className={styles.label} htmlFor='religion'>
+              <label className={styles.label} htmlFor="religion">
                 Religion
               </label>
               <input
-                id='religion'
+                id="religion"
                 className={`${styles.valueHighlight} ${
-                  religion ? 'hasValue' : ''
+                  religion ? "hasValue" : ""
                 }`}
-                type='text'
+                type="text"
                 value={religion}
                 onChange={(e) => handleReligion(e.target.value)}
-                placeholder='Religion'
+                placeholder="Religion"
               />
             </div>
             <div className={styles.citizenshipField}>
-              <label className={styles.label} htmlFor='placeOfBirth'>
+              <label className={styles.label} htmlFor="placeOfBirth">
                 Place of birth
               </label>
               <input
-                id='placeOfBirth'
+                id="placeOfBirth"
                 className={`${styles.valueHighlight} ${
-                  placeOfBirth ? 'hasValue' : ''
+                  placeOfBirth ? "hasValue" : ""
                 }`}
-                type='text'
+                type="text"
                 value={placeOfBirth}
                 onChange={(e) => handlePlaceOfBirth(e.target.value)}
-                placeholder='Place of birth'
+                placeholder="Place of birth"
               />
             </div>
             <div className={styles.nicknameField}>
-              <label className={styles.label} htmlFor='dateOfBirth'>
+              <label className={styles.label} htmlFor="dateOfBirth">
                 Date of birth
               </label>
               <div className={styles.dateInputWrapper}>
                 <input
-                  id='dateOfBirth'
-                  type='date'
+                  id="dateOfBirth"
+                  type="date"
                   value={dateOfBirth}
                   onChange={(e) => handleDateOfBirth(e.target.value)}
                   className={`${styles.dateInput} ${
-                    dateOfBirth ? 'hasValue' : ''
+                    dateOfBirth ? "hasValue" : ""
                   }`}
-                  max={new Date().toISOString().split('T')[0]}
+                  max={new Date().toISOString().split("T")[0]}
                 />
                 <div className={styles.calendarIcon}>
                   <svg
-                    width='20'
-                    height='20'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    xmlns='http://www.w3.org/2000/svg'
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d='M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z'
-                      stroke='currentColor'
-                      strokeWidth='1.5'
-                      strokeMiterlimit='10'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
+                      d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
                 </div>
               </div>
             </div>
           </div>
-          {citizenship === 'Non Indonesia' && (
+          {citizenship === "Non Indonesia" && (
             <div className={styles.row}>
               <div className={styles.nicknameField}>
-                <label className={styles.label} htmlFor='foreignCountry'>
+                <label className={styles.label} htmlFor="foreignCountry">
                   Country of origin
                 </label>
                 <input
-                  id='foreignCountry'
+                  id="foreignCountry"
                   className={`${styles.valueHighlight} ${
-                    foreignCountry ? 'hasValue' : ''
+                    foreignCountry ? "hasValue" : ""
                   }`}
-                  type='text'
+                  type="text"
                   value={foreignCountry}
                   onChange={(e) => handleForeignCountry(e.target.value)}
-                  placeholder='Country of Origin'
+                  placeholder="Country of Origin"
                 />
               </div>
             </div>
           )}
           <div className={styles.row}>
-            {citizenship === 'Non Indonesia' && (
+            {citizenship === "Non Indonesia" && (
               <div className={styles.nicknameField}>
-                <label className={styles.label} htmlFor='kitas'>
+                <label className={styles.label} htmlFor="kitas">
                   KITAS
                 </label>
                 <input
-                  id='kitas'
+                  id="kitas"
                   className={`${styles.valueHighlight} ${
-                    kitas ? 'hasValue' : ''
+                    kitas ? "hasValue" : ""
                   }`}
-                  type='text'
+                  type="text"
                   value={kitas}
                   onChange={(e) => handleKitas(e.target.value)}
-                  placeholder='KITAS'
+                  placeholder="KITAS"
                 />
               </div>
             )}
             <div className={styles.nicknameField}>
-              <label className={styles.label} htmlFor='nisn'>
+              <label className={styles.label} htmlFor="nisn">
                 Nomor Induk Siswa Nasional (NISN)
               </label>
               <input
-                id='nisn'
-                className={`${styles.label} ${nisn ? 'hasValue' : ''}`}
-                type='text'
+                id="nisn"
+                className={`${styles.label} ${nisn ? "hasValue" : ""}`}
+                type="text"
                 value={nisn}
                 onChange={(e) => handleNisn(e.target.value)}
-                placeholder='NISN'
+                placeholder="NISN"
               />
             </div>
-            {citizenship === 'Indonesia' && (
+            {citizenship === "Indonesia" && (
               <div className={styles.nicknameField}>
-                <label className={styles.label} htmlFor='nik'>
+                <label className={styles.label} htmlFor="nik">
                   Nomor Induk Kependudukan (NIK)
                 </label>
                 <input
-                  id='nik'
-                  className={`${styles.label} ${nik ? 'hasValue' : ''}`}
-                  type='text'
+                  id="nik"
+                  className={`${styles.label} ${nik ? "hasValue" : ""}`}
+                  type="text"
                   value={nik}
                   onChange={(e) => handleNik(e.target.value)}
-                  placeholder='NIK'
+                  placeholder="NIK"
                 />
               </div>
             )}
           </div>
           <div className={styles.row}>
             <div className={styles.genderField}>
-              <label className={styles.label} htmlFor='gender'>
+              <label className={styles.label} htmlFor="gender">
                 Gender
               </label>
               <Select
-                id='gender'
+                id="gender"
                 options={genderOptions.map((opt) => ({
                   value: opt,
                   label: opt,
                 }))}
-                placeholder='Select gender'
+                placeholder="Select gender"
                 value={gender ? { value: gender, label: gender } : null}
-                onChange={(opt) => handleGender(opt ? opt.value : '')}
+                onChange={(opt) => handleGender(opt ? opt.value : "")}
                 isClearable
                 styles={{
                   control: (base) => ({
                     ...base,
-                    fontWeight: gender ? 'bold' : '400',
-                    color: gender ? '#000' : 'rgba(128,128,128,0.6)',
-                    border: 'none',
-                    boxShadow: 'none',
+                    fontWeight: gender ? "bold" : "400",
+                    color: gender ? "#000" : "rgba(128,128,128,0.6)",
+                    border: "none",
+                    boxShadow: "none",
                     borderRadius: 0,
-                    borderBottom: 'none',
-                    background: 'transparent',
+                    borderBottom: "none",
+                    background: "transparent",
                   }),
                   singleValue: (base) => ({
                     ...base,
-                    fontWeight: gender ? 'bold' : '400',
-                    color: gender ? '#000' : 'rgba(128,128,128,0.6)',
+                    fontWeight: gender ? "bold" : "400",
+                    color: gender ? "#000" : "rgba(128,128,128,0.6)",
                   }),
                   placeholder: (base) => ({
                     ...base,
-                    color: 'rgba(128,128,128,0.6)',
+                    color: "rgba(128,128,128,0.6)",
                   }),
                 }}
               />
             </div>
             <div className={`${styles.genderField} ${styles.rankField}`}>
-              <label className={styles.label} htmlFor='rank'>
+              <label className={styles.label} htmlFor="rank">
                 Rank in the family
               </label>
               <input
-                id='rank'
-                className={`${styles.valueSmall} ${rank ? 'hasValue' : ''}`}
-                type='number'
+                id="rank"
+                className={`${styles.valueSmall} ${rank ? "hasValue" : ""}`}
+                type="number"
                 value={rank}
                 onChange={(e) => handleFamilyRank(e.target.value)}
-                placeholder='1'
-                min='1'
-                max='99'
+                placeholder="1"
+                min="1"
+                max="99"
               />
             </div>
             <div className={`${styles.genderField} ${styles.ageField}`}>
-              <label className={styles.label} htmlFor='age'>
+              <label className={styles.label} htmlFor="age">
                 Age
               </label>
               <div
-                className={`${styles.valueSmall} ${age ? 'hasValue' : ''}`}
-                id='age'
+                className={`${styles.valueSmall} ${age ? "hasValue" : ""}`}
+                id="age"
               >
                 {age || <>&nbsp;</>}
               </div>
@@ -719,66 +716,66 @@ const StudentInformationSection = ({
         <div className={styles.infoSection}>
           <div className={styles.topRow}>
             <div className={styles.nicknameField}>
-              <label className={styles.label} htmlFor='email'>
+              <label className={styles.label} htmlFor="email">
                 Email address
               </label>
               <input
-                id='email'
+                id="email"
                 className={`${styles.valueHighlight} ${
-                  email ? 'hasValue' : ''
+                  email ? "hasValue" : ""
                 }`}
-                type='email'
+                type="email"
                 value={email}
                 onChange={(e) => handleEmail(e.target.value)}
-                placeholder='Email address'
-                style={{ borderBottom: 'none', boxShadow: 'none' }}
+                placeholder="Email address"
+                style={{ borderBottom: "none", boxShadow: "none" }}
               />
             </div>
             <div className={styles.nicknameField}>
-              <label className={styles.label} htmlFor='previousSchool'>
+              <label className={styles.label} htmlFor="previousSchool">
                 Previous school
               </label>
               <input
-                id='previousSchool'
+                id="previousSchool"
                 className={`${styles.valueHighlight} ${
-                  previousSchool ? 'hasValue' : ''
+                  previousSchool ? "hasValue" : ""
                 }`}
-                type='text'
+                type="text"
                 value={previousSchool}
                 onChange={(e) => handlePreviousSchool(e.target.value)}
-                placeholder='Previous School'
+                placeholder="Previous School"
               />
             </div>
           </div>
           <div className={styles.topRow}>
             <div className={`${styles.citizenshipField} ${styles.noBorder}`}>
-              <label className={styles.label} htmlFor='phone'>
+              <label className={styles.label} htmlFor="phone">
                 Phone number
               </label>
               <input
-                id='phone'
+                id="phone"
                 className={`${styles.valueHighlight} ${
-                  phone ? 'hasValue' : ''
+                  phone ? "hasValue" : ""
                 }`}
-                type='text'
+                type="text"
                 value={phone}
                 onChange={(e) => handlePhone(e.target.value)}
-                placeholder='Phone number'
+                placeholder="Phone number"
               />
             </div>
             <div className={`${styles.academicStatusField} ${styles.noBorder}`}>
-              <label className={styles.label} htmlFor='academicStatus'>
+              <label className={styles.label} htmlFor="academicStatus">
                 Academic status
               </label>
               <div className={styles.academicStatusOptions}>
                 <div className={styles.academicStatusOption}>
                   <Select
-                    id='academicStatus'
+                    id="academicStatus"
                     options={academicStatusOptions.map((opt) => ({
                       value: opt,
                       label: opt,
                     }))}
-                    placeholder='Select status'
+                    placeholder="Select status"
                     value={
                       // ✅ PERBAIKAN: Hapus kondisi academicStatus !== 'OTHER'
                       academicStatus
@@ -786,23 +783,23 @@ const StudentInformationSection = ({
                         : null
                     }
                     onChange={(opt) => {
-                      const selectedValue = opt ? opt.value : '';
+                      const selectedValue = opt ? opt.value : "";
 
                       // ✅ PERBAIKAN: Handle semua kasus termasuk 'OTHER'
-                      if (selectedValue === 'OTHER') {
-                        setAcademicStatus('OTHER');
+                      if (selectedValue === "OTHER") {
+                        setAcademicStatus("OTHER");
                         // setAcademicStatusOther(''); // ← Hapus baris ini
                         onDataChange({
-                          academic_status: 'OTHER',
+                          academic_status: "OTHER",
                           academic_status_other: academicStatusOther, // ← Gunakan nilai yang sudah ada
                         });
                       } else {
                         // Jika pilih status lain, clear OTHER
                         setAcademicStatus(selectedValue);
-                        setAcademicStatusOther('');
+                        setAcademicStatusOther("");
                         onDataChange({
                           academic_status: selectedValue,
-                          academic_status_other: '',
+                          academic_status_other: "",
                         });
                       }
                     }}
@@ -810,26 +807,26 @@ const StudentInformationSection = ({
                     styles={{
                       control: (base) => ({
                         ...base,
-                        fontWeight: academicStatus ? 'bold' : '400', // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
+                        fontWeight: academicStatus ? "bold" : "400", // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
                         color: academicStatus
-                          ? '#000'
-                          : 'rgba(128,128,128,0.6)',
-                        border: 'none',
-                        boxShadow: 'none',
+                          ? "#000"
+                          : "rgba(128,128,128,0.6)",
+                        border: "none",
+                        boxShadow: "none",
                         borderRadius: 0,
-                        borderBottom: 'none',
-                        background: 'transparent',
+                        borderBottom: "none",
+                        background: "transparent",
                       }),
                       singleValue: (base) => ({
                         ...base,
-                        fontWeight: academicStatus ? 'bold' : '400', // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
+                        fontWeight: academicStatus ? "bold" : "400", // ✅ PERBAIKAN: Hapus kondisi !== 'Other'
                         color: academicStatus
-                          ? '#000'
-                          : 'rgba(128,128,128,0.6)',
+                          ? "#000"
+                          : "rgba(128,128,128,0.6)",
                       }),
                       placeholder: (base) => ({
                         ...base,
-                        color: 'rgba(128,128,128,0.6)',
+                        color: "rgba(128,128,128,0.6)",
                       }),
                     }}
                   />
@@ -837,16 +834,16 @@ const StudentInformationSection = ({
                 <div className={styles.academicStatusOption}>
                   <label className={styles.otherLabel}>
                     <input
-                      type='radio'
-                      name='academicStatusType'
-                      value='OTHER'
-                      checked={academicStatus === 'OTHER'}
+                      type="radio"
+                      name="academicStatusType"
+                      value="OTHER"
+                      checked={academicStatus === "OTHER"}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setAcademicStatus('OTHER');
+                          setAcademicStatus("OTHER");
                           // setAcademicStatusOther(''); // ← Hapus baris ini
                           onDataChange({
-                            academic_status: 'OTHER',
+                            academic_status: "OTHER",
                             academic_status_other: academicStatusOther, // ← Gunakan nilai yang sudah ada
                           });
                         }
@@ -856,10 +853,10 @@ const StudentInformationSection = ({
                     <span className={styles.otherText}>Other</span>
 
                     {/* ✅ Tampilkan input field jika OTHER dipilih */}
-                    {academicStatus === 'OTHER' && (
+                    {academicStatus === "OTHER" && (
                       <input
                         className={styles.otherInput}
-                        type='text'
+                        type="text"
                         value={academicStatusOther}
                         onChange={(e) => {
                           const value = e.target.value;
@@ -867,11 +864,11 @@ const StudentInformationSection = ({
 
                           // ✅ Kirim kedua field sekaligus
                           onDataChange({
-                            academic_status: 'OTHER',
+                            academic_status: "OTHER",
                             academic_status_other: value,
                           });
                         }}
-                        placeholder='Enter academic status'
+                        placeholder="Enter academic status"
                       />
                     )}
                   </label>
@@ -884,129 +881,129 @@ const StudentInformationSection = ({
           <div className={styles.addressSection}>
             <div className={styles.addressRow}>
               <div className={styles.genderField}>
-                <label className={styles.label} htmlFor='street'>
+                <label className={styles.label} htmlFor="street">
                   Street
                 </label>
                 <input
-                  id='street'
+                  id="street"
                   className={`${styles.valueHighlight} ${
-                    street ? 'hasValue' : ''
+                    street ? "hasValue" : ""
                   }`}
-                  type='text'
+                  type="text"
                   value={street}
                   onChange={(e) => handleStreet(e.target.value)}
-                  placeholder='Street'
+                  placeholder="Street"
                 />
               </div>
               <div className={styles.rtrwGroup}>
                 <div className={styles.rtField}>
-                  <label className={styles.label} htmlFor='rt'>
+                  <label className={styles.label} htmlFor="rt">
                     RT
                   </label>
                   <input
-                    id='rt'
-                    className={`${styles.label} ${rt ? 'hasValue' : ''}`}
-                    type='text'
+                    id="rt"
+                    className={`${styles.label} ${rt ? "hasValue" : ""}`}
+                    type="text"
                     value={rt}
                     onChange={(e) => handleRt(e.target.value)}
-                    placeholder='RT'
+                    placeholder="RT"
                   />
                 </div>
                 <div className={styles.rtField}>
-                  <label className={styles.label} htmlFor='rw'>
+                  <label className={styles.label} htmlFor="rw">
                     RW
                   </label>
                   <input
-                    id='rw'
-                    className={`${styles.label} ${rw ? 'hasValue' : ''}`}
-                    type='text'
+                    id="rw"
+                    className={`${styles.label} ${rw ? "hasValue" : ""}`}
+                    type="text"
                     value={rw}
                     onChange={(e) => handleRw(e.target.value)}
-                    placeholder='RW'
+                    placeholder="RW"
                   />
                 </div>
               </div>
             </div>
             <div className={styles.addressRow}>
               <div className={styles.genderField}>
-                <label className={styles.label} htmlFor='village'>
+                <label className={styles.label} htmlFor="village">
                   Village
                 </label>
                 <input
-                  id='village'
+                  id="village"
                   className={`${styles.valueHighlight} ${
-                    village ? 'hasValue' : ''
+                    village ? "hasValue" : ""
                   }`}
-                  type='text'
+                  type="text"
                   value={village}
                   onChange={(e) => handleVillage(e.target.value)}
-                  placeholder='Village'
+                  placeholder="Village"
                 />
               </div>
               <div className={styles.districtField}>
-                <label className={styles.label} htmlFor='district'>
+                <label className={styles.label} htmlFor="district">
                   District
                 </label>
                 <input
-                  id='district'
+                  id="district"
                   className={`${styles.valueHighlight} ${
-                    district ? 'hasValue' : ''
+                    district ? "hasValue" : ""
                   }`}
-                  type='text'
+                  type="text"
                   value={district}
                   onChange={(e) => handleDistrict(e.target.value)}
-                  placeholder='District'
+                  placeholder="District"
                 />
               </div>
             </div>
             <div className={styles.addressRow}>
               <div className={styles.genderField}>
-                <label className={styles.label} htmlFor='city'>
+                <label className={styles.label} htmlFor="city">
                   City/Regency
                 </label>
                 <input
-                  id='city'
+                  id="city"
                   className={`${styles.valueHighlight} ${
-                    city ? 'hasValue' : ''
+                    city ? "hasValue" : ""
                   }`}
-                  type='text'
+                  type="text"
                   value={city}
                   onChange={(e) => handleCity(e.target.value)}
-                  placeholder='City/Regency'
+                  placeholder="City/Regency"
                 />
               </div>
               <div className={styles.genderField}>
-                <label className={styles.label} htmlFor='province'>
+                <label className={styles.label} htmlFor="province">
                   Province
                 </label>
                 <input
-                  id='province'
+                  id="province"
                   className={`${styles.valueHighlight} ${
-                    province ? 'hasValue' : ''
+                    province ? "hasValue" : ""
                   }`}
-                  type='text'
+                  type="text"
                   value={province}
                   onChange={(e) => handleProvince(e.target.value)}
-                  placeholder='Province'
+                  placeholder="Province"
                 />
               </div>
             </div>
             <div className={styles.otherAddressWrapper}>
               <div className={styles.districtField}>
-                <label className={styles.valueHighlight} htmlFor='otherAddress'>
+                <label className={styles.valueHighlight} htmlFor="otherAddress">
                   Other
                 </label>
                 <div className={styles.otherAddressParent}>
                   <span className={styles.bracket}>(</span>
                   <input
-                    id='otherAddress'
+                    id="otherAddress"
                     className={`${styles.apartementUnit} ${
-                      otherAddress ? 'hasValue' : ''
+                      otherAddress ? "hasValue" : ""
                     }`}
-                    type='text'
+                    type="text"
                     value={otherAddress}
                     onChange={(e) => handleOtherAddress(e.target.value)}
-                    placeholder='Other address'
+                    placeholder="Other address"
                   />
                   <span className={styles.bracket}>)</span>
                 </div>

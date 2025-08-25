@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import styles from './TermOfPaymentSection.module.css';
-import checkBoxIcon from '../../../assets/CheckBox.png';
-import { getRegistrationOptions } from '../../../services/api';
+import React, { useState, useEffect, useRef } from "react";
+import styles from "./TermOfPaymentSection.module.css";
+import checkBoxIcon from "../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../services/api";
 
 const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   // State untuk payment options
-  const [paymentType, setPaymentType] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentType, setPaymentType] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
-  const [discountName, setDiscountName] = useState('');
-  const [discountNotes, setDiscountNotes] = useState('');
+  const [discountName, setDiscountName] = useState("");
+  const [discountNotes, setDiscountNotes] = useState("");
 
   // State untuk dropdown options dari backend
   const [paymentTypeOptions, setPaymentTypeOptions] = useState([]);
@@ -35,7 +35,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
           setDiscountTypeOptions(data.discount_types || []);
         })
         .catch((err) => {
-          console.error('Failed to fetch payment options:', err);
+          console.error("Failed to fetch payment options:", err);
         });
     }
   }, [sharedData]);
@@ -45,53 +45,98 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
     if (prefill && Object.keys(prefill).length > 0) {
       // Jika ini prefill pertama kali atau prefill berubah signifikan
       if (isInitialPrefill.current || !hasInitialized.current) {
-        console.log('Initial prefilling TermOfPaymentSection with:', prefill);
+        console.log("Initial prefilling TermOfPaymentSection with:", prefill);
 
         if (prefill.payment_type) setPaymentType(prefill.payment_type);
         if (prefill.payment_method) setPaymentMethod(prefill.payment_method);
         if (prefill.financial_policy_contract) {
-          setFinancialPolicy(prefill.financial_policy_contract === 'Signed');
+          setFinancialPolicy(prefill.financial_policy_contract === "Signed");
         }
         if (prefill.discount_name) setDiscountName(prefill.discount_name);
         if (prefill.discount_notes) setDiscountNotes(prefill.discount_notes);
-        
+
         hasInitialized.current = true;
         isInitialPrefill.current = false;
       }
     } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
       // Jika prefill menjadi empty object (reset form), reset semua field
-      console.log('Resetting TermOfPaymentSection form');
-      setPaymentType('');
-      setPaymentMethod('');
+      console.log("Resetting TermOfPaymentSection form");
+      setPaymentType("");
+      setPaymentMethod("");
       setFinancialPolicy(false);
-      setDiscountName('');
-      setDiscountNotes('');
-      
+      setDiscountName("");
+      setDiscountNotes("");
+
       hasInitialized.current = false;
     }
   }, [prefill]);
 
   const handlePaymentTypeChange = (value) => {
-    setPaymentType(value);
-    onDataChange({ payment_type: value });
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (paymentType === value) {
+      setPaymentType("");
+
+      onDataChange({
+        payment_type: "",
+        // ... other fields
+      });
+    } else {
+      // Jika user memilih option baru
+      setPaymentType(value);
+
+      onDataChange({
+        payment_type: value,
+        // ... other fields
+      });
+    }
   };
 
   const handlePaymentMethodChange = (value) => {
-    setPaymentMethod(value);
-    onDataChange({ payment_method: value });
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (paymentMethod === value) {
+      setPaymentMethod("");
+
+      onDataChange({
+        payment_method: "",
+        // ... other fields
+      });
+    } else {
+      // Jika user memilih option baru
+      setPaymentMethod(value);
+
+      onDataChange({
+        payment_method: value,
+        // ... other fields
+      });
+    }
   };
 
   const handleFinancialPolicyChange = (e) => {
     const value = e.target.checked;
     setFinancialPolicy(value);
     onDataChange({
-      financial_policy_contract: value ? 'Signed' : 'Not Signed',
+      financial_policy_contract: value ? "Signed" : "Not Signed",
     });
   };
 
   const handleDiscountNameChange = (value) => {
-    setDiscountName(value);
-    onDataChange({ discount_name: value });
+    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
+    if (discountName === value) {
+      setDiscountName("");
+
+      onDataChange({
+        discount_name: "",
+        // ... other fields
+      });
+    } else {
+      // Jika user memilih option baru
+      setDiscountName(value);
+
+      onDataChange({
+        discount_name: value,
+        // ... other fields
+      });
+    }
   };
 
   const handleDiscountNotesChange = (e) => {
@@ -115,11 +160,12 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
-                    type='radio'
-                    name='paymentType'
+                    type="radio"
+                    name="paymentType"
                     value={option}
                     checked={paymentType === option}
                     onChange={(e) => handlePaymentTypeChange(e.target.value)}
+                    onClick={() => handlePaymentTypeChange(option)}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
@@ -144,11 +190,12 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
-                    type='radio'
-                    name='paymentMethod'
+                    type="radio"
+                    name="paymentMethod"
                     value={option}
                     checked={paymentMethod === option}
                     onChange={(e) => handlePaymentMethodChange(e.target.value)}
+                    onClick={() => handlePaymentMethodChange(option)}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
@@ -174,7 +221,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
             <div className={styles.optionItem}>
               <label className={styles.checkboxLabel}>
                 <input
-                  type='checkbox'
+                  type="checkbox"
                   checked={financialPolicy}
                   onChange={handleFinancialPolicyChange}
                   className={styles.hiddenCheckbox}
@@ -184,7 +231,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
                   {financialPolicy && (
                     <img
                       className={styles.checkBoxIcon}
-                      alt=''
+                      alt=""
                       src={checkBoxIcon}
                     />
                   )}
@@ -206,12 +253,12 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
               <div className={styles.label}>Discount Type</div>
               <select
                 className={`${styles.dropdownSelect} ${
-                  discountName ? styles.hasValue : ''
+                  discountName ? styles.hasValue : ""
                 }`}
                 value={discountName}
                 onChange={(e) => handleDiscountNameChange(e.target.value)}
               >
-                <option value=''>Select discount type</option>
+                <option value="">Select discount type</option>
                 {discountTypeOptions.map((discount) => (
                   <option key={discount.discount_type_id} value={discount.name}>
                     {discount.name}
@@ -227,10 +274,10 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
                 <span className={styles.label}>Notes</span>
                 <input
                   className={styles.valueRegular}
-                  type='text'
+                  type="text"
                   value={discountNotes}
                   onChange={handleDiscountNotesChange}
-                  placeholder='Enter discount notes'
+                  placeholder="Enter discount notes"
                   style={{ margin: 0, padding: 0 }}
                 />
               </label>

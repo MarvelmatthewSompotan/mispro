@@ -180,6 +180,13 @@ class RegistrationController extends Controller
 
     public function store(Request $request, $draft_id)
     {
+        // Tambahkan logging untuk debug
+        \Log::info('Registration store called', [
+            'draft_id' => $draft_id,
+            'request_data' => $request->all(),
+            'user_id' => auth()->id()
+        ]);
+
         DB::beginTransaction();
         try {
             $draft = Draft::where('draft_id', $draft_id)
@@ -227,13 +234,13 @@ class RegistrationController extends Controller
                 'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
 
-                // student address
+                // student address - Pastikan semua field wajib terisi
                 'street' => 'required|string',
                 'rt' => 'nullable|string',
                 'rw' => 'nullable|string',
                 'village' => 'required|string',
                 'district' => 'required|string',
-                'city_regency' => 'required|string',
+                'city_regency' => 'required|string', // Pastikan required
                 'province' => 'required|string',
                 'other' => 'nullable|string',
 
@@ -253,7 +260,7 @@ class RegistrationController extends Controller
                 'pickup_point_id' => 'nullable|integer|exists:pickup_points,pickup_point_id',
                 'pickup_point_custom' => 'nullable|string|max:255',
                 'transportation_policy' => 'required|in:Signed,Not Signed',
-                'residence_id' => 'required|exists:residence_halls,residence_id',
+                'residence_id' => 'required|integer|exists:residence_halls,residence_id',
                 'residence_hall_policy' => 'required|in:Signed,Not Signed',
 
                 // student parent (father)
@@ -261,7 +268,7 @@ class RegistrationController extends Controller
                 'father_company' => 'nullable|string',
                 'father_occupation' => 'nullable|string',
                 'father_phone' => 'nullable|string',
-                'father_email' => 'nullable|email',
+                'father_email' => 'nullable|email', // Perbaiki email validation
                 'father_address_street' => 'nullable|string',
                 'father_address_rt' => 'nullable|string',
                 'father_address_rw' => 'nullable|string',
@@ -277,7 +284,7 @@ class RegistrationController extends Controller
                 'mother_company' => 'nullable|string',
                 'mother_occupation' => 'nullable|string',
                 'mother_phone' => 'nullable|string',
-                'mother_email' => 'nullable|email',
+                'mother_email' => 'nullable|email', // Perbaiki email validation
                 'mother_address_street' => 'nullable|string',
                 'mother_address_rt' => 'nullable|string',
                 'mother_address_rw' => 'nullable|string',
@@ -292,7 +299,7 @@ class RegistrationController extends Controller
                 'guardian_name' => 'nullable|string',
                 'relation_to_student' => 'nullable|string',
                 'guardian_phone' => 'nullable|string',
-                'guardian_email' => 'nullable|email',
+                'guardian_email' => 'nullable|email', // Perbaiki email validation
                 'guardian_address_street' => 'nullable|string',
                 'guardian_address_rt' => 'nullable|string',
                 'guardian_address_rw' => 'nullable|string',
@@ -343,11 +350,6 @@ class RegistrationController extends Controller
                 $pickupPoint = PickupPoint::firstOrCreate([
                     'name' => $validated['pickup_point_custom'],
                 ]);
-            }
-            
-            if ($pickupPoint && $transportation) {
-                $transportation->pickup_point_id = $pickupPoint->pickup_point_id;
-                $transportation->save();
             }
 
             // registration id
@@ -431,6 +433,7 @@ class RegistrationController extends Controller
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
                     'transport_id' => $transportation ? $transportation->transport_id : null,
+                    'pickup_point_id' => $pickupPoint ? $pickupPoint->pickup_point_id : null,
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
@@ -471,6 +474,7 @@ class RegistrationController extends Controller
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
                     'transport_id' => $transportation ? $transportation->transport_id : null,
+                    'pickup_point_id' => $pickupPoint ? $pickupPoint->pickup_point_id : null,
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
@@ -496,17 +500,20 @@ class RegistrationController extends Controller
             
             return response()->json([
                 'success' => true, 
-                'message' => 'Registration completed successfully',
+                'message' => 'Registration submitted successfully.',
                 'data' => [
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
-                    'application_id' => $applicationForm->application_id,
-                    'enrollment_id' => $enrollment->enrollment_id
-                ]
+                ],
             ], 200);
             
         } catch (\Exception $e) {
-            DB::rollBack();
+            DB::rollback();
+            \Log::error('Registration store error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false, 
                 'error' => 'Registration failed: ' . $e->getMessage()

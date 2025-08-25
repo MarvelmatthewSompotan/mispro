@@ -1,53 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   searchStudent,
   getStudentLatestApplication,
   getRegistrationOptions,
-} from '../../../services/api';
-import styles from './StudentStatusSection.module.css';
+} from "../../../services/api";
+import styles from "./StudentStatusSection.module.css";
 
 const StudentStatusSection = ({
   onSelectOldStudent,
   onDataChange,
   sharedData,
 }) => {
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState("");
   const [statusOptions, setStatusOptions] = useState([]);
-  const [studentSearch, setStudentSearch] = useState('');
+  const [studentSearch, setStudentSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef(null);
 
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
       const opts = sharedData.student_status || [];
       // Ensure order: New, Transferee, Old
-      const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+      const ordered = ["New", "Transferee", "Old"].filter((o) =>
+        opts.includes(o)
+      );
       setStatusOptions(ordered);
     } else {
       // Fallback to individual API call if shared data not available
       getRegistrationOptions()
         .then((data) => {
           const opts = data.student_status || [];
-          const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+          const ordered = ["New", "Transferee", "Old"].filter((o) =>
+            opts.includes(o)
+          );
           setStatusOptions(ordered);
         })
         .catch((err) => {
-          console.error('Failed to fetch student status options:', err);
+          console.error("Failed to fetch student status options:", err);
         });
     }
   }, [sharedData]);
 
   const handleStatusChange = (option) => {
     setStatus(option);
-    setStudentSearch('');
+    setStudentSearch("");
     setSearchResults([]);
 
     // Kirim data ke parent component dengan input_name
     if (onDataChange) {
       onDataChange({
         student_status: option,
-        input_name: option === 'Old' ? '' : null, // Tambahkan input_name
+        input_name: option === "Old" ? "" : null, // Tambahkan input_name
       });
     }
   };
@@ -58,8 +64,8 @@ const StudentStatusSection = ({
     // Update input_name setiap kali user mengetik
     if (onDataChange) {
       onDataChange({
-        student_status: 'Old',
-        input_name: '', // Update input_name dengan value yang diketik
+        student_status: "Old",
+        input_name: "", // Update input_name dengan value yang diketik
       });
     }
 
@@ -68,26 +74,30 @@ const StudentStatusSection = ({
       try {
         const results = await searchStudent(value);
         setSearchResults(results);
+        setShowDropdown(true);
       } catch (err) {
-        console.error('Error searching student:', err);
+        console.error("Error searching student:", err);
         setSearchResults([]);
+        setShowDropdown(false);
       } finally {
         setIsSearching(false);
       }
     } else {
       setSearchResults([]);
+      setShowDropdown(false);
     }
   };
 
   const handleSelectStudent = async (student) => {
     setStudentSearch(student.full_name || student.student_id);
     setSearchResults([]);
+    setShowDropdown(false);
     setIsSearching(true);
 
     try {
       const latestData = await getStudentLatestApplication(student.student_id);
       if (latestData.success && latestData.data) {
-        console.log('Received application data:', latestData.data); // Debug log
+        console.log("Received application data:", latestData.data); // Debug log
 
         // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
@@ -95,35 +105,64 @@ const StudentStatusSection = ({
         // Update input_name dengan nama student yang dipilih
         if (onDataChange) {
           onDataChange({
-            student_status: 'Old',
+            student_status: "Old",
             input_name: student.student_id,
           });
         }
       } else {
         console.error(
-          'No application data found for student:',
+          "No application data found for student:",
           student.student_id
         );
         // Handle case ketika tidak ada data application
         if (onDataChange) {
           onDataChange({
-            student_status: 'Old',
+            student_status: "Old",
             input_name: student.student_id,
           });
         }
       }
     } catch (err) {
-      console.error('Error getting latest application:', err);
+      console.error("Error getting latest application:", err);
       // Handle error case
       if (onDataChange) {
         onDataChange({
-          student_status: 'Old',
+          student_status: "Old",
           input_name: student.student_id,
         });
       }
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Calculate dropdown width based on content
+  const getDropdownWidth = () => {
+    if (searchResults.length === 0) return "auto";
+
+    // Find the longest text to determine width
+    const longestText = searchResults.reduce((longest, student) => {
+      const text = `${student.full_name} (${student.student_id})`;
+      return text.length > longest.length ? text : longest;
+    }, "");
+
+    // Estimate width based on character count (roughly 8px per character)
+    const estimatedWidth = Math.max(longestText.length * 8, 300); // Minimum 300px
+    return `${estimatedWidth}px`;
   };
 
   return (
@@ -136,26 +175,26 @@ const StudentStatusSection = ({
           {statusOptions.map((option) => (
             <div
               key={option}
-              className={option === 'Old' ? styles.optionOld : styles.optionNew}
+              className={option === "Old" ? styles.optionOld : styles.optionNew}
             >
               <label
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                   gap: 8,
-                  cursor: 'pointer',
-                  position: 'relative',
+                  cursor: "pointer",
+                  position: "relative",
                 }}
               >
                 <input
-                  type='radio'
-                  name='studentStatus'
+                  type="radio"
+                  name="studentStatus"
                   value={option}
                   checked={status === option}
                   onChange={() => handleStatusChange(option)}
                   style={{
                     opacity: 0,
-                    position: 'absolute',
+                    position: "absolute",
                     width: 0,
                     height: 0,
                   }}
@@ -169,55 +208,66 @@ const StudentStatusSection = ({
                 <span className={styles.statusLabel}>{option}</span>
               </label>
 
-              {/* Show dropdown-like field (input with datalist) only for Old student status */}
-              {option === 'Old' && status === 'Old' && (
-                <div className={styles.studentIdField}>
-                  <label htmlFor='studentSearch' className={styles.statusLabel}>
+              {/* Show unified search field with popup dropdown for Old student status */}
+              {option === "Old" && status === "Old" && (
+                <div className={styles.studentIdField} ref={searchRef}>
+                  <label htmlFor="studentSearch" className={styles.statusLabel}>
                     Search Student
                   </label>
-                  <input
-                    id='studentSearch'
-                    className={styles.studentIdValue}
-                    type='text'
-                    value={studentSearch}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    placeholder='Enter Name or ID'
-                    style={{
-                      border: 'none',
-                      outline: 'none',
-                      background: 'transparent',
-                      fontFamily: 'Poppins, Arial, sans-serif',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      padding: 3,
-                      margin: 0,
-                      width: 'auto',
-                      minWidth: 240,
-                      maxWidth: '100%'
-                    }}
-                  />
-                  {isSearching && (
-                    <div className={styles.searching}>Searching...</div>
-                  )}
-                  {searchResults.length > 0 && (
-                    <select
-                      className={styles.searchResultsSelect}
-                      value=""
-                      onChange={(e) => {
-                        const picked = searchResults.find((s) => s.student_id === e.target.value);
-                        if (picked) handleSelectStudent(picked);
-                      }}
-                    >
-                      <option value="" disabled>
-                        Select a student
-                      </option>
-                      {searchResults.map((student) => (
-                        <option key={student.student_id} value={student.student_id}>
-                          {`${student.full_name} (${student.student_id})`}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  <div className={styles.searchContainer}>
+                    <div className={styles.searchInputRow}>
+                      <input
+                        id="studentSearch"
+                        className={styles.studentIdValue}
+                        type="text"
+                        value={studentSearch}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        onFocus={() =>
+                          searchResults.length > 0 && setShowDropdown(true)
+                        }
+                        placeholder="Enter Name or ID"
+                        style={{
+                          border: "none",
+                          outline: "none",
+                          background: "transparent",
+                          fontFamily: "Poppins, Arial, sans-serif",
+                          fontWeight: "bold",
+                          fontSize: 16,
+                          padding: 3,
+                          margin: 0,
+                          width: "auto",
+                          minWidth: 240,
+                          maxWidth: "100%",
+                        }}
+                      />
+                      {isSearching && (
+                        <div className={styles.searching}>Searching...</div>
+                      )}
+                    </div>
+
+                    {/* Popup Dropdown */}
+                    {showDropdown && searchResults.length > 0 && (
+                      <div
+                        className={styles.searchDropdown}
+                        style={{ width: getDropdownWidth() }}
+                      >
+                        {searchResults.map((student) => (
+                          <div
+                            key={student.student_id}
+                            className={styles.dropdownItem}
+                            onClick={() => handleSelectStudent(student)}
+                          >
+                            <span className={styles.studentName}>
+                              {student.full_name}
+                            </span>
+                            <span className={styles.studentId}>
+                              ({student.student_id})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
