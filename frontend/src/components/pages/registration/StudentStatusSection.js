@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
 import {
   searchStudent,
   getStudentLatestApplication,
@@ -17,17 +16,21 @@ const StudentStatusSection = ({
   const [studentSearch, setStudentSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
 
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
-      setStatusOptions(sharedData.student_status || []);
+      const opts = sharedData.student_status || [];
+      // Ensure order: New, Transferee, Old
+      const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+      setStatusOptions(ordered);
     } else {
       // Fallback to individual API call if shared data not available
       getRegistrationOptions()
         .then((data) => {
-          setStatusOptions(data.student_status || []);
+          const opts = data.student_status || [];
+          const ordered = ['New', 'Transferee', 'Old'].filter((o) => opts.includes(o));
+          setStatusOptions(ordered);
         })
         .catch((err) => {
           console.error('Failed to fetch student status options:', err);
@@ -39,13 +42,12 @@ const StudentStatusSection = ({
     setStatus(option);
     setStudentSearch('');
     setSearchResults([]);
-    setSelectedStudent(null);
 
     // Kirim data ke parent component dengan input_name
     if (onDataChange) {
       onDataChange({
         student_status: option,
-        input_name: option === 'Old' ? '' : null,
+        input_name: option === 'Old' ? '' : null, // Tambahkan input_name
       });
     }
   };
@@ -57,11 +59,11 @@ const StudentStatusSection = ({
     if (onDataChange) {
       onDataChange({
         student_status: 'Old',
-        input_name: '',
+        input_name: '', // Update input_name dengan value yang diketik
       });
     }
 
-    if (value && value.length > 2) {
+    if (value.length > 2) {
       setIsSearching(true);
       try {
         const results = await searchStudent(value);
@@ -79,95 +81,49 @@ const StudentStatusSection = ({
 
   const handleSelectStudent = async (student) => {
     setStudentSearch(student.full_name || student.student_id);
-    setSelectedStudent(student);
     setSearchResults([]);
     setIsSearching(true);
 
     try {
-      // IMPORTANT: Update studentStatus FIRST dengan input_name
-      if (onDataChange) {
-        onDataChange({
-          student_status: 'Old',
-          input_name: student.student_id,
-        });
-      }
-
       const latestData = await getStudentLatestApplication(student.student_id);
       if (latestData.success && latestData.data) {
-        console.log('Received application data:', latestData.data);
+        console.log('Received application data:', latestData.data); // Debug log
 
-        // Kemudian kirim data ke parent untuk prefill semua form fields
+        // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
+
+        // Update input_name dengan nama student yang dipilih
+        if (onDataChange) {
+          onDataChange({
+            student_status: 'Old',
+            input_name: student.student_id,
+          });
+        }
       } else {
         console.error(
           'No application data found for student:',
           student.student_id
         );
         // Handle case ketika tidak ada data application
-        // Tidak perlu onDataChange lagi karena sudah di atas
+        if (onDataChange) {
+          onDataChange({
+            student_status: 'Old',
+            input_name: student.student_id,
+          });
+        }
       }
     } catch (err) {
       console.error('Error getting latest application:', err);
       // Handle error case
-      // Tidak perlu onDataChange lagi karena sudah di atas
+      if (onDataChange) {
+        onDataChange({
+          student_status: 'Old',
+          input_name: student.student_id,
+        });
+      }
     } finally {
       setIsSearching(false);
     }
-  };
-
-  // Convert search results to react-select options format
-  const studentOptions = searchResults.map(student => ({
-    value: student.student_id,
-    label: `${student.full_name} (${student.student_id})`,
-    student: student
-  }));
-
-  const customSelectStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      border: 'none',
-      borderBottom: '1px solid #000',
-      borderRadius: 0,
-      boxShadow: 'none',
-      background: 'transparent',
-      '&:hover': {
-        borderBottom: '1px solid #000',
-      },
-    }),
-    input: (provided) => ({
-      ...provided,
-      fontFamily: 'Poppins, Arial, sans-serif',
-      fontWeight: 'bold',
-      fontSize: 16,
-      color: '#000',
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      fontFamily: 'Poppins, Arial, sans-serif',
-      fontWeight: 400,
-      fontSize: 16,
-      color: 'rgba(128, 128, 128, 0.6)',
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? '#5f84fe' : state.isFocused ? '#f5f5f5' : 'white',
-      color: state.isSelected ? 'white' : '#333',
-      fontFamily: 'Poppins, Arial, sans-serif',
-      fontSize: 14,
-      cursor: 'pointer',
-    }),
-    menu: (provided) => ({
-      ...provided,
-      zIndex: 1000,
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      fontFamily: 'Poppins, Arial, sans-serif',
-      fontWeight: 'bold',
-      fontSize: 16,
-      color: '#000',
-    }),
   };
 
   return (
@@ -177,11 +133,10 @@ const StudentStatusSection = ({
       </div>
       <div className={styles.contentWrapper}>
         <div className={styles.statusOptions}>
-          {/* New and Transferee options first */}
-          {statusOptions.filter(option => option !== 'Old').map((option) => (
+          {statusOptions.map((option) => (
             <div
               key={option}
-              className={option === 'New' ? styles.optionNew : styles.optionTransferee}
+              className={option === 'Old' ? styles.optionOld : styles.optionNew}
             >
               <label
                 style={{
@@ -213,85 +168,60 @@ const StudentStatusSection = ({
                 </span>
                 <span className={styles.statusLabel}>{option}</span>
               </label>
-            </div>
-          ))}
 
-          {/* Old student option last (on the right) */}
-          {statusOptions.includes('Old') && (
-            <div className={styles.optionOld}>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  cursor: 'pointer',
-                  position: 'relative',
-                }}
-              >
-                <input
-                  type='radio'
-                  name='studentStatus'
-                  value='Old'
-                  checked={status === 'Old'}
-                  onChange={() => handleStatusChange('Old')}
-                  style={{
-                    opacity: 0,
-                    position: 'absolute',
-                    width: 0,
-                    height: 0,
-                  }}
-                />
-                <span className={styles.radioButton}>
-                  <span className={styles.radioButtonCircle} />
-                  {status === 'Old' && (
-                    <span className={styles.radioButtonSelected} />
-                  )}
-                </span>
-                <span className={styles.statusLabel}>Old</span>
-              </label>
-
-              {/* Show searchable dropdown only for Old student status */}
-              {status === 'Old' && (
+              {/* Show dropdown-like field (input with datalist) only for Old student status */}
+              {option === 'Old' && status === 'Old' && (
                 <div className={styles.studentIdField}>
                   <label htmlFor='studentSearch' className={styles.statusLabel}>
                     Search Student
                   </label>
-                  <Select
+                  <input
                     id='studentSearch'
-                    className={styles.studentSelect}
-                    placeholder='Search by name or ID...'
-                    isSearchable={true}
-                    isClearable={true}
-                    options={studentOptions}
-                    value={selectedStudent ? {
-                      value: selectedStudent.student_id,
-                      label: `${selectedStudent.full_name} (${selectedStudent.student_id})`
-                    } : null}
-                    onChange={(option) => {
-                      if (option) {
-                        handleSelectStudent(option.student);
-                      } else {
-                        setSelectedStudent(null);
-                        setStudentSearch('');
-                        if (onDataChange) {
-                          onDataChange({
-                            student_status: 'Old',
-                            input_name: '',
-                          });
-                        }
-                      }
+                    className={styles.studentIdValue}
+                    type='text'
+                    value={studentSearch}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    placeholder='Enter Name or ID'
+                    style={{
+                      border: 'none',
+                      outline: 'none',
+                      background: 'transparent',
+                      fontFamily: 'Poppins, Arial, sans-serif',
+                      fontWeight: 'bold',
+                      fontSize: 16,
+                      padding: 3,
+                      margin: 0,
+                      width: 'auto',
+                      minWidth: 240,
+                      maxWidth: '100%'
                     }}
-                    onInputChange={(inputValue) => {
-                      handleSearchChange(inputValue);
-                    }}
-                    isLoading={isSearching}
-                    noOptionsMessage={() => 'No students found'}
-                    styles={customSelectStyles}
                   />
+                  {isSearching && (
+                    <div className={styles.searching}>Searching...</div>
+                  )}
+                  {searchResults.length > 0 && (
+                    <select
+                      className={styles.searchResultsSelect}
+                      value=""
+                      onChange={(e) => {
+                        const picked = searchResults.find((s) => s.student_id === e.target.value);
+                        if (picked) handleSelectStudent(picked);
+                      }}
+                    >
+                      <option value="" disabled>
+                        Select a student
+                      </option>
+                      {searchResults.map((student) => (
+                        <option key={student.student_id} value={student.student_id}>
+                          {`${student.full_name} (${student.student_id})`}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               )}
             </div>
-          )}
+          ))}
         </div>
 
         <div className={styles.noteSection}>
