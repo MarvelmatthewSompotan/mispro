@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import styles from '../styles/PopUpConfirm.module.css';
-import { submitRegistrationForm } from '../../services/api';
+import React, { useState } from "react";
+import styles from "../styles/PopUpConfirm.module.css";
+import { submitRegistrationForm } from "../../services/api";
 
 const PopUpConfirm = React.memo(
   ({ onCancel, onConfirm, draftId, allFormData, locationState, navigate }) => {
@@ -12,10 +12,10 @@ const PopUpConfirm = React.memo(
 
         const transformedData = transformFormData(allFormData);
 
-        console.log('=== SUBMIT DEBUG INFO ===');
-        console.log('Draft ID:', draftId);
-        console.log('Data keys:', Object.keys(transformedData));
-        console.log('========================');
+        console.log("=== SUBMIT DEBUG INFO ===");
+        console.log("Draft ID:", draftId);
+        console.log("Data keys:", Object.keys(transformedData));
+        console.log("========================");
 
         const response = await submitRegistrationForm(draftId, transformedData);
 
@@ -51,8 +51,8 @@ const PopUpConfirm = React.memo(
     const transformFormData = (formData) => {
       console.log('Original form data:', formData);
 
-      const studentStatus = formData.studentStatus?.student_status || 'New';
-      const inputName = formData.studentStatus?.input_name || '';
+      const studentStatus = formData.studentStatus?.student_status || "New";
+      const inputName = formData.studentStatus?.input_name || "";
 
       if (studentStatus === 'Old' && !inputName) {
         throw new Error('Student ID is required for Old student status');
@@ -72,21 +72,21 @@ const PopUpConfirm = React.memo(
           formData.studentInfo?.citizenship === 'Non Indonesia'
             ? formData.studentInfo?.country || ''
             : null,
-        religion: formData.studentInfo?.religion || '',
-        place_of_birth: formData.studentInfo?.place_of_birth || '',
-        date_of_birth: formData.studentInfo?.date_of_birth || '',
-        email: formData.studentInfo?.email || '',
-        phone_number: formData.studentInfo?.phone_number || '',
-        previous_school: formData.studentInfo?.previous_school || '',
-        academic_status: formData.studentInfo?.academic_status || 'OTHER',
+        religion: formData.studentInfo?.religion || "",
+        place_of_birth: formData.studentInfo?.place_of_birth || "",
+        date_of_birth: formData.studentInfo?.date_of_birth || "",
+        email: formData.studentInfo?.email || "",
+        phone_number: formData.studentInfo?.phone_number || "",
+        previous_school: formData.studentInfo?.previous_school || "",
+        academic_status: formData.studentInfo?.academic_status || "OTHER",
         academic_status_other:
           formData.studentInfo?.academic_status === 'OTHER'
             ? formData.studentInfo?.academic_status_other || ''
             : null,
-        gender: formData.studentInfo?.gender || '',
-        family_rank: formData.studentInfo?.family_rank || '',
-        age: formData.studentInfo?.age || '',
-        nisn: formData.studentInfo?.nisn || '',
+        gender: formData.studentInfo?.gender || "",
+        family_rank: formData.studentInfo?.family_rank || "",
+        age: formData.studentInfo?.age || "",
+        nisn: formData.studentInfo?.nisn || "",
         nik: formData.studentInfo?.nik || null,
         kitas: formData.studentInfo?.kitas || null,
 
@@ -115,7 +115,7 @@ const PopUpConfirm = React.memo(
           : null,
         pickup_point_custom: formData.facilities?.pickup_point_custom || null,
         transportation_policy:
-          formData.facilities?.transportation_policy || 'Not Signed',
+          formData.facilities?.transportation_policy || "Not Signed",
         residence_id: parseInt(formData.facilities?.residence_id) || 3,
         residence_hall_policy:
           formData.facilities?.residence_hall_policy || 'Not Signed',

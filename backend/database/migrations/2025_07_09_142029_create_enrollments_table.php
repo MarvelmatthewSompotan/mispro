@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('program_id')->nullable();
             $table->unsignedBigInteger('residence_id')->nullable();
             $table->unsignedBigInteger('transport_id')->nullable();
+            $table->unsignedBigInteger('pickup_point_id')->nullable();
             $table->enum('residence_hall_policy', ['Signed', 'Not Signed']);
             $table->enum('transportation_policy', ['Signed', 'Not Signed']);
             $table->boolean('is_active')->default(true);
@@ -30,8 +31,10 @@ return new class extends Migration
             $table->foreign('program_id')->references('program_id')->on('programs')->onDelete('set null');
             $table->foreign('residence_id')->references('residence_id')->on('residence_halls')->onDelete('set null');
             $table->foreign('transport_id')->references('transport_id')->on('transportations')->onDelete('set null');
+            $table->foreign('pickup_point_id')->references('pickup_point_id')->on('pickup_points')->onDelete('set null');
         });
     }
+    
 
     /**
      * Reverse the migrations.

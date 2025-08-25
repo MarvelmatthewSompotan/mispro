@@ -24,6 +24,7 @@ const RegistrationForm = () => {
     parentGuardian: {},
     termOfPayment: {},
   });
+  const [prefillTrigger, setPrefillTrigger] = useState(0);
 
   // Add shared data state to avoid multiple API calls
   const [sharedData, setSharedData] = useState(null);
@@ -120,7 +121,7 @@ const RegistrationForm = () => {
   );
 
   const handleSelectOldStudent = (latestData) => {
-    console.log('Received latest data for prefill:', latestData); // Debug log
+    console.log("Received latest data for prefill:", latestData); // Debug log
 
     // Prefill semua form sections dengan data dari backend
     if (latestData) {
@@ -129,14 +130,14 @@ const RegistrationForm = () => {
         latestData.studentInfo &&
         Object.keys(latestData.studentInfo).length > 0
       ) {
-        console.log('Prefilling studentInfo:', latestData.studentInfo);
-        handleSectionDataChange('studentInfo', latestData.studentInfo);
+        console.log("Prefilling studentInfo:", latestData.studentInfo);
+        handleSectionDataChange("studentInfo", latestData.studentInfo);
       }
 
       // Prefill Program
       if (latestData.program && Object.keys(latestData.program).length > 0) {
-        console.log('Prefilling program:', latestData.program);
-        handleSectionDataChange('program', latestData.program);
+        console.log("Prefilling program:", latestData.program);
+        handleSectionDataChange("program", latestData.program);
       }
 
       // Prefill Facilities
@@ -144,8 +145,8 @@ const RegistrationForm = () => {
         latestData.facilities &&
         Object.keys(latestData.facilities).length > 0
       ) {
-        console.log('Prefilling facilities:', latestData.facilities);
-        handleSectionDataChange('facilities', latestData.facilities);
+        console.log("Prefilling facilities:", latestData.facilities);
+        handleSectionDataChange("facilities", latestData.facilities);
       }
 
       // Prefill Parent Guardian
@@ -153,8 +154,8 @@ const RegistrationForm = () => {
         latestData.parentGuardian &&
         Object.keys(latestData.parentGuardian).length > 0
       ) {
-        console.log('Prefilling parentGuardian:', latestData.parentGuardian);
-        handleSectionDataChange('parentGuardian', latestData.parentGuardian);
+        console.log("Prefilling parentGuardian:", latestData.parentGuardian);
+        handleSectionDataChange("parentGuardian", latestData.parentGuardian);
       }
 
       // Prefill Term of Payment
@@ -162,12 +163,14 @@ const RegistrationForm = () => {
         latestData.termOfPayment &&
         Object.keys(latestData.termOfPayment).length > 0
       ) {
-        console.log('Prefilling termOfPayment:', latestData.termOfPayment);
-        handleSectionDataChange('termOfPayment', latestData.termOfPayment);
+        console.log("Prefilling termOfPayment:", latestData.termOfPayment);
+        handleSectionDataChange("termOfPayment", latestData.termOfPayment);
       }
     }
 
     setPrefilledData((prev) => ({ ...prev, ...latestData }));
+    // Signal children to apply prefill just once
+    setPrefillTrigger((prev) => prev + 1);
   };
 
   // State untuk validasi
@@ -234,11 +237,6 @@ const RegistrationForm = () => {
             <p>
               <strong>Date:</strong> {formData.date}
             </p>
-            {draftId && (
-              <p>
-                <strong>Draft ID:</strong> {draftId}
-              </p>
-            )}
           </div>
         )}
 
@@ -268,6 +266,7 @@ const RegistrationForm = () => {
         <ParentGuardianSection
           prefill={formSections.parentGuardian || {}}
           onDataChange={handleParentGuardianDataChange}
+          prefillTrigger={prefillTrigger}
           // ParentGuardianSection tidak memerlukan sharedData
         />
         <TermOfPaymentSection
