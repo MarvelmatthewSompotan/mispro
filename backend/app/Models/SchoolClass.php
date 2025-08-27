@@ -18,9 +18,7 @@ class SchoolClass extends Model
 
     protected $fillable = [
         'class_id',
-        'section_id',
         'grade',
-        'major_id'
     ];
 
     public function enrollment() : HasMany
@@ -29,15 +27,6 @@ class SchoolClass extends Model
             Enrollment::class,
             'class_id',
             'class_id',
-        );
-    }
-
-    public function section() : BelongsTo
-    {
-        return $this->belongsTo(
-            Section::class,
-            'section_id',
-            'section_id',
         );
     }
 
@@ -52,16 +41,5 @@ class SchoolClass extends Model
             'student_id',
         );
     } 
-
-    public function major(): BelongsTo 
-    {
-        return $this->belongsTo(
-            Major::class,
-            'major_id',
-            'major_id',
-
-        );
-
-    }
 
 }

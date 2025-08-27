@@ -141,7 +141,7 @@ class RegistrationController extends Controller
             return DB::table('students')
                 ->join('enrollments', 'students.student_id', '=', 'enrollments.student_id')
                 ->join('classes', 'enrollments.class_id', '=', 'classes.class_id')
-                ->where('classes.section_id', $section_id)
+                ->where('enrollments.section_id', $section_id)
                 ->whereMonth('students.registration_date', $month)
                 ->whereYear('students.registration_date', $year)
                 ->lockForUpdate()
@@ -181,7 +181,7 @@ class RegistrationController extends Controller
     public function store(Request $request, $draft_id)
     {
         // Tambahkan logging untuk debug
-        \Log::info('Registration store called', [
+    \Log::info('Registration store called', [
             'draft_id' => $draft_id,
             'request_data' => $request->all(),
             'user_id' => auth()->id()
@@ -329,6 +329,8 @@ class RegistrationController extends Controller
             // data master
             $program = Program::findOrFail($validated['program_id']);
             $schoolClass = SchoolClass::findOrFail($validated['class_id']);
+            $major = Major::findOrFail($validated['major_id']);
+            $section = Section::findOrFail($validated['section_id']);
 
             $transportation = null;
             if (!empty($validated['transportation_id'])) {
@@ -429,6 +431,8 @@ class RegistrationController extends Controller
                 // Create enrollment (sama untuk New dan Old)
                 $enrollment = $student->enrollments()->create([
                     'class_id' => $schoolClass->class_id,
+                    'section_id' => $section->section_id,
+                    'major_id' => $major->major_id,
                     'semester_id' => $draft->semester_id,
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
@@ -470,6 +474,8 @@ class RegistrationController extends Controller
                 // Create enrollment (sama untuk New dan Old)
                 $enrollment = $student->enrollments()->create([
                     'class_id' => $schoolClass->class_id,
+                    'section_id' => $section->section_id,
+                    'major_id' => $major->major_id,
                     'semester_id' => $draft->semester_id,
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
@@ -504,7 +510,8 @@ class RegistrationController extends Controller
                 'data' => [
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
-                    'application_id' => $applicationForm->application_id, 
+                    'application_id' => $applicationForm->application_id,
+                    'registration_number' =>$enrollment->enrollment_id
                 ],
             ], 200);
             
@@ -847,14 +854,15 @@ class RegistrationController extends Controller
 
     private function createApplicationForm($enrollment)
     {
-        $maxVersion = ApplicationForm::where('enrollment_id', $enrollment->enrollment_id)->max('version');
+        $maxVersion = ApplicationForm::whereHas('enrollment', function($query) use ($enrollment) {
+            $query->where('student_id', $enrollment->student_id);
+        })->max('version');
         $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
         return ApplicationForm::create([
             'enrollment_id' => $enrollment->enrollment_id,
             'status' => 'Submitted',
             'submitted_at' => now(),
             'version' => $nextVersion,
-            'created_by' => auth()->id(),
         ]);
     }
 
@@ -869,10 +877,17 @@ class RegistrationController extends Controller
             'action' => 'registration'
         ];
         
+        $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment', function($query) use ($student) {
+            $query->where('student_id', $student->student_id);
+        })->max('version');
+        
+        $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
+        $userName = auth()->user()->name;
+
         ApplicationFormVersion::create([
             'application_id' => $applicationForm->application_id,
-            'version' => 1,
-            'updated_by' => auth()->id(),
+            'version' => $nextVersion,
+            'updated_by' => $userName,
             'data_snapshot' => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
         ]);
     }

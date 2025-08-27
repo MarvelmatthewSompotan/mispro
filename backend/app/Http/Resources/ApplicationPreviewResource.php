@@ -60,13 +60,13 @@ class ApplicationPreviewResource extends JsonResource
             ]),
             'enrollment' => [
                 'class' => $enrollment->schoolClass->grade,
-                'section' => $this->enrollment->section ? [
-                    'id' => $this->enrollment->section->section_id,
-                    'name' => $this->enrollment->section->name
+                'section' => $this->enrollment->getSectionAttribute ? [
+                    'id' => $this->enrollment->getSectionAttribute->section_id,
+                    'name' => $this->enrollment->getSectionAttribute->name
                 ] : null,
-                'major' => $this->enrollment->major ? [
-                    'id' => $this->enrollment->major->major_id,
-                    'name' => $this->enrollment->major->name
+                'major' => $this->enrollment->getMajorAttribute ? [
+                    'id' => $this->enrollment->getMajorAttribute->major_id,
+                    'name' => $this->enrollment->getMajorAttribute->name
                 ] : null,
                 'program' => $this->enrollment->program ? [
                     'id' => $this->enrollment->program_id,
