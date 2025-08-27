@@ -179,7 +179,8 @@ const StudentInformationSection = ({
       if (errors.city_regency !== undefined) setCityError(errors.city_regency);
       if (errors.province !== undefined) setProvinceError(errors.province);
       if (errors.other !== undefined) setOtherAddressError(errors.other); // Tambah error handling untuk Other Address
-      if (errors.academic_status !== undefined) setAcademicStatusError(errors.academic_status); // Tambahkan kembali
+      if (errors.academic_status !== undefined)
+        setAcademicStatusError(errors.academic_status); // Tambahkan kembali
     }
   }, [errors]);
 
@@ -1094,7 +1095,7 @@ const StudentInformationSection = ({
                           academic_status_other: "",
                         });
                       }
-                      
+
                       // HILANGKAN error state academic status setelah memilih
                       if (academicStatusError) {
                         setAcademicStatusError(false);
@@ -1143,7 +1144,7 @@ const StudentInformationSection = ({
                             academic_status_other: academicStatusOther,
                           });
                         }
-                        
+
                         // HILANGKAN error state academic status setelah memilih
                         if (academicStatusError) {
                           setAcademicStatusError(false);

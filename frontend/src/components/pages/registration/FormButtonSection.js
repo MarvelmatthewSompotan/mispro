@@ -97,12 +97,12 @@ const FormButtonSection = ({
     if (!allFormData.studentInfo || !allFormData.studentInfo.phone_number) {
       errors.studentInfo = { ...errors.studentInfo, phone_number: true };
     }
-    
+
     // Tambahkan kembali validasi academic status (required)
     if (!allFormData.studentInfo || !allFormData.studentInfo.academic_status) {
       errors.studentInfo = { ...errors.studentInfo, academic_status: true };
     }
-    
+
     if (!allFormData.studentInfo || !allFormData.studentInfo.street) {
       errors.studentInfo = { ...errors.studentInfo, street: true };
     }

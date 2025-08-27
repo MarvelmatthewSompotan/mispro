@@ -204,7 +204,6 @@ textarea[value]:not([value=""]) {
 .districtField,
 .academicStatusField,
 .phoneField, /* Tambah phoneField */
-.emailField, /* Tambah emailField */
 .previousSchoolField, /* Tambah previousSchoolField */
 .otherField {
   /* Tambah otherField */
@@ -223,6 +222,16 @@ textarea[value]:not([value=""]) {
   width: 100%; /* Pastikan semua field punya width yang sama */
 }
 
+.emailField {
+  flex: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 12px; /* Standard padding untuk semua field */
+  margin: 0;
+  min-width: 0;
+  border-bottom: 1px solid #000;
+}
 /* Khusus untuk field age dan email address - tambah gap yang lebih besar */
 .ageField,
 .emailField {
@@ -278,6 +287,10 @@ textarea[value]:not([value=""]) {
   align-self: stretch;
   position: relative;
   line-height: 100%;
+  border: none !important; /* hilangkan border input */
+  outline: none !important; /* hilangkan outline fokus */
+  box-shadow: none !important; /* hilangkan shadow bawaan */
+  background: transparent !important; /* biar nyatu dengan bg */
 }
 
 /* Khusus untuk field yang tidak memerlukan border bottom - HAPUS noBorder */
