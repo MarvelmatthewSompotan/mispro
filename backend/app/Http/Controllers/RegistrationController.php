@@ -504,6 +504,8 @@ class RegistrationController extends Controller
                 'data' => [
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
+                    'application_id' => $applicationForm->application_id,
+                    'registration_number' =>$enrollment->enrollment_id
                 ],
             ], 200);
             
@@ -835,14 +837,15 @@ class RegistrationController extends Controller
 
     private function createApplicationForm($enrollment)
     {
-        $maxVersion = ApplicationForm::where('enrollment_id', $enrollment->enrollment_id)->max('version');
+        $maxVersion = ApplicationForm::whereHas('enrollment', function($query) use ($enrollment) {
+            $query->where('student_id', $enrollment->student_id);
+        })->max('version');
         $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
         return ApplicationForm::create([
             'enrollment_id' => $enrollment->enrollment_id,
             'status' => 'Submitted',
             'submitted_at' => now(),
             'version' => $nextVersion,
-            'created_by' => auth()->id(),
         ]);
     }
 
@@ -857,10 +860,17 @@ class RegistrationController extends Controller
             'action' => 'registration'
         ];
         
+        $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment', function($query) use ($student) {
+            $query->where('student_id', $student->student_id);
+        })->max('version');
+        
+        $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
+        $userName = auth()->user()->name;
+
         ApplicationFormVersion::create([
             'application_id' => $applicationForm->application_id,
-            'version' => 1,
-            'updated_by' => auth()->id(),
+            'version' => $nextVersion,
+            'updated_by' => $userName,
             'data_snapshot' => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
         ]);
     }
