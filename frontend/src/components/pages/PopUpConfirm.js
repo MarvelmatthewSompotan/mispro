@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../styles/PopUpConfirm.module.css";
 import { submitRegistrationForm } from "../../services/api";
 
@@ -15,11 +16,39 @@ const PopUpConfirm = React.memo(
         console.log("=== SUBMIT DEBUG INFO ===");
         console.log("Draft ID:", draftId);
         console.log("Data keys:", Object.keys(transformedData));
+        console.log("All form data:", allFormData);
         console.log("========================");
 
         const response = await submitRegistrationForm(draftId, transformedData);
 
+        console.log("=== RESPONSE DEBUG INFO ===");
+        console.log("Response:", response);
+        console.log("Response data:", response.data);
+        console.log("========================");
+
         if (response.success) {
+          const applicationId = response.data.application_id || response.data.student_id;
+          
+          console.log("=== APPLICATION ID DEBUG ===");
+          console.log("Response data keys:", Object.keys(response.data));
+          console.log("Application ID found:", applicationId);
+          console.log("========================");
+          
+          // Redirect ke halaman Print dengan data yang diperlukan
+          const printData = {
+            ...locationState,
+            applicationId: applicationId,
+            formData: allFormData,
+            submittedData: response.data,
+            isPreview: true
+          };
+          
+          console.log("=== PRINT DATA DEBUG INFO ===");
+          console.log("Application ID:", applicationId);
+          console.log("Print data being sent:", printData);
+          console.log("========================");
+          
+          navigate('/print', { state: printData });
           onConfirm();
         } else {
           alert("Registration failed: " + (response.error || "Unknown error"));

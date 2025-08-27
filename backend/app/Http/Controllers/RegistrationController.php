@@ -504,6 +504,7 @@ class RegistrationController extends Controller
                 'data' => [
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
+                    'application_id' => $applicationForm->application_id, 
                 ],
             ], 200);
             
@@ -524,6 +525,9 @@ class RegistrationController extends Controller
     public function showPreview($applicationId)
     {
         try {
+            // ✅ PERBAIKAN: Tambahkan logging untuk debug
+            \Log::info('Preview called for application ID:', ['application_id' => $applicationId]);
+            
             $application = ApplicationForm::with([
                 'enrollment.student.studentAddress',
                 'enrollment.schoolClass',
@@ -537,12 +541,20 @@ class RegistrationController extends Controller
                 'enrollment.student.payments',
             ])->findOrFail($applicationId);
             
+            \Log::info('Application found:', ['application' => $application]);
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Preview data saved to session',
+                'message' => 'Preview data retrieved successfully',
                 'data' => new ApplicationPreviewResource($application)
             ], 200);
         } catch (\Exception $e) {
+            // ✅ PERBAIKAN: Log error yang lebih detail
+            \Log::error('Preview failed for application ID: ' . $applicationId, [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'error' => 'Preview failed: ' . $e->getMessage()

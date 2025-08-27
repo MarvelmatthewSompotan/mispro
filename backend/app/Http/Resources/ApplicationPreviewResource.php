@@ -60,19 +60,33 @@ class ApplicationPreviewResource extends JsonResource
             ]),
             'enrollment' => [
                 'class' => $enrollment->schoolClass->grade,
-                'section_id' => $enrollment->schoolClass->section_id,
-                'section_name' => $enrollment->schoolClass->section->name,
-                'major_id' => $enrollment->schoolClass->major_id,
-                'major_name' => $enrollment->schoolClass->major->name,
-                'program_id' => $enrollment->program_id,
-                'program_name' => $enrollment->program->name,
-                'residence' => $enrollment->residenceHall->type,
-                'transportation' => $enrollment->transportation->type,
-                'pickup_point' => optional($enrollment->transportation->pickupPoint)->name,
-                'policies' => [
-                    'residence_hall' => $enrollment->residence_hall_policy,
-                    'transportation' => $enrollment->transportation_policy,
-                ],
+                'section' => $this->enrollment->section ? [
+                    'id' => $this->enrollment->section->section_id,
+                    'name' => $this->enrollment->section->name
+                ] : null,
+                'major' => $this->enrollment->major ? [
+                    'id' => $this->enrollment->major->major_id,
+                    'name' => $this->enrollment->major->name
+                ] : null,
+                'program' => $this->enrollment->program ? [
+                    'id' => $this->enrollment->program_id,
+                    'name' => $this->enrollment->program->name
+                ] : null,
+                'residence' => $this->enrollment->residenceHall ? [
+                    'id' => $this->enrollment->residenceHall->residence_id,
+                    'name' => $this->enrollment->residenceHall->type,
+                    'policy' => $this->enrollment->residence_hall_policy ?? 'Not Signed'
+                ] : null,
+                'transportation' => $this->enrollment->transportation ? [
+                    'id' => $this->enrollment->transportation->transport_id,
+                    'name' => $this->enrollment->transportation->type,
+                    'policy' => $this->enrollment->transportation_policy ?? 'Not Signed'
+                ] : null,
+                'pickup_point' => $this->enrollment->pickupPoint ? [
+                    'id' => $this->enrollment->pickupPoint->pickup_point_id,
+                    'name' => $this->enrollment->pickupPoint->name,
+                    'custom' => $this->enrollment->pickup_point_custom ?? null
+                ] : null,
             ],
             'father' => [
                 'name' => $student->studentParent->father_name ?? null,
