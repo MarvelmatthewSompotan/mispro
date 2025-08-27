@@ -20,16 +20,7 @@ class MasterDataController extends Controller
     {
         $sections = Section::select('section_id', 'name')->get();
         $majors = Major::select('major_id', 'name')->get();
-        $classes = SchoolClass::with(['section', 'major'])->get()->map(function ($class){
-            return [
-                'class_id' => $class->class_id,
-                'grade' => $class->grade,
-                'section_id' => $class->section_id,
-                'section_name' => $class->section->name,
-                'major_id' => $class->major_id,
-                'major_name' => $class->major->name,
-            ];
-        });
+        $classes = SchoolClass::select('class_id', 'grade')->get();
         
         $pickupPoints = PickupPoint::select('pickup_point_id', 'name')->get();
         

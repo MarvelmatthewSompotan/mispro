@@ -141,7 +141,7 @@ class RegistrationController extends Controller
             return DB::table('students')
                 ->join('enrollments', 'students.student_id', '=', 'enrollments.student_id')
                 ->join('classes', 'enrollments.class_id', '=', 'classes.class_id')
-                ->where('classes.section_id', $section_id)
+                ->where('enrollments.section_id', $section_id)
                 ->whereMonth('students.registration_date', $month)
                 ->whereYear('students.registration_date', $year)
                 ->lockForUpdate()
@@ -329,6 +329,8 @@ class RegistrationController extends Controller
             // data master
             $program = Program::findOrFail($validated['program_id']);
             $schoolClass = SchoolClass::findOrFail($validated['class_id']);
+            $major = Major::findOrFail($validated['major_id']);
+            $section = Section::findOrFail($validated['section_id']);
 
             $transportation = null;
             if (!empty($validated['transportation_id'])) {
@@ -429,6 +431,8 @@ class RegistrationController extends Controller
                 // Create enrollment (sama untuk New dan Old)
                 $enrollment = $student->enrollments()->create([
                     'class_id' => $schoolClass->class_id,
+                    'section_id' => $section->section_id,
+                    'major_id' => $major->major_id,
                     'semester_id' => $draft->semester_id,
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
@@ -470,6 +474,8 @@ class RegistrationController extends Controller
                 // Create enrollment (sama untuk New dan Old)
                 $enrollment = $student->enrollments()->create([
                     'class_id' => $schoolClass->class_id,
+                    'section_id' => $section->section_id,
+                    'major_id' => $major->major_id,
                     'semester_id' => $draft->semester_id,
                     'school_year_id' => $draft->school_year_id,
                     'program_id' => $program->program_id,
