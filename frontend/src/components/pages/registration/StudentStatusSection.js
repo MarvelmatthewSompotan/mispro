@@ -49,11 +49,11 @@ const StudentStatusSection = ({
     setStudentSearch("");
     setSearchResults([]);
 
-    // Kirim data ke parent component dengan input_name
+    // Kirim data ke parent component dengan format yang benar
     if (onDataChange) {
       onDataChange({
         student_status: option,
-        input_name: option === "Old" ? "" : null, // Tambahkan input_name
+        input_name: "", // Reset input_name ketika status berubah
       });
     }
   };
@@ -102,7 +102,7 @@ const StudentStatusSection = ({
         // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
 
-        // Update input_name dengan nama student yang dipilih
+        // Kirim input_name ke parent component
         if (onDataChange) {
           onDataChange({
             student_status: "Old",

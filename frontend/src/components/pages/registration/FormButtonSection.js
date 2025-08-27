@@ -37,8 +37,86 @@ const FormButtonSection = ({
     if (!allFormData.studentInfo || !allFormData.studentInfo.first_name) {
       errors.studentInfo = { ...errors.studentInfo, first_name: true };
     }
-    if (!allFormData.studentInfo || !allFormData.studentInfo.citizenship) {
+    if (!allFormData.studentInfo || !allFormData.studentInfo.nickname) {
+      errors.studentInfo = { ...errors.studentInfo, nickname: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.nisn) {
+      errors.studentInfo = { ...errors.studentInfo, nisn: true };
+    }
+
+    // Validasi NIK hanya jika citizenship = "Indonesia"
+    if (
+      allFormData.studentInfo &&
+      allFormData.studentInfo.citizenship === "Indonesia"
+    ) {
+      if (!allFormData.studentInfo.nik) {
+        errors.studentInfo = { ...errors.studentInfo, nik: true };
+      }
+    }
+
+    // Validasi KITAS hanya jika citizenship = "Non Indonesia" (country tidak required)
+    if (
+      allFormData.studentInfo &&
+      allFormData.studentInfo.citizenship === "Non Indonesia"
+    ) {
+      if (!allFormData.studentInfo.kitas) {
+        errors.studentInfo = { ...errors.studentInfo, kitas: true };
+      }
+      // HAPUS validasi country karena tidak required
+    }
+
+    // Field lain yang selalu required
+    if (!allFormData.studentInfo || !allFormData.studentInfo.gender) {
+      errors.studentInfo = { ...errors.studentInfo, gender: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.family_rank) {
+      errors.studentInfo = { ...errors.studentInfo, family_rank: true };
+    }
+    if (
+      !allFormData.studentInfo ||
+      allFormData.studentInfo.citizenship === undefined ||
+      allFormData.studentInfo.citizenship === null
+    ) {
       errors.studentInfo = { ...errors.studentInfo, citizenship: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.religion) {
+      errors.studentInfo = { ...errors.studentInfo, religion: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.place_of_birth) {
+      errors.studentInfo = { ...errors.studentInfo, place_of_birth: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.date_of_birth) {
+      errors.studentInfo = { ...errors.studentInfo, date_of_birth: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.email) {
+      errors.studentInfo = { ...errors.studentInfo, email: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.previous_school) {
+      errors.studentInfo = { ...errors.studentInfo, previous_school: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.phone_number) {
+      errors.studentInfo = { ...errors.studentInfo, phone_number: true };
+    }
+
+    // Tambahkan kembali validasi academic status (required)
+    if (!allFormData.studentInfo || !allFormData.studentInfo.academic_status) {
+      errors.studentInfo = { ...errors.studentInfo, academic_status: true };
+    }
+
+    if (!allFormData.studentInfo || !allFormData.studentInfo.street) {
+      errors.studentInfo = { ...errors.studentInfo, street: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.village) {
+      errors.studentInfo = { ...errors.studentInfo, village: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.district) {
+      errors.studentInfo = { ...errors.studentInfo, district: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.city_regency) {
+      errors.studentInfo = { ...errors.studentInfo, city_regency: true };
+    }
+    if (!allFormData.studentInfo || !allFormData.studentInfo.province) {
+      errors.studentInfo = { ...errors.studentInfo, province: true };
     }
 
     // Validasi Program Section

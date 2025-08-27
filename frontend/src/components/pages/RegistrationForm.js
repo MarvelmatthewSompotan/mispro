@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
-import Main from "../layout/Main";
-import StudentStatusSection from "./registration/StudentStatusSection";
-import StudentInformationSection from "./registration/StudentInformationSection";
-import ProgramSection from "./registration/ProgramSection";
-import FacilitiesSection from "./registration/FacilitiesSection";
-import ParentGuardianSection from "./registration/ParentGuardianSection";
-import TermOfPaymentSection from "./registration/TermOfPaymentSection";
-import OtherDetailSection from "./registration/OtherDetailSection";
-import FormButtonSection from "./registration/FormButtonSection";
-import styles from "./RegistrationForm.module.css";
-import { getRegistrationOptions } from "../../services/api";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
+import Main from '../layout/Main';
+import StudentStatusSection from './registration/StudentStatusSection';
+import StudentInformationSection from './registration/StudentInformationSection';
+import ProgramSection from './registration/ProgramSection';
+import FacilitiesSection from './registration/FacilitiesSection';
+import ParentGuardianSection from './registration/ParentGuardianSection';
+import TermOfPaymentSection from './registration/TermOfPaymentSection';
+import OtherDetailSection from './registration/OtherDetailSection';
+import FormButtonSection from './registration/FormButtonSection';
+import styles from './RegistrationForm.module.css';
+import { getRegistrationOptions } from '../../services/api';
 
 const RegistrationForm = () => {
   const location = useLocation();
@@ -39,7 +39,7 @@ const RegistrationForm = () => {
         setSharedData(data);
         setIsLoading(false);
       } catch (error) {
-        console.error("Failed to fetch registration options:", error);
+        console.error('Failed to fetch registration options:', error);
         setIsLoading(false);
       }
     };
@@ -48,7 +48,7 @@ const RegistrationForm = () => {
   }, []);
 
   const handleSectionDataChange = useCallback((sectionName, data) => {
-    if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
       console.error(`Data untuk ${sectionName} harus berupa objek`, data);
       return;
     }
@@ -72,51 +72,50 @@ const RegistrationForm = () => {
     (data) => {
       // Pastikan data lengkap sebelum dikirim
       const completeData = {
-        student_status: data.student_status || "New",
-        input_name: data.input_name || "",
+        student_status: data.student_status || 'New',
+        input_name: data.input_name || '',
       };
 
-      handleSectionDataChange("studentStatus", completeData);
+      handleSectionDataChange('studentStatus', completeData);
     },
     [handleSectionDataChange]
   );
 
   const handleStudentInfoDataChange = useCallback(
     (data) => {
-      handleSectionDataChange("studentInfo", data);
+      handleSectionDataChange('studentInfo', data);
     },
     [handleSectionDataChange]
   );
 
   const handleStudentInfoValidationChange = useCallback((validationData) => {
-    handleValidationChange("studentInfo", validationData);
+    handleValidationChange('studentInfo', validationData);
   }, []);
 
   const handleProgramDataChange = useCallback(
     (data) => {
-      console.log("Program data change:", data);
-      handleSectionDataChange("program", data);
+      handleSectionDataChange('program', data);
     },
     [handleSectionDataChange]
   );
 
   const handleFacilitiesDataChange = useCallback(
     (data) => {
-      handleSectionDataChange("facilities", data);
+      handleSectionDataChange('facilities', data);
     },
     [handleSectionDataChange]
   );
 
   const handleParentGuardianDataChange = useCallback(
     (data) => {
-      handleSectionDataChange("parentGuardian", data);
+      handleSectionDataChange('parentGuardian', data);
     },
     [handleSectionDataChange]
   );
 
   const handleTermOfPaymentDataChange = useCallback(
     (data) => {
-      handleSectionDataChange("termOfPayment", data);
+      handleSectionDataChange('termOfPayment', data);
     },
     [handleSectionDataChange]
   );
@@ -212,7 +211,7 @@ const RegistrationForm = () => {
     return (
       <Main>
         <div className={styles.formContainer}>
-          <div style={{ textAlign: "center", padding: "50px" }}>
+          <div style={{ textAlign: 'center', padding: '50px' }}>
             <p>Loading registration form...</p>
           </div>
         </div>

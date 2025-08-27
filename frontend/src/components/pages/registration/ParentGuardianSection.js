@@ -52,7 +52,66 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger }) => {
     other: '',
   });
 
-  // Helper untuk handle input change dan kirim data ke parent
+  // State untuk mengakumulasi semua data
+  const [allParentData, setAllParentData] = useState({});
+
+  // Function untuk mengupdate data dan mengirim ke parent
+  const updateAndSendData = () => {
+    const allData = {};
+
+    // Father data dengan field mapping yang benar - kirim semua field
+    allData.father_name = father.name || "";
+    allData.father_company = father.company || "";
+    allData.father_occupation = father.occupation || "";
+    allData.father_phone = father.phone || "";
+    allData.father_email = father.email || "";
+    allData.father_address_street = father.street || "";
+    allData.father_address_rt = father.rt || "";
+    allData.father_address_rw = father.rw || "";
+    allData.father_address_village = father.village || "";
+    allData.father_address_district = father.district || "";
+    allData.father_address_city_regency = father.city || "";
+    allData.father_address_province = father.province || "";
+    allData.father_address_other = father.other || "";
+
+    // Mother data dengan field mapping yang benar - kirim semua field
+    allData.mother_name = mother.name || "";
+    allData.mother_company = mother.company || "";
+    allData.mother_occupation = mother.occupation || "";
+    allData.mother_phone = mother.phone || "";
+    allData.mother_email = mother.email || "";
+    allData.mother_address_street = mother.street || "";
+    allData.mother_address_rt = mother.rt || "";
+    allData.mother_address_rw = mother.rw || "";
+    allData.mother_address_village = mother.village || "";
+    allData.mother_address_district = mother.district || "";
+    allData.mother_address_city_regency = mother.city || "";
+    allData.mother_address_province = mother.province || "";
+    allData.mother_address_other = mother.other || "";
+
+    // Guardian data dengan field mapping yang benar - kirim semua field
+    allData.guardian_name = guardian.name || "";
+    allData.relation_to_student = guardian.relationship || "";
+    allData.guardian_phone = guardian.phone || "";
+    allData.guardian_email = guardian.email || "";
+    allData.guardian_address_street = guardian.street || "";
+    allData.guardian_address_rt = guardian.rt || "";
+    allData.guardian_address_rw = guardian.rw || "";
+    allData.guardian_address_village = guardian.village || "";
+    allData.guardian_address_district = guardian.district || "";
+    allData.guardian_address_city_regency = guardian.city || "";
+    allData.guardian_address_province = guardian.province || "";
+    allData.guardian_address_other = guardian.other || "";
+
+    console.log("ParentGuardianSection - Data being sent:", allData);
+    console.log("ParentGuardianSection - Data type:", typeof allData);
+    console.log("ParentGuardianSection - Data keys:", Object.keys(allData));
+
+    setAllParentData(allData);
+    onDataChange("parentGuardian", allData);
+  };
+
+  // Helper untuk handle input change
   const handleChange = (setter, field, section) => (e) => {
     const value = e.target.value;
 
