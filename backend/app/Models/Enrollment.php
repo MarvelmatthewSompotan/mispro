@@ -31,6 +31,8 @@ class Enrollment extends Model
         'enrollment_id',
         'student_id',
         'class_id',
+        'section_id',
+        'major_id',
         'semester_id',
         'school_year_id',
         'program_id',
@@ -87,6 +89,16 @@ class Enrollment extends Model
         return $this->belongsTo(PickupPoint::class, 'pickup_point_id', 'pickup_point_id');
     }
 
+    public function section() : BelongsTo
+    {
+        return $this->belongsTo(Section::class, 'section_id', 'section_id');
+    }
+
+    public function major() : BelongsTo
+    {
+        return $this->belongsTo(Major::class, 'major_id', 'major_id');
+    }
+
     public function studentDiscount() : HasMany
     {
         return $this->hasMany(
@@ -115,16 +127,6 @@ class Enrollment extends Model
     {
         return $this->hasMany(
         StudentPhoto::class, 'enrollment_id', 'enrollment_id');
-    }
-
-    public function getSectionAttribute()
-    {
-        return $this->schoolClass ? $this->schoolClass->section : null;
-    }
-
-    public function getMajorAttribute()
-    {
-        return $this->schoolClass ? $this->schoolClass->major : null;
     }
 
     public function getPickupPoint()

@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id('enrollment_id');
             $table->string('student_id', 30)->nullable();
             $table->unsignedBigInteger('class_id')->nullable();
+            $table->unsignedBigInteger('section_id')->nullable(); 
+            $table->unsignedBigInteger('major_id')->nullable(); 
             $table->unsignedBigInteger('semester_id')->nullable();
             $table->unsignedBigInteger('school_year_id')->nullable();
             $table->unsignedBigInteger('program_id')->nullable();
@@ -26,6 +28,8 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
             $table->foreign('class_id')->references('class_id')->on('classes')->onDelete('set null');
+            $table->foreign('section_id')->references('section_id')->on('sections')->onDelete('set null'); 
+            $table->foreign('major_id')->references('major_id')->on('majors')->onDelete('set null');   
             $table->foreign('semester_id')->references('semester_id')->on('semesters')->onDelete('set null');
             $table->foreign('school_year_id')->references('school_year_id')->on('school_years')->onDelete('set null');
             $table->foreign('program_id')->references('program_id')->on('programs')->onDelete('set null');
