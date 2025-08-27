@@ -181,7 +181,7 @@ class RegistrationController extends Controller
     public function store(Request $request, $draft_id)
     {
         // Tambahkan logging untuk debug
-        \Log::info('Registration store called', [
+    \Log::info('Registration store called', [
             'draft_id' => $draft_id,
             'request_data' => $request->all(),
             'user_id' => auth()->id()
