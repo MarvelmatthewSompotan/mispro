@@ -141,3 +141,23 @@ export const getStudentLatestApplication = async (studentId) => {
 
   return await res.json();
 };
+
+export const getRegistrationPreview = async (applicationId) => {
+  const token = localStorage.getItem('token');
+  const res = await fetch(
+    `http://localhost:8000/api/registration/preview/${applicationId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch registration preview');
+  }
+
+  return await res.json();
+};

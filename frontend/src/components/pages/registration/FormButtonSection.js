@@ -9,9 +9,10 @@ const FormButtonSection = ({
   draftId,
   allFormData,
   onReset,
+  location
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const locationState = useLocation();
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleReset = () => {
@@ -248,7 +249,7 @@ const FormButtonSection = ({
           onConfirm={handleConfirmSubmit}
           draftId={draftId}
           allFormData={allFormData}
-          locationState={location.state}
+          locationState={location}
           navigate={navigate}
         />
       )}
