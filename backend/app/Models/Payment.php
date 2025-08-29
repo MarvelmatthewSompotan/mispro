@@ -15,8 +15,8 @@ class Payment extends Model
     protected $fillable = [
         'payment_id',
         'student_id',
-        'type',
-        'method',
+        'tuition_fees',
+        'residence_hall',
         'financial_policy_contract'
     ];
 
