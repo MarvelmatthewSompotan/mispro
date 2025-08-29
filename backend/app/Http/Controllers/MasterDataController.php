@@ -36,8 +36,8 @@ class MasterDataController extends Controller
             'discount_types' => DiscountType::select('discount_type_id', 'name')->get(),
             'student_status' => ['New', 'Old', 'Transferee'],
             'academic_status' => ['REGULAR', 'SIT-IN', 'OTHER'],
-            'payment_type' => ['Tuition Fee', 'Residence Hall'],
-            'payment_method' => ['Full Payment', 'Installment'],
+            'tuition_fees' => ['Full Payment', 'Installment'],
+            'residence_payment' => ['Full Payment', 'Installment'],
             'financial_policy_contract' => ['Signed', 'Not Signed'],
             'pickup_points' => $pickupPoints,
         ]);

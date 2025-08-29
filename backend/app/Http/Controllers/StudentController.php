@@ -140,8 +140,8 @@ class StudentController extends Controller
                 'guardian_address_other' => $requestData['guardian_address_other'] ?? '',
             ],
             'termOfPayment' => [
-                'payment_type' => $requestData['payment_type'] ?? '',
-                'payment_method' => $requestData['payment_method'] ?? '',
+                'tuition_fees' => $requestData['tuition_fees'] ?? '',
+                'residence_payment' => $requestData['residence_payment'] ?? '',
                 'financial_policy_contract' => $requestData['financial_policy_contract'] ?? '',
                 'discount_name' => $requestData['discount_name'] ?? '',
                 'discount_notes' => $requestData['discount_notes'] ?? '',

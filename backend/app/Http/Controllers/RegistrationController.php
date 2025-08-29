@@ -310,8 +310,8 @@ class RegistrationController extends Controller
                 'guardian_address_other' => 'nullable|string',
                 
                 // payment
-                'payment_type' => 'required|in:Tuition Fee,Residence Hall',
-                'payment_method' => 'required|in:Full Payment,Installment',
+                'tuition_fees' => 'required|in:Full Payment,Installment',
+                'residence_payment' => 'required|in:Full Payment,Installment',
                 'financial_policy_contract' => 'required|in:Signed,Not Signed',
 
                 // discount
@@ -686,8 +686,8 @@ class RegistrationController extends Controller
     {
         Payment::create([
             'student_id' => $student->student_id,
-            'type' => $validated['payment_type'],
-            'method' => $validated['payment_method'],
+            'tuition_fees' => $validated['tuition_fees'],
+            'residence_payment' => $validated['residence_payment'],
             'financial_policy_contract' => $validated['financial_policy_contract'],
         ]);
 
@@ -837,8 +837,8 @@ class RegistrationController extends Controller
     {
         Payment::updateOrCreate([
             'student_id' => $student->student_id,
-            'type' => $validated['payment_type'],
-            'method' => $validated['payment_method'],
+            'tuition_fees' => $validated['tuition_fees'],
+            'residence_payment' => $validated['residence_payment'],
             'financial_policy_contract' => $validated['financial_policy_contract'],
         ]);
 

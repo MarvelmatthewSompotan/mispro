@@ -16,7 +16,7 @@ class Payment extends Model
         'payment_id',
         'student_id',
         'tuition_fees',
-        'residence_hall',
+        'residence_payment',
         'financial_policy_contract'
     ];
 
