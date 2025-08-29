@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
-import styles from "./TermOfPaymentSection.module.css";
-import checkBoxIcon from "../../../assets/CheckBox.png";
-import { getRegistrationOptions } from "../../../services/api";
+import React, { useState, useEffect, useRef } from 'react';
+import styles from './TermOfPaymentSection.module.css';
+import checkBoxIcon from '../../../assets/CheckBox.png';
+import { getRegistrationOptions } from '../../../services/api';
 
 const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   // State untuk payment options
-  const [paymentType, setPaymentType] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [tuitionFees, setTuitionFees] = useState('');
+  const [residencePayment, setResidencePayment] = useState('');
   const [financialPolicy, setFinancialPolicy] = useState(false);
-  const [discountName, setDiscountName] = useState("");
-  const [discountNotes, setDiscountNotes] = useState("");
+  const [discountName, setDiscountName] = useState('');
+  const [discountNotes, setDiscountNotes] = useState('');
 
   // State untuk dropdown options dari backend
-  const [paymentTypeOptions, setPaymentTypeOptions] = useState([]);
-  const [paymentMethodOptions, setPaymentMethodOptions] = useState([]);
+  const [tuitionFeesOption, setTuitionFeesOption] = useState([]);
+  const [residencePaymentOption, setResidencePaymentOption] = useState([]);
   const [discountTypeOptions, setDiscountTypeOptions] = useState([]);
 
   // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
@@ -23,19 +23,19 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
-      setPaymentTypeOptions(sharedData.payment_type || []);
-      setPaymentMethodOptions(sharedData.payment_method || []);
+      setTuitionFeesOption(sharedData.tuition_fees || []);
+      setResidencePaymentOption(sharedData.residence_payment || []);
       setDiscountTypeOptions(sharedData.discount_types || []);
     } else {
       // Fallback to individual API call if shared data not available
       getRegistrationOptions()
         .then((data) => {
-          setPaymentTypeOptions(data.payment_type || []);
-          setPaymentMethodOptions(data.payment_method || []);
+          setTuitionFeesOption(data.tuition_fees || []);
+          setResidencePaymentOption(data.residence_payment || []);
           setDiscountTypeOptions(data.discount_types || []);
         })
         .catch((err) => {
-          console.error("Failed to fetch payment options:", err);
+          console.error('Failed to fetch payment options:', err);
         });
     }
   }, [sharedData]);
@@ -45,12 +45,13 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
     if (prefill && Object.keys(prefill).length > 0) {
       // Jika ini prefill pertama kali atau prefill berubah signifikan
       if (isInitialPrefill.current || !hasInitialized.current) {
-        console.log("Initial prefilling TermOfPaymentSection with:", prefill);
+        console.log('Initial prefilling TermOfPaymentSection with:', prefill);
 
-        if (prefill.payment_type) setPaymentType(prefill.payment_type);
-        if (prefill.payment_method) setPaymentMethod(prefill.payment_method);
+        if (prefill.tuition_fees) setTuitionFees(prefill.tuition_fees);
+        if (prefill.residence_payment)
+          setResidencePayment(prefill.residence_payment);
         if (prefill.financial_policy_contract) {
-          setFinancialPolicy(prefill.financial_policy_contract === "Signed");
+          setFinancialPolicy(prefill.financial_policy_contract === 'Signed');
         }
         if (prefill.discount_name) setDiscountName(prefill.discount_name);
         if (prefill.discount_notes) setDiscountNotes(prefill.discount_notes);
@@ -60,52 +61,52 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
       }
     } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
       // Jika prefill menjadi empty object (reset form), reset semua field
-      console.log("Resetting TermOfPaymentSection form");
-      setPaymentType("");
-      setPaymentMethod("");
+      console.log('Resetting TermOfPaymentSection form');
+      setTuitionFees('');
+      setResidencePayment('');
       setFinancialPolicy(false);
-      setDiscountName("");
-      setDiscountNotes("");
+      setDiscountName('');
+      setDiscountNotes('');
 
       hasInitialized.current = false;
     }
   }, [prefill]);
 
-  const handlePaymentTypeChange = (value) => {
+  const handleTuitionFeesChange = (value) => {
     // Jika user mengklik option yang sudah dipilih, batalkan pilihan
-    if (paymentType === value) {
-      setPaymentType("");
+    if (tuitionFees === value) {
+      setTuitionFees('');
 
       onDataChange({
-        payment_type: "",
+        tuition_fees: '',
         // ... other fields
       });
     } else {
       // Jika user memilih option baru
-      setPaymentType(value);
+      setTuitionFees(value);
 
       onDataChange({
-        payment_type: value,
+        tuition_fees: value,
         // ... other fields
       });
     }
   };
 
-  const handlePaymentMethodChange = (value) => {
+  const handleResidencePaymentChange = (value) => {
     // Jika user mengklik option yang sudah dipilih, batalkan pilihan
-    if (paymentMethod === value) {
-      setPaymentMethod("");
+    if (residencePayment === value) {
+      setResidencePayment('');
 
       onDataChange({
-        payment_method: "",
+        residence_payment: '',
         // ... other fields
       });
     } else {
       // Jika user memilih option baru
-      setPaymentMethod(value);
+      setResidencePayment(value);
 
       onDataChange({
-        payment_method: value,
+        residence_payment: value,
         // ... other fields
       });
     }
@@ -115,17 +116,17 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
     const value = e.target.checked;
     setFinancialPolicy(value);
     onDataChange({
-      financial_policy_contract: value ? "Signed" : "Not Signed",
+      financial_policy_contract: value ? 'Signed' : 'Not Signed',
     });
   };
 
   const handleDiscountNameChange = (value) => {
     // Jika user mengklik option yang sudah dipilih, batalkan pilihan
     if (discountName === value) {
-      setDiscountName("");
+      setDiscountName('');
 
       onDataChange({
-        discount_name: "",
+        discount_name: '',
         // ... other fields
       });
     } else {
@@ -153,24 +154,24 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
       <div className={styles.contentWrapper}>
         <div className={styles.paymentSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Payment Type</div>
+            <div className={styles.sectionTitleText}>Tuition Fees</div>
           </div>
           <div className={styles.optionGroup}>
-            {paymentTypeOptions.map((option) => (
+            {tuitionFeesOption.map((option) => (
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
-                    type="radio"
-                    name="paymentType"
+                    type='radio'
+                    name='tuitionFees'
                     value={option}
-                    checked={paymentType === option}
-                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
-                    onClick={() => handlePaymentTypeChange(option)}
+                    checked={tuitionFees === option}
+                    onChange={(e) => handleTuitionFeesChange(e.target.value)}
+                    onClick={() => handleTuitionFeesChange(option)}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
                     <div className={styles.radioButtonCircle} />
-                    {paymentType === option && (
+                    {tuitionFees === option && (
                       <div className={styles.radioButtonSelected} />
                     )}
                   </div>
@@ -183,24 +184,26 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
 
         <div className={styles.paymentSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Payment Method</div>
+            <div className={styles.sectionTitleText}>Residence Hall</div>
           </div>
           <div className={styles.optionGroup}>
-            {paymentMethodOptions.map((option) => (
+            {residencePaymentOption.map((option) => (
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
-                    type="radio"
-                    name="paymentMethod"
+                    type='radio'
+                    name='residencePayment'
                     value={option}
-                    checked={paymentMethod === option}
-                    onChange={(e) => handlePaymentMethodChange(e.target.value)}
-                    onClick={() => handlePaymentMethodChange(option)}
+                    checked={residencePayment === option}
+                    onChange={(e) =>
+                      handleResidencePaymentChange(e.target.value)
+                    }
+                    onClick={() => handleResidencePaymentChange(option)}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
                     <div className={styles.radioButtonCircle} />
-                    {paymentMethod === option && (
+                    {residencePayment === option && (
                       <div className={styles.radioButtonSelected} />
                     )}
                   </div>
@@ -221,7 +224,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
             <div className={styles.optionItem}>
               <label className={styles.checkboxLabel}>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={financialPolicy}
                   onChange={handleFinancialPolicyChange}
                   className={styles.hiddenCheckbox}
@@ -231,7 +234,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
                   {financialPolicy && (
                     <img
                       className={styles.checkBoxIcon}
-                      alt=""
+                      alt=''
                       src={checkBoxIcon}
                     />
                   )}
@@ -253,12 +256,12 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
               <div className={styles.label}>Discount Type</div>
               <select
                 className={`${styles.dropdownSelect} ${
-                  discountName ? styles.hasValue : ""
+                  discountName ? styles.hasValue : ''
                 }`}
                 value={discountName}
                 onChange={(e) => handleDiscountNameChange(e.target.value)}
               >
-                <option value="">Select discount type</option>
+                <option value=''>Select discount type</option>
                 {discountTypeOptions.map((discount) => (
                   <option key={discount.discount_type_id} value={discount.name}>
                     {discount.name}
@@ -274,10 +277,10 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
                 <span className={styles.label}>Notes</span>
                 <input
                   className={styles.valueRegular}
-                  type="text"
+                  type='text'
                   value={discountNotes}
                   onChange={handleDiscountNotesChange}
-                  placeholder="Enter discount notes"
+                  placeholder='Enter discount notes'
                   style={{ margin: 0, padding: 0 }}
                 />
               </label>

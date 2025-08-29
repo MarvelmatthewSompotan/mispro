@@ -195,9 +195,8 @@ const PopUpConfirm = React.memo(
           formData.parentGuardian?.guardian_address_other || null,
 
         // Payment
-        payment_type: formData.termOfPayment?.payment_type || 'Tuition Fee',
-        payment_method:
-          formData.termOfPayment?.payment_method || 'Full Payment',
+        tuition_fees: formData.termOfPayment?.tuition_fees || '',
+        residence_payment: formData.termOfPayment?.residence_payment || '',
         financial_policy_contract:
           formData.termOfPayment?.financial_policy_contract || 'Not Signed',
 

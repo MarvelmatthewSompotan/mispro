@@ -16,7 +16,7 @@ const StudentInformationSection = ({
   const [academicStatusOptions, setAcademicStatusOptions] = useState([]);
   const [academicStatus, setAcademicStatus] = useState('');
   const [academicStatusOther, setAcademicStatusOther] = useState('');
-  const [academicStatusError, setAcademicStatusError] = useState(false); // Tambahkan kembali
+  const [academicStatusError, setAcademicStatusError] = useState(false); 
 
   const [firstName, setFirstName] = useState('');
   const [firstNameError, setFirstNameError] = useState(false);
@@ -432,7 +432,7 @@ const StudentInformationSection = ({
           months += 12;
         }
 
-        const calculatedAge = `${years} Tahun, ${months} Bulan`;
+        const calculatedAge = `${years} years, ${months} months`;
         updateAge(calculatedAge);
       } catch (error) {
         console.error('Error calculating age:', error);
