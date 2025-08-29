@@ -1,71 +1,7 @@
-import React from "react";
-import styles from "../../styles/ParentsGuardianInformation_Content.module.css";
+import React from 'react';
+import styles from '../../styles/ParentsGuardianInformation_Content.module.css';
 
-const ParentsGuardianInformationContent = ({ parentData }) => {
-  const data = parentData || {};
-  
-  // Helper function untuk format address dengan rt/rw
-  const getFullAddress = (addressData) => {
-    const street = addressData.street || "";
-    const rt = addressData.rt || "";
-    const rw = addressData.rw || "";
-    const village = addressData.village || "";
-    const district = addressData.district || "";
-    const city = addressData.city_regency || "";
-    const province = addressData.province || "";
-    const other = addressData.other || "";
-    
-    const addressParts = [street];
-    
-    // Tambahkan rt/rw jika ada
-    if (rt && rw) {
-      addressParts.push(`${rt}/${rw}`);
-    } else if (rt) {
-      addressParts.push(rt);
-    } else if (rw) {
-      addressParts.push(rw);
-    }
-    
-    // Tambahkan bagian address lainnya
-    [village, district, city, province].forEach(part => {
-      if (part) addressParts.push(part);
-    });
-    
-    const fullAddress = addressParts.join(", ");
-    
-    return other ? `${fullAddress} (${other})` : fullAddress;
-  };
-
-  // Helper function untuk nama lengkap
-  const getFullName = (personData) => {
-    const firstName = personData.first_name || "";
-    const middleName = personData.middle_name || "";
-    const lastName = personData.last_name || "";
-    
-    if (firstName && middleName && lastName) {
-      return `${firstName} ${middleName} ${lastName}`;
-    } else if (firstName && lastName) {
-      return `${firstName} ${lastName}`;
-    } else if (firstName) {
-      return firstName;
-    }
-    return "N/A";
-  };
-
-  // Helper function untuk extract address data dari parent data
-  const extractAddressData = (prefix) => {
-    return {
-      street: data[`${prefix}_address_street`] || "",
-      rt: data[`${prefix}_address_rt`] || "",
-      rw: data[`${prefix}_address_rw`] || "",
-      village: data[`${prefix}_address_village`] || "",
-      district: data[`${prefix}_address_district`] || "",
-      city_regency: data[`${prefix}_address_city_regency`] || "",
-      province: data[`${prefix}_address_province`] || "",
-      other: data[`${prefix}_address_other`] || "",
-    };
-  };
-
+const ParentsGuardianInformationContent = () => {
   return (
     <div className={styles.content}>
       <div className={styles.father}>
@@ -76,31 +12,53 @@ const ParentsGuardianInformationContent = ({ parentData }) => {
           <div className={styles.left}>
             <div className={styles.name}>
               <div className={styles.johnDoe}>{`Name `}</div>
-              <b className={styles.johnDoe}>{data.father_name || "N/A"}</b>
+              <b className={styles.johnDoe}>JOHN DOE</b>
             </div>
             <div className={styles.name}>
               <div className={styles.johnDoe}>Phone number</div>
-              <b className={styles.johnDoe}>{data.father_phone || "N/A"}</b>
+              <b className={styles.johnDoe}>089281560955</b>
             </div>
             <div className={styles.name}>
               <div className={styles.johnDoe}>Email</div>
-              <b className={styles.johndoehebatgmailcom}>{data.father_email || "N/A"}</b>
+              <b
+                className={styles.johndoehebatgmailcom}
+              >{`JOHNDOEHEBAT@GMAIL.COM `}</b>
             </div>
           </div>
           <div className={styles.right}>
             <div className={styles.txtFather}>
               <div className={styles.compName}>
                 <div className={styles.johnDoe}>Company name</div>
-                <b className={styles.ptMultiRakyat}>{data.father_company || "N/A"}</b>
+                <b className={styles.ptMultiRakyat}>PT. MULTI RAKYAT</b>
               </div>
               <div className={styles.compName}>
                 <div className={styles.johnDoe}>Occupation/Position</div>
-                <b className={styles.fieldManager}>{data.father_occupation || "N/A"}</b>
+                <b className={styles.fieldManager}>FIELD MANAGER</b>
               </div>
             </div>
             <div className={styles.bottom}>
               <div className={styles.johnDoe}>Address</div>
-              <b className={styles.johnDoe}>{getFullAddress(extractAddressData('father'))}</b>
+              <b className={styles.johnDoe}>JL. SARUNDAJANG 01</b>
+              <b className={styles.b1}>,</b>
+              <div className={styles.parent}>
+                <b className={styles.johnDoe}>001</b>
+                <b className={styles.b3}>/</b>
+                <b className={styles.johnDoe}>002</b>
+              </div>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>GIRIAN</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>RANOWULU</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>BITUNG</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>NORTH SULAWESI</b>
+              <b className={styles.b1}>,</b>
+              <div className={styles.parent}>
+                <b className={styles.b3}>(</b>
+                <b className={styles.johnDoe}>DAHLIA APARTEMENT UNIT 5023</b>
+                <b className={styles.b3}>)</b>
+              </div>
             </div>
           </div>
         </div>
@@ -113,31 +71,53 @@ const ParentsGuardianInformationContent = ({ parentData }) => {
           <div className={styles.left}>
             <div className={styles.name}>
               <div className={styles.johnDoe}>{`Name `}</div>
-              <b className={styles.johnDoe}>{data.mother_name || "N/A"}</b>
+              <b className={styles.johnDoe}>JOHN DOE</b>
             </div>
             <div className={styles.name}>
               <div className={styles.johnDoe}>Phone number</div>
-              <b className={styles.johnDoe}>{data.mother_phone || "N/A"}</b>
+              <b className={styles.johnDoe}>089281560955</b>
             </div>
             <div className={styles.name}>
               <div className={styles.johnDoe}>Email</div>
-              <b className={styles.johndoehebatgmailcom}>{data.mother_email || "N/A"}</b>
+              <b
+                className={styles.johndoehebatgmailcom}
+              >{`JOHNDOEHEBAT@GMAIL.COM `}</b>
             </div>
           </div>
           <div className={styles.right}>
             <div className={styles.txtFather}>
               <div className={styles.compName}>
                 <div className={styles.johnDoe}>Company name</div>
-                <b className={styles.ptMultiRakyat}>{data.mother_company || "N/A"}</b>
+                <b className={styles.ptMultiRakyat}>PT. MULTI RAKYAT</b>
               </div>
               <div className={styles.compName}>
                 <div className={styles.johnDoe}>Occupation/Position</div>
-                <b className={styles.fieldManager}>{data.mother_occupation || "N/A"}</b>
+                <b className={styles.fieldManager}>FIELD MANAGER</b>
               </div>
             </div>
             <div className={styles.bottom}>
               <div className={styles.johnDoe}>Address</div>
-              <b className={styles.johnDoe}>{getFullAddress(extractAddressData('mother'))}</b>
+              <b className={styles.johnDoe}>JL. SARUNDAJANG 01</b>
+              <b className={styles.b1}>,</b>
+              <div className={styles.parent}>
+                <b className={styles.johnDoe}>001</b>
+                <b className={styles.b3}>/</b>
+                <b className={styles.johnDoe}>002</b>
+              </div>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>GIRIAN</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>RANOWULU</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>BITUNG</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>NORTH SULAWESI</b>
+              <b className={styles.b1}>,</b>
+              <div className={styles.parent}>
+                <b className={styles.b3}>(</b>
+                <b className={styles.johnDoe}>DAHLIA APARTEMENT UNIT 5023</b>
+                <b className={styles.b3}>)</b>
+              </div>
             </div>
           </div>
         </div>
@@ -153,28 +133,48 @@ const ParentsGuardianInformationContent = ({ parentData }) => {
             <div className={styles.top1}>
               <div className={styles.relation}>
                 <div className={styles.johnDoe}>{`Name `}</div>
-                <b className={styles.uncle}>{data.guardian_name || "N/A"}</b>
+                <b className={styles.uncle}>{`JOHN DOE `}</b>
               </div>
               <div className={styles.relation}>
                 <div className={styles.johnDoe}>Relationship to student</div>
-                <b className={styles.uncle}>{data.relation_to_student || "N/A"}</b>
+                <b className={styles.uncle}>UNCLE</b>
               </div>
             </div>
             <div className={styles.top1}>
               <div className={styles.relation}>
                 <div className={styles.johnDoe}>Phone number</div>
-                <b className={styles.uncle}>{data.guardian_phone || "N/A"}</b>
+                <b className={styles.uncle}>082176543890</b>
               </div>
               <div className={styles.relation}>
                 <div className={styles.johnDoe}>Email</div>
-                <b className={styles.uncle}>{data.guardian_email || "N/A"}</b>
+                <b className={styles.uncle}>JOHNDOE@GMAIL.COM</b>
               </div>
             </div>
           </div>
           <div className={styles.right1}>
             <div className={styles.address3}>
               <div className={styles.johnDoe}>Address</div>
-              <b className={styles.johnDoe}>{getFullAddress(extractAddressData('guardian'))}</b>
+              <b className={styles.johnDoe}>JL. SARUNDAJANG 01</b>
+              <b className={styles.b1}>,</b>
+              <div className={styles.parent}>
+                <b className={styles.johnDoe}>001</b>
+                <b className={styles.b3}>/</b>
+                <b className={styles.johnDoe}>002</b>
+              </div>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>GIRIAN</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>RANOWULU</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>BITUNG</b>
+              <b className={styles.b1}>,</b>
+              <b className={styles.johnDoe}>NORTH SULAWESI</b>
+              <b className={styles.b1}>,</b>
+              <div className={styles.parent}>
+                <b className={styles.b3}>(</b>
+                <b className={styles.johnDoe}>DAHLIA APARTEMENT UNIT 5023</b>
+                <b className={styles.b3}>)</b>
+              </div>
             </div>
           </div>
         </div>

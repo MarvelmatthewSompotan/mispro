@@ -10,7 +10,9 @@ function OtherDetail_Content() {
         </div>
         <div className={styles.content}>
           <div className={styles.txtSrs}>
-            <div className={styles.studentRequirementStatus}>Student Requirement Status:</div>
+            <div className={styles.studentRequirementStatus}>
+              Student Requirement Status:
+            </div>
           </div>
           <div className={styles.status}>
             <div className={styles.complete}>
@@ -52,4 +54,4 @@ function OtherDetail_Content() {
   );
 }
 
-export default OtherDetail_Content; 
+export default OtherDetail_Content;
