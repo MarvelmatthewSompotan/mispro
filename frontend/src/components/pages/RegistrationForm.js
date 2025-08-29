@@ -244,6 +244,8 @@ const RegistrationForm = () => {
           onSelectOldStudent={handleSelectOldStudent}
           onDataChange={handleStudentStatusDataChange}
           sharedData={sharedData}
+          errors={errors.studentStatus || {}}
+          forceError={forceError.studentStatus || {}}
         />
         <StudentInformationSection
           prefill={formSections.studentInfo || {}}
@@ -257,22 +259,30 @@ const RegistrationForm = () => {
           prefill={formSections.program || {}}
           onDataChange={handleProgramDataChange}
           sharedData={sharedData}
+          errors={errors.program || {}}
+          forceError={forceError.program || {}}
         />
         <FacilitiesSection
           prefill={formSections.facilities || {}}
           onDataChange={handleFacilitiesDataChange}
           sharedData={sharedData}
+          errors={errors.facilities || {}}
+          forceError={forceError.facilities || {}}
         />
         <ParentGuardianSection
           prefill={formSections.parentGuardian || {}}
           onDataChange={handleParentGuardianDataChange}
           prefillTrigger={prefillTrigger}
+          errors={errors.parentGuardian || {}}
+          forceError={forceError.parentGuardian || {}}
           // ParentGuardianSection tidak memerlukan sharedData
         />
         <TermOfPaymentSection
           prefill={formSections.termOfPayment || {}}
           onDataChange={handleTermOfPaymentDataChange}
           sharedData={sharedData}
+          errors={errors.termOfPayment || {}}
+          forceError={forceError.termOfPayment || {}}
         />
         <OtherDetailSection />
         <FormButtonSection
@@ -281,6 +291,7 @@ const RegistrationForm = () => {
           draftId={draftId}
           allFormData={formSections}
           onReset={handleResetForm}
+          location={location} // Add this line
         />
       </div>
     </Main>

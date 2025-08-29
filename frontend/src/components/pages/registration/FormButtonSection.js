@@ -9,9 +9,10 @@ const FormButtonSection = ({
   draftId,
   allFormData,
   onReset,
+  location,
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const locationState = useLocation();
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleReset = () => {
@@ -151,6 +152,9 @@ const FormButtonSection = ({
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };
     }
+    if (!allFormData.facilities || !allFormData.facilities.transportation_id) {
+      errors.facilities = { ...errors.facilities, transportation_id: true };
+    }
     if (
       !allFormData.facilities ||
       !allFormData.facilities.transportation_policy
@@ -171,10 +175,129 @@ const FormButtonSection = ({
     ) {
       errors.parentGuardian = { ...errors.parentGuardian, father_name: true };
     }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_phone
+    ) {
+      errors.parentGuardian = { ...errors.parentGuardian, father_phone: true };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_street
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_street: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_village
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_village: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_district
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_district: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_city_regency
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_city_regency: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_province
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_province: true,
+      };
+    }
+
+    // Validasi Mother fields
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_name
+    ) {
+      errors.parentGuardian = { ...errors.parentGuardian, mother_name: true };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_phone
+    ) {
+      errors.parentGuardian = { ...errors.parentGuardian, mother_phone: true };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_street
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_street: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_village
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_village: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_district
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_district: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_city_regency
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_city_regency: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_province
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_province: true,
+      };
+    }
 
     // Validasi Term of Payment Section
-    if (!allFormData.termOfPayment || !allFormData.termOfPayment.payment_type) {
-      errors.termOfPayment = { ...errors.termOfPayment, payment_type: true };
+    if (!allFormData.termOfPayment || !allFormData.termOfPayment.tuition_fees) {
+      errors.termOfPayment = { ...errors.termOfPayment, tuition_fees: true };
+    }
+    if (
+      !allFormData.termOfPayment ||
+      !allFormData.termOfPayment.residence_payment
+    ) {
+      errors.termOfPayment = {
+        ...errors.termOfPayment,
+        residence_payment: true,
+      };
     }
 
     // Debug: log errors
@@ -248,7 +371,7 @@ const FormButtonSection = ({
           onConfirm={handleConfirmSubmit}
           draftId={draftId}
           allFormData={allFormData}
-          locationState={location.state}
+          locationState={location}
           navigate={navigate}
         />
       )}

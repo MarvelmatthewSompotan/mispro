@@ -31,7 +31,9 @@ function FacilitiesContent() {
           <div className={styles.checkBox}>
             <div className={styles.checkBoxChild} />
           </div>
-          <div className={styles.transportationPolicy}>Transportation policy</div>
+          <div className={styles.transportationPolicy}>
+            Transportation policy
+          </div>
         </div>
       </div>
       <div className={styles.top}>
@@ -61,11 +63,13 @@ function FacilitiesContent() {
           <div className={styles.checkBox}>
             <div className={styles.checkBoxChild} />
           </div>
-          <div className={styles.transportationPolicy}>Residence Hall policy</div>
+          <div className={styles.transportationPolicy}>
+            Residence Hall policy
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-export default FacilitiesContent; 
+export default FacilitiesContent;

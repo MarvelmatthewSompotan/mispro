@@ -207,7 +207,7 @@ class RegistrationController extends Controller
                 'input_name' => 'nullable|string',
                 'first_name' => 'required|string',
                 'middle_name' => 'nullable|string',
-                'last_name' => 'required|string',
+                'last_name' => 'nullable|string',
                 'nickname' => 'nullable|string',
                 'citizenship' => 'required|in:Indonesia,Non Indonesia',
                 'country' => function ($attribute, $value, $fail) use ($request) {
@@ -310,8 +310,8 @@ class RegistrationController extends Controller
                 'guardian_address_other' => 'nullable|string',
                 
                 // payment
-                'payment_type' => 'required|in:Tuition Fee,Residence Hall',
-                'payment_method' => 'required|in:Full Payment,Installment',
+                'tuition_fees' => 'required|in:Full Payment,Installment',
+                'residence_payment' => 'required|in:Full Payment,Installment',
                 'financial_policy_contract' => 'required|in:Signed,Not Signed',
 
                 // discount
@@ -532,6 +532,9 @@ class RegistrationController extends Controller
     public function showPreview($applicationId)
     {
         try {
+            // ✅ PERBAIKAN: Tambahkan logging untuk debug
+            \Log::info('Preview called for application ID:', ['application_id' => $applicationId]);
+            
             $application = ApplicationForm::with([
                 'enrollment.student.studentAddress',
                 'enrollment.schoolClass',
@@ -545,12 +548,20 @@ class RegistrationController extends Controller
                 'enrollment.student.payments',
             ])->findOrFail($applicationId);
             
+            \Log::info('Application found:', ['application' => $application]);
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Preview data saved to session',
+                'message' => 'Preview data retrieved successfully',
                 'data' => new ApplicationPreviewResource($application)
             ], 200);
         } catch (\Exception $e) {
+            // ✅ PERBAIKAN: Log error yang lebih detail
+            \Log::error('Preview failed for application ID: ' . $applicationId, [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'error' => 'Preview failed: ' . $e->getMessage()
@@ -675,8 +686,8 @@ class RegistrationController extends Controller
     {
         Payment::create([
             'student_id' => $student->student_id,
-            'type' => $validated['payment_type'],
-            'method' => $validated['payment_method'],
+            'tuition_fees' => $validated['tuition_fees'],
+            'residence_payment' => $validated['residence_payment'],
             'financial_policy_contract' => $validated['financial_policy_contract'],
         ]);
 
@@ -826,8 +837,8 @@ class RegistrationController extends Controller
     {
         Payment::updateOrCreate([
             'student_id' => $student->student_id,
-            'type' => $validated['payment_type'],
-            'method' => $validated['payment_method'],
+            'tuition_fees' => $validated['tuition_fees'],
+            'residence_payment' => $validated['residence_payment'],
             'financial_policy_contract' => $validated['financial_policy_contract'],
         ]);
 

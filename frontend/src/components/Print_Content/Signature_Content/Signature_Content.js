@@ -18,11 +18,13 @@ function SignatureContent() {
           <div className={styles.studentName}>Acknowledge by:</div>
         </div>
         <div className={styles.txtStudentNameAndSignature}>
-          <div className={styles.studentName}>{`Parent / Guardian's name & signature`}</div>
+          <div
+            className={styles.studentName}
+          >{`Parent / Guardian's name & signature`}</div>
         </div>
       </div>
     </div>
   );
 }
 
-export default SignatureContent; 
+export default SignatureContent;

@@ -10,6 +10,8 @@ const StudentStatusSection = ({
   onSelectOldStudent,
   onDataChange,
   sharedData,
+  errors,
+  forceError,
 }) => {
   const [status, setStatus] = useState("");
   const [statusOptions, setStatusOptions] = useState([]);
@@ -171,7 +173,7 @@ const StudentStatusSection = ({
         <span className={styles.headerTitle}>STUDENT'S STATUS</span>
       </div>
       <div className={styles.contentWrapper}>
-        <div className={styles.statusOptions}>
+        <div className={`${styles.statusOptions} ${(errors?.student_status || forceError?.student_status) ? styles.studentStatusErrorWrapper : ''}`}>
           {statusOptions.map((option) => (
             <div
               key={option}
@@ -205,7 +207,9 @@ const StudentStatusSection = ({
                     <span className={styles.radioButtonSelected} />
                   )}
                 </span>
-                <span className={styles.statusLabel}>{option}</span>
+                <span className={`${styles.statusLabel} ${(errors?.student_status || forceError?.student_status) ? styles.studentStatusErrorLabel : ''}`}>
+                  {option}
+                </span>
               </label>
 
               {/* Show unified search field with popup dropdown for Old student status */}

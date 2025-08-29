@@ -3,17 +3,23 @@ import styles from "./TermOfPaymentSection.module.css";
 import checkBoxIcon from "../../../assets/CheckBox.png";
 import { getRegistrationOptions } from "../../../services/api";
 
-const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
+const TermOfPaymentSection = ({
+  onDataChange,
+  sharedData,
+  prefill,
+  errors,
+  forceError,
+}) => {
   // State untuk payment options
-  const [paymentType, setPaymentType] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [tuitionFees, setTuitionFees] = useState("");
+  const [residencePayment, setResidencePayment] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
   const [discountName, setDiscountName] = useState("");
   const [discountNotes, setDiscountNotes] = useState("");
 
   // State untuk dropdown options dari backend
-  const [paymentTypeOptions, setPaymentTypeOptions] = useState([]);
-  const [paymentMethodOptions, setPaymentMethodOptions] = useState([]);
+  const [tuitionFeesOption, setTuitionFeesOption] = useState([]);
+  const [residencePaymentOption, setResidencePaymentOption] = useState([]);
   const [discountTypeOptions, setDiscountTypeOptions] = useState([]);
 
   // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
@@ -23,15 +29,15 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   // Use shared data if available, otherwise fetch separately
   useEffect(() => {
     if (sharedData) {
-      setPaymentTypeOptions(sharedData.payment_type || []);
-      setPaymentMethodOptions(sharedData.payment_method || []);
+      setTuitionFeesOption(sharedData.tuition_fees || []);
+      setResidencePaymentOption(sharedData.residence_payment || []);
       setDiscountTypeOptions(sharedData.discount_types || []);
     } else {
       // Fallback to individual API call if shared data not available
       getRegistrationOptions()
         .then((data) => {
-          setPaymentTypeOptions(data.payment_type || []);
-          setPaymentMethodOptions(data.payment_method || []);
+          setTuitionFeesOption(data.tuition_fees || []);
+          setResidencePaymentOption(data.residence_payment || []);
           setDiscountTypeOptions(data.discount_types || []);
         })
         .catch((err) => {
@@ -47,8 +53,9 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
       if (isInitialPrefill.current || !hasInitialized.current) {
         console.log("Initial prefilling TermOfPaymentSection with:", prefill);
 
-        if (prefill.payment_type) setPaymentType(prefill.payment_type);
-        if (prefill.payment_method) setPaymentMethod(prefill.payment_method);
+        if (prefill.tuition_fees) setTuitionFees(prefill.tuition_fees);
+        if (prefill.residence_payment)
+          setResidencePayment(prefill.residence_payment);
         if (prefill.financial_policy_contract) {
           setFinancialPolicy(prefill.financial_policy_contract === "Signed");
         }
@@ -61,8 +68,8 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
     } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
       // Jika prefill menjadi empty object (reset form), reset semua field
       console.log("Resetting TermOfPaymentSection form");
-      setPaymentType("");
-      setPaymentMethod("");
+      setTuitionFees("");
+      setResidencePayment("");
       setFinancialPolicy(false);
       setDiscountName("");
       setDiscountNotes("");
@@ -71,41 +78,74 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
     }
   }, [prefill]);
 
-  const handlePaymentTypeChange = (value) => {
+  // Effect untuk handle errors dari parent component
+  useEffect(() => {
+    if (errors) {
+      // Error state akan dihandle oleh styling CSS
+    }
+  }, [errors]);
+
+  // Effect untuk handle forceError dari parent component
+  useEffect(() => {
+    if (forceError) {
+      // Force error state akan dihandle oleh styling CSS
+    }
+  }, [forceError]);
+
+  // Effect untuk reset error state ketika tuition fees sudah dipilih
+  useEffect(() => {
+    if (tuitionFees && (errors?.tuition_fees || forceError?.tuition_fees)) {
+      // Trigger re-render untuk menghilangkan error state
+      // Error state akan hilang karena tuition fees sudah dipilih
+    }
+  }, [tuitionFees, errors, forceError]);
+
+  // Effect untuk reset error state ketika residence payment sudah dipilih
+  useEffect(() => {
+    if (
+      residencePayment &&
+      (errors?.residence_payment || forceError?.residence_payment)
+    ) {
+      // Trigger re-render untuk menghilangkan error state
+      // Error state akan hilang karena residence payment sudah dipilih
+    }
+  }, [residencePayment, errors, forceError]);
+
+  const handleTuitionFeesChange = (value) => {
     // Jika user mengklik option yang sudah dipilih, batalkan pilihan
-    if (paymentType === value) {
-      setPaymentType("");
+    if (tuitionFees === value) {
+      setTuitionFees("");
 
       onDataChange({
-        payment_type: "",
+        tuition_fees: "",
         // ... other fields
       });
     } else {
       // Jika user memilih option baru
-      setPaymentType(value);
+      setTuitionFees(value);
 
       onDataChange({
-        payment_type: value,
+        tuition_fees: value,
         // ... other fields
       });
     }
   };
 
-  const handlePaymentMethodChange = (value) => {
+  const handleResidencePaymentChange = (value) => {
     // Jika user mengklik option yang sudah dipilih, batalkan pilihan
-    if (paymentMethod === value) {
-      setPaymentMethod("");
+    if (residencePayment === value) {
+      setResidencePayment("");
 
       onDataChange({
-        payment_method: "",
+        residence_payment: "",
         // ... other fields
       });
     } else {
       // Jika user memilih option baru
-      setPaymentMethod(value);
+      setResidencePayment(value);
 
       onDataChange({
-        payment_method: value,
+        residence_payment: value,
         // ... other fields
       });
     }
@@ -152,25 +192,47 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
       </div>
       <div className={styles.contentWrapper}>
         <div className={styles.paymentSection}>
-          <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Tuition Fee</div>
+          <div
+            className={`${styles.sectionTitle} ${
+              (errors?.tuition_fees ||
+                (typeof forceError === "object"
+                  ? forceError?.tuition_fees
+                  : !!forceError)) &&
+              !tuitionFees
+                ? styles.termOfPaymentErrorWrapper
+                : ""
+            }`}
+          >
+            <div
+              className={`${styles.sectionTitleText} ${
+                (errors?.tuition_fees ||
+                  (typeof forceError === "object"
+                    ? forceError?.tuition_fees
+                    : !!forceError)) &&
+                !tuitionFees
+                  ? styles.termOfPaymentErrorLabel
+                  : ""
+              }`}
+            >
+              Tuition Fees
+            </div>
           </div>
           <div className={styles.optionGroup}>
-            {paymentTypeOptions.map((option) => (
+            {tuitionFeesOption.map((option) => (
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
                     type="radio"
-                    name="paymentType"
+                    name="tuitionFees"
                     value={option}
-                    checked={paymentType === option}
-                    onChange={(e) => handlePaymentTypeChange(e.target.value)}
-                    onClick={() => handlePaymentTypeChange(option)}
+                    checked={tuitionFees === option}
+                    onChange={(e) => handleTuitionFeesChange(e.target.value)}
+                    onClick={() => handleTuitionFeesChange(option)}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
                     <div className={styles.radioButtonCircle} />
-                    {paymentType === option && (
+                    {tuitionFees === option && (
                       <div className={styles.radioButtonSelected} />
                     )}
                   </div>
@@ -182,25 +244,49 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
         </div>
 
         <div className={styles.paymentSection}>
-          <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Residence Hall</div>
+          <div
+            className={`${styles.sectionTitle} ${
+              (errors?.residence_payment ||
+                (typeof forceError === "object"
+                  ? forceError?.residence_payment
+                  : !!forceError)) &&
+              !residencePayment
+                ? styles.termOfPaymentErrorWrapper
+                : ""
+            }`}
+          >
+            <div
+              className={`${styles.sectionTitleText} ${
+                (errors?.residence_payment ||
+                  (typeof forceError === "object"
+                    ? forceError?.residence_payment
+                    : !!forceError)) &&
+                !residencePayment
+                  ? styles.termOfPaymentErrorLabel
+                  : ""
+              }`}
+            >
+              Residence Hall
+            </div>
           </div>
           <div className={styles.optionGroup}>
-            {paymentMethodOptions.map((option) => (
+            {residencePaymentOption.map((option) => (
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
                     type="radio"
-                    name="paymentMethod"
+                    name="residencePayment"
                     value={option}
-                    checked={paymentMethod === option}
-                    onChange={(e) => handlePaymentMethodChange(e.target.value)}
-                    onClick={() => handlePaymentMethodChange(option)}
+                    checked={residencePayment === option}
+                    onChange={(e) =>
+                      handleResidencePaymentChange(e.target.value)
+                    }
+                    onClick={() => handleResidencePaymentChange(option)}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
                     <div className={styles.radioButtonCircle} />
-                    {paymentMethod === option && (
+                    {residencePayment === option && (
                       <div className={styles.radioButtonSelected} />
                     )}
                   </div>

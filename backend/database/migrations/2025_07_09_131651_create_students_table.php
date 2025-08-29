@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nisn', 10);
             $table->string('first_name', 50);
             $table->string('middle_name', 50)->nullable();
-            $table->string('last_name', 50)->default('-');
+            $table->string('last_name', 50)->nullable();
             $table->string('nickname', 50)->nullable();
             $table->string('family_rank', 50);
             $table->enum('citizenship', ['Indonesia', 'Non Indonesia']);

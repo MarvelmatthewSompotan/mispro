@@ -47,26 +47,24 @@ class ApplicationPreviewResource extends JsonResource
                 'nisn' =>$student->nisn,
                 'nik' =>$student->nik,
                 'kitas' =>$student->kitas,
+                'street' => $student->studentAddress->street,
+                'village' => $student->studentAddress->village,
+                'district'=> $student->studentAddress->district,
+                'rt'=> $student->studentAddress->rt,
+                'rw'=> $student->studentAddress->rw,
+                'city_regency'=> $student->studentAddress->city_regency,
+                'province'=> $student->studentAddress->province,
+                'other'=> $student->studentAddress->other,
             ],
-            'address' => optional($student->studentAddress)->only([
-                'street',
-                'village',
-                'district',
-                'rt',
-                'rw',
-                'city_regency',
-                'province',
-                'other',
-            ]),
             'enrollment' => [
                 'class' => $enrollment->schoolClass->grade,
-                'section' => $this->enrollment->getSectionAttribute ? [
-                    'id' => $this->enrollment->getSectionAttribute->section_id,
-                    'name' => $this->enrollment->getSectionAttribute->name
+                'section' => $this->enrollment->section ? [
+                    'id' => $this->enrollment->section->section_id,
+                    'name' => $this->enrollment->section->name
                 ] : null,
-                'major' => $this->enrollment->getMajorAttribute ? [
-                    'id' => $this->enrollment->getMajorAttribute->major_id,
-                    'name' => $this->enrollment->getMajorAttribute->name
+                'major' => $this->enrollment->major ? [
+                    'id' => $this->enrollment->major->major_id,
+                    'name' => $this->enrollment->major->name
                 ] : null,
                 'program' => $this->enrollment->program ? [
                     'id' => $this->enrollment->program_id,

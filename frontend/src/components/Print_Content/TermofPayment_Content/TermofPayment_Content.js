@@ -46,7 +46,9 @@ function TermofPaymentContent() {
       </div>
       <div className={styles.tuitionFee}>
         <div className={styles.txtTuitionFee}>
-          <div className={styles.residenceHall}>{`Financial Policy & Contract`}</div>
+          <div
+            className={styles.residenceHall}
+          >{`Financial Policy & Contract`}</div>
         </div>
         <div className={styles.bottom2}>
           <div className={styles.full}>
@@ -61,4 +63,4 @@ function TermofPaymentContent() {
   );
 }
 
-export default TermofPaymentContent; 
+export default TermofPaymentContent;
