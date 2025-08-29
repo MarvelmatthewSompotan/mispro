@@ -31,7 +31,7 @@ function TermofPaymentContent({ paymentData }) {
     <div className={styles.content}>
       <div className={styles.tuitionFee}>
         <div className={styles.txtTuitionFee}>
-          <div className={styles.residenceHall}>Tuition Fee</div>
+          <div className={styles.contentTuitionFee}>Tuition Fee</div>
         </div>
         <div className={styles.bottom}>
           <div className={styles.full}>
@@ -52,7 +52,7 @@ function TermofPaymentContent({ paymentData }) {
       </div>
       <div className={styles.tuitionFee}>
         <div className={styles.txtTuitionFee}>
-          <div className={styles.residenceHall}>Residence Hall</div>
+          <div className={styles.contentTuitionFee}>Residence Hall</div>
         </div>
         <div className={styles.bottom}>
           <div className={styles.full}>
@@ -71,13 +71,26 @@ function TermofPaymentContent({ paymentData }) {
           </div>
         </div>
       </div>
+      <div className={styles.discountSection}>
+        <div className={styles.txtTuitionFee}>
+          <div className={styles.contentTuitionFee}>Discount</div>
+        </div>
+        <div className={styles.discountContent}>
+          <div className={styles.full}>
+            <div className={`${data.discount_waiver === "Waiver" ? styles.selected : ""}`}>
+              {data.discount_waiver === "Waiver" && <div className={styles.checkBoxInner} />}
+            </div>
+            <div className={styles.fullPayment}>Waiver</div>
+          </div>
+        </div>
+      </div>
       <div className={styles.tuitionFee}>
         <div className={styles.txtTuitionFee}>
-          <div className={styles.residenceHall}>{`Financial Policy & Contract`}</div>
+          <div className={styles.contentTuitionFee}>{`Financial Policy & Contract`}</div>
         </div>
         <div className={styles.bottom2}>
           <div className={styles.full}>
-            <div className={`${styles.checkBox} ${data.financial_policy_contract === "Signed" ? styles.selected : ""}`}>
+            <div className={`${styles.contentCheckBox} ${data.financial_policy_contract === "Signed" ? styles.selected : ""}`}>
               <div className={styles.checkBoxChild} />
               {data.financial_policy_contract === "Signed" && <div className={styles.checkBoxInner} />}
             </div>

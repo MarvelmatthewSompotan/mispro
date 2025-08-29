@@ -68,31 +68,43 @@ const StudentsInformationContent = ({ studentData }) => {
     <div className={styles.content}>
       <div className={styles.left}>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>{`Full name `}</div>
-          <b className={styles.jhoanne}>{fullName}</b>
+          <div className={styles.contentFullName}>{`Full name `}</div>
+          <b className={styles.contentFullName}>{fullName}</b>
         </div>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>Student ID</div>
+          <div className={styles.contentFullName}>Student ID</div>
           <b className={styles.regular}>{data.nisn || "N/A"}</b>
         </div>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>Academic status</div>
+          <div className={styles.contentFullName}>NIK</div>
+          <b className={styles.regular}>{data.nik || "N/A"}</b>
+        </div>
+        <div className={styles.fullName}>
+          <div className={styles.contentFullName}>NISN</div>
+          <b className={styles.regular}>{data.nisn || "N/A"}</b>
+        </div>
+        <div className={styles.fullName}>
+          <div className={styles.contentFullName}>KITAS</div>
+          <b className={styles.regular}>{data.kitas || "N/A"}</b>
+        </div>
+        <div className={styles.fullName}>
+          <div className={styles.contentFullName}>Academic status</div>
           <b className={styles.regular}>{data.academic_status || "N/A"}</b>
         </div>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>Student status</div>
+          <div className={styles.contentFullName}>Student status</div>
           <b className={styles.regular}>{studentStatus}</b>
         </div>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>Previous School</div>
+          <div className={styles.contentFullName}>Previous School</div>
           <b className={styles.regular}>{data.previous_school || "N/A"}</b>
         </div>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>Email address</div>
+          <div className={styles.contentFullName}>Email address</div>
           <b className={styles.regular}>{data.email || "N/A"}</b>
         </div>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>Phone number</div>
+          <div className={styles.contentFullName}>Phone number</div>
           <b className={styles.regular}>{data.phone_number || "N/A"}</b>
         </div>
       </div>
@@ -100,45 +112,45 @@ const StudentsInformationContent = ({ studentData }) => {
         <div className={styles.top}>
           <div className={styles.left}>
             <div className={styles.fullName}>
-              <div className={styles.jhoanne}>Citizenship</div>
+              <div className={styles.contentFullName}>Citizenship</div>
               <b className={styles.regular}>{data.citizenship || "N/A"}</b>
             </div>
             <div className={styles.fullName}>
-              <div className={styles.jhoanne}>Religion</div>
+              <div className={styles.contentFullName}>Religion</div>
               <b className={styles.regular}>{data.religion || "N/A"}</b>
             </div>
             <div className={styles.fullName}>
-              <div className={styles.jhoanne}>Place of birth</div>
+              <div className={styles.contentFullName}>Place of birth</div>
               <b className={styles.regular}>{data.place_of_birth || "N/A"}</b>
             </div>
             <div className={styles.fullName}>
-              <div className={styles.jhoanne}>Date of birth</div>
+              <div className={styles.contentFullName}>Date of birth</div>
               <b className={styles.regular}>{data.date_of_birth || "N/A"}</b>
             </div>
           </div>
-          <div className={styles.right1}>
+          <div className={styles.contentRight}>
             <div className={styles.fullName}>
-              <div className={styles.jhoanne}>Nickname</div>
+              <div className={styles.contentFullName}>Nickname</div>
               <b className={styles.regular}>{data.nickname || "N/A"}</b>
             </div>
             <div className={styles.fullName}>
-              <div className={styles.jhoanne}>Gender</div>
-              <b className={styles.jhoanne}>{data.gender || "N/A"}</b>
+              <div className={styles.contentFullName}>Gender</div>
+              <b className={styles.contentFullName}>{data.gender || "N/A"}</b>
             </div>
             <div className={styles.fullName}>
-              <div className={styles.jhoanne}>Age</div>
-              <b className={styles.b3}>{data.age || "N/A"}</b>
+              <div className={styles.contentFullName}>Age</div>
+              <b className={styles.b7}>{data.age || "N/A"}</b>
             </div>
             <div className={styles.rankInFamily}>
-              <div className={styles.jhoanne}>Rank in the family</div>
-              <b className={styles.b3}>{data.family_rank || "N/A"}</b>
+              <div className={styles.contentFullName}>Rank in the family</div>
+              <b className={styles.b7}>{data.family_rank || "N/A"}</b>
             </div>
           </div>
         </div>
-        <div className={styles.bottom}>
+        <div className={styles.top}>
           <div className={styles.address}>
-            <div className={styles.jhoanne}>Address</div>
-            <b className={styles.jhoanne}>{fullAddress}</b>
+            <div className={styles.contentFullName}>Address</div>
+            <b className={styles.contentFullName}>{fullAddress}</b>
           </div>
         </div>
       </div>
