@@ -153,7 +153,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
       <div className={styles.contentWrapper}>
         <div className={styles.paymentSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Payment Type</div>
+            <div className={styles.sectionTitleText}>Tuition Fee</div>
           </div>
           <div className={styles.optionGroup}>
             {paymentTypeOptions.map((option) => (
@@ -183,7 +183,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
 
         <div className={styles.paymentSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Payment Method</div>
+            <div className={styles.sectionTitleText}>Residence Hall</div>
           </div>
           <div className={styles.optionGroup}>
             {paymentMethodOptions.map((option) => (
