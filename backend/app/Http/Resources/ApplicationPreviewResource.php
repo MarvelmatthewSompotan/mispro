@@ -128,12 +128,10 @@ class ApplicationPreviewResource extends JsonResource
                 'residence_payment' => $payment ? $payment->residence_payment : null,
                 'financial_policy' => $payment ? $payment->financial_policy_contract : null,
             ],
-            'discount' => $enrollment->studentDiscount->map(function ($discount) {
-                return [
-                    'type' => optional($discount->discountType)->name,
-                    'notes' => $discount->notes
-                ];
-            })->values()
+            'discount' => $enrollment->studentDiscount? [
+                'type' => optional($enrollment->studentDiscount->discountType)->name,
+                'notes' => $enrollment->studentDiscount->notes,
+            ] : null,
         ];
     }
 }

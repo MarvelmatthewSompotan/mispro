@@ -99,9 +99,9 @@ class Enrollment extends Model
         return $this->belongsTo(Major::class, 'major_id', 'major_id');
     }
 
-    public function studentDiscount() : HasMany
+    public function studentDiscount() : HasOne
     {
-        return $this->hasMany(
+        return $this->hasOne(
         StudentDiscount::class, 'enrollment_id', 'enrollment_id');
     }
 
