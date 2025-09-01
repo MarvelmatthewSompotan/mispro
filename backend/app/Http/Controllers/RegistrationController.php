@@ -45,7 +45,6 @@ class RegistrationController extends Controller
         $validator = Validator::make($request->all(), [
             'school_year_id' => 'required|integer|exists:school_years,school_year_id',
             'semester_id' => 'required|integer|exists:semesters,semester_id',
-            'registration_date' => 'required|date',
         ]);
 
         if ($validator->fails()) {
@@ -64,7 +63,7 @@ class RegistrationController extends Controller
             'user_id' => auth()->id(),
             'school_year_id' => $validated['school_year_id'],
             'semester_id' => $validated['semester_id'],
-            'registration_date_draft' => $validated['registration_date'],
+            'registration_date_draft' => now(),
         ]);
 
         return $response = response()->json([
@@ -74,7 +73,7 @@ class RegistrationController extends Controller
                 'draft_id' => $uuid, 
                 'school_year_id' => $validated['school_year_id'],
                 'semester_id' => $validated['semester_id'],
-                'registration_date' => $validated['registration_date'],
+                'registration_date' => $draft->registration_date_draft,
             ],
         ], 200);
         
@@ -181,7 +180,7 @@ class RegistrationController extends Controller
     public function store(Request $request, $draft_id)
     {
         // Tambahkan logging untuk debug
-    \Log::info('Registration store called', [
+        \Log::info('Registration store called', [
             'draft_id' => $draft_id,
             'request_data' => $request->all(),
             'user_id' => auth()->id()
