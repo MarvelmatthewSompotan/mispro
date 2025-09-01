@@ -16,11 +16,15 @@ const StudentsInformationContent = ({ data }) => {
           <b className={styles.jhoanne}>{data.last_name}</b>
         </div>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>Student ID</div>
+          <div className={styles.contentFullName}>NISN</div>
           <b className={styles.regular}>{data.student_id}</b>
         </div>
         <div className={styles.fullName}>
-          <div className={styles.jhoanne}>Academic status</div>
+          <div className={styles.contentFullName}>KITAS</div>
+          <b className={styles.regular}>{data.kitas || 'N/A'}</b>
+        </div>
+        <div className={styles.fullName}>
+          <div className={styles.contentFullName}>Academic status</div>
           <b className={styles.regular}>
             {data.academic_status === 'OTHER'
               ? data.academic_status_other
@@ -64,7 +68,7 @@ const StudentsInformationContent = ({ data }) => {
               <b className={styles.regular}>{data.date_of_birth}</b>
             </div>
           </div>
-          <div className={styles.right1}>
+          <div className={styles.contentRight}>
             <div className={styles.fullName}>
               <div className={styles.jhoanne}>Nickname</div>
               <b className={styles.regular}>{data.nickname}</b>
@@ -83,7 +87,7 @@ const StudentsInformationContent = ({ data }) => {
             </div>
           </div>
         </div>
-        <div className={styles.bottom}>
+        <div className={styles.top}>
           <div className={styles.address}>
             <div className={styles.jhoanne}>Address</div>
             <b className={styles.jhoanne}>{data.street}</b>

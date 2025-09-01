@@ -30,7 +30,7 @@ function TermofPaymentContent({ payment, discount }) {
     <div className={styles.content}>
       <div className={styles.tuitionFee}>
         <div className={styles.txtTuitionFee}>
-          <div className={styles.residenceHall}>Tuition Fee</div>
+          <div className={styles.contentTuitionFee}>Tuition Fee</div>
         </div>
         <div className={styles.bottom}>
           {option.map((opt, index) => (
@@ -48,7 +48,7 @@ function TermofPaymentContent({ payment, discount }) {
       </div>
       <div className={styles.tuitionFee}>
         <div className={styles.txtTuitionFee}>
-          <div className={styles.residenceHall}>Residence Hall</div>
+          <div className={styles.contentTuitionFee}>Residence Hall</div>
         </div>
         <div className={styles.bottom}>
           {option.map((opt, index) => (
@@ -64,8 +64,30 @@ function TermofPaymentContent({ payment, discount }) {
           ))}
         </div>
       </div>
+      <div className={styles.discountSection}>
+        <div className={styles.txtTuitionFee}>
+          <div className={styles.contentTuitionFee}>Discount</div>
+        </div>
+        <div className={styles.discountContent}>
+          <div className={styles.full}>
+            <div
+              className={`${
+                data.discount_waiver === 'Waiver' ? styles.selected : ''
+              }`}
+            >
+              {data.discount_waiver === 'Waiver' && (
+                <div className={styles.checkBoxInner} />
+              )}
+            </div>
+            <div className={styles.fullPayment}>Waiver</div>
+          </div>
+        </div>
+      </div>
       <div className={styles.tuitionFee}>
         <div className={styles.txtTuitionFee}>
+          <div
+            className={styles.contentTuitionFee}
+          >{`Financial Policy & Contract`}</div>
           <div
             className={styles.residenceHall}
           >{`Financial Policy & Contract`}</div>
