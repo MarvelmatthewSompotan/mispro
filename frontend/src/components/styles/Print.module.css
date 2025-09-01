@@ -247,6 +247,7 @@
 .applicationForm {
   position: relative;
   line-height: 100%;
+  margin-left: 5px;
 }
 .title {
   align-self: stretch;
@@ -262,7 +263,6 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
 }
 .semesterParent {
   flex: 1;
@@ -270,7 +270,6 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 10px;
 }
 .registrationIdParent {
   flex: 1;
