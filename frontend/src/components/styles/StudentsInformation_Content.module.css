@@ -37,12 +37,13 @@
 }
 .right {
 	align-self: stretch;
-	width: 759px;
+	width: 900px;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: flex-start;
 	gap: 20px;
+	margin-right: 100px;
 }
 .top {
 	align-self: stretch;
@@ -56,15 +57,17 @@
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: flex-start;
+	
 }
 .b7 {
-	width: 30px;
+	/* width: 30px;
+	max-width: 30px; */
+	width: auto;
 	position: relative;
 	line-height: 100%;
 	display: flex;
 	align-items: center;
 	flex-shrink: 0;
-	max-width: 30px;
 }
 .rankInFamily {
 	display: flex;

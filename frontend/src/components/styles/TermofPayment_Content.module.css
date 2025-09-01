@@ -256,9 +256,7 @@
 	overflow: hidden;
 	max-height: 100%;
 }
-.selected {
-	/* Add selected state styling if needed */
-}
+
 .discountSection {
 	width: 250px;
 	display: flex;
