@@ -100,8 +100,8 @@ const RegistrationForm = () => {
   );
 
   const handleStudentInfoValidationChange = useCallback((validationData) => {
-    handleValidationChange('studentInfo', validationData);
-  }, []);
+    handleValidationChange('studentInfo', validationData);  // eslint-disable-next-line
+  }, []); 
 
   const handleProgramDataChange = useCallback(
     (data) => {

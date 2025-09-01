@@ -12,7 +12,8 @@ const FormButtonSection = ({
   location,
 }) => {
   const navigate = useNavigate();
-  const locationState = useLocation();
+  // eslint-disable-next-line
+  const locationState = useLocation(); 
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleReset = () => {

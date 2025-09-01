@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import styles from '../styles/Print.module.css';
 import kop from '../../assets/LogoMIS_Print.png';
 import footer from '../../assets/Footer.png';
@@ -20,15 +22,39 @@ function Print() {
   const location = useLocation();
   const { applicationId } = location.state || {};
 
+  const printRef = useRef();
+  const hasDownloadedRef = useRef(false);
+
   const [previewData, setPreviewData] = useState(null);
   const [sectionOptions, setSectionOptions] = useState([]);
   const [programOptions, setProgramOptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fungsi untuk download PDF
+  const downloadPDF = async (studentName) => {
+    if (hasDownloadedRef.current || !printRef.current) return;
+    
+    try {
+      const element = printRef.current;
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${studentName}_Application_Form.pdf`);
+      
+      hasDownloadedRef.current = true;
+    } catch (error) {
+      console.error("Failed to generate PDF:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // Fetch kedua data secara bersamaan menggunakan Promise.all
         const [previewResp, optionsResp] = await Promise.all([
           getRegistrationPreview(applicationId),
           getRegistrationOptions(),
@@ -52,27 +78,33 @@ function Print() {
     }
   }, [applicationId]);
 
+  // Efek untuk memicu download setelah data dimuat
+  useEffect(() => {
+    if (!loading && previewData && previewData.student && !hasDownloadedRef.current) {
+      const studentName = previewData.student.first_name + ' ' + previewData.student.last_name;
+      downloadPDF(studentName.replace(/[\\?%*:|"<>]/g, '-'));
+    }
+  }, [loading, previewData]);
+
+
   if (loading) return <div>Loading preview...</div>;
   if (!applicationId) return <div>No application ID found</div>;
   if (!previewData) return <div>No preview data found</div>;
-  // Format date untuk display
+
   const formatDate = (dateString) => {
     if (!dateString) return '';
-
     const date = new Date(dateString);
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
-
     return new Intl.DateTimeFormat('en-GB', options).format(date);
   };
 
-  // Extract semester number
   const getSemesterNumber = (semester) => {
-    if (!semester) return '1 (One)';
+    if (!semester) return '';
     return semester.includes('1') ? '1 (One)' : '2 (Two)';
   };
 
   return (
-    <div className={styles.printPageA4}>
+    <div ref={printRef} className={styles.printPageA4}>
       <div className={styles.header}>
         <div className={styles.headerRow}>
           <img src={kop} alt='Header KOP' className={styles.headerKop} />
