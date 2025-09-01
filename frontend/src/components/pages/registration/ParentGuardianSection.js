@@ -75,6 +75,7 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
   });
 
   // State untuk error fields Guardian (jika diperlukan)
+  // eslint-disable-next-line
   const [guardianErrors, setGuardianErrors] = useState({
     name: false,
     phone: false,
@@ -86,6 +87,7 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
   });
 
   // State untuk mengakumulasi semua data
+  // eslint-disable-next-line
   const [allParentData, setAllParentData] = useState({});
 
   // Effect untuk handle errors dari parent component - PERBAIKAN: Jangan reset error state yang sudah ada
@@ -147,6 +149,7 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
   }, [forceError]);
 
   // Function untuk mengupdate data dan mengirim ke parent
+  // eslint-disable-next-line
   const updateAndSendData = () => {
     const allData = {};
 

@@ -68,7 +68,9 @@ const StudentInformationSection = ({
   const [otherAddressError, setOtherAddressError] = useState(false); // Tambah state error untuk Other Address
 
   // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
+  // eslint-disable-next-line
   const isInitialPrefill = useRef(true);
+  // eslint-disable-next-line
   const hasInitialized = useRef(false);
 
   // Fetch dropdown data
