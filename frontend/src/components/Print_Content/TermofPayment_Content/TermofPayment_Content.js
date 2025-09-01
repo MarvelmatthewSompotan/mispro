@@ -64,30 +64,31 @@ function TermofPaymentContent({ payment, discount }) {
           ))}
         </div>
       </div>
+
       <div className={styles.discountSection}>
         <div className={styles.txtTuitionFee}>
           <div className={styles.contentTuitionFee}>Discount</div>
         </div>
         <div className={styles.discountContent}>
-          <div className={styles.full}>
-            <div
-              className={`${
-                data.discount_waiver === 'Waiver' ? styles.selected : ''
-              }`}
-            >
-              {data.discount_waiver === 'Waiver' && (
-                <div className={styles.checkBoxInner} />
-              )}
+          {discount ? (
+            <div className={styles.full}>
+              <div className={styles.fullPayment}>{discount.type}</div>
+              {/* {discount.notes && (
+                <div className={styles.fullPayment}>
+                  Notes: {discount.notes}
+                </div>
+              )} */}
             </div>
-            <div className={styles.fullPayment}>Waiver</div>
-          </div>
+          ) : (
+            <div className={styles.full}>
+              <div className={styles.fullPayment}>No discount</div>
+            </div>
+          )}
         </div>
       </div>
+
       <div className={styles.tuitionFee}>
         <div className={styles.txtTuitionFee}>
-          <div
-            className={styles.contentTuitionFee}
-          >{`Financial Policy & Contract`}</div>
           <div
             className={styles.residenceHall}
           >{`Financial Policy & Contract`}</div>
