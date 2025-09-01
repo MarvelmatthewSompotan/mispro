@@ -11,29 +11,41 @@ import TermofPaymentContent from '../Print_Content/TermofPayment_Content/TermofP
 import PledgeContent from '../Print_Content/Pledge_Content/Pledge_Content';
 import SignatureContent from '../Print_Content/Signature_Content/Signature_Content';
 import OtherDetailContent from '../Print_Content/OtherDetail_Content/OtherDetail_Content';
-import { getRegistrationPreview } from '../../services/api';
+import {
+  getRegistrationPreview,
+  getRegistrationOptions,
+} from '../../services/api';
 
 function Print() {
   const location = useLocation();
   const { applicationId } = location.state || {};
 
   const [previewData, setPreviewData] = useState(null);
+  const [sectionOptions, setSectionOptions] = useState([]);
+  const [programOptions, setProgramOptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPreview = async () => {
+    const fetchAllData = async () => {
       try {
-        const resp = await getRegistrationPreview(applicationId);
-        setPreviewData(resp.data);
+        // Fetch kedua data secara bersamaan menggunakan Promise.all
+        const [previewResp, optionsResp] = await Promise.all([
+          getRegistrationPreview(applicationId),
+          getRegistrationOptions(),
+        ]);
+
+        setPreviewData(previewResp.data);
+        setSectionOptions(optionsResp.sections || []);
+        setProgramOptions(optionsResp.programs || []);
       } catch (error) {
-        console.error('Failed to fetch preview', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
 
     if (applicationId) {
-      fetchPreview();
+      fetchAllData();
     } else {
       console.error('No applicationId provided in navigation state');
       setLoading(false);
@@ -45,13 +57,12 @@ function Print() {
   if (!previewData) return <div>No preview data found</div>;
   // Format date untuk display
   const formatDate = (dateString) => {
-    if (!dateString) return '12 September 2025'; // Default date
+    if (!dateString) return '';
+
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+
+    return new Intl.DateTimeFormat('en-GB', options).format(date);
   };
 
   // Extract semester number
@@ -89,19 +100,20 @@ function Print() {
           <div className={styles.dateParent}>
             <b className={styles.applicationForm}>Date:</b>
             <b className={styles.applicationForm}>
-              {formatDate(previewData.submitted_at) || ''}
+              {formatDate(previewData.student?.registration_date) || ''}
             </b>
           </div>
           <div className={styles.semesterParent}>
             <b className={styles.applicationForm}>Semester:</b>
             <b className={styles.applicationForm}>
-              {getSemesterNumber(previewData.semester) || ''}
+              {getSemesterNumber(previewData.enrollment?.semester?.number) ||
+                ''}
             </b>
           </div>
           <div className={styles.semesterParent}>
             <b className={styles.applicationForm}>School Year:</b>
             <b className={styles.applicationForm}>
-              {previewData.school_year || '2025/2026'}
+              {previewData.enrollment?.school_year?.year || ''}
             </b>
           </div>
           <div className={styles.semesterParent}>
@@ -111,7 +123,7 @@ function Print() {
             </b>
           </div>
           <div className={styles.registrationIdParent}>
-            <b className={styles.applicationForm}>Registration ID:</b>
+            <b className={styles.applicationForm}>Registration ID: </b>
             <b className={styles.applicationForm}>
               {previewData.student?.registration_id || ''}
             </b>
@@ -129,7 +141,11 @@ function Print() {
           <div className={styles.header1}>
             <b className={styles.applicationForm}>PROGRAM</b>
           </div>
-          <ProgramContent data={previewData.enrollment} />
+          <ProgramContent
+            data={previewData.enrollment}
+            sectionOptions={sectionOptions}
+            programOptions={programOptions}
+          />
         </div>
         <div className={styles.facilities}>
           <div className={styles.header1}>
@@ -162,10 +178,14 @@ function Print() {
           <div className={styles.header1}>
             <b className={styles.applicationForm}>PLEDGE</b>
           </div>
-          <PledgeContent />
+          <PledgeContent
+            student={previewData.student}
+            father={previewData.father}
+            mother={previewData.mother}
+          />
         </div>
         <div className={styles.signature}>
-          <SignatureContent />
+          <SignatureContent student={previewData.student} />
         </div>
         <div className={styles.otherDetail}>
           <OtherDetailContent />

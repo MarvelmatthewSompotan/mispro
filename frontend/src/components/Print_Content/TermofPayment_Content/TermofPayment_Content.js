@@ -1,7 +1,31 @@
 import React from 'react';
 import styles from '../../styles/TermofPayment_Content.module.css';
 
-function TermofPaymentContent() {
+function TermofPaymentContent({ payment, discount }) {
+  const option = ['Full Payment', 'Installment'];
+  // helper checkbox biar tidak duplikat
+  const renderCheckbox = (isSigned) => {
+    return isSigned ? (
+      <div className={styles.checkBoxChild} />
+    ) : (
+      <div
+        style={{
+          position: 'absolute',
+          height: '108.33%',
+          width: '108.33%',
+          top: '-4.17%',
+          right: '-4.17%',
+          bottom: '-4.17%',
+          left: '-4.17%',
+          borderRadius: '4px',
+          border: '3px solid #5f84fe',
+          boxSizing: 'border-box',
+          backgroundColor: 'white',
+        }}
+      />
+    );
+  };
+
   return (
     <div className={styles.content}>
       <div className={styles.tuitionFee}>
@@ -9,19 +33,17 @@ function TermofPaymentContent() {
           <div className={styles.residenceHall}>Tuition Fee</div>
         </div>
         <div className={styles.bottom}>
-          <div className={styles.full}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-              <div className={styles.radioBtnItem} />
+          {option.map((opt, index) => (
+            <div key={index} className={styles.full}>
+              <div className={styles.radioBtn}>
+                <div className={styles.radioBtnChild} />
+                {payment?.tuition_fees === opt && (
+                  <div className={styles.radioBtnItem} />
+                )}
+              </div>
+              <div className={styles.fullPayment}>{opt}</div>
             </div>
-            <div className={styles.fullPayment}>Full payment</div>
-          </div>
-          <div className={styles.full}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-            </div>
-            <div className={styles.fullPayment}>Installment</div>
-          </div>
+          ))}
         </div>
       </div>
       <div className={styles.tuitionFee}>
@@ -29,19 +51,17 @@ function TermofPaymentContent() {
           <div className={styles.residenceHall}>Residence Hall</div>
         </div>
         <div className={styles.bottom}>
-          <div className={styles.full}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-              <div className={styles.radioBtnItem} />
+          {option.map((opt, index) => (
+            <div key={index} className={styles.full}>
+              <div className={styles.radioBtn}>
+                <div className={styles.radioBtnChild} />
+                {payment?.residence_payment === opt && (
+                  <div className={styles.radioBtnItem} />
+                )}
+              </div>
+              <div className={styles.fullPayment}>{opt}</div>
             </div>
-            <div className={styles.fullPayment}>Full payment</div>
-          </div>
-          <div className={styles.full}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-            </div>
-            <div className={styles.fullPayment}>Installment</div>
-          </div>
+          ))}
         </div>
       </div>
       <div className={styles.tuitionFee}>
@@ -53,7 +73,7 @@ function TermofPaymentContent() {
         <div className={styles.bottom2}>
           <div className={styles.full}>
             <div className={styles.checkBox}>
-              <div className={styles.checkBoxChild} />
+              {renderCheckbox(payment?.financial_policy === 'Signed')}
             </div>
             <div className={styles.fullPayment}>Agree</div>
           </div>

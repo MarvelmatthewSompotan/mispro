@@ -1,13 +1,24 @@
 import React from 'react';
 import styles from '../../styles/Signature_Content.module.css';
 
-function SignatureContent() {
+function SignatureContent({ student }) {
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+
+    return new Intl.DateTimeFormat('en-GB', options).format(date);
+  };
+
   return (
     <div className={styles.signature}>
       <div className={styles.studentNameAndSignature}>
         <div className={styles.txtDate}>
           <div className={styles.date}>Date:</div>
-          <b className={styles.september2025}>12 September 2025</b>
+          <b className={styles.september2025}>
+            {formatDate(student.registration_date)}
+          </b>
         </div>
         <div className={styles.txtStudentNameAndSignature}>
           <div className={styles.studentName}>{`Student name & signature`}</div>
