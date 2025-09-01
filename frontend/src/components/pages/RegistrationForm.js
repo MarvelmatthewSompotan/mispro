@@ -15,7 +15,6 @@ import { getRegistrationOptions } from '../../services/api';
 const RegistrationForm = () => {
   const location = useLocation();
   const formData = location.state || {};
-  const [prefilledData, setPrefilledData] = useState({});
   const [formSections, setFormSections] = useState({
     studentStatus: {},
     studentInfo: {},
@@ -121,7 +120,7 @@ const RegistrationForm = () => {
   );
 
   const handleSelectOldStudent = (latestData) => {
-    console.log("Received latest data for prefill:", latestData); // Debug log
+    console.log('Received latest data for prefill:', latestData); // Debug log
 
     // Prefill semua form sections dengan data dari backend
     if (latestData) {
@@ -130,14 +129,14 @@ const RegistrationForm = () => {
         latestData.studentInfo &&
         Object.keys(latestData.studentInfo).length > 0
       ) {
-        console.log("Prefilling studentInfo:", latestData.studentInfo);
-        handleSectionDataChange("studentInfo", latestData.studentInfo);
+        console.log('Prefilling studentInfo:', latestData.studentInfo);
+        handleSectionDataChange('studentInfo', latestData.studentInfo);
       }
 
       // Prefill Program
       if (latestData.program && Object.keys(latestData.program).length > 0) {
-        console.log("Prefilling program:", latestData.program);
-        handleSectionDataChange("program", latestData.program);
+        console.log('Prefilling program:', latestData.program);
+        handleSectionDataChange('program', latestData.program);
       }
 
       // Prefill Facilities
@@ -145,8 +144,8 @@ const RegistrationForm = () => {
         latestData.facilities &&
         Object.keys(latestData.facilities).length > 0
       ) {
-        console.log("Prefilling facilities:", latestData.facilities);
-        handleSectionDataChange("facilities", latestData.facilities);
+        console.log('Prefilling facilities:', latestData.facilities);
+        handleSectionDataChange('facilities', latestData.facilities);
       }
 
       // Prefill Parent Guardian
@@ -154,8 +153,8 @@ const RegistrationForm = () => {
         latestData.parentGuardian &&
         Object.keys(latestData.parentGuardian).length > 0
       ) {
-        console.log("Prefilling parentGuardian:", latestData.parentGuardian);
-        handleSectionDataChange("parentGuardian", latestData.parentGuardian);
+        console.log('Prefilling parentGuardian:', latestData.parentGuardian);
+        handleSectionDataChange('parentGuardian', latestData.parentGuardian);
       }
 
       // Prefill Term of Payment
@@ -163,12 +162,11 @@ const RegistrationForm = () => {
         latestData.termOfPayment &&
         Object.keys(latestData.termOfPayment).length > 0
       ) {
-        console.log("Prefilling termOfPayment:", latestData.termOfPayment);
-        handleSectionDataChange("termOfPayment", latestData.termOfPayment);
+        console.log('Prefilling termOfPayment:', latestData.termOfPayment);
+        handleSectionDataChange('termOfPayment', latestData.termOfPayment);
       }
     }
 
-    setPrefilledData((prev) => ({ ...prev, ...latestData }));
     // Signal children to apply prefill just once
     setPrefillTrigger((prev) => prev + 1);
   };
@@ -200,11 +198,30 @@ const RegistrationForm = () => {
   }, []);
 
   const handleResetForm = () => {
-    setPrefilledData({});
     setValidationState({});
     setErrors({});
     setForceError({});
   };
+
+  // Function to get display values for school year and semester
+  const getDisplayValues = useCallback(() => {
+    if (!sharedData || !formData.schoolYear || !formData.semester) {
+      return { schoolYearDisplay: '', semesterDisplay: '' };
+    }
+
+    const schoolYear = sharedData.school_years?.find(
+      (sy) => sy.school_year_id.toString() === formData.schoolYear.toString()
+    );
+
+    const semester = sharedData.semesters?.find(
+      (s) => s.semester_id.toString() === formData.semester.toString()
+    );
+
+    return {
+      schoolYearDisplay: schoolYear?.year || formData.schoolYear,
+      semesterDisplay: semester?.number || formData.semester,
+    };
+  }, [sharedData, formData.schoolYear, formData.semester]);
 
   // Show loading state while data is being fetched
   if (isLoading) {
@@ -221,6 +238,7 @@ const RegistrationForm = () => {
 
   // Extract draft ID from formData
   const draftId = formData.draftId;
+  const { schoolYearDisplay, semesterDisplay } = getDisplayValues();
 
   return (
     <Main>
@@ -229,10 +247,10 @@ const RegistrationForm = () => {
         {formData.schoolYear && (
           <div className={styles.formInfo}>
             <p>
-              <strong>School Year:</strong> {formData.schoolYear}
+              <strong>School Year:</strong> {schoolYearDisplay}
             </p>
             <p>
-              <strong>Semester:</strong> {formData.semester}
+              <strong>Semester:</strong> {semesterDisplay}
             </p>
             <p>
               <strong>Date:</strong> {formData.date}
