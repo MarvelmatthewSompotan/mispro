@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import PopUpConfirm from '../PopUpConfirm';
-import styles from './FormButtonSection.module.css';
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import PopUpConfirm from "../PopUpConfirm";
+import styles from "./FormButtonSection.module.css";
 
 const FormButtonSection = ({
   validationState,
@@ -21,8 +21,8 @@ const FormButtonSection = ({
 
   const handleSubmit = () => {
     // Debug: log semua data untuk memeriksa
-    console.log('All Form Data:', allFormData);
-    console.log('Validation State:', validationState);
+    console.log("All Form Data:", allFormData);
+    console.log("Validation State:", validationState);
 
     const errors = {};
 
@@ -48,7 +48,7 @@ const FormButtonSection = ({
     // Validasi NIK hanya jika citizenship = "Indonesia"
     if (
       allFormData.studentInfo &&
-      allFormData.studentInfo.citizenship === 'Indonesia'
+      allFormData.studentInfo.citizenship === "Indonesia"
     ) {
       if (!allFormData.studentInfo.nik) {
         errors.studentInfo = { ...errors.studentInfo, nik: true };
@@ -58,7 +58,7 @@ const FormButtonSection = ({
     // Validasi KITAS hanya jika citizenship = "Non Indonesia" (country tidak required)
     if (
       allFormData.studentInfo &&
-      allFormData.studentInfo.citizenship === 'Non Indonesia'
+      allFormData.studentInfo.citizenship === "Non Indonesia"
     ) {
       if (!allFormData.studentInfo.kitas) {
         errors.studentInfo = { ...errors.studentInfo, kitas: true };
@@ -152,6 +152,9 @@ const FormButtonSection = ({
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };
     }
+    if (!allFormData.facilities || !allFormData.facilities.transportation_id) {
+      errors.facilities = { ...errors.facilities, transportation_id: true };
+    }
     if (
       !allFormData.facilities ||
       !allFormData.facilities.transportation_policy
@@ -172,14 +175,133 @@ const FormButtonSection = ({
     ) {
       errors.parentGuardian = { ...errors.parentGuardian, father_name: true };
     }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_phone
+    ) {
+      errors.parentGuardian = { ...errors.parentGuardian, father_phone: true };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_street
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_street: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_village
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_village: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_district
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_district: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_city_regency
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_city_regency: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.father_address_province
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        father_address_province: true,
+      };
+    }
+
+    // Validasi Mother fields
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_name
+    ) {
+      errors.parentGuardian = { ...errors.parentGuardian, mother_name: true };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_phone
+    ) {
+      errors.parentGuardian = { ...errors.parentGuardian, mother_phone: true };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_street
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_street: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_village
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_village: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_district
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_district: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_city_regency
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_city_regency: true,
+      };
+    }
+    if (
+      !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_address_province
+    ) {
+      errors.parentGuardian = {
+        ...errors.parentGuardian,
+        mother_address_province: true,
+      };
+    }
 
     // Validasi Term of Payment Section
     if (!allFormData.termOfPayment || !allFormData.termOfPayment.tuition_fees) {
       errors.termOfPayment = { ...errors.termOfPayment, tuition_fees: true };
     }
+    if (
+      !allFormData.termOfPayment ||
+      !allFormData.termOfPayment.residence_payment
+    ) {
+      errors.termOfPayment = {
+        ...errors.termOfPayment,
+        residence_payment: true,
+      };
+    }
 
     // Debug: log errors
-    console.log('Validation Errors:', errors);
+    console.log("Validation Errors:", errors);
 
     // Cek jika ada error
     const hasErrors = Object.values(errors).some(
@@ -214,13 +336,13 @@ const FormButtonSection = ({
         <div className={styles.noteLabel}>Note: </div>
         <div className={styles.noteText}>
           <span className={styles.noteContent}>
-            Please make sure all the data above are accurate before pressing{' '}
+            Please make sure all the data above are accurate before pressing{" "}
           </span>
           <b>Done</b>
         </div>
         <div className={styles.noteText}>
           <span className={styles.noteContent}>
-            Please keep in mind that this action cannot be{' '}
+            Please keep in mind that this action cannot be{" "}
           </span>
           <b>undone</b>
           <span className={styles.noteContent}>.</span>
@@ -230,14 +352,14 @@ const FormButtonSection = ({
         <button
           className={styles.resetButton}
           onClick={handleReset}
-          type='button'
+          type="button"
         >
           Reset
         </button>
         <button
           className={styles.submitButton}
           onClick={handleSubmit}
-          type='button'
+          type="button"
         >
           Submit
         </button>

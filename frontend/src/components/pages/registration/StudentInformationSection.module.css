@@ -19,16 +19,6 @@ textarea {
   transition: color 0.2s ease, font-weight 0.2s ease;
 }
 
-/* Error state styling - Hanya ubah warna label dan bottom line yang sudah ada */
-.errorFieldWrapper {
-  position: relative;
-  background-color: transparent !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  z-index: 1;
-}
-
 /* Error label styling - Label merah yang rapi */
 .errorLabel {
   color: #ff4444 !important;
@@ -64,22 +54,15 @@ textarea {
 .errorFieldWrapper .react-select__control,
 .errorFieldWrapper .dateInput,
 .errorFieldWrapper .otherInput {
-  border-bottom: 2px solid #ff4444 !important; /* Override line yang sudah ada menjadi merah */
   background-color: transparent !important;
-  color: #ff4444 !important; /* Text input jadi merah */
+
   transition: all 0.2s ease;
 }
 
 /* Error state untuk Select component - Override border bottom yang sudah ada */
-.errorFieldWrapper .react-select__control {
-  border-bottom: 2px solid #ff4444 !important; /* Override line yang sudah ada */
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
 
 /* Error state untuk date input - Override border bottom yang sudah ada */
 .errorFieldWrapper .dateInput {
-  border-bottom: 2px solid #ff4444 !important; /* Override line yang sudah ada */
   color: #ff4444 !important;
 }
 

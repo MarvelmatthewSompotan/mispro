@@ -3,7 +3,13 @@ import styles from "./FacilitiesSection.module.css";
 import checkBoxIcon from "../../../assets/CheckBox.png";
 import { getRegistrationOptions } from "../../../services/api";
 
-const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
+const FacilitiesSection = ({
+  onDataChange,
+  sharedData,
+  prefill,
+  errors,
+  forceError,
+}) => {
   const [transportations, setTransportations] = useState([]);
   const [pickupPoints, setPickupPoints] = useState([]);
   const [residenceHalls, setResidenceHalls] = useState([]);
@@ -246,6 +252,42 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
     }
   }, [selectedPickupPoint]);
 
+  // Effect untuk handle errors dari parent component
+  useEffect(() => {
+    if (errors) {
+      // Error state akan dihandle oleh styling CSS
+    }
+  }, [errors]);
+
+  // Effect untuk handle forceError dari parent component
+  useEffect(() => {
+    if (forceError) {
+      // Force error state akan dihandle oleh styling CSS
+    }
+  }, [forceError]);
+
+  // Effect untuk reset error state ketika transportation sudah dipilih
+  useEffect(() => {
+    if (
+      selectedTransportation &&
+      (errors?.transportation_id || forceError?.transportation_id)
+    ) {
+      // Trigger re-render untuk menghilangkan error state
+      // Error state akan hilang karena transportation sudah dipilih
+    }
+  }, [selectedTransportation, errors, forceError]);
+
+  // Effect untuk reset error state ketika residence hall sudah dipilih
+  useEffect(() => {
+    if (
+      selectedResidence &&
+      (errors?.residence_id || forceError?.residence_id)
+    ) {
+      // Trigger re-render untuk menghilangkan error state
+      // Error state akan hilang karena residence hall sudah dipilih
+    }
+  }, [selectedResidence, errors, forceError]);
+
   return (
     <div className={styles.container}>
       <div className={styles.sectionHeader}>
@@ -254,7 +296,19 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
       <div className={styles.contentWrapper}>
         <div className={styles.transportationSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Transportation</div>
+            <div
+              className={`${styles.sectionTitleText} ${
+                (errors?.transportation_id ||
+                  (typeof forceError === "object"
+                    ? forceError?.transportation_id
+                    : !!forceError)) &&
+                !selectedTransportation
+                  ? styles.facilitiesSectionErrorLabel
+                  : ""
+              }`}
+            >
+              Transportation
+            </div>
           </div>
 
           {/* Transportation Options from Backend */}
@@ -370,7 +424,17 @@ const FacilitiesSection = ({ onDataChange, sharedData, prefill }) => {
         {/* Residence Hall Section */}
         <div className={styles.residenceHallSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Residence Hall</div>
+            <div className={styles.sectionTitle}>
+              <div
+                className={`${styles.sectionTitleText} ${
+                  errors?.residence_id || forceError?.residence_id
+                    ? styles.facilitiesSectionErrorLabel
+                    : ""
+                }`}
+              >
+                Residence Hall
+              </div>
+            </div>
           </div>
 
           {/* Residence Hall Options from Backend */}

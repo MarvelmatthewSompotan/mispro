@@ -301,3 +301,10 @@
   color: #ff4d4d;
   line-height: 100%;
 }
+
+/* Error state styling untuk StudentStatusSection */
+
+.studentStatusErrorLabel {
+  color: #ff4444 !important;
+  font-weight: 600;
+}

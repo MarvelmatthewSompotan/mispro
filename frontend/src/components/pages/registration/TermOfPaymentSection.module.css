@@ -275,3 +275,9 @@ textarea::placeholder {
   background: white;
   color: #000;
 }
+
+/* Error label untuk sub label Term of Payment */
+.termOfPaymentErrorLabel {
+  color: #ff4444 !important;
+  font-weight: 600;
+}

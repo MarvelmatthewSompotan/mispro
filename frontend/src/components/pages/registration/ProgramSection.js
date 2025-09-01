@@ -3,7 +3,7 @@ import styles from './ProgramSection.module.css';
 import Select from 'react-select';
 import { getRegistrationOptions } from '../../../services/api';
 
-const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
+const ProgramSection = ({ onDataChange, sharedData, prefill, errors, forceError }) => {
   const [sections, setSections] = useState([]);
   const [majors, setMajors] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -306,9 +306,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
         <span className={styles.headerTitle}>PROGRAM</span>
       </div>
       <div className={styles.contentWrapper}>
-        <div className={styles.programSection}>
-          <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Section</div>
+        <div className={`${styles.programSection} ${(errors?.section_id || forceError?.section_id) ? styles.programSectionErrorWrapper : ''}`}>
+          <div className={`${styles.sectionTitle} ${(errors?.section_id || forceError?.section_id) ? styles.programSectionErrorWrapper : ''}`}>
+            <div className={`${styles.sectionTitleText} ${(errors?.section_id || forceError?.section_id) ? styles.programSectionErrorLabel : ''}`}>Section</div>
           </div>
           {sectionOptions.map((option) => (
             <div key={option.value} className={styles.optionItem}>
@@ -341,7 +341,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
                     <span className={styles.radioButtonSelected} />
                   )}
                 </span>
-                <span className={styles.label}>{option.label}</span>
+                <span className={`${styles.label} ${(errors?.section_id || forceError?.section_id) }`}>{option.label}</span>
               </label>
             </div>
           ))}
@@ -385,9 +385,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
           )}
         </div>
 
-        <div className={styles.programSection}>
-          <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Program</div>
+        <div className={`${styles.programSection} ${(errors?.program_id || forceError?.program_id) ? styles.programSectionErrorWrapper : ''}`}>
+          <div className={`${styles.sectionTitle} ${(errors?.program_id || forceError?.program_id) ? styles.programSectionErrorWrapper : ''}`}>
+            <div className={`${styles.sectionTitleText} ${(errors?.program_id || forceError?.program_id) ? styles.programSectionErrorLabel : ''}`}>Program</div>
           </div>
           {programOptions.map((option) => (
             <div key={option.value} className={styles.optionItem}>
@@ -420,7 +420,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill }) => {
                     <span className={styles.radioButtonSelected} />
                   )}
                 </span>
-                <span className={styles.label}>{option.label}</span>
+                <span className={`${styles.label} ${(errors?.program_id || forceError?.program_id) }`}>{option.label}</span>
                 {option.label === 'Other' &&
                   selectedProgram === option.value && (
                     <input

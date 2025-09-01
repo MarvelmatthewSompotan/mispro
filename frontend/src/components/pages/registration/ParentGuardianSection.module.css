@@ -337,6 +337,45 @@ textarea::placeholder {
   font-size: 16px;
 }
 
+/* ===== ERROR STATE STYLING UNTUK PARENT GUARDIAN SECTION ===== */
+
+/* Error label styling - Label merah yang rapi */
+.parentErrorLabel {
+  color: #ff4444 !important;
+  font-family: "Poppins", Arial, sans-serif;
+  font-weight: 500 !important;
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.2;
+  text-align: left;
+  width: 100%;
+  transition: color 0.2s ease;
+}
+
+/* Error input styling - Hanya ubah warna text, JANGAN tambah border baru */
+.parentErrorInput {
+  border: none !important;
+  border-bottom: none !important; /* HAPUS border baru */
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #ff4444 !important; /* Text input jadi merah */
+  transition: color 0.2s ease; /* Hanya transition untuk color */
+}
+
+.parentErrorInput:focus {
+  border-bottom: none !important; /* Focus state tidak ada border baru */
+  box-shadow: none !important;
+  color: #ff6666 !important; /* Focus text lebih terang */
+}
+
+/* Placeholder text merah untuk field yang error */
+.parentErrorFieldWrapper input::placeholder,
+.parentErrorFieldWrapper .react-select__placeholder {
+  color: #ff4444 !important; /* Placeholder merah saat error */
+  opacity: 0.8; /* Sedikit transparan agar tidak terlalu mencolok */
+}
+
 /* Responsive design */
 @media (max-width: 900px) {
   .guardianInfoContent {

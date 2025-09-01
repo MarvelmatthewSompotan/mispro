@@ -207,7 +207,7 @@ class RegistrationController extends Controller
                 'input_name' => 'nullable|string',
                 'first_name' => 'required|string',
                 'middle_name' => 'nullable|string',
-                'last_name' => 'required|string',
+                'last_name' => 'nullable|string',
                 'nickname' => 'nullable|string',
                 'citizenship' => 'required|in:Indonesia,Non Indonesia',
                 'country' => function ($attribute, $value, $fail) use ($request) {

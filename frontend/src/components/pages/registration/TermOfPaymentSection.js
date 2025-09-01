@@ -1,15 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import styles from './TermOfPaymentSection.module.css';
-import checkBoxIcon from '../../../assets/CheckBox.png';
-import { getRegistrationOptions } from '../../../services/api';
+import React, { useState, useEffect, useRef } from "react";
+import styles from "./TermOfPaymentSection.module.css";
+import checkBoxIcon from "../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../services/api";
 
-const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
+const TermOfPaymentSection = ({
+  onDataChange,
+  sharedData,
+  prefill,
+  errors,
+  forceError,
+}) => {
   // State untuk payment options
-  const [tuitionFees, setTuitionFees] = useState('');
-  const [residencePayment, setResidencePayment] = useState('');
+  const [tuitionFees, setTuitionFees] = useState("");
+  const [residencePayment, setResidencePayment] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
-  const [discountName, setDiscountName] = useState('');
-  const [discountNotes, setDiscountNotes] = useState('');
+  const [discountName, setDiscountName] = useState("");
+  const [discountNotes, setDiscountNotes] = useState("");
 
   // State untuk dropdown options dari backend
   const [tuitionFeesOption, setTuitionFeesOption] = useState([]);
@@ -35,7 +41,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
           setDiscountTypeOptions(data.discount_types || []);
         })
         .catch((err) => {
-          console.error('Failed to fetch payment options:', err);
+          console.error("Failed to fetch payment options:", err);
         });
     }
   }, [sharedData]);
@@ -45,13 +51,13 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
     if (prefill && Object.keys(prefill).length > 0) {
       // Jika ini prefill pertama kali atau prefill berubah signifikan
       if (isInitialPrefill.current || !hasInitialized.current) {
-        console.log('Initial prefilling TermOfPaymentSection with:', prefill);
+        console.log("Initial prefilling TermOfPaymentSection with:", prefill);
 
         if (prefill.tuition_fees) setTuitionFees(prefill.tuition_fees);
         if (prefill.residence_payment)
           setResidencePayment(prefill.residence_payment);
         if (prefill.financial_policy_contract) {
-          setFinancialPolicy(prefill.financial_policy_contract === 'Signed');
+          setFinancialPolicy(prefill.financial_policy_contract === "Signed");
         }
         if (prefill.discount_name) setDiscountName(prefill.discount_name);
         if (prefill.discount_notes) setDiscountNotes(prefill.discount_notes);
@@ -61,24 +67,57 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
       }
     } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
       // Jika prefill menjadi empty object (reset form), reset semua field
-      console.log('Resetting TermOfPaymentSection form');
-      setTuitionFees('');
-      setResidencePayment('');
+      console.log("Resetting TermOfPaymentSection form");
+      setTuitionFees("");
+      setResidencePayment("");
       setFinancialPolicy(false);
-      setDiscountName('');
-      setDiscountNotes('');
+      setDiscountName("");
+      setDiscountNotes("");
 
       hasInitialized.current = false;
     }
   }, [prefill]);
 
+  // Effect untuk handle errors dari parent component
+  useEffect(() => {
+    if (errors) {
+      // Error state akan dihandle oleh styling CSS
+    }
+  }, [errors]);
+
+  // Effect untuk handle forceError dari parent component
+  useEffect(() => {
+    if (forceError) {
+      // Force error state akan dihandle oleh styling CSS
+    }
+  }, [forceError]);
+
+  // Effect untuk reset error state ketika tuition fees sudah dipilih
+  useEffect(() => {
+    if (tuitionFees && (errors?.tuition_fees || forceError?.tuition_fees)) {
+      // Trigger re-render untuk menghilangkan error state
+      // Error state akan hilang karena tuition fees sudah dipilih
+    }
+  }, [tuitionFees, errors, forceError]);
+
+  // Effect untuk reset error state ketika residence payment sudah dipilih
+  useEffect(() => {
+    if (
+      residencePayment &&
+      (errors?.residence_payment || forceError?.residence_payment)
+    ) {
+      // Trigger re-render untuk menghilangkan error state
+      // Error state akan hilang karena residence payment sudah dipilih
+    }
+  }, [residencePayment, errors, forceError]);
+
   const handleTuitionFeesChange = (value) => {
     // Jika user mengklik option yang sudah dipilih, batalkan pilihan
     if (tuitionFees === value) {
-      setTuitionFees('');
+      setTuitionFees("");
 
       onDataChange({
-        tuition_fees: '',
+        tuition_fees: "",
         // ... other fields
       });
     } else {
@@ -95,10 +134,10 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
   const handleResidencePaymentChange = (value) => {
     // Jika user mengklik option yang sudah dipilih, batalkan pilihan
     if (residencePayment === value) {
-      setResidencePayment('');
+      setResidencePayment("");
 
       onDataChange({
-        residence_payment: '',
+        residence_payment: "",
         // ... other fields
       });
     } else {
@@ -116,17 +155,17 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
     const value = e.target.checked;
     setFinancialPolicy(value);
     onDataChange({
-      financial_policy_contract: value ? 'Signed' : 'Not Signed',
+      financial_policy_contract: value ? "Signed" : "Not Signed",
     });
   };
 
   const handleDiscountNameChange = (value) => {
     // Jika user mengklik option yang sudah dipilih, batalkan pilihan
     if (discountName === value) {
-      setDiscountName('');
+      setDiscountName("");
 
       onDataChange({
-        discount_name: '',
+        discount_name: "",
         // ... other fields
       });
     } else {
@@ -153,16 +192,38 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
       </div>
       <div className={styles.contentWrapper}>
         <div className={styles.paymentSection}>
-          <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Tuition Fees</div>
+          <div
+            className={`${styles.sectionTitle} ${
+              (errors?.tuition_fees ||
+                (typeof forceError === "object"
+                  ? forceError?.tuition_fees
+                  : !!forceError)) &&
+              !tuitionFees
+                ? styles.termOfPaymentErrorWrapper
+                : ""
+            }`}
+          >
+            <div
+              className={`${styles.sectionTitleText} ${
+                (errors?.tuition_fees ||
+                  (typeof forceError === "object"
+                    ? forceError?.tuition_fees
+                    : !!forceError)) &&
+                !tuitionFees
+                  ? styles.termOfPaymentErrorLabel
+                  : ""
+              }`}
+            >
+              Tuition Fees
+            </div>
           </div>
           <div className={styles.optionGroup}>
             {tuitionFeesOption.map((option) => (
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
-                    type='radio'
-                    name='tuitionFees'
+                    type="radio"
+                    name="tuitionFees"
                     value={option}
                     checked={tuitionFees === option}
                     onChange={(e) => handleTuitionFeesChange(e.target.value)}
@@ -183,16 +244,38 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
         </div>
 
         <div className={styles.paymentSection}>
-          <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Residence Hall</div>
+          <div
+            className={`${styles.sectionTitle} ${
+              (errors?.residence_payment ||
+                (typeof forceError === "object"
+                  ? forceError?.residence_payment
+                  : !!forceError)) &&
+              !residencePayment
+                ? styles.termOfPaymentErrorWrapper
+                : ""
+            }`}
+          >
+            <div
+              className={`${styles.sectionTitleText} ${
+                (errors?.residence_payment ||
+                  (typeof forceError === "object"
+                    ? forceError?.residence_payment
+                    : !!forceError)) &&
+                !residencePayment
+                  ? styles.termOfPaymentErrorLabel
+                  : ""
+              }`}
+            >
+              Residence Hall
+            </div>
           </div>
           <div className={styles.optionGroup}>
             {residencePaymentOption.map((option) => (
               <div key={option} className={styles.optionItem}>
                 <label className={styles.radioLabel}>
                   <input
-                    type='radio'
-                    name='residencePayment'
+                    type="radio"
+                    name="residencePayment"
                     value={option}
                     checked={residencePayment === option}
                     onChange={(e) =>
@@ -224,7 +307,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
             <div className={styles.optionItem}>
               <label className={styles.checkboxLabel}>
                 <input
-                  type='checkbox'
+                  type="checkbox"
                   checked={financialPolicy}
                   onChange={handleFinancialPolicyChange}
                   className={styles.hiddenCheckbox}
@@ -234,7 +317,7 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
                   {financialPolicy && (
                     <img
                       className={styles.checkBoxIcon}
-                      alt=''
+                      alt=""
                       src={checkBoxIcon}
                     />
                   )}
@@ -256,12 +339,12 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
               <div className={styles.label}>Discount Type</div>
               <select
                 className={`${styles.dropdownSelect} ${
-                  discountName ? styles.hasValue : ''
+                  discountName ? styles.hasValue : ""
                 }`}
                 value={discountName}
                 onChange={(e) => handleDiscountNameChange(e.target.value)}
               >
-                <option value=''>Select discount type</option>
+                <option value="">Select discount type</option>
                 {discountTypeOptions.map((discount) => (
                   <option key={discount.discount_type_id} value={discount.name}>
                     {discount.name}
@@ -277,10 +360,10 @@ const TermOfPaymentSection = ({ onDataChange, sharedData, prefill }) => {
                 <span className={styles.label}>Notes</span>
                 <input
                   className={styles.valueRegular}
-                  type='text'
+                  type="text"
                   value={discountNotes}
                   onChange={handleDiscountNotesChange}
-                  placeholder='Enter discount notes'
+                  placeholder="Enter discount notes"
                   style={{ margin: 0, padding: 0 }}
                 />
               </label>

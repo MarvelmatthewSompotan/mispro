@@ -333,3 +333,9 @@ textarea::placeholder {
     min-width: 0;
   }
 }
+
+/* Error label untuk sub label Facilities */
+.facilitiesSectionErrorLabel {
+  color: #ff4444 !important;
+  font-weight: 600;
+}

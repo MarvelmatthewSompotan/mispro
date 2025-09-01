@@ -201,3 +201,10 @@ textarea::placeholder {
   font-weight: 400;
   color: rgba(128, 128, 128, 0.6);
 }
+
+
+
+.programSectionErrorLabel {
+  color: #ff4444 !important;
+  font-weight: 600;
+}
