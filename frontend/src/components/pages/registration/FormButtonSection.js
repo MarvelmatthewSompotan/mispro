@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PopUpConfirm from "../PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
+import DuplicateStudentPopup from "./DuplicateStudentPopup";
 
 const FormButtonSection = ({
   validationState,
@@ -14,6 +15,7 @@ const FormButtonSection = ({
   const navigate = useNavigate();
   const locationState = useLocation();
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
 
   const handleReset = () => {
     if (onReset) onReset();
@@ -330,6 +332,14 @@ const FormButtonSection = ({
     setShowConfirmation(false);
   };
 
+  // BARU: Buat fungsi handler yang akan dipanggil jika backend menemukan duplikat
+  const handleDuplicateFound = () => {
+    // 1. Tutup popup konfirmasi yang sedang aktif
+    setShowConfirmation(false);
+    // 2. Tampilkan popup peringatan duplikat
+    setShowDuplicatePopup(true);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.noteSection}>
@@ -373,7 +383,12 @@ const FormButtonSection = ({
           allFormData={allFormData}
           locationState={location}
           navigate={navigate}
+          onDuplicateFound={handleDuplicateFound}
         />
+      )}
+      {/* BARU: Tambahkan render kondisional untuk popup peringatan duplikat */}
+      {showDuplicatePopup && (
+        <DuplicateStudentPopup onClose={() => setShowDuplicatePopup(false)} />
       )}
     </div>
   );

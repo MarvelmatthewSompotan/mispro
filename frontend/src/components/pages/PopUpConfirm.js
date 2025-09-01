@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
-import styles from '../styles/PopUpConfirm.module.css';
-import { submitRegistrationForm } from '../../services/api';
+import React, { useState } from "react";
+import styles from "../styles/PopUpConfirm.module.css";
+import { submitRegistrationForm } from "../../services/api";
 
 const PopUpConfirm = React.memo(
-  ({ onCancel, onConfirm, draftId, allFormData, locationState, navigate }) => {
+  // BARU: Tambahkan 'onDuplicateFound' ke daftar props
+  ({
+    onCancel,
+    onConfirm,
+    draftId,
+    allFormData,
+    locationState,
+    navigate,
+    onDuplicateFound,
+  }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleConfirm = async () => {
@@ -12,57 +21,76 @@ const PopUpConfirm = React.memo(
 
         const transformedData = transformFormData(allFormData);
 
-        console.log('=== SUBMIT DEBUG INFO ===');
-        console.log('Draft ID:', draftId);
-        console.log('Data keys:', Object.keys(transformedData));
-        console.log('========================');
+        console.log("=== SUBMIT DEBUG INFO ===");
+        console.log("Draft ID:", draftId);
+        console.log("Data keys:", Object.keys(transformedData));
+        console.log("========================");
 
         const response = await submitRegistrationForm(draftId, transformedData);
-        console.log('=== RESPONSE DEBUG ===');
-        console.log('Full response:', response);
-        console.log('Application ID:', response.data?.application_id);
-        console.log('======================');
+        console.log("=== RESPONSE DEBUG ===");
+        console.log("Full response:", response);
+        console.log("Application ID:", response.data?.application_id);
+        console.log("======================");
 
         if (response.success) {
-          navigate('/print', {
+          navigate("/print", {
             state: { applicationId: response.data.application_id },
           });
           onConfirm();
         } else {
-          alert('Registration failed: ' + (response.error || 'Unknown error'));
+          alert("Registration failed: " + (response.error || "Unknown error"));
         }
       } catch (error) {
-        console.error('=== ERROR DEBUG INFO ===');
-        console.error('Error message:', error.message);
+        console.error("=== ERROR DEBUG INFO ===");
+        console.error("Error message:", error.message);
         if (error.response) {
-          console.error('HTTP Status:', error.response.status);
+          console.error("HTTP Status:", error.response.status);
+          // BARU: Log data error untuk mempermudah debugging
+          console.error("Error Data:", error.response.data);
         }
-        console.error('========================');
+        console.error("========================");
 
+        // --- KODE BARU DIMASUKKAN DI SINI ---
+        // Cek secara spesifik untuk error duplikat siswa dari backend
+        if (
+          error.response &&
+          error.response.status === 422 &&
+          error.response.data &&
+          error.response.data.error && // Sesuai dengan respons backend Anda
+          error.response.data.error.includes("Student already exists")
+        ) {
+          // Panggil fungsi onDuplicateFound yang dikirim dari parent component
+          onDuplicateFound();
+          // Hentikan eksekusi agar tidak menampilkan alert generic di bawah
+          return;
+        }
+        // --- AKHIR DARI KODE BARU ---
+
+        // Struktur kode error handling yang sudah ada tetap dipertahankan
         if (error.data && error.data.errors) {
           const errorMessages = Object.values(error.data.errors)
             .flat()
-            .join(', ');
-          alert('Validation errors: ' + errorMessages);
+            .join(", ");
+          alert("Validation errors: " + errorMessages);
         } else if (error.data && error.data.message) {
-          alert('Registration failed: ' + error.data.message);
+          alert("Registration failed: " + error.data.message);
         } else {
-          alert('Registration failed: ' + error.message);
+          alert("Registration failed: " + error.message);
         }
       } finally {
         setIsSubmitting(false);
       }
     };
 
-    // Fungsi untuk transform data dengan field mapping yang benar
+    // Fungsi untuk transform data dengan field mapping yang benar (TIDAK ADA PERUBAHAN)
     const transformFormData = (formData) => {
-      console.log('Original form data:', formData);
+      console.log("Original form data:", formData);
 
-      const studentStatus = formData.studentStatus?.student_status || 'New';
-      const inputName = formData.studentStatus?.input_name || '';
+      const studentStatus = formData.studentStatus?.student_status || "New";
+      const inputName = formData.studentStatus?.input_name || "";
 
-      if (studentStatus === 'Old' && !inputName) {
-        throw new Error('Student ID is required for Old student status');
+      if (studentStatus === "Old" && !inputName) {
+        throw new Error("Student ID is required for Old student status");
       }
 
       const transformed = {
@@ -70,41 +98,41 @@ const PopUpConfirm = React.memo(
         input_name: inputName,
 
         // Student information
-        first_name: formData.studentInfo?.first_name || '',
-        middle_name: formData.studentInfo?.middle_name || '',
-        last_name: formData.studentInfo?.last_name || '',
-        nickname: formData.studentInfo?.nickname || '',
-        citizenship: formData.studentInfo?.citizenship || 'Indonesia',
+        first_name: formData.studentInfo?.first_name || "",
+        middle_name: formData.studentInfo?.middle_name || "",
+        last_name: formData.studentInfo?.last_name || "",
+        nickname: formData.studentInfo?.nickname || "",
+        citizenship: formData.studentInfo?.citizenship || "Indonesia",
         country:
-          formData.studentInfo?.citizenship === 'Non Indonesia'
-            ? formData.studentInfo?.country || ''
+          formData.studentInfo?.citizenship === "Non Indonesia"
+            ? formData.studentInfo?.country || ""
             : null,
-        religion: formData.studentInfo?.religion || '',
-        place_of_birth: formData.studentInfo?.place_of_birth || '',
-        date_of_birth: formData.studentInfo?.date_of_birth || '',
-        email: formData.studentInfo?.email || '',
-        phone_number: formData.studentInfo?.phone_number || '',
-        previous_school: formData.studentInfo?.previous_school || '',
-        academic_status: formData.studentInfo?.academic_status || 'OTHER',
+        religion: formData.studentInfo?.religion || "",
+        place_of_birth: formData.studentInfo?.place_of_birth || "",
+        date_of_birth: formData.studentInfo?.date_of_birth || "",
+        email: formData.studentInfo?.email || "",
+        phone_number: formData.studentInfo?.phone_number || "",
+        previous_school: formData.studentInfo?.previous_school || "",
+        academic_status: formData.studentInfo?.academic_status || "OTHER",
         academic_status_other:
-          formData.studentInfo?.academic_status === 'OTHER'
-            ? formData.studentInfo?.academic_status_other || ''
+          formData.studentInfo?.academic_status === "OTHER"
+            ? formData.studentInfo?.academic_status_other || ""
             : null,
-        gender: formData.studentInfo?.gender || '',
-        family_rank: formData.studentInfo?.family_rank || '',
-        age: formData.studentInfo?.age || '',
-        nisn: formData.studentInfo?.nisn || '',
+        gender: formData.studentInfo?.gender || "",
+        family_rank: formData.studentInfo?.family_rank || "",
+        age: formData.studentInfo?.age || "",
+        nisn: formData.studentInfo?.nisn || "",
         nik: formData.studentInfo?.nik || null,
         kitas: formData.studentInfo?.kitas || null,
 
         // Student address
-        street: formData.studentInfo?.street || '',
+        street: formData.studentInfo?.street || "",
         rt: formData.studentInfo?.rt || null,
         rw: formData.studentInfo?.rw || null,
-        village: formData.studentInfo?.village || '',
-        district: formData.studentInfo?.district || '',
-        city_regency: formData.studentInfo?.city_regency || '',
-        province: formData.studentInfo?.province || '',
+        village: formData.studentInfo?.village || "",
+        district: formData.studentInfo?.district || "",
+        city_regency: formData.studentInfo?.city_regency || "",
+        province: formData.studentInfo?.province || "",
         other: formData.studentInfo?.other || null,
 
         // Program, class, major
@@ -122,10 +150,10 @@ const PopUpConfirm = React.memo(
           : null,
         pickup_point_custom: formData.facilities?.pickup_point_custom || null,
         transportation_policy:
-          formData.facilities?.transportation_policy || 'Not Signed',
+          formData.facilities?.transportation_policy || "Not Signed",
         residence_id: parseInt(formData.facilities?.residence_id) || 3,
         residence_hall_policy:
-          formData.facilities?.residence_hall_policy || 'Not Signed',
+          formData.facilities?.residence_hall_policy || "Not Signed",
 
         // Parent/Guardian (father)
         father_name: formData.parentGuardian?.father_name || null,
@@ -195,17 +223,17 @@ const PopUpConfirm = React.memo(
           formData.parentGuardian?.guardian_address_other || null,
 
         // Payment
-        tuition_fees: formData.termOfPayment?.tuition_fees || '',
-        residence_payment: formData.termOfPayment?.residence_payment || '',
+        tuition_fees: formData.termOfPayment?.tuition_fees || "",
+        residence_payment: formData.termOfPayment?.residence_payment || "",
         financial_policy_contract:
-          formData.termOfPayment?.financial_policy_contract || 'Not Signed',
+          formData.termOfPayment?.financial_policy_contract || "Not Signed",
 
         // Discount
         discount_name: formData.termOfPayment?.discount_name || null,
         discount_notes: formData.termOfPayment?.discount_notes || null,
       };
 
-      console.log('Transformed form data (cleaned):', transformed);
+      console.log("Transformed form data (cleaned):", transformed);
       return transformed;
     };
 
@@ -232,7 +260,7 @@ const PopUpConfirm = React.memo(
             <button
               className={styles.bAddSubject1}
               onClick={onCancel}
-              type='button'
+              type="button"
               disabled={isSubmitting}
             >
               Cancel
@@ -240,10 +268,10 @@ const PopUpConfirm = React.memo(
             <button
               className={styles.bAddSubject}
               onClick={handleConfirm}
-              type='button'
+              type="button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : "Yes, I'm sure"}
+              {isSubmitting ? "Submitting..." : "Yes, I'm sure"}
             </button>
           </div>
         </div>
