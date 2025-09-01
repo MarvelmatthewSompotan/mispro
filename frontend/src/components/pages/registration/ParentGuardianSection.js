@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './ParentGuardianSection.module.css';
 
-const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, forceError }) => {
+const ParentGuardianSection = ({
+  onDataChange,
+  prefill,
+  prefillTrigger,
+  errors,
+  forceError,
+}) => {
   // State untuk Father
   const [father, setFather] = useState({
     name: '',
@@ -10,8 +16,8 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
     phone: '',
     email: '',
     street: '',
-    rt: '0',
-    rw: '0',
+    rt: '',
+    rw: '',
     village: '',
     district: '',
     city: '',
@@ -27,8 +33,8 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
     phone: '',
     email: '',
     street: '',
-    rt: '0',
-    rw: '0',
+    rt: '',
+    rw: '',
     village: '',
     district: '',
     city: '',
@@ -43,8 +49,8 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
     phone: '',
     email: '',
     street: '',
-    rt: '0',
-    rw: '0',
+    rt: '',
+    rw: '',
     village: '',
     district: '',
     city: '',
@@ -92,27 +98,51 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
   useEffect(() => {
     if (errors) {
       // Update father errors - hanya update field yang ada di errors, jangan reset yang lain
-      setFatherErrors(prev => ({
+      setFatherErrors((prev) => ({
         ...prev, // Pertahankan error state yang sudah ada
         ...(errors.father_name !== undefined && { name: errors.father_name }),
-        ...(errors.father_phone !== undefined && { phone: errors.father_phone }),
-        ...(errors.father_address_street !== undefined && { street: errors.father_address_street }),
-        ...(errors.father_address_village !== undefined && { village: errors.father_address_village }),
-        ...(errors.father_address_district !== undefined && { district: errors.father_address_district }),
-        ...(errors.father_address_city_regency !== undefined && { city: errors.father_address_city_regency }),
-        ...(errors.father_address_province !== undefined && { province: errors.father_address_province })
+        ...(errors.father_phone !== undefined && {
+          phone: errors.father_phone,
+        }),
+        ...(errors.father_address_street !== undefined && {
+          street: errors.father_address_street,
+        }),
+        ...(errors.father_address_village !== undefined && {
+          village: errors.father_address_village,
+        }),
+        ...(errors.father_address_district !== undefined && {
+          district: errors.father_address_district,
+        }),
+        ...(errors.father_address_city_regency !== undefined && {
+          city: errors.father_address_city_regency,
+        }),
+        ...(errors.father_address_province !== undefined && {
+          province: errors.father_address_province,
+        }),
       }));
 
       // Update mother errors - hanya update field yang ada di errors, jangan reset yang lain
-      setMotherErrors(prev => ({
+      setMotherErrors((prev) => ({
         ...prev, // Pertahankan error state yang sudah ada
         ...(errors.mother_name !== undefined && { name: errors.mother_name }),
-        ...(errors.mother_phone !== undefined && { phone: errors.mother_phone }),
-        ...(errors.mother_address_street !== undefined && { street: errors.mother_address_street }),
-        ...(errors.mother_address_village !== undefined && { village: errors.mother_address_village }),
-        ...(errors.mother_address_district !== undefined && { district: errors.mother_address_district }),
-        ...(errors.mother_address_city_regency !== undefined && { city: errors.mother_address_city_regency }),
-        ...(errors.mother_address_province !== undefined && { province: errors.mother_address_province })
+        ...(errors.mother_phone !== undefined && {
+          phone: errors.mother_phone,
+        }),
+        ...(errors.mother_address_street !== undefined && {
+          street: errors.mother_address_street,
+        }),
+        ...(errors.mother_address_village !== undefined && {
+          village: errors.mother_address_village,
+        }),
+        ...(errors.mother_address_district !== undefined && {
+          district: errors.mother_address_district,
+        }),
+        ...(errors.mother_address_city_regency !== undefined && {
+          city: errors.mother_address_city_regency,
+        }),
+        ...(errors.mother_address_province !== undefined && {
+          province: errors.mother_address_province,
+        }),
       }));
     }
   }, [errors]);
@@ -121,7 +151,7 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
   useEffect(() => {
     if (forceError) {
       // Force error untuk father fields - hanya update field yang ada di forceError, jangan reset yang lain
-      setFatherErrors(prev => ({
+      setFatherErrors((prev) => ({
         ...prev, // Pertahankan error state yang sudah ada
         ...(forceError.father_name && { name: true }),
         ...(forceError.father_phone && { phone: true }),
@@ -129,11 +159,11 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
         ...(forceError.father_address_village && { village: true }),
         ...(forceError.father_address_district && { district: true }),
         ...(forceError.father_address_city_regency && { city: true }),
-        ...(forceError.father_address_province && { province: true })
+        ...(forceError.father_address_province && { province: true }),
       }));
 
       // Force error untuk mother fields - hanya update field yang ada di forceError, jangan reset yang lain
-      setMotherErrors(prev => ({
+      setMotherErrors((prev) => ({
         ...prev, // Pertahankan error state yang sudah ada
         ...(forceError.mother_name && { name: true }),
         ...(forceError.mother_phone && { phone: true }),
@@ -141,7 +171,7 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
         ...(forceError.mother_address_village && { village: true }),
         ...(forceError.mother_address_district && { district: true }),
         ...(forceError.mother_address_city_regency && { city: true }),
-        ...(forceError.mother_address_province && { province: true })
+        ...(forceError.mother_address_province && { province: true }),
       }));
     }
   }, [forceError]);
@@ -151,55 +181,55 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
     const allData = {};
 
     // Father data dengan field mapping yang benar - kirim semua field
-    allData.father_name = father.name || "";
-    allData.father_company = father.company || "";
-    allData.father_occupation = father.occupation || "";
-    allData.father_phone = father.phone || "";
-    allData.father_email = father.email || "";
-    allData.father_address_street = father.street || "";
-    allData.father_address_rt = father.rt || "";
-    allData.father_address_rw = father.rw || "";
-    allData.father_address_village = father.village || "";
-    allData.father_address_district = father.district || "";
-    allData.father_address_city_regency = father.city || "";
-    allData.father_address_province = father.province || "";
-    allData.father_address_other = father.other || "";
+    allData.father_name = father.name || '';
+    allData.father_company = father.company || '';
+    allData.father_occupation = father.occupation || '';
+    allData.father_phone = father.phone || '';
+    allData.father_email = father.email || '';
+    allData.father_address_street = father.street || '';
+    allData.father_address_rt = father.rt || '';
+    allData.father_address_rw = father.rw || '';
+    allData.father_address_village = father.village || '';
+    allData.father_address_district = father.district || '';
+    allData.father_address_city_regency = father.city || '';
+    allData.father_address_province = father.province || '';
+    allData.father_address_other = father.other || '';
 
     // Mother data dengan field mapping yang benar - kirim semua field
-    allData.mother_name = mother.name || "";
-    allData.mother_company = mother.company || "";
-    allData.mother_occupation = mother.occupation || "";
-    allData.mother_phone = mother.phone || "";
-    allData.mother_email = mother.email || "";
-    allData.mother_address_street = mother.street || "";
-    allData.mother_address_rt = mother.rt || "";
-    allData.mother_address_rw = mother.rw || "";
-    allData.mother_address_village = mother.village || "";
-    allData.mother_address_district = mother.district || "";
-    allData.mother_address_city_regency = mother.city || "";
-    allData.mother_address_province = mother.province || "";
-    allData.mother_address_other = mother.other || "";
+    allData.mother_name = mother.name || '';
+    allData.mother_company = mother.company || '';
+    allData.mother_occupation = mother.occupation || '';
+    allData.mother_phone = mother.phone || '';
+    allData.mother_email = mother.email || '';
+    allData.mother_address_street = mother.street || '';
+    allData.mother_address_rt = mother.rt || '';
+    allData.mother_address_rw = mother.rw || '';
+    allData.mother_address_village = mother.village || '';
+    allData.mother_address_district = mother.district || '';
+    allData.mother_address_city_regency = mother.city || '';
+    allData.mother_address_province = mother.province || '';
+    allData.mother_address_other = mother.other || '';
 
     // Guardian data dengan field mapping yang benar - kirim semua field
-    allData.guardian_name = guardian.name || "";
-    allData.relation_to_student = guardian.relationship || "";
-    allData.guardian_phone = guardian.phone || "";
-    allData.guardian_email = guardian.email || "";
-    allData.guardian_address_street = guardian.street || "";
-    allData.guardian_address_rt = guardian.rt || "";
-    allData.guardian_address_rw = guardian.rw || "";
-    allData.guardian_address_village = guardian.village || "";
-    allData.guardian_address_district = guardian.district || "";
-    allData.guardian_address_city_regency = guardian.city || "";
-    allData.guardian_address_province = guardian.province || "";
-    allData.guardian_address_other = guardian.other || "";
+    allData.guardian_name = guardian.name || '';
+    allData.relation_to_student = guardian.relationship || '';
+    allData.guardian_phone = guardian.phone || '';
+    allData.guardian_email = guardian.email || '';
+    allData.guardian_address_street = guardian.street || '';
+    allData.guardian_address_rt = guardian.rt || '';
+    allData.guardian_address_rw = guardian.rw || '';
+    allData.guardian_address_village = guardian.village || '';
+    allData.guardian_address_district = guardian.district || '';
+    allData.guardian_address_city_regency = guardian.city || '';
+    allData.guardian_address_province = guardian.province || '';
+    allData.guardian_address_other = guardian.other || '';
 
-    console.log("ParentGuardianSection - Data being sent:", allData);
-    console.log("ParentGuardianSection - Data type:", typeof allData);
-    console.log("ParentGuardianSection - Data keys:", Object.keys(allData));
+    console.log('ParentGuardianSection - Data being sent:', allData);
+    console.log('ParentGuardianSection - Data type:', typeof allData);
+    console.log('ParentGuardianSection - Data keys:', Object.keys(allData));
 
     setAllParentData(allData);
-    onDataChange("parentGuardian", allData);
+    onDataChange('parentGuardian', allData);
   };
 
   // Helper untuk handle input change dengan validasi
@@ -218,17 +248,39 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
     setter((prev) => ({ ...prev, [field]: value }));
 
     // Validasi field required dan update error state - PERBAIKAN: Pertahankan error state field lain
-    if (section === 'father' && ['name', 'phone', 'street', 'village', 'district', 'city', 'province'].includes(field)) {
-      setFatherErrors(prev => ({
+    if (
+      section === 'father' &&
+      [
+        'name',
+        'phone',
+        'street',
+        'village',
+        'district',
+        'city',
+        'province',
+      ].includes(field)
+    ) {
+      setFatherErrors((prev) => ({
         ...prev, // Pertahankan error state field lain
-        [field]: !value.trim() // Hanya update field yang sedang diedit
+        [field]: !value.trim(), // Hanya update field yang sedang diedit
       }));
     }
 
-    if (section === 'mother' && ['name', 'phone', 'street', 'village', 'district', 'city', 'province'].includes(field)) {
-      setMotherErrors(prev => ({
+    if (
+      section === 'mother' &&
+      [
+        'name',
+        'phone',
+        'street',
+        'village',
+        'district',
+        'city',
+        'province',
+      ].includes(field)
+    ) {
+      setMotherErrors((prev) => ({
         ...prev, // Pertahankan error state field lain
-        [field]: !value.trim() // Hanya update field yang sedang diedit
+        [field]: !value.trim(), // Hanya update field yang sedang diedit
       }));
     }
 
@@ -519,8 +571,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
             </div>
             <div className={styles.parentInfoContent}>
               <div className={styles.fullWidthField}>
-                <div className={`${styles.fieldGroup} ${fatherErrors.name ? styles.parentErrorFieldWrapper : ''}`}>
-                  <div className={`${styles.label} ${fatherErrors.name ? styles.parentErrorLabel : ''}`}>Name</div>
+                <div
+                  className={`${styles.fieldGroup} ${
+                    fatherErrors.name ? styles.parentErrorFieldWrapper : ''
+                  }`}
+                >
+                  <div
+                    className={`${styles.label} ${
+                      fatherErrors.name ? styles.parentErrorLabel : ''
+                    }`}
+                  >
+                    Name
+                  </div>
                   <input
                     className={`${styles.value} ${
                       father.name ? styles.filled : ''
@@ -559,8 +621,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
-                <div className={`${styles.fieldGroup} ${fatherErrors.phone ? styles.parentErrorFieldWrapper : ''}`}>
-                  <div className={`${styles.label} ${fatherErrors.phone ? styles.parentErrorLabel : ''}`}>Phone number</div>
+                <div
+                  className={`${styles.fieldGroup} ${
+                    fatherErrors.phone ? styles.parentErrorFieldWrapper : ''
+                  }`}
+                >
+                  <div
+                    className={`${styles.label} ${
+                      fatherErrors.phone ? styles.parentErrorLabel : ''
+                    }`}
+                  >
+                    Phone number
+                  </div>
                   <input
                     className={`${styles.value} ${
                       father.phone ? styles.filled : ''
@@ -586,8 +658,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
               </div>
               <div className={styles.addressSection}>
                 <div className={styles.twoColumnRow}>
-                  <div className={`${styles.fieldGroup} ${fatherErrors.street ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${fatherErrors.street ? styles.parentErrorLabel : ''}`}>Street</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      fatherErrors.street ? styles.parentErrorFieldWrapper : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        fatherErrors.street ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      Street
+                    </div>
                     <input
                       className={`${styles.value} ${
                         father.street ? styles.filled : ''
@@ -626,8 +708,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
-                  <div className={`${styles.fieldGroup} ${fatherErrors.village ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${fatherErrors.village ? styles.parentErrorLabel : ''}`}>Village</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      fatherErrors.village ? styles.parentErrorFieldWrapper : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        fatherErrors.village ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      Village
+                    </div>
                     <input
                       className={`${styles.value} ${
                         father.village ? styles.filled : ''
@@ -638,12 +730,26 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                       placeholder='GIRIAN'
                     />
                   </div>
-                  <div className={`${styles.fieldGroup} ${fatherErrors.district ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${fatherErrors.district ? styles.parentErrorLabel : ''}`}>District</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      fatherErrors.district
+                        ? styles.parentErrorFieldWrapper
+                        : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        fatherErrors.district ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      District
+                    </div>
                     <input
                       className={`${styles.value} ${
                         father.district ? styles.filled : ''
-                      } ${fatherErrors.district ? styles.parentErrorInput : ''}`}
+                      } ${
+                        fatherErrors.district ? styles.parentErrorInput : ''
+                      }`}
                       type='text'
                       value={father.district}
                       onChange={handleChange(setFather, 'district', 'father')}
@@ -652,8 +758,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
-                  <div className={`${styles.fieldGroup} ${fatherErrors.city ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${fatherErrors.city ? styles.parentErrorLabel : ''}`}>City/Regency</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      fatherErrors.city ? styles.parentErrorFieldWrapper : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        fatherErrors.city ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      City/Regency
+                    </div>
                     <input
                       className={`${styles.value} ${
                         father.city ? styles.filled : ''
@@ -664,12 +780,26 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                       placeholder='KOTAMOBAGU'
                     />
                   </div>
-                  <div className={`${styles.fieldGroup} ${fatherErrors.province ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${fatherErrors.province ? styles.parentErrorLabel : ''}`}>Province</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      fatherErrors.province
+                        ? styles.parentErrorFieldWrapper
+                        : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        fatherErrors.province ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      Province
+                    </div>
                     <input
                       className={`${styles.value} ${
                         father.province ? styles.filled : ''
-                      } ${fatherErrors.province ? styles.parentErrorInput : ''}`}
+                      } ${
+                        fatherErrors.province ? styles.parentErrorInput : ''
+                      }`}
                       type='text'
                       value={father.province}
                       onChange={handleChange(setFather, 'province', 'father')}
@@ -706,8 +836,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
             </div>
             <div className={styles.parentInfoContent}>
               <div className={styles.fullWidthField}>
-                <div className={`${styles.fieldGroup} ${motherErrors.name ? styles.parentErrorFieldWrapper : ''}`}>
-                  <div className={`${styles.label} ${motherErrors.name ? styles.parentErrorLabel : ''}`}>Name</div>
+                <div
+                  className={`${styles.fieldGroup} ${
+                    motherErrors.name ? styles.parentErrorFieldWrapper : ''
+                  }`}
+                >
+                  <div
+                    className={`${styles.label} ${
+                      motherErrors.name ? styles.parentErrorLabel : ''
+                    }`}
+                  >
+                    Name
+                  </div>
                   <input
                     className={`${styles.value} ${
                       mother.name ? styles.filled : ''
@@ -746,8 +886,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
-                <div className={`${styles.fieldGroup} ${motherErrors.phone ? styles.parentErrorFieldWrapper : ''}`}>
-                  <div className={`${styles.label} ${motherErrors.phone ? styles.parentErrorLabel : ''}`}>Phone number</div>
+                <div
+                  className={`${styles.fieldGroup} ${
+                    motherErrors.phone ? styles.parentErrorFieldWrapper : ''
+                  }`}
+                >
+                  <div
+                    className={`${styles.label} ${
+                      motherErrors.phone ? styles.parentErrorLabel : ''
+                    }`}
+                  >
+                    Phone number
+                  </div>
                   <input
                     className={`${styles.value} ${
                       mother.phone ? styles.filled : ''
@@ -773,8 +923,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
               </div>
               <div className={styles.addressSection}>
                 <div className={styles.twoColumnRow}>
-                  <div className={`${styles.fieldGroup} ${motherErrors.street ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${motherErrors.street ? styles.parentErrorLabel : ''}`}>Street</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      motherErrors.street ? styles.parentErrorFieldWrapper : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        motherErrors.street ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      Street
+                    </div>
                     <input
                       className={`${styles.value} ${
                         mother.street ? styles.filled : ''
@@ -813,8 +973,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
-                  <div className={`${styles.fieldGroup} ${motherErrors.village ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${motherErrors.village ? styles.parentErrorLabel : ''}`}>Village</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      motherErrors.village ? styles.parentErrorFieldWrapper : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        motherErrors.village ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      Village
+                    </div>
                     <input
                       className={`${styles.value} ${
                         mother.village ? styles.filled : ''
@@ -825,12 +995,26 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                       placeholder='GIRIAN'
                     />
                   </div>
-                  <div className={`${styles.fieldGroup} ${motherErrors.district ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${motherErrors.district ? styles.parentErrorLabel : ''}`}>District</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      motherErrors.district
+                        ? styles.parentErrorFieldWrapper
+                        : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        motherErrors.district ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      District
+                    </div>
                     <input
                       className={`${styles.value} ${
                         mother.district ? styles.filled : ''
-                      } ${motherErrors.district ? styles.parentErrorInput : ''}`}
+                      } ${
+                        motherErrors.district ? styles.parentErrorInput : ''
+                      }`}
                       type='text'
                       value={mother.district}
                       onChange={handleChange(setMother, 'district', 'mother')}
@@ -839,8 +1023,18 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
-                  <div className={`${styles.fieldGroup} ${motherErrors.city ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${motherErrors.city ? styles.parentErrorLabel : ''}`}>City/Regency</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      motherErrors.city ? styles.parentErrorFieldWrapper : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        motherErrors.city ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      City/Regency
+                    </div>
                     <input
                       className={`${styles.value} ${
                         mother.city ? styles.filled : ''
@@ -851,12 +1045,26 @@ const ParentGuardianSection = ({ onDataChange, prefill, prefillTrigger, errors, 
                       placeholder='KOTAMOBAGU'
                     />
                   </div>
-                  <div className={`${styles.fieldGroup} ${motherErrors.province ? styles.parentErrorFieldWrapper : ''}`}>
-                    <div className={`${styles.label} ${motherErrors.province ? styles.parentErrorLabel : ''}`}>Province</div>
+                  <div
+                    className={`${styles.fieldGroup} ${
+                      motherErrors.province
+                        ? styles.parentErrorFieldWrapper
+                        : ''
+                    }`}
+                  >
+                    <div
+                      className={`${styles.label} ${
+                        motherErrors.province ? styles.parentErrorLabel : ''
+                      }`}
+                    >
+                      Province
+                    </div>
                     <input
                       className={`${styles.value} ${
                         mother.province ? styles.filled : ''
-                      } ${motherErrors.province ? styles.parentErrorInput : ''}`}
+                      } ${
+                        motherErrors.province ? styles.parentErrorInput : ''
+                      }`}
                       type='text'
                       value={mother.province}
                       onChange={handleChange(setMother, 'province', 'mother')}

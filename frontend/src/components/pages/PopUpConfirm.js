@@ -99,8 +99,8 @@ const PopUpConfirm = React.memo(
 
         // Student address
         street: formData.studentInfo?.street || '',
-        rt: formData.studentInfo?.rt || null,
-        rw: formData.studentInfo?.rw || null,
+        rt: formData.studentInfo?.rt || '-',
+        rw: formData.studentInfo?.rw || '-',
         village: formData.studentInfo?.village || '',
         district: formData.studentInfo?.district || '',
         city_regency: formData.studentInfo?.city_regency || '',
@@ -135,8 +135,8 @@ const PopUpConfirm = React.memo(
         father_email: formData.parentGuardian?.father_email || null,
         father_address_street:
           formData.parentGuardian?.father_address_street || null,
-        father_address_rt: formData.parentGuardian?.father_address_rt || 0,
-        father_address_rw: formData.parentGuardian?.father_address_rw || 0,
+        father_address_rt: formData.parentGuardian?.father_address_rt || '-',
+        father_address_rw: formData.parentGuardian?.father_address_rw || '-',
         father_address_village:
           formData.parentGuardian?.father_address_village || null,
         father_address_district:
@@ -158,8 +158,8 @@ const PopUpConfirm = React.memo(
         mother_email: formData.parentGuardian?.mother_email || null,
         mother_address_street:
           formData.parentGuardian?.mother_address_street || null,
-        mother_address_rt: formData.parentGuardian?.mother_address_rt || 0,
-        mother_address_rw: formData.parentGuardian?.mother_address_rw || 0,
+        mother_address_rt: formData.parentGuardian?.mother_address_rt || '-',
+        mother_address_rw: formData.parentGuardian?.mother_address_rw || '-',
         mother_address_village:
           formData.parentGuardian?.mother_address_village || null,
         mother_address_district:
@@ -181,8 +181,10 @@ const PopUpConfirm = React.memo(
         guardian_email: formData.parentGuardian?.guardian_email || null,
         guardian_address_street:
           formData.parentGuardian?.guardian_address_street || null,
-        guardian_address_rt: formData.parentGuardian?.guardian_address_rt || 0,
-        guardian_address_rw: formData.parentGuardian?.guardian_address_rw || 0,
+        guardian_address_rt:
+          formData.parentGuardian?.guardian_address_rt || '-',
+        guardian_address_rw:
+          formData.parentGuardian?.guardian_address_rw || '-',
         guardian_address_village:
           formData.parentGuardian?.guardian_address_village || null,
         guardian_address_district:

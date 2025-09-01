@@ -29,6 +29,18 @@ const RegistrationForm = () => {
   const [sharedData, setSharedData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+
+    // Gunakan Intl.DateTimeFormat biar otomatis ke nama bulan lokal
+    return new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
+  };
+
   // Fetch all registration options once at the top level
   useEffect(() => {
     const fetchData = async () => {
@@ -253,7 +265,7 @@ const RegistrationForm = () => {
               <strong>Semester:</strong> {semesterDisplay}
             </p>
             <p>
-              <strong>Date:</strong> {formData.date}
+              <strong>Date:</strong> {formatDate(formData.date)}
             </p>
           </div>
         )}

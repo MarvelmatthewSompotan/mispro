@@ -26,6 +26,12 @@ const PopUpForm = ({ onClose, onCreate }) => {
       });
   }, []);
 
+  // Set today's date once on mount
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setDate(today);
+  }, []);
+
   useEffect(() => {
     if (schoolYearRef.current) {
       schoolYearRef.current.classList.toggle(styles.hasValue, !!schoolYear);
@@ -40,19 +46,19 @@ const PopUpForm = ({ onClose, onCreate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (schoolYear && semester && date) {
-      console.log('Submitting with data:', { schoolYear, semester, date }); // Debug log
+    if (schoolYear && semester) {
+      console.log('Submitting with data:', { schoolYear, semester }); // Debug log
 
       // Call startRegistration to generate draft ID
-      startRegistration(schoolYear, semester, date)
+      startRegistration(schoolYear, semester)
         .then((response) => {
           console.log('Success response:', response); // Debug log
           if (response.success) {
-            // Pass the draft ID along with other data to onCreate
+            // Pakai tanggal dari server agar konsisten
             onCreate({
               schoolYear,
               semester,
-              date,
+              date: response.data.registration_date,
               draftId: response.data.draft_id,
             });
           } else {
@@ -64,7 +70,6 @@ const PopUpForm = ({ onClose, onCreate }) => {
         })
         .catch((error) => {
           console.error('Error starting registration:', error);
-          // Tambahkan detail error yang lebih spesifik
           if (error.response) {
             console.error('Error response:', error.response);
             console.error('Error status:', error.response.status);
@@ -121,15 +126,14 @@ const PopUpForm = ({ onClose, onCreate }) => {
             </select>
           </div>
 
-          {/* Date Field */}
+          {/* Date Field (readonly, auto today) */}
           <div className={styles.fieldWrapper}>
             <input
               ref={dateRef}
               className={styles.dateField}
               type='date'
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
+              readOnly
             />
           </div>
         </div>
