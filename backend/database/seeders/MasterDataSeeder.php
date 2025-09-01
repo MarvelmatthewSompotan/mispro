@@ -38,7 +38,7 @@ class MasterDataSeeder extends Seeder
         }
 
         // transportation
-        foreach(['Own car', 'School bus'] as $type) {
+        foreach(['Own Car', 'School Bus'] as $type) {
             Transportation::create(['type' => $type]);
         }
 

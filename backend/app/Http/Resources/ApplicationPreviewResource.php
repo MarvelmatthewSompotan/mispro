@@ -47,6 +47,7 @@ class ApplicationPreviewResource extends JsonResource
                 'nisn' =>$student->nisn,
                 'nik' =>$student->nik,
                 'kitas' =>$student->kitas,
+                'registration_date' => $student->registration_date,
                 'street' => $student->studentAddress->street,
                 'village' => $student->studentAddress->village,
                 'district'=> $student->studentAddress->district,
@@ -57,6 +58,12 @@ class ApplicationPreviewResource extends JsonResource
                 'other'=> $student->studentAddress->other,
             ],
             'enrollment' => [
+                'school_year' => $this->enrollment->schoolYear ? [
+                    'year' => $this->enrollment->schoolYear->year
+                ] : null,
+                'semester' => $this->enrollment->semester ? [
+                    'number' => $this->enrollment->semester->number
+                ] : null,
                 'class' => $enrollment->schoolClass->grade,
                 'section' => $this->enrollment->section ? [
                     'id' => $this->enrollment->section->section_id,
@@ -83,7 +90,6 @@ class ApplicationPreviewResource extends JsonResource
                 'pickup_point' => $this->enrollment->pickupPoint ? [
                     'id' => $this->enrollment->pickupPoint->pickup_point_id,
                     'name' => $this->enrollment->pickupPoint->name,
-                    'custom' => $this->enrollment->pickup_point_custom ?? null
                 ] : null,
             ],
             'father' => [
@@ -118,8 +124,8 @@ class ApplicationPreviewResource extends JsonResource
                 ]),
             ],
             'payment' => [
-                'type' => $payment ? $payment->type : null,
-                'method' => $payment ? $payment->method : null,
+                'tuition_fees' => $payment ? $payment->tuition_fees : null,
+                'residence_payment' => $payment ? $payment->residence_payment : null,
                 'financial_policy' => $payment ? $payment->financial_policy_contract : null,
             ],
             'discount' => $enrollment->studentDiscount->map(function ($discount) {
