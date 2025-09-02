@@ -31,10 +31,57 @@ class RegistrationController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Student::query()
+            ->select(
+                'students.registration_id',
+                'students.student_id',
+                DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"),
+                'students.registration_date'
+            );
+
+        // Jika ada filter → tampilkan semua enrollment sesuai filter
+        if ($request->filled('school_year_id') || $request->filled('semester_id') || $request->filled('section_id')) {
+            $query->join('enrollments', 'students.student_id', '=', 'enrollments.student_id')
+                ->with(['enrollments.section', 'enrollments.schoolYear', 'enrollments.semester']);
+
+            if ($request->filled('school_year_id')) {
+                $query->where('enrollments.school_year_id', $request->input('school_year_id'));
+            }
+            if ($request->filled('semester_id')) {
+                $query->where('enrollments.semester_id', $request->input('semester_id'));
+            }
+            if ($request->filled('section_id')) {
+                $query->where('enrollments.section_id', $request->input('section_id'));
+            }
+        } 
+        // Kalau tidak ada filter → ambil hanya enrollment terbaru per student
+        else {
+            $query->join('enrollments', function($join) {
+                $join->on('students.student_id', '=', 'enrollments.student_id')
+                    ->whereRaw('enrollments.id = (
+                        SELECT MAX(e2.id) FROM enrollments e2 WHERE e2.student_id = students.student_id
+                    )');
+            })->with(['enrollments.section', 'enrollments.schoolYear', 'enrollments.semester']);
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('students.student_id', 'like', "%$search%")
+                    ->orWhere(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$search%");
+            });
+        }
+
+        // Pagination
+        $perPage = $request->input('per_page', 20);
+        $data = $query->paginate($perPage);
+
+        return response()->json($data);
     }
+
 
     /**
      * Start registration process with initial context
