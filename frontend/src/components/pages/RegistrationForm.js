@@ -18,6 +18,7 @@ gsap.registerPlugin(ScrollToPlugin);
 
 const RegistrationForm = () => {
   const location = useLocation();
+  const [prefilledData, setPrefilledData] = useState({});
   const formData = location.state || {};
   const [formSections, setFormSections] = useState({
     studentStatus: {},
@@ -274,6 +275,11 @@ const RegistrationForm = () => {
     setValidationState({});
     setErrors({});
     setForceError({});
+
+    // TAMBAHKAN BARIS INI UNTUK MENGUBAH KEY
+    setResetKey((prevKey) => prevKey + 1);
+
+    window.scrollTo(0, 0);
   };
 
   // Function to get display values for school year and semester
