@@ -59,7 +59,6 @@ const RegistrationForm = () => {
     fetchData();
   }, []);
 
-  // 4. Buat useEffect untuk handle scrolling saat ada error
   useEffect(() => {
     const sectionOrder = [
       "studentStatus",
@@ -216,6 +215,26 @@ const RegistrationForm = () => {
     setPrefillTrigger((prev) => prev + 1);
   };
 
+  const handleClearFormOnStatusChange = useCallback(() => {
+    // Reset semua section form KECUALI studentStatus
+    setFormSections((prev) => ({
+      ...prev, // Pertahankan studentStatus yang akan diupdate oleh child nanti
+      studentInfo: {},
+      program: {},
+      facilities: {},
+      parentGuardian: {},
+      termOfPayment: {},
+    }));
+
+    // Hapus juga prefilled data dan error yang mungkin ada
+    setPrefilledData({});
+    setErrors({});
+    setForceError({});
+
+    // Trigger re-render pada komponen anak dengan mengubah key
+    setResetKey((prevKey) => prevKey + 1);
+  }, []);
+
   // Handler untuk menerima status validasi dari child components
   const handleValidationChange = useCallback((sectionName, validationData) => {
     setValidationState((prev) => ({
@@ -294,6 +313,7 @@ const RegistrationForm = () => {
             sharedData={sharedData}
             errors={errors.studentStatus || {}}
             forceError={forceError.studentStatus || {}}
+            onClearForm={handleClearFormOnStatusChange} 
           />
         </div>
         <div id="studentInfo">

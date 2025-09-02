@@ -12,6 +12,7 @@ const StudentStatusSection = ({
   sharedData,
   errors,
   forceError,
+  onClearForm,
 }) => {
   const [status, setStatus] = useState("");
   const [statusOptions, setStatusOptions] = useState([]);
@@ -50,6 +51,12 @@ const StudentStatusSection = ({
     setStatus(option);
     setStudentSearch("");
     setSearchResults([]);
+
+    // Jika user memilih "New" atau "Transferee" setelah mengisi data "Old",
+    // panggil fungsi reset dari parent.
+    if ((option === "New" || option === "Transferee") && onClearForm) {
+      onClearForm();
+    }
 
     // Kirim data ke parent component dengan format yang benar
     if (onDataChange) {
@@ -173,7 +180,13 @@ const StudentStatusSection = ({
         <span className={styles.headerTitle}>STUDENT'S STATUS</span>
       </div>
       <div className={styles.contentWrapper}>
-        <div className={`${styles.statusOptions} ${(errors?.student_status || forceError?.student_status) ? styles.studentStatusErrorWrapper : ''}`}>
+        <div
+          className={`${styles.statusOptions} ${
+            errors?.student_status || forceError?.student_status
+              ? styles.studentStatusErrorWrapper
+              : ""
+          }`}
+        >
           {statusOptions.map((option) => (
             <div
               key={option}
@@ -207,7 +220,13 @@ const StudentStatusSection = ({
                     <span className={styles.radioButtonSelected} />
                   )}
                 </span>
-                <span className={`${styles.statusLabel} ${(errors?.student_status || forceError?.student_status) ? styles.studentStatusErrorLabel : ''}`}>
+                <span
+                  className={`${styles.statusLabel} ${
+                    errors?.student_status || forceError?.student_status
+                      ? styles.studentStatusErrorLabel
+                      : ""
+                  }`}
+                >
                   {option}
                 </span>
               </label>
