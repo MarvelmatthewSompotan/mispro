@@ -83,6 +83,7 @@ export const logout = async () => {
   localStorage.removeItem("token");
 };
 
+// --- FUNGSI INI TELAH DIPERBARUI ---
 export const submitRegistrationForm = async (draftId, formData) => {
   const token = localStorage.getItem("token");
   const res = await fetch(
@@ -97,12 +98,28 @@ export const submitRegistrationForm = async (draftId, formData) => {
     }
   );
 
+  // Jika respons TIDAK sukses (misal: status 422, 500, dll.)
   if (!res.ok) {
-    throw new Error("Failed to submit registration form");
+    // 1. Ambil body JSON dari respons error untuk mendapatkan detailnya.
+    const errorData = await res.json();
+
+    // 2. Buat objek error baru untuk dilempar.
+    const error = new Error("Failed to submit registration form");
+
+    // 3. Lampirkan detail respons ke objek error tersebut.
+    error.response = {
+      data: errorData, // Ini akan berisi { error: "Student already exists..." }
+      status: res.status, // Ini akan berisi 422
+    };
+
+    // 4. Lempar error yang sudah diperkaya dengan detail.
+    throw error;
   }
 
+  // Jika sukses, kembalikan data JSON seperti biasa.
   return await res.json();
 };
+// --- AKHIR DARI FUNGSI YANG DIPERBARUI ---
 
 export const searchStudent = async (searchTerm) => {
   const token = localStorage.getItem("token");
@@ -143,20 +160,20 @@ export const getStudentLatestApplication = async (studentId) => {
 };
 
 export const getRegistrationPreview = async (applicationId) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(
     `http://localhost:8000/api/registration/preview/${applicationId}`,
     {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     }
   );
 
   if (!res.ok) {
-    throw new Error('Failed to fetch registration preview');
+    throw new Error("Failed to fetch registration preview");
   }
 
   return await res.json();

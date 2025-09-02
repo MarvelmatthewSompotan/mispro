@@ -242,17 +242,22 @@ textarea[value]:not([value=""]) {
 
 /* Khusus untuk row 4 (Gender, Email, Previous School) - tambah margin top */
 .row:nth-child(4) {
-  margin-top: 7px; /* Gap yang cukup antara row 3 dan 4 */
+  margin-top: 15px; /* Gap yang cukup antara row 3 dan 4 */
 }
 
 /* Khusus untuk row 5 (Phone, Academic Status, Other) - tambah margin top */
 .row:nth-child(5) {
-  margin-top: 24px; /* Gap yang cukup antara row 4 dan 5 */
+  margin-top: 20px; /* Gap yang cukup antara row 4 dan 5 */
 }
 
 /* Khusus untuk row 7 (Phone, Academic Status) - tambah margin top */
 .topRow:nth-of-type(2) {
   margin-top: 15px; /* Tambah gap yang lebih besar antara Email/Previous School dengan Phone/Academic Status */
+}
+
+/* Jarak vertikal spesifik di atas baris Gender */
+.genderRow {
+  margin-top: 20px; /* <-- UBAH NILAI INI SESUAI KEINGINAN ANDA */
 }
 
 /* Address section styling - KURANGI gap yang terlalu besar */

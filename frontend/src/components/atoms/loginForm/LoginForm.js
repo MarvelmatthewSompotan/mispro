@@ -13,6 +13,10 @@ const LoginForm = () => {
     password: '',
     staySignedIn: false,
   });
+  
+  // 1. Tambahkan state untuk loading pada saat submit
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(''); // State untuk pesan error
 
   const navigate = useNavigate();
 
@@ -26,6 +30,8 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // 2. Set loading menjadi true saat proses dimulai
+    setError(''); // Bersihkan error sebelumnya
 
     try {
       await login(form.email, form.password);
@@ -34,7 +40,9 @@ const LoginForm = () => {
       navigate('/home');
     } catch (error) {
       console.error('Login failed:', error);
-      alert('Login failed. Please check your Email/Password.');
+      setError('Login failed. Please check your Email/Password.'); // Set pesan error
+    } finally {
+      setIsLoading(false); // 5. Set loading kembali ke false setelah selesai (sukses/gagal)
     }
   };
 
@@ -43,12 +51,15 @@ const LoginForm = () => {
       <Label htmlFor='username' className='login-title'>
         Login to your account
       </Label>
+      {/* Tampilkan pesan error jika ada */}
+      {error && <p className="login-error-message">{error}</p>}
       <Input
         type='text'
         placeholder='Username or Email'
         name='email'
         value={form.email}
         onChange={handleChange}
+        disabled={isLoading} // 3. Nonaktifkan input saat loading
       />
       <Input
         type='password'
@@ -56,6 +67,7 @@ const LoginForm = () => {
         name='password'
         value={form.password}
         onChange={handleChange}
+        disabled={isLoading} // 3. Nonaktifkan input saat loading
       />
       <div className='login-form-options'>
         <Checkbox
@@ -63,9 +75,13 @@ const LoginForm = () => {
           onChange={handleChange}
           name='staySignedIn'
           label='Stay signed in'
+          disabled={isLoading} // 3. Nonaktifkan checkbox saat loading
         />
       </div>
-      <Button type='submit'>Login</Button>
+      <Button type='submit' disabled={isLoading}>
+        {/* 4. Ubah konten tombol saat loading */}
+        {isLoading ? 'Logging in...' : 'Login'}
+      </Button>
     </form>
   );
 };

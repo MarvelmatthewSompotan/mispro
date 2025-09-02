@@ -3,7 +3,16 @@ import styles from '../styles/PopUpConfirm.module.css';
 import { submitRegistrationForm } from '../../services/api';
 
 const PopUpConfirm = React.memo(
-  ({ onCancel, onConfirm, draftId, allFormData, locationState, navigate }) => {
+  // BARU: Tambahkan 'onDuplicateFound' ke daftar props
+  ({
+    onCancel,
+    onConfirm,
+    draftId,
+    allFormData,
+    locationState,
+    navigate,
+    onDuplicateFound,
+  }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleConfirm = async () => {
@@ -36,9 +45,28 @@ const PopUpConfirm = React.memo(
         console.error('Error message:', error.message);
         if (error.response) {
           console.error('HTTP Status:', error.response.status);
+          // BARU: Log data error untuk mempermudah debugging
+          console.error('Error Data:', error.response.data);
         }
         console.error('========================');
 
+        // --- KODE BARU DIMASUKKAN DI SINI ---
+        // Cek secara spesifik untuk error duplikat siswa dari backend
+        if (
+          error.response &&
+          error.response.status === 422 &&
+          error.response.data &&
+          error.response.data.error && // Sesuai dengan respons backend Anda
+          error.response.data.error.includes('Student already exists')
+        ) {
+          // Panggil fungsi onDuplicateFound yang dikirim dari parent component
+          onDuplicateFound();
+          // Hentikan eksekusi agar tidak menampilkan alert generic di bawah
+          return;
+        }
+        // --- AKHIR DARI KODE BARU ---
+
+        // Struktur kode error handling yang sudah ada tetap dipertahankan
         if (error.data && error.data.errors) {
           const errorMessages = Object.values(error.data.errors)
             .flat()
@@ -54,7 +82,7 @@ const PopUpConfirm = React.memo(
       }
     };
 
-    // Fungsi untuk transform data dengan field mapping yang benar
+    // Fungsi untuk transform data dengan field mapping yang benar (TIDAK ADA PERUBAHAN)
     const transformFormData = (formData) => {
       console.log('Original form data:', formData);
 

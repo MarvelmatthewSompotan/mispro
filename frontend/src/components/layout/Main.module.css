@@ -39,6 +39,7 @@
   min-height: calc(100vh - 76px);
   width: calc(100% - 280px);
   box-sizing: border-box;
+  
 }
 
 .mainContentFull {

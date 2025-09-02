@@ -296,19 +296,7 @@ const FacilitiesSection = ({
       <div className={styles.contentWrapper}>
         <div className={styles.transportationSection}>
           <div className={styles.sectionTitle}>
-            <div
-              className={`${styles.sectionTitleText} ${
-                (errors?.transportation_id ||
-                  (typeof forceError === "object"
-                    ? forceError?.transportation_id
-                    : !!forceError)) &&
-                !selectedTransportation
-                  ? styles.facilitiesSectionErrorLabel
-                  : ""
-              }`}
-            >
-              Transportation
-            </div>
+            <div className={styles.sectionTitleText}>Transportation</div>
           </div>
 
           {/* Transportation Options from Backend */}

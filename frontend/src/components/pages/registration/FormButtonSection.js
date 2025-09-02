@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PopUpConfirm from "../PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
+import DuplicateStudentPopup from "./DuplicateStudentPopup";
 
 const FormButtonSection = ({
   validationState,
@@ -15,12 +16,15 @@ const FormButtonSection = ({
   // eslint-disable-next-line
   const locationState = useLocation(); 
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
 
   const handleReset = () => {
     if (onReset) onReset();
   };
 
   const handleSubmit = () => {
+    console.log("Data saat Submit:", JSON.stringify(allFormData, null, 2));
+
     // Debug: log semua data untuk memeriksa
     console.log("All Form Data:", allFormData);
     console.log("Validation State:", validationState);
@@ -64,7 +68,6 @@ const FormButtonSection = ({
       if (!allFormData.studentInfo.kitas) {
         errors.studentInfo = { ...errors.studentInfo, kitas: true };
       }
-      // HAPUS validasi country karena tidak required
     }
 
     // Field lain yang selalu required
@@ -153,9 +156,7 @@ const FormButtonSection = ({
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };
     }
-    if (!allFormData.facilities || !allFormData.facilities.transportation_id) {
-      errors.facilities = { ...errors.facilities, transportation_id: true };
-    }
+
     if (
       !allFormData.facilities ||
       !allFormData.facilities.transportation_policy
@@ -311,9 +312,8 @@ const FormButtonSection = ({
 
     if (hasErrors) {
       if (onSetErrors) {
-        Object.entries(errors).forEach(([sectionName, errorData]) => {
-          onSetErrors(sectionName, errorData);
-        });
+        // Langsung kirim seluruh objek errors dalam satu kali panggilan
+        onSetErrors(errors);
       }
       return;
     }
@@ -329,6 +329,14 @@ const FormButtonSection = ({
   const handleConfirmSubmit = () => {
     // Popup ditutup, data akan diproses di PopUpConfirm
     setShowConfirmation(false);
+  };
+
+  // BARU: Buat fungsi handler yang akan dipanggil jika backend menemukan duplikat
+  const handleDuplicateFound = () => {
+    // 1. Tutup popup konfirmasi yang sedang aktif
+    setShowConfirmation(false);
+    // 2. Tampilkan popup peringatan duplikat
+    setShowDuplicatePopup(true);
   };
 
   return (
@@ -374,7 +382,12 @@ const FormButtonSection = ({
           allFormData={allFormData}
           locationState={location}
           navigate={navigate}
+          onDuplicateFound={handleDuplicateFound}
         />
+      )}
+      {/* BARU: Tambahkan render kondisional untuk popup peringatan duplikat */}
+      {showDuplicatePopup && (
+        <DuplicateStudentPopup onClose={() => setShowDuplicatePopup(false)} />
       )}
     </div>
   );
