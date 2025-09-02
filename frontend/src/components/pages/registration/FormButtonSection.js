@@ -22,6 +22,8 @@ const FormButtonSection = ({
   };
 
   const handleSubmit = () => {
+    console.log("Data saat Submit:", JSON.stringify(allFormData, null, 2));
+
     // Debug: log semua data untuk memeriksa
     console.log("All Form Data:", allFormData);
     console.log("Validation State:", validationState);
@@ -65,7 +67,6 @@ const FormButtonSection = ({
       if (!allFormData.studentInfo.kitas) {
         errors.studentInfo = { ...errors.studentInfo, kitas: true };
       }
-      // HAPUS validasi country karena tidak required
     }
 
     // Field lain yang selalu required
@@ -154,9 +155,7 @@ const FormButtonSection = ({
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };
     }
-    if (!allFormData.facilities || !allFormData.facilities.transportation_id) {
-      errors.facilities = { ...errors.facilities, transportation_id: true };
-    }
+
     if (
       !allFormData.facilities ||
       !allFormData.facilities.transportation_policy
@@ -312,9 +311,8 @@ const FormButtonSection = ({
 
     if (hasErrors) {
       if (onSetErrors) {
-        Object.entries(errors).forEach(([sectionName, errorData]) => {
-          onSetErrors(sectionName, errorData);
-        });
+        // Langsung kirim seluruh objek errors dalam satu kali panggilan
+        onSetErrors(errors);
       }
       return;
     }
