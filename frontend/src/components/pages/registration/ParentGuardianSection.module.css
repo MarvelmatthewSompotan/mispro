@@ -352,16 +352,6 @@ textarea::placeholder {
   transition: color 0.2s ease;
 }
 
-/* Error input styling - Hanya ubah warna text, JANGAN tambah border baru */
-.parentErrorInput {
-  border: none !important;
-  border-bottom: none !important; /* HAPUS border baru */
-  border-radius: 0 !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-  color: #ff4444 !important; /* Text input jadi merah */
-  transition: color 0.2s ease; /* Hanya transition untuk color */
-}
 
 .parentErrorInput:focus {
   border-bottom: none !important; /* Focus state tidak ada border baru */

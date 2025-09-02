@@ -307,13 +307,12 @@ const RegistrationForm = () => {
 
         <div id="studentStatus">
           <StudentStatusSection
-            key={resetKey}
             onSelectOldStudent={handleSelectOldStudent}
             onDataChange={handleStudentStatusDataChange}
             sharedData={sharedData}
             errors={errors.studentStatus || {}}
             forceError={forceError.studentStatus || {}}
-            onClearForm={handleClearFormOnStatusChange} 
+            onClearForm={handleClearFormOnStatusChange}
           />
         </div>
         <div id="studentInfo">

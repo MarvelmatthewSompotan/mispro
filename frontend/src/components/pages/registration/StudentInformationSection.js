@@ -1414,7 +1414,7 @@ const StudentInformationSection = ({
                     type="text"
                     value={otherAddress}
                     onChange={(e) => handleOtherAddress(e.target.value)}
-                    placeholder="Other address"
+                    
                   />
                   <span className={styles.bracket}>)</span>
                 </div>
