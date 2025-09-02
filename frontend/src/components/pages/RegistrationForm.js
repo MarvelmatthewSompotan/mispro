@@ -28,6 +28,9 @@ const RegistrationForm = () => {
     parentGuardian: {},
     termOfPayment: {},
   });
+
+  const [resetKey, setResetKey] = useState(0);
+
   const [prefillTrigger, setPrefillTrigger] = useState(0);
 
   // Add shared data state to avoid multiple API calls
@@ -228,10 +231,25 @@ const RegistrationForm = () => {
   }, []);
 
   const handleResetForm = () => {
+    //kode reset yang sudah ada
+    setFormSections({
+      studentStatus: {},
+      studentInfo: {},
+      program: {},
+      facilities: {},
+      parentGuardian: {},
+      termOfPayment: {},
+    });
+
     setPrefilledData({});
     setValidationState({});
     setErrors({});
     setForceError({});
+
+    // TAMBAHKAN BARIS INI UNTUK MENGUBAH KEY
+    setResetKey((prevKey) => prevKey + 1);
+
+    window.scrollTo(0, 0);
   };
 
   // Show loading state while data is being fetched
@@ -270,6 +288,7 @@ const RegistrationForm = () => {
 
         <div id="studentStatus">
           <StudentStatusSection
+            key={resetKey}
             onSelectOldStudent={handleSelectOldStudent}
             onDataChange={handleStudentStatusDataChange}
             sharedData={sharedData}
@@ -289,6 +308,7 @@ const RegistrationForm = () => {
         </div>
         <div id="program">
           <ProgramSection
+            key={resetKey}
             prefill={formSections.program || {}}
             onDataChange={handleProgramDataChange}
             sharedData={sharedData}
@@ -298,6 +318,7 @@ const RegistrationForm = () => {
         </div>
         <div id="facilities">
           <FacilitiesSection
+            key={resetKey}
             prefill={formSections.facilities || {}}
             onDataChange={handleFacilitiesDataChange}
             sharedData={sharedData}
@@ -316,6 +337,7 @@ const RegistrationForm = () => {
         </div>
         <div id="termOfPayment">
           <TermOfPaymentSection
+            key={resetKey}
             prefill={formSections.termOfPayment || {}}
             onDataChange={handleTermOfPaymentDataChange}
             sharedData={sharedData}
