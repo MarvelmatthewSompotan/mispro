@@ -223,12 +223,13 @@ const StudentInformationSection = ({
     return true;
   };
 
-  // Validasi KITAS (minimal 11 karakter)
   const validateKITAS = (value) => {
-    if (value && value.length <= 11) {
+    // Tampilkan error jika value ada tapi panjangnya < 11 atau > 16
+    if (value && (value.length < 11 || value.length > 16)) {
       setKitasError(true);
       return false;
     }
+    // Jika valid, hilangkan error
     setKitasError(false);
     return true;
   };
@@ -770,12 +771,12 @@ const StudentInformationSection = ({
                     type="text"
                     value={kitas}
                     onChange={(e) => handleKitas(e.target.value)}
-                    placeholder="KITAS (11 digits)"
-                    maxLength={50}
+                    placeholder="KITAS (11-16 characters)"
+                    maxLength={16} // Batasi input maksimal 16 karakter
                   />
                   {kitasError && (
                     <div className={styles.inlineErrorMessage}>
-                      KITAS must be 11 at least character
+                      KITAS must be between 11 and 16 characters
                     </div>
                   )}
                 </div>
@@ -830,7 +831,7 @@ const StudentInformationSection = ({
               </div>
             )}
           </div>
-          <div className={styles.row}>
+          <div className={`${styles.row} ${styles.genderRow}`}>
             <div
               className={`${styles.genderField} ${
                 genderError ? styles.errorFieldWrapper : ""
