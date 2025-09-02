@@ -22,6 +22,7 @@ Route::prefix('students')->group(function () {
 
 Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
   Route::prefix('registration')->group(function () {
+    Route::get('/', [RegistrationController::class, 'index']);
     Route::post('/start', [RegistrationController::class, 'startRegistration']);
     Route::get('/context/{draft_id}', [RegistrationController::class, 'getRegistrationContext']);
     Route::post('/store/{draft_id}', [RegistrationController::class, 'store']);

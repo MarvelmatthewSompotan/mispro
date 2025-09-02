@@ -37,33 +37,48 @@ class RegistrationController extends Controller
             ->select(
                 'students.registration_id',
                 'students.student_id',
-                DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"),
+                DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
                 'students.registration_date'
-            );
+            )
+            ->with(['enrollments.section', 'enrollments.schoolYear', 'enrollments.semester']);
 
-        // Jika ada filter → tampilkan semua enrollment sesuai filter
+        // Jika ada filter → filter pakai whereHas
         if ($request->filled('school_year_id') || $request->filled('semester_id') || $request->filled('section_id')) {
-            $query->join('enrollments', 'students.student_id', '=', 'enrollments.student_id')
-                ->with(['enrollments.section', 'enrollments.schoolYear', 'enrollments.semester']);
+            $query->whereHas('enrollments', function($q) use ($request) {
+                if ($request->filled('school_year_id')) {
+                    $q->where('school_year_id', $request->input('school_year_id'));
+                }
+                if ($request->filled('semester_id')) {
+                    $q->where('semester_id', $request->input('semester_id'));
+                }
+                if ($request->filled('section_id')) {
+                    $q->where('section_id', $request->input('section_id'));
+                }
+            });
 
-            if ($request->filled('school_year_id')) {
-                $query->where('enrollments.school_year_id', $request->input('school_year_id'));
-            }
-            if ($request->filled('semester_id')) {
-                $query->where('enrollments.semester_id', $request->input('semester_id'));
-            }
-            if ($request->filled('section_id')) {
-                $query->where('enrollments.section_id', $request->input('section_id'));
-            }
+            $query->with(['enrollments' => function($q) use ($request) {
+                if ($request->filled('school_year_id')) {
+                    $q->where('school_year_id', $request->input('school_year_id'));
+                }
+                if ($request->filled('semester_id')) {
+                    $q->where('semester_id', $request->input('semester_id'));
+                }
+                if ($request->filled('section_id')) {
+                    $q->where('section_id', $request->input('section_id'));
+                }
+        
+                $q->with(['section', 'schoolYear', 'semester']);
+            }]);
         } 
         // Kalau tidak ada filter → ambil hanya enrollment terbaru per student
         else {
-            $query->join('enrollments', function($join) {
-                $join->on('students.student_id', '=', 'enrollments.student_id')
-                    ->whereRaw('enrollments.id = (
-                        SELECT MAX(e2.id) FROM enrollments e2 WHERE e2.student_id = students.student_id
-                    )');
-            })->with(['enrollments.section', 'enrollments.schoolYear', 'enrollments.semester']);
+            $query->with(['enrollments' => function($q) {
+                $q->whereIn('enrollments.enrollment_id', function($sub) {
+                    $sub->selectRaw('MAX(e2.enrollment_id)')
+                        ->from('enrollments as e2')
+                        ->whereColumn('e2.student_id', 'enrollments.student_id');
+                });
+            }]);
         }
 
         // Search
@@ -79,7 +94,11 @@ class RegistrationController extends Controller
         $perPage = $request->input('per_page', 20);
         $data = $query->paginate($perPage);
 
-        return response()->json($data);
+        return response()->json([
+            'success' => true,
+            'message' => $data->isEmpty() ? 'No students found' : 'Students retrieved successfully',
+            'data' => $data
+        ], 200);
     }
 
 
