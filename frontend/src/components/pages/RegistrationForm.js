@@ -1,3 +1,4 @@
+ // eslint-disable-next-line
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Main from '../layout/Main';
@@ -18,6 +19,7 @@ gsap.registerPlugin(ScrollToPlugin);
 
 const RegistrationForm = () => {
   const location = useLocation();
+   // eslint-disable-next-line
   const [prefilledData, setPrefilledData] = useState({});
   const formData = location.state || {};
   const [formSections, setFormSections] = useState({
@@ -307,7 +309,7 @@ const RegistrationForm = () => {
     return (
       <Main>
         <div className={styles.formContainer}>
-          <div style={{ textAlign: 'center', padding: '50px' }}>
+          <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px', fontWeight: 'medium' }}>
             <p>Loading registration form...</p>
           </div>
         </div>

@@ -28,6 +28,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 24px;
+  padding-bottom: 5px;
   position: relative;
   width: 500px;
   border: 2px solid #5f84fe;
@@ -36,8 +37,7 @@
 
 .searchInput {
   flex: 1;
-  padding: 12px 48px 12px 20px;
-  font-size: 16px;
+  padding: 8px 0px 0px 15px;
   margin-right: 0;
   box-sizing: border-box;
 }
@@ -45,6 +45,7 @@
 .searchInput::placeholder {
   color: #5f84fe;
   opacity: 0.8;
+  font-size: 15px;
 }
 
 .searchIconImg {
@@ -131,11 +132,11 @@ input[type="checkbox"]:checked + .customCheckbox::after {
 
 .yearSelect,
 .semesterSelect {
-  padding: 6px 12px;
+  padding: 5px 5px;
   border-radius: 6px;
   border: 1px solid #b6c6fa;
-  font-size: 16px;
-  width: 230px;
+  font-size: 15px;
+  width: 180px;
 }
 
 .seeAllForms {

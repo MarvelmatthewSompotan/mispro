@@ -178,3 +178,40 @@ export const getRegistrationPreview = async (applicationId) => {
 
   return await res.json();
 };
+
+export const getRegistrations = async ({
+  search = "",
+  school_year_id = null,
+  semester_id = null,
+  section_id = null,
+} = {}) => {
+  const token = localStorage.getItem("token");
+
+  // Bangun query string dinamis
+  const params = new URLSearchParams();
+  if (search) params.append("search", search);
+  if (school_year_id) params.append("school_year_id", school_year_id);
+  if (semester_id) params.append("semester_id", semester_id);
+
+  if (Array.isArray(section_id)) {
+    section_id.forEach((id) => params.append("section_id[]", id));
+  } else if (section_id) {
+    params.append("section_id", section_id);
+  }
+
+  const res = await fetch(
+    `http://localhost:8000/api/registration?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch registration data");
+  }
+
+  return await res.json();
+};
+
