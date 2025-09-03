@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '../../styles/Signature_Content.module.css';
 
-function SignatureContent({ student }) {
+function SignatureContent({ enrollment }) {
   const formatDate = (dateString) => {
     if (!dateString) return '';
 
@@ -17,7 +17,7 @@ function SignatureContent({ student }) {
         <div className={styles.txtDate}>
           <div className={styles.date}>Date:</div>
           <b className={styles.september2025}>
-            {formatDate(student.registration_date)}
+            {formatDate(enrollment.registration_date)}
           </b>
         </div>
         <div className={styles.txtStudentNameAndSignature}>

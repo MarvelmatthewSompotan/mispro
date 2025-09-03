@@ -47,12 +47,15 @@ function Print() {
 
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-      const studentName = `${previewData.student.first_name} ${previewData.student.last_name}`
-        .replace(/[\\?%*:|"<>]/g, '-');
+      const studentName =
+        `${previewData.student.first_name} ${previewData.student.last_name}`.replace(
+          /[\\?%*:|"<>]/g,
+          '-'
+        );
 
       pdf.save(`${studentName}_Application_Form.pdf`);
     } catch (error) {
-      console.error("Failed to generate PDF:", error);
+      console.error('Failed to generate PDF:', error);
     }
   };
 
@@ -82,45 +85,53 @@ function Print() {
     }
   }, [applicationId]);
 
-  if (loading) return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      fontSize: '18px',
-      fontWeight: 'medium'
-    }}>
-      Loading preview...
-    </div>
-  );
-  
-  if (!applicationId) return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      fontSize: '18px',
-      fontWeight: 'bold'
-    }}>
-      No application ID found
-    </div>
-  );
-  
-  if (!previewData) return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      fontSize: '18px',
-      fontWeight: 'bold'
-    }}>
-      No preview data found
-    </div>
-  );
-  
+  if (loading)
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '18px',
+          fontWeight: 'medium',
+        }}
+      >
+        Loading preview...
+      </div>
+    );
+
+  if (!applicationId)
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '18px',
+          fontWeight: 'bold',
+        }}
+      >
+        No application ID found
+      </div>
+    );
+
+  if (!previewData)
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '18px',
+          fontWeight: 'bold',
+        }}
+      >
+        No preview data found
+      </div>
+    );
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -137,9 +148,9 @@ function Print() {
   return (
     <div className={styles.printWrapper}>
       {/* 🔹 Tombol kontrol */}
-      <div 
-        className="no-print"
-        style={{ 
+      <div
+        className='no-print'
+        style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -154,29 +165,29 @@ function Print() {
           zIndex: 9999,
         }}
       >
-        <button 
+        <button
           onClick={() => navigate('/home')}
-          style={{ 
+          style={{
             padding: '6px 12px',
             background: '#fff',
             color: '#7b7bfa',
             border: '2px solid #7b7bfa',
             borderRadius: '6px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           Back to Home
         </button>
-        <button 
+        <button
           onClick={downloadPDF}
-          style={{ 
+          style={{
             marginRight: '40px',
             padding: '6px 12px',
             background: '#7b7bfa',
             color: '#fff',
             border: 'none',
             borderRadius: '6px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           Print
@@ -211,7 +222,7 @@ function Print() {
             <div className={styles.dateParent}>
               <b className={styles.applicationForm}>Date:</b>
               <b className={styles.applicationForm}>
-                {formatDate(previewData.student?.registration_date) || ''}
+                {formatDate(previewData.enrollment?.registration_date) || ''}
               </b>
             </div>
             <div className={styles.semesterParent}>
@@ -236,7 +247,7 @@ function Print() {
             <div className={styles.registrationIdParent}>
               <b className={styles.applicationForm}>Registration ID: </b>
               <b className={styles.applicationForm}>
-                {previewData.student?.registration_id || ''}
+                {previewData.enrollment?.registration_id || ''}
               </b>
             </div>
           </div>
@@ -296,7 +307,7 @@ function Print() {
             />
           </div>
           <div className={styles.signature}>
-            <SignatureContent student={previewData.student} />
+            <SignatureContent enrollment={previewData.enrollment} />
           </div>
           <div className={styles.otherDetail}>
             <OtherDetailContent />
