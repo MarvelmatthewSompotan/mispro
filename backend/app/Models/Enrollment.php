@@ -41,7 +41,8 @@ class Enrollment extends Model
         'residence_id',
         'residence_hall_policy',
         'transportation_policy',
-        'is_active'
+        'is_active',
+        'registration_date'
     ];
 
     public function applicationForm() : HasOne
