@@ -1,30 +1,14 @@
-.registrationPage {
+.studentListContainer {
   flex: 1;
   padding: 32px;
   max-width: 1400px;
   margin: 0 auto;
   background: #fafbff;
+  font-family: "Poppins", Arial, sans-serif; /* Menambahkan font-family agar konsisten */
 }
 
-.topBar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.newFormBtn {
-  background: #7b7bfa !important;
-  color: #fff !important;
-  margin-right: 16px;
-}
-
-.printBtn {
-  background: #7bfa7b !important;
-  color: #fff !important;
-}
-
-.searchBar {
+/* --- Search Bar --- */
+.searchContainer {
   display: flex;
   align-items: center;
   margin-bottom: 24px;
@@ -40,6 +24,11 @@
   padding: 8px 0px 0px 15px;
   margin-right: 0;
   box-sizing: border-box;
+  /* Menambahkan properti dasar agar input terlihat */
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
 }
 
 .searchInput::placeholder {
@@ -48,7 +37,7 @@
   font-size: 15px;
 }
 
-.searchIconImg {
+.searchIcon {
   position: absolute;
   right: 18px;
   top: 50%;
@@ -58,30 +47,25 @@
   pointer-events: none;
 }
 
-.searchIcon {
-  font-size: 22px;
-  color: #b6c6fa;
-  margin-right: 8px;
-}
-
-.filtersSection {
+/* --- Filters Section --- */
+.filterContainer {
   margin-bottom: 16px;
 }
 
-.filtersTitle {
+.filterTitle {
   font-weight: 700;
   font-size: 22px;
   margin-bottom: 8px;
 }
 
-.filtersRow {
+.filterControls {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
 }
 
-.filterCheckboxLabel {
+.checkboxLabel {
   position: relative;
   display: flex;
   align-items: center;
@@ -90,12 +74,12 @@
   cursor: pointer;
 }
 
-.filterCheckboxLabel input[type="checkbox"] {
+.checkboxLabel input[type="checkbox"] {
   opacity: 0;
   width: 22px;
   height: 22px;
   margin-right: 4px;
-  position: relative;
+  position: absolute; /* Mengubah ke absolute agar tidak menggeser teks */
   z-index: 2;
   cursor: pointer;
 }
@@ -106,18 +90,17 @@
   border: 2px solid #5f84fe;
   border-radius: 4px;
   display: inline-block;
-  position: relative;
   background: #fff;
   box-sizing: border-box;
   margin-right: 8px;
 }
 
-input[type="checkbox"]:checked + .customCheckbox {
+.checkboxLabel input[type="checkbox"]:checked + .customCheckbox {
   background: #5f84fe;
   border-color: #5f84fe;
 }
 
-input[type="checkbox"]:checked + .customCheckbox::after {
+.checkboxLabel input[type="checkbox"]:checked + .customCheckbox::after {
   content: "";
   display: block;
   position: absolute;
@@ -130,8 +113,7 @@ input[type="checkbox"]:checked + .customCheckbox::after {
   transform: rotate(45deg);
 }
 
-.yearSelect,
-.semesterSelect {
+.filterSelect {
   padding: 5px 5px;
   border-radius: 6px;
   border: 1px solid #b6c6fa;
@@ -139,29 +121,21 @@ input[type="checkbox"]:checked + .customCheckbox::after {
   width: 180px;
 }
 
-.seeAllForms {
-  color: #7b7bfa;
-  margin-left: 8px;
-  font-weight: 500;
-  text-decoration: underline;
-  background-color: transparent;
-  border-color: transparent;
-}
-
-.resultsInfo {
+/* --- Results Count & Table --- */
+.resultsCount {
   color: #b6c6fa;
   font-weight: 500;
   margin-bottom: 8px;
 }
 
-.tableWrapper {
+.tableContainer {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 12px #0001;
   overflow: hidden;
 }
 
-.registrationTable {
+.studentTable {
   width: 100%;
   border-collapse: collapse;
 }
@@ -171,7 +145,7 @@ input[type="checkbox"]:checked + .customCheckbox::after {
   border-bottom: 2px solid #b6c6fa;
 }
 
-.tableHeaderCell {
+.tableHeader {
   padding: 16px 12px;
   text-align: left;
   font-weight: 700;
@@ -183,7 +157,7 @@ input[type="checkbox"]:checked + .customCheckbox::after {
 }
 
 .tableRow:hover {
-  background-color: #a0b6ff;
+  background-color: #f0f5ff; /* Mengganti warna hover agar lebih soft */
 }
 
 .tableCell {
@@ -193,12 +167,4 @@ input[type="checkbox"]:checked + .customCheckbox::after {
 .tableCellName {
   padding: 16px 12px;
   font-weight: 700;
-}
-
-.viewBtn {
-  background: #39fa39 !important;
-  color: #fff !important;
-  font-weight: 700;
-  padding: 6px 18px !important;
-  font-size: 16px !important;
 }

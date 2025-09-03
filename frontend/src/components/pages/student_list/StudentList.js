@@ -1,32 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "../atoms/Button";
-import PopUpForm from "./PopUpForm";
-import styles from "../styles/Registration.module.css";
-import searchIcon from "../../assets/Search-icon.png";
-import { getRegistrations, getRegistrationOptions } from "../../services/api";
+// Tidak perlu useNavigate, Button, atau PopUpForm
+import styles from "./StudentList.module.css"; // Menggunakan CSS untuk StudentList
+import searchIcon from "../../../assets/Search-icon.png";
+import {
+  getRegistrations,
+  getRegistrationOptions,
+} from "../../../services/api";
 
-const Registration = () => {
-  const navigate = useNavigate();
-
-  // State data API
-  const [registrationData, setRegistrationData] = useState([]);
+const StudentList = () => {
+  // State data API diganti nama agar lebih sesuai
+  const [studentData, setStudentData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // Options dari backend
+  // Options dari backend (sama)
   const [sections, setSections] = useState([]);
   const [schoolYears, setSchoolYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
 
-  // Filter state
+  // Filter state (sama)
   const [selectedSections, setSelectedSections] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(null);
 
-  const [showPopupForm, setShowPopupForm] = useState(false);
+  const [gradeMap, setGradeMap] = useState(new Map());
 
-  // Fetch options (sections, years, semesters)
+  // State untuk popup form tidak diperlukan lagi
+  // const [showPopupForm, setShowPopupForm] = useState(false);
+
+  // Fetch options (sections, years, semesters) - Logika sama
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -34,6 +36,15 @@ const Registration = () => {
         setSections(opts.sections || []);
         setSchoolYears(opts.school_years || []);
         setSemesters(opts.semesters || []);
+
+        // 2. UBAH ARRAY 'classes' MENJADI MAP UNTUK PENCARIAN CEPAT
+        const newGradeMap = new Map();
+        if (opts.classes && Array.isArray(opts.classes)) {
+          opts.classes.forEach((cls) => {
+            newGradeMap.set(cls.class_id, cls.grade);
+          });
+        }
+        setGradeMap(newGradeMap);
       } catch (err) {
         console.error("Error fetching registration options:", err);
       }
@@ -41,28 +52,28 @@ const Registration = () => {
     fetchOptions();
   }, []);
 
-  // Fetch registrations dari API
-  const fetchRegistrations = async (filters = {}) => {
+  // Fetch data dari API - Logika sama, nama fungsi disesuaikan
+  const fetchStudents = async (filters = {}) => {
     try {
       setLoading(true);
       const res = await getRegistrations(filters);
       // backend return { data: { data: [...] } }
-      setRegistrationData(res.data.data || []);
+      setStudentData(res.data.data || []);
     } catch (err) {
-      console.error("Error fetching registrations:", err);
+      console.error("Error fetching student data:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial load
+  // Initial load - Memanggil fungsi fetchStudents
   useEffect(() => {
-    fetchRegistrations();
+    fetchStudents();
   }, []);
 
-  // Auto fetch ketika filter/search berubah
+  // Auto fetch ketika filter/search berubah - Logika sama
   useEffect(() => {
-    fetchRegistrations({
+    fetchStudents({
       search: search || undefined,
       school_year_id: selectedYear || undefined,
       semester_id: selectedSemester || undefined,
@@ -70,41 +81,22 @@ const Registration = () => {
     });
   }, [search, selectedYear, selectedSemester, selectedSections]);
 
-  // Toggle section checkbox
+  // Toggle section checkbox - Logika sama
   const handleSectionToggle = (id) => {
     setSelectedSections((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
   };
 
-  // Popup form handlers
-  const handleNewForm = () => setShowPopupForm(true);
-  const handleClosePopup = () => setShowPopupForm(false);
-
-  const handleCreateForm = (formData) => {
-    navigate("/registration-form", { state: formData });
-    setShowPopupForm(false);
-  };
-
-  // Row click → navigate ke print page
-  const handleRowClick = (row) => {
-    const applicationId = row.application_forms?.[0]?.application_id || null;
-    navigate('/print', {
-      state: { applicationId },
-    });
-  };
+  // Semua handler untuk popup dan navigasi tidak diperlukan lagi
 
   return (
-    <div className={styles.registrationPage}>
-      {/* Top Bar */}
-      <div className={styles.topBar}>
-        <Button className={styles.newFormBtn} onClick={handleNewForm}>
-          New Form
-        </Button>
-      </div>
+    // Menggunakan class name baru dari StudentList.module.css
+    <div className={styles.studentListContainer}>
+      {/* Top Bar dengan tombol New Form dihilangkan */}
 
       {/* Search Bar */}
-      <div className={styles.searchBar}>
+      <div className={styles.searchContainer}>
         <input
           type="text"
           placeholder="Find name or student id"
@@ -112,16 +104,16 @@ const Registration = () => {
           onChange={(e) => setSearch(e.target.value)}
           className={styles.searchInput}
         />
-        <img src={searchIcon} alt="Search" className={styles.searchIconImg} />
+        <img src={searchIcon} alt="Search" className={styles.searchIcon} />
       </div>
 
       {/* Filters */}
-      <div className={styles.filtersSection}>
-        <div className={styles.filtersTitle}>Filters</div>
-        <div className={styles.filtersRow}>
+      <div className={styles.filterContainer}>
+        <div className={styles.filterTitle}>Filters</div>
+        <div className={styles.filterControls}>
           {/* Sections */}
           {sections.map((section) => (
-            <label key={section.section_id} className={styles.filterCheckboxLabel}>
+            <label key={section.section_id} className={styles.checkboxLabel}>
               <input
                 type="checkbox"
                 checked={selectedSections.includes(section.section_id)}
@@ -136,7 +128,7 @@ const Registration = () => {
           <select
             value={selectedYear || ""}
             onChange={(e) => setSelectedYear(e.target.value || null)}
-            className={styles.yearSelect}
+            className={styles.filterSelect}
           >
             <option value="">Select School Year</option>
             {schoolYears.map((y) => (
@@ -150,7 +142,7 @@ const Registration = () => {
           <select
             value={selectedSemester || ""}
             onChange={(e) => setSelectedSemester(e.target.value || null)}
-            className={styles.semesterSelect}
+            className={styles.filterSelect}
           >
             <option value="">Select Semester</option>
             {semesters.map((s) => (
@@ -163,38 +155,39 @@ const Registration = () => {
       </div>
 
       {/* Results Info */}
-      <div className={styles.resultsInfo}>
-        Showing {loading ? "..." : registrationData.length} results
+      <div className={styles.resultsCount}>
+        Showing {loading ? "..." : studentData.length} results
       </div>
 
       {/* Table */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.registrationTable}>
+      <div className={styles.tableContainer}>
+        <table className={styles.studentTable}>
           <thead>
             <tr className={styles.tableHeaderRow}>
-              <th className={styles.tableHeaderCell}>Created at</th>
-              <th className={styles.tableHeaderCell}>Registration ID</th>
-              <th className={styles.tableHeaderCell}>Section</th>
-              <th className={styles.tableHeaderCell}>Name</th>
+              {/* Kolom tabel disesuaikan */}
+              <th className={styles.tableHeader}>Student ID</th>
+              <th className={styles.tableHeader}>Name</th>
+              <th className={styles.tableHeader}>Section</th>
+              <th className={styles.tableHeader}>Grade</th>
             </tr>
           </thead>
           <tbody>
-            {!loading && registrationData.length > 0 ? (
-              registrationData.map((row, idx) => {
-                const enrollment = row.enrollments[0] || {}; // ambil enrollment terbaru
+            {!loading && studentData.length > 0 ? (
+              studentData.map((student, idx) => {
+                const enrollment = student.enrollments[0] || {}; // ambil enrollment terbaru
+                const grade = gradeMap.get(enrollment.class_id) || "N/A";
                 return (
-                  <tr
-                    key={idx}
-                    className={styles.tableRow}
-                    onClick={() => handleRowClick(row)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td className={styles.tableCell}>
-                      {new Date(row.registration_date).toLocaleDateString()}
+                  // onClick handler dihilangkan dari <tr>
+                  <tr key={idx} className={styles.tableRow}>
+                    {/* Isi sel tabel disesuaikan */}
+                    <td className={styles.tableCell}>{student.student_id}</td>
+                    <td className={styles.tableCellName}>
+                      {student.full_name}
                     </td>
-                    <td className={styles.tableCell}>{row.registration_id}</td>
-                    <td className={styles.tableCell}>{enrollment.section?.name}</td>
-                    <td className={styles.tableCellName}>{row.full_name}</td>
+                    <td className={styles.tableCell}>
+                      {enrollment.section?.name}
+                    </td>
+                    <td className={styles.tableCell}>{grade}</td>
                   </tr>
                 );
               })
@@ -209,12 +202,9 @@ const Registration = () => {
         </table>
       </div>
 
-      {/* Popup Form */}
-      {showPopupForm && (
-        <PopUpForm onClose={handleClosePopup} onCreate={handleCreateForm} />
-      )}
+      {/* Bagian Popup Form dihilangkan */}
     </div>
   );
 };
 
-export default Registration;
+export default StudentList;
