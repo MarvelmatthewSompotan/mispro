@@ -26,6 +26,7 @@ return new class extends Migration
             $table->enum('residence_hall_policy', ['Signed', 'Not Signed']);
             $table->enum('transportation_policy', ['Signed', 'Not Signed']);
             $table->boolean('is_active')->default(true);
+            $table->string('registration_id', 100);
             $table->timestamp('registration_date')->useCurrent();
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
             $table->foreign('class_id')->references('class_id')->on('classes')->onDelete('set null');
