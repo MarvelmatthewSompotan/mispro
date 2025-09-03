@@ -352,7 +352,6 @@ textarea::placeholder {
   transition: color 0.2s ease;
 }
 
-
 .parentErrorInput:focus {
   border-bottom: none !important; /* Focus state tidak ada border baru */
   box-shadow: none !important;

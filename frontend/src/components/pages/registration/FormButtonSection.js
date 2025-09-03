@@ -14,7 +14,7 @@ const FormButtonSection = ({
 }) => {
   const navigate = useNavigate();
   // eslint-disable-next-line
-  const locationState = useLocation(); 
+  const locationState = useLocation();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
 
@@ -148,10 +148,15 @@ const FormButtonSection = ({
       }
     }
 
+    // Validasi Grade (class_id)
     if (!allFormData.program || !allFormData.program.class_id) {
       errors.program = { ...errors.program, class_id: true };
     }
 
+    const needsMajor = allFormData.program && [12, 13, 14, 15].includes(allFormData.program.class_id);
+    if (needsMajor && !allFormData.program.major_id) {
+      errors.program = { ...errors.program, major_id: true };
+    }
     // Validasi Facilities Section
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };

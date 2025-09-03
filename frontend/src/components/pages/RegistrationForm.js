@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import Main from '../layout/Main';
-import StudentStatusSection from './registration/StudentStatusSection';
-import StudentInformationSection from './registration/StudentInformationSection';
-import ProgramSection from './registration/ProgramSection';
-import FacilitiesSection from './registration/FacilitiesSection';
-import ParentGuardianSection from './registration/ParentGuardianSection';
-import TermOfPaymentSection from './registration/TermOfPaymentSection';
-import OtherDetailSection from './registration/OtherDetailSection';
-import FormButtonSection from './registration/FormButtonSection';
-import styles from './RegistrationForm.module.css';
-import { getRegistrationOptions } from '../../services/api';
-import { gsap } from 'gsap';
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import Main from "../layout/Main";
+import StudentStatusSection from "./registration/StudentStatusSection";
+import StudentInformationSection from "./registration/StudentInformationSection";
+import ProgramSection from "./registration/ProgramSection";
+import FacilitiesSection from "./registration/FacilitiesSection";
+import ParentGuardianSection from "./registration/ParentGuardianSection";
+import TermOfPaymentSection from "./registration/TermOfPaymentSection";
+import OtherDetailSection from "./registration/OtherDetailSection";
+import FormButtonSection from "./registration/FormButtonSection";
+import styles from "./RegistrationForm.module.css";
+import { getRegistrationOptions } from "../../services/api";
+import { gsap } from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -43,14 +43,14 @@ const RegistrationForm = () => {
   const [forceError, setForceError] = useState({});
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
 
     // Gunakan Intl.DateTimeFormat biar otomatis ke nama bulan lokal
-    return new Intl.DateTimeFormat('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     }).format(date);
   };
 
@@ -63,7 +63,7 @@ const RegistrationForm = () => {
         setSharedData(data);
         setIsLoading(false);
       } catch (error) {
-        console.error('Failed to fetch registration options:', error);
+        console.error("Failed to fetch registration options:", error);
         setIsLoading(false);
       }
     };
@@ -73,12 +73,12 @@ const RegistrationForm = () => {
 
   useEffect(() => {
     const sectionOrder = [
-      'studentStatus',
-      'studentInfo',
-      'program',
-      'facilities',
-      'parentGuardian',
-      'termOfPayment',
+      "studentStatus",
+      "studentInfo",
+      "program",
+      "facilities",
+      "parentGuardian",
+      "termOfPayment",
     ];
 
     const firstErrorSection = sectionOrder.find(
@@ -100,14 +100,14 @@ const RegistrationForm = () => {
             y: targetElement, // Scroll ke elemen target
             offsetY: 100, // Beri jarak dari atas layar sebesar 100px
           },
-          ease: 'power2.inOut', // Jenis animasi untuk efek lebih dinamis
+          ease: "power2.inOut", // Jenis animasi untuk efek lebih dinamis
         });
       }
     }
   }, [errors]);
 
   const handleSectionDataChange = useCallback((sectionName, data) => {
-    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+    if (typeof data !== "object" || data === null || Array.isArray(data)) {
       console.error(`Data untuk ${sectionName} harus berupa objek`, data);
       return;
     }
@@ -130,52 +130,52 @@ const RegistrationForm = () => {
     (data) => {
       // Langsung teruskan data apa adanya dari komponen child.
       // Jangan berikan nilai default di sini.
-      handleSectionDataChange('studentStatus', data);
+      handleSectionDataChange("studentStatus", data);
     },
     [handleSectionDataChange]
   );
 
   const handleStudentInfoDataChange = useCallback(
     (data) => {
-      handleSectionDataChange('studentInfo', data);
+      handleSectionDataChange("studentInfo", data);
     },
     [handleSectionDataChange]
   );
 
   const handleStudentInfoValidationChange = useCallback((validationData) => {
-    handleValidationChange('studentInfo', validationData); // eslint-disable-next-line
+    handleValidationChange("studentInfo", validationData); // eslint-disable-next-line
   }, []);
 
   const handleProgramDataChange = useCallback(
     (data) => {
-      handleSectionDataChange('program', data);
+      handleSectionDataChange("program", data);
     },
     [handleSectionDataChange]
   );
 
   const handleFacilitiesDataChange = useCallback(
     (data) => {
-      handleSectionDataChange('facilities', data);
+      handleSectionDataChange("facilities", data);
     },
     [handleSectionDataChange]
   );
 
   const handleParentGuardianDataChange = useCallback(
     (data) => {
-      handleSectionDataChange('parentGuardian', data);
+      handleSectionDataChange("parentGuardian", data);
     },
     [handleSectionDataChange]
   );
 
   const handleTermOfPaymentDataChange = useCallback(
     (data) => {
-      handleSectionDataChange('termOfPayment', data);
+      handleSectionDataChange("termOfPayment", data);
     },
     [handleSectionDataChange]
   );
 
   const handleSelectOldStudent = (latestData) => {
-    console.log('Received latest data for prefill:', latestData); // Debug log
+    console.log("Received latest data for prefill:", latestData); // Debug log
 
     // Prefill semua form sections dengan data dari backend
     if (latestData) {
@@ -184,14 +184,14 @@ const RegistrationForm = () => {
         latestData.studentInfo &&
         Object.keys(latestData.studentInfo).length > 0
       ) {
-        console.log('Prefilling studentInfo:', latestData.studentInfo);
-        handleSectionDataChange('studentInfo', latestData.studentInfo);
+        console.log("Prefilling studentInfo:", latestData.studentInfo);
+        handleSectionDataChange("studentInfo", latestData.studentInfo);
       }
 
       // Prefill Program
       if (latestData.program && Object.keys(latestData.program).length > 0) {
-        console.log('Prefilling program:', latestData.program);
-        handleSectionDataChange('program', latestData.program);
+        console.log("Prefilling program:", latestData.program);
+        handleSectionDataChange("program", latestData.program);
       }
 
       // Prefill Facilities
@@ -199,8 +199,8 @@ const RegistrationForm = () => {
         latestData.facilities &&
         Object.keys(latestData.facilities).length > 0
       ) {
-        console.log('Prefilling facilities:', latestData.facilities);
-        handleSectionDataChange('facilities', latestData.facilities);
+        console.log("Prefilling facilities:", latestData.facilities);
+        handleSectionDataChange("facilities", latestData.facilities);
       }
 
       // Prefill Parent Guardian
@@ -208,8 +208,8 @@ const RegistrationForm = () => {
         latestData.parentGuardian &&
         Object.keys(latestData.parentGuardian).length > 0
       ) {
-        console.log('Prefilling parentGuardian:', latestData.parentGuardian);
-        handleSectionDataChange('parentGuardian', latestData.parentGuardian);
+        console.log("Prefilling parentGuardian:", latestData.parentGuardian);
+        handleSectionDataChange("parentGuardian", latestData.parentGuardian);
       }
 
       // Prefill Term of Payment
@@ -217,8 +217,8 @@ const RegistrationForm = () => {
         latestData.termOfPayment &&
         Object.keys(latestData.termOfPayment).length > 0
       ) {
-        console.log('Prefilling termOfPayment:', latestData.termOfPayment);
-        handleSectionDataChange('termOfPayment', latestData.termOfPayment);
+        console.log("Prefilling termOfPayment:", latestData.termOfPayment);
+        handleSectionDataChange("termOfPayment", latestData.termOfPayment);
       }
     }
 
@@ -285,7 +285,7 @@ const RegistrationForm = () => {
   // Function to get display values for school year and semester
   const getDisplayValues = useCallback(() => {
     if (!sharedData || !formData.schoolYear || !formData.semester) {
-      return { schoolYearDisplay: '', semesterDisplay: '' };
+      return { schoolYearDisplay: "", semesterDisplay: "" };
     }
 
     const schoolYear = sharedData.school_years?.find(
@@ -307,7 +307,7 @@ const RegistrationForm = () => {
     return (
       <Main>
         <div className={styles.formContainer}>
-          <div style={{ textAlign: 'center', padding: '50px' }}>
+          <div style={{ textAlign: "center", padding: "50px" }}>
             <p>Loading registration form...</p>
           </div>
         </div>
@@ -337,7 +337,7 @@ const RegistrationForm = () => {
           </div>
         )}
 
-        <div id='studentStatus'>
+        <div id="studentStatus">
           <StudentStatusSection
             onSelectOldStudent={handleSelectOldStudent}
             onDataChange={handleStudentStatusDataChange}
@@ -347,7 +347,7 @@ const RegistrationForm = () => {
             onClearForm={handleClearFormOnStatusChange}
           />
         </div>
-        <div id='studentInfo'>
+        <div id="studentInfo">
           <StudentInformationSection
             prefill={formSections.studentInfo || {}}
             onValidationChange={handleStudentInfoValidationChange}
@@ -357,7 +357,7 @@ const RegistrationForm = () => {
             sharedData={sharedData}
           />
         </div>
-        <div id='program'>
+        <div id="program">
           <ProgramSection
             key={resetKey}
             prefill={formSections.program || {}}
@@ -367,7 +367,7 @@ const RegistrationForm = () => {
             forceError={forceError.program || {}}
           />
         </div>
-        <div id='facilities'>
+        <div id="facilities">
           <FacilitiesSection
             key={resetKey}
             prefill={formSections.facilities || {}}
@@ -377,7 +377,7 @@ const RegistrationForm = () => {
             forceError={forceError.facilities || {}}
           />
         </div>
-        <div id='parentGuardian'>
+        <div id="parentGuardian">
           <ParentGuardianSection
             prefill={formSections.parentGuardian || {}}
             onDataChange={handleParentGuardianDataChange}
@@ -386,7 +386,7 @@ const RegistrationForm = () => {
             forceError={forceError.parentGuardian || {}}
           />
         </div>
-        <div id='termOfPayment'>
+        <div id="termOfPayment">
           <TermOfPaymentSection
             key={resetKey}
             prefill={formSections.termOfPayment || {}}
