@@ -31,7 +31,6 @@ return new class extends Migration
             $table->string('email', 100);
             $table->string('previous_school', 100);
             $table->string('religion', 30);
-            $table->string('registration_id', 100);
             $table->string('academic_status_other', 50)->nullable();
             $table->enum('enrollment_status', ['ACTIVE','TRANSFEREE','GRADUATE','UNREGISTER']);
             $table->enum('student_status', ['New','Old','Transferee']);

@@ -60,7 +60,6 @@ class Student extends Model
         'previous_school', 
         'religion',
         'academic_status_other',
-        'registration_id', 
         'student_status', 
         'academic_status', 
         'enrollment_status',

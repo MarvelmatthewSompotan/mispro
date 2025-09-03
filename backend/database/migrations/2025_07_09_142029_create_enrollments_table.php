@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('enrollments', function (Blueprint $table) {
             $table->id('enrollment_id');
             $table->string('student_id', 30)->nullable();
+            $table->string('registration_id', 100)->unique();
+            $table->timestamp('registration_date')->useCurrent();
             $table->unsignedBigInteger('class_id')->nullable();
             $table->unsignedBigInteger('section_id')->nullable(); 
             $table->unsignedBigInteger('major_id')->nullable(); 

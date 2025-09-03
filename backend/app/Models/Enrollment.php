@@ -27,9 +27,13 @@ class Enrollment extends Model
     protected $primaryKey = 'enrollment_id';
     public $timestamps = false;
 
+    const CREATED_AT = 'registration_date';
+    const UPDATED_AT = null;
+
     protected $fillable = [
         'enrollment_id',
         'student_id',
+        'registration_id', 
         'class_id',
         'section_id',
         'major_id',

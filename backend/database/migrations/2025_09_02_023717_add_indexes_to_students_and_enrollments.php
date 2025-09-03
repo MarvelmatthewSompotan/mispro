@@ -8,11 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->index('registration_id');
-        });
-
         Schema::table('enrollments', function (Blueprint $table) {
+            $table->index('registration_id');
             $table->index('section_id');
             $table->index('school_year_id');
             $table->index('semester_id');

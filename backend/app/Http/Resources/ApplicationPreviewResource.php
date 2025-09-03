@@ -26,7 +26,6 @@ class ApplicationPreviewResource extends JsonResource
             'student' => [
                 'student_id' => $student->student_id,
                 'student_status' => $student->student_status,
-                'registration_id' => $student->registration_id,
                 'first_name' => $student->first_name,
                 'middle_name' => $student->middle_name,
                 'last_name' => $student->last_name,
@@ -58,6 +57,8 @@ class ApplicationPreviewResource extends JsonResource
                 'other'=> $student->studentAddress->other,
             ],
             'enrollment' => [
+                'registration_id' => $enrollment->registration_id,
+                'registration_date' => $enrollment->registration_date,
                 'school_year' => $this->enrollment->schoolYear ? [
                     'year' => $this->enrollment->schoolYear->year
                 ] : null,

@@ -33,52 +33,25 @@ class RegistrationController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Student::query()
-            ->select(
-                'students.registration_id',
-                'students.student_id',
-                DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
-                'students.registration_date'
-            )
-            ->with(['enrollments.section', 'enrollments.schoolYear', 'enrollments.semester']);
+        $query = Enrollment::with(['student', 'section', 'schoolYear', 'semester', 'applicationForm'])
+            ->select('enrollments.*') // ambil semua kolom enrollment
+            ->selectRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name")
+            ->join('students', 'students.student_id', '=', 'enrollments.student_id');
 
-        // Jika ada filter → filter pakai whereHas
-        if ($request->filled('school_year_id') || $request->filled('semester_id') || $request->filled('section_id')) {
-            $query->whereHas('enrollments', function($q) use ($request) {
-                if ($request->filled('school_year_id')) {
-                    $q->where('school_year_id', $request->input('school_year_id'));
-                }
-                if ($request->filled('semester_id')) {
-                    $q->where('semester_id', $request->input('semester_id'));
-                }
-                if ($request->filled('section_id')) {
-                    $q->where('section_id', $request->input('section_id'));
-                }
-            });
-
-            $query->with(['enrollments' => function($q) use ($request) {
-                if ($request->filled('school_year_id')) {
-                    $q->where('school_year_id', $request->input('school_year_id'));
-                }
-                if ($request->filled('semester_id')) {
-                    $q->where('semester_id', $request->input('semester_id'));
-                }
-                if ($request->filled('section_id')) {
-                    $q->where('section_id', $request->input('section_id'));
-                }
-        
-                $q->with(['section', 'schoolYear', 'semester']);
-            }]);
-        } 
-        // Kalau tidak ada filter → ambil hanya enrollment terbaru per student
-        else {
-            $query->with(['enrollments' => function($q) {
-                $q->whereIn('enrollments.enrollment_id', function($sub) {
-                    $sub->selectRaw('MAX(e2.enrollment_id)')
-                        ->from('enrollments as e2')
-                        ->whereColumn('e2.student_id', 'enrollments.student_id');
-                });
-            }]);
+        // Filter
+        if ($request->filled('school_year_id')) {
+            $query->where('enrollments.school_year_id', $request->input('school_year_id'));
+        }
+        if ($request->filled('semester_id')) {
+            $query->where('enrollments.semester_id', $request->input('semester_id'));
+        }
+        if ($request->filled('section_id')) {
+            $sectionIds = $request->input('section_id');
+            if (is_array($sectionIds)) {
+                $query->whereIn('enrollments.section_id', $sectionIds);
+            } else {
+                $query->where('enrollments.section_id', $sectionIds);
+            }
         }
 
         // Search
@@ -86,11 +59,13 @@ class RegistrationController extends Controller
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
                 $q->where('students.student_id', 'like', "%$search%")
-                    ->orWhere(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$search%");
+                ->orWhere(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$search%");
             });
         }
 
-        // Pagination
+        // Order by created_at supaya kelihatan histori pendaftaran
+        $query->orderBy('enrollments.registration_date', 'desc');
+
         $perPage = $request->input('per_page', 20);
         $data = $query->paginate($perPage);
 
@@ -100,6 +75,7 @@ class RegistrationController extends Controller
             'data' => $data
         ], 200);
     }
+
 
 
     /**
@@ -469,7 +445,6 @@ class RegistrationController extends Controller
                 $student = Student::create([
                     'student_id' => $generatedId,
                     'student_status' => $validated['student_status'],
-                    'registration_id' => $registrationId,
                     'first_name' => $validated['first_name'],
                     'middle_name' => $validated['middle_name'],
                     'last_name' => $validated['last_name'],
@@ -495,6 +470,8 @@ class RegistrationController extends Controller
                 ]);
                 // Create enrollment (sama untuk New dan Old)
                 $enrollment = $student->enrollments()->create([
+                    'registration_date' => $draft->registration_date_draft,
+                    'registration_id' => $registrationId,
                     'class_id' => $schoolClass->class_id,
                     'section_id' => $section->section_id,
                     'major_id' => $major->major_id,
@@ -538,6 +515,8 @@ class RegistrationController extends Controller
                 }
                 // Create enrollment (sama untuk New dan Old)
                 $enrollment = $student->enrollments()->create([
+                    'registration_date' => $draft->registration_date_draft,
+                    'registration_id' => $registrationId,
                     'class_id' => $schoolClass->class_id,
                     'section_id' => $section->section_id,
                     'major_id' => $major->major_id,
@@ -789,7 +768,6 @@ class RegistrationController extends Controller
             'phone_number' => $validated['phone_number'],
             'academic_status' => $validated['academic_status'],
             'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
-            'registration_date' => $draft->registration_date_draft,
             'enrollment_status' => 'ACTIVE',
             'nik' => $validated['nik'],
             'kitas' => $validated['kitas'],
