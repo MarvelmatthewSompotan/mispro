@@ -1,0 +1,170 @@
+.studentListContainer {
+  flex: 1;
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #fafbff;
+  font-family: "Poppins", Arial, sans-serif; /* Menambahkan font-family agar konsisten */
+}
+
+/* --- Search Bar --- */
+.searchContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 5px;
+  position: relative;
+  width: 500px;
+  border: 2px solid #5f84fe;
+  border-radius: 5px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 8px 0px 0px 15px;
+  margin-right: 0;
+  box-sizing: border-box;
+  /* Menambahkan properti dasar agar input terlihat */
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+}
+
+.searchInput::placeholder {
+  color: #5f84fe;
+  opacity: 0.8;
+  font-size: 15px;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+/* --- Filters Section --- */
+.filterContainer {
+  margin-bottom: 16px;
+}
+
+.filterTitle {
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.filterControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.checkboxLabel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  opacity: 0;
+  width: 22px;
+  height: 22px;
+  margin-right: 4px;
+  position: absolute; /* Mengubah ke absolute agar tidak menggeser teks */
+  z-index: 2;
+  cursor: pointer;
+}
+
+.customCheckbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #5f84fe;
+  border-radius: 4px;
+  display: inline-block;
+  background: #fff;
+  box-sizing: border-box;
+  margin-right: 8px;
+}
+
+.checkboxLabel input[type="checkbox"]:checked + .customCheckbox {
+  background: #5f84fe;
+  border-color: #5f84fe;
+}
+
+.checkboxLabel input[type="checkbox"]:checked + .customCheckbox::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid #fff;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+.filterSelect {
+  padding: 5px 5px;
+  border-radius: 6px;
+  border: 1px solid #b6c6fa;
+  font-size: 15px;
+  width: 180px;
+}
+
+/* --- Results Count & Table --- */
+.resultsCount {
+  color: #b6c6fa;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.tableContainer {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0001;
+  overflow: hidden;
+}
+
+.studentTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeaderRow {
+  background: #fafbff;
+  border-bottom: 2px solid #b6c6fa;
+}
+
+.tableHeader {
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.tableRow {
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
+}
+
+.tableRow:hover {
+  background-color: #f0f5ff; /* Mengganti warna hover agar lebih soft */
+}
+
+.tableCell {
+  padding: 16px 12px;
+}
+
+.tableCellName {
+  padding: 16px 12px;
+  font-weight: 700;
+}
