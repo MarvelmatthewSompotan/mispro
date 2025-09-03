@@ -132,7 +132,7 @@ input[type="checkbox"]:checked + .customCheckbox::after {
 
 .yearSelect,
 .semesterSelect {
-  padding: 5px 5px;
+  padding: 2px 0px;
   border-radius: 6px;
   border: 1px solid #b6c6fa;
   font-size: 15px;

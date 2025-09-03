@@ -29,15 +29,19 @@ function Print() {
   const [programOptions, setProgramOptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 🔹 State baru untuk loading tombol Print
+  const [isPrinting, setIsPrinting] = useState(false);
+
   // Fungsi untuk download PDF manual
   const downloadPDF = async () => {
     if (!printRef.current || !previewData?.student) return;
 
+    setIsPrinting(true); // mulai loading
     try {
       const element = printRef.current;
       const canvas = await html2canvas(element, {
         scale: 2,
-        ignoreElements: (el) => el.classList.contains('no-print'), // <- exclude button
+        ignoreElements: (el) => el.classList.contains('no-print'),
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -56,6 +60,8 @@ function Print() {
       pdf.save(`${studentName}_Application_Form.pdf`);
     } catch (error) {
       console.error('Failed to generate PDF:', error);
+    } finally {
+      setIsPrinting(false); // selesai loading
     }
   };
 
@@ -180,17 +186,18 @@ function Print() {
         </button>
         <button
           onClick={downloadPDF}
+          disabled={isPrinting}
           style={{
             marginRight: '40px',
             padding: '6px 12px',
-            background: '#7b7bfa',
+            background: isPrinting ? '#aaa' : '#7b7bfa',
             color: '#fff',
             border: 'none',
             borderRadius: '6px',
-            cursor: 'pointer',
+            cursor: isPrinting ? 'not-allowed' : 'pointer',
           }}
         >
-          Print
+          {isPrinting ? 'Generating PDF...' : 'Print'}
         </button>
       </div>
 
