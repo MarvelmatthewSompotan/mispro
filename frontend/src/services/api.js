@@ -214,4 +214,3 @@ export const getRegistrations = async ({
 
   return await res.json();
 };
-
