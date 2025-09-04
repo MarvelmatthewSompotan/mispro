@@ -35,6 +35,31 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Radio button styles */
+.radioLabel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.radioLabel:hover {
+  background-color: rgba(95, 132, 254, 0.05);
+  border-radius: 4px;
+}
+
+.radioButton {
+  width: 28px;
+  position: relative;
+  height: 28px;
+  flex-shrink: 0;
+}
+
 .radioButtonCircle {
   position: absolute;
   height: 110.71%;
@@ -46,12 +71,38 @@
   border-radius: 50%;
   border: 3px solid #5f84fe;
   box-sizing: border-box;
+  transition: all 0.2s ease;
 }
-.radioButton {
-  width: 28px;
-  position: relative;
-  height: 28px;
+
+.radioButtonSelected {
+  position: absolute;
+  height: 57.14%;
+  width: 57.14%;
+  top: 21.43%;
+  right: 21.43%;
+  bottom: 21.43%;
+  left: 21.43%;
+  border-radius: 50%;
+  background-color: #5f84fe;
+  transform: scale(1);
+  opacity: 1;
+  animation: grow-in 0.25s forwards;
 }
+
+@keyframes grow-in {
+  /* Tahap Awal: Mulai dari ukuran 0 (tidak terlihat) */
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  /* Tahap Akhir: Selesai di ukuran normal */
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .optionItem {
   display: flex;
   flex-direction: row;
@@ -71,17 +122,7 @@
   position: relative;
   line-height: 100%;
 }
-.radioButtonSelected {
-  position: absolute;
-  height: 57.14%;
-  width: 57.14%;
-  top: 21.43%;
-  right: 21.43%;
-  bottom: 21.43%;
-  left: 21.43%;
-  border-radius: 50%;
-  background-color: #5f84fe;
-}
+
 .gradeField {
   border-bottom: 1px solid #000;
   display: flex;
@@ -201,8 +242,6 @@ textarea::placeholder {
   font-weight: 400;
   color: rgba(128, 128, 128, 0.6);
 }
-
-
 
 .programSectionErrorLabel {
   color: #ff4444 !important;

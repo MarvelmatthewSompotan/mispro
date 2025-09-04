@@ -43,8 +43,19 @@
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 55px;
   background-color: #fffaec;
+  margin-left: 10px;
+}
+
+.discountSection {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+
+  background-color: #fffaec;
+  margin-left: 10px;
 }
 
 .paymentSection {
@@ -77,45 +88,94 @@
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 0px 12px;
-  gap: 32px;
+  padding: 0px 10px;
 }
 
 .optionItem {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+}
+
+/* Radio button styles */
+.radioLabel {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  padding: 12px;
   gap: 10px;
+  cursor: pointer;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.radioLabel:hover {
+  background-color: rgba(95, 132, 254, 0.05);
+  border-radius: 4px;
 }
 
 .radioButton {
   width: 28px;
-  height: 28px;
   position: relative;
+  height: 28px;
   flex-shrink: 0;
 }
 
 .radioButtonCircle {
   position: absolute;
-  width: 28px;
-  height: 28px;
-  top: 0;
-  left: 0;
+  height: 110.71%;
+  width: 110.71%;
+  top: -5.36%;
+  right: -5.36%;
+  bottom: -5.36%;
+  left: -5.36%;
   border-radius: 50%;
   border: 3px solid #5f84fe;
   box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 .radioButtonSelected {
   position: absolute;
-  width: 16px;
-  height: 16px;
-  top: 6px;
-  left: 6px;
+  height: 57.14%;
+  width: 57.14%;
+  top: 21.43%;
+  right: 21.43%;
+  bottom: 21.43%;
+  left: 21.43%;
   border-radius: 50%;
   background-color: #5f84fe;
+  transform: scale(1);
+  opacity: 1;
+  animation: grow-in 0.25s forwards;
+}
+
+@keyframes grow-in {
+  /* Tahap Awal: Mulai dari ukuran 0 (tidak terlihat) */
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  /* Tahap Akhir: Selesai di ukuran normal */
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Checkbox styles */
+.checkboxLabel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px;
 }
 
 .checkBox {
@@ -152,7 +212,6 @@
 }
 
 .label {
-  position: relative;
   line-height: 100%;
   font-family: Poppins, Arial, sans-serif;
   font-weight: 400;
@@ -187,28 +246,6 @@
   opacity: 0;
   width: 0;
   height: 0;
-}
-
-/* Radio button styles */
-.radioLabel {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  cursor: pointer;
-  padding: 12px;
-}
-
-/* Checkbox styles */
-.checkboxLabel {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  cursor: pointer;
-  padding: 12px;
 }
 
 .inputField,
