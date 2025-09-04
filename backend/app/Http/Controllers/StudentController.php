@@ -9,6 +9,59 @@ use App\Models\ApplicationFormVersion;
 
 class StudentController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = Student::select(
+            'students.student_id',
+            DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
+            'enrollments.section_id',
+            'enrollments.class_id',
+            'enrollments.school_year_id',
+            'enrollments.semester_id',
+            'students.nisn',
+            'students.nik',
+            'students.registration_date'
+        )
+        ->join('enrollments', 'enrollments.student_id', '=', 'students.student_id');
+        
+        // Filter
+        if ($request->filled('school_year_id')) {
+            $query->where('enrollments.school_year_id', $request->input('school_year_id'));
+        }
+        if ($request->filled('semester_id')) {
+            $query->where('enrollments.semester_id', $request->input('semester_id'));
+        }
+        if ($request->filled('section_id')) {
+            $sectionIds = $request->input('section_id');
+            if (is_array($sectionIds)) {
+                $query->whereIn('enrollments.section_id', $sectionIds);
+            } else {
+                $query->where('enrollments.section_id', $sectionIds);
+            }
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('students.student_id', 'like', "%$search%")
+                ->orWhere(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$search%");
+            });
+        }
+        
+        $students= $query
+            ->orderBy('students.registration_date', 'desc')
+            ->get()
+            ->unique(function ($item) {
+                return $item->nisn . '|' . $item->nik;
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $students
+        ]);
+    }
+
     public function searchStudents(Request $request)
     {
         $keyword = $request->input('search');
@@ -168,5 +221,53 @@ class StudentController extends Controller
             'data' => $formattedData,
             'student' => $latestVersion->applicationForm->enrollment->student ?? null,
         ]);
+    }
+
+    public function updateStudent(Request $request, $student_id)
+    {
+        $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
+            ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
+                $q->where('student_id', $student_id);
+            })
+            ->orderByDesc('updated_at')
+            ->first();
+
+        if (!$latestVersion) {
+            return response()->json([
+                'success' => false,
+                'error' => 'No application found for this student',
+            ], 404);
+        }
+
+        $oldSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
+        $oldRequestData = $oldSnapshot['request_data'] ?? [];
+
+        $newRequestData = array_merge($oldRequestData, $request->all());
+
+        $newSnapshot = [
+            'request_data' => $newRequestData,
+        ];
+
+        $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment', function($query) use ($student) {
+            $query->where('student_id', $student_id);
+        })->max('version');
+        
+        $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
+        $userName = auth()->user()->name;
+
+        $newVersion = ApplicationFormVersion::create([
+            'application_id' => $latestVersion->application_id,
+            'version' => $nextVersion,
+            'updated_by' => $userName,
+            'data_snapshot' => json_encode($newSnapshot, JSON_PRETTY_PRINT),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Student application updated successfully',
+            'version_id' => $newVersion->version_id,
+            'data' => $newSnapshot,
+        ]);
+
     }
 }
