@@ -16,7 +16,13 @@ class StudentController extends Controller
             return response()->json([]);
         }
 
-        $students = Student::select('student_id', DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"))
+        $students = Student::select(
+                'student_id',
+                DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"),
+                'nisn',
+                'nik',
+                'registration_date'
+            )
             ->where(function ($query) use ($keyword) {
                 $query->where('student_id', 'like', "%$keyword%")
                     ->orWhere('first_name', 'like', "%$keyword%")
@@ -24,11 +30,18 @@ class StudentController extends Controller
                     ->orWhere('last_name', 'like', "%$keyword%")
                     ->orWhere(DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name)"), 'like', "%$keyword%");
             })
-            ->limit(10)
-            ->get();
+            ->orderBy('registration_date', 'desc') 
+            ->limit(50) 
+            ->get()
+            ->unique(function ($item) {
+                return $item->nisn . '|' . $item->nik;
+            })
+            ->values()
+            ->take(10); 
 
         return response()->json($students);
     }
+
 
     public function getLatestApplication($student_id)
     {

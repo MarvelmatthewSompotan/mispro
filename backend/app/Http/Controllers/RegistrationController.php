@@ -408,12 +408,11 @@ class RegistrationController extends Controller
             
             if ($status === 'New' || $status === 'Transferee') {
                 // Check existing student
-                $existingStudent = Student::where(function($query) use ($validated) {
+                $possibleStudents = Student::where(function($query) use ($validated) {
                     $query->where('first_name', $validated['first_name'])
                         ->where('last_name', $validated['last_name'])
                         ->where('date_of_birth', $validated['date_of_birth'])
-                        ->where('place_of_birth', $validated['place_of_birth'])
-                        ->where('previous_school', $validated['previous_school']);
+                        ->where('place_of_birth', $validated['place_of_birth']);
                 })
                 ->orWhere(function($query) use ($validated) {
                     if (!empty($validated['nik'])) {
@@ -425,14 +424,20 @@ class RegistrationController extends Controller
                         $query->where('kitas', $validated['kitas']);
                     }
                 })
-                ->first();
+                ->get();
                 
-                if ($existingStudent) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'Student already exists, please select Old status and input student name'
-                    ], 422);
-                }
+                foreach ($possibleStudents as $stud) {
+                    $alreadyInSection = $stud->enrollments()
+                        ->where('section_id', $validated['section_id'])
+                        ->exists();
+    
+                    if ($alreadyInSection) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'Student already exists in this section (any semester), please select Old status'
+                        ], 422);
+                    }
+                }    
                 
                 // Generate new student ID
                 $generatedId = $this->generateStudentId(
@@ -468,7 +473,7 @@ class RegistrationController extends Controller
                     'kitas' => $validated['kitas'],
                     'nisn' => $validated['nisn'],
                 ]);
-                // Create enrollment (sama untuk New dan Old)
+
                 $enrollment = $student->enrollments()->create([
                     'registration_date' => $draft->registration_date_draft,
                     'registration_id' => $registrationId,
@@ -496,7 +501,6 @@ class RegistrationController extends Controller
                 $this->createStudentRelatedData($student, $validated, $enrollment);
                 
             } else if ($status === 'Old') {
-                // ✅ PERBAIKAN: Gunakan student yang sudah ada
                 $existingStudentId = $validated['input_name'];
                 if (!$existingStudentId) {
                     return response()->json([
@@ -513,7 +517,18 @@ class RegistrationController extends Controller
                         'error' => 'Student not found'
                     ], 404);
                 }
-                // Create enrollment (sama untuk New dan Old)
+
+                $sameSection = $student->enrollments()
+                    ->where('section_id', $validated['section_id'])
+                    ->exists();
+
+                if (!$sameSection) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'For different section, please register as New Student.'
+                    ], 422);
+                }
+
                 $enrollment = $student->enrollments()->create([
                     'registration_date' => $draft->registration_date_draft,
                     'registration_id' => $registrationId,
@@ -536,10 +551,8 @@ class RegistrationController extends Controller
                 // Create application form version dengan data snapshot
                 $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
-                // ✅ PERBAIKAN: Update student data jika ada perubahan
                 $this->updateStudentData($student, $validated, $registrationId, $draft);
                 
-                // ✅ PERBAIKAN: Update atau create related data
                 $this->updateStudentRelatedData($student, $validated, $enrollment);
             }
             
