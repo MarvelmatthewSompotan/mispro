@@ -9,12 +9,13 @@ import Registration from "../components/pages/Registration";
 import RegistrationPage from "../components/pages/RegistrationForm";
 import Print from "../components/pages/Print";
 import MainLayout from "../components/layout/Main";
+import StudentProfile from "../components/pages/student_list/StudentProfile/StudentProfile.js";
 
 const AppRouter = () => (
   <Routes>
     {/* Public routes */}
     <Route path="/login" element={<LoginPage />} />
-    
+
     {/* Protected routes with MainLayout */}
     <Route
       path="/home"
@@ -32,6 +33,16 @@ const AppRouter = () => (
         </MainLayout>
       }
     />
+
+    <Route
+      path="/students/:studentId"
+      element={
+        <MainLayout>
+          <StudentProfile />
+        </MainLayout>
+      }
+    />
+
     <Route
       path="/teachers"
       element={
@@ -56,15 +67,9 @@ const AppRouter = () => (
         </MainLayout>
       }
     />
-    <Route
-      path="/registration-form"
-      element={<RegistrationPage />}
-    />
-    <Route
-      path="/print"
-      element={<Print />}
-    />
-    
+    <Route path="/registration-form" element={<RegistrationPage />} />
+    <Route path="/print" element={<Print />} />
+
     {/* Default redirects */}
     <Route path="/" element={<Navigate to="/login" replace />} />
     <Route path="*" element={<Navigate to="/login" replace />} />
