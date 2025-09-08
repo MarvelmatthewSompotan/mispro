@@ -1,0 +1,1102 @@
+.headerRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  width: 100%;
+}
+.headerKop {
+  width: 110px;
+  height: auto;
+  margin-bottom: 0;
+  margin-right: 18px;
+}
+.schoolInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.schoolName {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+.schoolAddress {
+  font-size: 12px;
+  color: #333;
+  line-height: 1.2;
+  margin-bottom: 1px;
+}
+.title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 28px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.infoBar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+.infoBar span span {
+  font-weight: 700;
+}
+.studentInfoSection {
+  background: #e8f0fe;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 8px;
+}
+.studentInfoSectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  width: 100%;
+}
+.studentInfoSection::before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  background: #7bb6fa;
+  border-radius: 2px;
+}
+.studentInfoTable {
+  width: 100%;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 24px;
+  font-size: 15px;
+  box-sizing: border-box;
+  padding: 0 0 8px 0;
+}
+.studentInfoRow {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  min-height: 32px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+.studentInfoRow:last-child {
+  border-bottom: none;
+}
+.studentInfoLabel {
+  font-weight: 700;
+  color: #222;
+  min-width: 220px;
+  margin-right: 12px;
+  white-space: nowrap;
+}
+.studentInfoValue {
+  font-weight: 500;
+  color: #111;
+  flex: 1;
+  white-space: pre-line;
+  word-break: break-word;
+}
+.sectionTitle {
+  background: #e8f0fe;
+  color: #1a4e8a;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 8px 0 8px 16px;
+  margin-bottom: 0;
+  margin-top: 8px;
+  border-radius: 4px 4px 0 0;
+  letter-spacing: 1px;
+}
+.programTable {
+  width: 100%;
+  background: #fff;
+  border-radius: 0 0 6px 6px;
+  border: 1px solid #d1d5db;
+  border-top: none;
+  margin-bottom: 24px;
+  font-size: 15px;
+  box-sizing: border-box;
+  padding: 0 0 8px 0;
+}
+.programRow {
+  display: grid;
+  grid-template-columns: 120px 2fr 80px 1fr 80px 1fr;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  min-height: 32px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+.programRow:last-child {
+  border-bottom: none;
+}
+.programLabel {
+  font-weight: 600;
+  color: #222;
+  padding: 4px 8px 4px 0;
+  white-space: nowrap;
+}
+.programValue {
+  font-weight: 500;
+  color: #111;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.programCheck {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #b6c6fa;
+  border-radius: 4px;
+  margin-right: 6px;
+  background: #fff;
+  vertical-align: middle;
+  position: relative;
+}
+.checked {
+  background: #5a6bff;
+  border-color: #5a6bff;
+}
+.checked::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 2px;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+} 
+
+.misLogo1024x9801Icon {
+  width: 148px;
+  position: relative;
+  max-height: 100%;
+  object-fit: cover;
+}
+.manadoIndependentSchool {
+  position: relative;
+  font-size: 20px;
+  line-height: 100%;
+}
+.jlWalandaMaramis {
+  position: relative;
+  line-height: 100%;
+  font-weight: 600;
+}
+.manadoIndependentSchoolParent {
+  align-self: stretch;
+  width: 691px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+}
+.misInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.cambridgeLogoIcon {
+  width: 308.2px;
+  position: relative;
+  max-height: 100%;
+  object-fit: cover;
+}
+.abekaLoogIcon {
+  width: 213px;
+  position: relative;
+  max-height: 100%;
+  object-fit: cover;
+}
+.other {
+  align-self: stretch;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+}
+.kop {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 24px;
+}
+.applicationForm {
+  position: relative;
+  line-height: 100%;
+  margin-left: 5px;
+}
+.title {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+.dateParent {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.semesterParent {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.registrationIdParent {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+.formInfo {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.header {
+  align-self: stretch;
+  height: 322px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 72px 0px 12px;
+  box-sizing: border-box;
+  gap: 15px;
+  padding-top: 100px;
+}
+.header1 {
+  align-self: stretch;
+  background-color: #e4eefa;
+  border-left: 7px solid #8dc1ff;
+  box-sizing: border-box;
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.fullName {
+  align-self: stretch;
+  flex: 1;
+  border-bottom: 1px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+}
+.left {
+  align-self: stretch;
+  width: 834.5px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.annie {
+  flex: 1;
+  position: relative;
+  line-height: 100%;
+}
+.nickname {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+  max-width: 220px;
+}
+.gender {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+  max-width: 226px;
+}
+.b4 {
+  width: 30px;
+  position: relative;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  max-width: 30px;
+}
+.age {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+  max-width: 108px;
+}
+.rankInFamily {
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+  max-width: 240px;
+}
+.right {
+  align-self: stretch;
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 27px;
+}
+.top {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+}
+.citizenship {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+}
+.dob {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+}
+.top1 {
+  align-self: stretch;
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+}
+.sec2 {
+  align-self: stretch;
+  border: 1px solid #000;
+  box-sizing: border-box;
+  height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 6px 12px;
+}
+.b9 {
+  align-self: stretch;
+  width: 8px;
+  position: relative;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.parent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+}
+.address {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  height: 80px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px;
+}
+.sec3 {
+  align-self: stretch;
+  border: 1px solid #000;
+  box-sizing: border-box;
+  height: 92px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: center;
+  padding: 6px 12px;
+}
+.studentsInformation {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.section {
+  width: 100px;
+  position: relative;
+  line-height: 100%;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.txtSection {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.radioBtnChild {
+  position: absolute;
+  height: 110.71%;
+  width: 110.71%;
+  top: -5.36%;
+  right: -5.36%;
+  bottom: -5.36%;
+  left: -5.36%;
+  border-radius: 50%;
+  border: 3px solid #5f84fe;
+  box-sizing: border-box;
+}
+.radioBtn {
+  width: 28px;
+  position: relative;
+  height: 28px;
+}
+.ecp {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+}
+.radioBtnChild1 {
+  position: absolute;
+  height: 57.14%;
+  width: 57.14%;
+  top: 21.43%;
+  right: 21.43%;
+  bottom: 21.43%;
+  left: 21.43%;
+  border-radius: 50%;
+  background-color: #5f84fe;
+}
+.grade {
+  border-bottom: 1px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 100px 12px 12px;
+  gap: 10px;
+}
+.major {
+  width: 250px;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 10px;
+}
+.top2 {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0px 12px;
+  gap: 32px;
+}
+.checkBoxChild {
+  position: absolute;
+  height: 112.5%;
+  width: 112.5%;
+  top: -6.25%;
+  right: -6.25%;
+  bottom: -6.25%;
+  left: -6.25%;
+  border-radius: 4px;
+  border: 3px solid #5f84fe;
+  box-sizing: border-box;
+}
+.checkBox {
+  width: 24px;
+  position: relative;
+  height: 24px;
+}
+.cambridge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+}
+.other1 {
+  width: 458px;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 0px 12px 12px;
+  gap: 10px;
+}
+.content1 {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.txtTransportation {
+  width: 200px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.schoolBusDetails {
+  width: 540px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.rectangleDiv {
+  position: absolute;
+  height: 108.33%;
+  width: 108.33%;
+  top: -4.17%;
+  right: -4.17%;
+  bottom: -4.17%;
+  left: -4.17%;
+  border-radius: 4px;
+  background-color: #5f84fe;
+  border: 2px solid #5f84fe;
+  box-sizing: border-box;
+}
+.ucheckIcon {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0%;
+  right: 0%;
+  bottom: 0%;
+  left: 0%;
+  max-width: 100%;
+  overflow: hidden;
+  max-height: 100%;
+}
+.residenceHall {
+  width: 200px;
+  position: relative;
+  line-height: 100%;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.txtFather {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.johnDoe {
+  align-self: stretch;
+  position: relative;
+  line-height: 100%;
+}
+.name {
+  align-self: stretch;
+  flex: 1;
+  border-bottom: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px 0px;
+  gap: 10px;
+}
+.first {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.fieldManager {
+  width: 100%;
+  position: relative;
+  line-height: 100%;
+  display: inline-block;
+  max-width: 228.5px;
+}
+.second {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 27px;
+}
+.johndoehebatgmailcom {
+  width: 100%;
+  position: relative;
+  line-height: 100%;
+  display: inline-block;
+  max-width: 357.5px;
+}
+.b20 {
+  width: 5px;
+  position: relative;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.address2 {
+  width: 830px;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 12px 0px;
+  gap: 10px;
+}
+.fourth {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.fatherInfo {
+  align-self: stretch;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px 12px;
+}
+.father {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.father1 {
+  width: 854px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.left1 {
+  flex: 1;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px 0px;
+}
+.address6 {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  height: 74px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 12px 0px;
+  gap: 10px;
+}
+.right1 {
+  align-self: stretch;
+  flex: 0.9718;
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: center;
+  padding: 6px 12px;
+}
+.guardianInfo {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.bottom5 {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0px 12px;
+  gap: 32px;
+}
+.tuitionFee {
+  width: 590.7px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.bottom7 {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0px 12px;
+}
+.weParent {
+  font-family: Poppins;
+}
+.weParentJohnJaneDoeA {
+  margin: 0;
+}
+.weParentJohnContainer {
+  align-self: stretch;
+  position: relative;
+  line-height: 150%;
+}
+.date1 {
+  align-self: stretch;
+  width: 42px;
+  position: relative;
+  line-height: 100%;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.september20251 {
+  align-self: stretch;
+  width: 1720px;
+  position: relative;
+  line-height: 150%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.studentName {
+  position: relative;
+  line-height: 100%;
+  font-weight: 500;
+}
+.txtStudentNameAndSignature {
+  align-self: stretch;
+  border-top: 0.9px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.studentNameAndSignature {
+  flex: 1;
+  height: 198px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0px;
+}
+.parentGuardianSignature {
+  flex: 1;
+  height: 198px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0px;
+}
+.signature {
+  align-self: stretch;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px;
+  gap: 12px;
+  font-size: 16px;
+}
+.radioBtnChild15 {
+  position: absolute;
+  height: 110%;
+  width: 110%;
+  top: -5.06%;
+  right: -4.94%;
+  bottom: -4.94%;
+  left: -5.06%;
+  border-radius: 50%;
+  border: 2.8px solid #5f84fe;
+  box-sizing: border-box;
+}
+.complete1 {
+  width: 104px;
+  position: relative;
+  line-height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.complete {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 11.3px;
+  gap: 9.4px;
+}
+.status {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0px 11.3px;
+  gap: 30.2px;
+}
+.txtIcDocs {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 11.3px;
+}
+.note {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0px 11.3px;
+}
+.content6 {
+  align-self: stretch;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  gap: 18.9px;
+  font-size: 16px;
+}
+.officeUseNote {
+  flex: 1;
+  height: 302px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 9.4px;
+}
+.txtApprovedBy {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 2.8px 0px;
+}
+.principal {
+  align-self: stretch;
+  border-bottom: 0.9px solid #000;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+.approvedBy {
+  flex: 1;
+  height: 302px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 66.1px;
+  font-size: 16px;
+}
+.otherDetail {
+  align-self: stretch;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px;
+  gap: 12px;
+}
+.form {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  font-size: 20px;
+  font-family: Poppins;
+}
+.printPageA4 {
+  width: 1816px;
+  min-width: 1816px;
+  max-width: 1816px;
+  position: relative;
+  background-color: #fff;
+  height: 2570px;
+  overflow: hidden;
+  padding: 10px 48px;
+  box-sizing: border-box;
+  gap: 6px;
+  text-align: left;
+  font-size: 16px;
+  color: #000;
+  font-family: Inter;
+} 
+
+.program {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+} 
+
+.facilities {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+} 
+
+.parentsguardianInformation {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+} 
+
+.termOfPayment {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.pledge {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.newFormBtn {
+  background: #7b7bfa !important;
+  color: #fff !important;
+  margin-right: 16px;
+}

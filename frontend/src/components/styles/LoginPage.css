@@ -1,0 +1,102 @@
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  flex-direction: row;
+}
+
+.login-left {
+  flex: 0.7;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 0 0 13vw;
+  background: #fff;
+  z-index: 2;
+  min-width: 260px;
+  box-sizing: border-box;
+}
+
+.login-right {
+  flex: 1.3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  min-width: 0;
+  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  background-color: #fff;
+}
+
+.login-illustration {
+  max-width: 100%;
+  max-height: 100vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  mix-blend-mode: darken;
+}
+
+@media (max-width: 1200px) {
+  .login-left {
+    padding-left: 3vw;
+  }
+}
+
+@media (max-width: 900px) {
+  .login-page {
+    flex-direction: column;
+    min-height: unset;
+  }
+  .login-left {
+    width: 100vw;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 0 0 0;
+  }
+  .login-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    min-width: unset;
+    min-height: unset;
+    overflow: hidden;
+    pointer-events: none;
+    /* konten tetap di tempat, tidak responsif, ter-clip jika layar kecil */
+  }
+  .login-illustration {
+    max-width: 340px;
+    max-height: 220px;
+    margin-top: 16px;
+  }
+}
+@media (max-width: 600px) {
+  .login-left {
+    width: 100vw;
+    padding: 0 8px;
+  }
+  .login-right {
+    width: 100vw;
+    height: 100vh;
+    min-width: unset;
+    min-height: unset;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .login-illustration {
+    max-width: 100vw;
+    max-height: 120px;
+  }
+}
+
+
