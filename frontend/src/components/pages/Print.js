@@ -138,7 +138,7 @@ function Print() {
         No preview data found
       </div>
     );
-
+  // eslint-disable-next-line
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -180,6 +180,8 @@ function Print() {
             border: '2px solid #7b7bfa',
             borderRadius: '6px',
             cursor: 'pointer',
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: '600',
           }}
         >
           Back to Home
@@ -195,6 +197,8 @@ function Print() {
             border: 'none',
             borderRadius: '6px',
             cursor: isPrinting ? 'not-allowed' : 'pointer',
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: '600',
           }}
         >
           {isPrinting ? 'Generating PDF...' : 'Print'}
@@ -226,12 +230,6 @@ function Print() {
             <b className={styles.applicationForm}>APPLICATION FORM</b>
           </div>
           <div className={styles.formInfo}>
-            <div className={styles.dateParent}>
-              <b className={styles.applicationForm}>Date:</b>
-              <b className={styles.applicationForm}>
-                {formatDate(previewData.enrollment?.registration_date) || ''}
-              </b>
-            </div>
             <div className={styles.semesterParent}>
               <b className={styles.applicationForm}>Semester:</b>
               <b className={styles.applicationForm}>
@@ -239,13 +237,13 @@ function Print() {
                   ''}
               </b>
             </div>
-            <div className={styles.semesterParent}>
+            <div className={styles.semesterChild}>
               <b className={styles.applicationForm}>School Year:</b>
               <b className={styles.applicationForm}>
                 {previewData.enrollment?.school_year?.year || ''}
               </b>
             </div>
-            <div className={styles.semesterParent}>
+            <div className={styles.semesterChild}>
               <b className={styles.applicationForm}>Registration Number:</b>
               <b className={styles.applicationForm}>
                 {previewData.registration_number}
