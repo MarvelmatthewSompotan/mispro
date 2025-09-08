@@ -17,7 +17,7 @@ function SignatureContent({ enrollment }) {
         <div className={styles.txtDate}>
           <div className={styles.date}>Date:</div>
           <b className={styles.contentDate}>
-            {formatDate(student.registration_date)}
+            {formatDate(enrollment.registration_date)}
           </b>
         </div>
         <div className={styles.txtStudentNameAndSignature}>
