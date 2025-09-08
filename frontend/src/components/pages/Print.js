@@ -29,27 +29,33 @@ function Print() {
   const [programOptions, setProgramOptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 State baru untuk loading tombol Print
+  // 🔹 State untuk loading tombol Print
   const [isPrinting, setIsPrinting] = useState(false);
 
   // Fungsi untuk download PDF manual
   const downloadPDF = async () => {
     if (!printRef.current || !previewData?.student) return;
 
-    setIsPrinting(true); // mulai loading
+    setIsPrinting(true);
     try {
       const element = printRef.current;
+
+      // render canvas dengan kualitas tinggi
       const canvas = await html2canvas(element, {
         scale: 2,
+        useCORS: true,
         ignoreElements: (el) => el.classList.contains('no-print'),
       });
 
-      const imgData = canvas.toDataURL('image/png');
+      // simpan jadi JPEG (lebih kecil dari PNG)
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // tambah image ke PDF dengan kompresi
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
 
       const studentName = `${previewData.student.first_name} ${previewData.student.last_name}`
         .replace(/[\\?%*:|"<>]/g, '-');
@@ -58,7 +64,7 @@ function Print() {
     } catch (error) {
       console.error("Failed to generate PDF:", error);
     } finally {
-      setIsPrinting(false); // selesai loading
+      setIsPrinting(false);
     }
   };
 
@@ -193,6 +199,7 @@ function Print() {
         </button>
       </div>
 
+      {/* Konten PDF */}
       <div ref={printRef} className={styles.printPageA4}>
         <div className={styles.header}>
           <div className={styles.headerRow}>
@@ -221,8 +228,7 @@ function Print() {
             <div className={styles.semesterParent}>
               <b className={styles.applicationForm}>Semester:</b>
               <b className={styles.applicationForm}>
-                {getSemesterNumber(previewData.enrollment?.semester?.number) ||
-                  ''}
+                {getSemesterNumber(previewData.enrollment?.semester?.number) || ''}
               </b>
             </div>
             <div className={styles.semesterChild}>
