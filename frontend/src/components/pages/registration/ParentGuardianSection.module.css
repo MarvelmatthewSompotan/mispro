@@ -376,3 +376,54 @@ textarea::placeholder {
     min-width: 0;
   }
 }
+
+/* Add these styles to ParentGuardianSection.module.css */
+/* (Copied and adapted from StudentInformationSection.module.css) */
+
+.parentErrorLabel {
+  color: #ff4444 !important;
+  font-weight: 500 !important;
+}
+
+.parentErrorInput {
+  color: #ff4444 !important;
+}
+
+.parentErrorFieldWrapper input {
+  /* This will be handled by parentErrorInput, but you can add more here if needed */
+  transition: color 0.2s ease;
+}
+
+/* Wrapper to hold input and its inline error message */
+.inputWithError {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Atur agar input mengisi ruang yang tersedia */
+.inputWithError .value {
+  flex-grow: 1; /* Input akan membesar mengisi sisa ruang */
+  width: auto; /* Hapus width tetap agar bisa fleksibel */
+}
+
+.inputWithError input {
+  flex-grow: 1; /* Make input take available space */
+}
+
+/* The inline error message itself */
+.inlineErrorMessage {
+  color: #ff4444;
+  font-family: "Poppins", Arial, sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 4px 8px;
+  background-color: rgba(255, 68, 68, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid #ff4444;
+}

@@ -62,6 +62,7 @@ const ParentGuardianSection = ({
   const [fatherErrors, setFatherErrors] = useState({
     name: false,
     phone: false,
+    email: false,
     street: false,
     village: false,
     district: false,
@@ -73,6 +74,7 @@ const ParentGuardianSection = ({
   const [motherErrors, setMotherErrors] = useState({
     name: false,
     phone: false,
+    email: false,
     street: false,
     village: false,
     district: false,
@@ -106,6 +108,7 @@ const ParentGuardianSection = ({
         ...(errors.father_phone !== undefined && {
           phone: errors.father_phone,
         }),
+        ...(forceError.father_email && { email: true }),
         ...(errors.father_address_street !== undefined && {
           street: errors.father_address_street,
         }),
@@ -130,6 +133,7 @@ const ParentGuardianSection = ({
         ...(errors.mother_phone !== undefined && {
           phone: errors.mother_phone,
         }),
+        ...(forceError.mother_email && { email: true }),
         ...(errors.mother_address_street !== undefined && {
           street: errors.mother_address_street,
         }),
@@ -571,7 +575,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={father.name}
                     onChange={handleChange(setFather, "name", "father")}
-                    placeholder="JOHN DOE"
+                    placeholder="John Doe"
                   />
                 </div>
               </div>
@@ -585,7 +589,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={father.company}
                     onChange={handleChange(setFather, "company", "father")}
-                    placeholder="PT. MULTI RAKYAT"
+                    placeholder="PT. Multi Rakyat"
                   />
                 </div>
                 <div className={styles.fieldGroup}>
@@ -597,7 +601,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={father.occupation}
                     onChange={handleChange(setFather, "occupation", "father")}
-                    placeholder="FIELD MANAGER"
+                    placeholder="Field Manager"
                   />
                 </div>
               </div>
@@ -614,27 +618,57 @@ const ParentGuardianSection = ({
                   >
                     Phone number
                   </div>
-                  <input
-                    className={`${styles.value} ${
-                      father.phone ? styles.filled : ""
-                    } ${fatherErrors.phone ? styles.parentErrorInput : ""}`}
-                    type="tel"
-                    value={father.phone}
-                    onChange={handleChange(setFather, "phone", "father")}
-                    placeholder="089281560955"
-                  />
+                  <div className={styles.inputWithError}>
+                    <input
+                      className={`${styles.value} ${
+                        father.phone ? styles.filled : ""
+                      } ${fatherErrors.phone ? styles.parentErrorInput : ""}`}
+                      type="tel"
+                      value={father.phone}
+                      maxLength="20"
+                      onChange={handleChange(setFather, "phone", "father")}
+                      placeholder="089281560955"
+                    />
+                    {fatherErrors.phone && (
+                      <div className={styles.inlineErrorMessage}>
+                        {/* Pesan default diubah agar konsisten */}
+                        {typeof fatherErrors.phone === "string"
+                          ? fatherErrors.phone
+                          : "Phone number must be at most 20 characters"}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className={styles.fieldGroup}>
-                  <div className={styles.label}>Email</div>
-                  <input
-                    className={`${styles.value} ${
-                      father.email ? styles.filled : ""
+                <div
+                  className={`${styles.fieldGroup} ${
+                    fatherErrors.email ? styles.parentErrorFieldWrapper : ""
+                  }`}
+                >
+                  <div
+                    className={`${styles.label} ${
+                      fatherErrors.email ? styles.parentErrorLabel : ""
                     }`}
-                    type="email"
-                    value={father.email}
-                    onChange={handleChange(setFather, "email", "father")}
-                    placeholder="JOHNDOEHEBAT@GMAIL.COM"
-                  />
+                  >
+                    Email
+                  </div>
+                  <div className={styles.inputWithError}>
+                    <input
+                      className={`${styles.value} ${
+                        father.email ? styles.filled : ""
+                      } ${fatherErrors.email ? styles.parentErrorInput : ""}`}
+                      type="email"
+                      value={father.email}
+                      onChange={handleChange(setFather, "email", "father")}
+                      placeholder="Johndoehebat@gmail.com"
+                    />
+                    {fatherErrors.email && (
+                      <div className={styles.inlineErrorMessage}>
+                        {typeof fatherErrors.email === "string"
+                          ? fatherErrors.email
+                          : "Please enter a valid email address"}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className={styles.addressSection}>
@@ -658,7 +692,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={father.street}
                       onChange={handleChange(setFather, "street", "father")}
-                      placeholder="JL. SARUNDAJANG 01"
+                      placeholder="JL. Sarundajang 01"
                     />
                   </div>
                   <div className={styles.rtRwGroup}>
@@ -708,7 +742,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={father.village}
                       onChange={handleChange(setFather, "village", "father")}
-                      placeholder="GIRIAN"
+                      placeholder="Girian"
                     />
                   </div>
                   <div
@@ -734,7 +768,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={father.district}
                       onChange={handleChange(setFather, "district", "father")}
-                      placeholder="RANOWULU"
+                      placeholder="Danowudu"
                     />
                   </div>
                 </div>
@@ -758,7 +792,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={father.city}
                       onChange={handleChange(setFather, "city", "father")}
-                      placeholder="KOTAMOBAGU"
+                      placeholder="Kotamobagu"
                     />
                   </div>
                   <div
@@ -784,7 +818,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={father.province}
                       onChange={handleChange(setFather, "province", "father")}
-                      placeholder="NORTH SULAWESI"
+                      placeholder="North Sulawesi"
                     />
                   </div>
                 </div>
@@ -799,7 +833,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={father.other}
                       onChange={handleChange(setFather, "other", "father")}
-                      placeholder="DAHLIA APARTEMENT UNIT 5023"
+                      placeholder="Dahlia Apartement Unit 502"
                     />
                     <span className={styles.bracket}>)</span>
                   </div>
@@ -836,7 +870,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={mother.name}
                     onChange={handleChange(setMother, "name", "mother")}
-                    placeholder="JOHN DOE"
+                    placeholder="Jane Doe"
                   />
                 </div>
               </div>
@@ -850,7 +884,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={mother.company}
                     onChange={handleChange(setMother, "company", "mother")}
-                    placeholder="PT. MULTI RAKYAT"
+                    placeholder="PT. Multi Rakyat"
                   />
                 </div>
                 <div className={styles.fieldGroup}>
@@ -862,7 +896,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={mother.occupation}
                     onChange={handleChange(setMother, "occupation", "mother")}
-                    placeholder="FIELD MANAGER"
+                    placeholder="Field Manager"
                   />
                 </div>
               </div>
@@ -879,27 +913,57 @@ const ParentGuardianSection = ({
                   >
                     Phone number
                   </div>
-                  <input
-                    className={`${styles.value} ${
-                      mother.phone ? styles.filled : ""
-                    } ${motherErrors.phone ? styles.parentErrorInput : ""}`}
-                    type="tel"
-                    value={mother.phone}
-                    onChange={handleChange(setMother, "phone", "mother")}
-                    placeholder="089281560955"
-                  />
+                  <div className={styles.inputWithError}>
+                    <input
+                      className={`${styles.value} ${
+                        mother.phone ? styles.filled : ""
+                      } ${motherErrors.phone ? styles.parentErrorInput : ""}`}
+                      type="tel"
+                      value={mother.phone}
+                      maxLength="20" // Atribut ini sudah membatasi input pengguna
+                      onChange={handleChange(setMother, "phone", "mother")}
+                      placeholder="089281560955"
+                    />
+                    {motherErrors.phone && (
+                      <div className={styles.inlineErrorMessage}>
+                        {/* Pesan error diubah sesuai requirement Anda */}
+                        {typeof motherErrors.phone === "string"
+                          ? motherErrors.phone
+                          : "Phone number must be at most 20 characters"}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className={styles.fieldGroup}>
-                  <div className={styles.label}>Email</div>
-                  <input
-                    className={`${styles.value} ${
-                      mother.email ? styles.filled : ""
+                <div
+                  className={`${styles.fieldGroup} ${
+                    motherErrors.email ? styles.parentErrorFieldWrapper : ""
+                  }`}
+                >
+                  <div
+                    className={`${styles.label} ${
+                      motherErrors.email ? styles.parentErrorLabel : ""
                     }`}
-                    type="email"
-                    value={mother.email}
-                    onChange={handleChange(setMother, "email", "mother")}
-                    placeholder="JOHNDOEHEBAT@GMAIL.COM"
-                  />
+                  >
+                    Email
+                  </div>
+                  <div className={styles.inputWithError}>
+                    <input
+                      className={`${styles.value} ${
+                        mother.email ? styles.filled : ""
+                      } ${motherErrors.email ? styles.parentErrorInput : ""}`}
+                      type="email"
+                      value={mother.email}
+                      onChange={handleChange(setMother, "email", "mother")}
+                      placeholder="Janedoehebat@gmail.com"
+                    />
+                    {motherErrors.email && (
+                      <div className={styles.inlineErrorMessage}>
+                        {typeof motherErrors.email === "string"
+                          ? motherErrors.email
+                          : "Please enter a valid email address"}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className={styles.addressSection}>
@@ -923,7 +987,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={mother.street}
                       onChange={handleChange(setMother, "street", "mother")}
-                      placeholder="JL. SARUNDAJANG 01"
+                      placeholder="JL. Sarundajang 01"
                     />
                   </div>
                   <div className={styles.rtRwGroup}>
@@ -973,7 +1037,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={mother.village}
                       onChange={handleChange(setMother, "village", "mother")}
-                      placeholder="GIRIAN"
+                      placeholder="Girian"
                     />
                   </div>
                   <div
@@ -999,7 +1063,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={mother.district}
                       onChange={handleChange(setMother, "district", "mother")}
-                      placeholder="RANOWULU"
+                      placeholder="Danowudu"
                     />
                   </div>
                 </div>
@@ -1023,7 +1087,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={mother.city}
                       onChange={handleChange(setMother, "city", "mother")}
-                      placeholder="KOTAMOBAGU"
+                      placeholder="Kotamobagu"
                     />
                   </div>
                   <div
@@ -1049,7 +1113,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={mother.province}
                       onChange={handleChange(setMother, "province", "mother")}
-                      placeholder="NORTH SULAWESI"
+                      placeholder="North Sulawesi"
                     />
                   </div>
                 </div>
@@ -1064,7 +1128,7 @@ const ParentGuardianSection = ({
                       type="text"
                       value={mother.other}
                       onChange={handleChange(setMother, "other", "mother")}
-                      placeholder="DAHLIA APARTEMENT UNIT 5023"
+                      placeholder="Dahlia Apartement Unit 502"
                     />
                     <span className={styles.bracket}>)</span>
                   </div>
@@ -1091,7 +1155,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={guardian.name}
                     onChange={handleChange(setGuardian, "name", "guardian")}
-                    placeholder="JOHN DOE"
+                    placeholder="John Doe"
                   />
                 </div>
               </div>
@@ -1109,7 +1173,7 @@ const ParentGuardianSection = ({
                       "relationship",
                       "guardian"
                     )}
-                    placeholder="UNCLE"
+                    placeholder="Uncle"
                   />
                 </div>
               </div>
@@ -1135,7 +1199,7 @@ const ParentGuardianSection = ({
                     type="email"
                     value={guardian.email}
                     onChange={handleChange(setGuardian, "email", "guardian")}
-                    placeholder="JOHNDOE@GMAIL.COM"
+                    placeholder="Johndoe@gmail.com"
                   />
                 </div>
               </div>
@@ -1149,7 +1213,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={guardian.street}
                     onChange={handleChange(setGuardian, "street", "guardian")}
-                    placeholder="JL. SARUNDAJANG 01"
+                    placeholder="JL. Sarundajang 01"
                   />
                 </div>
                 <div className={styles.rtRwGroup}>
@@ -1189,7 +1253,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={guardian.village}
                     onChange={handleChange(setGuardian, "village", "guardian")}
-                    placeholder="GIRIAN"
+                    placeholder="Girian"
                   />
                 </div>
                 <div className={styles.fieldGroup}>
@@ -1201,7 +1265,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={guardian.district}
                     onChange={handleChange(setGuardian, "district", "guardian")}
-                    placeholder="RANOWULU"
+                    placeholder="Danowudu"
                   />
                 </div>
               </div>
@@ -1215,7 +1279,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={guardian.city}
                     onChange={handleChange(setGuardian, "city", "guardian")}
-                    placeholder="KOTAMOBAGU"
+                    placeholder="Kotamobagu"
                   />
                 </div>
                 <div className={styles.fieldGroup}>
@@ -1227,7 +1291,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={guardian.province}
                     onChange={handleChange(setGuardian, "province", "guardian")}
-                    placeholder="NORTH SULAWESI"
+                    placeholder="North Sulawesi"
                   />
                 </div>
               </div>
@@ -1242,7 +1306,7 @@ const ParentGuardianSection = ({
                     type="text"
                     value={guardian.other}
                     onChange={handleChange(setGuardian, "other", "guardian")}
-                    placeholder="DAHLIA APARTEMENT UNIT 5023"
+                    placeholder="Dahlia Apartement Unit 502"
                   />
                   <span className={styles.bracket}>)</span>
                 </div>

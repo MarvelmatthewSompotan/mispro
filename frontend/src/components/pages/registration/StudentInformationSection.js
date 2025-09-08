@@ -53,9 +53,9 @@ const StudentInformationSection = ({
   const [street, setStreet] = useState("");
   const [streetError, setStreetError] = useState(false);
   const [rt, setRt] = useState("0");
-  const [rtError, setRtError] = useState(false); // Tambah state error untuk RT
+  const [rtError, setRtError] = useState(false);
   const [rw, setRw] = useState("0");
-  const [rwError, setRwError] = useState(false); // Tambah state error untuk RW
+  const [rwError, setRwError] = useState(false);
   const [village, setVillage] = useState("");
   const [villageError, setVillageError] = useState(false);
   const [district, setDistrict] = useState("");
@@ -65,15 +65,11 @@ const StudentInformationSection = ({
   const [province, setProvince] = useState("");
   const [provinceError, setProvinceError] = useState(false);
   const [otherAddress, setOtherAddress] = useState("");
-  const [otherAddressError, setOtherAddressError] = useState(false); // Tambah state error untuk Other Address
+  const [otherAddressError, setOtherAddressError] = useState(false);
 
-  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
-  // eslint-disable-next-line
   const isInitialPrefill = useRef(true);
-  // eslint-disable-next-line
   const hasInitialized = useRef(false);
 
-  // Fetch dropdown data
   useEffect(() => {
     getRegistrationOptions()
       .then((data) => {
@@ -84,11 +80,8 @@ const StudentInformationSection = ({
       });
   }, []);
 
-  // Prefill hanya sekali saat component pertama kali mount atau saat prefill berubah signifikan
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-      console.log("Prefilling StudentInformationSection with:", prefill);
-
       if (prefill.first_name) setFirstName(prefill.first_name);
       if (prefill.middle_name) setMiddleName(prefill.middle_name);
       if (prefill.last_name) setLastName(prefill.last_name);
@@ -118,8 +111,6 @@ const StudentInformationSection = ({
       if (prefill.province) setProvince(prefill.province);
       if (prefill.other) setOtherAddress(prefill.other);
     } else if (Object.keys(prefill).length === 0) {
-      // Jika prefill menjadi empty object (reset form), reset semua field
-      console.log("Resetting StudentInformationSection form");
       setFirstName("");
       setMiddleName("");
       setLastName("");
@@ -151,10 +142,8 @@ const StudentInformationSection = ({
     }
   }, [prefill]);
 
-  // Terima error state dari parent component
   useEffect(() => {
     if (errors) {
-      // Student Information fields
       if (errors.first_name !== undefined) setFirstNameError(errors.first_name);
       if (errors.nickname !== undefined) setNicknameError(errors.nickname);
       if (errors.nisn !== undefined) setNisnError(errors.nisn);
@@ -174,19 +163,18 @@ const StudentInformationSection = ({
         setPreviousSchoolError(errors.previous_school);
       if (errors.phone_number !== undefined) setPhoneError(errors.phone_number);
       if (errors.street !== undefined) setStreetError(errors.street);
-      if (errors.rt !== undefined) setRtError(errors.rt); // Tambah error handling untuk RT
-      if (errors.rw !== undefined) setRwError(errors.rw); // Tambah error handling untuk RW
+      if (errors.rt !== undefined) setRtError(errors.rt);
+      if (errors.rw !== undefined) setRwError(errors.rw);
       if (errors.village !== undefined) setVillageError(errors.village);
       if (errors.district !== undefined) setDistrictError(errors.district);
       if (errors.city_regency !== undefined) setCityError(errors.city_regency);
       if (errors.province !== undefined) setProvinceError(errors.province);
-      if (errors.other !== undefined) setOtherAddressError(errors.other); // Tambah error handling untuk Other Address
+      if (errors.other !== undefined) setOtherAddressError(errors.other);
       if (errors.academic_status !== undefined)
-        setAcademicStatusError(errors.academic_status); // Tambahkan kembali
+        setAcademicStatusError(errors.academic_status);
     }
   }, [errors]);
 
-  // Terima forceError prop untuk testing
   useEffect(() => {
     if (forceError) {
       if (forceError.first_name) setFirstNameError(true);
@@ -204,18 +192,17 @@ const StudentInformationSection = ({
       if (forceError.previous_school) setPreviousSchoolError(true);
       if (forceError.phone_number) setPhoneError(true);
       if (forceError.street) setStreetError(true);
-      if (forceError.rt) setRtError(true); // Tambah forceError untuk RT
-      if (forceError.rw) setRwError(true); // Tambah forceError untuk RW
+      if (forceError.rt) setRtError(true);
+      if (forceError.rw) setRwError(true);
       if (forceError.village) setVillageError(true);
       if (forceError.district) setDistrictError(true);
       if (forceError.city_regency) setCityError(true);
       if (forceError.province) setProvinceError(true);
-      if (forceError.other) setOtherAddressError(true); // Tambah forceError untuk Other Address
-      if (forceError.academic_status) setAcademicStatusError(true); // Tambahkan kembali
+      if (forceError.other) setOtherAddressError(true);
+      if (forceError.academic_status) setAcademicStatusError(true);
     }
   }, [forceError]);
 
-  // Validasi NIK (16 angka)
   const validateNIK = (value) => {
     if (value && value.length !== 16) {
       setNikError(true);
@@ -226,17 +213,14 @@ const StudentInformationSection = ({
   };
 
   const validateKITAS = (value) => {
-    // Tampilkan error jika value ada tapi panjangnya < 11 atau > 16
     if (value && (value.length < 11 || value.length > 16)) {
       setKitasError(true);
       return false;
     }
-    // Jika valid, hilangkan error
     setKitasError(false);
     return true;
   };
 
-  // Validasi NISN (10 angka)
   const validateNISN = (value) => {
     if (value && value.length !== 10) {
       setNisnError(true);
@@ -307,9 +291,7 @@ const StudentInformationSection = ({
     const value = opt ? opt.value : "";
     setCitizenship(value);
     if (citizenshipError && value) setCitizenshipError(false);
-
     let updatedData = { citizenship: value };
-
     if (value === "Indonesia") {
       setKitas("");
       setForeignCountry("");
@@ -367,15 +349,13 @@ const StudentInformationSection = ({
 
   const handleRt = (value) => {
     setRt(value);
-    if (rtError && value.trim()) setRtError(false); // Clear error jika ada value
-    // Kirim "0" jika value kosong, otherwise kirim value asli
+    if (rtError && value.trim()) setRtError(false);
     onDataChange({ rt: value.trim() === "" ? "0" : value });
   };
 
   const handleRw = (value) => {
     setRw(value);
-    if (rwError && value.trim()) setRwError(false); // Clear error jika ada value
-    // Kirim "0" jika value kosong, otherwise kirim value asli
+    if (rwError && value.trim()) setRwError(false);
     onDataChange({ rw: value.trim() === "" ? "0" : value });
   };
 
@@ -405,12 +385,9 @@ const StudentInformationSection = ({
 
   const handleOtherAddress = (value) => {
     setOtherAddress(value);
-    if (otherAddressError && value.trim()) setOtherAddressError(false); // Clear error jika ada value
+    if (otherAddressError && value.trim()) setOtherAddressError(false);
     onDataChange({ other: value });
   };
-
-  // Hapus useEffect untuk error state
-  // Hapus useEffect untuk forceError
 
   const updateAge = useCallback(
     (newAge) => {
@@ -420,34 +397,21 @@ const StudentInformationSection = ({
     [onDataChange]
   );
 
-  // Tambahkan useEffect untuk menampilkan age otomatis
   useEffect(() => {
     if (dateOfBirth) {
       try {
         const dob = new Date(dateOfBirth);
         const now = new Date();
-
-        // Pastikan tanggal valid
-        if (isNaN(dob.getTime())) {
+        if (isNaN(dob.getTime()) || dob > now) {
           updateAge("");
           return;
         }
-
-        // Pastikan tanggal tidak di masa depan
-        if (dob > now) {
-          updateAge("");
-          return;
-        }
-
-        // Hitung umur dalam tahun dan bulan (sementara, nanti akan diganti backend)
         let years = now.getFullYear() - dob.getFullYear();
         let months = now.getMonth() - dob.getMonth();
-
         if (months < 0 || (months === 0 && now.getDate() < dob.getDate())) {
           years--;
           months += 12;
         }
-
         const calculatedAge = `${years} years, ${months} months`;
         updateAge(calculatedAge);
       } catch (error) {
@@ -605,8 +569,7 @@ const StudentInformationSection = ({
                     border: "none",
                     boxShadow: "none",
                     borderRadius: 0,
-                    borderBottom:
-                      "none" /* HAPUS border bottom untuk dropdown */,
+                    borderBottom: "none",
                     background: "transparent",
                   }),
                   singleValue: (base) => ({
@@ -787,7 +750,7 @@ const StudentInformationSection = ({
                     value={kitas}
                     onChange={(e) => handleKitas(e.target.value)}
                     placeholder="KITAS (11-16 characters)"
-                    maxLength={16} // Batasi input maksimal 16 karakter
+                    maxLength={16}
                   />
                   {kitasError && (
                     <div className={styles.inlineErrorMessage}>
@@ -892,8 +855,7 @@ const StudentInformationSection = ({
                     border: "none",
                     boxShadow: "none",
                     borderRadius: 0,
-                    borderBottom:
-                      "none" /* HAPUS border bottom untuk dropdown */,
+                    borderBottom: "none",
                     background: "transparent",
                   }),
                   singleValue: (base) => ({
@@ -976,26 +938,33 @@ const StudentInformationSection = ({
               >
                 Email address
               </label>
-              <input
-                id="email"
-                className={`${styles.valueHighlight} ${
-                  email ? "hasValue" : ""
-                } ${emailError ? styles.errorInput : ""}`}
-                type="email"
-                value={email}
-                onChange={(e) => {
-                  handleEmail(e.target.value);
-                  if (emailError && e.target.value.trim()) {
-                    setEmailError(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (emailError) {
-                    setEmailError(false);
-                  }
-                }}
-                placeholder="Email address"
-              />
+              <div className={styles.inputWithError}>
+                <input
+                  id="email"
+                  className={`${styles.valueHighlight} ${
+                    email ? "hasValue" : ""
+                  } ${emailError ? styles.errorInput : ""}`}
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    handleEmail(e.target.value);
+                    if (emailError && e.target.value.trim()) {
+                      setEmailError(false);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (emailError) {
+                      setEmailError(false);
+                    }
+                  }}
+                  placeholder="Johndoe@gmail.com"
+                />
+                {emailError && (
+                  <div className={styles.inlineErrorMessage}>
+                    Please enter a valid email address
+                  </div>
+                )}
+              </div>
             </div>
             <div
               className={`${styles.previousSchoolField} ${
@@ -1046,26 +1015,34 @@ const StudentInformationSection = ({
               >
                 Phone number
               </label>
-              <input
-                id="phone"
-                className={`${styles.valueHighlight} ${
-                  phone ? "hasValue" : ""
-                } ${phoneError ? styles.errorInput : ""}`}
-                type="text"
-                value={phone}
-                onChange={(e) => {
-                  handlePhone(e.target.value);
-                  if (phoneError && e.target.value.trim()) {
-                    setPhoneError(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (phoneError) {
-                    setPhoneError(false);
-                  }
-                }}
-                placeholder="Phone number"
-              />
+              <div className={styles.inputWithError}>
+                <input
+                  id="phone"
+                  className={`${styles.valueHighlight} ${
+                    phone ? "hasValue" : ""
+                  } ${phoneError ? styles.errorInput : ""}`}
+                  type="text"
+                  value={phone}
+                  maxLength="20"
+                  onChange={(e) => {
+                    handlePhone(e.target.value);
+                    if (phoneError && e.target.value.trim()) {
+                      setPhoneError(false);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (phoneError) {
+                      setPhoneError(false);
+                    }
+                  }}
+                  placeholder="Phone number"
+                />
+                {phoneError && (
+                  <div className={styles.inlineErrorMessage}>
+                    Phone number must be at most 20 characters
+                  </div>
+                )}
+              </div>
             </div>
             <div
               className={`${styles.academicStatusField} ${
@@ -1096,7 +1073,6 @@ const StudentInformationSection = ({
                     }
                     onChange={(opt) => {
                       const selectedValue = opt ? opt.value : "";
-
                       if (selectedValue === "OTHER") {
                         setAcademicStatus("OTHER");
                         onDataChange({
@@ -1111,8 +1087,6 @@ const StudentInformationSection = ({
                           academic_status_other: "",
                         });
                       }
-
-                      // HILANGKAN error state academic status setelah memilih
                       if (academicStatusError) {
                         setAcademicStatusError(false);
                       }
@@ -1160,8 +1134,6 @@ const StudentInformationSection = ({
                             academic_status_other: academicStatusOther,
                           });
                         }
-
-                        // HILANGKAN error state academic status setelah memilih
                         if (academicStatusError) {
                           setAcademicStatusError(false);
                         }
@@ -1169,7 +1141,6 @@ const StudentInformationSection = ({
                       className={styles.hiddenRadio}
                     />
                     <span className={styles.otherText}>Other</span>
-
                     {academicStatus === "OTHER" && (
                       <div className={styles.otherInputWrapper}>
                         <input
