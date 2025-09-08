@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 // Tidak perlu useNavigate, Button, atau PopUpForm
 import styles from "./StudentList.module.css"; // Menggunakan CSS untuk StudentList
+import { useNavigate } from "react-router-dom";
 import searchIcon from "../../../assets/Search-icon.png";
 import {
   getRegistrations,
@@ -8,6 +9,7 @@ import {
 } from "../../../services/api";
 
 const StudentList = () => {
+  const navigate = useNavigate();
   // State data API diganti nama agar lebih sesuai
   const [studentData, setStudentData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -174,11 +176,16 @@ const StudentList = () => {
           <tbody>
             {!loading && studentData.length > 0 ? (
               studentData.map((student, idx) => {
-                const enrollment = student.enrollments[0] || {}; // ambil enrollment terbaru
+                const enrollment = student.enrollments?.[0] || {}; // ambil enrollment terbaru
                 const grade = gradeMap.get(enrollment.class_id) || "N/A";
                 return (
                   // onClick handler dihilangkan dari <tr>
-                  <tr key={idx} className={styles.tableRow}>
+                  <tr
+                    key={idx}
+                    className={styles.tableRow}
+                    onClick={() => navigate(`/students/${student.student_id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
                     {/* Isi sel tabel disesuaikan */}
                     <td className={styles.tableCell}>{student.student_id}</td>
                     <td className={styles.tableCellName}>

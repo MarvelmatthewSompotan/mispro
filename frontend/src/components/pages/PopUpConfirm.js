@@ -1,36 +1,25 @@
 import React, { useState } from "react";
 import styles from "../styles/PopUpConfirm.module.css";
 import { submitRegistrationForm } from "../../services/api";
+import WrongSectionPopup from "./registration/WrongSectionPopup";
 
 const PopUpConfirm = React.memo(
-  // BARU: Tambahkan 'onDuplicateFound' ke daftar props
   ({
     onCancel,
     onConfirm,
     draftId,
     allFormData,
-    locationState,
     navigate,
     onDuplicateFound,
   }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showWrongSectionPopup, setShowWrongSectionPopup] = useState(false);
 
     const handleConfirm = async () => {
       try {
         setIsSubmitting(true);
-
         const transformedData = transformFormData(allFormData);
-
-        console.log("=== SUBMIT DEBUG INFO ===");
-        console.log("Draft ID:", draftId);
-        console.log("Data keys:", Object.keys(transformedData));
-        console.log("========================");
-
         const response = await submitRegistrationForm(draftId, transformedData);
-        console.log("=== RESPONSE DEBUG ===");
-        console.log("Full response:", response);
-        console.log("Application ID:", response.data?.application_id);
-        console.log("======================");
 
         if (response.success) {
           navigate("/print", {
@@ -41,51 +30,47 @@ const PopUpConfirm = React.memo(
           alert("Registration failed: " + (response.error || "Unknown error"));
         }
       } catch (error) {
-        console.error("=== ERROR DEBUG INFO ===");
-        console.error("Error message:", error.message);
-        if (error.response) {
-          console.error("HTTP Status:", error.response.status);
-          // BARU: Log data error untuk mempermudah debugging
-          console.error("Error Data:", error.response.data);
-        }
-        console.error("========================");
+        const errorMessage = error.response?.data?.error || "";
+        const errorDetails = error.response?.data?.errors;
+        const generalMessage = error.response?.data?.message;
 
-        // --- KODE BARU DIMASUKKAN DI SINI ---
-        // Cek secara spesifik untuk error duplikat siswa dari backend
-        if (
-          error.response &&
-          error.response.status === 422 &&
-          error.response.data &&
-          error.response.data.error && // Sesuai dengan respons backend Anda
-          error.response.data.error.includes("Student already exists")
-        ) {
-          // Panggil fungsi onDuplicateFound yang dikirim dari parent component
+        // Cek #1: Untuk error duplikat siswa
+        if (errorMessage.includes("Student already exists")) {
           onDuplicateFound();
-          // Hentikan eksekusi agar tidak menampilkan alert generic di bawah
+          // Di sini kita panggil onCancel karena DuplicateStudentPopup di-handle oleh parent
+          onCancel();
           return;
         }
-        // --- AKHIR DARI KODE BARU ---
 
-        // Struktur kode error handling yang sudah ada tetap dipertahankan
-        if (error.data && error.data.errors) {
-          const errorMessages = Object.values(error.data.errors)
-            .flat()
-            .join(", ");
+        // Cek #2: Untuk error salah section
+        if (
+          errorMessage.includes(
+            "For different section, please register as New Student."
+          )
+        ) {
+          setShowWrongSectionPopup(true);
+          // onCancel(); // <-- BARIS INI DIHAPUS/DI-COMMENT
+          return;
+        }
+
+        // Penanganan Error Umum (Generic)
+        if (errorDetails) {
+          const errorMessages = Object.values(errorDetails).flat().join(", ");
           alert("Validation errors: " + errorMessages);
-        } else if (error.data && error.data.message) {
-          alert("Registration failed: " + error.data.message);
+        } else if (generalMessage) {
+          alert("Registration failed: " + generalMessage);
         } else {
-          alert("Registration failed: " + error.message);
+          alert(
+            "Registration failed: " +
+              (error.message || "An unknown error occurred.")
+          );
         }
       } finally {
         setIsSubmitting(false);
       }
     };
 
-    // Fungsi untuk transform data dengan field mapping yang benar (TIDAK ADA PERUBAHAN)
     const transformFormData = (formData) => {
-      console.log("Original form data:", formData);
-
       const studentStatus = formData.studentStatus?.student_status || "New";
       const inputName = formData.studentStatus?.input_name || "";
 
@@ -96,8 +81,6 @@ const PopUpConfirm = React.memo(
       const transformed = {
         student_status: studentStatus,
         input_name: inputName,
-
-        // Student information
         first_name: formData.studentInfo?.first_name || "",
         middle_name: formData.studentInfo?.middle_name || "",
         last_name: formData.studentInfo?.last_name || "",
@@ -124,8 +107,6 @@ const PopUpConfirm = React.memo(
         nisn: formData.studentInfo?.nisn || "",
         nik: formData.studentInfo?.nik || null,
         kitas: formData.studentInfo?.kitas || null,
-
-        // Student address
         street: formData.studentInfo?.street || "",
         rt: formData.studentInfo?.rt || "-",
         rw: formData.studentInfo?.rw || "-",
@@ -134,28 +115,22 @@ const PopUpConfirm = React.memo(
         city_regency: formData.studentInfo?.city_regency || "",
         province: formData.studentInfo?.province || "",
         other: formData.studentInfo?.other || null,
-
-        // Program, class, major
-        section_id: parseInt(formData.program?.section_id),
-        program_id: parseInt(formData.program?.program_id),
-        class_id: parseInt(formData.program?.class_id),
-        major_id: parseInt(formData.program?.major_id) || 1,
+        section_id: parseInt(formData.program?.section_id, 10),
+        program_id: parseInt(formData.program?.program_id, 10),
+        class_id: parseInt(formData.program?.class_id, 10),
+        major_id: parseInt(formData.program?.major_id, 10) || 1,
         program_other: formData.program?.program_other || null,
-
-        // Facilities
         transportation_id:
-          parseInt(formData.facilities?.transportation_id) || null,
+          parseInt(formData.facilities?.transportation_id, 10) || null,
         pickup_point_id: formData.facilities?.pickup_point_id
-          ? parseInt(formData.facilities.pickup_point_id)
+          ? parseInt(formData.facilities.pickup_point_id, 10)
           : null,
         pickup_point_custom: formData.facilities?.pickup_point_custom || null,
         transportation_policy:
           formData.facilities?.transportation_policy || "Not Signed",
-        residence_id: parseInt(formData.facilities?.residence_id) || 3,
+        residence_id: parseInt(formData.facilities?.residence_id, 10) || 3,
         residence_hall_policy:
           formData.facilities?.residence_hall_policy || "Not Signed",
-
-        // Parent/Guardian (father)
         father_name: formData.parentGuardian?.father_name || null,
         father_company: formData.parentGuardian?.father_company || null,
         father_occupation: formData.parentGuardian?.father_occupation || null,
@@ -177,8 +152,6 @@ const PopUpConfirm = React.memo(
           formData.parentGuardian?.father_address_other || null,
         father_company_addresses:
           formData.parentGuardian?.father_company_addresses || null,
-
-        // Parent/Guardian (mother)
         mother_name: formData.parentGuardian?.mother_name || null,
         mother_company: formData.parentGuardian?.mother_company || null,
         mother_occupation: formData.parentGuardian?.mother_occupation || null,
@@ -200,8 +173,6 @@ const PopUpConfirm = React.memo(
           formData.parentGuardian?.mother_address_other || null,
         mother_company_addresses:
           formData.parentGuardian?.mother_company_addresses || null,
-
-        // Guardian
         guardian_name: formData.parentGuardian?.guardian_name || null,
         relation_to_student:
           formData.parentGuardian?.relation_to_student || null,
@@ -223,61 +194,64 @@ const PopUpConfirm = React.memo(
           formData.parentGuardian?.guardian_address_province || null,
         guardian_address_other:
           formData.parentGuardian?.guardian_address_other || null,
-
-        // Payment
         tuition_fees: formData.termOfPayment?.tuition_fees || "",
         residence_payment: formData.termOfPayment?.residence_payment || "",
         financial_policy_contract:
           formData.termOfPayment?.financial_policy_contract || "Not Signed",
-
-        // Discount
         discount_name: formData.termOfPayment?.discount_name || null,
         discount_notes: formData.termOfPayment?.discount_notes || null,
       };
-
-      console.log("Transformed form data (cleaned):", transformed);
       return transformed;
     };
 
     return (
-      <div className={styles.overlay}>
-        <div className={styles.popUpConfirm}>
-          <div className={styles.confirmStudentInformation}>
-            Confirm Student Information
-          </div>
-          <div className={styles.pleaseDoubleCheckThatContainer}>
-            <p className={styles.pleaseDoubleCheckThat}>
-              Please double-check that all the information you've entered is
-              correct.
-            </p>
-            <p className={styles.pleaseDoubleCheckThat}>&nbsp;</p>
-            <p className={styles.pleaseDoubleCheckThat}>
-              Once submitted, changes may not be possible.
-            </p>
-          </div>
-          <div className={styles.areYouSure}>
-            Are you sure you want to continue?
-          </div>
-          <div className={styles.bAddSubjectParent}>
-            <button
-              className={styles.bAddSubject1}
-              onClick={onCancel}
-              type="button"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              className={styles.bAddSubject}
-              onClick={handleConfirm}
-              type="button"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "Yes, I'm sure"}
-            </button>
+      <>
+        {showWrongSectionPopup && (
+          <WrongSectionPopup onClose={() => onCancel()} />
+        )}
+        <div
+          className={styles.overlay}
+          // Sembunyikan popup konfirmasi jika popup error muncul
+          style={{ visibility: showWrongSectionPopup ? "hidden" : "visible" }}
+        >
+          <div className={styles.popUpConfirm}>
+            <div className={styles.confirmStudentInformation}>
+              Confirm Student Information
+            </div>
+            <div className={styles.pleaseDoubleCheckThatContainer}>
+              <p className={styles.pleaseDoubleCheckThat}>
+                Please double-check that all the information you've entered is
+                correct.
+              </p>
+              <p className={styles.pleaseDoubleCheckThat}>&nbsp;</p>
+              <p className={styles.pleaseDoubleCheckThat}>
+                Once submitted, changes may not be possible.
+              </p>
+            </div>
+            <div className={styles.areYouSure}>
+              Are you sure you want to continue?
+            </div>
+            <div className={styles.bAddSubjectParent}>
+              <button
+                className={styles.bAddSubject1}
+                onClick={onCancel}
+                type="button"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.bAddSubject}
+                onClick={handleConfirm}
+                type="button"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "Yes, I'm sure"}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 );

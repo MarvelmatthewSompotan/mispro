@@ -193,6 +193,7 @@ const StudentStatusSection = ({
               className={option === "Old" ? styles.optionOld : styles.optionNew}
             >
               <label
+                className={styles.radioLabel}
                 style={{
                   display: "flex",
                   alignItems: "center",

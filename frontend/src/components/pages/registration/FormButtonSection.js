@@ -11,6 +11,7 @@ const FormButtonSection = ({
   allFormData,
   onReset,
   location,
+  sharedData,
 }) => {
   const navigate = useNavigate();
   // eslint-disable-next-line
@@ -30,6 +31,8 @@ const FormButtonSection = ({
     console.log("Validation State:", validationState);
 
     const errors = {};
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // Validasi Student Status Section
     if (
@@ -93,14 +96,20 @@ const FormButtonSection = ({
     if (!allFormData.studentInfo || !allFormData.studentInfo.date_of_birth) {
       errors.studentInfo = { ...errors.studentInfo, date_of_birth: true };
     }
-    if (!allFormData.studentInfo || !allFormData.studentInfo.email) {
+
+    if (
+      !allFormData.studentInfo ||
+      !allFormData.studentInfo.email ||
+      !emailRegex.test(allFormData.studentInfo.email)
+    ) {
       errors.studentInfo = { ...errors.studentInfo, email: true };
-    }
-    if (!allFormData.studentInfo || !allFormData.studentInfo.previous_school) {
-      errors.studentInfo = { ...errors.studentInfo, previous_school: true };
     }
     if (!allFormData.studentInfo || !allFormData.studentInfo.phone_number) {
       errors.studentInfo = { ...errors.studentInfo, phone_number: true };
+    }
+
+    if (!allFormData.studentInfo || !allFormData.studentInfo.previous_school) {
+      errors.studentInfo = { ...errors.studentInfo, previous_school: true };
     }
 
     // Tambahkan kembali validasi academic status (required)
@@ -153,7 +162,9 @@ const FormButtonSection = ({
       errors.program = { ...errors.program, class_id: true };
     }
 
-    const needsMajor = allFormData.program && [12, 13, 14, 15].includes(allFormData.program.class_id);
+    const needsMajor =
+      allFormData.program &&
+      [12, 13, 14, 15].includes(allFormData.program.class_id);
     if (needsMajor && !allFormData.program.major_id) {
       errors.program = { ...errors.program, major_id: true };
     }
@@ -175,6 +186,35 @@ const FormButtonSection = ({
       errors.facilities = { ...errors.facilities, residence_hall_policy: true };
     }
 
+    // Validasi Pickup Point jika School Bus dipilih
+    if (
+      sharedData &&
+      allFormData.facilities &&
+      allFormData.facilities.transportation_id
+    ) {
+      // Cari tipe transportasi yang dipilih dari sharedData
+      const selectedTransportation = sharedData.transportations?.find(
+        (t) => t.transport_id === allFormData.facilities.transportation_id
+      );
+
+      // Cek jika tipenya adalah "School bus" (gunakan toLowerCase untuk jaga-jaga)
+      if (
+        selectedTransportation &&
+        selectedTransportation.type.toLowerCase().includes("school bus")
+      ) {
+        // Cek apakah pickup point (dropdown) atau custom pickup point (input) sudah diisi
+        const pickupPointFilled = allFormData.facilities.pickup_point_id;
+        const customPickupPointFilled =
+          allFormData.facilities.pickup_point_custom &&
+          allFormData.facilities.pickup_point_custom.trim() !== "";
+
+        // Jika keduanya kosong, maka buat error
+        if (!pickupPointFilled && !customPickupPointFilled) {
+          errors.facilities = { ...errors.facilities, pickup_point_id: true };
+        }
+      }
+    }
+
     // Validasi Parent Guardian Section
     if (
       !allFormData.parentGuardian ||
@@ -188,6 +228,13 @@ const FormButtonSection = ({
     ) {
       errors.parentGuardian = { ...errors.parentGuardian, father_phone: true };
     }
+
+    const fatherEmail = allFormData.parentGuardian?.father_email;
+    if (!fatherEmail || !emailRegex.test(fatherEmail)) {
+      // Baris ini akan error jika email kosong ATAU formatnya salah
+      errors.parentGuardian = { ...errors.parentGuardian, father_email: true };
+    }
+
     if (
       !allFormData.parentGuardian ||
       !allFormData.parentGuardian.father_address_street
@@ -243,10 +290,24 @@ const FormButtonSection = ({
     }
     if (
       !allFormData.parentGuardian ||
+      !allFormData.parentGuardian.mother_name
+    ) {
+      errors.parentGuardian = { ...errors.parentGuardian, mother_name: true };
+    }
+
+    if (
+      !allFormData.parentGuardian ||
       !allFormData.parentGuardian.mother_phone
     ) {
       errors.parentGuardian = { ...errors.parentGuardian, mother_phone: true };
     }
+
+    const motherEmail = allFormData.parentGuardian?.mother_email;
+    if (!motherEmail || !emailRegex.test(motherEmail)) {
+      // Baris ini akan error jika email kosong ATAU formatnya salah
+      errors.parentGuardian = { ...errors.parentGuardian, mother_email: true };
+    }
+
     if (
       !allFormData.parentGuardian ||
       !allFormData.parentGuardian.mother_address_street

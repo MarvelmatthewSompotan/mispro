@@ -159,6 +159,22 @@ export const getStudentLatestApplication = async (studentId) => {
   return await res.json();
 };
 
+// FUNGSI IDEAL (untuk digunakan nanti jika endpoint sudah siap)
+export const getStudentById = async (studentId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`http://localhost:8000/api/students/${studentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch student profile data");
+  }
+
+  return await res.json();
+};
+
 export const getRegistrationPreview = async (applicationId) => {
   const token = localStorage.getItem("token");
   const res = await fetch(
@@ -214,4 +230,3 @@ export const getRegistrations = async ({
 
   return await res.json();
 };
-

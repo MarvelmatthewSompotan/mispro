@@ -152,7 +152,23 @@
   left: 21.43%;
   border-radius: 50%;
   background-color: #5f84fe;
-  transition: all 0.2s ease;
+  transform: scale(1);
+  opacity: 1;
+  animation: grow-in 0.25s forwards;
+}
+
+@keyframes grow-in {
+  /* Tahap Awal: Mulai dari ukuran 0 (tidak terlihat) */
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  /* Tahap Akhir: Selesai di ukuran normal */
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Checkbox styles */
@@ -204,7 +220,6 @@
 }
 
 .schoolBusWrapper {
-
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -222,8 +237,6 @@
   align-items: center;
   justify-content: flex-start;
   padding: 12px;
-
-
 }
 
 .pickupPointInput {
@@ -313,7 +326,7 @@ textarea::placeholder {
   .optionItem,
   .schoolBusWrapper {
     width: 100%;
-    
+
     align-items: flex-start;
     display: block;
     flex-direction: row;
@@ -321,7 +334,6 @@ textarea::placeholder {
     gap: 8px;
   }
   .pickupPointField {
-   
     margin-top: 8px;
     flex: 1;
     min-width: 200px;

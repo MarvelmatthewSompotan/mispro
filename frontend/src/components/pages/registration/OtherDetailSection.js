@@ -7,6 +7,17 @@ const OtherDetailSection = () => {
     useState("complete");
   const [incompleteDocuments, setIncompleteDocuments] = useState("");
 
+  // Handler baru untuk mengelola perubahan status radio button
+  const handleStatusChange = (e) => {
+    const newStatus = e.target.value;
+    setStudentRequirementStatus(newStatus);
+
+    // Jika status diubah menjadi "complete", kosongkan field incomplete documents
+    if (newStatus === "complete") {
+      setIncompleteDocuments("");
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.officeUseNote}>
@@ -26,9 +37,7 @@ const OtherDetailSection = () => {
                     name="studentRequirementStatus"
                     value="complete"
                     checked={studentRequirementStatus === "complete"}
-                    onChange={(e) =>
-                      setStudentRequirementStatus(e.target.value)
-                    }
+                    onChange={handleStatusChange}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
@@ -47,9 +56,7 @@ const OtherDetailSection = () => {
                     name="studentRequirementStatus"
                     value="incomplete"
                     checked={studentRequirementStatus === "incomplete"}
-                    onChange={(e) =>
-                      setStudentRequirementStatus(e.target.value)
-                    }
+                    onChange={handleStatusChange}
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
@@ -63,18 +70,22 @@ const OtherDetailSection = () => {
               </div>
             </div>
           </div>
-          <div className={styles.documentsSection}>
-            <div className={styles.documentsLabel}>Incomplete documents:</div>
-            <div className={styles.documentsInput}>
-              <textarea
-                className={styles.textareaField}
-                placeholder="Enter incomplete documents"
-                value={incompleteDocuments}
-                onChange={(e) => setIncompleteDocuments(e.target.value)}
-                rows={3}
-              />
+
+          {/* Tampilkan section ini hanya jika statusnya "incomplete" */}
+          {studentRequirementStatus === "incomplete" && (
+            <div className={styles.documentsSection}>
+              <div className={styles.documentsLabel}>Incomplete documents:</div>
+              <div className={styles.documentsInput}>
+                <textarea
+                  className={styles.textareaField}
+                  placeholder="Enter incomplete documents"
+                  value={incompleteDocuments}
+                  onChange={(e) => setIncompleteDocuments(e.target.value)}
+                  rows={3}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
