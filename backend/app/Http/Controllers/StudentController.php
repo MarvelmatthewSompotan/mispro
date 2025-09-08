@@ -225,7 +225,8 @@ class StudentController extends Controller
 
     public function updateStudent(Request $request, $student_id)
     {
-        $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
+         // --- Ambil versi terakhir untuk student ini ---
+         $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
             ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
                 $q->where('student_id', $student_id);
             })
@@ -239,35 +240,189 @@ class StudentController extends Controller
             ], 404);
         }
 
-        $oldSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
-        $oldRequestData = $oldSnapshot['request_data'] ?? [];
+        DB::beginTransaction();
+        try {
 
-        $newRequestData = array_merge($oldRequestData, $request->all());
+            $student = Student::with(['studentAddress', 'studentParent', 'studentGuardian', 'enrollments'])
+                ->findOrFail($student_id);
 
-        $newSnapshot = [
-            'request_data' => $newRequestData,
-        ];
+            // --- Validasi input ---
+            $validated = $request->validate([
+                // Student
+                'first_name'   => 'sometimes|string',
+                'middle_name'  => 'sometimes|nullable|string',
+                'last_name'    => 'sometimes|string',
+                'nickname'     => 'sometimes|nullable|string',
+                'citizenship' => 'sometimes|nullable',
+                'country' => 'sometimes|nullable',
+                'religion'     => 'sometimes|nullable|string',
+                'place_of_birth' => 'sometimes|nullable|string',
+                'date_of_birth' => 'sometimes|nullable|date',
+                'gender' => 'sometimes|nullable|string',
+                'family_rank' => 'sometimes|nullable|string',
+                'email'        => 'sometimes|nullable|email',
+                'phone_number' => 'sometimes|nullable|string|max:20',
+                'previous_school' => 'sometimes|nullable|string',
+                'nisn' => 'sometimes|nullable|string',
+                'nik' => 'sometimes|nullable|integer',
+                'kitas' => 'sometimes|nullable|string',
 
-        $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment', function($query) use ($student) {
-            $query->where('student_id', $student_id);
-        })->max('version');
-        
-        $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
-        $userName = auth()->user()->name;
+                // Address
+                'street'       => 'sometimes|nullable|string',
+                'rt' => 'sometimes|nullable|string',
+                'rw' => 'sometimes|nullable|string',
+                'village' => 'sometimes|nullable|string',
+                'district' => 'sometimes|nullable|string',
+                'city_regency' => 'sometimes|nullable|string',
+                'province'     => 'sometimes|nullable|string',
+                'other'     => 'sometimes|nullable|string',
 
-        $newVersion = ApplicationFormVersion::create([
-            'application_id' => $latestVersion->application_id,
-            'version' => $nextVersion,
-            'updated_by' => $userName,
-            'data_snapshot' => json_encode($newSnapshot, JSON_PRETTY_PRINT),
-        ]);
+                // Parent
+                'father_name' => 'sometimes|nullable|string',
+                'father_company' => 'sometimes|nullable|string',
+                'father_occupation' => 'sometimes|nullable|string',
+                'father_phone' => 'sometimes|nullable|string',
+                'father_email' => 'sometimes|nullable|email',
+                'father_address_street' => 'sometimes|nullable|string',
+                'father_address_rt' => 'sometimes|nullable|string',
+                'father_address_rw' => 'sometimes|nullable|string',
+                'father_address_village' => 'sometimes|nullable|string',
+                'father_address_district' => 'sometimes|nullable|string',
+                'father_address_city_regency' => 'sometimes|nullable|string',
+                'father_address_province' => 'sometimes|nullable|string',
+                'father_address_other' => 'sometimes|nullable|string',
+                'father_company_addresses' => 'sometimes|nullable|string',
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Student application updated successfully',
-            'version_id' => $newVersion->version_id,
-            'data' => $newSnapshot,
-        ]);
+                'mother_name' => 'sometimes|nullable|string',
+                'mother_company' => 'sometimes|nullable|string',
+                'mother_occupation' => 'sometimes|nullable|string',
+                'mother_phone' => 'sometimes|nullable|string',
+                'mother_email' => 'sometimes|nullable|email', 
+                'mother_address_street' => 'sometimes|nullable|string',
+                'mother_address_rt' => 'sometimes|nullable|string',
+                'mother_address_rw' => 'sometimes|nullable|string',
+                'mother_address_village' => 'sometimes|nullable|string',
+                'mother_address_district' => 'sometimes|nullable|string',
+                'mother_address_city_regency' => 'sometimes|nullable|string',
+                'mother_address_province' => 'sometimes|nullable|string',
+                'mother_address_other' => 'sometimes|nullable|string',
+                'mother_company_addresses' => 'sometimes|nullable|string',
 
+                // Guardian
+                'guardian_name' => 'sometimes|nullable|string',
+                'relation_to_student' => 'sometimes|nullable|string',
+                'guardian_phone' => 'sometimes|nullable|string',
+                'guardian_email' => 'sometimes|nullable|email',
+                'guardian_address_street' => 'sometimes|nullable|string',
+                'guardian_address_rt' => 'sometimes|nullable|string',
+                'guardian_address_rw' => 'sometimes|nullable|string',
+                'guardian_address_village' => 'sometimes|nullable|string',
+                'guardian_address_district' => 'sometimes|nullable|string',
+                'guardian_address_city_regency' => 'sometimes|nullable|string',
+                'guardian_address_province' => 'sometimes|nullable|string',
+                'guardian_address_other' => 'sometimes|nullable|string',
+
+                // Enrollment
+                'residence_id' => 'sometimes|nullable|exists:residence_halls,residence_id',
+                'transport_id' => 'sometimes|nullable|exists:transportations,transport_id',
+                'pickup_point_id' => 'sometimes|nullable|exists:pickup_points,pickup_point_id',
+                'pickup_point_custom' => 'sometimes|nullable|string',
+                'residence_hall_policy'  => 'sometimes|nullable|string',
+                'transportation_policy'  => 'sometimes|nullable|string',
+            ]);
+
+            // --- Update data di tabel terkait ---
+            $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
+            $student->update(array_filter($studentData, fn($v) => !is_null($v)));
+
+            if ($request->hasAny(['street', 'city_regency', 'province'])) {
+                $student->studentAddress()->updateOrCreate(
+                    ['student_id' => $student->student_id],
+                    $request->only(['street', 'city_regency', 'province'])
+                );
+            }
+
+            if ($request->hasAny(['father_name', 'mother_name'])) {
+                $student->studentParent()->updateOrCreate(
+                    ['student_id' => $student->student_id],
+                    $request->only([
+                        'father_name', 'father_company', 'father_occupation', 'father_phone', 'father_email',
+                        'father_address_street', 'father_address_rt', 'father_address_rw', 'father_address_village',
+                        'father_address_district', 'father_address_city_regency', 'father_address_province', 'father_address_other',
+                        'father_company_addresses',
+                        'mother_name', 'mother_company', 'mother_occupation', 'mother_phone', 'mother_email',
+                        'mother_address_street', 'mother_address_rt', 'mother_address_rw', 'mother_address_village',
+                        'mother_address_district', 'mother_address_city_regency', 'mother_address_province', 'mother_address_other',
+                        'mother_company_addresses',
+                    ])
+                );
+            }
+
+            if ($request->hasAny(['guardian_name'])) {
+                $student->studentGuardian()->updateOrCreate(
+                    ['student_id' => $student->student_id],
+                    $request->only([
+                        'guardian_name', 'relation_to_student', 'guardian_phone', 'guardian_email',
+                        'guardian_address_street', 'guardian_address_rt', 'guardian_address_rw', 'guardian_address_village',
+                        'guardian_address_district', 'guardian_address_city_regency', 'guardian_address_province', 'guardian_address_other',
+                    ])
+                );
+            }
+
+            if ($request->hasAny([
+                'residence_id', 'transport_id', 'pickup_point_id',
+                'residence_hall_policy', 'transportation_policy'
+            ])) {
+                $student->enrollments()->updateOrCreate([
+                    'residence_id'          => $request->residence_id ?? $student->enrollments->residence_id,
+                    'transport_id'          => $request->transport_id ?? $student->enrollments->transport_id,
+                    'pickup_point_id'       => $request->pickup_point_id ?? $student->enrollments->pickup_point_id,
+                    'residence_hall_policy' => $request->residence_hall_policy ?? $student->enrollments->residence_hall_policy,
+                    'transportation_policy' => $request->transportation_policy ?? $student->enrollments->transportation_policy,
+                ]);
+            }
+
+            // --- Buat snapshot baru di ApplicationFormVersion ---
+            $oldSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
+            $oldRequestData = $oldSnapshot['request_data'] ?? [];
+
+            // Gabungkan data lama + input baru
+            $newRequestData = array_merge($oldRequestData, $validated);
+            $newSnapshot = [
+                'request_data' => $newRequestData,
+            ];
+
+            $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment.student', function($q) use ($student_id) {
+                $q->where('student_id', $student_id);
+            })->max('version');
+
+            $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
+            $userName = auth()->user()->name ?? 'system';
+
+            $newVersion = ApplicationFormVersion::create([
+                'application_id' => $latestVersion->application_id,
+                'version' => $nextVersion,
+                'updated_by' => $userName,
+                'data_snapshot' => json_encode($newSnapshot, JSON_PRETTY_PRINT),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Student updated and new application form version created',
+                'application_id_field' => $latestVersion->application_id,
+                'applicationForm_relation' => $latestVersion->applicationForm,
+                'version_id' => $newVersion->version_id,
+                'data' => $newSnapshot,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+
 }

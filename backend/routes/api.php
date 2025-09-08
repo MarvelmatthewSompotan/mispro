@@ -15,9 +15,14 @@ Route::middleware('auth:sanctum')->group(function() {
 });
 
 Route::get('/registration-option', [MasterDataController::class, 'getRegistrationOption']);
-Route::prefix('students')->group(function () {
-  Route::get('/search', [StudentController::class, 'searchStudents']);
-  Route::get('/{student_id}/latest-application', [StudentController::class, 'getLatestApplication']);
+
+Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
+  Route::prefix('students')->group(function () {
+    Route::get('/', [StudentController::class, 'index']);
+    Route::get('/search', [StudentController::class, 'searchStudents']);
+    Route::get('/{student_id}/latest-application', [StudentController::class, 'getLatestApplication']);
+    Route::patch('/{student_id}/update', [StudentController::class, 'updateStudent']);
+  });
 });
 
 Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
