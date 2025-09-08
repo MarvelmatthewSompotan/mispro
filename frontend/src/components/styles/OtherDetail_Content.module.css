@@ -1,6 +1,8 @@
-.dataForOffice {
+.heading {
   position: relative;
   line-height: 100%;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Bold;
 }
 .header {
   align-self: stretch;
@@ -16,7 +18,9 @@
 .studentRequirementStatus {
   position: relative;
   line-height: 100%;
-  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Bold;
+  font-size: 20px;
 }
 .txtSrs {
   align-self: stretch;
@@ -61,13 +65,15 @@
   align-items: center;
   flex-shrink: 0;
 }
-.complete {
+.choice {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   padding: 11.3px;
   gap: 9.4px;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 }
 .status {
   align-self: stretch;
@@ -77,6 +83,7 @@
   justify-content: flex-start;
   padding: 0px 11.3px;
   gap: 30.2px;
+  font-size: 20px;
 }
 .txtIcDocs {
   display: flex;
@@ -92,6 +99,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   padding: 0px 11.3px;
+  font-size: 20px;
 }
 .content {
   align-self: stretch;
@@ -118,7 +126,8 @@
 .approvedBy1 {
   position: relative;
   line-height: 100%;
-  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 }
 .txtApprovedBy {
   align-self: stretch;
@@ -138,14 +147,14 @@
 }
 .approvedBy {
   flex: 1;
-  height: 207px;
+  height: 210px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 40px;
-  font-size: 16px;
+  font-size: 20px;
 }
 .otherDetail {
   width: 100%;
@@ -164,4 +173,8 @@
   font-size: 20px;
   color: #000;
   font-family: Poppins;
+}
+.incompleteDocuments {
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 } 

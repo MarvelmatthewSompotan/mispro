@@ -6,7 +6,7 @@ function OtherDetail_Content() {
     <div className={styles.otherDetail}>
       <div className={styles.officeUseNote}>
         <div className={styles.header}>
-          <b className={styles.dataForOffice}>DATA FOR OFFICE USE ONLY</b>
+          <b className={styles.heading}>DATA FOR OFFICE USE ONLY</b>
         </div>
         <div className={styles.content}>
           <div className={styles.txtSrs}>
@@ -15,23 +15,23 @@ function OtherDetail_Content() {
             </div>
           </div>
           <div className={styles.status}>
-            <div className={styles.complete}>
+            <div className={styles.choice}>
               <div className={styles.radioBtn}>
                 <div className={styles.radioBtnChild} />
                 <div className={styles.radioBtnItem} />
               </div>
               <div className={styles.complete1}>Complete</div>
             </div>
-            <div className={styles.complete}>
+            <div className={styles.choice}>
               <div className={styles.radioBtn}>
                 <div className={styles.radioBtnChild} />
               </div>
-              <div className={styles.dataForOffice}>Incomplete</div>
+              <div className={styles.complete1}>Incomplete</div>
             </div>
           </div>
           <div className={styles.note}>
             <div className={styles.txtIcDocs}>
-              <div className={styles.dataForOffice}>Incomplete documents:</div>
+              <div className={styles.incompleteDocuments}>Incomplete documents:</div>
             </div>
           </div>
         </div>

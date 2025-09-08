@@ -49,14 +49,14 @@ function FacilitiesContent({ data }) {
                 <div className={styles.radioBtnInner} />
               )}
             </div>
-            <div className={styles.elementarySchool}>{transport}</div>
+            <div className={styles.field}>{transport}</div>
           </div>
         ))}
 
         <div className={styles.schoolBusDetails}>
           <div className={styles.pickupPoint}>
-            <div className={styles.transportationPolicy}>Pickup point</div>
-            <b className={styles.girian}>{data.pickup_point?.name ?? '-'}</b>
+            <div className={styles.field}>Pickup point</div>
+            <b className={styles.pickupPointAnswer}>{data.pickup_point?.name ?? '-'}</b>
           </div>
         </div>
 
@@ -64,7 +64,7 @@ function FacilitiesContent({ data }) {
           <div className={styles.checkBox}>
             {renderCheckbox(data?.transportation?.policy === 'Signed')}
           </div>
-          <div className={styles.transportationPolicy}>
+          <div className={styles.checkBoxPolicy}>
             Transportation policy
           </div>
         </div>
@@ -84,7 +84,7 @@ function FacilitiesContent({ data }) {
                 <div className={styles.radioBtnInner} />
               )}
             </div>
-            <div className={styles.elementarySchool}>{residence}</div>
+            <div className={styles.field}>{residence}</div>
           </div>
         ))}
 
@@ -92,7 +92,7 @@ function FacilitiesContent({ data }) {
           <div className={styles.checkBox}>
             {renderCheckbox(data?.residence?.policy === 'Signed')}
           </div>
-          <div className={styles.transportationPolicy}>
+          <div className={styles.checkBoxPolicy}>
             Residence Hall policy
           </div>
         </div>

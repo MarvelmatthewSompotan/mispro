@@ -10,23 +10,23 @@ function ProgramContent({ data, sectionOptions, programOptions }) {
         </div>
 
         {sectionOptions.map((section) => (
-          <div key={section.section_id} className={styles.ecp}>
+          <div key={section.section_id} className={styles.answer}>
             <div className={styles.radioBtn}>
               <div className={styles.radioBtnChild} />
               {data?.section?.name === section.name && (
                 <div className={styles.radioBtnChild1} />
               )}
             </div>
-            <div className={styles.elementarySchool}>{section.name}</div>
+            <div className={styles.field}>{section.name}</div>
           </div>
         ))}
 
         <div className={styles.grade}>
-          <div className={styles.elementarySchool}>Grade</div>
-          <b className={styles.elementarySchool}>{data?.class}</b>
+          <div className={styles.field}>Grade</div>
+          <b className={styles.option}>{data?.class}</b>
         </div>
         <div className={styles.major}>
-          <div className={styles.elementarySchool}>Major</div>
+          <div className={styles.option}>Major</div>
           <b className={styles.science}>{data?.major?.name}</b>
         </div>
       </div>
@@ -37,14 +37,14 @@ function ProgramContent({ data, sectionOptions, programOptions }) {
         </div>
 
         {programOptions.map((program) => (
-          <div key={program.program_id} className={styles.ecp}>
+          <div key={program.program_id} className={styles.answer}>
             <div className={styles.radioBtn}>
               <div className={styles.radioBtnChild} />
               {data?.program?.name === program.name && (
                 <div className={styles.radioBtnChild1} />
               )}
             </div>
-            <div className={styles.elementarySchool}>{program.name}</div>
+            <div className={styles.option}>{program.name}</div>
           </div>
         ))}
       </div>

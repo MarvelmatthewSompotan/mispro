@@ -7,8 +7,10 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 }
-.september2025 {
+.contentDate {
   align-self: stretch;
   width: 1720px;
   position: relative;
@@ -16,6 +18,8 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Bold;
 }
 .txtDate {
   align-self: stretch;
@@ -28,7 +32,9 @@
 .studentName {
   position: relative;
   line-height: 100%;
-  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
+  padding-bottom: 1px;
 }
 .txtStudentNameAndSignature {
   align-self: stretch;
@@ -38,6 +44,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  width: 100%;
 }
 .studentNameAndSignature {
   flex: 1;
@@ -48,6 +55,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0px;
+  font-size: 20px;
 }
 .txtAcknowledgeBy {
   align-self: stretch;
@@ -65,6 +73,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 0px;
+  font-size: 20px;
 }
 .signature {
   width: 100%;
@@ -78,7 +87,6 @@
   box-sizing: border-box;
   gap: 12px;
   text-align: left;
-  font-size: 16px;
   color: #000;
   font-family: Poppins;
 } 

@@ -25,15 +25,19 @@
 	justify-content: flex-start;
 	padding: 6px 12px;
 	gap: 10px;
+	font-size: 20px;
 }
 .contentFullName {
 	position: relative;
 	line-height: 100%;
+	font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 }
-.regular {
-	flex: 1;
+.answer {
 	position: relative;
 	line-height: 100%;
+	font-family: 'Poppins', sans-serif;
+	font-weight: Bold;
 }
 .right {
 	align-self: stretch;
@@ -105,4 +109,10 @@
 	display: flex;
 	align-items: center;
 	flex-shrink: 0;
-} 
+}
+.field {
+	position: relative;
+	line-height: 100%;
+	font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
+}
