@@ -1,36 +1,28 @@
 import React, { useState, useEffect } from "react";
-// Tidak perlu useNavigate, Button, atau PopUpForm
-import styles from "./StudentList.module.css"; // Menggunakan CSS untuk StudentList
+import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
 import searchIcon from "../../../assets/Search-icon.png";
-import {
-  getRegistrations,
-  getRegistrationOptions,
-} from "../../../services/api";
+import { getStudents, getRegistrationOptions } from "../../../services/api";
 
 const StudentList = () => {
   const navigate = useNavigate();
-  // State data API diganti nama agar lebih sesuai
   const [studentData, setStudentData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // Options dari backend (sama)
+  // Options dari backend
   const [sections, setSections] = useState([]);
   const [schoolYears, setSchoolYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
 
-  // Filter state (sama)
+  // Filter state
   const [selectedSections, setSelectedSections] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(null);
 
   const [gradeMap, setGradeMap] = useState(new Map());
 
-  // State untuk popup form tidak diperlukan lagi
-  // const [showPopupForm, setShowPopupForm] = useState(false);
-
-  // Fetch options (sections, years, semesters) - Logika sama
+  // Fetch options (sections, years, semesters)
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -39,7 +31,6 @@ const StudentList = () => {
         setSchoolYears(opts.school_years || []);
         setSemesters(opts.semesters || []);
 
-        // 2. UBAH ARRAY 'classes' MENJADI MAP UNTUK PENCARIAN CEPAT
         const newGradeMap = new Map();
         if (opts.classes && Array.isArray(opts.classes)) {
           opts.classes.forEach((cls) => {
@@ -54,13 +45,13 @@ const StudentList = () => {
     fetchOptions();
   }, []);
 
-  // Fetch data dari API - Logika sama, nama fungsi disesuaikan
+  // Fetch data dari API menggunakan getStudents
   const fetchStudents = async (filters = {}) => {
     try {
       setLoading(true);
-      const res = await getRegistrations(filters);
-      // backend return { data: { data: [...] } }
-      setStudentData(res.data.data || []);
+      const res = await getStudents(filters);
+      // Data dari endpoint /students ada di res.data
+      setStudentData(res.data || []);
     } catch (err) {
       console.error("Error fetching student data:", err);
     } finally {
@@ -68,35 +59,34 @@ const StudentList = () => {
     }
   };
 
-  // Initial load - Memanggil fungsi fetchStudents
+  // Initial load
   useEffect(() => {
     fetchStudents();
   }, []);
 
-  // Auto fetch ketika filter/search berubah - Logika sama
+  // Auto fetch ketika filter/search berubah
   useEffect(() => {
-    fetchStudents({
-      search: search || undefined,
-      school_year_id: selectedYear || undefined,
-      semester_id: selectedSemester || undefined,
-      section_id: selectedSections.length > 0 ? selectedSections : undefined,
-    });
+    const timer = setTimeout(() => {
+      fetchStudents({
+        search: search || undefined,
+        school_year_id: selectedYear || undefined,
+        semester_id: selectedSemester || undefined,
+        section_id: selectedSections.length > 0 ? selectedSections : undefined,
+      });
+    }, 300); // Debounce untuk mengurangi request saat mengetik
+
+    return () => clearTimeout(timer);
   }, [search, selectedYear, selectedSemester, selectedSections]);
 
-  // Toggle section checkbox - Logika sama
+  // Toggle section checkbox
   const handleSectionToggle = (id) => {
     setSelectedSections((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
   };
 
-  // Semua handler untuk popup dan navigasi tidak diperlukan lagi
-
   return (
-    // Menggunakan class name baru dari StudentList.module.css
     <div className={styles.studentListContainer}>
-      {/* Top Bar dengan tombol New Form dihilangkan */}
-
       {/* Search Bar */}
       <div className={styles.searchContainer}>
         <input
@@ -166,7 +156,6 @@ const StudentList = () => {
         <table className={styles.studentTable}>
           <thead>
             <tr className={styles.tableHeaderRow}>
-              {/* Kolom tabel disesuaikan */}
               <th className={styles.tableHeader}>Student ID</th>
               <th className={styles.tableHeader}>Name</th>
               <th className={styles.tableHeader}>Section</th>
@@ -175,25 +164,24 @@ const StudentList = () => {
           </thead>
           <tbody>
             {!loading && studentData.length > 0 ? (
-              studentData.map((student, idx) => {
-                const enrollment = student.enrollments?.[0] || {}; // ambil enrollment terbaru
-                const grade = gradeMap.get(enrollment.class_id) || "N/A";
+              studentData.map((student) => {
+                const grade = gradeMap.get(student.class_id) || "N/A";
+                const sectionName =
+                  sections.find((s) => s.section_id === student.section_id)
+                    ?.name || "N/A";
+
                 return (
-                  // onClick handler dihilangkan dari <tr>
                   <tr
-                    key={idx}
+                    key={student.student_id}
                     className={styles.tableRow}
                     onClick={() => navigate(`/students/${student.student_id}`)}
                     style={{ cursor: "pointer" }}
                   >
-                    {/* Isi sel tabel disesuaikan */}
                     <td className={styles.tableCell}>{student.student_id}</td>
                     <td className={styles.tableCellName}>
                       {student.full_name}
                     </td>
-                    <td className={styles.tableCell}>
-                      {enrollment.section?.name}
-                    </td>
+                    <td className={styles.tableCell}>{sectionName}</td>
                     <td className={styles.tableCell}>{grade}</td>
                   </tr>
                 );
@@ -208,8 +196,6 @@ const StudentList = () => {
           </tbody>
         </table>
       </div>
-
-      {/* Bagian Popup Form dihilangkan */}
     </div>
   );
 };
