@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\ApplicationFormVersion;
 
 class StudentController extends Controller
@@ -225,23 +226,23 @@ class StudentController extends Controller
 
     public function updateStudent(Request $request, $student_id)
     {
-         // --- Ambil versi terakhir untuk student ini ---
-         $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
-            ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
-                $q->where('student_id', $student_id);
-            })
-            ->orderByDesc('updated_at')
-            ->first();
-
-        if (!$latestVersion) {
-            return response()->json([
-                'success' => false,
-                'error' => 'No application found for this student',
-            ], 404);
-        }
-
+        Log::error('updateStudent called', ['student_id' => $student_id, 'input' => $request->all()]);
         DB::beginTransaction();
         try {
+             // --- Ambil versi terakhir untuk student ini ---
+            $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
+                ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
+                    $q->where('student_id', $student_id);
+                })
+                ->orderByDesc('updated_at')
+                ->first();
+
+            if (!$latestVersion) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'No application found for this student',
+                ], 404);
+            }
 
             $student = Student::with(['studentAddress', 'studentParent', 'studentGuardian', 'enrollments'])
                 ->findOrFail($student_id);
@@ -324,7 +325,7 @@ class StudentController extends Controller
 
                 // Enrollment
                 'residence_id' => 'sometimes|nullable|exists:residence_halls,residence_id',
-                'transport_id' => 'sometimes|nullable|exists:transportations,transport_id',
+                'transportation_id' => 'sometimes|nullable|exists:transportations,transport_id',
                 'pickup_point_id' => 'sometimes|nullable|exists:pickup_points,pickup_point_id',
                 'pickup_point_custom' => 'sometimes|nullable|string',
                 'residence_hall_policy'  => 'sometimes|nullable|string',
@@ -370,17 +371,36 @@ class StudentController extends Controller
             }
 
             if ($request->hasAny([
-                'residence_id', 'transport_id', 'pickup_point_id',
-                'residence_hall_policy', 'transportation_policy'
+                'residence_id', 'transportation_id', 'pickup_point_id',
+                'pickup_point_custom', 'residence_hall_policy', 'transportation_policy'
             ])) {
-                $student->enrollments()->updateOrCreate([
-                    'residence_id'          => $request->residence_id ?? $student->enrollments->residence_id,
-                    'transport_id'          => $request->transport_id ?? $student->enrollments->transport_id,
-                    'pickup_point_id'       => $request->pickup_point_id ?? $student->enrollments->pickup_point_id,
-                    'residence_hall_policy' => $request->residence_hall_policy ?? $student->enrollments->residence_hall_policy,
-                    'transportation_policy' => $request->transportation_policy ?? $student->enrollments->transportation_policy,
-                ]);
+                // Ambil enrollment terbaru student ini
+                $latestEnrollment = $student->enrollments()
+                    ->orderByDesc('registration_date')
+                    ->first();
+
+                if ($latestEnrollment) {
+                    $latestEnrollment->update([
+                        'residence_id'          => $request->residence_id ?? $latestEnrollment->residence_id,
+                        'transportation_id'     => $request->transportation_id ?? $latestEnrollment->transportation_id,
+                        'pickup_point_id'       => $request->pickup_point_id ?? $latestEnrollment->pickup_point_id,
+                        'pickup_point_custom'   => $request->pickup_point_custom ?? $latestEnrollment->pickup_point_custom,
+                        'residence_hall_policy' => $request->residence_hall_policy ?? $latestEnrollment->residence_hall_policy,
+                        'transportation_policy' => $request->transportation_policy ?? $latestEnrollment->transportation_policy,
+                    ]);
+                } else {
+                    // Kalau belum ada enrollment → buat baru
+                    $student->enrollments()->create([
+                        'residence_id'          => $request->residence_id,
+                        'transportation_id'     => $request->transportation_id,
+                        'pickup_point_id'       => $request->pickup_point_id,
+                        'pickup_point_custom'   => $request->pickup_point_custom,
+                        'residence_hall_policy' => $request->residence_hall_policy,
+                        'transportation_policy' => $request->transportation_policy,
+                    ]);
+                }
             }
+
 
             // --- Buat snapshot baru di ApplicationFormVersion ---
             $oldSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
@@ -416,11 +436,24 @@ class StudentController extends Controller
                 'version_id' => $newVersion->version_id,
                 'data' => $newSnapshot,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
+            // error validasi biar jelas
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'type' => 'validation',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // error umum biar frontend bisa baca detail
+            return response()->json([
+                'success' => false,
+                'type' => 'server',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => config('app.debug') ? $e->getTrace() : [] // trace dikirim hanya kalau APP_DEBUG=true
             ], 500);
         }
     }
