@@ -143,7 +143,14 @@
   justify-content: flex-start;
   padding: 12px;
   gap: 10px;
+  position: relative;
+  padding-bottom: 24px;
 }
+
+.field br {
+  display: none;
+}
+
 .fieldLabel {
   color: #000;
   line-height: 100%;
@@ -380,4 +387,63 @@
   justify-content: flex-start;
   gap: 12px;
   padding: 8px 0;
+}
+
+.visualInput {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  min-height: 38px;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+}
+
+/* ================================== */
+/* ===== STYLE UNTUK ERROR STATE ===== */
+/* ================================== */
+
+/* Memberi border bawah warna merah pada seluruh field yang error */
+.errorFieldWrapper {
+  border-bottom-color: #d32f2f !important;
+}
+
+/* Mengubah warna label field menjadi merah dan tebal */
+.errorLabel {
+  color: #d32f2f !important;
+  font-weight: 600 !important;
+}
+
+/* Mengubah warna teks di dalam input yang error menjadi merah */
+.errorInput,
+.errorInput:focus {
+  color: #d32f2f !important;
+}
+
+/* Mengubah warna placeholder menjadi merah muda saat error */
+.errorInput::placeholder {
+  color: #e57373 !important;
+  opacity: 1;
+}
+
+/* Style untuk teks pesan error yang muncul di bawah input */
+.inlineErrorMessage {
+  position: absolute; /* Mengeluarkan pesan dari alur layout normal */
+  bottom: 4px; /* Posisikan di bagian bawah container */
+  left: 12px; /* Sesuaikan dengan padding kiri field */
+  right: 12px; /* Sesuaikan dengan padding kanan field */
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 0; /* Hapus margin-top karena sudah diatur oleh 'bottom' */
+  cursor: pointer;
+}
+
+/* Style untuk pesan error yang butuh lebar penuh (untuk grup radio/checkbox) */
+.inlineErrorMessageFullWidth {
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 4px;
+  padding-left: 12px; /* Menyesuaikan dengan padding section */
+  width: 100%;
 }
