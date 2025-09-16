@@ -31,7 +31,7 @@ Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
     Route::post('/start', [RegistrationController::class, 'startRegistration']);
     Route::get('/context/{draft_id}', [RegistrationController::class, 'getRegistrationContext']);
     Route::post('/store/{draft_id}', [RegistrationController::class, 'store']);
-    Route::get('/preview/{applicationId}', [RegistrationController::class, 'showPreview']);
+    Route::get('/preview/{applicationId}/version/{version}', [RegistrationController::class, 'showPreview']);
   });
 });
 
