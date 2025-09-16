@@ -150,10 +150,10 @@ export const getStudentLatestApplication = async (studentId) => {
   return await res.json();
 };
 
-export const getRegistrationPreview = async (applicationId) => {
+export const getRegistrationPreview = async (applicationId, version) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    `http://localhost:8000/api/registration/preview/${applicationId}`,
+    `http://localhost:8000/api/registration/preview/${applicationId}/version/${version}`,
     {
       method: 'GET',
       headers: {

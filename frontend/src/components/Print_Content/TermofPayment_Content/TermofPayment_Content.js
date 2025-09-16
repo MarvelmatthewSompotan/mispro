@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '../../styles/TermofPayment_Content.module.css';
 
-function TermofPaymentContent({ payment, discount }) {
+function TermofPaymentContent({ data }) {
   const option = ['Full Payment', 'Installment'];
   // helper checkbox biar tidak duplikat
   const renderCheckbox = (isSigned) => {
@@ -37,7 +37,7 @@ function TermofPaymentContent({ payment, discount }) {
             <div key={index} className={styles.full}>
               <div className={styles.radioBtn}>
                 <div className={styles.radioBtnChild} />
-                {payment?.tuition_fees === opt && (
+                {data?.tuition_fees === opt && (
                   <div className={styles.radioBtnItem} />
                 )}
               </div>
@@ -55,7 +55,7 @@ function TermofPaymentContent({ payment, discount }) {
             <div key={index} className={styles.full}>
               <div className={styles.radioBtn}>
                 <div className={styles.radioBtnChild} />
-                {payment?.residence_payment === opt && (
+                {data?.residence_payment === opt && (
                   <div className={styles.radioBtnItem} />
                 )}
               </div>
@@ -70,12 +70,12 @@ function TermofPaymentContent({ payment, discount }) {
           <div className={styles.contentTuitionFee}>Discount</div>
         </div>
         <div className={styles.discountContent}>
-          {discount ? (
+          {data.discount_name ? (
             <div className={styles.full}>
-              <div className={styles.fullPayment}>{discount.type}</div>
-              {/* {discount.notes && (
+              <div className={styles.fullPayment}>{data.discount_name}</div>
+              {/* {data.discount_notes && (
                 <div className={styles.fullPayment}>
-                  Notes: {discount.notes}
+                  Notes: {data.discount_notes}
                 </div>
               )} */}
             </div>
@@ -96,7 +96,7 @@ function TermofPaymentContent({ payment, discount }) {
         <div className={styles.bottom2}>
           <div className={styles.full}>
             <div className={styles.checkBox}>
-              {renderCheckbox(payment?.financial_policy === 'Signed')}
+              {renderCheckbox(data?.financial_policy_contract === 'Signed')}
             </div>
             <div className={styles.fullPayment}>Agree</div>
           </div>

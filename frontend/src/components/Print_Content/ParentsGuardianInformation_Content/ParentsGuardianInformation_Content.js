@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '../../styles/ParentsGuardianInformation_Content.module.css';
 
-const ParentsGuardianInformationContent = ({ father, mother, guardian }) => {
+const ParentsGuardianInformationContent = ({ data }) => {
   const formatValue = (val) =>
     val === null || val === undefined || val === '' ? '-' : val;
 
@@ -15,17 +15,15 @@ const ParentsGuardianInformationContent = ({ father, mother, guardian }) => {
           <div className={styles.left}>
             <div className={styles.name}>
               <div className={styles.field}>{`Name `}</div>
-              <b className={styles.field}>{formatValue(father.name)}</b>
+              <b className={styles.field}>{formatValue(data.father_name)}</b>
             </div>
             <div className={styles.name}>
               <div className={styles.field}>Phone number</div>
-              <b className={styles.field}>{formatValue(father.phone)}</b>
+              <b className={styles.field}>{formatValue(data.father_phone)}</b>
             </div>
             <div className={styles.name}>
               <div className={styles.field}>Email</div>
-              <b className={styles.gmail}>
-                {formatValue(father.email)}
-              </b>
+              <b className={styles.gmail}>{formatValue(data.father_email)}</b>
             </div>
           </div>
           <div className={styles.right}>
@@ -33,52 +31,52 @@ const ParentsGuardianInformationContent = ({ father, mother, guardian }) => {
               <div className={styles.compName}>
                 <div className={styles.field}>Company name</div>
                 <b className={styles.nameCompany}>
-                  {formatValue(father.company)}
+                  {formatValue(data.father_company)}
                 </b>
               </div>
               <div className={styles.compName}>
                 <div className={styles.field}>Occupation/Position</div>
                 <b className={styles.position}>
-                  {formatValue(father.occupation)}
+                  {formatValue(data.father_occupation)}
                 </b>
               </div>
             </div>
             <div className={styles.bottom}>
               <div className={styles.field}>Address</div>
               <b className={styles.field}>
-                {formatValue(father.address.street)}
+                {formatValue(data.father_address_street)}
               </b>
               <b className={styles.b1}>,</b>
               <div className={styles.parent}>
                 <b className={styles.field}>
-                  {formatValue(father.address.rt)}
+                  {formatValue(data.father_address_rt)}
                 </b>
                 <b className={styles.b3}>/</b>
                 <b className={styles.field}>
-                  {formatValue(father.address.rw)}
+                  {formatValue(data.father_address_rw)}
                 </b>
               </div>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(father.address.village)}
+                {formatValue(data.father_address_village)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(father.address.district)}
+                {formatValue(data.father_address_district)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(father.address.city_regency)}
+                {formatValue(data.father_address_city_regency)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(father.address.province)}
+                {formatValue(data.father_address_province)}
               </b>
               <b className={styles.b1}>,</b>
               <div className={styles.parent}>
                 <b className={styles.b3}>(</b>
                 <b className={styles.field}>
-                  {formatValue(father.address.other)}
+                  {formatValue(data.father_address_other)}
                 </b>
                 <b className={styles.b3}>)</b>
               </div>
@@ -94,17 +92,15 @@ const ParentsGuardianInformationContent = ({ father, mother, guardian }) => {
           <div className={styles.left}>
             <div className={styles.name}>
               <div className={styles.field}>{`Name `}</div>
-              <b className={styles.field}>{formatValue(mother.name)}</b>
+              <b className={styles.field}>{formatValue(data.mother_name)}</b>
             </div>
             <div className={styles.name}>
               <div className={styles.field}>Phone number</div>
-              <b className={styles.field}>{formatValue(mother.phone)}</b>
+              <b className={styles.field}>{formatValue(data.mother_phone)}</b>
             </div>
             <div className={styles.name}>
               <div className={styles.field}>Email</div>
-              <b className={styles.gmail}>
-                {formatValue(mother.email)}
-              </b>
+              <b className={styles.gmail}>{formatValue(data.mother_email)}</b>
             </div>
           </div>
           <div className={styles.right}>
@@ -112,52 +108,52 @@ const ParentsGuardianInformationContent = ({ father, mother, guardian }) => {
               <div className={styles.compName}>
                 <div className={styles.field}>Company name</div>
                 <b className={styles.nameCompany}>
-                  {formatValue(mother.company)}
+                  {formatValue(data.mother_company)}
                 </b>
               </div>
               <div className={styles.compName}>
                 <div className={styles.field}>Occupation/Position</div>
                 <b className={styles.position}>
-                  {formatValue(mother.occupation)}
+                  {formatValue(data.mother_occupation)}
                 </b>
               </div>
             </div>
             <div className={styles.bottom}>
               <div className={styles.field}>Address</div>
               <b className={styles.field}>
-                {formatValue(mother.address.street)}
+                {formatValue(data.mother_address_street)}
               </b>
               <b className={styles.b1}>,</b>
               <div className={styles.parent}>
                 <b className={styles.field}>
-                  {formatValue(mother.address.rt)}
+                  {formatValue(data.mother_address_rt)}
                 </b>
                 <b className={styles.b3}>/</b>
                 <b className={styles.field}>
-                  {formatValue(mother.address.rw)}
+                  {formatValue(data.mother_address_rw)}
                 </b>
               </div>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(mother.address.village)}
+                {formatValue(data.mother_address_village)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(mother.address.district)}
+                {formatValue(data.mother_address_district)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(mother.address.city_regency)}
+                {formatValue(data.mother_address_city_regency)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(mother.address.province)}
+                {formatValue(data.mother_address_province)}
               </b>
               <b className={styles.b1}>,</b>
               <div className={styles.parent}>
                 <b className={styles.b3}>(</b>
                 <b className={styles.field}>
-                  {formatValue(mother.address.other)}
+                  {formatValue(data.mother_address_other)}
                 </b>
                 <b className={styles.b3}>)</b>
               </div>
@@ -176,23 +172,29 @@ const ParentsGuardianInformationContent = ({ father, mother, guardian }) => {
             <div className={styles.top1}>
               <div className={styles.relation}>
                 <div className={styles.field}>{`Name `}</div>
-                <b className={styles.guardianField}>{formatValue(guardian.name)}</b>
+                <b className={styles.guardianField}>
+                  {formatValue(data.guardian_name)}
+                </b>
               </div>
               <div className={styles.relation}>
                 <div className={styles.field}>Relationship to student</div>
                 <b className={styles.guardianField}>
-                  {formatValue(guardian.relation_to_student)}
+                  {formatValue(data.relation_to_student)}
                 </b>
               </div>
             </div>
             <div className={styles.top1}>
               <div className={styles.relation}>
                 <div className={styles.field}>Phone number</div>
-                <b className={styles.guardianField}>{formatValue(guardian.phone)}</b>
+                <b className={styles.guardianField}>
+                  {formatValue(data.guardian_phone)}
+                </b>
               </div>
               <div className={styles.relation}>
                 <div className={styles.field}>Email</div>
-                <b className={styles.guardianField}>{formatValue(guardian.email)}</b>
+                <b className={styles.guardianField}>
+                  {formatValue(data.guardian_email)}
+                </b>
               </div>
             </div>
           </div>
@@ -200,39 +202,39 @@ const ParentsGuardianInformationContent = ({ father, mother, guardian }) => {
             <div className={styles.address3}>
               <div className={styles.field}>Address</div>
               <b className={styles.field}>
-                {formatValue(guardian.address.street)}
+                {formatValue(data.guardian_address_street)}
               </b>
               <b className={styles.b1}>,</b>
               <div className={styles.parent}>
                 <b className={styles.field}>
-                  {formatValue(guardian.address.rt)}
+                  {formatValue(data.guardian_address_rt)}
                 </b>
                 <b className={styles.b3}>/</b>
                 <b className={styles.field}>
-                  {formatValue(guardian.address.rw)}
+                  {formatValue(data.guardian_address_rw)}
                 </b>
               </div>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(guardian.address.village)}
+                {formatValue(data.guardian_address_village)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(guardian.address.district)}
+                {formatValue(data.guardian_address_district)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(guardian.address.city_regency)}
+                {formatValue(data.guardian_address_city_regency)}
               </b>
               <b className={styles.b1}>,</b>
               <b className={styles.field}>
-                {formatValue(guardian.address.province)}
+                {formatValue(data.guardian_address_province)}
               </b>
               <b className={styles.b1}>,</b>
               <div className={styles.parent}>
                 <b className={styles.b3}>(</b>
                 <b className={styles.field}>
-                  {formatValue(guardian.address.other)}
+                  {formatValue(data.guardian_address_other)}
                 </b>
                 <b className={styles.b3}>)</b>
               </div>

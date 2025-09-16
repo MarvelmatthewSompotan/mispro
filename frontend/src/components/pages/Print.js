@@ -21,12 +21,15 @@ import {
 function Print() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { applicationId } = location.state || {};
+  const { applicationId, version } = location.state || {};
 
   const printRef = useRef();
   const [previewData, setPreviewData] = useState(null);
   const [sectionOptions, setSectionOptions] = useState([]);
   const [programOptions, setProgramOptions] = useState([]);
+  const [pickupPointOptions, setPickupPointOptions] = useState([]);
+  const [classOptions, setClassOptions] = useState([]);
+  const [majorOptions, setMajorOptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // 🔹 State baru untuk loading tombol Print
@@ -34,7 +37,7 @@ function Print() {
 
   // Fungsi untuk download PDF manual
   const downloadPDF = async () => {
-    if (!printRef.current || !previewData?.student) return;
+    if (!printRef.current || !previewData?.student_id) return;
 
     setIsPrinting(true); // mulai loading
     try {
@@ -52,7 +55,7 @@ function Print() {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
       const studentName =
-        `${previewData.student.first_name} ${previewData.student.last_name}`.replace(
+        `${previewData.request_data.first_name} ${previewData.request_data.last_name}`.replace(
           /[\\?%*:|"<>]/g,
           '-'
         );
@@ -69,13 +72,16 @@ function Print() {
     const fetchAllData = async () => {
       try {
         const [previewResp, optionsResp] = await Promise.all([
-          getRegistrationPreview(applicationId),
+          getRegistrationPreview(applicationId, version),
           getRegistrationOptions(),
         ]);
 
         setPreviewData(previewResp.data);
         setSectionOptions(optionsResp.sections || []);
         setProgramOptions(optionsResp.programs || []);
+        setPickupPointOptions(optionsResp.pickup_points || []);
+        setClassOptions(optionsResp.classes || []);
+        setMajorOptions(optionsResp.majors || []);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -89,7 +95,7 @@ function Print() {
       console.error('No applicationId provided in navigation state');
       setLoading(false);
     }
-  }, [applicationId]);
+  }, [applicationId, version]);
 
   if (loading)
     return (
@@ -233,26 +239,25 @@ function Print() {
             <div className={styles.semesterParent}>
               <b className={styles.applicationForm}>Semester:</b>
               <b className={styles.applicationForm}>
-                {getSemesterNumber(previewData.enrollment?.semester?.number) ||
-                  ''}
+                {getSemesterNumber(previewData.semester ?? '')}
               </b>
             </div>
             <div className={styles.semesterChild}>
               <b className={styles.applicationForm}>School Year:</b>
               <b className={styles.applicationForm}>
-                {previewData.enrollment?.school_year?.year || ''}
+                {previewData.school_year ?? ''}
               </b>
             </div>
             <div className={styles.semesterChild}>
               <b className={styles.applicationForm}>Registration Number:</b>
               <b className={styles.applicationForm}>
-                {previewData.registration_number}
+                {previewData.registration_number ?? ''}
               </b>
             </div>
             <div className={styles.registrationIdParent}>
               <b className={styles.applicationForm}>Registration ID: </b>
               <b className={styles.applicationForm}>
-                {previewData.enrollment?.registration_id || ''}
+                {previewData.registration_id ?? ''}
               </b>
             </div>
           </div>
@@ -262,23 +267,28 @@ function Print() {
             <div className={styles.header1}>
               <b className={styles.applicationForm}>STUDENT'S INFORMATION</b>
             </div>
-            <StudentsInformationContent data={previewData.student} />
+            <StudentsInformationContent data={previewData} />
           </div>
           <div className={styles.program}>
             <div className={styles.header1}>
               <b className={styles.applicationForm}>PROGRAM</b>
             </div>
             <ProgramContent
-              data={previewData.enrollment}
+              data={previewData.request_data}
               sectionOptions={sectionOptions}
               programOptions={programOptions}
+              classOptions={classOptions}
+              majorOptions={majorOptions}
             />
           </div>
           <div className={styles.facilities}>
             <div className={styles.header1}>
               <b className={styles.applicationForm}>FACILITIES</b>
             </div>
-            <FacilitiesContent data={previewData.enrollment} />
+            <FacilitiesContent
+              data={previewData.request_data}
+              pickupPointOptions={pickupPointOptions}
+            />
           </div>
           <div className={styles.parentsguardianInformation}>
             <div className={styles.header1}>
@@ -287,32 +297,23 @@ function Print() {
               </b>
             </div>
             <ParentsGuardianInformationContent
-              father={previewData.father}
-              mother={previewData.mother}
-              guardian={previewData.guardian}
+              data={previewData.request_data}
             />
           </div>
           <div className={styles.termOfPayment}>
             <div className={styles.header1}>
               <b className={styles.applicationForm}>TERM OF PAYMENT</b>
             </div>
-            <TermofPaymentContent
-              payment={previewData.payment}
-              discount={previewData.discount}
-            />
+            <TermofPaymentContent data={previewData.request_data} />
           </div>
           <div className={styles.pledge}>
             <div className={styles.header1}>
               <b className={styles.applicationForm}>PLEDGE</b>
             </div>
-            <PledgeContent
-              student={previewData.student}
-              father={previewData.father}
-              mother={previewData.mother}
-            />
+            <PledgeContent data={previewData.request_data} />
           </div>
           <div className={styles.signature}>
-            <SignatureContent enrollment={previewData.enrollment} />
+            <SignatureContent data={previewData} />
           </div>
           <div className={styles.otherDetail}>
             <OtherDetailContent />

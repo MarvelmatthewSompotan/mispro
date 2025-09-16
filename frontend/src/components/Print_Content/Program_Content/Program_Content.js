@@ -1,7 +1,29 @@
 import React from 'react';
 import styles from '../../styles/Program_Content.module.css';
 
-function ProgramContent({ data, sectionOptions, programOptions }) {
+function ProgramContent({
+  data,
+  sectionOptions,
+  programOptions,
+  classOptions,
+  majorOptions,
+}) {
+  const getGradeName = () => {
+    if (data?.class_id) {
+      const found = classOptions.find((cls) => cls.class_id === data.class_id);
+      return found ? found.grade : '';
+    }
+    return '';
+  };
+
+  const getMajorName = () => {
+    if (data?.major_id) {
+      const found = majorOptions?.find((m) => m.major_id === data.major_id);
+      return found ? found.name : '';
+    }
+    return '';
+  };
+
   return (
     <div className={styles.content}>
       <div className={styles.top}>
@@ -13,7 +35,7 @@ function ProgramContent({ data, sectionOptions, programOptions }) {
           <div key={section.section_id} className={styles.answer}>
             <div className={styles.radioBtn}>
               <div className={styles.radioBtnChild} />
-              {data?.section?.name === section.name && (
+              {data?.section_id === section.section_id && (
                 <div className={styles.radioBtnChild1} />
               )}
             </div>
@@ -23,11 +45,11 @@ function ProgramContent({ data, sectionOptions, programOptions }) {
 
         <div className={styles.grade}>
           <div className={styles.field}>Grade</div>
-          <b className={styles.option}>{data?.class}</b>
+          <b className={styles.option}>{getGradeName()}</b>
         </div>
         <div className={styles.major}>
           <div className={styles.option}>Major</div>
-          <b className={styles.science}>{data?.major?.name}</b>
+          <b className={styles.science}>{getMajorName()}</b>
         </div>
       </div>
 
@@ -40,13 +62,23 @@ function ProgramContent({ data, sectionOptions, programOptions }) {
           <div key={program.program_id} className={styles.answer}>
             <div className={styles.radioBtn}>
               <div className={styles.radioBtnChild} />
-              {data?.program?.name === program.name && (
+              {data?.program_id === program.program_id && (
                 <div className={styles.radioBtnChild1} />
               )}
             </div>
             <div className={styles.option}>{program.name}</div>
           </div>
         ))}
+
+        {data?.program_other && (
+          <div className={styles.answer}>
+            <div className={styles.radioBtn}>
+              <div className={styles.radioBtnChild} />
+              {!data?.program_id && <div className={styles.radioBtnChild1} />}
+            </div>
+            <div className={styles.option}>{data.program_other}</div>
+          </div>
+        )}
       </div>
     </div>
   );
