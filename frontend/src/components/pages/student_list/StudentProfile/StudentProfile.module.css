@@ -136,13 +136,13 @@
   flex: 1;
   border-bottom: 1px solid #000;
   box-sizing: border-box;
-  min-height: 66px;
+  height: 80px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: space-between; /* <--- UBAH MENJADI INI */
   padding: 12px;
-  gap: 10px;
+  gap: 10px;  
   position: relative;
   padding-bottom: 24px;
 }
@@ -156,10 +156,15 @@
   line-height: 100%;
 }
 .fieldValue {
+  align-self: stretch;
+  position: relative;
   color: #000;
   font-weight: bold;
-  line-height: 100%;
-  padding-top: 1px; /* Minor adjustment for alignment */
+  /* Tambahan untuk menyamakan dengan input */
+  padding: 1px 0; /* Samakan padding vertikal dengan .formInput */
+  line-height: normal; /* Samakan line-height dengan .formInput */
+  display: block; /* Pastikan elemen mengambil ruang vertikal dengan benar */
+  min-height: 22px; /* Beri tinggi minimum agar sejajar bahkan saat kosong */
 }
 .fieldValue,
 .fieldLabel {
@@ -434,8 +439,19 @@
   color: #d32f2f;
   font-size: 13px;
   font-weight: 500;
-  margin-top: 0; /* Hapus margin-top karena sudah diatur oleh 'bottom' */
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.inputWithError .formInput {
+  flex-grow: 1; /* Input akan membesar mengisi sisa ruang */
+}
+
+.inputWithError {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 
 /* Style untuk pesan error yang butuh lebar penuh (untuk grup radio/checkbox) */
@@ -446,4 +462,104 @@
   margin-top: 4px;
   padding-left: 12px; /* Menyesuaikan dengan padding section */
   width: 100%;
+}
+
+/* Style baru untuk pesan error yang muncul di KANAN input */
+.inlineErrorMessageRight {
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap; /* Mencegah pesan error terpotong ke baris baru */
+  flex-shrink: 0; /* Mencegah pesan error mengecil jika tidak ada ruang */
+}
+
+.academicStatusWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.academicStatusWrapper > div:first-child {
+  /* The Select component */
+  flex: 1;
+}
+
+.otherInput {
+  flex: 1;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid #ccc !important;
+  margin-left: 10px;
+}
+
+:global(.react-select-error__control) {
+  border-bottom-color: #d32f2f !important;
+}
+:global(.react-select-error__placeholder) {
+  color: #e57373 !important;
+}
+
+/* Wrapper baru untuk membungkus Select component */
+.selectWrapper {
+  width: 50%;
+}
+
+/* Menghilangkan semua border dan background dari container utama react-select */
+:global(.react-select__control) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important; /* Menghilangkan shadow saat focus */
+  min-height: auto !important;
+  padding: 0;
+  margin: 0;
+}
+
+/* Mengatur posisi input dan placeholder agar pas */
+:global(.react-select__value-container) {
+  padding: 1px 0 !important;
+  margin: 0;
+}
+
+/* Menyamakan style teks terpilih dengan input field lain */
+:global(.react-select__single-value) {
+  font-weight: bold !important;
+  font-family: Poppins, Arial, sans-serif !important;
+  font-size: 16px !important;
+  color: #000 !important;
+  margin: 0;
+}
+
+/* Menyamakan style placeholder */
+:global(.react-select__placeholder) {
+  font-weight: bold !important;
+  font-family: Poppins, Arial, sans-serif !important;
+  font-size: 16px !important;
+  color: #a9a9a9 !important; /* Warna placeholder standar input */
+  margin: 0;
+}
+
+/* Menghilangkan garis pemisah (indicator) */
+:global(.react-select__indicator-separator) {
+  display: none !important;
+}
+
+/* Mengatur posisi ikon dropdown */
+:global(.react-select__indicators) {
+  padding: 0 !important;
+}
+
+/* Override khusus untuk state error */
+:global(.react-select-error__control) {
+  background-color: transparent !important; /* Tetap transparan saat error */
+}
+
+:global(.react-select-error__single-value) {
+  color: #d32f2f !important; /* Warna teks merah saat error */
+}
+
+:global(.react-select-error__placeholder) {
+  color: #e57373 !important; /* Warna placeholder merah saat error */
 }

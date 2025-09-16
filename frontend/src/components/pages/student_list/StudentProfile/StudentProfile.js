@@ -7,6 +7,7 @@ import {
   getRegistrationOptions,
   updateStudent,
 } from "../../../../services/api";
+import Select from "react-select";
 import styles from "./StudentProfile.module.css";
 import placeholderImage from "../../../../assets/user.png";
 import ConfirmUpdatePopup from "../PopUpConfirmUpdate/PopUpConfirmUpdate.js";
@@ -100,6 +101,35 @@ const StudentProfile = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState({});
+  const [studentInfo, setStudentInfo] = useState({});
+  const [academicStatusOptions, setAcademicStatusOptions] = useState([]);
+  const [genderOptions, setGenderOptions] = useState([]);
+  const [scrollTrigger, setScrollTrigger] = useState(0);
+
+  const citizenshipOptions = [
+    { value: "Indonesia", label: "Indonesia" },
+    { value: "Non Indonesia", label: "Non Indonesia" },
+  ];
+
+  const [validationMessages, setValidationMessages] = useState({
+    nik: "",
+    kitas: "",
+    nisn: "",
+  });
+
+  // Fetch options untuk dropdowns
+  useEffect(() => {
+    getRegistrationOptions()
+      .then((data) => {
+        setAcademicStatusOptions(
+          data.academic_status?.map((opt) => ({ value: opt, label: opt })) || []
+        );
+        setGenderOptions(
+          data.genders?.map((opt) => ({ value: opt, label: opt })) || []
+        );
+      })
+      .catch((err) => console.error("Failed to fetch options:", err));
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -121,6 +151,7 @@ const StudentProfile = () => {
         };
         setProfileData(combinedData);
         setFormData(combinedData);
+        setStudentInfo(studentData.studentInfo || {});
       }
     } catch (err) {
       console.error("Error fetching student profile data:", err);
@@ -132,44 +163,6 @@ const StudentProfile = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const handleRadioChange = (name, value) => {
-    clearError("facilities", name);
-    setFormData((prevData) => {
-      const currentVal = prevData[name];
-      const newVal = currentVal === value ? "" : value; // Logika unselect
-
-      const newFormData = { ...prevData, [name]: newVal };
-
-      // Logika dependen tetap berjalan di sini
-      if (name === "section_id") {
-        newFormData.class_id = "";
-        newFormData.major_id = "";
-      }
-
-      if (name === "transportation_id") {
-        const selectedTransport = options.transportations.find(
-          (t) => String(t.transport_id) === String(newVal)
-        );
-        const transportType = selectedTransport
-          ? selectedTransport.type.toLowerCase()
-          : "";
-        if (transportType === "own car" || transportType === "school bus") {
-          const currentResidence = options.residence_halls.find(
-            (r) => String(r.residence_id) === String(prevData.residence_id)
-          );
-          if (
-            currentResidence &&
-            currentResidence.type.toLowerCase().includes("dormitory")
-          ) {
-            newFormData.residence_id = "";
-          }
-        }
-      }
-
-      return newFormData;
-    });
-  };
 
   const clearError = (section, fieldName) => {
     if (errors[section] && errors[section][fieldName]) {
@@ -184,6 +177,60 @@ const StudentProfile = () => {
         [section]: newSectionErrors,
       }));
     }
+  };
+
+  // Handler untuk input biasa di student info
+  const handleStudentInfoChange = (e) => {
+    const { name, value } = e.target;
+    clearError("studentInfo", name);
+
+    // Real-time validation for specific fields
+    if (name === "nik" && value && value.length !== 16) {
+      setValidationMessages((prev) => ({
+        ...prev,
+        nik: "NIK must be 16 digits",
+      }));
+    } else if (name === "nik") {
+      setValidationMessages((prev) => ({ ...prev, nik: "" }));
+    }
+
+    if (name === "kitas" && value && (value.length < 11 || value.length > 16)) {
+      setValidationMessages((prev) => ({
+        ...prev,
+        kitas: "KITAS must be 11-16 characters",
+      }));
+    } else if (name === "kitas") {
+      setValidationMessages((prev) => ({ ...prev, kitas: "" }));
+    }
+
+    if (name === "nisn" && value && value.length !== 10) {
+      setValidationMessages((prev) => ({
+        ...prev,
+        nisn: "NISN must be 10 digits",
+      }));
+    } else if (name === "nisn") {
+      setValidationMessages((prev) => ({ ...prev, nisn: "" }));
+    }
+    setStudentInfo((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handler khusus untuk react-select
+  const handleStudentInfoSelectChange = (name, selectedOption) => {
+    const value = selectedOption ? selectedOption.value : "";
+    clearError("studentInfo", name);
+    setStudentInfo((prev) => {
+      const newData = { ...prev, [name]: value };
+      if (name === "citizenship") {
+        if (value === "Indonesia") {
+          newData.kitas = "";
+          newData.country = "";
+        } else if (value === "Non Indonesia") newData.nik = "";
+      }
+      if (name === "academic_status" && value !== "OTHER") {
+        newData.academic_status_other = "";
+      }
+      return newData;
+    });
   };
 
   const handleChange = (e) => {
@@ -330,14 +377,50 @@ const StudentProfile = () => {
     });
   };
 
+  const handleRadioChange = (name, value) => {
+    clearError("facilities", name);
+    setFormData((prevData) => {
+      const currentVal = prevData[name];
+      const newVal = currentVal === value ? "" : value;
+      const newFormData = { ...prevData, [name]: newVal };
+
+      if (name === "transportation_id") {
+        const selectedTransport = options.transportations.find(
+          (t) => String(t.transport_id) === String(newVal)
+        );
+        const transportType = selectedTransport
+          ? selectedTransport.type.toLowerCase()
+          : "";
+        if (transportType === "own car" || transportType === "school bus") {
+          const currentResidence = options.residence_halls.find(
+            (r) => String(r.residence_id) === String(prevData.residence_id)
+          );
+          if (
+            currentResidence &&
+            currentResidence.type.toLowerCase().includes("dormitory")
+          ) {
+            newFormData.residence_id = "";
+          }
+        }
+      }
+      return newFormData;
+    });
+  };
+
   const handleCancel = () => {
     setFormData(profileData);
+    setStudentInfo(profileData); // Reset student info as well
     setIsEditing(false);
+    setErrors({});
+    setValidationMessages({ nik: "", kitas: "", nisn: "" });
   };
 
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Menggabungkan data dari kedua state untuk validasi yang komprehensif
+    const fullFormData = { ...formData, ...studentInfo };
 
     // 1. Validasi Student Information
     const studentInfoErrors = {};
@@ -362,92 +445,125 @@ const StudentProfile = () => {
       province: "Province is required",
     };
     for (const field in requiredStudentFields) {
-      if (!formData[field] || String(formData[field]).trim() === "")
+      if (!fullFormData[field] || String(fullFormData[field]).trim() === "") {
         studentInfoErrors[field] = requiredStudentFields[field];
+      }
     }
-    if (formData.email && !emailRegex.test(formData.email))
+    if (fullFormData.email && !emailRegex.test(fullFormData.email)) {
       studentInfoErrors.email = "Invalid email format.";
-    if (formData.citizenship === "Indonesia" && !formData.nik?.trim())
+    }
+    if (fullFormData.citizenship === "Indonesia" && !fullFormData.nik?.trim()) {
       studentInfoErrors.nik = "NIK is required.";
-    if (formData.citizenship === "Non Indonesia" && !formData.kitas?.trim())
+    }
+    if (
+      fullFormData.citizenship === "Non Indonesia" &&
+      !fullFormData.kitas?.trim()
+    ) {
       studentInfoErrors.kitas = "KITAS is required.";
-    if (Object.keys(studentInfoErrors).length > 0)
+    }
+
+    if (fullFormData.citizenship === "Indonesia") {
+      if (!fullFormData.nik?.trim()) studentInfoErrors.nik = "NIK is required.";
+      else if (fullFormData.nik.length !== 16)
+        studentInfoErrors.nik = "NIK must be 16 digits.";
+    }
+    if (fullFormData.citizenship === "Non Indonesia") {
+      if (!fullFormData.kitas?.trim())
+        studentInfoErrors.kitas = "KITAS is required.";
+      else if (fullFormData.kitas.length < 11 || fullFormData.kitas.length > 16)
+        studentInfoErrors.kitas = "KITAS must be 11-16 characters.";
+    }
+    if (fullFormData.nisn && fullFormData.nisn.length !== 10) {
+      studentInfoErrors.nisn = "NISN must be 10 digits.";
+    }
+    if (
+      fullFormData.academic_status === "OTHER" &&
+      !fullFormData.academic_status_other?.trim()
+    ) {
+      studentInfoErrors.academic_status = "Please specify the academic status.";
+    }
+    if (Object.keys(studentInfoErrors).length > 0) {
       newErrors.studentInfo = studentInfoErrors;
+    }
 
     // 2. Validasi Facilities
     const facilitiesErrors = {};
-    if (!formData.transportation_id)
+    if (!fullFormData.transportation_id) {
       facilitiesErrors.transportation_id = "Transportation is required.";
-    if (!formData.residence_id)
+    }
+    if (!fullFormData.residence_id) {
       facilitiesErrors.residence_id = "Residence Hall is required.";
-    if (formData.transportation_policy !== "Signed")
+    }
+    if (fullFormData.transportation_policy !== "Signed") {
       facilitiesErrors.transportation_policy = "Policy must be signed.";
-    if (formData.residence_hall_policy !== "Signed")
+    }
+    if (fullFormData.residence_hall_policy !== "Signed") {
       facilitiesErrors.residence_hall_policy = "Policy must be signed.";
-    if (Object.keys(facilitiesErrors).length > 0)
+    }
+    if (Object.keys(facilitiesErrors).length > 0) {
       newErrors.facilities = facilitiesErrors;
+    }
 
-    // 3. Validasi Parent/Guardian Information
-    // 3. Validasi Parent/Guardian Information
+    // 3. Validasi Parent/Guardian Information (Versi Lengkap)
     const parentErrors = {};
-
-    // === Validasi Informasi Ayah ===
-    if (!formData.father_name?.trim())
+    // Ayah
+    if (!fullFormData.father_name?.trim())
       parentErrors.father_name = "Father's name is required.";
-    if (!formData.father_phone?.trim())
+    if (!fullFormData.father_phone?.trim())
       parentErrors.father_phone = "Father's phone is required.";
     if (
-      !formData.father_email?.trim() ||
-      !emailRegex.test(formData.father_email)
+      !fullFormData.father_email?.trim() ||
+      !emailRegex.test(fullFormData.father_email)
     ) {
       parentErrors.father_email = "A valid email for the father is required.";
     }
-    if (!formData.father_address_street?.trim())
+    if (!fullFormData.father_address_street?.trim())
       parentErrors.father_address_street =
         "Father's street address is required.";
-    if (!formData.father_address_village?.trim())
+    if (!fullFormData.father_address_village?.trim())
       parentErrors.father_address_village = "Father's village is required.";
-    if (!formData.father_address_district?.trim())
+    if (!fullFormData.father_address_district?.trim())
       parentErrors.father_address_district = "Father's district is required.";
-    if (!formData.father_address_city_regency?.trim())
+    if (!fullFormData.father_address_city_regency?.trim())
       parentErrors.father_address_city_regency =
         "Father's city/regency is required.";
-    if (!formData.father_address_province?.trim())
+    if (!fullFormData.father_address_province?.trim())
       parentErrors.father_address_province = "Father's province is required.";
 
-    // === Validasi Informasi Ibu ===
-    if (!formData.mother_name?.trim())
+    // Ibu
+    if (!fullFormData.mother_name?.trim())
       parentErrors.mother_name = "Mother's name is required.";
-    if (!formData.mother_phone?.trim())
+    if (!fullFormData.mother_phone?.trim())
       parentErrors.mother_phone = "Mother's phone is required.";
     if (
-      !formData.mother_email?.trim() ||
-      !emailRegex.test(formData.mother_email)
+      !fullFormData.mother_email?.trim() ||
+      !emailRegex.test(fullFormData.mother_email)
     ) {
       parentErrors.mother_email = "A valid email for the mother is required.";
     }
-    if (!formData.mother_address_street?.trim())
+    if (!fullFormData.mother_address_street?.trim())
       parentErrors.mother_address_street =
         "Mother's street address is required.";
-    if (!formData.mother_address_village?.trim())
+    if (!fullFormData.mother_address_village?.trim())
       parentErrors.mother_address_village = "Mother's village is required.";
-    if (!formData.mother_address_district?.trim())
+    if (!fullFormData.mother_address_district?.trim())
       parentErrors.mother_address_district = "Mother's district is required.";
-    if (!formData.mother_address_city_regency?.trim())
+    if (!fullFormData.mother_address_city_regency?.trim())
       parentErrors.mother_address_city_regency =
         "Mother's city/regency is required.";
-    if (!formData.mother_address_province?.trim())
+    if (!fullFormData.mother_address_province?.trim())
       parentErrors.mother_address_province = "Mother's province is required.";
 
-    if (Object.keys(parentErrors).length > 0)
+    if (Object.keys(parentErrors).length > 0) {
       newErrors.parentGuardian = parentErrors;
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   useEffect(() => {
-    if (Object.keys(errors).length > 0) {
+    if (Object.keys(errors).length > 0 && scrollTrigger > 0) {
       const sectionOrder = ["studentInfo", "facilities", "parentGuardian"];
       const firstErrorSectionKey = sectionOrder.find(
         (key) => errors[key] && Object.keys(errors[key]).length > 0
@@ -464,13 +580,18 @@ const StudentProfile = () => {
         }
       }
     }
-  }, [errors]);
+  }, [scrollTrigger]);
 
   const handleSaveClick = () => {
     const isValid = validateForm();
     if (isValid) {
       setErrors({});
+      // Before opening popup, combine studentInfo back into the main formData
+      setFormData((prev) => ({ ...prev, ...studentInfo }));
       setIsPopupOpen(true);
+    } else {
+      // === TAMBAHKAN BARIS INI UNTUK MENGAKTIFKAN SCROLL ===
+      setScrollTrigger((prev) => prev + 1);
     }
   };
 
@@ -497,10 +618,6 @@ const StudentProfile = () => {
     const item = options[type]?.find((i) => String(i[keyName]) === String(id));
     return item?.name || item?.grade || item?.type || id;
   };
-
-  // =================================================================================
-  // ▼▼▼ LOGIKA BARU UNTUK MEMFILTER DROPDOWN SECARA DINAMIS (di-cache dengan useMemo) ▼▼▼
-  // =================================================================================
 
   const filteredGrades = useMemo(() => {
     if (!isEditing || !options?.classes || !formData?.section_id) return [];
@@ -659,20 +776,18 @@ const StudentProfile = () => {
                       id="first_name"
                       type="text"
                       name="first_name"
-                      value={formData.first_name || ""}
-                      onChange={handleChange}
+                      value={studentInfo.first_name || ""}
+                      onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
                         errors.studentInfo?.first_name ? styles.errorInput : ""
                       }`}
                       placeholder={
-                        errors.studentInfo?.first_name
-                          ? errors.studentInfo.first_name
-                          : "First name"
+                        errors.studentInfo?.first_name || "First name"
                       }
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.first_name || "-"}
+                      {studentInfo.first_name || "-"}
                     </b>
                   )}
                 </div>
@@ -685,14 +800,14 @@ const StudentProfile = () => {
                       id="middle_name"
                       type="text"
                       name="middle_name"
-                      value={formData.middle_name || ""}
-                      onChange={handleChange}
+                      value={studentInfo.middle_name || ""}
+                      onChange={handleStudentInfoChange}
                       className={styles.formInput}
                       placeholder="Middle name"
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.middle_name || "-"}
+                      {studentInfo.middle_name || "-"}
                     </b>
                   )}
                 </div>
@@ -707,14 +822,14 @@ const StudentProfile = () => {
                       id="last_name"
                       type="text"
                       name="last_name"
-                      value={formData.last_name || ""}
-                      onChange={handleChange}
+                      value={studentInfo.last_name || ""}
+                      onChange={handleStudentInfoChange}
                       className={styles.formInput}
                       placeholder="Last name"
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.last_name || "-"}
+                      {studentInfo.last_name || "-"}
                     </b>
                   )}
                 </div>
@@ -736,122 +851,17 @@ const StudentProfile = () => {
                       id="nickname"
                       type="text"
                       name="nickname"
-                      value={formData.nickname || ""}
-                      onChange={handleChange}
+                      value={studentInfo.nickname || ""}
+                      onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
                         errors.studentInfo?.nickname ? styles.errorInput : ""
                       }`}
-                      placeholder={
-                        errors.studentInfo?.nickname
-                          ? errors.studentInfo.nickname
-                          : "Nickname"
-                      }
+                      placeholder={errors.studentInfo?.nickname || "Nickname"}
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.nickname || "-"}
+                      {studentInfo.nickname || "-"}
                     </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.nisn ? styles.errorFieldWrapper : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="nisn"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.nisn ? styles.errorLabel : ""
-                    }`}
-                  >
-                    NISN
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="nisn"
-                      type="text"
-                      name="nisn"
-                      value={formData.nisn || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.nisn ? styles.errorInput : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.nisn
-                          ? errors.studentInfo.nisn
-                          : "NISN"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>{formData.nisn || "-"}</b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.nik ? styles.errorFieldWrapper : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="nik"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.nik ? styles.errorLabel : ""
-                    }`}
-                  >
-                    NIK
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="nik"
-                      type="text"
-                      name="nik"
-                      value={formData.nik || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.nik ? styles.errorInput : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.nik ? errors.studentInfo.nik : "NIK"
-                      }
-                      disabled={formData.citizenship !== "Indonesia"}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>{formData.nik || "-"}</b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.kitas ? styles.errorFieldWrapper : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="kitas"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.kitas ? styles.errorLabel : ""
-                    }`}
-                  >
-                    KITAS
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="kitas"
-                      type="text"
-                      name="kitas"
-                      value={formData.kitas || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.kitas ? styles.errorInput : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.kitas
-                          ? errors.studentInfo.kitas
-                          : "KITAS"
-                      }
-                      disabled={formData.citizenship !== "Non Indonesia"}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>{formData.kitas || "-"}</b>
                   )}
                 </div>
               </div>
@@ -872,24 +882,201 @@ const StudentProfile = () => {
                     Citizenship
                   </label>
                   {isEditing ? (
-                    <input
-                      id="citizenship"
-                      type="text"
-                      name="citizenship"
-                      value={formData.citizenship || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.citizenship ? styles.errorInput : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.citizenship
-                          ? errors.studentInfo.citizenship
-                          : "Citizenship"
-                      }
-                    />
+                    <div className={styles.selectWrapper}>
+                      <Select
+                        id="citizenship"
+                        name="citizenship"
+                        options={citizenshipOptions}
+                        value={
+                          studentInfo.citizenship
+                            ? {
+                                value: studentInfo.citizenship,
+                                label: studentInfo.citizenship,
+                              }
+                            : null
+                        }
+                        onChange={(opt) =>
+                          handleStudentInfoSelectChange("citizenship", opt)
+                        }
+                        placeholder={
+                          errors.studentInfo?.citizenship ||
+                          "Select citizenship"
+                        }
+                        isClearable
+                        // Gunakan prefix 'react-select' dan biarkan CSS global yang menghandle error
+                        classNamePrefix={
+                          errors.studentInfo?.citizenship
+                            ? "react-select-error"
+                            : "react-select"
+                        }
+                      />
+                    </div>
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.citizenship || "-"}
+                      {studentInfo.citizenship || "-"}
+                    </b>
+                  )}
+                </div>
+                {studentInfo.citizenship === "Indonesia" && (
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.nik ? styles.errorFieldWrapper : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="nik"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.nik ? styles.errorLabel : ""
+                      }`}
+                    >
+                      NIK
+                    </label>
+                    {isEditing ? (
+                      <div className={styles.inputWithError}>
+                        <input
+                          id="nik"
+                          type="text"
+                          name="nik"
+                          value={studentInfo.nik || ""}
+                          onChange={handleStudentInfoChange}
+                          maxLength={16}
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.nik || validationMessages.nik
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.studentInfo?.nik || "NIK (16 digits)"
+                          }
+                        />
+                        {validationMessages.nik && (
+                          <div className={styles.inlineErrorMessageRight}>
+                            {validationMessages.nik}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.nik || "-"}
+                      </b>
+                    )}
+                  </div>
+                )}
+                {studentInfo.citizenship === "Non Indonesia" && (
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.kitas ? styles.errorFieldWrapper : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="kitas"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.kitas ? styles.errorLabel : ""
+                      }`}
+                    >
+                      KITAS
+                    </label>
+                    {isEditing ? (
+                      <div className={styles.inputWithError}>
+                        <input
+                          id="kitas"
+                          type="text"
+                          name="kitas"
+                          value={studentInfo.kitas || ""}
+                          onChange={handleStudentInfoChange}
+                          maxLength={16}
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.kitas ||
+                            validationMessages.kitas
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.studentInfo?.kitas ||
+                            "KITAS (11-16 characters)"
+                          }
+                        />
+                        {validationMessages.kitas && (
+                          /* ===== UBAH CLASSNAME DI SINI ===== */
+                          <div className={styles.inlineErrorMessageRight}>
+                            {validationMessages.kitas}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.kitas || "-"}
+                      </b>
+                    )}
+                  </div>
+                )}
+              </div>
+              {studentInfo.citizenship === "Non Indonesia" && (
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <label htmlFor="country" className={styles.fieldLabel}>
+                      Country of origin
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="country"
+                        type="text"
+                        name="country"
+                        value={studentInfo.country || ""}
+                        onChange={handleStudentInfoChange}
+                        className={styles.formInput}
+                        placeholder="Country of origin"
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.country || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className={styles.row}>
+                <div
+                  className={`${styles.field} ${
+                    errors.studentInfo?.nisn ? styles.errorFieldWrapper : ""
+                  }`}
+                >
+                  <label
+                    htmlFor="nisn"
+                    className={`${styles.fieldLabel} ${
+                      errors.studentInfo?.nisn ? styles.errorLabel : ""
+                    }`}
+                  >
+                    NISN
+                  </label>
+                  {isEditing ? (
+                    <div className={styles.inputWithError}>
+                      <input
+                        id="nisn"
+                        type="text"
+                        name="nisn"
+                        value={studentInfo.nisn || ""}
+                        onChange={handleStudentInfoChange}
+                        maxLength={10}
+                        className={`${styles.formInput} ${
+                          errors.studentInfo?.nisn || validationMessages.nisn
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.studentInfo?.nisn || "NISN (10 digits)"
+                        }
+                      />
+                      {validationMessages.nisn && (
+                        /* ===== UBAH CLASSNAME DI SINI ===== */
+                        <div className={styles.inlineErrorMessageRight}>
+                          {validationMessages.nisn}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <b className={styles.fieldValue}>
+                      {studentInfo.nisn || "-"}
                     </b>
                   )}
                 </div>
@@ -911,23 +1098,21 @@ const StudentProfile = () => {
                       id="religion"
                       type="text"
                       name="religion"
-                      value={formData.religion || ""}
-                      onChange={handleChange}
+                      value={studentInfo.religion || ""}
+                      onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
                         errors.studentInfo?.religion ? styles.errorInput : ""
                       }`}
-                      placeholder={
-                        errors.studentInfo?.religion
-                          ? errors.studentInfo.religion
-                          : "Religion"
-                      }
+                      placeholder={errors.studentInfo?.religion || "Religion"}
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.religion || "-"}
+                      {studentInfo.religion || "-"}
                     </b>
                   )}
                 </div>
+              </div>
+              <div className={styles.row}>
                 <div
                   className={`${styles.field} ${
                     errors.studentInfo?.place_of_birth
@@ -950,22 +1135,20 @@ const StudentProfile = () => {
                       id="place_of_birth"
                       type="text"
                       name="place_of_birth"
-                      value={formData.place_of_birth || ""}
-                      onChange={handleChange}
+                      value={studentInfo.place_of_birth || ""}
+                      onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
                         errors.studentInfo?.place_of_birth
                           ? styles.errorInput
                           : ""
                       }`}
                       placeholder={
-                        errors.studentInfo?.place_of_birth
-                          ? errors.studentInfo.place_of_birth
-                          : "Place of birth"
+                        errors.studentInfo?.place_of_birth || "Place of birth"
                       }
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.place_of_birth || "-"}
+                      {studentInfo.place_of_birth || "-"}
                     </b>
                   )}
                 </div>
@@ -989,17 +1172,13 @@ const StudentProfile = () => {
                       id="date_of_birth"
                       type="date"
                       name="date_of_birth"
-                      value={formatDateForInput(formData.date_of_birth)}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.date_of_birth
-                          ? styles.errorInput
-                          : ""
-                      }`}
+                      value={formatDateForInput(studentInfo.date_of_birth)}
+                      onChange={handleStudentInfoChange}
+                      className={styles.formInput}
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formatDateForDisplay(formData.date_of_birth)}
+                      {formatDateForDisplay(studentInfo.date_of_birth)}
                     </b>
                   )}
                 </div>
@@ -1019,24 +1198,36 @@ const StudentProfile = () => {
                     Gender
                   </label>
                   {isEditing ? (
-                    <input
-                      id="gender"
-                      type="text"
-                      name="gender"
-                      value={formData.gender || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.gender ? styles.errorInput : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.gender
-                          ? errors.studentInfo.gender
-                          : "Gender"
-                      }
-                    />
+                    <div className={styles.selectWrapper}>
+                      <Select
+                        id="gender"
+                        name="gender"
+                        options={genderOptions}
+                        value={
+                          studentInfo.gender
+                            ? {
+                                value: studentInfo.gender,
+                                label: studentInfo.gender,
+                              }
+                            : null
+                        }
+                        onChange={(opt) =>
+                          handleStudentInfoSelectChange("gender", opt)
+                        }
+                        placeholder={
+                          errors.studentInfo?.gender || "Select gender"
+                        }
+                        isClearable
+                        classNamePrefix={
+                          errors.studentInfo?.gender
+                            ? "react-select-error"
+                            : "react-select"
+                        }
+                      />
+                    </div>
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.gender || "-"}
+                      {studentInfo.gender || "-"}
                     </b>
                   )}
                 </div>
@@ -1060,20 +1251,16 @@ const StudentProfile = () => {
                       id="family_rank"
                       type="number"
                       name="family_rank"
-                      value={formData.family_rank || ""}
-                      onChange={handleChange}
+                      value={studentInfo.family_rank || ""}
+                      onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
                         errors.studentInfo?.family_rank ? styles.errorInput : ""
                       }`}
-                      placeholder={
-                        errors.studentInfo?.family_rank
-                          ? errors.studentInfo.family_rank
-                          : "Rank"
-                      }
+                      placeholder={errors.studentInfo?.family_rank || "Rank"}
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.family_rank || "-"}
+                      {studentInfo.family_rank || "-"}
                     </b>
                   )}
                 </div>
@@ -1097,19 +1284,17 @@ const StudentProfile = () => {
                       id="email"
                       type="email"
                       name="email"
-                      value={formData.email || ""}
-                      onChange={handleChange}
+                      value={studentInfo.email || ""}
+                      onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
                         errors.studentInfo?.email ? styles.errorInput : ""
                       }`}
-                      placeholder={
-                        errors.studentInfo?.email
-                          ? errors.studentInfo.email
-                          : "Email Address"
-                      }
+                      placeholder={errors.studentInfo?.email || "Email Address"}
                     />
                   ) : (
-                    <b className={styles.fieldValue}>{formData.email || "-"}</b>
+                    <b className={styles.fieldValue}>
+                      {studentInfo.email || "-"}
+                    </b>
                   )}
                 </div>
                 <div
@@ -1134,22 +1319,20 @@ const StudentProfile = () => {
                       id="previous_school"
                       type="text"
                       name="previous_school"
-                      value={formData.previous_school || ""}
-                      onChange={handleChange}
+                      value={studentInfo.previous_school || ""}
+                      onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
                         errors.studentInfo?.previous_school
                           ? styles.errorInput
                           : ""
                       }`}
                       placeholder={
-                        errors.studentInfo?.previous_school
-                          ? errors.studentInfo.previous_school
-                          : "Previous School"
+                        errors.studentInfo?.previous_school || "Previous School"
                       }
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.previous_school || "-"}
+                      {studentInfo.previous_school || "-"}
                     </b>
                   )}
                 </div>
@@ -1175,22 +1358,20 @@ const StudentProfile = () => {
                       id="phone_number"
                       type="tel"
                       name="phone_number"
-                      value={formData.phone_number || ""}
-                      onChange={handleChange}
+                      value={studentInfo.phone_number || ""}
+                      onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
                         errors.studentInfo?.phone_number
                           ? styles.errorInput
                           : ""
                       }`}
                       placeholder={
-                        errors.studentInfo?.phone_number
-                          ? errors.studentInfo.phone_number
-                          : "Phone Number"
+                        errors.studentInfo?.phone_number || "Phone Number"
                       }
                     />
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.phone_number || "-"}
+                      {studentInfo.phone_number || "-"}
                     </b>
                   )}
                 </div>
@@ -1212,26 +1393,54 @@ const StudentProfile = () => {
                     Academic status
                   </label>
                   {isEditing ? (
-                    <input
-                      id="academic_status"
-                      type="text"
-                      name="academic_status"
-                      value={formData.academic_status || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.academic_status
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.academic_status
-                          ? errors.studentInfo.academic_status
-                          : "Academic Status"
-                      }
-                    />
+                    <div className={styles.academicStatusWrapper}>
+                      <div className={styles.selectWrapper}>
+                        <Select
+                          id="academic_status"
+                          name="academic_status"
+                          options={academicStatusOptions}
+                          value={
+                            studentInfo.academic_status
+                              ? {
+                                  value: studentInfo.academic_status,
+                                  label: studentInfo.academic_status,
+                                }
+                              : null
+                          }
+                          onChange={(opt) =>
+                            handleStudentInfoSelectChange(
+                              "academic_status",
+                              opt
+                            )
+                          }
+                          placeholder={
+                            errors.studentInfo?.academic_status ||
+                            "Select status"
+                          }
+                          isClearable
+                          classNamePrefix={
+                            errors.studentInfo?.academic_status
+                              ? "react-select-error"
+                              : "react-select"
+                          }
+                        />
+                      </div>
+                      {studentInfo.academic_status === "OTHER" && (
+                        <input
+                          type="text"
+                          name="academic_status_other"
+                          value={studentInfo.academic_status_other || ""}
+                          onChange={handleStudentInfoChange}
+                          className={`${styles.formInput} ${styles.otherInput}`}
+                          placeholder="Please specify"
+                        />
+                      )}
+                    </div>
                   ) : (
                     <b className={styles.fieldValue}>
-                      {formData.academic_status || "-"}
+                      {studentInfo.academic_status_other ||
+                        studentInfo.academic_status ||
+                        "-"}
                     </b>
                   )}
                 </div>
@@ -1256,20 +1465,16 @@ const StudentProfile = () => {
                         id="street"
                         type="text"
                         name="street"
-                        value={formData.street || ""}
-                        onChange={handleChange}
+                        value={studentInfo.street || ""}
+                        onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.street ? styles.errorInput : ""
                         }`}
-                        placeholder={
-                          errors.studentInfo?.street
-                            ? errors.studentInfo.street
-                            : "Street"
-                        }
+                        placeholder={errors.studentInfo?.street || "Street"}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.street || "-"}
+                        {studentInfo.street || "-"}
                       </b>
                     )}
                   </div>
@@ -1283,14 +1488,14 @@ const StudentProfile = () => {
                           id="rt"
                           type="text"
                           name="rt"
-                          value={formData.rt || ""}
-                          onChange={handleChange}
+                          value={studentInfo.rt || ""}
+                          onChange={handleStudentInfoChange}
                           className={styles.formInput}
                           placeholder="RT"
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.rt || "-"}
+                          {studentInfo.rt || "-"}
                         </b>
                       )}
                     </div>
@@ -1303,14 +1508,14 @@ const StudentProfile = () => {
                           id="rw"
                           type="text"
                           name="rw"
-                          value={formData.rw || ""}
-                          onChange={handleChange}
+                          value={studentInfo.rw || ""}
+                          onChange={handleStudentInfoChange}
                           className={styles.formInput}
                           placeholder="RW"
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.rw || "-"}
+                          {studentInfo.rw || "-"}
                         </b>
                       )}
                     </div>
@@ -1337,20 +1542,16 @@ const StudentProfile = () => {
                         id="village"
                         type="text"
                         name="village"
-                        value={formData.village || ""}
-                        onChange={handleChange}
+                        value={studentInfo.village || ""}
+                        onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.village ? styles.errorInput : ""
                         }`}
-                        placeholder={
-                          errors.studentInfo?.village
-                            ? errors.studentInfo.village
-                            : "Village"
-                        }
+                        placeholder={errors.studentInfo?.village || "Village"}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.village || "-"}
+                        {studentInfo.village || "-"}
                       </b>
                     )}
                   </div>
@@ -1374,20 +1575,16 @@ const StudentProfile = () => {
                         id="district"
                         type="text"
                         name="district"
-                        value={formData.district || ""}
-                        onChange={handleChange}
+                        value={studentInfo.district || ""}
+                        onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.district ? styles.errorInput : ""
                         }`}
-                        placeholder={
-                          errors.studentInfo?.district
-                            ? errors.studentInfo.district
-                            : "District"
-                        }
+                        placeholder={errors.studentInfo?.district || "District"}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.district || "-"}
+                        {studentInfo.district || "-"}
                       </b>
                     )}
                   </div>
@@ -1415,22 +1612,20 @@ const StudentProfile = () => {
                         id="city_regency"
                         type="text"
                         name="city_regency"
-                        value={formData.city_regency || ""}
-                        onChange={handleChange}
+                        value={studentInfo.city_regency || ""}
+                        onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.city_regency
                             ? styles.errorInput
                             : ""
                         }`}
                         placeholder={
-                          errors.studentInfo?.city_regency
-                            ? errors.studentInfo.city_regency
-                            : "City/Regency"
+                          errors.studentInfo?.city_regency || "City/Regency"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.city_regency || "-"}
+                        {studentInfo.city_regency || "-"}
                       </b>
                     )}
                   </div>
@@ -1454,20 +1649,16 @@ const StudentProfile = () => {
                         id="province"
                         type="text"
                         name="province"
-                        value={formData.province || ""}
-                        onChange={handleChange}
+                        value={studentInfo.province || ""}
+                        onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.province ? styles.errorInput : ""
                         }`}
-                        placeholder={
-                          errors.studentInfo?.province
-                            ? errors.studentInfo.province
-                            : "Province"
-                        }
+                        placeholder={errors.studentInfo?.province || "Province"}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.province || "-"}
+                        {studentInfo.province || "-"}
                       </b>
                     )}
                   </div>
@@ -1478,15 +1669,15 @@ const StudentProfile = () => {
                     <input
                       type="text"
                       name="other"
-                      value={formData.other || ""}
-                      onChange={handleChange}
+                      value={studentInfo.other || ""}
+                      onChange={handleStudentInfoChange}
                       className={styles.formInput}
                     />
                   ) : (
                     <div
                       className={`${styles.formInput} ${styles.visualInput}`}
                     >
-                      {formData.other || "-"}
+                      {studentInfo.other || "-"}
                     </div>
                   )}
                   <span className={styles.fieldLabel}>)</span>
