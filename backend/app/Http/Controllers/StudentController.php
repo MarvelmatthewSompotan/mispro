@@ -226,7 +226,6 @@ class StudentController extends Controller
 
     public function updateStudent(Request $request, $student_id)
     {
-        Log::error('updateStudent called', ['student_id' => $student_id, 'input' => $request->all()]);
         DB::beginTransaction();
         try {
              // --- Ambil versi terakhir untuk student ini ---
@@ -234,7 +233,7 @@ class StudentController extends Controller
                 ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
                     $q->where('student_id', $student_id);
                 })
-                ->orderByDesc('updated_at')
+                ->orderByDesc('version')
                 ->first();
 
             if (!$latestVersion) {
@@ -408,8 +407,24 @@ class StudentController extends Controller
 
             // Gabungkan data lama + input baru
             $newRequestData = array_merge($oldRequestData, $validated);
+
+            // Ambil enrollment terbaru student
+            $latestEnrollment = $student->enrollments()
+            ->orderByDesc('registration_date')
+            ->first();
+
             $newSnapshot = [
-                'request_data' => $newRequestData,
+                'student_id'     => $student->student_id,
+                'registration_id' => $latestEnrollment?->registration_id,
+                'enrollment_id'  => $latestEnrollment?->enrollment_id,
+                'registration_number' =>$latestEnrollment?->enrollment_id,
+                'registration_date' =>$latestEnrollment?->registration_date,
+                'application_id' => $latestVersion->application_id,
+                'semester'     => $latestEnrollment?->semester->number,        
+                'school_year'  => $latestEnrollment?->schoolYear->year, 
+                'request_data'   => $newRequestData,
+                'timestamp'      => now(),
+                'action'         => 'Update',
             ];
 
             $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment.student', function($q) use ($student_id) {
@@ -431,8 +446,6 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Student updated and new application form version created',
-                'application_id_field' => $latestVersion->application_id,
-                'applicationForm_relation' => $latestVersion->applicationForm,
                 'version_id' => $newVersion->version_id,
                 'data' => $newSnapshot,
             ]);
