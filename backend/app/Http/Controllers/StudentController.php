@@ -471,4 +471,47 @@ class StudentController extends Controller
         }
     }
 
+    public function getStudentHistoryDates($studentId)
+    {
+        $dates = ApplicationFormVersion::whereHas('applicationForm.enrollment', function ($q) use ($studentId) {
+                $q->where('student_id', $studentId);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->get(['version_id', 'application_id', 'updated_at']);
+
+        return response()->json($dates);
+    }
+
+    public function getHistoryDetail($versionId)
+    {
+        try {
+            $version = ApplicationFormVersion::with('applicationForm.enrollment.student')
+                ->findOrFail($versionId);
+
+            return response()->json([
+                'success'            => true,
+                'version_id'         => $version->version_id,
+                'student_id'         => $version->applicationForm->enrollment->student_id ?? null,
+                'application_form_id'=> $version->application_id,
+                'updated_at'         => $version->updated_at,
+                'data_snapshot'      => json_decode($version->data_snapshot, true),
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'History version not found',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
+
 }

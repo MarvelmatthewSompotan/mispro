@@ -22,6 +22,8 @@ Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
     Route::get('/search', [StudentController::class, 'searchStudents']);
     Route::get('/{student_id}/latest-application', [StudentController::class, 'getLatestApplication']);
     Route::patch('/{student_id}/update', [StudentController::class, 'updateStudent']);
+    Route::get('/{studentId}/history-dates', [StudentController::class, 'getStudentHistoryDates']);
+    Route::get('/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
   });
 });
 
