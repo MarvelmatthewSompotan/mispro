@@ -315,7 +315,42 @@ textarea[value]:not([value=""]) {
   padding: 0;
 }
 
-/* Address section styling - TAMBAH gap yang lebih besar */
+.academicStatusField {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end; /* Ini akan mendorong label & input ke bawah */
+  padding: 12px;
+  gap: 8px;
+}
+
+/* Biarkan Select mengisi ruang yang tersedia */
+:global(.react-select__control) {
+  flex: 1;
+}
+
+.academicStatusWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding-bottom: 8px;
+  position: relative;
+}
+
+.selectWrapper {
+  flex: 1; /* Biarkan Select mengisi ruang yang tersedia */
+}
+
+/* Wrapper untuk komponen Select agar bisa mengatur lebarnya */
+.academicStatusWrapper .selectWrapper {
+  flex: 1; /* Membuat Select mengambil ruang yang tersedia */
+}
 
 /* Academic status styling - HAPUS line yang double */
 .academicStatusOptions {
@@ -354,17 +389,15 @@ textarea[value]:not([value=""]) {
   color: #000;
 }
 
+/* Style untuk input 'Other' saat muncul */
 .otherInput {
-  border: none;
-  outline: none;
-  background: transparent;
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  color: rgba(128, 128, 128, 0.6);
-  padding: 0;
-  transition: color 0.2s ease, font-weight 0.2s ease;
-  min-width: 200px;
+  color: #000;
+  padding: 6px 2px;
+  width: 70%; /* Atur lebar agar tidak memenuhi layar */
+  border-bottom: 1px solid #ccc; /* Beri garis bawah terpisah */
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
 }
 
 .otherInput:focus {
@@ -374,8 +407,8 @@ textarea[value]:not([value=""]) {
 }
 
 .otherInput:not(:placeholder-shown) {
-  color: #000 !important;
-  font-weight: bold !important;
+  color: #a9a9a9;
+  font-weight: normal !important;
 }
 
 /* Date input styling */

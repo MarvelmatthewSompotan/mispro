@@ -175,7 +175,7 @@ const FormButtonSection = ({
 
     if (
       !allFormData.facilities ||
-      !allFormData.facilities.transportation_policy
+      allFormData.facilities.transportation_policy !== "Signed"
     ) {
       errors.facilities = { ...errors.facilities, transportation_policy: true };
     }

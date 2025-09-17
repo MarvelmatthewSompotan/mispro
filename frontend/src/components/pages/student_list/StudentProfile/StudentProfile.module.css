@@ -27,7 +27,7 @@
 /* --- Header Aksi (Tombol Update, dll) --- */
 .topActionHeader {
   align-self: stretch;
-  overflow: hidden;
+
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -142,7 +142,7 @@
   align-items: flex-start;
   justify-content: space-between; /* <--- UBAH MENJADI INI */
   padding: 12px;
-  gap: 10px;  
+  gap: 10px;
   position: relative;
   padding-bottom: 24px;
 }
@@ -160,17 +160,11 @@
   position: relative;
   color: #000;
   font-weight: bold;
-  /* Tambahan untuk menyamakan dengan input */
-  padding: 1px 0; /* Samakan padding vertikal dengan .formInput */
   line-height: normal; /* Samakan line-height dengan .formInput */
   display: block; /* Pastikan elemen mengambil ruang vertikal dengan benar */
-  min-height: 22px; /* Beri tinggi minimum agar sejajar bahkan saat kosong */
+  min-height: 20px; /* Beri tinggi minimum agar sejajar bahkan saat kosong */
 }
-.fieldValue,
-.fieldLabel {
-  align-self: stretch;
-  position: relative;
-}
+
 /* --- Style Khusus Alamat --- */
 .addressGroup {
   align-self: stretch;
@@ -562,4 +556,46 @@
 
 :global(.react-select-error__placeholder) {
   color: #e57373 !important; /* Warna placeholder merah saat error */
+}
+
+/* --- [BARU] Style untuk Fitur History --- */
+
+.historyContainer {
+  position: relative; /* Wajib untuk positioning dropdown */
+  display: flex;
+  align-items: center;
+}
+
+.historyDropdown {
+  position: absolute;
+  top: calc(100% + 4px); /* Muncul 4px di bawah tombol */
+  left: 0;
+  width: 100%; /* Lebar dropdown */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  list-style: none;
+  padding: 8px 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.historyItem {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.historyItem:hover {
+  background-color: #f0f6ff;
+}
+
+/* Style untuk pesan 'Loading...' atau 'No history' */
+.historyInfoItem {
+  padding: 10px 16px;
+  font-style: italic;
+  color: #888;
 }
