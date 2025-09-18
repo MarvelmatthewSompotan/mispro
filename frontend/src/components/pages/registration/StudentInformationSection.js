@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
 import { getRegistrationOptions } from "../../../services/api";
@@ -67,8 +67,6 @@ const StudentInformationSection = ({
   const [otherAddress, setOtherAddress] = useState("");
   const [otherAddressError, setOtherAddressError] = useState(false);
 
-  const isInitialPrefill = useRef(true);
-  const hasInitialized = useRef(false);
   const customSelectStyles = {
     control: (baseStyles) => ({
       ...baseStyles,

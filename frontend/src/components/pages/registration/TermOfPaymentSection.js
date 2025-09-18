@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./TermOfPaymentSection.module.css";
 import checkBoxIcon from "../../../assets/CheckBox.png";
 import { getRegistrationOptions } from "../../../services/api";
-import Select from "react-select"; // Impor react-select
+import Select from "react-select";
 
 const TermOfPaymentSection = ({
   onDataChange,
@@ -20,8 +20,6 @@ const TermOfPaymentSection = ({
   const [tuitionFeesOption, setTuitionFeesOption] = useState([]);
   const [residencePaymentOption, setResidencePaymentOption] = useState([]);
   const [discountTypeOptions, setDiscountTypeOptions] = useState([]);
-
-  const hasInitialized = useRef(false);
 
   useEffect(() => {
     if (sharedData) {
@@ -42,29 +40,23 @@ const TermOfPaymentSection = ({
   }, [sharedData]);
 
   useEffect(() => {
-    if (prefill && Object.keys(prefill).length > 0 && !hasInitialized.current) {
-      if (prefill.tuition_fees) setTuitionFees(prefill.tuition_fees);
-      if (prefill.residence_payment)
-        setResidencePayment(prefill.residence_payment);
-      if (prefill.financial_policy_contract) {
-        setFinancialPolicy(prefill.financial_policy_contract === "Signed");
-      }
-      if (prefill.discount_name) setDiscountName(prefill.discount_name);
-      if (prefill.discount_notes) setDiscountNotes(prefill.discount_notes);
-      hasInitialized.current = true;
+    if (prefill && Object.keys(prefill).length > 0) {
+      setTuitionFees(prefill.tuition_fees || "");
+      setResidencePayment(prefill.residence_payment || "");
+      setFinancialPolicy(prefill.financial_policy_contract === "Signed");
+      setDiscountName(prefill.discount_name || "");
+      setDiscountNotes(prefill.discount_notes || "");
     }
   }, [prefill]);
 
   useEffect(() => {
-    if (hasInitialized.current) {
-      onDataChange({
-        tuition_fees: tuitionFees,
-        residence_payment: residencePayment,
-        financial_policy_contract: financialPolicy ? "Signed" : "Not Signed",
-        discount_name: discountName,
-        discount_notes: discountNotes,
-      });
-    }
+    onDataChange({
+      tuition_fees: tuitionFees,
+      residence_payment: residencePayment,
+      financial_policy_contract: financialPolicy ? "Signed" : "Not Signed",
+      discount_name: discountName,
+      discount_notes: discountNotes,
+    });
   }, [
     tuitionFees,
     residencePayment,
@@ -74,11 +66,15 @@ const TermOfPaymentSection = ({
     onDataChange,
   ]);
 
-  const handleTuitionFeesChange = (value) => {
+  // DIUBAH: Fungsi handler sekarang menerima 'event'
+  const handleTuitionFeesChange = (e, value) => {
+    e.preventDefault(); // Mencegah event ganda
     setTuitionFees((current) => (current === value ? "" : value));
   };
 
-  const handleResidencePaymentChange = (value) => {
+  // DIUBAH: Fungsi handler sekarang menerima 'event'
+  const handleResidencePaymentChange = (e, value) => {
+    e.preventDefault(); // Mencegah event ganda
     setResidencePayment((current) => (current === value ? "" : value));
   };
 
@@ -90,35 +86,12 @@ const TermOfPaymentSection = ({
     const value = selectedOption ? selectedOption.value : "";
     setDiscountName(value);
     if (!value) {
-      setDiscountNotes(""); // Otomatis kosongkan notes jika diskon dihapus
+      setDiscountNotes("");
     }
   };
 
   const handleDiscountNotesChange = (e) => {
     setDiscountNotes(e.target.value);
-  };
-
-  const customSelectStyles = {
-    control: (baseStyles) => ({
-      ...baseStyles,
-      border: "1px solid #ccc", // Di sini kita beri border agar terlihat
-      boxShadow: "none",
-      "&:hover": {
-        borderColor: "#888",
-      },
-    }),
-    placeholder: (baseStyles) => ({
-      ...baseStyles,
-      fontFamily: "Poppins, Arial, sans-serif",
-      fontWeight: 400, // <-- 400 adalah font regular (tidak bold)
-      color: "rgba(128, 128, 128, 0.6)",
-    }),
-    singleValue: (baseStyles) => ({
-      ...baseStyles,
-      fontFamily: "Poppins, Arial, sans-serif",
-      fontWeight: "normal", // Teks yang sudah dipilih dibuat normal
-      color: "#000",
-    }),
   };
 
   return (
@@ -149,13 +122,17 @@ const TermOfPaymentSection = ({
           <div className={styles.optionGroup}>
             {tuitionFeesOption.map((option) => (
               <div key={option} className={styles.optionItem}>
-                <label className={styles.radioLabel}>
+                <label
+                  className={styles.radioLabel}
+                  // DIUBAH: Kirim event (e) ke handler
+                  onClick={(e) => handleTuitionFeesChange(e, option)}
+                >
                   <input
                     type="radio"
                     name="tuitionFees"
                     value={option}
                     checked={tuitionFees === option}
-                    onChange={() => handleTuitionFeesChange(option)}
+                    readOnly
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
@@ -194,13 +171,17 @@ const TermOfPaymentSection = ({
           <div className={styles.optionGroup}>
             {residencePaymentOption.map((option) => (
               <div key={option} className={styles.optionItem}>
-                <label className={styles.radioLabel}>
+                <label
+                  className={styles.radioLabel}
+                  // DIUBAH: Kirim event (e) ke handler
+                  onClick={(e) => handleResidencePaymentChange(e, option)}
+                >
                   <input
                     type="radio"
                     name="residencePayment"
                     value={option}
                     checked={residencePayment === option}
-                    onChange={() => handleResidencePaymentChange(option)}
+                    readOnly
                     className={styles.hiddenRadio}
                   />
                   <div className={styles.radioButton}>
@@ -261,7 +242,6 @@ const TermOfPaymentSection = ({
                 value: d.name,
                 label: d.name,
               }))}
-              
               value={
                 discountName
                   ? { value: discountName, label: discountName }
