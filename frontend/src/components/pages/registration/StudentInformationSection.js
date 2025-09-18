@@ -69,6 +69,26 @@ const StudentInformationSection = ({
 
   const isInitialPrefill = useRef(true);
   const hasInitialized = useRef(false);
+  const customSelectStyles = {
+    control: (baseStyles) => ({
+      ...baseStyles,
+      border: "none",
+      boxShadow: "none",
+      backgroundColor: "transparent",
+    }),
+    placeholder: (baseStyles) => ({
+      ...baseStyles,
+      fontFamily: "Poppins, Arial, sans-serif",
+      fontWeight: 400, // <-- 400 adalah font regular (tidak bold)
+      color: "rgba(128, 128, 128, 0.6)",
+    }),
+    singleValue: (baseStyles) => ({
+      ...baseStyles,
+      fontFamily: "Poppins, Arial, sans-serif",
+      fontWeight: "bold", // Teks yang sudah dipilih tetap bold
+      color: "#000",
+    }),
+  };
 
   useEffect(() => {
     getRegistrationOptions()
@@ -582,40 +602,10 @@ const StudentInformationSection = ({
                   value: opt,
                   label: opt,
                 }))}
+                styles={customSelectStyles}
                 placeholder="Select citizenship"
                 isClearable
                 className={citizenshipError ? styles.errorInput : ""}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    fontWeight: citizenship ? "bold" : "400",
-                    color: citizenshipError
-                      ? "#ff4444"
-                      : citizenship
-                      ? "#000"
-                      : "rgba(128,128,128,0.6)",
-                    border: "none",
-                    boxShadow: "none",
-                    borderRadius: 0,
-                    borderBottom: "none",
-                    background: "transparent",
-                  }),
-                  singleValue: (base) => ({
-                    ...base,
-                    fontWeight: citizenship ? "bold" : "400",
-                    color: citizenshipError
-                      ? "#ff4444"
-                      : citizenship
-                      ? "#000"
-                      : "rgba(128,128,128,0.6)",
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: citizenshipError
-                      ? "#ff4444"
-                      : "rgba(128,128,128,0.6)",
-                  }),
-                }}
               />
             </div>
             <div
@@ -871,35 +861,7 @@ const StudentInformationSection = ({
                   }
                 }}
                 isClearable
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    fontWeight: gender ? "bold" : "400",
-                    color: genderError
-                      ? "#ff4444"
-                      : gender
-                      ? "#000"
-                      : "rgba(128,128,128,0.6)",
-                    border: "none",
-                    boxShadow: "none",
-                    borderRadius: 0,
-                    borderBottom: "none",
-                    background: "transparent",
-                  }),
-                  singleValue: (base) => ({
-                    ...base,
-                    fontWeight: gender ? "bold" : "400",
-                    color: genderError
-                      ? "#ff4444"
-                      : gender
-                      ? "#000"
-                      : "rgba(128,128,128,0.6)",
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: genderError ? "#ff4444" : "rgba(128,128,128,0.6)",
-                  }),
-                }}
+                styles={customSelectStyles}
               />
             </div>
             <div
@@ -1087,15 +1049,14 @@ const StudentInformationSection = ({
                 Academic status
               </label>
 
-             
               <div className={styles.academicStatusWrapper}>
-            
                 <Select
                   id="academicStatus"
                   options={academicStatusOptions.map((opt) => ({
                     value: opt,
                     label: opt,
                   }))}
+                  styles={customSelectStyles}
                   placeholder="Select status"
                   value={
                     academicStatus
