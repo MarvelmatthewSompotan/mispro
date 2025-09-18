@@ -89,8 +89,9 @@ const Registration = () => {
   // Row click → navigate ke print page
   const handleRowClick = (row) => {
     const applicationId = row.application_form?.application_id || null;
+    const version = row.version_id ?? null;
     navigate('/print', {
-      state: { applicationId },
+      state: { applicationId, version },
     });
   };
 

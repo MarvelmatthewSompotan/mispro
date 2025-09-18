@@ -88,37 +88,64 @@ const FacilitiesSection = ({
     }
   }, [prefill]);
 
+  // =====================================================================
+  // ▼▼▼ FUNGSI INI SUDAH DIPERBARUI ▼▼▼
+  // =====================================================================
   const handleTransportationChange = (value) => {
-    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
-    if (selectedTransportation === String(value)) {
-      setSelectedTransportation("");
-      setSelectedPickupPoint("");
-      setPickupPointCustom("");
+    const newSelectedId =
+      selectedTransportation === String(value) ? "" : String(value);
+    setSelectedTransportation(newSelectedId);
 
-      onDataChange({
-        transportation_id: null,
-        pickup_point_id: null,
-        pickup_point_custom: "",
-        transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
-        residence_id: selectedResidence ? Number(selectedResidence) : null,
-        residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
-      });
-    } else {
-      // Jika user memilih option baru
-      setSelectedTransportation(String(value));
-      setSelectedPickupPoint("");
-      setPickupPointCustom("");
+    // Selalu reset pickup point saat transportasi berubah
+    setSelectedPickupPoint("");
+    setPickupPointCustom("");
 
-      onDataChange({
-        transportation_id: value != null ? Number(value) : null,
-        pickup_point_id: null,
-        pickup_point_custom: "",
-        transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
-        residence_id: selectedResidence ? Number(selectedResidence) : null,
-        residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
-      });
+    // Logika baru yang lebih spesifik untuk mereset asrama
+    let newSelectedResidenceId = selectedResidence; // Asumsikan state tidak berubah
+
+    const selectedTransport = transportations.find(
+      (t) => t.transport_id === Number(newSelectedId)
+    );
+    const transportType = selectedTransport
+      ? selectedTransport.type.toLowerCase()
+      : "";
+
+    // Cek apakah transportasi yang baru dipilih adalah Own Car / School Bus
+    if (transportType === "own car" || transportType === "school bus") {
+      // Jika ya, cek apakah pilihan asrama saat ini adalah sebuah "Dormitory"
+      if (selectedResidence) {
+        const currentResidence = residenceHalls.find(
+          (r) => r.residence_id === Number(selectedResidence)
+        );
+
+        // Jika pilihan saat ini adalah "Dormitory", baru kosongkan state-nya
+        if (
+          currentResidence &&
+          currentResidence.type.toLowerCase().includes("dormitory")
+        ) {
+          setSelectedResidence("");
+          newSelectedResidenceId = ""; // Siapkan state kosong untuk dikirim
+        }
+        // Jika yang terpilih bukan "Dormitory" (misal: "Non-Residence Hall"),
+        // maka state-nya tidak akan diubah dan pilihan tetap ada.
+      }
     }
+
+    // Kirim data terbaru ke parent component
+    onDataChange({
+      transportation_id: newSelectedId ? Number(newSelectedId) : null,
+      pickup_point_id: null,
+      pickup_point_custom: "",
+      transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
+      residence_id: newSelectedResidenceId
+        ? Number(newSelectedResidenceId)
+        : null,
+      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
+    });
   };
+  // =====================================================================
+  // ▲▲▲ AKHIR DARI FUNGSI YANG DIPERBARUI ▲▲▲
+  // =====================================================================
 
   const handlePickupPointChange = (value) => {
     setSelectedPickupPoint(String(value));
@@ -158,9 +185,6 @@ const FacilitiesSection = ({
     const value = e.target.checked;
     setTransportationPolicy(value);
 
-    console.log("Transportation policy changed to:", value);
-
-    // Send data immediately
     onDataChange({
       transportation_id: selectedTransportation
         ? Number(selectedTransportation)
@@ -191,7 +215,7 @@ const FacilitiesSection = ({
             : null,
         pickup_point_custom: pickupPointCustom,
         transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
-        residence_id: null,
+        residence_id: null, // Nilai yang diubah
         residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
       });
     } else {
@@ -208,7 +232,7 @@ const FacilitiesSection = ({
             : null,
         pickup_point_custom: pickupPointCustom,
         transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
-        residence_id: value != null ? Number(value) : null,
+        residence_id: value != null ? Number(value) : null, // Nilai yang diubah
         residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
       });
     }
@@ -218,9 +242,7 @@ const FacilitiesSection = ({
     const value = e.target.checked;
     setResidencePolicy(value);
 
-    console.log("Residence policy changed to:", value);
-
-    // Send data immediately
+    // Kirim data lengkapnya
     onDataChange({
       transportation_id: selectedTransportation
         ? Number(selectedTransportation)
@@ -232,7 +254,7 @@ const FacilitiesSection = ({
       pickup_point_custom: pickupPointCustom,
       transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
       residence_id: selectedResidence ? Number(selectedResidence) : null,
-      residence_hall_policy: value ? "Signed" : "Not Signed",
+      residence_hall_policy: value ? "Signed" : "Not Signed", // Nilai yang diubah
     });
   };
 
@@ -252,39 +274,29 @@ const FacilitiesSection = ({
     }
   }, [selectedPickupPoint]);
 
-  // Effect untuk handle errors dari parent component
   useEffect(() => {
     if (errors) {
-      // Error state akan dihandle oleh styling CSS
     }
   }, [errors]);
 
-  // Effect untuk handle forceError dari parent component
   useEffect(() => {
     if (forceError) {
-      // Force error state akan dihandle oleh styling CSS
     }
   }, [forceError]);
 
-  // Effect untuk reset error state ketika transportation sudah dipilih
   useEffect(() => {
     if (
       selectedTransportation &&
       (errors?.transportation_id || forceError?.transportation_id)
     ) {
-      // Trigger re-render untuk menghilangkan error state
-      // Error state akan hilang karena transportation sudah dipilih
     }
   }, [selectedTransportation, errors, forceError]);
 
-  // Effect untuk reset error state ketika residence hall sudah dipilih
   useEffect(() => {
     if (
       selectedResidence &&
       (errors?.residence_id || forceError?.residence_id)
     ) {
-      // Trigger re-render untuk menghilangkan error state
-      // Error state akan hilang karena residence hall sudah dipilih
     }
   }, [selectedResidence, errors, forceError]);
 
@@ -296,10 +308,17 @@ const FacilitiesSection = ({
       <div className={styles.contentWrapper}>
         <div className={styles.transportationSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitleText}>Transportation</div>
+            <div
+              className={`${styles.sectionTitleText} ${
+                errors?.pickup_point_id || forceError?.pickup_point_id
+                  ? styles.facilitiesSectionErrorLabel
+                  : ""
+              }`}
+            >
+              Transportation
+            </div>
           </div>
 
-          {/* Transportation Options from Backend */}
           {transportations.map((transport) => (
             <div key={transport.transport_id} className={styles.optionItem}>
               <label className={styles.radioLabel}>
@@ -330,7 +349,6 @@ const FacilitiesSection = ({
             </div>
           ))}
 
-          {/* Pickup Point Field - Show only for school bus type */}
           {(() => {
             if (!selectedTransportation) return false;
             const selectedTransport = transportations.find(
@@ -364,7 +382,6 @@ const FacilitiesSection = ({
             </div>
           )}
 
-          {/* Custom Pickup Point Input - Show only for school bus type */}
           {(() => {
             if (!selectedTransportation) return false;
             const selectedTransport = transportations.find(
@@ -385,7 +402,6 @@ const FacilitiesSection = ({
             </div>
           )}
 
-          {/* Transportation Policy Checkbox */}
           <div className={styles.optionItem}>
             <label className={styles.checkboxLabel}>
               <input
@@ -409,47 +425,80 @@ const FacilitiesSection = ({
           </div>
         </div>
 
-        {/* Residence Hall Section */}
         <div className={styles.residenceHallSection}>
           <div className={styles.sectionTitle}>
-            <div className={styles.sectionTitle}>
-              <div
-                className={`${styles.sectionTitleText} ${
-                  errors?.residence_id || forceError?.residence_id
-                    ? styles.facilitiesSectionErrorLabel
-                    : ""
-                }`}
-              >
-                Residence Hall
-              </div>
+            <div
+              className={`${styles.sectionTitleText} ${
+                errors?.residence_id || forceError?.residence_id
+                  ? styles.facilitiesSectionErrorLabel
+                  : ""
+              }`}
+            >
+              Residence Hall
             </div>
           </div>
 
-          {/* Residence Hall Options from Backend */}
-          {residenceHalls.map((residence) => (
-            <div key={residence.residence_id} className={styles.optionItem}>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="residenceHall"
-                  value={String(residence.residence_id)}
-                  checked={selectedResidence === String(residence.residence_id)}
-                  onChange={() => handleResidenceChange(residence.residence_id)}
-                  onClick={() => handleResidenceChange(residence.residence_id)}
-                  className={styles.hiddenRadio}
-                />
-                <div className={styles.radioButton}>
-                  <div className={styles.radioButtonCircle} />
-                  {selectedResidence === String(residence.residence_id) && (
-                    <div className={styles.radioButtonSelected} />
-                  )}
-                </div>
-                <div className={styles.label}>{residence.type}</div>
-              </label>
-            </div>
-          ))}
+          {/* ===================================================================== */}
+          {/* ▼▼▼ BAGIAN JSX INI SUDAH DIPERBARUI ▼▼▼ */}
+          {/* ===================================================================== */}
+          {(() => {
+            // Kalkulasi tipe transportasi yang dipilih
+            const selectedTransport = transportations.find(
+              (t) => t.transport_id === Number(selectedTransportation)
+            );
+            const transportType = selectedTransport
+              ? selectedTransport.type.toLowerCase()
+              : "";
+            const isTransportRestricted =
+              transportType === "own car" || transportType === "school bus";
 
-          {/* Residence Hall Policy Checkbox */}
+            // Lakukan mapping dan filter di dalamnya
+            return residenceHalls.map((residence) => {
+              const isDormitoryOption = residence.type
+                .toLowerCase()
+                .includes("dormitory");
+
+              // Jika transportasi yang dipilih adalah Own Car/School Bus DAN opsi ini adalah asrama,
+              // maka jangan tampilkan (return null).
+              if (isTransportRestricted && isDormitoryOption) {
+                return null;
+              }
+
+              // Jika tidak, tampilkan seperti biasa.
+              return (
+                <div key={residence.residence_id} className={styles.optionItem}>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="residenceHall"
+                      value={String(residence.residence_id)}
+                      checked={
+                        selectedResidence === String(residence.residence_id)
+                      }
+                      onChange={() =>
+                        handleResidenceChange(residence.residence_id)
+                      }
+                      onClick={() =>
+                        handleResidenceChange(residence.residence_id)
+                      }
+                      className={styles.hiddenRadio}
+                    />
+                    <div className={styles.radioButton}>
+                      <div className={styles.radioButtonCircle} />
+                      {selectedResidence === String(residence.residence_id) && (
+                        <div className={styles.radioButtonSelected} />
+                      )}
+                    </div>
+                    <div className={styles.label}>{residence.type}</div>
+                  </label>
+                </div>
+              );
+            });
+          })()}
+          {/* ===================================================================== */}
+          {/* ▲▲▲ AKHIR DARI BAGIAN JSX YANG DIPERBARUI ▲▲▲ */}
+          {/* ===================================================================== */}
+
           <div className={styles.optionItem}>
             <label className={styles.checkboxLabel}>
               <input

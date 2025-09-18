@@ -1,7 +1,8 @@
-.fathersInformation {
+.heading {
 	position: relative;
 	line-height: 100%;
-	font-weight: 600;
+	font-family: 'Poppins', sans-serif;
+	font-weight: Bold;
 }
 .txtFather {
 	align-self: stretch;
@@ -10,9 +11,10 @@
 	align-items: center;
 	justify-content: flex-start;
 }
-.johnDoe {
+.field {
 	position: relative;
 	line-height: 100%;
+	font-family: 'Poppins', sans-serif;
 }
 .name {
 	align-self: stretch;
@@ -23,11 +25,12 @@
 	padding: 8px 12px;
 	gap: 10px;
 }
-.johndoehebatgmailcom {
+.gmail {
 	position: relative;
 	line-height: 100%;
 	display: inline-block;
 	max-width: 357.5px;
+	font-family: 'Poppins', sans-serif;
 }
 .left {
 	align-self: stretch;
@@ -37,10 +40,11 @@
 	align-items: flex-start;
 	justify-content: flex-start;
 }
-.ptMultiRakyat {
+.nameCompany {
 	align-self: stretch;
 	position: relative;
 	line-height: 100%;
+	font-family: 'Poppins', sans-serif;
 }
 .compName {
 	align-self: stretch;
@@ -52,12 +56,13 @@
 	padding: 8px 12px;
 	gap: 10px;
 }
-.fieldManager {
+.position {
 	width: 100%;
 	position: relative;
 	line-height: 100%;
 	display: inline-block;
 	max-width: 228.5px;
+	font-family: 'Poppins', sans-serif;
 }
 .b1 {
 	width: 5px;
@@ -118,10 +123,11 @@
 	align-items: flex-start;
 	justify-content: flex-start;
 }
-.uncle {
+.guardianField {
 	flex: 1;
 	position: relative;
 	line-height: 100%;
+	font-family: 'Poppins', sans-serif;	
 }
 .relation {
 	align-self: stretch;

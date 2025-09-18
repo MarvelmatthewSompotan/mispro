@@ -15,9 +15,16 @@ Route::middleware('auth:sanctum')->group(function() {
 });
 
 Route::get('/registration-option', [MasterDataController::class, 'getRegistrationOption']);
-Route::prefix('students')->group(function () {
-  Route::get('/search', [StudentController::class, 'searchStudents']);
-  Route::get('/{student_id}/latest-application', [StudentController::class, 'getLatestApplication']);
+
+Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
+  Route::prefix('students')->group(function () {
+    Route::get('/', [StudentController::class, 'index']);
+    Route::get('/search', [StudentController::class, 'searchStudents']);
+    Route::get('/{student_id}/latest-application', [StudentController::class, 'getLatestApplication']);
+    Route::patch('/{student_id}/update', [StudentController::class, 'updateStudent']);
+    Route::get('/{studentId}/history-dates', [StudentController::class, 'getStudentHistoryDates']);
+    Route::get('/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
+  });
 });
 
 Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
@@ -26,7 +33,7 @@ Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
     Route::post('/start', [RegistrationController::class, 'startRegistration']);
     Route::get('/context/{draft_id}', [RegistrationController::class, 'getRegistrationContext']);
     Route::post('/store/{draft_id}', [RegistrationController::class, 'store']);
-    Route::get('/preview/{applicationId}', [RegistrationController::class, 'showPreview']);
+    Route::get('/preview/{applicationId}/version/{version}', [RegistrationController::class, 'showPreview']);
   });
 });
 

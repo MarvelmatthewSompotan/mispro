@@ -1,10 +1,15 @@
-.weParent {
-  font-family: Poppins;
+.contentParagraph {
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 }
-.weParentJohnJaneDoeA {
+.answer {
+  font-family: 'Poppins', sans-serif;
+	font-weight: bold;
+}
+.paragraph {
   margin: 0;
 }
-.weParentJohnContainer {
+.container {
   align-self: stretch;
   position: relative;
   line-height: 150%;

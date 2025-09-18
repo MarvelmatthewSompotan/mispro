@@ -36,7 +36,14 @@ class RegistrationController extends Controller
         $query = Enrollment::with(['student', 'section', 'schoolYear', 'semester', 'applicationForm'])
             ->select('enrollments.*') // ambil semua kolom enrollment
             ->selectRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name")
-            ->join('students', 'students.student_id', '=', 'enrollments.student_id');
+            ->addSelect('application_form_versions.version_id') 
+            ->join('students', 'students.student_id', '=', 'enrollments.student_id')
+            ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+            ->leftJoin('application_form_versions', function($join) {
+                $join->on('application_form_versions.application_id', '=', 'application_forms.application_id')
+                     ->where('application_form_versions.data_snapshot->action', '=', 'registration');
+            })
+            ->addSelect('application_form_versions.version_id as registration_version_id');
 
         // Filter
         if ($request->filled('school_year_id')) {
@@ -75,8 +82,6 @@ class RegistrationController extends Controller
             'data' => $data
         ], 200);
     }
-
-
 
     /**
      * Start registration process with initial context
@@ -495,7 +500,7 @@ class RegistrationController extends Controller
                 $applicationForm = $this->createApplicationForm($enrollment);
                 
                 // Create application form version dengan data snapshot
-                $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
+                $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
                 // Create student address, parent, guardian for new student
                 $this->createStudentRelatedData($student, $validated, $enrollment);
@@ -549,7 +554,7 @@ class RegistrationController extends Controller
                 $applicationForm = $this->createApplicationForm($enrollment);
 
                 // Create application form version dengan data snapshot
-                $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
+                $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
                 $this->updateStudentData($student, $validated, $registrationId, $draft);
                 
@@ -568,6 +573,7 @@ class RegistrationController extends Controller
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
                     'application_id' => $applicationForm->application_id,
+                    'version' => $applicationFormVersion->version_id,
                     'registration_number' =>$enrollment->enrollment_id
                 ],
             ], 200);
@@ -586,39 +592,40 @@ class RegistrationController extends Controller
         }
     }
 
-    public function showPreview($applicationId)
+    public function showPreview($applicationId, $versionId)
     {
         try {
-            // ✅ PERBAIKAN: Tambahkan logging untuk debug
-            \Log::info('Preview called for application ID:', ['application_id' => $applicationId]);
-            
-            $application = ApplicationForm::with([
-                'enrollment.student.studentAddress',
-                'enrollment.schoolClass',
-                'enrollment.program',
-                'enrollment.transportation',
-                'enrollment.residenceHall',
-                'enrollment.studentDiscount.discountType',
-                'enrollment.student.studentParent.fatherAddress',
-                'enrollment.student.studentParent.motherAddress',
-                'enrollment.student.studentGuardian.guardian.guardianAddress',
-                'enrollment.student.payments',
-            ])->findOrFail($applicationId);
-            
-            \Log::info('Application found:', ['application' => $application]);
-            
+            \Log::info('Preview called', [
+                'application_id' => $applicationId,
+                'version_id' => $versionId
+            ]);
+
+            // Query base
+            $version = ApplicationFormVersion::where('application_id', $applicationId)
+                ->where('version_id', $versionId)
+                ->firstOrFail();
+
+            \Log::info('Version found:', [
+                'version_id' => $version->version_id,
+                'application_id' => $applicationId
+            ]);
+
+            $snapshot = json_decode($version->data_snapshot, true);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Preview data retrieved successfully',
-                'data' => new ApplicationPreviewResource($application)
-            ], 200);
+                'data' => $snapshot
+            ], 200, [], JSON_PRETTY_PRINT);
+
         } catch (\Exception $e) {
-            // ✅ PERBAIKAN: Log error yang lebih detail
-            \Log::error('Preview failed for application ID: ' . $applicationId, [
+            \Log::error('Preview failed', [
+                'application_id' => $applicationId,
+                'version_id' => $versionId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'error' => 'Preview failed: ' . $e->getMessage()
@@ -926,11 +933,16 @@ class RegistrationController extends Controller
     {
         $dataSnapshot = [
             'student_id' => $student->student_id,
+            'registration_id' => $enrollment->registration_id,
             'enrollment_id' => $enrollment->enrollment_id,
+            'registration_number' =>$enrollment->enrollment_id,
+            'registration_date' =>$enrollment->registration_date,
             'application_id' => $applicationForm->application_id,
+            'semester' => $enrollment->semester->number, 
+            'school_year' => $enrollment->schoolYear->year, 
             'request_data' => $validated,
             'timestamp' => now(),
-            'action' => 'registration'
+            'action' => 'Registration'
         ];
         
         $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment', function($query) use ($student) {
@@ -940,7 +952,7 @@ class RegistrationController extends Controller
         $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
         $userName = auth()->user()->name;
 
-        ApplicationFormVersion::create([
+        return ApplicationFormVersion::create([
             'application_id' => $applicationForm->application_id,
             'version' => $nextVersion,
             'updated_by' => $userName,

@@ -1,7 +1,29 @@
 import React from 'react';
 import styles from '../../styles/Program_Content.module.css';
 
-function ProgramContent({ data, sectionOptions, programOptions }) {
+function ProgramContent({
+  data,
+  sectionOptions,
+  programOptions,
+  classOptions,
+  majorOptions,
+}) {
+  const getGradeName = () => {
+    if (data?.class_id) {
+      const found = classOptions.find((cls) => cls.class_id === data.class_id);
+      return found ? found.grade : '';
+    }
+    return '';
+  };
+
+  const getMajorName = () => {
+    if (data?.major_id) {
+      const found = majorOptions?.find((m) => m.major_id === data.major_id);
+      return found ? found.name : '';
+    }
+    return '';
+  };
+
   return (
     <div className={styles.content}>
       <div className={styles.top}>
@@ -10,24 +32,24 @@ function ProgramContent({ data, sectionOptions, programOptions }) {
         </div>
 
         {sectionOptions.map((section) => (
-          <div key={section.section_id} className={styles.ecp}>
+          <div key={section.section_id} className={styles.answer}>
             <div className={styles.radioBtn}>
               <div className={styles.radioBtnChild} />
-              {data?.section?.name === section.name && (
+              {data?.section_id === section.section_id && (
                 <div className={styles.radioBtnChild1} />
               )}
             </div>
-            <div className={styles.elementarySchool}>{section.name}</div>
+            <div className={styles.field}>{section.name}</div>
           </div>
         ))}
 
         <div className={styles.grade}>
-          <div className={styles.elementarySchool}>Grade</div>
-          <b className={styles.elementarySchool}>{data?.class}</b>
+          <div className={styles.field}>Grade</div>
+          <b className={styles.option}>{getGradeName()}</b>
         </div>
         <div className={styles.major}>
-          <div className={styles.elementarySchool}>Major</div>
-          <b className={styles.science}>{data?.major?.name}</b>
+          <div className={styles.option}>Major</div>
+          <b className={styles.science}>{getMajorName()}</b>
         </div>
       </div>
 
@@ -37,16 +59,26 @@ function ProgramContent({ data, sectionOptions, programOptions }) {
         </div>
 
         {programOptions.map((program) => (
-          <div key={program.program_id} className={styles.ecp}>
+          <div key={program.program_id} className={styles.answer}>
             <div className={styles.radioBtn}>
               <div className={styles.radioBtnChild} />
-              {data?.program?.name === program.name && (
+              {data?.program_id === program.program_id && (
                 <div className={styles.radioBtnChild1} />
               )}
             </div>
-            <div className={styles.elementarySchool}>{program.name}</div>
+            <div className={styles.option}>{program.name}</div>
           </div>
         ))}
+
+        {data?.program_other && (
+          <div className={styles.answer}>
+            <div className={styles.radioBtn}>
+              <div className={styles.radioBtnChild} />
+              {!data?.program_id && <div className={styles.radioBtnChild1} />}
+            </div>
+            <div className={styles.option}>{data.program_other}</div>
+          </div>
+        )}
       </div>
     </div>
   );

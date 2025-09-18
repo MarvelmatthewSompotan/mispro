@@ -339,6 +339,7 @@ const ProgramSection = ({
           {sectionOptions.map((option) => (
             <div key={option.value} className={styles.optionItem}>
               <label
+                className={styles.radioLabel}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -460,6 +461,7 @@ const ProgramSection = ({
           {programOptions.map((option) => (
             <div key={option.value} className={styles.optionItem}>
               <label
+                className={styles.radioLabel}
                 style={{
                   display: "flex",
                   alignItems: "center",

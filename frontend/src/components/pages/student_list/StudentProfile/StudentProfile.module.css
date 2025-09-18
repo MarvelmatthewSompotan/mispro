@@ -1,0 +1,565 @@
+/* File: src/components/pages/StudentProfile.module.css (Versi Final & Benar) */
+
+/* --- Layout Utama Halaman --- */
+.profilePage {
+  width: 100%;
+  position: relative;
+  background-color: #fff;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+  font-size: 16px;
+  color: #000;
+  font-family: Poppins, Arial, sans-serif;
+}
+.profileContent {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 32px 24px 64px;
+  gap: 48px;
+}
+/* --- Header Aksi (Tombol Update, dll) --- */
+.topActionHeader {
+  align-self: stretch;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 20px 36px;
+  box-sizing: border-box;
+  gap: 16px;
+}
+.actionButton {
+  border-radius: 5px;
+  border: 2px solid #5f84fe;
+  box-sizing: border-box;
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  color: #5f84fe;
+  background-color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.actionButtonPrimary {
+  background-color: #5f84fe;
+  color: #fff;
+}
+/* --- Sidebar Kiri (Foto & ID) --- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+}
+.profileImage {
+  width: 154px;
+  position: relative;
+  background-color: #d9d9d9;
+  height: 208px;
+  object-fit: cover;
+}
+.studentIdContainer {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 6px 12px;
+  gap: 10px;
+  font-size: 16px;
+}
+/* --- Kontainer Informasi Kanan --- */
+.infoContainer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 32px;
+}
+.infoSection {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.sectionHeader {
+  align-self: stretch;
+  background-color: #e4eefa;
+  border-left: 7px solid #8dc1ff;
+  box-sizing: border-box;
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #000;
+}
+.sectionContent {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  font-size: 16px;
+  padding: 6px 12px;
+  background-color: #fff;
+}
+/* --- Style Field Informasi (Label & Value) --- */
+.row {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.field {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  box-sizing: border-box;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between; /* <--- UBAH MENJADI INI */
+  padding: 12px;
+  gap: 10px;  
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.field br {
+  display: none;
+}
+
+.fieldLabel {
+  color: #000;
+  line-height: 100%;
+}
+.fieldValue {
+  align-self: stretch;
+  position: relative;
+  color: #000;
+  font-weight: bold;
+  /* Tambahan untuk menyamakan dengan input */
+  padding: 1px 0; /* Samakan padding vertikal dengan .formInput */
+  line-height: normal; /* Samakan line-height dengan .formInput */
+  display: block; /* Pastikan elemen mengambil ruang vertikal dengan benar */
+  min-height: 22px; /* Beri tinggi minimum agar sejajar bahkan saat kosong */
+}
+.fieldValue,
+.fieldLabel {
+  align-self: stretch;
+  position: relative;
+}
+/* --- Style Khusus Alamat --- */
+.addressGroup {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 6px 0px;
+}
+.rtRwGroup {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 180px;
+}
+.rtRwGroup .field {
+  flex-grow: 1;
+  min-width: auto;
+}
+.otherAddress {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  width: 100%;
+  padding: 12px;
+  border-bottom: 1px solid #000;
+  min-height: 66px;
+  box-sizing: border-box;
+}
+.otherAddress .fieldLabel {
+  align-self: auto;
+  font-size: 16px;
+  padding-bottom: 1px;
+}
+.otherAddress .fieldValue {
+  padding-top: 0;
+}
+.otherAddress .formInput {
+  flex: 1;
+  border-bottom: none;
+}
+
+/* --- Style Pilihan (Program, Fasilitas, dll) --- */
+.optionsRow {
+  align-self: stretch;
+  background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 0px 12px;
+  gap: 6px 32px;
+}
+.optionLabel {
+  min-width: 150px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+.optionItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 0;
+  gap: 12px;
+}
+/* --- Style Visual Radio & Checkbox --- */
+.visualRadio {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  flex-shrink: 0;
+}
+.radioOuter {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+  border: 3px solid #dbdbdb;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+.radioOuterSelected {
+  border-color: #5f84fe;
+}
+.radioInner {
+  position: absolute;
+  height: 57%;
+  width: 57%;
+  top: 21.5%;
+  left: 21.5%;
+  border-radius: 50%;
+  background-color: #5f84fe;
+  transform: scale(0);
+  opacity: 0;
+  animation: grow-in 0.25s forwards;
+}
+.visualCheckbox {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  flex-shrink: 0;
+}
+.checkboxOuter {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  border: 2px solid #dbdbdb;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+.checkboxOuterSelected {
+  border-color: #5f84fe;
+  background-color: #5f84fe;
+}
+.checkboxCheckmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0;
+  animation: checkmark-grow-in 0.25s forwards;
+}
+@keyframes grow-in {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes checkmark-grow-in {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+/* --- Style Term of Payment --- */
+.paymentContentWrapper {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 24px;
+  padding: 12px;
+}
+.paymentSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+}
+.paymentTitle {
+  font-weight: 600;
+  padding-bottom: 8px;
+  font-size: 16px;
+}
+.paymentOptionGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+}
+.discountSection {
+  align-self: stretch;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* === PERBAIKAN FINAL UNTUK MODE EDIT === */
+.formInput {
+  width: 100%;
+  border: none !important; /* HAPUS SEMUA BORDER DARI INPUT */
+  background-color: transparent;
+  font-family: Poppins, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  padding: 1px 0;
+  margin: 0;
+  line-height: normal;
+}
+.formInput:focus {
+  outline: none; /* Hapus outline biru saat di-klik */
+  background-color: #f0f6ff;
+}
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.clickableLabel {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.visualInput {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  min-height: 38px;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+}
+
+/* ================================== */
+/* ===== STYLE UNTUK ERROR STATE ===== */
+/* ================================== */
+
+/* Memberi border bawah warna merah pada seluruh field yang error */
+.errorFieldWrapper {
+  border-bottom-color: #d32f2f !important;
+}
+
+/* Mengubah warna label field menjadi merah dan tebal */
+.errorLabel {
+  color: #d32f2f !important;
+  font-weight: 600 !important;
+}
+
+/* Mengubah warna teks di dalam input yang error menjadi merah */
+.errorInput,
+.errorInput:focus {
+  color: #d32f2f !important;
+}
+
+/* Mengubah warna placeholder menjadi merah muda saat error */
+.errorInput::placeholder {
+  color: #e57373 !important;
+  opacity: 1;
+}
+
+/* Style untuk teks pesan error yang muncul di bawah input */
+.inlineErrorMessage {
+  position: absolute; /* Mengeluarkan pesan dari alur layout normal */
+  bottom: 4px; /* Posisikan di bagian bawah container */
+  left: 12px; /* Sesuaikan dengan padding kiri field */
+  right: 12px; /* Sesuaikan dengan padding kanan field */
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inputWithError .formInput {
+  flex-grow: 1; /* Input akan membesar mengisi sisa ruang */
+}
+
+.inputWithError {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Style untuk pesan error yang butuh lebar penuh (untuk grup radio/checkbox) */
+.inlineErrorMessageFullWidth {
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 4px;
+  padding-left: 12px; /* Menyesuaikan dengan padding section */
+  width: 100%;
+}
+
+/* Style baru untuk pesan error yang muncul di KANAN input */
+.inlineErrorMessageRight {
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap; /* Mencegah pesan error terpotong ke baris baru */
+  flex-shrink: 0; /* Mencegah pesan error mengecil jika tidak ada ruang */
+}
+
+.academicStatusWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.academicStatusWrapper > div:first-child {
+  /* The Select component */
+  flex: 1;
+}
+
+.otherInput {
+  flex: 1;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid #ccc !important;
+  margin-left: 10px;
+}
+
+:global(.react-select-error__control) {
+  border-bottom-color: #d32f2f !important;
+}
+:global(.react-select-error__placeholder) {
+  color: #e57373 !important;
+}
+
+/* Wrapper baru untuk membungkus Select component */
+.selectWrapper {
+  width: 50%;
+}
+
+/* Menghilangkan semua border dan background dari container utama react-select */
+:global(.react-select__control) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important; /* Menghilangkan shadow saat focus */
+  min-height: auto !important;
+  padding: 0;
+  margin: 0;
+}
+
+/* Mengatur posisi input dan placeholder agar pas */
+:global(.react-select__value-container) {
+  padding: 1px 0 !important;
+  margin: 0;
+}
+
+/* Menyamakan style teks terpilih dengan input field lain */
+:global(.react-select__single-value) {
+  font-weight: bold !important;
+  font-family: Poppins, Arial, sans-serif !important;
+  font-size: 16px !important;
+  color: #000 !important;
+  margin: 0;
+}
+
+/* Menyamakan style placeholder */
+:global(.react-select__placeholder) {
+  font-weight: bold !important;
+  font-family: Poppins, Arial, sans-serif !important;
+  font-size: 16px !important;
+  color: #a9a9a9 !important; /* Warna placeholder standar input */
+  margin: 0;
+}
+
+/* Menghilangkan garis pemisah (indicator) */
+:global(.react-select__indicator-separator) {
+  display: none !important;
+}
+
+/* Mengatur posisi ikon dropdown */
+:global(.react-select__indicators) {
+  padding: 0 !important;
+}
+
+/* Override khusus untuk state error */
+:global(.react-select-error__control) {
+  background-color: transparent !important; /* Tetap transparan saat error */
+}
+
+:global(.react-select-error__single-value) {
+  color: #d32f2f !important; /* Warna teks merah saat error */
+}
+
+:global(.react-select-error__placeholder) {
+  color: #e57373 !important; /* Warna placeholder merah saat error */
+}

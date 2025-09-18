@@ -1,7 +1,8 @@
 .transportation {
   position: relative;
   line-height: 100%;
-  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Bold;
 }
 .txtTransportation {
   width: 200px;
@@ -46,10 +47,12 @@
   border-radius: 50%;
   background-color: #5f84fe;
 }
-.girian {
+.pickupPointAnswer {
   flex: 1;
   position: relative;
   line-height: 100%;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Bold;
 }
 .pickupPoint {
   flex: 1;
@@ -108,9 +111,11 @@
   position: relative;
   height: 24px;
 }
-.transportationPolicy {
+.checkBoxPolicy {
   position: relative;
   line-height: 100%;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 }
 .top {
   align-self: stretch;
@@ -125,10 +130,11 @@
   width: 200px;
   position: relative;
   line-height: 100%;
-  font-weight: 600;
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Bold;
 }
 .txtRh {
   display: flex;
@@ -147,4 +153,8 @@
   font-size: 20px;
   color: #000;
   font-family: Poppins;
+}
+.field {
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 } 

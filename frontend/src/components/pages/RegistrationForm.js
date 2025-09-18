@@ -412,7 +412,8 @@ const RegistrationForm = () => {
           draftId={draftId}
           allFormData={formSections}
           onReset={handleResetForm}
-          location={location} // Add this line
+          location={location} 
+          sharedData={sharedData}
         />
       </div>
     </Main>
