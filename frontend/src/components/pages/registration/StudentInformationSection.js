@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
 import { getRegistrationOptions } from "../../../services/api";
-
 const genderOptions = ["MALE", "FEMALE"];
 const citizenshipOptions = ["Indonesia", "Non Indonesia"];
 
@@ -17,7 +16,6 @@ const StudentInformationSection = ({
   const [academicStatus, setAcademicStatus] = useState("");
   const [academicStatusOther, setAcademicStatusOther] = useState("");
   const [academicStatusError, setAcademicStatusError] = useState(false);
-
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(false);
   const [middleName, setMiddleName] = useState("");
@@ -954,36 +952,19 @@ const StudentInformationSection = ({
                 )}
               </div>
             </div>
-            <div
-              className={`${styles.previousSchoolField} ${
-                previousSchoolError ? styles.errorFieldWrapper : ""
-              }`}
-            >
-              <label
-                className={`${styles.label} ${
-                  previousSchoolError ? styles.errorLabel : ""
-                }`}
-                htmlFor="previousSchool"
-              >
+            <div className={styles.previousSchoolField}>
+              <label className={styles.label} htmlFor="previousSchool">
                 Previous school
               </label>
               <input
                 id="previousSchool"
                 className={`${styles.valueHighlight} ${
                   previousSchool ? "hasValue" : ""
-                } ${previousSchoolError ? styles.errorInput : ""}`}
+                }`}
                 type="text"
                 value={previousSchool}
                 onChange={(e) => {
                   handlePreviousSchool(e.target.value);
-                  if (previousSchoolError && e.target.value.trim()) {
-                    setPreviousSchoolError(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (previousSchoolError) {
-                    setPreviousSchoolError(false);
-                  }
                 }}
                 placeholder="Previous School"
               />
