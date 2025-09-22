@@ -206,7 +206,6 @@ const StudentProfile = () => {
 
   // --- [BARU] Handler saat memilih tanggal dari dropdown history ---
   const handleHistoryDateChange = async (versionId) => {
-
     if (!versionId) {
       setSelectedVersionId(null);
       setFormData(profileData);
@@ -393,6 +392,7 @@ const StudentProfile = () => {
   };
 
   const handleChange = (e) => {
+    // eslint-disable-next-line
     const { name, value, type, checked } = e.target;
 
     const studentInfoFields = [
@@ -739,6 +739,7 @@ const StudentProfile = () => {
         }
       }
     }
+    // eslint-disable-next-line
   }, [scrollTrigger]);
 
   const handleSaveClick = () => {
@@ -777,7 +778,7 @@ const StudentProfile = () => {
     const item = options[type]?.find((i) => String(i[keyName]) === String(id));
     return item?.name || item?.grade || item?.type || id;
   };
-
+  // eslint-disable-next-line
   const filteredGrades = useMemo(() => {
     if (!isEditing || !options?.classes || !formData?.section_id) return [];
     const selectedSection = options.sections?.find(
@@ -946,7 +947,7 @@ const StudentProfile = () => {
         <div className={styles.infoContainer}>
           {/* STUDENT'S INFORMATION */}
           <div id="studentInfo" className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>STUDENT’S INFORMATION</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1449,7 +1450,9 @@ const StudentProfile = () => {
                       value={studentInfo.family_rank || ""}
                       onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
-                        errors.studentInfo?.family_rank ? styles.errorInput : ""
+                        errors.studentInfo?.family_rank
+                          ? styles.errorInput
+                          : ""
                       }`}
                       placeholder={errors.studentInfo?.family_rank || "Rank"}
                     />
@@ -1883,7 +1886,7 @@ const StudentProfile = () => {
 
           {/* PROGRAM */}
           <div className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>PROGRAM</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1943,7 +1946,7 @@ const StudentProfile = () => {
 
           {/* FACILITIES */}
           <div id="facilities" className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>FACILITIES</b>
             </div>
             <div className={styles.sectionContent}>
@@ -2106,7 +2109,7 @@ const StudentProfile = () => {
 
           {/* PARENT / GUARDIAN INFORMATION */}
           <div id="parentGuardian" className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>PARENT / GUARDIAN INFORMATION</b>
             </div>
             <div className={styles.sectionContent}>
@@ -3006,7 +3009,6 @@ const StudentProfile = () => {
                       value={formData.mother_address_other || ""}
                       onChange={handleChange}
                       className={styles.formInput}
-                      placeholder="Other address details"
                     />
                   ) : (
                     <div
@@ -3235,7 +3237,7 @@ const StudentProfile = () => {
 
           {/* TERM OF PAYMENT */}
           <div className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>TERM OF PAYMENT</b>
             </div>
             <div className={styles.paymentContentWrapper}>

@@ -67,6 +67,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
       program_other: programOther,
     };
     onDataChange(dataToSync);
+    // eslint-disable-next-line
   }, [
     selectedSection,
     selectedMajor,
