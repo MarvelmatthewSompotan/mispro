@@ -1,544 +1,91 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import styles from "./ParentGuardianSection.module.css";
 
-const ParentGuardianSection = ({
-  onDataChange,
-  prefill,
-  prefillTrigger,
-  errors,
-  forceError,
-}) => {
-  // State untuk Father
-  const [father, setFather] = useState({
-    name: "",
-    company: "",
-    occupation: "",
-    phone: "",
-    email: "",
-    street: "",
-    rt: "",
-    rw: "",
-    village: "",
-    district: "",
-    city: "",
-    province: "",
-    other: "",
-  });
+const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
+  // State untuk error highlight
+  const [fatherErrors, setFatherErrors] = React.useState({});
+  const [motherErrors, setMotherErrors] = React.useState({});
 
-  // State untuk Mother
-  const [mother, setMother] = useState({
-    name: "",
-    company: "",
-    occupation: "",
-    phone: "",
-    email: "",
-    street: "",
-    rt: "",
-    rw: "",
-    village: "",
-    district: "",
-    city: "",
-    province: "",
-    other: "",
-  });
-
-  // State untuk Guardian
-  const [guardian, setGuardian] = useState({
-    name: "",
-    relationship: "",
-    phone: "",
-    email: "",
-    street: "",
-    rt: "",
-    rw: "",
-    village: "",
-    district: "",
-    city: "",
-    province: "",
-    other: "",
-  });
-
-  // State untuk error fields Father
-  const [fatherErrors, setFatherErrors] = useState({
-    name: false,
-    phone: false,
-    email: false,
-    street: false,
-    village: false,
-    district: false,
-    city: false,
-    province: false,
-  });
-
-  // State untuk error fields Mother
-  const [motherErrors, setMotherErrors] = useState({
-    name: false,
-    phone: false,
-    email: false,
-    street: false,
-    village: false,
-    district: false,
-    city: false,
-    province: false,
-  });
-
-  // State untuk error fields Guardian (jika diperlukan)
-  // eslint-disable-next-line
-  const [guardianErrors, setGuardianErrors] = useState({
-    name: false,
-    phone: false,
-    street: false,
-    village: false,
-    district: false,
-    city: false,
-    province: false,
-  });
-
-  // State untuk mengakumulasi semua data
-  // eslint-disable-next-line
-  const [allParentData, setAllParentData] = useState({});
-
-  // Effect untuk handle errors dari parent component - PERBAIKAN: Jangan reset error state yang sudah ada
-  useEffect(() => {
+  React.useEffect(() => {
     if (errors) {
-      // Update father errors - hanya update field yang ada di errors, jangan reset yang lain
-      setFatherErrors((prev) => ({
-        ...prev, // Pertahankan error state yang sudah ada
-        ...(errors.father_name !== undefined && { name: errors.father_name }),
-        ...(errors.father_phone !== undefined && {
-          phone: errors.father_phone,
-        }),
-        ...(forceError.father_email && { email: true }),
-        ...(errors.father_address_street !== undefined && {
-          street: errors.father_address_street,
-        }),
-        ...(errors.father_address_village !== undefined && {
-          village: errors.father_address_village,
-        }),
-        ...(errors.father_address_district !== undefined && {
-          district: errors.father_address_district,
-        }),
-        ...(errors.father_address_city_regency !== undefined && {
-          city: errors.father_address_city_regency,
-        }),
-        ...(errors.father_address_province !== undefined && {
-          province: errors.father_address_province,
-        }),
-      }));
-
-      // Update mother errors - hanya update field yang ada di errors, jangan reset yang lain
-      setMotherErrors((prev) => ({
-        ...prev, // Pertahankan error state yang sudah ada
-        ...(errors.mother_name !== undefined && { name: errors.mother_name }),
-        ...(errors.mother_phone !== undefined && {
-          phone: errors.mother_phone,
-        }),
-        ...(forceError.mother_email && { email: true }),
-        ...(errors.mother_address_street !== undefined && {
-          street: errors.mother_address_street,
-        }),
-        ...(errors.mother_address_village !== undefined && {
-          village: errors.mother_address_village,
-        }),
-        ...(errors.mother_address_district !== undefined && {
-          district: errors.mother_address_district,
-        }),
-        ...(errors.mother_address_city_regency !== undefined && {
-          city: errors.mother_address_city_regency,
-        }),
-        ...(errors.mother_address_province !== undefined && {
-          province: errors.mother_address_province,
-        }),
-      }));
+      setFatherErrors({
+        name: !!errors.father_name,
+        phone: !!errors.father_phone,
+        email: !!errors.father_email,
+        street: !!errors.father_address_street,
+        village: !!errors.father_address_village,
+        district: !!errors.father_address_district,
+        city: !!errors.father_address_city_regency,
+        province: !!errors.father_address_province,
+      });
+      setMotherErrors({
+        name: !!errors.mother_name,
+        phone: !!errors.mother_phone,
+        email: !!errors.mother_email,
+        street: !!errors.mother_address_street,
+        village: !!errors.mother_address_village,
+        district: !!errors.mother_address_district,
+        city: !!errors.mother_address_city_regency,
+        province: !!errors.mother_address_province,
+      });
     }
   }, [errors]);
 
-  // Effect untuk handle forceError dari parent component - PERBAIKAN: Jangan reset error state yang sudah ada
-  useEffect(() => {
-    if (forceError) {
-      // Force error untuk father fields - hanya update field yang ada di forceError, jangan reset yang lain
-      setFatherErrors((prev) => ({
-        ...prev, // Pertahankan error state yang sudah ada
-        ...(forceError.father_name && { name: true }),
-        ...(forceError.father_phone && { phone: true }),
-        ...(forceError.father_address_street && { street: true }),
-        ...(forceError.father_address_village && { village: true }),
-        ...(forceError.father_address_district && { district: true }),
-        ...(forceError.father_address_city_regency && { city: true }),
-        ...(forceError.father_address_province && { province: true }),
-      }));
-
-      // Force error untuk mother fields - hanya update field yang ada di forceError, jangan reset yang lain
-      setMotherErrors((prev) => ({
-        ...prev, // Pertahankan error state yang sudah ada
-        ...(forceError.mother_name && { name: true }),
-        ...(forceError.mother_phone && { phone: true }),
-        ...(forceError.mother_address_street && { street: true }),
-        ...(forceError.mother_address_village && { village: true }),
-        ...(forceError.mother_address_district && { district: true }),
-        ...(forceError.mother_address_city_regency && { city: true }),
-        ...(forceError.mother_address_province && { province: true }),
-      }));
-    }
-  }, [forceError]);
-
-  // Function untuk mengupdate data dan mengirim ke parent
-  // eslint-disable-next-line
-  const updateAndSendData = () => {
-    const allData = {};
-
-    // Father data dengan field mapping yang benar - kirim semua field
-    allData.father_name = father.name || "";
-    allData.father_company = father.company || "";
-    allData.father_occupation = father.occupation || "";
-    allData.father_phone = father.phone || "";
-    allData.father_email = father.email || "";
-    allData.father_address_street = father.street || "";
-    allData.father_address_rt = father.rt || "";
-    allData.father_address_rw = father.rw || "";
-    allData.father_address_village = father.village || "";
-    allData.father_address_district = father.district || "";
-    allData.father_address_city_regency = father.city || "";
-    allData.father_address_province = father.province || "";
-    allData.father_address_other = father.other || "";
-
-    // Mother data dengan field mapping yang benar - kirim semua field
-    allData.mother_name = mother.name || "";
-    allData.mother_company = mother.company || "";
-    allData.mother_occupation = mother.occupation || "";
-    allData.mother_phone = mother.phone || "";
-    allData.mother_email = mother.email || "";
-    allData.mother_address_street = mother.street || "";
-    allData.mother_address_rt = mother.rt || "";
-    allData.mother_address_rw = mother.rw || "";
-    allData.mother_address_village = mother.village || "";
-    allData.mother_address_district = mother.district || "";
-    allData.mother_address_city_regency = mother.city || "";
-    allData.mother_address_province = mother.province || "";
-    allData.mother_address_other = mother.other || "";
-
-    // Guardian data dengan field mapping yang benar - kirim semua field
-    allData.guardian_name = guardian.name || "";
-    allData.relation_to_student = guardian.relationship || "";
-    allData.guardian_phone = guardian.phone || "";
-    allData.guardian_email = guardian.email || "";
-    allData.guardian_address_street = guardian.street || "";
-    allData.guardian_address_rt = guardian.rt || "";
-    allData.guardian_address_rw = guardian.rw || "";
-    allData.guardian_address_village = guardian.village || "";
-    allData.guardian_address_district = guardian.district || "";
-    allData.guardian_address_city_regency = guardian.city || "";
-    allData.guardian_address_province = guardian.province || "";
-    allData.guardian_address_other = guardian.other || "";
-
-    console.log("ParentGuardianSection - Data being sent:", allData);
-    console.log("ParentGuardianSection - Data type:", typeof allData);
-    console.log("ParentGuardianSection - Data keys:", Object.keys(allData));
-
-    setAllParentData(allData);
-    onDataChange("parentGuardian", allData);
+  // INI FUNGSI handleChange YANG BENAR:
+  // Menerima satu 'key' (misal: "father_name") dan mengirim update ke parent.
+  const handleChange = (key) => (e) => {
+    const { value } = e.target;
+    onDataChange({ [key]: value });
   };
 
-  // Helper untuk handle input change dengan validasi
-  const handleChange = (setter, field, section) => (e) => {
-    const value = e.target.value;
-
-    // Hitung next state untuk section yang sedang diedit agar tidak pakai state lama
-    const nextFather =
-      section === "father" ? { ...father, [field]: value } : father;
-    const nextMother =
-      section === "mother" ? { ...mother, [field]: value } : mother;
-    const nextGuardian =
-      section === "guardian" ? { ...guardian, [field]: value } : guardian;
-
-    // Update local state
-    setter((prev) => ({ ...prev, [field]: value }));
-
-    // Hapus error state jika field yang sebelumnya error kini diisi oleh pengguna
-    if (section === "father" && fatherErrors[field] && value.trim() !== "") {
-      setFatherErrors((prev) => ({
-        ...prev,
-        [field]: false, // Nonaktifkan error untuk field ini
-      }));
-    }
-
-    if (section === "mother" && motherErrors[field] && value.trim() !== "") {
-      setMotherErrors((prev) => ({
-        ...prev,
-        [field]: false, // Nonaktifkan error untuk field ini
-      }));
-    }
-
-    // Kirim data ke parent component dengan format yang benar
-    if (onDataChange) {
-      const allData = {};
-
-      // Helper function untuk handle rt/rw fields
-      const handleRtRw = (value) => {
-        return value.trim() === "" ? "0" : value;
-      };
-
-      // Father
-      allData.father_name = nextFather.name;
-      allData.father_company = nextFather.company || "";
-      allData.father_occupation = nextFather.occupation || "";
-      allData.father_phone = nextFather.phone;
-      allData.father_email = nextFather.email;
-      allData.father_address_street = nextFather.street;
-      allData.father_address_rt = handleRtRw(nextFather.rt);
-      allData.father_address_rw = handleRtRw(nextFather.rw);
-      allData.father_address_village = nextFather.village;
-      allData.father_address_district = nextFather.district;
-      allData.father_address_city_regency = nextFather.city;
-      allData.father_address_province = nextFather.province;
-      allData.father_address_other = nextFather.other || "";
-      allData.father_company_addresses = nextFather.company;
-
-      // Mother
-      allData.mother_name = nextMother.name;
-      allData.mother_company = nextMother.company || "";
-      allData.mother_occupation = nextMother.occupation || "";
-      allData.mother_phone = nextMother.phone;
-      allData.mother_email = nextMother.email;
-      allData.mother_address_street = nextMother.street;
-      allData.mother_address_rt = handleRtRw(nextMother.rt);
-      allData.mother_address_rw = handleRtRw(nextMother.rw);
-      allData.mother_address_village = nextMother.village;
-      allData.mother_address_district = nextMother.district;
-      allData.mother_address_city_regency = nextMother.city;
-      allData.mother_address_province = nextMother.province;
-      allData.mother_address_other = nextMother.other || "";
-      allData.mother_company_addresses = nextMother.company;
-
-      // Guardian
-      allData.guardian_name = nextGuardian.name || "";
-      allData.relation_to_student = nextGuardian.relationship || "";
-      allData.guardian_phone = nextGuardian.phone || "";
-      allData.guardian_email = nextGuardian.email || "";
-      allData.guardian_address_street = nextGuardian.street || "";
-      allData.guardian_address_rt = handleRtRw(nextGuardian.rt);
-      allData.guardian_address_rw = handleRtRw(nextGuardian.rw);
-      allData.guardian_address_village = nextGuardian.village || "";
-      allData.guardian_address_district = nextGuardian.district || "";
-      allData.guardian_address_city_regency = nextGuardian.city || "";
-      allData.guardian_address_province = nextGuardian.province || "";
-      allData.guardian_address_other = nextGuardian.other || "";
-
-      onDataChange(allData);
-    }
+  // Membuat variabel objek NESTED dari props formData yang FLAT.
+  // Ini adalah "jembatan" agar JSX tidak perlu diubah.
+  const father = {
+    name: formData.father_name,
+    company: formData.father_company,
+    occupation: formData.father_occupation,
+    phone: formData.father_phone,
+    email: formData.father_email,
+    street: formData.father_address_street,
+    rt: formData.father_address_rt,
+    rw: formData.father_address_rw,
+    village: formData.father_address_village,
+    district: formData.father_address_district,
+    city: formData.father_address_city_regency,
+    province: formData.father_address_province,
+    other: formData.father_address_other,
   };
 
-  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
-  const isInitialPrefill = useRef(true);
-  const hasInitialized = useRef(false);
+  const mother = {
+    name: formData.mother_name,
+    company: formData.mother_company,
+    occupation: formData.mother_occupation,
+    phone: formData.mother_phone,
+    email: formData.mother_email,
+    street: formData.mother_address_street,
+    rt: formData.mother_address_rt,
+    rw: formData.mother_address_rw,
+    village: formData.mother_address_village,
+    district: formData.mother_address_district,
+    city: formData.mother_address_city_regency,
+    province: formData.mother_address_province,
+    other: formData.mother_address_other,
+  };
 
-  // ✅ Perbaiki useEffect untuk prefill data: hanya apply saat berbeda signifikan
-  useEffect(() => {
-    if (prefill && Object.keys(prefill).length > 0) {
-      // Jika ini prefill pertama kali atau prefill berubah signifikan
-      if (isInitialPrefill.current || !hasInitialized.current) {
-        console.log("Initial prefilling ParentGuardianSection with:", prefill);
-
-        // ✅ Mapping data father dari backend ke state local
-        const fatherData = {
-          name: prefill.father_name || "",
-          company: prefill.father_company || "",
-          occupation: prefill.father_occupation || "",
-          phone: prefill.father_phone || "",
-          email: prefill.father_email || "",
-          street: prefill.father_address_street || "",
-          rt: prefill.father_address_rt || "0",
-          rw: prefill.father_address_rw || "0",
-          village: prefill.father_address_village || "",
-          district: prefill.father_address_district || "",
-          city: prefill.father_address_city_regency || "",
-          province: prefill.father_address_province || "",
-          other: prefill.father_address_other || "",
-        };
-
-        // ✅ Mapping data mother dari backend ke state local
-        const motherData = {
-          name: prefill.mother_name || "",
-          company: prefill.mother_company || "",
-          occupation: prefill.mother_occupation || "",
-          phone: prefill.mother_phone || "",
-          email: prefill.mother_email || "",
-          street: prefill.mother_address_street || "",
-          rt: prefill.father_address_rt || "0",
-          rw: prefill.father_address_rw || "0",
-          village: prefill.mother_address_village || "",
-          district: prefill.mother_address_district || "",
-          city: prefill.mother_address_city_regency || "",
-          province: prefill.mother_address_province || "",
-          other: prefill.mother_address_other || "",
-        };
-
-        // ✅ Mapping data guardian dari backend ke state local
-        const guardianData = {
-          name: prefill.guardian_name || "",
-          relationship: prefill.relation_to_student || "",
-          phone: prefill.guardian_phone || "",
-          email: prefill.guardian_email || "",
-          street: prefill.guardian_address_street || "",
-          rt: prefill.guardian_address_rt || "0",
-          rw: prefill.guardian_address_rw || "0",
-          village: prefill.guardian_address_village || "",
-          district: prefill.guardian_address_district || "",
-          city: prefill.guardian_address_city_regency || "",
-          province: prefill.guardian_address_province || "",
-          other: prefill.guardian_address_other || "",
-        };
-
-        // ✅ Set state dengan data yang sudah di-mapping
-        setFather(fatherData);
-        setMother(motherData);
-        setGuardian(guardianData);
-
-        // Reset error states saat prefill - PERBAIKAN: Hanya reset jika tidak ada errors dari parent
-        if (!errors) {
-          setFatherErrors({
-            name: false,
-            phone: false,
-            street: false,
-            village: false,
-            district: false,
-            city: false,
-            province: false,
-          });
-          setMotherErrors({
-            name: false,
-            phone: false,
-            street: false,
-            village: false,
-            district: false,
-            city: false,
-            province: false,
-          });
-          setGuardianErrors({
-            name: false,
-            phone: false,
-            street: false,
-            village: false,
-            district: false,
-            city: false,
-            province: false,
-          });
-        }
-
-        // ✅ Kirim data ke parent component setelah prefill
-        if (onDataChange) {
-          const allData = {
-            // Father data
-            father_name: fatherData.name,
-            father_company: fatherData.company,
-            father_occupation: fatherData.occupation,
-            father_phone: fatherData.phone,
-            father_email: fatherData.email,
-            father_address_street: fatherData.street,
-            father_address_rt: fatherData.rt,
-            father_address_rw: fatherData.rw,
-            father_address_village: fatherData.village,
-            father_address_district: fatherData.district,
-            father_address_city_regency: fatherData.city,
-            father_address_province: fatherData.province,
-            father_address_other: fatherData.other,
-            father_company_addresses: fatherData.company,
-
-            // Mother data
-            mother_name: motherData.name,
-            mother_company: motherData.company,
-            mother_occupation: motherData.occupation,
-            mother_phone: motherData.phone,
-            mother_email: motherData.email,
-            mother_address_street: motherData.street,
-            mother_address_rt: motherData.rt,
-            mother_address_rw: motherData.rw,
-            mother_address_village: motherData.village,
-            mother_address_district: motherData.district,
-            mother_address_city_regency: motherData.city,
-            mother_address_province: motherData.province,
-            mother_address_other: motherData.other,
-            mother_company_addresses: motherData.company,
-
-            // Guardian data
-            guardian_name: guardianData.name,
-            relation_to_student: guardianData.relationship,
-            guardian_phone: guardianData.phone,
-            guardian_email: guardianData.email,
-            guardian_address_street: guardianData.street,
-            guardian_address_rt: guardianData.rt,
-            guardian_address_rw: guardianData.rw,
-            guardian_address_village: guardianData.village,
-            guardian_address_district: guardianData.district,
-            guardian_address_city_regency: guardianData.city,
-            guardian_address_province: guardianData.province,
-            guardian_address_other: guardianData.other,
-          };
-
-          onDataChange(allData);
-        }
-
-        hasInitialized.current = true;
-        isInitialPrefill.current = false;
-      }
-    } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
-      // Jika prefill menjadi empty object (reset form), reset semua field
-      console.log("Resetting ParentGuardianSection form");
-
-      const emptyData = {
-        name: "",
-        company: "",
-        occupation: "",
-        phone: "",
-        email: "",
-        street: "",
-        rt: "0",
-        rw: "0",
-        village: "",
-        district: "",
-        city: "",
-        province: "",
-        other: "",
-      };
-
-      setFather(emptyData);
-      setMother(emptyData);
-      setGuardian({ ...emptyData, relationship: "" });
-
-      // Reset error states - PERBAIKAN: Hanya reset jika tidak ada errors dari parent
-      if (!errors) {
-        setFatherErrors({
-          name: false,
-          phone: false,
-          street: false,
-          village: false,
-          district: false,
-          city: false,
-          province: false,
-        });
-        setMotherErrors({
-          name: false,
-          phone: false,
-          street: false,
-          village: false,
-          district: false,
-          city: false,
-          province: false,
-        });
-        setGuardianErrors({
-          name: false,
-          phone: false,
-          street: false,
-          village: false,
-          district: false,
-          city: false,
-          province: false,
-        });
-      }
-
-      hasInitialized.current = false;
-    }
-  }, [prefill, onDataChange, errors]);
+  const guardian = {
+    name: formData.guardian_name,
+    relationship: formData.relation_to_student,
+    phone: formData.guardian_phone,
+    email: formData.guardian_email,
+    street: formData.guardian_address_street,
+    rt: formData.guardian_address_rt,
+    rw: formData.guardian_address_rw,
+    village: formData.guardian_address_village,
+    district: formData.guardian_address_district,
+    city: formData.guardian_address_city_regency,
+    province: formData.guardian_address_province,
+    other: formData.guardian_address_other,
+  };
 
   return (
     <div className={styles.container}>
@@ -573,8 +120,8 @@ const ParentGuardianSection = ({
                       father.name ? styles.filled : ""
                     } ${fatherErrors.name ? styles.parentErrorInput : ""}`}
                     type="text"
-                    value={father.name}
-                    onChange={handleChange(setFather, "name", "father")}
+                    value={father.name || ""}
+                    onChange={handleChange("father_name")}
                     placeholder="John Doe"
                   />
                 </div>
@@ -587,8 +134,8 @@ const ParentGuardianSection = ({
                       father.company ? styles.filled : ""
                     }`}
                     type="text"
-                    value={father.company}
-                    onChange={handleChange(setFather, "company", "father")}
+                    value={father.company || ""}
+                    onChange={handleChange("father_company")}
                     placeholder="PT. Multi Rakyat"
                   />
                 </div>
@@ -599,8 +146,8 @@ const ParentGuardianSection = ({
                       father.occupation ? styles.filled : ""
                     }`}
                     type="text"
-                    value={father.occupation}
-                    onChange={handleChange(setFather, "occupation", "father")}
+                    value={father.occupation || ""}
+                    onChange={handleChange("father_occupation")}
                     placeholder="Field Manager"
                   />
                 </div>
@@ -624,14 +171,13 @@ const ParentGuardianSection = ({
                         father.phone ? styles.filled : ""
                       } ${fatherErrors.phone ? styles.parentErrorInput : ""}`}
                       type="tel"
-                      value={father.phone}
+                      value={father.phone || ""}
                       maxLength="20"
-                      onChange={handleChange(setFather, "phone", "father")}
+                      onChange={handleChange("father_phone")}
                       placeholder="089281560955"
                     />
                     {fatherErrors.phone && (
                       <div className={styles.inlineErrorMessage}>
-                        {/* Pesan default diubah agar konsisten */}
                         {typeof fatherErrors.phone === "string"
                           ? fatherErrors.phone
                           : "Phone number must be at most 20 characters"}
@@ -657,8 +203,8 @@ const ParentGuardianSection = ({
                         father.email ? styles.filled : ""
                       } ${fatherErrors.email ? styles.parentErrorInput : ""}`}
                       type="email"
-                      value={father.email}
-                      onChange={handleChange(setFather, "email", "father")}
+                      value={father.email || ""}
+                      onChange={handleChange("father_email")}
                       placeholder="Johndoehebat@gmail.com"
                     />
                     {fatherErrors.email && (
@@ -690,8 +236,8 @@ const ParentGuardianSection = ({
                         father.street ? styles.filled : ""
                       } ${fatherErrors.street ? styles.parentErrorInput : ""}`}
                       type="text"
-                      value={father.street}
-                      onChange={handleChange(setFather, "street", "father")}
+                      value={father.street || ""}
+                      onChange={handleChange("father_address_street")}
                       placeholder="JL. Sarundajang 01"
                     />
                   </div>
@@ -703,8 +249,8 @@ const ParentGuardianSection = ({
                           father.rt ? styles.filled : ""
                         }`}
                         type="text"
-                        value={father.rt}
-                        onChange={handleChange(setFather, "rt", "father")}
+                        value={father.rt || ""}
+                        onChange={handleChange("father_address_rt")}
                         placeholder="001"
                       />
                     </div>
@@ -715,8 +261,8 @@ const ParentGuardianSection = ({
                           father.rw ? styles.filled : ""
                         }`}
                         type="text"
-                        value={father.rw}
-                        onChange={handleChange(setFather, "rw", "father")}
+                        value={father.rw || ""}
+                        onChange={handleChange("father_address_rw")}
                         placeholder="002"
                       />
                     </div>
@@ -740,8 +286,8 @@ const ParentGuardianSection = ({
                         father.village ? styles.filled : ""
                       } ${fatherErrors.village ? styles.parentErrorInput : ""}`}
                       type="text"
-                      value={father.village}
-                      onChange={handleChange(setFather, "village", "father")}
+                      value={father.village || ""}
+                      onChange={handleChange("father_address_village")}
                       placeholder="Girian"
                     />
                   </div>
@@ -766,8 +312,8 @@ const ParentGuardianSection = ({
                         fatherErrors.district ? styles.parentErrorInput : ""
                       }`}
                       type="text"
-                      value={father.district}
-                      onChange={handleChange(setFather, "district", "father")}
+                      value={father.district || ""}
+                      onChange={handleChange("father_address_district")}
                       placeholder="Danowudu"
                     />
                   </div>
@@ -790,8 +336,8 @@ const ParentGuardianSection = ({
                         father.city ? styles.filled : ""
                       } ${fatherErrors.city ? styles.parentErrorInput : ""}`}
                       type="text"
-                      value={father.city}
-                      onChange={handleChange(setFather, "city", "father")}
+                      value={father.city || ""}
+                      onChange={handleChange("father_address_city_regency")}
                       placeholder="Kotamobagu"
                     />
                   </div>
@@ -816,8 +362,8 @@ const ParentGuardianSection = ({
                         fatherErrors.province ? styles.parentErrorInput : ""
                       }`}
                       type="text"
-                      value={father.province}
-                      onChange={handleChange(setFather, "province", "father")}
+                      value={father.province || ""}
+                      onChange={handleChange("father_address_province")}
                       placeholder="North Sulawesi"
                     />
                   </div>
@@ -831,8 +377,8 @@ const ParentGuardianSection = ({
                         father.other ? styles.filled : ""
                       }`}
                       type="text"
-                      value={father.other}
-                      onChange={handleChange(setFather, "other", "father")}
+                      value={father.other || ""}
+                      onChange={handleChange("father_address_other")}
                       placeholder="Dahlia Apartement Unit 502"
                     />
                     <span className={styles.bracket}>)</span>
@@ -868,8 +414,8 @@ const ParentGuardianSection = ({
                       mother.name ? styles.filled : ""
                     } ${motherErrors.name ? styles.parentErrorInput : ""}`}
                     type="text"
-                    value={mother.name}
-                    onChange={handleChange(setMother, "name", "mother")}
+                    value={mother.name || ""}
+                    onChange={handleChange("mother_name")}
                     placeholder="Jane Doe"
                   />
                 </div>
@@ -882,8 +428,8 @@ const ParentGuardianSection = ({
                       mother.company ? styles.filled : ""
                     }`}
                     type="text"
-                    value={mother.company}
-                    onChange={handleChange(setMother, "company", "mother")}
+                    value={mother.company || ""}
+                    onChange={handleChange("mother_company")}
                     placeholder="PT. Multi Rakyat"
                   />
                 </div>
@@ -894,8 +440,8 @@ const ParentGuardianSection = ({
                       mother.occupation ? styles.filled : ""
                     }`}
                     type="text"
-                    value={mother.occupation}
-                    onChange={handleChange(setMother, "occupation", "mother")}
+                    value={mother.occupation || ""}
+                    onChange={handleChange("mother_occupation")}
                     placeholder="Field Manager"
                   />
                 </div>
@@ -919,14 +465,13 @@ const ParentGuardianSection = ({
                         mother.phone ? styles.filled : ""
                       } ${motherErrors.phone ? styles.parentErrorInput : ""}`}
                       type="tel"
-                      value={mother.phone}
-                      maxLength="20" // Atribut ini sudah membatasi input pengguna
-                      onChange={handleChange(setMother, "phone", "mother")}
+                      value={mother.phone || ""}
+                      maxLength="20"
+                      onChange={handleChange("mother_phone")}
                       placeholder="089281560955"
                     />
                     {motherErrors.phone && (
                       <div className={styles.inlineErrorMessage}>
-                        {/* Pesan error diubah sesuai requirement Anda */}
                         {typeof motherErrors.phone === "string"
                           ? motherErrors.phone
                           : "Phone number must be at most 20 characters"}
@@ -952,8 +497,8 @@ const ParentGuardianSection = ({
                         mother.email ? styles.filled : ""
                       } ${motherErrors.email ? styles.parentErrorInput : ""}`}
                       type="email"
-                      value={mother.email}
-                      onChange={handleChange(setMother, "email", "mother")}
+                      value={mother.email || ""}
+                      onChange={handleChange("mother_email")}
                       placeholder="Janedoehebat@gmail.com"
                     />
                     {motherErrors.email && (
@@ -985,8 +530,8 @@ const ParentGuardianSection = ({
                         mother.street ? styles.filled : ""
                       } ${motherErrors.street ? styles.parentErrorInput : ""}`}
                       type="text"
-                      value={mother.street}
-                      onChange={handleChange(setMother, "street", "mother")}
+                      value={mother.street || ""}
+                      onChange={handleChange("mother_address_street")}
                       placeholder="JL. Sarundajang 01"
                     />
                   </div>
@@ -998,8 +543,8 @@ const ParentGuardianSection = ({
                           mother.rt ? styles.filled : ""
                         }`}
                         type="text"
-                        value={mother.rt}
-                        onChange={handleChange(setMother, "rt", "mother")}
+                        value={mother.rt || ""}
+                        onChange={handleChange("mother_address_rt")}
                         placeholder="001"
                       />
                     </div>
@@ -1010,8 +555,8 @@ const ParentGuardianSection = ({
                           mother.rw ? styles.filled : ""
                         }`}
                         type="text"
-                        value={mother.rw}
-                        onChange={handleChange(setMother, "rw", "mother")}
+                        value={mother.rw || ""}
+                        onChange={handleChange("mother_address_rw")}
                         placeholder="002"
                       />
                     </div>
@@ -1035,8 +580,8 @@ const ParentGuardianSection = ({
                         mother.village ? styles.filled : ""
                       } ${motherErrors.village ? styles.parentErrorInput : ""}`}
                       type="text"
-                      value={mother.village}
-                      onChange={handleChange(setMother, "village", "mother")}
+                      value={mother.village || ""}
+                      onChange={handleChange("mother_address_village")}
                       placeholder="Girian"
                     />
                   </div>
@@ -1061,8 +606,8 @@ const ParentGuardianSection = ({
                         motherErrors.district ? styles.parentErrorInput : ""
                       }`}
                       type="text"
-                      value={mother.district}
-                      onChange={handleChange(setMother, "district", "mother")}
+                      value={mother.district || ""}
+                      onChange={handleChange("mother_address_district")}
                       placeholder="Danowudu"
                     />
                   </div>
@@ -1085,8 +630,8 @@ const ParentGuardianSection = ({
                         mother.city ? styles.filled : ""
                       } ${motherErrors.city ? styles.parentErrorInput : ""}`}
                       type="text"
-                      value={mother.city}
-                      onChange={handleChange(setMother, "city", "mother")}
+                      value={mother.city || ""}
+                      onChange={handleChange("mother_address_city_regency")}
                       placeholder="Kotamobagu"
                     />
                   </div>
@@ -1111,8 +656,8 @@ const ParentGuardianSection = ({
                         motherErrors.province ? styles.parentErrorInput : ""
                       }`}
                       type="text"
-                      value={mother.province}
-                      onChange={handleChange(setMother, "province", "mother")}
+                      value={mother.province || ""}
+                      onChange={handleChange("mother_address_province")}
                       placeholder="North Sulawesi"
                     />
                   </div>
@@ -1126,8 +671,8 @@ const ParentGuardianSection = ({
                         mother.other ? styles.filled : ""
                       }`}
                       type="text"
-                      value={mother.other}
-                      onChange={handleChange(setMother, "other", "mother")}
+                      value={mother.other || ""}
+                      onChange={handleChange("mother_address_other")}
                       placeholder="Dahlia Apartement Unit 502"
                     />
                     <span className={styles.bracket}>)</span>
@@ -1153,8 +698,8 @@ const ParentGuardianSection = ({
                       guardian.name ? styles.filled : ""
                     }`}
                     type="text"
-                    value={guardian.name}
-                    onChange={handleChange(setGuardian, "name", "guardian")}
+                    value={guardian.name || ""}
+                    onChange={handleChange("guardian_name")}
                     placeholder="John Doe"
                   />
                 </div>
@@ -1167,12 +712,8 @@ const ParentGuardianSection = ({
                       guardian.relationship ? styles.filled : ""
                     }`}
                     type="text"
-                    value={guardian.relationship}
-                    onChange={handleChange(
-                      setGuardian,
-                      "relationship",
-                      "guardian"
-                    )}
+                    value={guardian.relationship || ""}
+                    onChange={handleChange("relation_to_student")}
                     placeholder="Uncle"
                   />
                 </div>
@@ -1185,8 +726,8 @@ const ParentGuardianSection = ({
                       guardian.phone ? styles.filled : ""
                     }`}
                     type="tel"
-                    value={guardian.phone}
-                    onChange={handleChange(setGuardian, "phone", "guardian")}
+                    value={guardian.phone || ""}
+                    onChange={handleChange("guardian_phone")}
                     placeholder="082176543890"
                   />
                 </div>
@@ -1197,8 +738,8 @@ const ParentGuardianSection = ({
                       guardian.email ? styles.filled : ""
                     }`}
                     type="email"
-                    value={guardian.email}
-                    onChange={handleChange(setGuardian, "email", "guardian")}
+                    value={guardian.email || ""}
+                    onChange={handleChange("guardian_email")}
                     placeholder="Johndoe@gmail.com"
                   />
                 </div>
@@ -1211,8 +752,8 @@ const ParentGuardianSection = ({
                       guardian.street ? styles.filled : ""
                     }`}
                     type="text"
-                    value={guardian.street}
-                    onChange={handleChange(setGuardian, "street", "guardian")}
+                    value={guardian.street || ""}
+                    onChange={handleChange("guardian_address_street")}
                     placeholder="JL. Sarundajang 01"
                   />
                 </div>
@@ -1224,8 +765,8 @@ const ParentGuardianSection = ({
                         guardian.rt ? styles.filled : ""
                       }`}
                       type="text"
-                      value={guardian.rt}
-                      onChange={handleChange(setGuardian, "rt", "guardian")}
+                      value={guardian.rt || ""}
+                      onChange={handleChange("guardian_address_rt")}
                       placeholder="001"
                     />
                   </div>
@@ -1236,8 +777,8 @@ const ParentGuardianSection = ({
                         guardian.rw ? styles.filled : ""
                       }`}
                       type="text"
-                      value={guardian.rw}
-                      onChange={handleChange(setGuardian, "rw", "guardian")}
+                      value={guardian.rw || ""}
+                      onChange={handleChange("guardian_address_rw")}
                       placeholder="002"
                     />
                   </div>
@@ -1251,8 +792,8 @@ const ParentGuardianSection = ({
                       guardian.village ? styles.filled : ""
                     }`}
                     type="text"
-                    value={guardian.village}
-                    onChange={handleChange(setGuardian, "village", "guardian")}
+                    value={guardian.village || ""}
+                    onChange={handleChange("guardian_address_village")}
                     placeholder="Girian"
                   />
                 </div>
@@ -1263,8 +804,8 @@ const ParentGuardianSection = ({
                       guardian.district ? styles.filled : ""
                     }`}
                     type="text"
-                    value={guardian.district}
-                    onChange={handleChange(setGuardian, "district", "guardian")}
+                    value={guardian.district || ""}
+                    onChange={handleChange("guardian_address_district")}
                     placeholder="Danowudu"
                   />
                 </div>
@@ -1277,8 +818,8 @@ const ParentGuardianSection = ({
                       guardian.city ? styles.filled : ""
                     }`}
                     type="text"
-                    value={guardian.city}
-                    onChange={handleChange(setGuardian, "city", "guardian")}
+                    value={guardian.city || ""}
+                    onChange={handleChange("guardian_address_city_regency")}
                     placeholder="Kotamobagu"
                   />
                 </div>
@@ -1289,8 +830,8 @@ const ParentGuardianSection = ({
                       guardian.province ? styles.filled : ""
                     }`}
                     type="text"
-                    value={guardian.province}
-                    onChange={handleChange(setGuardian, "province", "guardian")}
+                    value={guardian.province || ""}
+                    onChange={handleChange("guardian_address_province")}
                     placeholder="North Sulawesi"
                   />
                 </div>
@@ -1304,8 +845,8 @@ const ParentGuardianSection = ({
                       guardian.other ? styles.filled : ""
                     }`}
                     type="text"
-                    value={guardian.other}
-                    onChange={handleChange(setGuardian, "other", "guardian")}
+                    value={guardian.other || ""}
+                    onChange={handleChange("guardian_address_other")}
                     placeholder="Dahlia Apartement Unit 502"
                   />
                   <span className={styles.bracket}>)</span>

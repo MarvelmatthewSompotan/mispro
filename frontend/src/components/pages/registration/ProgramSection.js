@@ -1,15 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./ProgramSection.module.css";
 import Select from "react-select";
 import { getRegistrationOptions } from "../../../services/api";
 
-const ProgramSection = ({
-  onDataChange,
-  sharedData,
-  prefill,
-  errors,
-  forceError,
-}) => {
+const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
+  // --- STATE LOKAL ---
   const [sections, setSections] = useState([]);
   const [majors, setMajors] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -21,13 +16,11 @@ const ProgramSection = ({
   const [selectedProgram, setSelectedProgram] = useState("");
   const [programOther, setProgramOther] = useState("");
 
-  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
-  const isInitialPrefill = useRef(true);
-  const hasInitialized = useRef(false);
-
-  // add near top-level of the component
   const OTHER = "OTHER";
 
+  // --- LOGIKA UTAMA ---
+
+  // 1. Mengambil data opsi dari API (tidak berubah)
   useEffect(() => {
     if (sharedData) {
       setSections(sharedData.sections || []);
@@ -48,177 +41,115 @@ const ProgramSection = ({
     }
   }, [sharedData]);
 
-  // Prefill hanya sekali saat component pertama kali mount atau saat prefill berubah signifikan
+  // 2. Mengisi data dari prefill (disederhanakan)
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-      // Jika ini prefill pertama kali atau prefill berubah signifikan
-      if (isInitialPrefill.current || !hasInitialized.current) {
-        console.log("Initial prefilling ProgramSection with:", prefill);
-
-        if (prefill.section_id) setSelectedSection(prefill.section_id);
-        if (prefill.major_id) setSelectedMajor(prefill.major_id);
-        if (prefill.class_id) setSelectedClass(prefill.class_id);
-        if (prefill.program_id) {
-          setSelectedProgram(prefill.program_id);
-        } else if (prefill.program_other) {
-          setSelectedProgram(OTHER);
-        }
-        if (prefill.program_other) setProgramOther(prefill.program_other);
-
-        hasInitialized.current = true;
-        isInitialPrefill.current = false;
+      setSelectedSection(prefill.section_id || "");
+      setSelectedMajor(prefill.major_id || "");
+      setSelectedClass(prefill.class_id || "");
+      if (prefill.program_id) {
+        setSelectedProgram(prefill.program_id);
+      } else if (prefill.program_other) {
+        setSelectedProgram(OTHER);
       }
-    } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
-      // Jika prefill menjadi empty object (reset form), reset semua field
-      console.log("Resetting ProgramSection form");
-      setSelectedSection("");
-      setSelectedMajor("");
-      setSelectedClass("");
-      setSelectedProgram("");
-      setProgramOther("");
-
-      hasInitialized.current = false;
+      setProgramOther(prefill.program_other || "");
     }
   }, [prefill]);
 
-  const handleSectionChange = (opt) => {
-    const value = opt ? opt.value : "";
-
-    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
-    if (selectedSection === value) {
-      setSelectedSection("");
-      setSelectedMajor("");
-      setSelectedClass("");
-
-      onDataChange({
-        section_id: value,
-        major_id: "",
-        class_id: "",
-        program_id: selectedProgram === OTHER ? null : selectedProgram,
-        program_other: programOther,
-      });
-    } else {
-      // Jika user memilih option baru
-      setSelectedSection(value);
-
-      // Auto-select grade berdasarkan section
-      let autoGrade = "";
-      const selectedSectionData = sections.find(
-        (sec) => sec.section_id === value
-      );
-
-      if (selectedSectionData) {
-        const sectionName = selectedSectionData.name;
-        if (sectionName === "ECP") {
-          autoGrade = "N";
-        } else if (sectionName === "Elementary School") {
-          autoGrade = "1";
-        } else if (sectionName === "Middle School") {
-          autoGrade = "7";
-        } else if (sectionName === "High School") {
-          autoGrade = "10";
-        }
-      }
-
-      // Cari class_id yang sesuai dengan section dan grade
-      let autoClass = "";
-      if (autoGrade && value) {
-        const autoClassData = classes.find(
-          (cls) => cls.section_id === value && cls.grade === autoGrade
-        );
-        if (autoClassData) {
-          autoClass = autoClassData.class_id;
-          setSelectedClass(autoClassData.class_id);
-        }
-      } else {
-        setSelectedClass("");
-      }
-
-      setSelectedMajor("");
-
-      onDataChange({
-        section_id: value,
-        major_id: "",
-        class_id: autoClass,
-        program_id: selectedProgram === OTHER ? null : selectedProgram,
-        program_other: programOther,
-      });
-    }
-  };
-
-  const handleMajorChange = (opt) => {
-    const value = opt ? opt.value : "";
-    setSelectedMajor(value);
-    onDataChange({
+  // 3. [PERBAIKAN UTAMA #1] useEffect terpusat untuk sinkronisasi data
+  //    Tugasnya hanya satu: mengirim data terbaru ke parent setiap ada perubahan.
+  useEffect(() => {
+    const dataToSync = {
       section_id: selectedSection,
-      major_id: value,
+      major_id: selectedMajor,
       class_id: selectedClass,
       program_id: selectedProgram === OTHER ? null : selectedProgram,
       program_other: programOther,
-    });
+    };
+    onDataChange(dataToSync);
+    // eslint-disable-next-line
+  }, [
+    selectedSection,
+    selectedMajor,
+    selectedClass,
+    selectedProgram,
+    onDataChange,
+  ]);
+
+  // --- HANDLERS (FUNGSI UNTUK INTERAKSI USER) ---
+  // Tugasnya hanya mengubah state lokal. Tidak perlu panggil onDataChange lagi.
+
+  // [PERBAIKAN UTAMA #2] Handler radio button diperbaiki
+  const handleSectionChange = (e, value) => {
+    e.preventDefault();
+    const newSection = selectedSection === value ? "" : value;
+    setSelectedSection(newSection);
+
+    // Reset fields lain jika section diubah
+    if (selectedSection !== newSection) {
+      setSelectedClass("");
+      setSelectedMajor("");
+    }
   };
+
+  const handleProgramChange = (e, value) => {
+    e.preventDefault();
+    const newProgram = selectedProgram === value ? "" : value;
+    setSelectedProgram(newProgram);
+
+    // Reset input "Other" jika program lain dipilih
+    if (newProgram !== OTHER) {
+      setProgramOther("");
+    }
+  };
+
+  const handleProgramOtherChange = (e) => {
+    // Hanya update state lokal, tidak memicu onDataChange
+    setProgramOther(e.target.value);
+  };
+
+  const handleProgramOtherBlur = () => {
+    // Baru kirim data ke parent saat user selesai mengetik
+    const dataToSync = {
+      section_id: selectedSection,
+      major_id: selectedMajor,
+      class_id: selectedClass,
+      program_id: selectedProgram === OTHER ? null : selectedProgram,
+      program_other: programOther,
+    };
+    onDataChange(dataToSync);
+  };
+
 
   const handleClassChange = (opt) => {
     const value = opt ? opt.value : "";
     setSelectedClass(value);
 
+    // Jika grade dikosongkan, major juga kosong
+    if (!value) {
+      setSelectedMajor("");
+      return;
+    }
+
+    // Logika untuk auto-select "No Major" di grade < 9
     const selectedClassData = classes.find((c) => c.class_id === value);
     if (selectedClassData) {
-      const gradeNum = parseInt(selectedClassData.grade);
-      // Middle School grade 9 ke atas (termasuk grade 9) akan menampilkan major
+      const gradeNum = parseInt(selectedClassData.grade, 10);
       if (gradeNum < 9) {
-        setSelectedMajor(1); // default ke No Major untuk ECP, Elementary, dan Middle School grade 7-8
+        const noMajor = majors.find((mjr) => mjr.name === "No Major");
+        setSelectedMajor(noMajor ? noMajor.major_id : "");
       } else {
-        setSelectedMajor(""); // Biarkan user pilih major untuk Middle School grade 9 dan High School
-      }
-    }
-
-    onDataChange({
-      section_id: selectedSection,
-      major_id: selectedMajor,
-      class_id: value,
-      program_id: selectedProgram === OTHER ? null : selectedProgram,
-      program_other: programOther,
-    });
-  };
-
-  const handleProgramChange = (opt) => {
-    const value = opt ? opt.value : "";
-
-    // deselect if clicking the same radio
-    if (selectedProgram === value) {
-      setSelectedProgram("");
-      setProgramOther("");
-      onDataChange({
-        section_id: selectedSection,
-        major_id: selectedMajor,
-        class_id: selectedClass,
-        program_id: "",
-        program_other: "",
-      });
-    } else {
-      setSelectedProgram(value);
-
-      if (value !== OTHER) {
-        setProgramOther("");
-        onDataChange({
-          section_id: selectedSection,
-          major_id: selectedMajor,
-          class_id: selectedClass,
-          program_id: value,
-          program_other: "",
-        });
-      } else {
-        onDataChange({
-          section_id: selectedSection,
-          major_id: selectedMajor,
-          class_id: selectedClass,
-          program_id: null,
-          program_other: programOther,
-        });
+        setSelectedMajor("");
       }
     }
   };
+
+  const handleMajorChange = (opt) => {
+    setSelectedMajor(opt ? opt.value : "");
+  };
+
+  // --- OPSI & LOGIKA TAMPILAN (TIDAK BERUBAH) ---
+  // Semua kode di bawah ini sudah benar dan tidak perlu diubah.
 
   const sectionOptions = sections.map((sec) => ({
     value: sec.section_id,
@@ -230,10 +161,8 @@ const ProgramSection = ({
     label: prog.name,
   }));
 
-  // Filter kelas berdasarkan section yang dipilih
   const gradeOptions = (() => {
     if (!selectedSection) return [];
-
     const selectedSectionData = sections.find(
       (sec) => sec.section_id === selectedSection
     );
@@ -242,53 +171,42 @@ const ProgramSection = ({
     const sectionName = selectedSectionData.name;
     let gradeRange = [];
 
-    // Tentukan range grade berdasarkan section
     if (sectionName === "ECP") {
-      // ECP: grade N, K1, K2 (class_id 1-3)
       gradeRange = classes.filter((cls) =>
         ["N", "K1", "K2"].includes(cls.grade)
       );
     } else if (sectionName === "Elementary School") {
-      // Elementary: grade 1-6 (class_id 4-9)
       gradeRange = classes.filter((cls) => {
-        const grade = parseInt(cls.grade);
+        const grade = parseInt(cls.grade, 10);
         return grade >= 1 && grade <= 6;
       });
     } else if (sectionName === "Middle School") {
-      // Middle School: grade 7-9 (class_id 10-12)
       gradeRange = classes.filter((cls) => {
-        const grade = parseInt(cls.grade);
+        const grade = parseInt(cls.grade, 10);
         return grade >= 7 && grade <= 9;
       });
     } else if (sectionName === "High School") {
-      // High School: grade 10-12 (class_id 13-15)
       gradeRange = classes.filter((cls) => {
-        const grade = parseInt(cls.grade);
+        const grade = parseInt(cls.grade, 10);
         return grade >= 10 && grade <= 12;
       });
     }
 
-    // Convert ke format yang dibutuhkan Select component
     return gradeRange
-      .map((cls) => ({
-        value: cls.class_id,
-        label: cls.grade,
-      }))
+      .map((cls) => ({ value: cls.class_id, label: cls.grade }))
       .sort((a, b) => {
-        // Sort berdasarkan urutan grade yang benar
         const gradeOrder = ["N", "K1", "K2"];
         const idxA = gradeOrder.indexOf(a.label);
         const idxB = gradeOrder.indexOf(b.label);
-
         if (idxA !== -1 || idxB !== -1) {
           return idxA - idxB;
         }
-        return parseInt(a.label) - parseInt(b.label);
+        return parseInt(a.label, 10) - parseInt(b.label, 10);
       });
   })();
 
   const majorSelectOptions = majors
-    .filter((mjr) => [2, 3].includes(mjr.major_id))
+    .filter((mjr) => mjr.name !== "No Major")
     .map((mjr) => ({
       value: mjr.major_id,
       label: mjr.name,
@@ -296,12 +214,10 @@ const ProgramSection = ({
 
   const showMajor = (() => {
     if (!selectedClass) return false;
-
     const selectedClassData = classes.find((c) => c.class_id === selectedClass);
     if (selectedClassData) {
-      const gradeNum = parseInt(selectedClassData.grade);
-      // Tampilkan major untuk Middle School grade 9 ke atas (termasuk grade 9)
-      return gradeNum >= 9;
+      const gradeNum = parseInt(selectedClassData.grade, 10);
+      return !isNaN(gradeNum) && gradeNum >= 9;
     }
     return false;
   })();
@@ -312,25 +228,16 @@ const ProgramSection = ({
         <span className={styles.headerTitle}>PROGRAM</span>
       </div>
       <div className={styles.contentWrapper}>
+        {/* --- BAGIAN SECTION & GRADE --- */}
         <div
           className={`${styles.programSection} ${
-            errors?.section_id || forceError?.section_id
-              ? styles.programSectionErrorWrapper
-              : ""
+            errors?.section_id ? styles.programSectionErrorWrapper : ""
           }`}
         >
-          <div
-            className={`${styles.sectionTitle} ${
-              errors?.section_id || forceError?.section_id
-                ? styles.programSectionErrorWrapper
-                : ""
-            }`}
-          >
+          <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                errors?.section_id || forceError?.section_id
-                  ? styles.programSectionErrorLabel
-                  : ""
+                errors?.section_id ? styles.programSectionErrorLabel : ""
               }`}
             >
               Section
@@ -340,27 +247,15 @@ const ProgramSection = ({
             <div key={option.value} className={styles.optionItem}>
               <label
                 className={styles.radioLabel}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  cursor: "pointer",
-                  position: "relative",
-                }}
+                onClick={(e) => handleSectionChange(e, option.value)}
               >
                 <input
                   type="radio"
                   name="section"
                   value={option.value}
                   checked={selectedSection === option.value}
-                  onChange={() => handleSectionChange({ value: option.value })}
-                  onClick={() => handleSectionChange({ value: option.value })}
-                  style={{
-                    opacity: 0,
-                    position: "absolute",
-                    width: 0,
-                    height: 0,
-                  }}
+                  readOnly
+                  className={styles.hiddenRadio}
                 />
                 <span className={styles.radioButton}>
                   <span className={styles.radioButtonCircle} />
@@ -368,53 +263,55 @@ const ProgramSection = ({
                     <span className={styles.radioButtonSelected} />
                   )}
                 </span>
-                <span
-                  className={`${styles.label} ${
-                    errors?.section_id || forceError?.section_id
-                  }`}
-                >
-                  {option.label}
-                </span>
+                <span className={styles.label}>{option.label}</span>
               </label>
             </div>
           ))}
 
-          <div className={styles.sectionTitle}>
+          <div className={styles.gradeField}>
             <div
               className={`${styles.sectionTitleText} ${
-                errors?.class_id || forceError?.class_id
-                  ? styles.programSectionErrorLabel
-                  : ""
+                errors?.class_id ? styles.programSectionErrorLabel : ""
               }`}
             >
               Grade
             </div>
+            <Select
+              id="grade"
+              options={gradeOptions}
+              placeholder="Select grade"
+              value={
+                selectedClass
+                  ? gradeOptions.find((opt) => opt.value === selectedClass)
+                  : null
+              }
+              onChange={handleClassChange}
+              isClearable
+              isDisabled={!selectedSection}
+              classNamePrefix={
+                errors?.class_id ? "react-select-error" : "react-select"
+              }
+              // Menambahkan styles agar transparan & tanpa border, sesuai style awal Anda
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  border: 0,
+                  boxShadow: "none",
+                  backgroundColor: "transparent",
+                  width: "150px", // Sesuaikan lebar jika perlu
+                }),
+              }}
+            />
           </div>
-          <Select
-            id="grade"
-            options={gradeOptions}
-            placeholder="Select grade"
-            value={
-              selectedClass
-                ? gradeOptions.find((opt) => opt.value === selectedClass)
-                : null
-            }
-            onChange={(opt) => handleClassChange(opt)}
-            isClearable
-          />
 
           {showMajor && (
-            <>
-              <div className={styles.sectionTitle}>
-                <div
-                  className={`${styles.sectionTitleText} ${
-                    errors?.major_id || forceError?.major_id
-                      ? styles.programSectionErrorLabel
-                      : ""
-                  }`}
-                >
-                  Major
-                </div>
+            <div className={styles.majorField}>
+              <div
+                className={`${styles.sectionTitleText} ${
+                  errors?.major_id ? styles.programSectionErrorLabel : ""
+                }`}
+              >
+                Major
               </div>
               <Select
                 id="major"
@@ -427,32 +324,37 @@ const ProgramSection = ({
                       )
                     : null
                 }
-                onChange={(opt) => handleMajorChange(opt)}
+                onChange={handleMajorChange}
                 isClearable
+                classNamePrefix={
+                  errors?.major_id ? "react-select-error" : "react-select"
+                }
+                // Menambahkan styles agar transparan & tanpa border
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    border: 0,
+                    boxShadow: "none",
+                    backgroundColor: "transparent",
+                    width: "200px", // Sesuaikan lebar jika perlu
+                    
+                  }),
+                }}
               />
-            </>
+            </div>
           )}
         </div>
 
+        {/* --- BAGIAN PROGRAM --- */}
         <div
           className={`${styles.programSection} ${
-            errors?.program_id || forceError?.program_id
-              ? styles.programSectionErrorWrapper
-              : ""
+            errors?.program_id ? styles.programSectionErrorWrapper : ""
           }`}
         >
-          <div
-            className={`${styles.sectionTitle} ${
-              errors?.program_id || forceError?.program_id
-                ? styles.programSectionErrorWrapper
-                : ""
-            }`}
-          >
+          <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                errors?.program_id || forceError?.program_id
-                  ? styles.programSectionErrorLabel
-                  : ""
+                errors?.program_id ? styles.programSectionErrorLabel : ""
               }`}
             >
               Program
@@ -462,27 +364,15 @@ const ProgramSection = ({
             <div key={option.value} className={styles.optionItem}>
               <label
                 className={styles.radioLabel}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  cursor: "pointer",
-                  position: "relative",
-                }}
+                onClick={(e) => handleProgramChange(e, option.value)}
               >
                 <input
                   type="radio"
                   name="program"
                   value={option.value}
                   checked={selectedProgram === option.value}
-                  onChange={() => handleProgramChange({ value: option.value })}
-                  onClick={() => handleProgramChange({ value: option.value })}
-                  style={{
-                    opacity: 0,
-                    position: "absolute",
-                    width: 0,
-                    height: 0,
-                  }}
+                  readOnly
+                  className={styles.hiddenRadio}
                 />
                 <span className={styles.radioButton}>
                   <span className={styles.radioButtonCircle} />
@@ -490,34 +380,25 @@ const ProgramSection = ({
                     <span className={styles.radioButtonSelected} />
                   )}
                 </span>
-                <span
-                  className={`${styles.label} ${
-                    errors?.program_id || forceError?.program_id
-                  }`}
-                >
-                  {option.label}
-                </span>
-                {option.label === "Other" &&
-                  selectedProgram === option.value && (
-                    <input
-                      className={styles.valueRegular}
-                      type="text"
-                      value={programOther}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setProgramOther(value);
-                        onDataChange({
-                          section_id: selectedSection,
-                          major_id: selectedMajor,
-                          class_id: selectedClass,
-                          program_id: null,
-                          program_other: value,
-                        });
-                      }}
-                      placeholder="Enter other program"
-                      style={{ marginLeft: 12, padding: 0 }}
-                    />
-                  )}
+                <span className={styles.label}>{option.label}</span>
+                {option.value === OTHER && selectedProgram === OTHER && (
+                  <input
+                    className={styles.valueRegular}
+                    type="text"
+                    value={programOther}
+                    onBlur={handleProgramOtherBlur} 
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={handleProgramOtherChange}
+                    placeholder="Enter other program"
+                    style={{
+                      marginLeft: 12,
+                      padding: 0,
+                      border: "none",
+                      background: "transparent",
+                      borderBottom: "1px solid #ccc",
+                    }}
+                  />
+                )}
               </label>
             </div>
           ))}
