@@ -15,7 +15,7 @@
   position: fixed;
   top: 0px;
   left: 0;
-  z-index: 100;
+  z-index: 300;
   background-color: white;
   height: calc(100vh - 76px);
   transition: transform 0.3s ease;
