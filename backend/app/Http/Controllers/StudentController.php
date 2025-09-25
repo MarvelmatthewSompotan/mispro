@@ -50,7 +50,7 @@ class StudentController extends Controller
         }
         
         $students= $query
-            ->orderBy('students.registration_date', 'desc')
+            ->orderBy('enrollments.registration_date', 'desc')
             ->get()
             ->unique(function ($item) {
                 return $item->nisn . '|' . $item->nik;
@@ -103,7 +103,7 @@ class StudentController extends Controller
             ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
                 $q->where('student_id', $student_id);
             })
-            ->orderByDesc('updated_at')
+            ->orderByDesc('version_id')
             ->first();
 
         if (!$latestVersion) {
@@ -233,7 +233,7 @@ class StudentController extends Controller
                 ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
                     $q->where('student_id', $student_id);
                 })
-                ->orderByDesc('version')
+                ->orderByDesc('version_id')
                 ->first();
 
             if (!$latestVersion) {

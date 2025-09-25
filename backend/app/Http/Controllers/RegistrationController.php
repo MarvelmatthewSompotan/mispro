@@ -266,7 +266,7 @@ class RegistrationController extends Controller
                 'date_of_birth' => 'required|date',
                 'email' => 'required|email',
                 'phone_number' => 'required|string',
-                'previous_school' => 'required|string',
+                'previous_school' => 'nullable|string',
                 'academic_status' => 'required|in:REGULAR,SIT-IN,OTHER',
                 'academic_status_other' => function ($attribute, $value, $fail) use ($request) {
                     if ($request->academic_status === 'OTHER' && empty($value)) {
@@ -276,7 +276,7 @@ class RegistrationController extends Controller
                 'gender' => 'required|in:MALE,FEMALE',
                 'family_rank' => 'required|string',
                 'age' => 'required|string',
-                'nisn' => 'required|string',
+                'nisn' => 'nullable|string',
                 'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
 
@@ -945,9 +945,8 @@ class RegistrationController extends Controller
             'action' => 'Registration'
         ];
         
-        $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment', function($query) use ($student) {
-            $query->where('student_id', $student->student_id);
-        })->max('version');
+        $maxVersion = ApplicationFormVersion::where('application_id', $applicationForm->application_id)
+            ->max('version');
         
         $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
         $userName = auth()->user()->name;

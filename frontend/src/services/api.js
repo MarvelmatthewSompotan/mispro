@@ -266,7 +266,7 @@ export const getRegistrations = async ({
 export const getStudentHistoryDates = async (studentId) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    `http://localhost:8000/api/students/${studentId}/history-dates`,
+    `${API_BASE_URL}/api/students/${studentId}/history-dates`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -283,14 +283,11 @@ export const getStudentHistoryDates = async (studentId) => {
 
 export const getHistoryDetail = async (versionId) => {
   const token = localStorage.getItem('token');
-  const res = await fetch(
-    `http://localhost:8000/api/students/history/${versionId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const res = await fetch(`${API_BASE_URL}/api/students/history/${versionId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!res.ok) {
     throw new Error('Failed to fetch history detail');

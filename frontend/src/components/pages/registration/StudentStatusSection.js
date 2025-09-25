@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   searchStudent,
   getStudentLatestApplication,
   getRegistrationOptions,
-} from "../../../services/api";
-import styles from "./StudentStatusSection.module.css";
+} from '../../../services/api';
+import styles from './StudentStatusSection.module.css';
 
 const StudentStatusSection = ({
   onSelectOldStudent,
@@ -14,9 +14,9 @@ const StudentStatusSection = ({
   forceError,
   onClearForm,
 }) => {
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState('');
   const [statusOptions, setStatusOptions] = useState([]);
-  const [studentSearch, setStudentSearch] = useState("");
+  const [studentSearch, setStudentSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -27,7 +27,7 @@ const StudentStatusSection = ({
     if (sharedData) {
       const opts = sharedData.student_status || [];
       // Ensure order: New, Transferee, Old
-      const ordered = ["New", "Transferee", "Old"].filter((o) =>
+      const ordered = ['New', 'Transferee', 'Old'].filter((o) =>
         opts.includes(o)
       );
       setStatusOptions(ordered);
@@ -36,25 +36,25 @@ const StudentStatusSection = ({
       getRegistrationOptions()
         .then((data) => {
           const opts = data.student_status || [];
-          const ordered = ["New", "Transferee", "Old"].filter((o) =>
+          const ordered = ['New', 'Transferee', 'Old'].filter((o) =>
             opts.includes(o)
           );
           setStatusOptions(ordered);
         })
         .catch((err) => {
-          console.error("Failed to fetch student status options:", err);
+          console.error('Failed to fetch student status options:', err);
         });
     }
   }, [sharedData]);
 
   const handleStatusChange = (option) => {
     setStatus(option);
-    setStudentSearch("");
+    setStudentSearch('');
     setSearchResults([]);
 
     // Jika user memilih "New" atau "Transferee" setelah mengisi data "Old",
     // panggil fungsi reset dari parent.
-    if ((option === "New" || option === "Transferee") && onClearForm) {
+    if ((option === 'New' || option === 'Transferee') && onClearForm) {
       onClearForm();
     }
 
@@ -62,7 +62,7 @@ const StudentStatusSection = ({
     if (onDataChange) {
       onDataChange({
         student_status: option,
-        input_name: "", // Reset input_name ketika status berubah
+        input_name: '', // Reset input_name ketika status berubah
       });
     }
   };
@@ -73,8 +73,8 @@ const StudentStatusSection = ({
     // Update input_name setiap kali user mengetik
     if (onDataChange) {
       onDataChange({
-        student_status: "Old",
-        input_name: "", // Update input_name dengan value yang diketik
+        student_status: 'Old',
+        input_name: '', // Update input_name dengan value yang diketik
       });
     }
 
@@ -85,7 +85,7 @@ const StudentStatusSection = ({
         setSearchResults(results);
         setShowDropdown(true);
       } catch (err) {
-        console.error("Error searching student:", err);
+        console.error('Error searching student:', err);
         setSearchResults([]);
         setShowDropdown(false);
       } finally {
@@ -106,7 +106,7 @@ const StudentStatusSection = ({
     try {
       const latestData = await getStudentLatestApplication(student.student_id);
       if (latestData.success && latestData.data) {
-        console.log("Received application data:", latestData.data); // Debug log
+        console.log('Received application data:', latestData.data); // Debug log
 
         // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
@@ -114,29 +114,29 @@ const StudentStatusSection = ({
         // Kirim input_name ke parent component
         if (onDataChange) {
           onDataChange({
-            student_status: "Old",
+            student_status: 'Old',
             input_name: student.student_id,
           });
         }
       } else {
         console.error(
-          "No application data found for student:",
+          'No application data found for student:',
           student.student_id
         );
         // Handle case ketika tidak ada data application
         if (onDataChange) {
           onDataChange({
-            student_status: "Old",
+            student_status: 'Old',
             input_name: student.student_id,
           });
         }
       }
     } catch (err) {
-      console.error("Error getting latest application:", err);
+      console.error('Error getting latest application:', err);
       // Handle error case
       if (onDataChange) {
         onDataChange({
-          student_status: "Old",
+          student_status: 'Old',
           input_name: student.student_id,
         });
       }
@@ -153,21 +153,21 @@ const StudentStatusSection = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
   // Calculate dropdown width based on content
   const getDropdownWidth = () => {
-    if (searchResults.length === 0) return "auto";
+    if (searchResults.length === 0) return 'auto';
 
     // Find the longest text to determine width
     const longestText = searchResults.reduce((longest, student) => {
       const text = `${student.full_name} (${student.student_id})`;
       return text.length > longest.length ? text : longest;
-    }, "");
+    }, '');
 
     // Estimate width based on character count (roughly 8px per character)
     const estimatedWidth = Math.max(longestText.length * 8, 300); // Minimum 300px
@@ -184,33 +184,33 @@ const StudentStatusSection = ({
           className={`${styles.statusOptions} ${
             errors?.student_status || forceError?.student_status
               ? styles.studentStatusErrorWrapper
-              : ""
+              : ''
           }`}
         >
           {statusOptions.map((option) => (
             <div
               key={option}
-              className={option === "Old" ? styles.optionOld : styles.optionNew}
+              className={option === 'Old' ? styles.optionOld : styles.optionNew}
             >
               <label
                 className={styles.radioLabel}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 8,
-                  cursor: "pointer",
-                  position: "relative",
+                  cursor: 'pointer',
+                  position: 'relative',
                 }}
               >
                 <input
-                  type="radio"
-                  name="studentStatus"
+                  type='radio'
+                  name='studentStatus'
                   value={option}
                   checked={status === option}
                   onChange={() => handleStatusChange(option)}
                   style={{
                     opacity: 0,
-                    position: "absolute",
+                    position: 'absolute',
                     width: 0,
                     height: 0,
                   }}
@@ -225,7 +225,7 @@ const StudentStatusSection = ({
                   className={`${styles.statusLabel} ${
                     errors?.student_status || forceError?.student_status
                       ? styles.studentStatusErrorLabel
-                      : ""
+                      : ''
                   }`}
                 >
                   {option}
@@ -233,35 +233,36 @@ const StudentStatusSection = ({
               </label>
 
               {/* Show unified search field with popup dropdown for Old student status */}
-              {option === "Old" && status === "Old" && (
+              {option === 'Old' && status === 'Old' && (
                 <div className={styles.studentIdField} ref={searchRef}>
-                  <label htmlFor="studentSearch" className={styles.statusLabel}>
+                  <label htmlFor='studentSearch' className={styles.statusLabel}>
                     Search Student
                   </label>
                   <div className={styles.searchContainer}>
                     <div className={styles.searchInputRow}>
                       <input
-                        id="studentSearch"
+                        id='studentSearch'
                         className={styles.studentIdValue}
-                        type="text"
+                        type='text'
+                        autoComplete='off'
                         value={studentSearch}
                         onChange={(e) => handleSearchChange(e.target.value)}
                         onFocus={() =>
                           searchResults.length > 0 && setShowDropdown(true)
                         }
-                        placeholder="Enter Name or ID"
+                        placeholder='Enter Name or ID'
                         style={{
-                          border: "none",
-                          outline: "none",
-                          background: "transparent",
-                          fontFamily: "Poppins, Arial, sans-serif",
-                          fontWeight: "bold",
+                          border: 'none',
+                          outline: 'none',
+                          background: 'transparent',
+                          fontFamily: 'Poppins, Arial, sans-serif',
+                          fontWeight: 'bold',
                           fontSize: 16,
                           padding: 3,
                           margin: 0,
-                          width: "auto",
+                          width: 'auto',
                           minWidth: 240,
-                          maxWidth: "100%",
+                          maxWidth: '100%',
                         }}
                       />
                       {isSearching && (
