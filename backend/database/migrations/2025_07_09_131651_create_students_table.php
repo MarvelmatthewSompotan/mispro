@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->string('student_id', 30)->primary();
-            $table->string('nisn', 10);
+            $table->string('nisn', 10)->nullable();
             $table->string('first_name', 50);
             $table->string('middle_name', 50)->nullable();
             $table->string('last_name', 50)->nullable();
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->enum('gender', ['MALE', 'FEMALE']);
             $table->string('phone_number', 20);
             $table->string('email', 100);
-            $table->string('previous_school', 100);
+            $table->string('previous_school', 100)->nullable();
             $table->string('religion', 30);
             $table->string('academic_status_other', 50)->nullable();
             $table->enum('enrollment_status', ['ACTIVE','TRANSFEREE','GRADUATE','UNREGISTER']);
