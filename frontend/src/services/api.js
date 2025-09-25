@@ -262,3 +262,37 @@ export const getRegistrations = async ({
 
   return await res.json();
 };
+
+// --- FUNGSI BARU UNTUK HISTORY ---
+export const getStudentHistoryDates = async (studentId) => {
+  const token = localStorage.getItem('token');
+  const res = await fetch(
+    `${API_BASE_URL}/api/students/${studentId}/history-dates`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch student history dates');
+  }
+
+  return await res.json();
+};
+
+export const getHistoryDetail = async (versionId) => {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE_URL}/api/students/history/${versionId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch history detail');
+  }
+
+  return await res.json();
+};
