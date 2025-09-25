@@ -1,42 +1,47 @@
+// src/components/layout/Main.js
+
 import React, { useState, useEffect } from "react";
-import HeaderBar from "../molecules/HeaderBar";
-import SidebarMenu from "../molecules/SidebarMenu";
-import styles from "./Main.module.css";
+import HeaderBar from "../molecules/HeaderBar"; // Sesuaikan path jika perlu
+import SidebarMenu from "../molecules/SidebarMenu"; // Sesuaikan path jika perlu
+import styles from "./Main.module.css"; // Pastikan nama file CSS sesuai
 
 const Main = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [theme, setTheme] = useState("light");
+  // State untuk sidebar sekarang terpusat di sini
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
 
-  const handleSidebarToggle = () => setSidebarOpen((open) => !open);
-  const handleToggleTheme = () =>
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  // Fungsi untuk toggle sidebar, akan dikirim ke HeaderBar
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
 
+  // Logika untuk mengatur sidebar berdasarkan ukuran layar
   useEffect(() => {
-    document.body.className = theme === "dark" ? "dark" : "";
-  }, [theme]);
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+    handleResize(); // Panggil sekali saat komponen dimuat
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
-    <div
-      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
-    >
-      <HeaderBar
-        onHamburgerClick={handleSidebarToggle}
-        onToggleTheme={handleToggleTheme}
-        theme={theme}
-      />
-      <div style={{ display: "flex", flex: 1 }}>
-        {/* Sidebar */}
-        {sidebarOpen && (
-          <div className={styles.sidebar}>
-            <SidebarMenu />
-          </div>
-        )}
-        {/* Main content */}
+    <div className={styles.layoutContainer}>
+      {/* HeaderBar menerima fungsi untuk toggle sidebar */}
+      <HeaderBar onHamburgerClick={handleSidebarToggle} />
+
+      <div className={styles.contentWrapper}>
+        {/* Sidebar menerima statusnya dari Main.js */}
+        <SidebarMenu isOpen={isSidebarOpen} />
+
+        {/* Konten utama mendapat class dinamis berdasarkan status sidebar */}
         <main
-          className={
-            styles.mainContent +
-            (!sidebarOpen ? ` ${styles.mainContentFull}` : "")
-          }
+          className={`${styles.mainContent} ${
+            isSidebarOpen ? styles.sidebarOpen : styles.sidebarClosed
+          }`}
         >
           {children}
         </main>
