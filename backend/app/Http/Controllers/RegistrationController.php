@@ -945,9 +945,8 @@ class RegistrationController extends Controller
             'action' => 'Registration'
         ];
         
-        $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment', function($query) use ($student) {
-            $query->where('student_id', $student->student_id);
-        })->max('version');
+        $maxVersion = ApplicationFormVersion::where('application_id', $applicationForm->application_id)
+            ->max('version');
         
         $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
         $userName = auth()->user()->name;
