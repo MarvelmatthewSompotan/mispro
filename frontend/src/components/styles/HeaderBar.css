@@ -13,6 +13,7 @@
   z-index: 2000;
   padding: 0 24px;
   box-sizing: border-box;
+  pointer-events: none;
 }
 .header-bar-left {
   display: flex;

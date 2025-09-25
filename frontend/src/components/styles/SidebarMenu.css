@@ -1,29 +1,38 @@
+/* --- Default Styles (Desktop First) --- */
 .sidebar-menu {
-  width: 220px;
+  width: 280px; /* Lebar awal */
   background: #f7f7fa;
   padding: 24px;
   min-height: 100vh;
   box-sizing: border-box;
   margin-top: 76px;
-  width: 280px;
-  
+  position: fixed; /* Memastikan sidebar tetap di tempat saat scrolling */
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease, transform 0.3s ease; /* Transisi halus untuk lebar dan transformasi */
+  z-index: 1000; /* Pastikan di atas konten lain */
+  border-right: 1px solid #e0e0e0;
 }
+
 .sidebar-menu-logo {
   display: flex;
   align-items: center;
   margin-bottom: 40px;
 }
+
 .sidebar-menu-title {
   font-weight: 700;
   font-size: 18px;
   color: #2d3a4a;
   line-height: 1.1;
 }
+
 .sidebar-menu-list {
   margin: 0;
   padding: 0;
   list-style: none;
 }
+
 .sidebar-menu-item {
   display: flex;
   align-items: center;
@@ -33,40 +42,153 @@
   color: #2d3a4a;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.3s ease, color 0.3s ease; /* Transisi lebih smooth */
   text-decoration: none;
   background: none;
   border: none;
+  overflow: hidden; /* Mencegah teks keluar saat sidebar menyusut */
+  white-space: nowrap; /* Menjaga teks dalam satu baris */
 }
+
 .sidebar-menu-item.active {
   background: #b6c6fa;
   color: #fff;
   font-weight: 700;
 }
-.sidebar-menu-item .sidebar-menu-icon {
+
+.sidebar-menu-item:hover {
+  background: #e8eeff;
+  color: #2d3a4a;
+}
+
+.sidebar-menu-icon {
   margin-right: 16px;
   font-size: 22px;
+  min-width: 24px; /* Lebar minimum untuk ikon */
+  transition: margin 0.3s ease;
 }
+
+.sidebar-menu-label {
+  transition: opacity 0.3s ease; /* Transisi untuk teks label */
+  opacity: 1;
+}
+
 .sidebar-menu-item .sidebar-menu-icon .atom-icon {
-  transition: filter 0.2s;
-  filter: none;
-  /* Icon default warna abu-abu tua */
-  filter: brightness(0) saturate(100%) invert(27%) sepia(0%) saturate(0%) hue-rotate(176deg) brightness(95%) contrast(90%);
+  transition: filter 0.3s ease;
+  filter: brightness(0) saturate(100%) invert(27%) sepia(0%) saturate(0%)
+    hue-rotate(176deg) brightness(95%) contrast(90%);
 }
+
 .sidebar-menu-item.active .sidebar-menu-icon .atom-icon {
   filter: brightness(0) invert(1);
 }
-.sidebar-menu-item:visited,
-.sidebar-menu-item:link {
-  color: #2d3a4a;
-  text-decoration: none;
+
+.sidebar-menu-toggle {
+  display: none; /* Sembunyikan di desktop */
 }
-.sidebar-menu-item.active:visited,
-.sidebar-menu-item.active:link {
-  color: #fff;
-  text-decoration: none;
+
+/* --- Tablet Styles (lebar 768px - 1024px) --- */
+@media (max-width: 1024px) {
+  .sidebar-menu {
+    width: 80px; /* Sidebar menyusut */
+    padding: 24px 16px;
+  }
+
+  .sidebar-menu-item {
+    justify-content: center; /* Ikon di tengah */
+    padding: 12px;
+  }
+
+  .sidebar-menu-label {
+    opacity: 0; /* Sembunyikan teks label */
+    width: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-menu-icon {
+    margin-right: 0; /* Hapus margin ikon */
+  }
 }
-.sidebar-menu-item:hover {
-  background: #E8EEFF;  
-  color: #2d3a4a;
-} 
+
+/* --- Mobile Styles (lebar < 768px) --- */
+@media (max-width: 768px) {
+  .sidebar-menu {
+    transform: translateX(-100%); /* Sembunyikan sidebar di luar layar */
+    width: 250px; /* Lebar saat terbuka di mobile */
+    margin-top: 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar-menu.open {
+    transform: translateX(0); /* Munculkan sidebar */
+  }
+
+  .sidebar-menu-item {
+    justify-content: flex-start; /* Kembalikan teks di sebelah ikon */
+    padding: 12px 24px;
+  }
+
+  .sidebar-menu-label {
+    opacity: 1; /* Tampilkan kembali label */
+    width: auto;
+  }
+
+  .sidebar-menu-icon {
+    margin-right: 16px; /* Kembalikan margin ikon */
+  }
+
+  /* --- Hamburger Button --- */
+  .sidebar-menu-toggle {
+    display: block;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001; /* Di atas sidebar */
+    background: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  }
+
+  .hamburger-icon {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #2d3a4a;
+    position: relative;
+    transition: background 0.3s ease;
+  }
+
+  .hamburger-icon::before,
+  .hamburger-icon::after {
+    content: "";
+    position: absolute;
+    width: 24px;
+    height: 2px;
+    background: #2d3a4a;
+    transition: transform 0.3s ease;
+  }
+
+  .hamburger-icon::before {
+    transform: translateY(-8px);
+  }
+
+  .hamburger-icon::after {
+    transform: translateY(8px);
+  }
+
+  /* Animasi hamburger menjadi 'X' saat menu terbuka */
+  .sidebar-menu.open + .sidebar-menu-toggle .hamburger-icon {
+    background: transparent;
+  }
+
+  .sidebar-menu.open + .sidebar-menu-toggle .hamburger-icon::before {
+    transform: rotate(45deg);
+  }
+
+  .sidebar-menu.open + .sidebar-menu-toggle .hamburger-icon::after {
+    transform: rotate(-45deg);
+  }
+}

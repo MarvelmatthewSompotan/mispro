@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
 import { getRegistrationOptions } from "../../../services/api";
-
 const genderOptions = ["MALE", "FEMALE"];
 const citizenshipOptions = ["Indonesia", "Non Indonesia"];
 
@@ -17,7 +16,6 @@ const StudentInformationSection = ({
   const [academicStatus, setAcademicStatus] = useState("");
   const [academicStatusOther, setAcademicStatusOther] = useState("");
   const [academicStatusError, setAcademicStatusError] = useState(false);
-
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(false);
   const [middleName, setMiddleName] = useState("");
@@ -67,8 +65,26 @@ const StudentInformationSection = ({
   const [otherAddress, setOtherAddress] = useState("");
   const [otherAddressError, setOtherAddressError] = useState(false);
 
-  const isInitialPrefill = useRef(true);
-  const hasInitialized = useRef(false);
+  const customSelectStyles = {
+    control: (baseStyles) => ({
+      ...baseStyles,
+      border: "none",
+      boxShadow: "none",
+      backgroundColor: "transparent",
+    }),
+    placeholder: (baseStyles) => ({
+      ...baseStyles,
+      fontFamily: "Poppins, Arial, sans-serif",
+      fontWeight: 400, // <-- 400 adalah font regular (tidak bold)
+      color: "rgba(128, 128, 128, 0.6)",
+    }),
+    singleValue: (baseStyles) => ({
+      ...baseStyles,
+      fontFamily: "Poppins, Arial, sans-serif",
+      fontWeight: "bold", // Teks yang sudah dipilih tetap bold
+      color: "#000",
+    }),
+  };
 
   useEffect(() => {
     getRegistrationOptions()
@@ -202,6 +218,34 @@ const StudentInformationSection = ({
       if (forceError.academic_status) setAcademicStatusError(true);
     }
   }, [forceError]);
+
+  const handleAcademicStatusChange = (opt) => {
+    const selectedValue = opt ? opt.value : "";
+    setAcademicStatus(selectedValue);
+    if (academicStatusError) {
+      setAcademicStatusError(false);
+    }
+
+    let dataToUpdate = { academic_status: selectedValue };
+
+    if (selectedValue !== "OTHER") {
+      setAcademicStatusOther(""); // Kosongkan text field 'other'
+      dataToUpdate.academic_status_other = "";
+    } else {
+      dataToUpdate.academic_status_other = academicStatusOther;
+    }
+    onDataChange(dataToUpdate);
+  };
+
+  // --- [BARU] Handler untuk input teks 'Other' ---
+  const handleAcademicStatusOtherChange = (e) => {
+    const value = e.target.value;
+    setAcademicStatusOther(value);
+    onDataChange({
+      academic_status: "OTHER",
+      academic_status_other: value,
+    });
+  };
 
   const validateNIK = (value) => {
     if (value && value.length !== 16) {
@@ -554,40 +598,10 @@ const StudentInformationSection = ({
                   value: opt,
                   label: opt,
                 }))}
+                styles={customSelectStyles}
                 placeholder="Select citizenship"
                 isClearable
                 className={citizenshipError ? styles.errorInput : ""}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    fontWeight: citizenship ? "bold" : "400",
-                    color: citizenshipError
-                      ? "#ff4444"
-                      : citizenship
-                      ? "#000"
-                      : "rgba(128,128,128,0.6)",
-                    border: "none",
-                    boxShadow: "none",
-                    borderRadius: 0,
-                    borderBottom: "none",
-                    background: "transparent",
-                  }),
-                  singleValue: (base) => ({
-                    ...base,
-                    fontWeight: citizenship ? "bold" : "400",
-                    color: citizenshipError
-                      ? "#ff4444"
-                      : citizenship
-                      ? "#000"
-                      : "rgba(128,128,128,0.6)",
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: citizenshipError
-                      ? "#ff4444"
-                      : "rgba(128,128,128,0.6)",
-                  }),
-                }}
               />
             </div>
             <div
@@ -843,35 +857,7 @@ const StudentInformationSection = ({
                   }
                 }}
                 isClearable
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    fontWeight: gender ? "bold" : "400",
-                    color: genderError
-                      ? "#ff4444"
-                      : gender
-                      ? "#000"
-                      : "rgba(128,128,128,0.6)",
-                    border: "none",
-                    boxShadow: "none",
-                    borderRadius: 0,
-                    borderBottom: "none",
-                    background: "transparent",
-                  }),
-                  singleValue: (base) => ({
-                    ...base,
-                    fontWeight: gender ? "bold" : "400",
-                    color: genderError
-                      ? "#ff4444"
-                      : gender
-                      ? "#000"
-                      : "rgba(128,128,128,0.6)",
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: genderError ? "#ff4444" : "rgba(128,128,128,0.6)",
-                  }),
-                }}
+                styles={customSelectStyles}
               />
             </div>
             <div
@@ -966,36 +952,19 @@ const StudentInformationSection = ({
                 )}
               </div>
             </div>
-            <div
-              className={`${styles.previousSchoolField} ${
-                previousSchoolError ? styles.errorFieldWrapper : ""
-              }`}
-            >
-              <label
-                className={`${styles.label} ${
-                  previousSchoolError ? styles.errorLabel : ""
-                }`}
-                htmlFor="previousSchool"
-              >
+            <div className={styles.previousSchoolField}>
+              <label className={styles.label} htmlFor="previousSchool">
                 Previous school
               </label>
               <input
                 id="previousSchool"
                 className={`${styles.valueHighlight} ${
                   previousSchool ? "hasValue" : ""
-                } ${previousSchoolError ? styles.errorInput : ""}`}
+                }`}
                 type="text"
                 value={previousSchool}
                 onChange={(e) => {
                   handlePreviousSchool(e.target.value);
-                  if (previousSchoolError && e.target.value.trim()) {
-                    setPreviousSchoolError(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (previousSchoolError) {
-                    setPreviousSchoolError(false);
-                  }
                 }}
                 placeholder="Previous School"
               />
@@ -1044,6 +1013,7 @@ const StudentInformationSection = ({
                 )}
               </div>
             </div>
+            {/* GANTI BLOK JSX UNTUK ACADEMIC STATUS DENGAN INI */}
             <div
               className={`${styles.academicStatusField} ${
                 academicStatusError ? styles.errorFieldWrapper : ""
@@ -1057,110 +1027,38 @@ const StudentInformationSection = ({
               >
                 Academic status
               </label>
-              <div className={styles.academicStatusOptions}>
-                <div className={styles.academicStatusOption}>
-                  <Select
-                    id="academicStatus"
-                    options={academicStatusOptions.map((opt) => ({
-                      value: opt,
-                      label: opt,
-                    }))}
-                    placeholder="Select status"
-                    value={
-                      academicStatus
-                        ? { value: academicStatus, label: academicStatus }
-                        : null
-                    }
-                    onChange={(opt) => {
-                      const selectedValue = opt ? opt.value : "";
-                      if (selectedValue === "OTHER") {
-                        setAcademicStatus("OTHER");
-                        onDataChange({
-                          academic_status: "OTHER",
-                          academic_status_other: academicStatusOther,
-                        });
-                      } else {
-                        setAcademicStatus(selectedValue);
-                        setAcademicStatusOther("");
-                        onDataChange({
-                          academic_status: selectedValue,
-                          academic_status_other: "",
-                        });
-                      }
-                      if (academicStatusError) {
-                        setAcademicStatusError(false);
-                      }
-                    }}
-                    isClearable
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        fontWeight: academicStatus ? "bold" : "400",
-                        color: academicStatus
-                          ? "#000"
-                          : "rgba(128,128,128,0.6)",
-                        border: "none",
-                        boxShadow: "none",
-                        borderRadius: 0,
-                        borderBottom: "none",
-                        background: "transparent",
-                      }),
-                      singleValue: (base) => ({
-                        ...base,
-                        fontWeight: academicStatus ? "bold" : "400",
-                        color: academicStatus
-                          ? "#000"
-                          : "rgba(128,128,128,0.6)",
-                      }),
-                      placeholder: (base) => ({
-                        ...base,
-                        color: "rgba(128,128,128,0.6)",
-                      }),
-                    }}
+
+              <div className={styles.academicStatusWrapper}>
+                <Select
+                  id="academicStatus"
+                  options={academicStatusOptions.map((opt) => ({
+                    value: opt,
+                    label: opt,
+                  }))}
+                  styles={customSelectStyles}
+                  placeholder="Select status"
+                  value={
+                    academicStatus
+                      ? { value: academicStatus, label: academicStatus }
+                      : null
+                  }
+                  onChange={handleAcademicStatusChange}
+                  isClearable
+                  classNamePrefix={
+                    academicStatusError ? "react-select-error" : "react-select"
+                  }
+                />
+
+                {/* Input 'Other' akan muncul di sebelah kanan jika kondisi terpenuhi */}
+                {academicStatus === "OTHER" && (
+                  <input
+                    className={styles.otherInput}
+                    type="text"
+                    value={academicStatusOther}
+                    onChange={handleAcademicStatusOtherChange}
+                    placeholder="Please specify"
                   />
-                </div>
-                <div className={styles.academicStatusOption}>
-                  <label className={styles.otherLabel}>
-                    <input
-                      type="radio"
-                      name="academicStatusType"
-                      value="OTHER"
-                      checked={academicStatus === "OTHER"}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setAcademicStatus("OTHER");
-                          onDataChange({
-                            academic_status: "OTHER",
-                            academic_status_other: academicStatusOther,
-                          });
-                        }
-                        if (academicStatusError) {
-                          setAcademicStatusError(false);
-                        }
-                      }}
-                      className={styles.hiddenRadio}
-                    />
-                    <span className={styles.otherText}>Other</span>
-                    {academicStatus === "OTHER" && (
-                      <div className={styles.otherInputWrapper}>
-                        <input
-                          className={styles.otherInput}
-                          type="text"
-                          value={academicStatusOther}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setAcademicStatusOther(value);
-                            onDataChange({
-                              academic_status: "OTHER",
-                              academic_status_other: value,
-                            });
-                          }}
-                          placeholder="Enter academic status"
-                        />
-                      </div>
-                    )}
-                  </label>
-                </div>
+                )}
               </div>
             </div>
           </div>

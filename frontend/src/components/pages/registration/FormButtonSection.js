@@ -108,10 +108,6 @@ const FormButtonSection = ({
       errors.studentInfo = { ...errors.studentInfo, phone_number: true };
     }
 
-    if (!allFormData.studentInfo || !allFormData.studentInfo.previous_school) {
-      errors.studentInfo = { ...errors.studentInfo, previous_school: true };
-    }
-
     // Tambahkan kembali validasi academic status (required)
     if (!allFormData.studentInfo || !allFormData.studentInfo.academic_status) {
       errors.studentInfo = { ...errors.studentInfo, academic_status: true };
@@ -175,7 +171,7 @@ const FormButtonSection = ({
 
     if (
       !allFormData.facilities ||
-      !allFormData.facilities.transportation_policy
+      allFormData.facilities.transportation_policy !== "Signed"
     ) {
       errors.facilities = { ...errors.facilities, transportation_policy: true };
     }

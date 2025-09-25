@@ -1,11 +1,19 @@
 // File: src/components/pages/StudentProfile.js (Versi Final & Lengkap)
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { useParams } from "react-router-dom";
 import {
   getStudentLatestApplication,
   getRegistrationOptions,
   updateStudent,
+  getStudentHistoryDates,
+  getHistoryDetail,
 } from "../../../../services/api";
 import Select from "react-select";
 import styles from "./StudentProfile.module.css";
@@ -105,11 +113,15 @@ const StudentProfile = () => {
   const [academicStatusOptions, setAcademicStatusOptions] = useState([]);
   const [genderOptions, setGenderOptions] = useState([]);
   const [scrollTrigger, setScrollTrigger] = useState(0);
-
+  const [historyDates, setHistoryDates] = useState([]);
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const [selectedVersionId, setSelectedVersionId] = useState(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const citizenshipOptions = [
     { value: "Indonesia", label: "Indonesia" },
     { value: "Non Indonesia", label: "Non Indonesia" },
   ];
+  const historyRef = useRef(null);
 
   const [validationMessages, setValidationMessages] = useState({
     nik: "",
@@ -163,6 +175,152 @@ const StudentProfile = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // --- [BARU] Handler untuk mengambil dan menampilkan history ---
+  const handleViewHistoryClick = async () => {
+    // Jika sedang dalam mode view history, tombol ini akan kembali ke data terbaru
+    if (selectedVersionId) {
+      setSelectedVersionId(null);
+      setIsHistoryVisible(false);
+      setFormData(profileData); // Reset ke data terbaru yang sudah disimpan
+      setStudentInfo(profileData);
+      return;
+    }
+
+    // Toggle tampilan dropdown
+    setIsHistoryVisible(!isHistoryVisible);
+
+    // Jika dropdown dibuka dan data history belum ada, fetch data
+    if (!isHistoryVisible && historyDates.length === 0) {
+      setIsLoadingHistory(true);
+      try {
+        const dates = await getStudentHistoryDates(studentId);
+        setHistoryDates(dates);
+      } catch (error) {
+        console.error("Failed to fetch history dates:", error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    }
+  };
+
+  // --- [BARU] Handler saat memilih tanggal dari dropdown history ---
+  const handleHistoryDateChange = async (versionId) => {
+    if (!versionId) {
+      setSelectedVersionId(null);
+      setFormData(profileData);
+      setStudentInfo(profileData);
+      setIsHistoryVisible(false);
+      return;
+    }
+
+    setSelectedVersionId(versionId);
+    setLoading(true); // Tampilkan loading global
+    try {
+      const historyDetail = await getHistoryDetail(versionId);
+      if (historyDetail.success) {
+        const snapshotData = historyDetail.data_snapshot.request_data;
+
+        // Re-construct studentInfo dari snapshot
+        const studentInfoSnapshot = {
+          first_name: snapshotData.first_name,
+          middle_name: snapshotData.middle_name,
+          last_name: snapshotData.last_name,
+          nickname: snapshotData.nickname,
+          citizenship: snapshotData.citizenship,
+          country: snapshotData.country,
+          religion: snapshotData.religion,
+          place_of_birth: snapshotData.place_of_birth,
+          date_of_birth: snapshotData.date_of_birth,
+          email: snapshotData.email,
+          phone_number: snapshotData.phone_number,
+          previous_school: snapshotData.previous_school,
+          academic_status: snapshotData.academic_status,
+          academic_status_other: snapshotData.academic_status_other,
+          gender: snapshotData.gender,
+          family_rank: snapshotData.family_rank,
+          nisn: snapshotData.nisn,
+          nik: snapshotData.nik,
+          kitas: snapshotData.kitas,
+          street: snapshotData.street,
+          rt: snapshotData.rt,
+          rw: snapshotData.rw,
+          village: snapshotData.village,
+          district: snapshotData.district,
+          city_regency: snapshotData.city_regency,
+          province: snapshotData.province,
+          other: snapshotData.other,
+        };
+
+        // Re-construct formData dari snapshot
+        const combinedData = {
+          student_id: historyDetail.student_id,
+          ...studentInfoSnapshot, // studentInfo fields
+          section_id: snapshotData.section_id,
+          program_id: snapshotData.program_id, // program fields
+          class_id: snapshotData.class_id,
+          major_id: snapshotData.major_id,
+          program_other: snapshotData.program_other,
+          transportation_id: snapshotData.transportation_id,
+          pickup_point_id: snapshotData.pickup_point_id, // facilities fields
+          pickup_point_custom: snapshotData.pickup_point_custom,
+          transportation_policy: snapshotData.transportation_policy,
+          residence_id: snapshotData.residence_id,
+          residence_hall_policy: snapshotData.residence_hall_policy,
+          father_name: snapshotData.father_name,
+          mother_name: snapshotData.mother_name, // parent/guardian fields
+          father_company: snapshotData.father_company,
+          father_occupation: snapshotData.father_occupation,
+          father_phone: snapshotData.father_phone,
+          father_email: snapshotData.father_email,
+          father_address_street: snapshotData.father_address_street,
+          father_address_rt: snapshotData.father_address_rt,
+          father_address_rw: snapshotData.father_address_rw,
+          father_address_village: snapshotData.father_address_village,
+          father_address_district: snapshotData.father_address_district,
+          father_address_city_regency: snapshotData.father_address_city_regency,
+          father_address_province: snapshotData.father_address_province,
+          father_address_other: snapshotData.father_address_other,
+          mother_phone: snapshotData.mother_phone,
+          mother_email: snapshotData.mother_email,
+          mother_address_street: snapshotData.mother_address_street,
+          mother_address_rt: snapshotData.mother_address_rt,
+          mother_address_rw: snapshotData.mother_address_rw,
+          mother_address_village: snapshotData.mother_address_village,
+          mother_address_district: snapshotData.mother_address_district,
+          mother_address_city_regency: snapshotData.mother_address_city_regency,
+          mother_address_province: snapshotData.mother_address_province,
+          mother_address_other: snapshotData.mother_address_other,
+          guardian_name: snapshotData.guardian_name,
+          relation_to_student: snapshotData.relation_to_student,
+          guardian_phone: snapshotData.guardian_phone,
+          guardian_email: snapshotData.guardian_email,
+          guardian_address_street: snapshotData.guardian_address_street,
+          guardian_address_rt: snapshotData.guardian_address_rt,
+          guardian_address_rw: snapshotData.guardian_address_rw,
+          guardian_address_village: snapshotData.guardian_address_village,
+          guardian_address_district: snapshotData.guardian_address_district,
+          guardian_address_city_regency:
+            snapshotData.guardian_address_city_regency,
+          guardian_address_province: snapshotData.guardian_address_province,
+          guardian_address_other: snapshotData.guardian_address_other,
+          tuition_fees: snapshotData.tuition_fees,
+          residence_payment: snapshotData.residence_payment, // payment fields
+          financial_policy_contract: snapshotData.financial_policy_contract,
+          discount_name: snapshotData.discount_name,
+          discount_notes: snapshotData.discount_notes,
+        };
+
+        setStudentInfo(studentInfoSnapshot);
+        setFormData(combinedData);
+        setIsHistoryVisible(false);
+      }
+    } catch (error) {
+      console.error("Failed to fetch history detail:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const clearError = (section, fieldName) => {
     if (errors[section] && errors[section][fieldName]) {
@@ -234,6 +392,7 @@ const StudentProfile = () => {
   };
 
   const handleChange = (e) => {
+    // eslint-disable-next-line
     const { name, value, type, checked } = e.target;
 
     const studentInfoFields = [
@@ -580,6 +739,7 @@ const StudentProfile = () => {
         }
       }
     }
+    // eslint-disable-next-line
   }, [scrollTrigger]);
 
   const handleSaveClick = () => {
@@ -618,7 +778,7 @@ const StudentProfile = () => {
     const item = options[type]?.find((i) => String(i[keyName]) === String(id));
     return item?.name || item?.grade || item?.type || id;
   };
-
+  // eslint-disable-next-line
   const filteredGrades = useMemo(() => {
     if (!isEditing || !options?.classes || !formData?.section_id) return [];
     const selectedSection = options.sections?.find(
@@ -707,7 +867,43 @@ const StudentProfile = () => {
   return (
     <div className={styles.profilePage}>
       <div className={styles.topActionHeader}>
-        <button className={styles.actionButton}>View version history</button>
+        <div className={styles.historyContainer} ref={historyRef}>
+          <button
+            className={styles.actionButton}
+            onClick={handleViewHistoryClick}
+            disabled={isEditing}
+          >
+            {selectedVersionId
+              ? "Back to Latest Version"
+              : "View version history"}
+          </button>
+          {isHistoryVisible && (
+            <ul className={styles.historyDropdown}>
+              {isLoadingHistory ? (
+                <li className={styles.historyInfoItem}>Loading...</li>
+              ) : historyDates.length > 0 ? (
+                historyDates.map((version) => (
+                  <li
+                    key={version.version_id}
+                    className={styles.historyItem}
+                    onClick={() => handleHistoryDateChange(version.version_id)}
+                  >
+                    {new Date(version.updated_at).toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </li>
+                ))
+              ) : (
+                <li className={styles.historyInfoItem}>No history found.</li>
+              )}
+            </ul>
+          )}
+        </div>
+
         {isEditing ? (
           <>
             <button
@@ -751,7 +947,7 @@ const StudentProfile = () => {
         <div className={styles.infoContainer}>
           {/* STUDENT'S INFORMATION */}
           <div id="studentInfo" className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>STUDENT’S INFORMATION</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1254,7 +1450,9 @@ const StudentProfile = () => {
                       value={studentInfo.family_rank || ""}
                       onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
-                        errors.studentInfo?.family_rank ? styles.errorInput : ""
+                        errors.studentInfo?.family_rank
+                          ? styles.errorInput
+                          : ""
                       }`}
                       placeholder={errors.studentInfo?.family_rank || "Rank"}
                     />
@@ -1688,7 +1886,7 @@ const StudentProfile = () => {
 
           {/* PROGRAM */}
           <div className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>PROGRAM</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1748,7 +1946,7 @@ const StudentProfile = () => {
 
           {/* FACILITIES */}
           <div id="facilities" className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>FACILITIES</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1911,7 +2109,7 @@ const StudentProfile = () => {
 
           {/* PARENT / GUARDIAN INFORMATION */}
           <div id="parentGuardian" className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>PARENT / GUARDIAN INFORMATION</b>
             </div>
             <div className={styles.sectionContent}>
@@ -2811,7 +3009,6 @@ const StudentProfile = () => {
                       value={formData.mother_address_other || ""}
                       onChange={handleChange}
                       className={styles.formInput}
-                      placeholder="Other address details"
                     />
                   ) : (
                     <div
@@ -3040,7 +3237,7 @@ const StudentProfile = () => {
 
           {/* TERM OF PAYMENT */}
           <div className={styles.infoSection}>
-            <div className={styles.sectionHeader}>
+            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
               <b>TERM OF PAYMENT</b>
             </div>
             <div className={styles.paymentContentWrapper}>
