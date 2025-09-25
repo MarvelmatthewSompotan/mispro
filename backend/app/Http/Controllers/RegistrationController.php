@@ -266,7 +266,7 @@ class RegistrationController extends Controller
                 'date_of_birth' => 'required|date',
                 'email' => 'required|email',
                 'phone_number' => 'required|string',
-                'previous_school' => 'required|string',
+                'previous_school' => 'nullable|string',
                 'academic_status' => 'required|in:REGULAR,SIT-IN,OTHER',
                 'academic_status_other' => function ($attribute, $value, $fail) use ($request) {
                     if ($request->academic_status === 'OTHER' && empty($value)) {
@@ -276,7 +276,7 @@ class RegistrationController extends Controller
                 'gender' => 'required|in:MALE,FEMALE',
                 'family_rank' => 'required|string',
                 'age' => 'required|string',
-                'nisn' => 'required|string',
+                'nisn' => 'nullable|string',
                 'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
 
