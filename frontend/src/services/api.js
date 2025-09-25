@@ -10,7 +10,6 @@ export const login = async (email, password) => {
   });
 
   if (!res.ok) {
-    console.error('Login API error:', res.status, data);
     throw new Error('Login gagal');
   }
 
