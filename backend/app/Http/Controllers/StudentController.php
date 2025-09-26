@@ -438,6 +438,7 @@ class StudentController extends Controller
                 'application_id' => $latestVersion->application_id,
                 'version' => $nextVersion,
                 'updated_by' => $userName,
+                'action' => 'update',
                 'data_snapshot' => json_encode($newSnapshot, JSON_PRETTY_PRINT),
             ]);
 

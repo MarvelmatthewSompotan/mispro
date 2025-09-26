@@ -34,14 +34,15 @@ class RegistrationController extends Controller
     public function index(Request $request)
     {
         $query = Enrollment::with(['student', 'section', 'schoolYear', 'semester', 'applicationForm'])
-            ->select('enrollments.*') // ambil semua kolom enrollment
+            ->select('enrollments.*')
             ->selectRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name")
-            ->addSelect('application_form_versions.version_id') 
+            ->addSelect('application_form_versions.version_id')
             ->join('students', 'students.student_id', '=', 'enrollments.student_id')
             ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
             ->leftJoin('application_form_versions', function($join) {
+                // Ubah baris ini untuk menggunakan kolom 'action' yang baru
                 $join->on('application_form_versions.application_id', '=', 'application_forms.application_id')
-                     ->where('application_form_versions.data_snapshot->action', '=', 'registration');
+                     ->where('application_form_versions.action', '=', 'registration');
             })
             ->addSelect('application_form_versions.version_id as registration_version_id');
 
@@ -175,7 +176,6 @@ class RegistrationController extends Controller
         $number = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         return "{$prefix}{$number}"; 
     }
-
 
     private function getSectionRegistrationNumber($section_id, $registration_date)
     {
@@ -942,7 +942,7 @@ class RegistrationController extends Controller
             'school_year' => $enrollment->schoolYear->year, 
             'request_data' => $validated,
             'timestamp' => now(),
-            'action' => 'Registration'
+            'action' => 'registration'
         ];
         
         $maxVersion = ApplicationFormVersion::where('application_id', $applicationForm->application_id)
@@ -955,6 +955,7 @@ class RegistrationController extends Controller
             'application_id' => $applicationForm->application_id,
             'version' => $nextVersion,
             'updated_by' => $userName,
+            'action' => 'registration',
             'data_snapshot' => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
         ]);
     }
