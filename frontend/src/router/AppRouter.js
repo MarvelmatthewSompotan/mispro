@@ -1,5 +1,9 @@
+// src/router/AppRouter.js
+
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+
+// Import komponen halaman
 import LoginPage from "../components/pages/LoginPage";
 import Home from "../components/pages/Home";
 import StudentList from "../components/pages/student_list/StudentList";
@@ -11,66 +15,93 @@ import Print from "../components/pages/Print";
 import MainLayout from "../components/layout/Main";
 import StudentProfile from "../components/pages/student_list/StudentProfile/StudentProfile.js";
 
+// Import komponen penjaga rute
+import ProtectedRoute from "./ProtectedRoute";
+
 const AppRouter = () => (
   <Routes>
-    {/* Public routes */}
+    {/* Rute Publik: HANYA halaman login yang bisa diakses tanpa token */}
     <Route path="/login" element={<LoginPage />} />
 
-    {/* Protected routes with MainLayout */}
+    {/* Rute Terproteksi: SEMUA halaman di bawah ini HARUS punya token untuk diakses */}
     <Route
       path="/home"
       element={
-        <MainLayout>
-          <Home />
-        </MainLayout>
+        <ProtectedRoute>
+          <MainLayout>
+            <Home />
+          </MainLayout>
+        </ProtectedRoute>
       }
     />
     <Route
       path="/students"
       element={
-        <MainLayout>
-          <StudentList />
-        </MainLayout>
+        <ProtectedRoute>
+          <MainLayout>
+            <StudentList />
+          </MainLayout>
+        </ProtectedRoute>
       }
     />
-
     <Route
       path="/students/:studentId"
       element={
-        <MainLayout>
-          <StudentProfile />
-        </MainLayout>
+        <ProtectedRoute>
+          <MainLayout>
+            <StudentProfile />
+          </MainLayout>
+        </ProtectedRoute>
       }
     />
-
     <Route
       path="/teachers"
       element={
-        <MainLayout>
-          <TeacherList />
-        </MainLayout>
+        <ProtectedRoute>
+          <MainLayout>
+            <TeacherList />
+          </MainLayout>
+        </ProtectedRoute>
       }
     />
     <Route
       path="/homerooms"
       element={
-        <MainLayout>
-          <HomeroomList />
-        </MainLayout>
+        <ProtectedRoute>
+          <MainLayout>
+            <HomeroomList />
+          </MainLayout>
+        </ProtectedRoute>
       }
     />
     <Route
       path="/registration"
       element={
-        <MainLayout>
-          <Registration />
-        </MainLayout>
+        <ProtectedRoute>
+          <MainLayout>
+            <Registration />
+          </MainLayout>
+        </ProtectedRoute>
       }
     />
-    <Route path="/registration-form" element={<RegistrationPage />} />
-    <Route path="/print" element={<Print />} />
+    <Route
+      path="/registration-form"
+      element={
+        <ProtectedRoute>
+          <RegistrationPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/print"
+      element={
+        <ProtectedRoute>
+          <Print />
+        </ProtectedRoute>
+      }
+    />
 
-    {/* Default redirects */}
+    {/* Pengalihan Default */}
     <Route path="/" element={<Navigate to="/login" replace />} />
     <Route path="*" element={<Navigate to="/login" replace />} />
   </Routes>
