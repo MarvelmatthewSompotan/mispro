@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from '../atoms/Button';
-import PopUpForm from './PopUpForm';
-import styles from '../styles/Registration.module.css';
-import searchIcon from '../../assets/Search-icon.png';
-import { getRegistrations, getRegistrationOptions } from '../../services/api';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Button from "../atoms/Button";
+import PopUpForm from "./PopUpForm";
+import styles from "../styles/Registration.module.css";
+import searchIcon from "../../assets/Search-icon.png";
+import { getRegistrations, getRegistrationOptions } from "../../services/api";
 
 const Registration = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ const Registration = () => {
   // State data API
   const [registrationData, setRegistrationData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   // Options dari backend
   const [sections, setSections] = useState([]);
@@ -35,7 +35,7 @@ const Registration = () => {
         setSchoolYears(opts.school_years || []);
         setSemesters(opts.semesters || []);
       } catch (err) {
-        console.error('Error fetching registration options:', err);
+        console.error("Error fetching registration options:", err);
       }
     };
     fetchOptions();
@@ -49,7 +49,7 @@ const Registration = () => {
       // backend return { data: { data: [...] } }
       setRegistrationData(res.data.data || []);
     } catch (err) {
-      console.error('Error fetching registrations:', err);
+      console.error("Error fetching registrations:", err);
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,12 @@ const Registration = () => {
   const handleClosePopup = () => setShowPopupForm(false);
 
   const handleCreateForm = (formData) => {
-    navigate('/registration-form', { state: formData });
+    navigate("/registration-form", {
+      state: {
+        ...formData,
+        fromPopup: true, 
+      },
+    });
     setShowPopupForm(false);
   };
 
@@ -90,7 +95,7 @@ const Registration = () => {
   const handleRowClick = (row) => {
     const applicationId = row.application_form?.application_id || null;
     const version = row.version_id ?? null;
-    navigate('/print', {
+    navigate("/print", {
       state: { applicationId, version },
     });
   };
@@ -107,13 +112,13 @@ const Registration = () => {
       {/* Search Bar */}
       <div className={styles.searchBar}>
         <input
-          type='text'
-          placeholder='Find name or student id'
+          type="text"
+          placeholder="Find name or student id"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={styles.searchInput}
         />
-        <img src={searchIcon} alt='Search' className={styles.searchIconImg} />
+        <img src={searchIcon} alt="Search" className={styles.searchIconImg} />
       </div>
 
       {/* Filters */}
@@ -127,7 +132,7 @@ const Registration = () => {
               className={styles.filterCheckboxLabel}
             >
               <input
-                type='checkbox'
+                type="checkbox"
                 checked={selectedSections.includes(section.section_id)}
                 onChange={() => handleSectionToggle(section.section_id)}
               />
@@ -138,11 +143,11 @@ const Registration = () => {
 
           {/* School Year */}
           <select
-            value={selectedYear || ''}
+            value={selectedYear || ""}
             onChange={(e) => setSelectedYear(e.target.value || null)}
             className={styles.yearSelect}
           >
-            <option value=''>Select School Year</option>
+            <option value="">Select School Year</option>
             {schoolYears.map((y) => (
               <option key={y.school_year_id} value={y.school_year_id}>
                 {y.year}
@@ -152,11 +157,11 @@ const Registration = () => {
 
           {/* Semester */}
           <select
-            value={selectedSemester || ''}
+            value={selectedSemester || ""}
             onChange={(e) => setSelectedSemester(e.target.value || null)}
             className={styles.semesterSelect}
           >
-            <option value=''>Select Semester</option>
+            <option value="">Select Semester</option>
             {semesters.map((s) => (
               <option key={s.semester_id} value={s.semester_id}>
                 {s.name}
@@ -168,7 +173,7 @@ const Registration = () => {
 
       {/* Results Info */}
       <div className={styles.resultsInfo}>
-        Showing {loading ? '...' : registrationData.length} results
+        Showing {loading ? "..." : registrationData.length} results
       </div>
 
       {/* Table */}
@@ -189,15 +194,15 @@ const Registration = () => {
                   key={idx}
                   className={styles.tableRow}
                   onClick={() => handleRowClick(row)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 >
                   <td className={styles.tableCell}>
                     {new Date(row.registration_date).toLocaleDateString(
-                      'id-ID',
+                      "id-ID",
                       {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
                       }
                     )}
                   </td>
@@ -208,8 +213,8 @@ const Registration = () => {
               ))
             ) : (
               <tr>
-                <td colSpan='4' className={styles.tableCell}>
-                  {loading ? 'Loading...' : 'No data available'}
+                <td colSpan="4" className={styles.tableCell}>
+                  {loading ? "Loading..." : "No data available"}
                 </td>
               </tr>
             )}

@@ -166,7 +166,11 @@ const StudentList = () => {
                   <tr
                     key={student.student_id}
                     className={styles.tableRow}
-                    onClick={() => navigate(`/students/${student.student_id}`)}
+                    onClick={() =>
+                      navigate(`/students/${student.student_id}`, {
+                        state: { fromList: true },
+                      })
+                    }
                     style={{ cursor: "pointer" }}
                   >
                     <td className={styles.tableCell}>{student.student_id}</td>

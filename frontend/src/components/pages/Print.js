@@ -1,27 +1,27 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import styles from '../styles/Print.module.css';
-import kop from '../../assets/LogoMIS_Print.png';
-import footer from '../../assets/Footer.png';
-import StudentsInformationContent from '../Print_Content/StudentsInformation_Content/StudentsInformation_Content';
-import ProgramContent from '../Print_Content/Program_Content/Program_Content';
-import FacilitiesContent from '../Print_Content/Facilities_Content/Facilities_Content';
-import ParentsGuardianInformationContent from '../Print_Content/ParentsGuardianInformation_Content/ParentsGuardianInformation_Content';
-import TermofPaymentContent from '../Print_Content/TermofPayment_Content/TermofPayment_Content';
-import PledgeContent from '../Print_Content/Pledge_Content/Pledge_Content';
-import SignatureContent from '../Print_Content/Signature_Content/Signature_Content';
-import OtherDetailContent from '../Print_Content/OtherDetail_Content/OtherDetail_Content';
+import React, { useRef, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import styles from "../styles/Print.module.css";
+import kop from "../../assets/LogoMIS_Print.png";
+import footer from "../../assets/Footer.png";
+import StudentsInformationContent from "../Print_Content/StudentsInformation_Content/StudentsInformation_Content";
+import ProgramContent from "../Print_Content/Program_Content/Program_Content";
+import FacilitiesContent from "../Print_Content/Facilities_Content/Facilities_Content";
+import ParentsGuardianInformationContent from "../Print_Content/ParentsGuardianInformation_Content/ParentsGuardianInformation_Content";
+import TermofPaymentContent from "../Print_Content/TermofPayment_Content/TermofPayment_Content";
+import PledgeContent from "../Print_Content/Pledge_Content/Pledge_Content";
+import SignatureContent from "../Print_Content/Signature_Content/Signature_Content";
+import OtherDetailContent from "../Print_Content/OtherDetail_Content/OtherDetail_Content";
 import {
   getRegistrationPreview,
   getRegistrationOptions,
-} from '../../services/api';
+} from "../../services/api";
 
 function Print() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { applicationId, version } = location.state || {}
+  const { applicationId, version } = location.state || {};
   const printRef = useRef();
   const [previewData, setPreviewData] = useState(null);
   const [sectionOptions, setSectionOptions] = useState([]);
@@ -33,6 +33,38 @@ function Print() {
 
   // 🔹 State untuk loading tombol Print
   const [isPrinting, setIsPrinting] = useState(false);
+  // Tambahkan state baru setelah line 35:
+  const [isFromSubmission, setIsFromSubmission] = useState(false);
+
+  // Tambahkan useEffect setelah useEffect yang sudah ada (setelah line 112):
+  useEffect(() => {
+    // Cek apakah datang dari form submission
+    const isFromFormSubmission = location.state?.fromSubmission || false;
+    setIsFromSubmission(isFromFormSubmission);
+  }, [location.state]);
+
+  // Tambahkan useEffect untuk handle back navigation:
+  useEffect(() => {
+    if (!isFromSubmission) return;
+
+    const handleBackNavigation = () => {
+      // Redirect ke registration page saat back
+      navigate("/registration", { replace: true });
+    };
+
+    window.addEventListener("popstate", handleBackNavigation);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackNavigation);
+    };
+  }, [navigate, isFromSubmission]);
+
+  useEffect(() => {
+    // Jika user akses langsung ke /print tanpa fromSubmission flag
+    if (!location.state?.fromSubmission && !location.state?.applicationId) {
+      navigate("/registration", { replace: true });
+    }
+  }, [location.state, navigate]);
 
   // Fungsi untuk download PDF manual
   const downloadPDF = async () => {
@@ -46,37 +78,37 @@ function Print() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        ignoreElements: (el) => el.classList.contains('no-print'),
+        ignoreElements: (el) => el.classList.contains("no-print"),
       });
 
       // simpan jadi JPEG (lebih kecil dari PNG)
-      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      const imgData = canvas.toDataURL("image/jpeg", 0.85);
 
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
       // tambah image ke PDF dengan kompresi
       pdf.addImage(
         imgData,
-        'JPEG',
+        "JPEG",
         0,
         0,
         pdfWidth,
         pdfHeight,
         undefined,
-        'FAST'
+        "FAST"
       );
 
       const studentName =
         `${previewData.request_data.first_name} ${previewData.request_data.last_name}`.replace(
           /[\\?%*:|"<>]/g,
-          '-'
+          "-"
         );
 
       pdf.save(`${studentName}_Application_Form.pdf`);
     } catch (error) {
-      console.error('Failed to generate PDF:', error);
+      console.error("Failed to generate PDF:", error);
     } finally {
       setIsPrinting(false);
     }
@@ -97,7 +129,7 @@ function Print() {
         setClassOptions(optionsResp.classes || []);
         setMajorOptions(optionsResp.majors || []);
       } catch (error) {
-        console.error('Failed to fetch data:', error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
@@ -106,7 +138,7 @@ function Print() {
     if (applicationId) {
       fetchAllData();
     } else {
-      console.error('No applicationId provided in navigation state');
+      console.error("No applicationId provided in navigation state");
       setLoading(false);
     }
   }, [applicationId, version]);
@@ -115,12 +147,12 @@ function Print() {
     return (
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          fontSize: '18px',
-          fontWeight: 'medium',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          fontSize: "18px",
+          fontWeight: "medium",
         }}
       >
         Loading preview...
@@ -131,12 +163,12 @@ function Print() {
     return (
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          fontSize: '18px',
-          fontWeight: 'bold',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          fontSize: "18px",
+          fontWeight: "bold",
         }}
       >
         No application ID found
@@ -147,12 +179,12 @@ function Print() {
     return (
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          fontSize: '18px',
-          fontWeight: 'bold',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          fontSize: "18px",
+          fontWeight: "bold",
         }}
       >
         No preview data found
@@ -160,48 +192,48 @@ function Print() {
     );
   // eslint-disable-next-line
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return new Intl.DateTimeFormat('en-GB', options).format(date);
+    const options = { day: "numeric", month: "long", year: "numeric" };
+    return new Intl.DateTimeFormat("en-GB", options).format(date);
   };
 
   const getSemesterNumber = (semester) => {
-    if (!semester) return '';
-    return semester.includes('1') ? '1 (One)' : '2 (Two)';
+    if (!semester) return "";
+    return semester.includes("1") ? "1 (One)" : "2 (Two)";
   };
 
   return (
     <div className={styles.printWrapper}>
       {/* 🔹 Tombol kontrol */}
       <div
-        className='no-print'
+        className="no-print"
         style={{
-          position: 'fixed',
+          position: "fixed",
           top: 0,
           left: 0,
           right: 0,
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: '10px',
-          padding: '20px 20px',
-          background: '#fff',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+          width: "100%",
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: "10px",
+          padding: "20px 20px",
+          background: "#fff",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           zIndex: 9999,
         }}
       >
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => navigate("/home")}
           style={{
-            padding: '6px 12px',
-            background: '#fff',
-            color: '#7b7bfa',
-            border: '2px solid #7b7bfa',
-            borderRadius: '6px',
-            cursor: 'pointer',
+            padding: "6px 12px",
+            background: "#fff",
+            color: "#7b7bfa",
+            border: "2px solid #7b7bfa",
+            borderRadius: "6px",
+            cursor: "pointer",
             fontFamily: "'Poppins', sans-serif",
-            fontWeight: '600',
+            fontWeight: "600",
           }}
         >
           Back to Home
@@ -210,18 +242,18 @@ function Print() {
           onClick={downloadPDF}
           disabled={isPrinting}
           style={{
-            marginRight: '40px',
-            padding: '6px 12px',
-            background: isPrinting ? '#aaa' : '#7b7bfa',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: isPrinting ? 'not-allowed' : 'pointer',
+            marginRight: "40px",
+            padding: "6px 12px",
+            background: isPrinting ? "#aaa" : "#7b7bfa",
+            color: "#fff",
+            border: "none",
+            borderRadius: "6px",
+            cursor: isPrinting ? "not-allowed" : "pointer",
             fontFamily: "'Poppins', sans-serif",
-            fontWeight: '600',
+            fontWeight: "600",
           }}
         >
-          {isPrinting ? 'Generating PDF...' : 'Print'}
+          {isPrinting ? "Generating PDF..." : "Print"}
         </button>
       </div>
 
@@ -229,7 +261,7 @@ function Print() {
       <div ref={printRef} className={styles.printPageA4}>
         <div className={styles.header}>
           <div className={styles.headerRow}>
-            <img src={kop} alt='Header KOP' className={styles.headerKop} />
+            <img src={kop} alt="Header KOP" className={styles.headerKop} />
             <div className={styles.schoolInfo}>
               <div className={styles.schoolName}>
                 <b>MANADO INDEPENDENT SCHOOL</b>
@@ -254,25 +286,25 @@ function Print() {
             <div className={styles.semesterParent}>
               <b className={styles.applicationForm}>Semester:</b>
               <b className={styles.applicationForm}>
-                {getSemesterNumber(previewData.semester ?? '')}
+                {getSemesterNumber(previewData.semester ?? "")}
               </b>
             </div>
             <div className={styles.semesterChild}>
               <b className={styles.applicationForm}>School Year:</b>
               <b className={styles.applicationForm}>
-                {previewData.school_year ?? ''}
+                {previewData.school_year ?? ""}
               </b>
             </div>
             <div className={styles.semesterChild}>
               <b className={styles.applicationForm}>Registration Number:</b>
               <b className={styles.applicationForm}>
-                {previewData.registration_number ?? ''}
+                {previewData.registration_number ?? ""}
               </b>
             </div>
             <div className={styles.registrationIdParent}>
               <b className={styles.applicationForm}>Registration ID: </b>
               <b className={styles.applicationForm}>
-                {previewData.registration_id ?? ''}
+                {previewData.registration_id ?? ""}
               </b>
             </div>
           </div>
@@ -336,7 +368,7 @@ function Print() {
         </div>
         <div className={styles.footer}>
           <div className={styles.footerRow}>
-            <img src={footer} alt='Footer' className={styles.footerImg} />
+            <img src={footer} alt="Footer" className={styles.footerImg} />
           </div>
         </div>
       </div>

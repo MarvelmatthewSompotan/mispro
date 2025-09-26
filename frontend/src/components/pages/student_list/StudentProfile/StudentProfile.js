@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import {
   getStudentLatestApplication,
   getRegistrationOptions,
@@ -28,7 +28,7 @@ const RadioDisplay = ({
   isEditing,
   name,
   value,
-  onChange, 
+  onChange,
 }) => {
   const content = (
     <>
@@ -100,6 +100,8 @@ const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
 
 const StudentProfile = () => {
   const { studentId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
   const [formData, setFormData] = useState(null);
   const [options, setOptions] = useState(null);
@@ -128,6 +130,13 @@ const StudentProfile = () => {
     kitas: "",
     nisn: "",
   });
+
+  useEffect(() => {
+    if (!location.state?.fromList) {
+      navigate("/students", { replace: true });
+    }
+    // eslint-disable-next-line
+  }, []);
 
   // Fetch options untuk dropdowns
   useEffect(() => {
@@ -867,42 +876,46 @@ const StudentProfile = () => {
   return (
     <div className={styles.profilePage}>
       <div className={styles.topActionHeader}>
-        <div className={styles.historyContainer} ref={historyRef}>
-          <button
-            className={styles.actionButton}
-            onClick={handleViewHistoryClick}
-            disabled={isEditing}
-          >
-            {selectedVersionId
-              ? "Back to Latest Version"
-              : "View version history"}
-          </button>
-          {isHistoryVisible && (
-            <ul className={styles.historyDropdown}>
-              {isLoadingHistory ? (
-                <li className={styles.historyInfoItem}>Loading...</li>
-              ) : historyDates.length > 0 ? (
-                historyDates.map((version) => (
-                  <li
-                    key={version.version_id}
-                    className={styles.historyItem}
-                    onClick={() => handleHistoryDateChange(version.version_id)}
-                  >
-                    {new Date(version.updated_at).toLocaleString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </li>
-                ))
-              ) : (
-                <li className={styles.historyInfoItem}>No history found.</li>
-              )}
-            </ul>
-          )}
-        </div>
+        {!isEditing && (
+          <div className={styles.historyContainer} ref={historyRef}>
+            <button
+              className={styles.actionButton}
+              onClick={handleViewHistoryClick}
+              // Atribut 'disabled' tidak lagi diperlukan karena komponennya disembunyikan
+            >
+              {selectedVersionId
+                ? "Back to Latest Version"
+                : "View version history"}
+            </button>
+            {isHistoryVisible && (
+              <ul className={styles.historyDropdown}>
+                {isLoadingHistory ? (
+                  <li className={styles.historyInfoItem}>Loading...</li>
+                ) : historyDates.length > 0 ? (
+                  historyDates.map((version) => (
+                    <li
+                      key={version.version_id}
+                      className={styles.historyItem}
+                      onClick={() =>
+                        handleHistoryDateChange(version.version_id)
+                      }
+                    >
+                      {new Date(version.updated_at).toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </li>
+                  ))
+                ) : (
+                  <li className={styles.historyInfoItem}>No history found.</li>
+                )}
+              </ul>
+            )}
+          </div>
+        )}
 
         {isEditing ? (
           <>
@@ -922,12 +935,15 @@ const StudentProfile = () => {
             </button>
           </>
         ) : (
-          <button
-            className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
-            onClick={() => setIsEditing(true)}
-          >
-            Edit
-          </button>
+          // Tombol Edit hanya akan muncul jika TIDAK sedang melihat histori
+          !selectedVersionId && (
+            <button
+              className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
+              onClick={() => setIsEditing(true)}
+            >
+              Edit
+            </button>
+          )
         )}
       </div>
 
@@ -947,7 +963,11 @@ const StudentProfile = () => {
         <div className={styles.infoContainer}>
           {/* STUDENT'S INFORMATION */}
           <div id="studentInfo" className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>STUDENT’S INFORMATION</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1450,9 +1470,7 @@ const StudentProfile = () => {
                       value={studentInfo.family_rank || ""}
                       onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
-                        errors.studentInfo?.family_rank
-                          ? styles.errorInput
-                          : ""
+                        errors.studentInfo?.family_rank ? styles.errorInput : ""
                       }`}
                       placeholder={errors.studentInfo?.family_rank || "Rank"}
                     />
@@ -1886,7 +1904,11 @@ const StudentProfile = () => {
 
           {/* PROGRAM */}
           <div className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>PROGRAM</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1946,7 +1968,11 @@ const StudentProfile = () => {
 
           {/* FACILITIES */}
           <div id="facilities" className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>FACILITIES</b>
             </div>
             <div className={styles.sectionContent}>
@@ -2109,7 +2135,11 @@ const StudentProfile = () => {
 
           {/* PARENT / GUARDIAN INFORMATION */}
           <div id="parentGuardian" className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>PARENT / GUARDIAN INFORMATION</b>
             </div>
             <div className={styles.sectionContent}>
@@ -3237,7 +3267,11 @@ const StudentProfile = () => {
 
           {/* TERM OF PAYMENT */}
           <div className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>TERM OF PAYMENT</b>
             </div>
             <div className={styles.paymentContentWrapper}>
@@ -3315,8 +3349,8 @@ const StudentProfile = () => {
       </div>
       <ConfirmUpdatePopup
         isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)} 
-        onConfirm={handleConfirmUpdate} 
+        onClose={() => setIsPopupOpen(false)}
+        onConfirm={handleConfirmUpdate}
         isUpdating={isUpdating}
       />
 
