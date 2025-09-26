@@ -202,9 +202,8 @@ const FormButtonSection = ({
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };
     }
-
     if (
-      !allFormData.facilities ||
+      allFormData.facilities?.transportation_id &&
       allFormData.facilities.transportation_policy !== "Signed"
     ) {
       errors.facilities = { ...errors.facilities, transportation_policy: true };

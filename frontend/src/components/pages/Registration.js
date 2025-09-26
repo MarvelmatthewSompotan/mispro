@@ -82,7 +82,12 @@ const Registration = () => {
   const handleClosePopup = () => setShowPopupForm(false);
 
   const handleCreateForm = (formData) => {
-    navigate('/registration-form', { state: formData });
+    navigate('/registration-form', {
+      state: {
+        ...formData,
+        fromPopup: true,
+      },
+    });
     setShowPopupForm(false);
   };
 

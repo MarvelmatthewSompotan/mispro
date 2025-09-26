@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Main from "../layout/Main";
 import StudentStatusSection from "./registration/StudentStatus/StudentStatusSection";
 import StudentInformationSection from "./registration/StudentInformation/StudentInformationSection";
@@ -43,6 +43,22 @@ const RegistrationForm = () => {
   const [validationState, setValidationState] = useState({});
   const [errors, setErrors] = useState({});
   const [forceError, setForceError] = useState({});
+
+  const navigate = useNavigate();
+
+  // Guard akses langsung: wajib datang dari PopUpForm
+  useEffect(() => {
+    const s = location.state || {};
+    const isValid =
+      s.fromPopup &&
+      s.draftId &&
+      s.schoolYear &&
+      s.semester;
+
+    if (!isValid) {
+      navigate("/registration", { replace: true });
+    }
+  }, [location.state, navigate]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";

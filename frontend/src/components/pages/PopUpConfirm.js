@@ -26,7 +26,9 @@ const PopUpConfirm = React.memo(
             state: {
               applicationId: response.data.application_id,
               version: response.data.version,
+              fromSubmission: true,
             },
+            replace: true, 
           });
           onConfirm();
         } else {
