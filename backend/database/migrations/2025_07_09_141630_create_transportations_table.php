@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transportations', function (Blueprint $table) {
             $table->id('transport_id');
-            $table->enum('type', ['Own car', 'School bus']);
+            $table->enum('type', ['Own car', 'School bus'])->nullable();
         });
     }
 
