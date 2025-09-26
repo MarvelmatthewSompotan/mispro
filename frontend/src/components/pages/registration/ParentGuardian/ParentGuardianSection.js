@@ -2,44 +2,26 @@ import React from "react";
 import styles from "./ParentGuardianSection.module.css";
 
 const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
-  // State untuk error highlight
-  const [fatherErrors, setFatherErrors] = React.useState({});
-  const [motherErrors, setMotherErrors] = React.useState({});
+  // 1. State untuk melacak field yang sudah diubah/disentuh oleh pengguna
+  const [touchedFields, setTouchedFields] = React.useState({});
 
+  // 2. useEffect untuk mereset 'touchedFields' setiap kali ada submit baru
   React.useEffect(() => {
-    if (errors) {
-      setFatherErrors({
-        name: !!errors.father_name,
-        phone: !!errors.father_phone,
-        email: !!errors.father_email,
-        street: !!errors.father_address_street,
-        village: !!errors.father_address_village,
-        district: !!errors.father_address_district,
-        city: !!errors.father_address_city_regency,
-        province: !!errors.father_address_province,
-      });
-      setMotherErrors({
-        name: !!errors.mother_name,
-        phone: !!errors.mother_phone,
-        email: !!errors.mother_email,
-        street: !!errors.mother_address_street,
-        village: !!errors.mother_address_village,
-        district: !!errors.mother_address_district,
-        city: !!errors.mother_address_city_regency,
-        province: !!errors.mother_address_province,
-      });
-    }
+    // Setiap kali 'errors' dari parent berubah, itu artinya ada proses submit baru.
+    // Kita reset 'touchedFields' agar pengecekan error dimulai dari awal lagi.
+    setTouchedFields({});
   }, [errors]);
 
-  // INI FUNGSI handleChange YANG BENAR:
-  // Menerima satu 'key' (misal: "father_name") dan mengirim update ke parent.
+  // 3. handleChange yang diperbarui untuk menandai field sebagai "sudah disentuh"
   const handleChange = (key) => (e) => {
     const { value } = e.target;
     onDataChange({ [key]: value });
+
+    // Tandai field ini sebagai "sudah disentuh" agar error tidak muncul lagi
+    setTouchedFields((prev) => ({ ...prev, [key]: true }));
   };
 
   // Membuat variabel objek NESTED dari props formData yang FLAT.
-  // Ini adalah "jembatan" agar JSX tidak perlu diubah.
   const father = {
     name: formData.father_name,
     company: formData.father_company,
@@ -103,14 +85,19 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
             </div>
             <div className={styles.parentInfoContent}>
               <div className={styles.fullWidthField}>
+                {/* Name */}
                 <div
                   className={`${styles.fieldGroup} ${
-                    fatherErrors.name ? styles.parentErrorFieldWrapper : ""
+                    errors?.father_name && !touchedFields.father_name
+                      ? styles.parentErrorFieldWrapper
+                      : ""
                   }`}
                 >
                   <div
                     className={`${styles.label} ${
-                      fatherErrors.name ? styles.parentErrorLabel : ""
+                      errors?.father_name && !touchedFields.father_name
+                        ? styles.parentErrorLabel
+                        : ""
                     }`}
                   >
                     Name
@@ -118,7 +105,11 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   <input
                     className={`${styles.value} ${
                       father.name ? styles.filled : ""
-                    } ${fatherErrors.name ? styles.parentErrorInput : ""}`}
+                    } ${
+                      errors?.father_name && !touchedFields.father_name
+                        ? styles.parentErrorInput
+                        : ""
+                    }`}
                     type="text"
                     value={father.name || ""}
                     onChange={handleChange("father_name")}
@@ -127,6 +118,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
+                {/* Company & Occupation (tidak wajib) */}
                 <div className={styles.fieldGroup}>
                   <div className={styles.label}>Company name</div>
                   <input
@@ -153,80 +145,87 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
+                {/* Phone Number */}
                 <div
                   className={`${styles.fieldGroup} ${
-                    fatherErrors.phone ? styles.parentErrorFieldWrapper : ""
+                    errors?.father_phone && !touchedFields.father_phone
+                      ? styles.parentErrorFieldWrapper
+                      : ""
                   }`}
                 >
                   <div
                     className={`${styles.label} ${
-                      fatherErrors.phone ? styles.parentErrorLabel : ""
+                      errors?.father_phone && !touchedFields.father_phone
+                        ? styles.parentErrorLabel
+                        : ""
                     }`}
                   >
                     Phone number
                   </div>
-                  <div className={styles.inputWithError}>
-                    <input
-                      className={`${styles.value} ${
-                        father.phone ? styles.filled : ""
-                      } ${fatherErrors.phone ? styles.parentErrorInput : ""}`}
-                      type="tel"
-                      value={father.phone || ""}
-                      maxLength="20"
-                      onChange={handleChange("father_phone")}
-                      placeholder="089281560955"
-                    />
-                    {fatherErrors.phone && (
-                      <div className={styles.inlineErrorMessage}>
-                        {typeof fatherErrors.phone === "string"
-                          ? fatherErrors.phone
-                          : "Phone number must be at most 20 characters"}
-                      </div>
-                    )}
-                  </div>
+                  <input
+                    className={`${styles.value} ${
+                      father.phone ? styles.filled : ""
+                    } ${
+                      errors?.father_phone && !touchedFields.father_phone
+                        ? styles.parentErrorInput
+                        : ""
+                    }`}
+                    type="tel"
+                    value={father.phone || ""}
+                    maxLength="20"
+                    onChange={handleChange("father_phone")}
+                    placeholder="089281560955"
+                  />
                 </div>
+                {/* Email */}
                 <div
                   className={`${styles.fieldGroup} ${
-                    fatherErrors.email ? styles.parentErrorFieldWrapper : ""
+                    errors?.father_email && !touchedFields.father_email
+                      ? styles.parentErrorFieldWrapper
+                      : ""
                   }`}
                 >
                   <div
                     className={`${styles.label} ${
-                      fatherErrors.email ? styles.parentErrorLabel : ""
+                      errors?.father_email && !touchedFields.father_email
+                        ? styles.parentErrorLabel
+                        : ""
                     }`}
                   >
                     Email
                   </div>
-                  <div className={styles.inputWithError}>
-                    <input
-                      className={`${styles.value} ${
-                        father.email ? styles.filled : ""
-                      } ${fatherErrors.email ? styles.parentErrorInput : ""}`}
-                      type="email"
-                      value={father.email || ""}
-                      onChange={handleChange("father_email")}
-                      placeholder="Johndoehebat@gmail.com"
-                    />
-                    {fatherErrors.email && (
-                      <div className={styles.inlineErrorMessage}>
-                        {typeof fatherErrors.email === "string"
-                          ? fatherErrors.email
-                          : "Please enter a valid email address"}
-                      </div>
-                    )}
-                  </div>
+                  <input
+                    className={`${styles.value} ${
+                      father.email ? styles.filled : ""
+                    } ${
+                      errors?.father_email && !touchedFields.father_email
+                        ? styles.parentErrorInput
+                        : ""
+                    }`}
+                    type="email"
+                    value={father.email || ""}
+                    onChange={handleChange("father_email")}
+                    placeholder="Johndoehebat@gmail.com"
+                  />
                 </div>
               </div>
               <div className={styles.addressSection}>
                 <div className={styles.twoColumnRow}>
+                  {/* Street */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      fatherErrors.street ? styles.parentErrorFieldWrapper : ""
+                      errors?.father_address_street &&
+                      !touchedFields.father_address_street
+                        ? styles.parentErrorFieldWrapper
+                        : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        fatherErrors.street ? styles.parentErrorLabel : ""
+                        errors?.father_address_street &&
+                        !touchedFields.father_address_street
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       Street
@@ -234,13 +233,19 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     <input
                       className={`${styles.value} ${
                         father.street ? styles.filled : ""
-                      } ${fatherErrors.street ? styles.parentErrorInput : ""}`}
+                      } ${
+                        errors?.father_address_street &&
+                        !touchedFields.father_address_street
+                          ? styles.parentErrorInput
+                          : ""
+                      }`}
                       type="text"
                       value={father.street || ""}
                       onChange={handleChange("father_address_street")}
                       placeholder="JL. Sarundajang 01"
                     />
                   </div>
+                  {/* RT/RW (tidak wajib) */}
                   <div className={styles.rtRwGroup}>
                     <div className={styles.rtField}>
                       <div className={styles.label}>RT</div>
@@ -269,14 +274,21 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
+                  {/* Village */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      fatherErrors.village ? styles.parentErrorFieldWrapper : ""
+                      errors?.father_address_village &&
+                      !touchedFields.father_address_village
+                        ? styles.parentErrorFieldWrapper
+                        : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        fatherErrors.village ? styles.parentErrorLabel : ""
+                        errors?.father_address_village &&
+                        !touchedFields.father_address_village
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       Village
@@ -284,23 +296,33 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     <input
                       className={`${styles.value} ${
                         father.village ? styles.filled : ""
-                      } ${fatherErrors.village ? styles.parentErrorInput : ""}`}
+                      } ${
+                        errors?.father_address_village &&
+                        !touchedFields.father_address_village
+                          ? styles.parentErrorInput
+                          : ""
+                      }`}
                       type="text"
                       value={father.village || ""}
                       onChange={handleChange("father_address_village")}
                       placeholder="Girian"
                     />
                   </div>
+                  {/* District */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      fatherErrors.district
+                      errors?.father_address_district &&
+                      !touchedFields.father_address_district
                         ? styles.parentErrorFieldWrapper
                         : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        fatherErrors.district ? styles.parentErrorLabel : ""
+                        errors?.father_address_district &&
+                        !touchedFields.father_address_district
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       District
@@ -309,7 +331,10 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       className={`${styles.value} ${
                         father.district ? styles.filled : ""
                       } ${
-                        fatherErrors.district ? styles.parentErrorInput : ""
+                        errors?.father_address_district &&
+                        !touchedFields.father_address_district
+                          ? styles.parentErrorInput
+                          : ""
                       }`}
                       type="text"
                       value={father.district || ""}
@@ -319,14 +344,21 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
+                  {/* City/Regency */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      fatherErrors.city ? styles.parentErrorFieldWrapper : ""
+                      errors?.father_address_city_regency &&
+                      !touchedFields.father_address_city_regency
+                        ? styles.parentErrorFieldWrapper
+                        : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        fatherErrors.city ? styles.parentErrorLabel : ""
+                        errors?.father_address_city_regency &&
+                        !touchedFields.father_address_city_regency
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       City/Regency
@@ -334,23 +366,33 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     <input
                       className={`${styles.value} ${
                         father.city ? styles.filled : ""
-                      } ${fatherErrors.city ? styles.parentErrorInput : ""}`}
+                      } ${
+                        errors?.father_address_city_regency &&
+                        !touchedFields.father_address_city_regency
+                          ? styles.parentErrorInput
+                          : ""
+                      }`}
                       type="text"
                       value={father.city || ""}
                       onChange={handleChange("father_address_city_regency")}
                       placeholder="Kotamobagu"
                     />
                   </div>
+                  {/* Province */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      fatherErrors.province
+                      errors?.father_address_province &&
+                      !touchedFields.father_address_province
                         ? styles.parentErrorFieldWrapper
                         : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        fatherErrors.province ? styles.parentErrorLabel : ""
+                        errors?.father_address_province &&
+                        !touchedFields.father_address_province
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       Province
@@ -359,7 +401,10 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       className={`${styles.value} ${
                         father.province ? styles.filled : ""
                       } ${
-                        fatherErrors.province ? styles.parentErrorInput : ""
+                        errors?.father_address_province &&
+                        !touchedFields.father_address_province
+                          ? styles.parentErrorInput
+                          : ""
                       }`}
                       type="text"
                       value={father.province || ""}
@@ -368,6 +413,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     />
                   </div>
                 </div>
+                {/* Other (tidak wajib) */}
                 <div className={styles.otherField}>
                   <div className={styles.label}>Other</div>
                   <div className={styles.otherValue}>
@@ -397,14 +443,19 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
             </div>
             <div className={styles.parentInfoContent}>
               <div className={styles.fullWidthField}>
+                {/* Name */}
                 <div
                   className={`${styles.fieldGroup} ${
-                    motherErrors.name ? styles.parentErrorFieldWrapper : ""
+                    errors?.mother_name && !touchedFields.mother_name
+                      ? styles.parentErrorFieldWrapper
+                      : ""
                   }`}
                 >
                   <div
                     className={`${styles.label} ${
-                      motherErrors.name ? styles.parentErrorLabel : ""
+                      errors?.mother_name && !touchedFields.mother_name
+                        ? styles.parentErrorLabel
+                        : ""
                     }`}
                   >
                     Name
@@ -412,7 +463,11 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   <input
                     className={`${styles.value} ${
                       mother.name ? styles.filled : ""
-                    } ${motherErrors.name ? styles.parentErrorInput : ""}`}
+                    } ${
+                      errors?.mother_name && !touchedFields.mother_name
+                        ? styles.parentErrorInput
+                        : ""
+                    }`}
                     type="text"
                     value={mother.name || ""}
                     onChange={handleChange("mother_name")}
@@ -421,6 +476,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
+                {/* Company & Occupation (tidak wajib) */}
                 <div className={styles.fieldGroup}>
                   <div className={styles.label}>Company name</div>
                   <input
@@ -447,80 +503,87 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
+                {/* Phone Number */}
                 <div
                   className={`${styles.fieldGroup} ${
-                    motherErrors.phone ? styles.parentErrorFieldWrapper : ""
+                    errors?.mother_phone && !touchedFields.mother_phone
+                      ? styles.parentErrorFieldWrapper
+                      : ""
                   }`}
                 >
                   <div
                     className={`${styles.label} ${
-                      motherErrors.phone ? styles.parentErrorLabel : ""
+                      errors?.mother_phone && !touchedFields.mother_phone
+                        ? styles.parentErrorLabel
+                        : ""
                     }`}
                   >
                     Phone number
                   </div>
-                  <div className={styles.inputWithError}>
-                    <input
-                      className={`${styles.value} ${
-                        mother.phone ? styles.filled : ""
-                      } ${motherErrors.phone ? styles.parentErrorInput : ""}`}
-                      type="tel"
-                      value={mother.phone || ""}
-                      maxLength="20"
-                      onChange={handleChange("mother_phone")}
-                      placeholder="089281560955"
-                    />
-                    {motherErrors.phone && (
-                      <div className={styles.inlineErrorMessage}>
-                        {typeof motherErrors.phone === "string"
-                          ? motherErrors.phone
-                          : "Phone number must be at most 20 characters"}
-                      </div>
-                    )}
-                  </div>
+                  <input
+                    className={`${styles.value} ${
+                      mother.phone ? styles.filled : ""
+                    } ${
+                      errors?.mother_phone && !touchedFields.mother_phone
+                        ? styles.parentErrorInput
+                        : ""
+                    }`}
+                    type="tel"
+                    value={mother.phone || ""}
+                    maxLength="20"
+                    onChange={handleChange("mother_phone")}
+                    placeholder="089281560955"
+                  />
                 </div>
+                {/* Email */}
                 <div
                   className={`${styles.fieldGroup} ${
-                    motherErrors.email ? styles.parentErrorFieldWrapper : ""
+                    errors?.mother_email && !touchedFields.mother_email
+                      ? styles.parentErrorFieldWrapper
+                      : ""
                   }`}
                 >
                   <div
                     className={`${styles.label} ${
-                      motherErrors.email ? styles.parentErrorLabel : ""
+                      errors?.mother_email && !touchedFields.mother_email
+                        ? styles.parentErrorLabel
+                        : ""
                     }`}
                   >
                     Email
                   </div>
-                  <div className={styles.inputWithError}>
-                    <input
-                      className={`${styles.value} ${
-                        mother.email ? styles.filled : ""
-                      } ${motherErrors.email ? styles.parentErrorInput : ""}`}
-                      type="email"
-                      value={mother.email || ""}
-                      onChange={handleChange("mother_email")}
-                      placeholder="Janedoehebat@gmail.com"
-                    />
-                    {motherErrors.email && (
-                      <div className={styles.inlineErrorMessage}>
-                        {typeof motherErrors.email === "string"
-                          ? motherErrors.email
-                          : "Please enter a valid email address"}
-                      </div>
-                    )}
-                  </div>
+                  <input
+                    className={`${styles.value} ${
+                      mother.email ? styles.filled : ""
+                    } ${
+                      errors?.mother_email && !touchedFields.mother_email
+                        ? styles.parentErrorInput
+                        : ""
+                    }`}
+                    type="email"
+                    value={mother.email || ""}
+                    onChange={handleChange("mother_email")}
+                    placeholder="Janedoehebat@gmail.com"
+                  />
                 </div>
               </div>
               <div className={styles.addressSection}>
                 <div className={styles.twoColumnRow}>
+                  {/* Street */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      motherErrors.street ? styles.parentErrorFieldWrapper : ""
+                      errors?.mother_address_street &&
+                      !touchedFields.mother_address_street
+                        ? styles.parentErrorFieldWrapper
+                        : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        motherErrors.street ? styles.parentErrorLabel : ""
+                        errors?.mother_address_street &&
+                        !touchedFields.mother_address_street
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       Street
@@ -528,13 +591,19 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     <input
                       className={`${styles.value} ${
                         mother.street ? styles.filled : ""
-                      } ${motherErrors.street ? styles.parentErrorInput : ""}`}
+                      } ${
+                        errors?.mother_address_street &&
+                        !touchedFields.mother_address_street
+                          ? styles.parentErrorInput
+                          : ""
+                      }`}
                       type="text"
                       value={mother.street || ""}
                       onChange={handleChange("mother_address_street")}
                       placeholder="JL. Sarundajang 01"
                     />
                   </div>
+                  {/* RT/RW (tidak wajib) */}
                   <div className={styles.rtRwGroup}>
                     <div className={styles.rtField}>
                       <div className={styles.label}>RT</div>
@@ -563,14 +632,21 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
+                  {/* Village */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      motherErrors.village ? styles.parentErrorFieldWrapper : ""
+                      errors?.mother_address_village &&
+                      !touchedFields.mother_address_village
+                        ? styles.parentErrorFieldWrapper
+                        : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        motherErrors.village ? styles.parentErrorLabel : ""
+                        errors?.mother_address_village &&
+                        !touchedFields.mother_address_village
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       Village
@@ -578,23 +654,33 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     <input
                       className={`${styles.value} ${
                         mother.village ? styles.filled : ""
-                      } ${motherErrors.village ? styles.parentErrorInput : ""}`}
+                      } ${
+                        errors?.mother_address_village &&
+                        !touchedFields.mother_address_village
+                          ? styles.parentErrorInput
+                          : ""
+                      }`}
                       type="text"
                       value={mother.village || ""}
                       onChange={handleChange("mother_address_village")}
                       placeholder="Girian"
                     />
                   </div>
+                  {/* District */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      motherErrors.district
+                      errors?.mother_address_district &&
+                      !touchedFields.mother_address_district
                         ? styles.parentErrorFieldWrapper
                         : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        motherErrors.district ? styles.parentErrorLabel : ""
+                        errors?.mother_address_district &&
+                        !touchedFields.mother_address_district
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       District
@@ -603,7 +689,10 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       className={`${styles.value} ${
                         mother.district ? styles.filled : ""
                       } ${
-                        motherErrors.district ? styles.parentErrorInput : ""
+                        errors?.mother_address_district &&
+                        !touchedFields.mother_address_district
+                          ? styles.parentErrorInput
+                          : ""
                       }`}
                       type="text"
                       value={mother.district || ""}
@@ -613,14 +702,21 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
+                  {/* City/Regency */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      motherErrors.city ? styles.parentErrorFieldWrapper : ""
+                      errors?.mother_address_city_regency &&
+                      !touchedFields.mother_address_city_regency
+                        ? styles.parentErrorFieldWrapper
+                        : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        motherErrors.city ? styles.parentErrorLabel : ""
+                        errors?.mother_address_city_regency &&
+                        !touchedFields.mother_address_city_regency
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       City/Regency
@@ -628,23 +724,33 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     <input
                       className={`${styles.value} ${
                         mother.city ? styles.filled : ""
-                      } ${motherErrors.city ? styles.parentErrorInput : ""}`}
+                      } ${
+                        errors?.mother_address_city_regency &&
+                        !touchedFields.mother_address_city_regency
+                          ? styles.parentErrorInput
+                          : ""
+                      }`}
                       type="text"
                       value={mother.city || ""}
                       onChange={handleChange("mother_address_city_regency")}
                       placeholder="Kotamobagu"
                     />
                   </div>
+                  {/* Province */}
                   <div
                     className={`${styles.fieldGroup} ${
-                      motherErrors.province
+                      errors?.mother_address_province &&
+                      !touchedFields.mother_address_province
                         ? styles.parentErrorFieldWrapper
                         : ""
                     }`}
                   >
                     <div
                       className={`${styles.label} ${
-                        motherErrors.province ? styles.parentErrorLabel : ""
+                        errors?.mother_address_province &&
+                        !touchedFields.mother_address_province
+                          ? styles.parentErrorLabel
+                          : ""
                       }`}
                     >
                       Province
@@ -653,7 +759,10 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       className={`${styles.value} ${
                         mother.province ? styles.filled : ""
                       } ${
-                        motherErrors.province ? styles.parentErrorInput : ""
+                        errors?.mother_address_province &&
+                        !touchedFields.mother_address_province
+                          ? styles.parentErrorInput
+                          : ""
                       }`}
                       type="text"
                       value={mother.province || ""}
@@ -662,6 +771,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     />
                   </div>
                 </div>
+                {/* Other (tidak wajib) */}
                 <div className={styles.otherField}>
                   <div className={styles.label}>Other</div>
                   <div className={styles.otherValue}>

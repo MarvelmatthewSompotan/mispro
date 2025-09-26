@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./TermOfPaymentSection.module.css";
-import checkBoxIcon from "../../../assets/CheckBox.png";
-import { getRegistrationOptions } from "../../../services/api";
+import checkBoxIcon from "../../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../../services/api";
 import Select from "react-select";
 
 const TermOfPaymentSection = ({
@@ -66,13 +66,11 @@ const TermOfPaymentSection = ({
     onDataChange,
   ]);
 
-  // DIUBAH: Fungsi handler sekarang menerima 'event'
   const handleTuitionFeesChange = (e, value) => {
     e.preventDefault(); // Mencegah event ganda
     setTuitionFees((current) => (current === value ? "" : value));
   };
 
-  // DIUBAH: Fungsi handler sekarang menerima 'event'
   const handleResidencePaymentChange = (e, value) => {
     e.preventDefault(); // Mencegah event ganda
     setResidencePayment((current) => (current === value ? "" : value));
@@ -124,7 +122,6 @@ const TermOfPaymentSection = ({
               <div key={option} className={styles.optionItem}>
                 <label
                   className={styles.radioLabel}
-                  // DIUBAH: Kirim event (e) ke handler
                   onClick={(e) => handleTuitionFeesChange(e, option)}
                 >
                   <input
@@ -173,7 +170,6 @@ const TermOfPaymentSection = ({
               <div key={option} className={styles.optionItem}>
                 <label
                   className={styles.radioLabel}
-                  // DIUBAH: Kirim event (e) ke handler
                   onClick={(e) => handleResidencePaymentChange(e, option)}
                 >
                   <input
