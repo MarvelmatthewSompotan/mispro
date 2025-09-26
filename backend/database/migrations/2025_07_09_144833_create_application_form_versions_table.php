@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('action', 100)->nullable();
             $table->json('data_snapshot')->nullable();
             $table->foreign('application_id')->references('application_id')->on('application_forms')->onDelete('set null');
-            $table->string('action', 100)->nullable();
+            
         });
     }
 
