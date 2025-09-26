@@ -90,6 +90,9 @@ const Registration = () => {
   const handleRowClick = (row) => {
     const applicationId = row.application_form?.application_id || null;
     const version = row.version_id ?? null;
+    console.log('Row data:', row);
+    console.log('Application ID:', applicationId);
+    console.log('Version:', version);
     navigate('/print', {
       state: { applicationId, version },
     });

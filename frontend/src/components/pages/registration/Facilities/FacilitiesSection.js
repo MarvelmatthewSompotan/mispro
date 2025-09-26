@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./FacilitiesSection.module.css";
-import checkBoxIcon from "../../../assets/CheckBox.png";
-import { getRegistrationOptions } from "../../../services/api";
+import checkBoxIcon from "../../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../../services/api";
 
 const FacilitiesSection = ({
   onDataChange,
@@ -88,9 +88,6 @@ const FacilitiesSection = ({
     }
   }, [prefill]);
 
-  // =====================================================================
-  // ▼▼▼ FUNGSI INI SUDAH DIPERBARUI ▼▼▼
-  // =====================================================================
   const handleTransportationChange = (value) => {
     const newSelectedId =
       selectedTransportation === String(value) ? "" : String(value);
@@ -143,9 +140,6 @@ const FacilitiesSection = ({
       residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
     });
   };
-  // =====================================================================
-  // ▲▲▲ AKHIR DARI FUNGSI YANG DIPERBARUI ▲▲▲
-  // =====================================================================
 
   const handlePickupPointChange = (value) => {
     setSelectedPickupPoint(String(value));
@@ -429,7 +423,8 @@ const FacilitiesSection = ({
           <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                errors?.residence_id || forceError?.residence_id
+                (errors?.residence_id || forceError?.residence_id) &&
+                !selectedResidence
                   ? styles.facilitiesSectionErrorLabel
                   : ""
               }`}
@@ -438,9 +433,6 @@ const FacilitiesSection = ({
             </div>
           </div>
 
-          {/* ===================================================================== */}
-          {/* ▼▼▼ BAGIAN JSX INI SUDAH DIPERBARUI ▼▼▼ */}
-          {/* ===================================================================== */}
           {(() => {
             // Kalkulasi tipe transportasi yang dipilih
             const selectedTransport = transportations.find(
@@ -495,9 +487,6 @@ const FacilitiesSection = ({
               );
             });
           })()}
-          {/* ===================================================================== */}
-          {/* ▲▲▲ AKHIR DARI BAGIAN JSX YANG DIPERBARUI ▲▲▲ */}
-          {/* ===================================================================== */}
 
           <div className={styles.optionItem}>
             <label className={styles.checkboxLabel}>
