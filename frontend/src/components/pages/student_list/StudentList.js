@@ -9,17 +9,12 @@ const StudentList = () => {
   const [studentData, setStudentData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-
-  // Options dari backend
   const [sections, setSections] = useState([]);
   const [schoolYears, setSchoolYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
-
-  // Filter state
   const [selectedSections, setSelectedSections] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(null);
-
   const [gradeMap, setGradeMap] = useState(new Map());
 
   // Fetch options (sections, years, semesters)
@@ -58,8 +53,6 @@ const StudentList = () => {
       setLoading(false);
     }
   };
-
-  // Initial load
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -73,12 +66,11 @@ const StudentList = () => {
         semester_id: selectedSemester || undefined,
         section_id: selectedSections.length > 0 ? selectedSections : undefined,
       });
-    }, 300); // Debounce untuk mengurangi request saat mengetik
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [search, selectedYear, selectedSemester, selectedSections]);
 
-  // Toggle section checkbox
   const handleSectionToggle = (id) => {
     setSelectedSections((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]

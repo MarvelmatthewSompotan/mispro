@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ProgramSection.module.css";
 import Select from "react-select";
-import { getRegistrationOptions } from "../../../services/api";
+import { getRegistrationOptions } from "../../../../services/api";
 
 const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
-  // --- STATE LOKAL ---
+  // STATE LOKAL
   const [sections, setSections] = useState([]);
   const [majors, setMajors] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -18,9 +18,6 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
 
   const OTHER = "OTHER";
 
-  // --- LOGIKA UTAMA ---
-
-  // 1. Mengambil data opsi dari API (tidak berubah)
   useEffect(() => {
     if (sharedData) {
       setSections(sharedData.sections || []);
@@ -41,7 +38,6 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
     }
   }, [sharedData]);
 
-  // 2. Mengisi data dari prefill (disederhanakan)
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
       setSelectedSection(prefill.section_id || "");
@@ -56,8 +52,6 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
     }
   }, [prefill]);
 
-  // 3. [PERBAIKAN UTAMA #1] useEffect terpusat untuk sinkronisasi data
-  //    Tugasnya hanya satu: mengirim data terbaru ke parent setiap ada perubahan.
   useEffect(() => {
     const dataToSync = {
       section_id: selectedSection,
@@ -76,10 +70,6 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
     onDataChange,
   ]);
 
-  // --- HANDLERS (FUNGSI UNTUK INTERAKSI USER) ---
-  // Tugasnya hanya mengubah state lokal. Tidak perlu panggil onDataChange lagi.
-
-  // [PERBAIKAN UTAMA #2] Handler radio button diperbaiki
   const handleSectionChange = (e, value) => {
     e.preventDefault();
     const newSection = selectedSection === value ? "" : value;
@@ -120,7 +110,6 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
     onDataChange(dataToSync);
   };
 
-
   const handleClassChange = (opt) => {
     const value = opt ? opt.value : "";
     setSelectedClass(value);
@@ -147,9 +136,6 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
   const handleMajorChange = (opt) => {
     setSelectedMajor(opt ? opt.value : "");
   };
-
-  // --- OPSI & LOGIKA TAMPILAN (TIDAK BERUBAH) ---
-  // Semua kode di bawah ini sudah benar dan tidak perlu diubah.
 
   const sectionOptions = sections.map((sec) => ({
     value: sec.section_id,
@@ -237,7 +223,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
           <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                errors?.section_id ? styles.programSectionErrorLabel : ""
+                errors?.section_id && !selectedSection
+                  ? styles.programSectionErrorLabel
+                  : ""
               }`}
             >
               Section
@@ -271,7 +259,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
           <div className={styles.gradeField}>
             <div
               className={`${styles.sectionTitleText} ${
-                errors?.class_id ? styles.programSectionErrorLabel : ""
+                errors?.class_id && !selectedClass
+                  ? styles.programSectionErrorLabel
+                  : ""
               }`}
             >
               Grade
@@ -289,7 +279,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
               isClearable
               isDisabled={!selectedSection}
               classNamePrefix={
-                errors?.class_id ? "react-select-error" : "react-select"
+                errors?.class_id && !selectedClass
+                  ? "react-select-error"
+                  : "react-select"
               }
               // Menambahkan styles agar transparan & tanpa border, sesuai style awal Anda
               styles={{
@@ -298,7 +290,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
                   border: 0,
                   boxShadow: "none",
                   backgroundColor: "transparent",
-                  width: "150px", // Sesuaikan lebar jika perlu
+                  width: "150px",
                 }),
               }}
             />
@@ -308,7 +300,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
             <div className={styles.majorField}>
               <div
                 className={`${styles.sectionTitleText} ${
-                  errors?.major_id ? styles.programSectionErrorLabel : ""
+                  errors?.major_id && !selectedMajor
+                    ? styles.programSectionErrorLabel
+                    : ""
                 }`}
               >
                 Major
@@ -327,7 +321,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
                 onChange={handleMajorChange}
                 isClearable
                 classNamePrefix={
-                  errors?.major_id ? "react-select-error" : "react-select"
+                  errors?.major_id && !selectedMajor
+                    ? "react-select-error"
+                    : "react-select"
                 }
                 // Menambahkan styles agar transparan & tanpa border
                 styles={{
@@ -336,8 +332,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
                     border: 0,
                     boxShadow: "none",
                     backgroundColor: "transparent",
-                    width: "200px", // Sesuaikan lebar jika perlu
-                    
+                    width: "200px",
                   }),
                 }}
               />
@@ -354,7 +349,9 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
           <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                errors?.program_id ? styles.programSectionErrorLabel : ""
+                errors?.program_id && !selectedProgram
+                  ? styles.programSectionErrorLabel
+                  : ""
               }`}
             >
               Program
@@ -386,7 +383,7 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
                     className={styles.valueRegular}
                     type="text"
                     value={programOther}
-                    onBlur={handleProgramOtherBlur} 
+                    onBlur={handleProgramOtherBlur}
                     onClick={(e) => e.stopPropagation()}
                     onChange={handleProgramOtherChange}
                     placeholder="Enter other program"

@@ -324,7 +324,6 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  
 }
 
 .discountInputWrapper {
@@ -333,14 +332,12 @@ textarea::placeholder {
   align-items: center;
   gap: 24px;
   width: 50%;
-  
+
   padding: 0px 30px;
 }
 
 .discountSelectWrapper {
   min-width: 250px;
-  
-
 }
 
 .notesWrapper {

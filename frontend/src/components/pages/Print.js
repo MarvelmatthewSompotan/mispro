@@ -21,8 +21,7 @@ import {
 function Print() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { applicationId, version } = location.state || {};
-
+  const { applicationId, version } = location.state || {}
   const printRef = useRef();
   const [previewData, setPreviewData] = useState(null);
   const [sectionOptions, setSectionOptions] = useState([]);

@@ -18,7 +18,7 @@ import {
 import Select from "react-select";
 import styles from "./StudentProfile.module.css";
 import placeholderImage from "../../../../assets/user.png";
-import ConfirmUpdatePopup from "../PopUpConfirmUpdate/PopUpConfirmUpdate.js";
+import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate.js";
 import UpdatedNotification from "../UpdateNotification/UpdateNotification.js";
 import gsap from "gsap";
 
@@ -28,7 +28,7 @@ const RadioDisplay = ({
   isEditing,
   name,
   value,
-  onChange, // Ini akan menjadi fungsi handleRadioChange
+  onChange, 
 }) => {
   const content = (
     <>
@@ -3315,8 +3315,8 @@ const StudentProfile = () => {
       </div>
       <ConfirmUpdatePopup
         isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)} // Fungsi untuk menutup popup (tombol cancel)
-        onConfirm={handleConfirmUpdate} // Fungsi untuk konfirmasi update
+        onClose={() => setIsPopupOpen(false)} 
+        onConfirm={handleConfirmUpdate} 
         isUpdating={isUpdating}
       />
 
