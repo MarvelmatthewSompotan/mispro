@@ -36,7 +36,8 @@
   position: relative;
   font-size: 20px;
   line-height: 100%;
-  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 }
 
 .fieldWrapper {
@@ -171,7 +172,8 @@
 .cancel {
   position: relative;
   line-height: 100%;
-  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+	font-weight: Regular;
 }
 
 .bAddSubject {

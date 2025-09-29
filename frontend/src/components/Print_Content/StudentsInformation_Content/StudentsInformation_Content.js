@@ -134,35 +134,35 @@ const StudentsInformationContent = ({ data }) => {
           <div className={styles.address}>
             <div className={styles.field}>Address</div>
             <b className={styles.answer}>
-              {formatValue(data.request_data.street)}
+              {formatValue(data.request_data.street)},
             </b>
-            <b className={styles.answer}>,</b>
+            <b className={styles.answer}></b>
             <div className={styles.parent}>
               <b className={styles.answer}>
                 {formatValue(data.request_data.rt)}
               </b>
               <b className={styles.answer}>/</b>
               <b className={styles.answer}>
-                {formatValue(data.request_data.rw)}
+                {formatValue(data.request_data.rw)},
               </b>
             </div>
-            <b className={styles.answer}>,</b>
+            <b className={styles.answer}></b>
             <b className={styles.answer}>
-              {formatValue(data.request_data.village)}
+              {formatValue(data.request_data.village)},
             </b>
-            <b className={styles.answer}>,</b>
+            <b className={styles.answer}></b>
             <b className={styles.answer}>
-              {formatValue(data.request_data.district)}
+              {formatValue(data.request_data.district)},
             </b>
-            <b className={styles.answer}>,</b>
+            <b className={styles.answer}></b>
             <b className={styles.answer}>
-              {formatValue(data.request_data.city_regency)}
+              {formatValue(data.request_data.city_regency)},
             </b>
-            <b className={styles.answer}>,</b>
+            <b className={styles.answer}></b>
             <b className={styles.answer}>
-              {formatValue(data.request_data.province)}
+              {formatValue(data.request_data.province)},
             </b>
-            <b className={styles.answer}>,</b>
+            <b className={styles.answer}></b>
             <div className={styles.parent}>
               <b className={styles.answer}>(</b>
               <b className={styles.answer}>

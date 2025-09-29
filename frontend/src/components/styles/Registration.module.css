@@ -1,7 +1,6 @@
 .registrationPage {
   flex: 1;
   padding: 32px;
-  max-width: 1400px;
   margin: 0 auto;
   background: #fafbff;
   font-family: 'Poppins', sans-serif;
@@ -33,6 +32,7 @@
   margin-bottom: 24px;
   padding-bottom: 5px;
   position: relative;
+
   width: 500px;
   border: 2px solid #5f84fe;
   border-radius: 5px;
