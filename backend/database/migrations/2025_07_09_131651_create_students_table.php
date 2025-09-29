@@ -33,7 +33,8 @@ return new class extends Migration
             $table->string('previous_school', 100)->nullable();
             $table->string('religion', 30);
             $table->string('academic_status_other', 50)->nullable();
-            $table->enum('enrollment_status', ['ACTIVE','TRANSFEREE','GRADUATE','UNREGISTER']);
+            $table->enum('enrollment_status', ['ACTIVE','INACTIVE',]);
+            $table->enum('inactive_status', ['GRADUATE','TRANSFEREE','EXPELLED']);
             $table->enum('student_status', ['New','Old','Transferee']);
             $table->enum('academic_status', ['REGULAR','SIT-IN','OTHER']);
             $table->timestamp('registration_date')->useCurrent();
