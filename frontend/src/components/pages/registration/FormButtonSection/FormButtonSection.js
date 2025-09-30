@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import PopUpConfirm from "../PopUpConfirm";
+import PopUpConfirm from "../../PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
-import DuplicateStudentPopup from "./DuplicateStudentPopup";
+import DuplicateStudentPopup from "../PopUp/DuplicateStudentPopup";
 
 const FormButtonSection = ({
   validationState,
@@ -49,7 +49,41 @@ const FormButtonSection = ({
     if (!allFormData.studentInfo || !allFormData.studentInfo.nickname) {
       errors.studentInfo = { ...errors.studentInfo, nickname: true };
     }
-    if (!allFormData.studentInfo || !allFormData.studentInfo.nisn) {
+    let isNisnRequired = true; // Asumsikan NISN selalu wajib secara default
+
+    // Ambil data section dan class dari form
+    const sectionId = allFormData.program?.section_id;
+    const classId = allFormData.program?.class_id;
+
+    if (sharedData && sectionId && classId) {
+      const selectedSection = sharedData.sections?.find(
+        (s) => s.section_id === sectionId
+      );
+      const selectedClass = sharedData.classes?.find(
+        (c) => c.class_id === classId
+      );
+
+      if (selectedSection) {
+        // Kondisi 1: Jika section adalah 'ECP', NISN tidak wajib
+        if (selectedSection.name === "ECP") {
+          isNisnRequired = false;
+        }
+        // Kondisi 2: Jika section adalah 'Elementary School' DAN grade adalah '1' atau '2', NISN tidak wajib
+        else if (
+          selectedSection.name === "Elementary School" &&
+          selectedClass &&
+          ["1", "2"].includes(selectedClass.grade)
+        ) {
+          isNisnRequired = false;
+        }
+      }
+    }
+
+    // Lakukan validasi HANYA jika isNisnRequired adalah true
+    if (
+      isNisnRequired &&
+      (!allFormData.studentInfo || !allFormData.studentInfo.nisn)
+    ) {
       errors.studentInfo = { ...errors.studentInfo, nisn: true };
     }
 
@@ -168,9 +202,8 @@ const FormButtonSection = ({
     if (!allFormData.facilities || !allFormData.facilities.residence_id) {
       errors.facilities = { ...errors.facilities, residence_id: true };
     }
-
     if (
-      !allFormData.facilities ||
+      allFormData.facilities?.transportation_id &&
       allFormData.facilities.transportation_policy !== "Signed"
     ) {
       errors.facilities = { ...errors.facilities, transportation_policy: true };

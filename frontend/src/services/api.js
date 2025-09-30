@@ -1,7 +1,7 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 export const login = async (email, password) => {
-  const res = await fetch(`${API_BASE_URL}/api/login`, {
+  const res = await fetch(`${API_BASE_URL}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ export const login = async (email, password) => {
 
 export const getMe = async () => {
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE_URL}/api/me`, {
+  const res = await fetch(`${API_BASE_URL}/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -35,7 +35,7 @@ export const getMe = async () => {
 
 export const getRegistrationOptions = async () => {
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE_URL}/api/registration-option`, {
+  const res = await fetch(`${API_BASE_URL}/registration-option`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -54,7 +54,7 @@ export const startRegistration = async (
   registrationDate
 ) => {
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE_URL}/api/registration/start`, {
+  const res = await fetch(`${API_BASE_URL}/registration/start`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export const startRegistration = async (
 
 export const logout = async () => {
   const token = localStorage.getItem('token');
-  await fetch(`${API_BASE_URL}/api/logout`, {
+  await fetch(`${API_BASE_URL}/logout`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -87,7 +87,7 @@ export const logout = async () => {
 
 export const submitRegistrationForm = async (draftId, formData) => {
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE_URL}/api/registration/store/${draftId}`, {
+  const res = await fetch(`${API_BASE_URL}/registration/store/${draftId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -112,9 +112,7 @@ export const submitRegistrationForm = async (draftId, formData) => {
 export const searchStudent = async (searchTerm) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    `${API_BASE_URL}/api/students/search?search=${encodeURIComponent(
-      searchTerm
-    )}`,
+    `${API_BASE_URL}/students/search?search=${encodeURIComponent(searchTerm)}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -132,7 +130,7 @@ export const searchStudent = async (searchTerm) => {
 export const getStudentLatestApplication = async (studentId) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    `${API_BASE_URL}/api/students/${studentId}/latest-application`,
+    `${API_BASE_URL}/students/${studentId}/latest-application`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -147,10 +145,10 @@ export const getStudentLatestApplication = async (studentId) => {
   return await res.json();
 };
 
-export const getRegistrationPreview = async (applicationId, version) => {
+export const getRegistrationPreview = async (applicationId, versionId) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    `${API_BASE_URL}/api/registration/preview/${applicationId}/version/${version}`,
+    `${API_BASE_URL}/registration/preview/${applicationId}/version/${versionId}`,
     {
       method: 'GET',
       headers: {
@@ -187,7 +185,7 @@ export const getStudents = async ({
     params.append('section_id', section_id);
   }
 
-  const res = await fetch(`${API_BASE_URL}/api/students?${params.toString()}`, {
+  const res = await fetch(`${API_BASE_URL}/students?${params.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -203,7 +201,7 @@ export const getStudents = async ({
 // --- FUNGSI BARU UNTUK UPDATE PROFIL MAHASISWA ---
 export const updateStudent = async (studentId, studentData) => {
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE_URL}/api/students/${studentId}/update`, {
+  const res = await fetch(`${API_BASE_URL}/students/${studentId}/update`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -246,14 +244,11 @@ export const getRegistrations = async ({
     params.append('section_id', section_id);
   }
 
-  const res = await fetch(
-    `${API_BASE_URL}/api/registration?${params.toString()}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const res = await fetch(`${API_BASE_URL}/registration?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!res.ok) {
     throw new Error('Failed to fetch registration data');
@@ -266,7 +261,7 @@ export const getRegistrations = async ({
 export const getStudentHistoryDates = async (studentId) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    `${API_BASE_URL}/api/students/${studentId}/history-dates`,
+    `${API_BASE_URL}/students/${studentId}/history-dates`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -283,7 +278,7 @@ export const getStudentHistoryDates = async (studentId) => {
 
 export const getHistoryDetail = async (versionId) => {
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE_URL}/api/students/history/${versionId}`, {
+  const res = await fetch(`${API_BASE_URL}/students/history/${versionId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

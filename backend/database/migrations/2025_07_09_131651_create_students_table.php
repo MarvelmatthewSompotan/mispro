@@ -29,10 +29,12 @@ return new class extends Migration
             $table->enum('gender', ['MALE', 'FEMALE']);
             $table->string('phone_number', 20);
             $table->string('email', 100);
+            $table->string('photo_path', 255)->nullable();
             $table->string('previous_school', 100)->nullable();
             $table->string('religion', 30);
             $table->string('academic_status_other', 50)->nullable();
-            $table->enum('enrollment_status', ['ACTIVE','TRANSFEREE','GRADUATE','UNREGISTER']);
+            $table->enum('enrollment_status', ['ACTIVE','INACTIVE',]);
+            $table->string('inactive_status', 50)->nullable();
             $table->enum('student_status', ['New','Old','Transferee']);
             $table->enum('academic_status', ['REGULAR','SIT-IN','OTHER']);
             $table->timestamp('registration_date')->useCurrent();

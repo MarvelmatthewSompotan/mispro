@@ -8,7 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1001; /* Pastikan z-index lebih tinggi dari popup konfirmasi */
+  z-index: 2001; /* Pastikan z-index lebih tinggi dari popup konfirmasi */
 }
 
 .notificationContent {

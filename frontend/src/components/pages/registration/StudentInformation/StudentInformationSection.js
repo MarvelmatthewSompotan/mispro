@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
-import { getRegistrationOptions } from "../../../services/api";
+import { getRegistrationOptions } from "../../../../services/api";
 const genderOptions = ["MALE", "FEMALE"];
 const citizenshipOptions = ["Indonesia", "Non Indonesia"];
 
@@ -75,13 +75,13 @@ const StudentInformationSection = ({
     placeholder: (baseStyles) => ({
       ...baseStyles,
       fontFamily: "Poppins, Arial, sans-serif",
-      fontWeight: 400, // <-- 400 adalah font regular (tidak bold)
+      fontWeight: 400,
       color: "rgba(128, 128, 128, 0.6)",
     }),
     singleValue: (baseStyles) => ({
       ...baseStyles,
       fontFamily: "Poppins, Arial, sans-serif",
-      fontWeight: "bold", // Teks yang sudah dipilih tetap bold
+      fontWeight: "bold",
       color: "#000",
     }),
   };
@@ -160,34 +160,29 @@ const StudentInformationSection = ({
 
   useEffect(() => {
     if (errors) {
-      if (errors.first_name !== undefined) setFirstNameError(errors.first_name);
-      if (errors.nickname !== undefined) setNicknameError(errors.nickname);
-      if (errors.nisn !== undefined) setNisnError(errors.nisn);
-      if (errors.nik !== undefined) setNikError(errors.nik);
-      if (errors.kitas !== undefined) setKitasError(errors.kitas);
-      if (errors.gender !== undefined) setGenderError(errors.gender);
-      if (errors.family_rank !== undefined) setRankError(errors.family_rank);
-      if (errors.citizenship !== undefined)
-        setCitizenshipError(errors.citizenship);
-      if (errors.religion !== undefined) setReligionError(errors.religion);
-      if (errors.place_of_birth !== undefined)
-        setPlaceOfBirthError(errors.place_of_birth);
-      if (errors.date_of_birth !== undefined)
-        setDateOfBirthError(errors.date_of_birth);
-      if (errors.email !== undefined) setEmailError(errors.email);
-      if (errors.previous_school !== undefined)
-        setPreviousSchoolError(errors.previous_school);
-      if (errors.phone_number !== undefined) setPhoneError(errors.phone_number);
-      if (errors.street !== undefined) setStreetError(errors.street);
-      if (errors.rt !== undefined) setRtError(errors.rt);
-      if (errors.rw !== undefined) setRwError(errors.rw);
-      if (errors.village !== undefined) setVillageError(errors.village);
-      if (errors.district !== undefined) setDistrictError(errors.district);
-      if (errors.city_regency !== undefined) setCityError(errors.city_regency);
-      if (errors.province !== undefined) setProvinceError(errors.province);
-      if (errors.other !== undefined) setOtherAddressError(errors.other);
-      if (errors.academic_status !== undefined)
-        setAcademicStatusError(errors.academic_status);
+      setFirstNameError(!!errors.first_name);
+      setNicknameError(!!errors.nickname);
+      setNisnError(!!errors.nisn);
+      setNikError(!!errors.nik);
+      setKitasError(!!errors.kitas);
+      setGenderError(!!errors.gender);
+      setRankError(!!errors.family_rank);
+      setCitizenshipError(!!errors.citizenship);
+      setReligionError(!!errors.religion);
+      setPlaceOfBirthError(!!errors.place_of_birth);
+      setDateOfBirthError(!!errors.date_of_birth);
+      setEmailError(!!errors.email);
+      setPreviousSchoolError(!!errors.previous_school);
+      setPhoneError(!!errors.phone_number);
+      setStreetError(!!errors.street);
+      setRtError(!!errors.rt);
+      setRwError(!!errors.rw);
+      setVillageError(!!errors.village);
+      setDistrictError(!!errors.district);
+      setCityError(!!errors.city_regency);
+      setProvinceError(!!errors.province);
+      setOtherAddressError(!!errors.other);
+      setAcademicStatusError(!!errors.academic_status);
     }
   }, [errors]);
 
@@ -229,7 +224,7 @@ const StudentInformationSection = ({
     let dataToUpdate = { academic_status: selectedValue };
 
     if (selectedValue !== "OTHER") {
-      setAcademicStatusOther(""); // Kosongkan text field 'other'
+      setAcademicStatusOther("");
       dataToUpdate.academic_status_other = "";
     } else {
       dataToUpdate.academic_status_other = academicStatusOther;
@@ -237,7 +232,6 @@ const StudentInformationSection = ({
     onDataChange(dataToUpdate);
   };
 
-  // --- [BARU] Handler untuk input teks 'Other' ---
   const handleAcademicStatusOtherChange = (e) => {
     const value = e.target.value;
     setAcademicStatusOther(value);
@@ -751,7 +745,12 @@ const StudentInformationSection = ({
           <div className={styles.row}>
             {citizenship === "Non Indonesia" && (
               <div className={styles.nicknameField}>
-                <label className={styles.label} htmlFor="kitas">
+                <label
+                  className={`${styles.label} ${
+                    kitasError ? styles.errorLabel : ""
+                  }`}
+                  htmlFor="kitas"
+                >
                   KITAS
                 </label>
                 <div className={styles.inputWithError}>
@@ -775,7 +774,12 @@ const StudentInformationSection = ({
               </div>
             )}
             <div className={styles.nicknameField}>
-              <label className={styles.label} htmlFor="nisn">
+              <label
+                className={`${styles.label} ${
+                  nisnError ? styles.errorLabel : ""
+                }`}
+                htmlFor="nisn"
+              >
                 Nomor Induk Siswa Nasional (NISN)
               </label>
               <div className={styles.inputWithError}>
@@ -799,7 +803,12 @@ const StudentInformationSection = ({
             </div>
             {citizenship === "Indonesia" && (
               <div className={styles.nicknameField}>
-                <label className={styles.label} htmlFor="nik">
+                <label
+                  className={`${styles.label} ${
+                    nikError ? styles.errorLabel : ""
+                  }`}
+                  htmlFor="nik"
+                >
                   Nomor Induk Kependudukan (NIK)
                 </label>
                 <div className={styles.inputWithError}>
@@ -1013,7 +1022,6 @@ const StudentInformationSection = ({
                 )}
               </div>
             </div>
-            {/* GANTI BLOK JSX UNTUK ACADEMIC STATUS DENGAN INI */}
             <div
               className={`${styles.academicStatusField} ${
                 academicStatusError ? styles.errorFieldWrapper : ""

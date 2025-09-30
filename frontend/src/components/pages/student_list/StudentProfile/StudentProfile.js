@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import {
   getStudentLatestApplication,
   getRegistrationOptions,
@@ -18,7 +18,7 @@ import {
 import Select from "react-select";
 import styles from "./StudentProfile.module.css";
 import placeholderImage from "../../../../assets/user.png";
-import ConfirmUpdatePopup from "../PopUpConfirmUpdate/PopUpConfirmUpdate.js";
+import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate.js";
 import UpdatedNotification from "../UpdateNotification/UpdateNotification.js";
 import gsap from "gsap";
 
@@ -28,7 +28,7 @@ const RadioDisplay = ({
   isEditing,
   name,
   value,
-  onChange, // Ini akan menjadi fungsi handleRadioChange
+  onChange,
 }) => {
   const content = (
     <>
@@ -100,6 +100,8 @@ const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
 
 const StudentProfile = () => {
   const { studentId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
   const [formData, setFormData] = useState(null);
   const [options, setOptions] = useState(null);
@@ -128,6 +130,13 @@ const StudentProfile = () => {
     kitas: "",
     nisn: "",
   });
+
+  useEffect(() => {
+    if (!location.state?.fromList) {
+      navigate("/students", { replace: true });
+    }
+    // eslint-disable-next-line
+  }, []);
 
   // Fetch options untuk dropdowns
   useEffect(() => {
@@ -543,7 +552,26 @@ const StudentProfile = () => {
       const newVal = currentVal === value ? "" : value;
       const newFormData = { ...prevData, [name]: newVal };
 
+      // [MODIFIKASI] Logika baru ditambahkan di sini
+      if (name === "residence_id") {
+        const selectedResidence = options.residence_halls.find(
+          (r) => String(r.residence_id) === String(newVal)
+        );
+        // Jika yang dipilih adalah asrama (Dormitory)
+        if (
+          selectedResidence &&
+          selectedResidence.type.toLowerCase().includes("dormitory")
+        ) {
+          // Reset semua data transportasi
+          newFormData.transportation_id = "";
+          newFormData.pickup_point_id = "";
+          newFormData.pickup_point_custom = "";
+          newFormData.transportation_policy = "Not Signed";
+        }
+      }
+
       if (name === "transportation_id") {
+        // Logika yang sudah ada sebelumnya tetap dipertahankan
         const selectedTransport = options.transportations.find(
           (t) => String(t.transport_id) === String(newVal)
         );
@@ -647,13 +675,10 @@ const StudentProfile = () => {
 
     // 2. Validasi Facilities
     const facilitiesErrors = {};
-    if (!fullFormData.transportation_id) {
-      facilitiesErrors.transportation_id = "Transportation is required.";
-    }
     if (!fullFormData.residence_id) {
       facilitiesErrors.residence_id = "Residence Hall is required.";
     }
-    if (fullFormData.transportation_policy !== "Signed") {
+    if (fullFormData.transportation_id && fullFormData.transportation_policy !== "Signed") {
       facilitiesErrors.transportation_policy = "Policy must be signed.";
     }
     if (fullFormData.residence_hall_policy !== "Signed") {
@@ -845,6 +870,16 @@ const StudentProfile = () => {
     return options.residence_halls;
   }, [options, formData?.transportation_id]);
 
+  const isDormitorySelected = useMemo(() => {
+    if (!options?.residence_halls || !formData?.residence_id) return false;
+    const selectedResidence = options.residence_halls.find(
+      (r) => String(r.residence_id) === String(formData.residence_id)
+    );
+    return selectedResidence
+      ? selectedResidence.type.toLowerCase().includes("dormitory")
+      : false;
+  }, [options, formData?.residence_id]);
+
   if (loading) return <div style={{ padding: "20px" }}></div>;
   if (!formData)
     return <div style={{ padding: "20px" }}>Student not found.</div>;
@@ -867,42 +902,46 @@ const StudentProfile = () => {
   return (
     <div className={styles.profilePage}>
       <div className={styles.topActionHeader}>
-        <div className={styles.historyContainer} ref={historyRef}>
-          <button
-            className={styles.actionButton}
-            onClick={handleViewHistoryClick}
-            disabled={isEditing}
-          >
-            {selectedVersionId
-              ? "Back to Latest Version"
-              : "View version history"}
-          </button>
-          {isHistoryVisible && (
-            <ul className={styles.historyDropdown}>
-              {isLoadingHistory ? (
-                <li className={styles.historyInfoItem}>Loading...</li>
-              ) : historyDates.length > 0 ? (
-                historyDates.map((version) => (
-                  <li
-                    key={version.version_id}
-                    className={styles.historyItem}
-                    onClick={() => handleHistoryDateChange(version.version_id)}
-                  >
-                    {new Date(version.updated_at).toLocaleString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </li>
-                ))
-              ) : (
-                <li className={styles.historyInfoItem}>No history found.</li>
-              )}
-            </ul>
-          )}
-        </div>
+        {!isEditing && (
+          <div className={styles.historyContainer} ref={historyRef}>
+            <button
+              className={styles.actionButton}
+              onClick={handleViewHistoryClick}
+              // Atribut 'disabled' tidak lagi diperlukan karena komponennya disembunyikan
+            >
+              {selectedVersionId
+                ? "Back to Latest Version"
+                : "View version history"}
+            </button>
+            {isHistoryVisible && (
+              <ul className={styles.historyDropdown}>
+                {isLoadingHistory ? (
+                  <li className={styles.historyInfoItem}>Loading...</li>
+                ) : historyDates.length > 0 ? (
+                  historyDates.map((version) => (
+                    <li
+                      key={version.version_id}
+                      className={styles.historyItem}
+                      onClick={() =>
+                        handleHistoryDateChange(version.version_id)
+                      }
+                    >
+                      {new Date(version.updated_at).toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </li>
+                  ))
+                ) : (
+                  <li className={styles.historyInfoItem}>No history found.</li>
+                )}
+              </ul>
+            )}
+          </div>
+        )}
 
         {isEditing ? (
           <>
@@ -922,12 +961,15 @@ const StudentProfile = () => {
             </button>
           </>
         ) : (
-          <button
-            className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
-            onClick={() => setIsEditing(true)}
-          >
-            Edit
-          </button>
+          // Tombol Edit hanya akan muncul jika TIDAK sedang melihat histori
+          !selectedVersionId && (
+            <button
+              className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
+              onClick={() => setIsEditing(true)}
+            >
+              Edit
+            </button>
+          )
         )}
       </div>
 
@@ -947,7 +989,11 @@ const StudentProfile = () => {
         <div className={styles.infoContainer}>
           {/* STUDENT'S INFORMATION */}
           <div id="studentInfo" className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>STUDENT’S INFORMATION</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1450,9 +1496,7 @@ const StudentProfile = () => {
                       value={studentInfo.family_rank || ""}
                       onChange={handleStudentInfoChange}
                       className={`${styles.formInput} ${
-                        errors.studentInfo?.family_rank
-                          ? styles.errorInput
-                          : ""
+                        errors.studentInfo?.family_rank ? styles.errorInput : ""
                       }`}
                       placeholder={errors.studentInfo?.family_rank || "Rank"}
                     />
@@ -1886,7 +1930,11 @@ const StudentProfile = () => {
 
           {/* PROGRAM */}
           <div className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>PROGRAM</b>
             </div>
             <div className={styles.sectionContent}>
@@ -1946,122 +1994,119 @@ const StudentProfile = () => {
 
           {/* FACILITIES */}
           <div id="facilities" className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>FACILITIES</b>
             </div>
             <div className={styles.sectionContent}>
-              <div className={styles.optionsRow}>
-                <div
-                  className={`${styles.optionLabel} ${
-                    errors.facilities?.transportation_id
-                      ? styles.errorLabel
-                      : ""
-                  }`}
-                >
-                  Transportation
-                </div>
-                {options?.transportations.map((t) => (
-                  <RadioDisplay
-                    key={t.transport_id}
-                    label={t.type}
-                    isSelected={
-                      String(formData.transportation_id) ===
-                      String(t.transport_id)
-                    }
-                    isEditing={isEditing}
-                    name="transportation_id"
-                    value={t.transport_id}
-                    onChange={handleRadioChange}
-                  />
-                ))}
-              </div>
-              {errors.facilities?.transportation_id && (
-                <div className={styles.inlineErrorMessageFullWidth}>
-                  {errors.facilities.transportation_id}
-                </div>
+              {/* [LOGIKA BARU] Seluruh blok transportasi hanya tampil jika asrama TIDAK dipilih */}
+              {!isDormitorySelected && (
+                <>
+                  <div className={styles.optionsRow}>
+                    <div className={styles.optionLabel}>Transportation</div>
+                    {options?.transportations.map((t) => (
+                      <RadioDisplay
+                        key={t.transport_id}
+                        label={t.type}
+                        isSelected={
+                          String(formData.transportation_id) ===
+                          String(t.transport_id)
+                        }
+                        isEditing={isEditing}
+                        name="transportation_id"
+                        value={t.transport_id}
+                        onChange={handleRadioChange}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Blok untuk pickup point & custom pickup point */}
+                  {/* Tampil jika transportasi dipilih & bukan 'Own car' */}
+                  {formData.transportation_id &&
+                    selectedTransportType.toLowerCase() !== "own car" && (
+                      <>
+                        {/* Dropdown Pickup Point */}
+                        <div className={styles.optionsRow}>
+                          <div className={styles.field} style={{ flexGrow: 2 }}>
+                            <div className={styles.fieldLabel}>
+                              Pickup point
+                            </div>
+                            {isEditing ? (
+                              <select
+                                name="pickup_point_id"
+                                value={formData.pickup_point_id || ""}
+                                onChange={handleChange}
+                                className={styles.formInput}
+                                disabled={!!formData.pickup_point_custom}
+                              >
+                                <option value="">Select pickup point</option>
+                                {options?.pickup_points.map((opt) => (
+                                  <option
+                                    key={opt.pickup_point_id}
+                                    value={opt.pickup_point_id}
+                                  >
+                                    {opt.name}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <b className={styles.fieldValue}>
+                                {getNameById(
+                                  "pickup_points",
+                                  formData.pickup_point_id
+                                ) || "-"}
+                              </b>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Custom Pickup Point */}
+                        <div className={styles.optionsRow}>
+                          <div className={styles.field} style={{ flexGrow: 2 }}>
+                            <div className={styles.fieldLabel}>
+                              Custom Pickup point
+                            </div>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                name="pickup_point_custom"
+                                value={formData.pickup_point_custom || ""}
+                                onChange={handleChange}
+                                className={styles.formInput}
+                                disabled={!!formData.pickup_point_id}
+                                placeholder="Enter custom pickup location"
+                              />
+                            ) : (
+                              <b className={styles.fieldValue}>
+                                {formData.pickup_point_custom || "-"}
+                              </b>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                  <div className={styles.optionsRow}>
+                    <CheckboxDisplay
+                      label="Transportation Policy"
+                      isSelected={formData.transportation_policy === "Signed"}
+                      isEditing={isEditing}
+                      name="transportation_policy"
+                      onChange={handleChange}
+                    />
+                    {errors.facilities?.transportation_policy && (
+                      <div className={styles.inlineErrorMessage}>
+                        {errors.facilities.transportation_policy}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
 
-              {/* ===== BLOK BARU UNTUK PICKUP POINT & CUSTOM PICKUP POINT ===== */}
-              {/* Tampilkan blok ini hanya jika transportasi dipilih & bukan 'Own car' */}
-              {formData.transportation_id &&
-                selectedTransportType.toLowerCase() !== "own car" && (
-                  <>
-                    {/* Dropdown Pickup Point */}
-                    <div className={styles.optionsRow}>
-                      <div className={styles.field} style={{ flexGrow: 2 }}>
-                        <div className={styles.fieldLabel}>Pickup point</div>
-                        {isEditing ? (
-                          <select
-                            name="pickup_point_id"
-                            value={formData.pickup_point_id || ""}
-                            onChange={handleChange}
-                            className={styles.formInput}
-                            // Nonaktifkan jika custom pickup point sedang diisi
-                            disabled={!!formData.pickup_point_custom}
-                          >
-                            <option value="">Select pickup point</option>
-                            {options?.pickup_points.map((opt) => (
-                              <option
-                                key={opt.pickup_point_id}
-                                value={opt.pickup_point_id}
-                              >
-                                {opt.name}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <b className={styles.fieldValue}>
-                            {getNameById(
-                              "pickup_points",
-                              formData.pickup_point_id
-                            ) || "-"}
-                          </b>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Custom Pickup Point */}
-                    <div className={styles.optionsRow}>
-                      <div className={styles.field} style={{ flexGrow: 2 }}>
-                        <div className={styles.fieldLabel}>
-                          Custom Pickup point
-                        </div>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            name="pickup_point_custom"
-                            value={formData.pickup_point_custom || ""}
-                            onChange={handleChange}
-                            className={styles.formInput}
-                            // Nonaktifkan jika dropdown pickup point sudah dipilih
-                            disabled={!!formData.pickup_point_id}
-                            placeholder="Enter custom pickup location"
-                          />
-                        ) : (
-                          <b className={styles.fieldValue}>
-                            {formData.pickup_point_custom || "-"}
-                          </b>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-              <div className={styles.optionsRow}>
-                <CheckboxDisplay
-                  label="Transportation Policy"
-                  isSelected={formData.transportation_policy === "Signed"}
-                  isEditing={isEditing}
-                  name="transportation_policy"
-                  onChange={handleChange}
-                />
-                {errors.facilities?.transportation_policy && (
-                  <div className={styles.inlineErrorMessage}>
-                    {errors.facilities.transportation_policy}
-                  </div>
-                )}
-              </div>
-
+              {/* Bagian Residence Hall tetap ditampilkan */}
               <div className={styles.optionsRow}>
                 <div
                   className={`${styles.optionLabel} ${
@@ -2109,7 +2154,11 @@ const StudentProfile = () => {
 
           {/* PARENT / GUARDIAN INFORMATION */}
           <div id="parentGuardian" className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>PARENT / GUARDIAN INFORMATION</b>
             </div>
             <div className={styles.sectionContent}>
@@ -3237,7 +3286,11 @@ const StudentProfile = () => {
 
           {/* TERM OF PAYMENT */}
           <div className={styles.infoSection}>
-            <div className={`${styles.sectionHeader} ${isEditing ? styles.sectionHeaderEditing : ''}`}>
+            <div
+              className={`${styles.sectionHeader} ${
+                isEditing ? styles.sectionHeaderEditing : ""
+              }`}
+            >
               <b>TERM OF PAYMENT</b>
             </div>
             <div className={styles.paymentContentWrapper}>
@@ -3315,8 +3368,8 @@ const StudentProfile = () => {
       </div>
       <ConfirmUpdatePopup
         isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)} // Fungsi untuk menutup popup (tombol cancel)
-        onConfirm={handleConfirmUpdate} // Fungsi untuk konfirmasi update
+        onClose={() => setIsPopupOpen(false)}
+        onConfirm={handleConfirmUpdate}
         isUpdating={isUpdating}
       />
 

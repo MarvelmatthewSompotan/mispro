@@ -266,6 +266,7 @@ class StudentController extends Controller
                 'nisn' => 'sometimes|nullable|string',
                 'nik' => 'sometimes|nullable|integer',
                 'kitas' => 'sometimes|nullable|string',
+                'photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg|max:5048',
 
                 // Address
                 'street'       => 'sometimes|nullable|string',
@@ -334,6 +335,18 @@ class StudentController extends Controller
             // --- Update data di tabel terkait ---
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
             $student->update(array_filter($studentData, fn($v) => !is_null($v)));
+            \Log::info($request->all());
+            if ($request->hasFile('photo')) {
+                \Log::info('Upload file masuk');
+                $timestamp = now()->format('Y-m-d_H-i-s');
+                $extension = $request->file('photo')->getClientOriginalExtension();
+                $fileName = "{$timestamp}.{$extension}";
+                $folder = "students/{$student->student_id}";
+                $photoPath = $request->file('photo')->storeAs($folder, $fileName, 'public');
+                \Log::info('Photo path tersimpan: '.$photoPath);
+                $student->photo_path = $photoPath;
+                $student->save();
+            }
 
             if ($request->hasAny(['street', 'city_regency', 'province'])) {
                 $student->studentAddress()->updateOrCreate(
@@ -407,6 +420,11 @@ class StudentController extends Controller
 
             // Gabungkan data lama + input baru
             $newRequestData = array_merge($oldRequestData, $validated);
+            
+            if ($student->photo_path) {
+                $newRequestData['photo_path'] = $student->photo_path;
+                $newRequestData['photo_url']  = asset('storage/' . $student->photo_path);
+            }
 
             // Ambil enrollment terbaru student
             $latestEnrollment = $student->enrollments()
@@ -438,6 +456,7 @@ class StudentController extends Controller
                 'application_id' => $latestVersion->application_id,
                 'version' => $nextVersion,
                 'updated_by' => $userName,
+                'action' => 'update',
                 'data_snapshot' => json_encode($newSnapshot, JSON_PRETTY_PRINT),
             ]);
 
@@ -447,7 +466,9 @@ class StudentController extends Controller
                 'success' => true,
                 'message' => 'Student updated and new application form version created',
                 'version_id' => $newVersion->version_id,
-                'data' => $newSnapshot,
+                'data' => array_merge($newSnapshot, [
+                    'photo_url' => $student->photo_path ? asset('storage/'.$student->photo_path) : null,
+                ]),
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
@@ -510,8 +531,5 @@ class StudentController extends Controller
             ], 500);
         }
     }
-
-
-
 
 }

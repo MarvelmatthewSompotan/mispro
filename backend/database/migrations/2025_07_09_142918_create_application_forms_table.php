@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('application_forms', function (Blueprint $table) {
             $table->id('application_id');
             $table->unsignedBigInteger('enrollment_id')->nullable();
-            $table->enum('status', ['Draft', 'Submitted', 'Approved', 'Rejected']);
+            $table->enum('status', ['Confirmed', 'Cenceled']);
             $table->dateTime('submitted_at')->nullable();
             $table->integer('version')->default(1);
             $table->timestamp('created_at')->useCurrent();

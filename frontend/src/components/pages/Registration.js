@@ -115,19 +115,27 @@
     const handleNewForm = () => setShowPopupForm(true);
     const handleClosePopup = () => setShowPopupForm(false);
 
-    const handleCreateForm = (formData) => {
-      navigate('/registration-form', { state: formData });
-      setShowPopupForm(false);
-    };
+  const handleCreateForm = (formData) => {
+    navigate('/registration-form', {
+      state: {
+        ...formData,
+        fromPopup: true,
+      },
+    });
+    setShowPopupForm(false);
+  };
 
-    // Row click → navigate ke print page
-    const handleRowClick = (row) => {
-      const applicationId = row.application_form?.application_id || null;
-      const version = row.version_id ?? null;
-      navigate('/print', {
-        state: { applicationId, version },
-      });
-    };
+  // Row click → navigate ke print page
+  const handleRowClick = (row) => {
+    const applicationId = row.application_form?.application_id || null;
+    const version = row.version_id ?? null;
+    console.log('Row data:', row);
+    console.log('Application ID:', applicationId);
+    console.log('Version:', version);
+    navigate('/print', {
+      state: { applicationId, version },
+    });
+  };
 
     return (                                                                                                                                                                                                                                                                                                    
       <div className={styles.registrationPage}>

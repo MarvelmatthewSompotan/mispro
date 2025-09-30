@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./FacilitiesSection.module.css";
-import checkBoxIcon from "../../../assets/CheckBox.png";
-import { getRegistrationOptions } from "../../../services/api";
+import checkBoxIcon from "../../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../../services/api";
 
 const FacilitiesSection = ({
   onDataChange,
@@ -88,9 +88,6 @@ const FacilitiesSection = ({
     }
   }, [prefill]);
 
-  // =====================================================================
-  // ▼▼▼ FUNGSI INI SUDAH DIPERBARUI ▼▼▼
-  // =====================================================================
   const handleTransportationChange = (value) => {
     const newSelectedId =
       selectedTransportation === String(value) ? "" : String(value);
@@ -143,9 +140,6 @@ const FacilitiesSection = ({
       residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
     });
   };
-  // =====================================================================
-  // ▲▲▲ AKHIR DARI FUNGSI YANG DIPERBARUI ▲▲▲
-  // =====================================================================
 
   const handlePickupPointChange = (value) => {
     setSelectedPickupPoint(String(value));
@@ -201,28 +195,46 @@ const FacilitiesSection = ({
   };
 
   const handleResidenceChange = (value) => {
-    // Jika user mengklik option yang sudah dipilih, batalkan pilihan
-    if (selectedResidence === String(value)) {
-      setSelectedResidence("");
+    // 1. Tentukan ID residensial baru (bisa kosong jika opsi yang sama diklik ulang)
+    const newSelectedResidence =
+      selectedResidence === String(value) ? "" : String(value);
+    setSelectedResidence(newSelectedResidence); // 2. Update state lokal untuk me-render ulang UI
 
-      onDataChange({
-        transportation_id: selectedTransportation
-          ? Number(selectedTransportation)
-          : null,
-        pickup_point_id:
-          selectedPickupPoint && String(selectedPickupPoint).trim() !== ""
-            ? Number(selectedPickupPoint)
-            : null,
-        pickup_point_custom: pickupPointCustom,
-        transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
-        residence_id: null, // Nilai yang diubah
-        residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
-      });
+    // 3. Cek apakah pilihan baru adalah asrama (dormitory)
+    const selectedResidenceObj = residenceHalls.find(
+      (r) => r.residence_id === Number(newSelectedResidence)
+    );
+    const isDormitory = selectedResidenceObj
+      ? selectedResidenceObj.type.toLowerCase().includes("dormitory")
+      : false;
+
+    // 4. Siapkan data dasar yang akan selalu dikirim ke parent
+    let dataToSend = {
+      residence_id: newSelectedResidence ? Number(newSelectedResidence) : null,
+      residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
+    };
+
+    // 5. Logika Kondisional untuk Data Transportasi
+    if (isDormitory) {
+      // Jika asrama dipilih, reset semua state lokal & data transportasi
+      setSelectedTransportation("");
+      setSelectedPickupPoint("");
+      setPickupPointCustom("");
+      setTransportationPolicy(false);
+
+      // Tambahkan data transportasi yang sudah direset ke dalam payload yang akan dikirim
+      dataToSend = {
+        ...dataToSend,
+        transportation_id: null,
+        pickup_point_id: null,
+        pickup_point_custom: "",
+        transportation_policy: "Not Signed",
+      };
     } else {
-      // Jika user memilih option baru
-      setSelectedResidence(String(value));
-
-      onDataChange({
+      // Jika BUKAN asrama yang dipilih (atau pilihan dikosongkan),
+      // pertahankan data transportasi yang ada saat ini.
+      dataToSend = {
+        ...dataToSend,
         transportation_id: selectedTransportation
           ? Number(selectedTransportation)
           : null,
@@ -232,10 +244,11 @@ const FacilitiesSection = ({
             : null,
         pickup_point_custom: pickupPointCustom,
         transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
-        residence_id: value != null ? Number(value) : null, // Nilai yang diubah
-        residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
-      });
+      };
     }
+
+    // 6. Kirim semua data yang sudah diperbarui ke parent dalam satu panggilan
+    onDataChange(dataToSend);
   };
 
   const handleResidencePolicy = (e) => {
@@ -300,136 +313,153 @@ const FacilitiesSection = ({
     }
   }, [selectedResidence, errors, forceError]);
 
+  const selectedResidenceObj = residenceHalls.find(
+    (r) => r.residence_id === Number(selectedResidence)
+  );
+  const isDormitorySelected = selectedResidenceObj
+    ? selectedResidenceObj.type.toLowerCase().includes("dormitory")
+    : false;
+
   return (
     <div className={styles.container}>
       <div className={styles.sectionHeader}>
         <span className={styles.headerText}>FACILITIES</span>
       </div>
       <div className={styles.contentWrapper}>
-        <div className={styles.transportationSection}>
-          <div className={styles.sectionTitle}>
-            <div
-              className={`${styles.sectionTitleText} ${
-                errors?.pickup_point_id || forceError?.pickup_point_id
-                  ? styles.facilitiesSectionErrorLabel
-                  : ""
-              }`}
-            >
-              Transportation
+        {!isDormitorySelected && (
+          <div className={styles.transportationSection}>
+            <div className={styles.sectionTitle}>
+              <div
+                className={`${styles.sectionTitleText} ${
+                  errors?.pickup_point_id || forceError?.pickup_point_id
+                    ? styles.facilitiesSectionErrorLabel
+                    : ""
+                }`}
+              >
+                Transportation
+              </div>
             </div>
-          </div>
 
-          {transportations.map((transport) => (
-            <div key={transport.transport_id} className={styles.optionItem}>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="transportation"
-                  value={String(transport.transport_id)}
-                  checked={
-                    selectedTransportation === String(transport.transport_id)
-                  }
-                  onChange={() =>
-                    handleTransportationChange(transport.transport_id)
-                  }
-                  onClick={() =>
-                    handleTransportationChange(transport.transport_id)
-                  }
-                  className={styles.hiddenRadio}
+            {transportations.map((transport) => (
+              <div key={transport.transport_id} className={styles.optionItem}>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="transportation"
+                    value={String(transport.transport_id)}
+                    checked={
+                      selectedTransportation === String(transport.transport_id)
+                    }
+                    onChange={() =>
+                      handleTransportationChange(transport.transport_id)
+                    }
+                    onClick={() =>
+                      handleTransportationChange(transport.transport_id)
+                    }
+                    className={styles.hiddenRadio}
+                  />
+                  <div className={styles.radioButton}>
+                    <div className={styles.radioButtonCircle} />
+                    {selectedTransportation ===
+                      String(transport.transport_id) && (
+                      <div className={styles.radioButtonSelected} />
+                    )}
+                  </div>
+                  <div className={styles.label}>{transport.type}</div>
+                </label>
+              </div>
+            ))}
+
+            {(() => {
+              if (!selectedTransportation) return false;
+              const selectedTransport = transportations.find(
+                (t) => t.transport_id === Number(selectedTransportation)
+              );
+              if (!selectedTransport) return false;
+              return selectedTransport.type
+                .toLowerCase()
+                .includes("school bus");
+            })() && (
+              <div
+                ref={pickupInputRef}
+                className={`${styles.pickupPointField}`}
+              >
+                <div className={styles.label}>Pickup point</div>
+                <select
+                  value={selectedPickupPoint ?? ""}
+                  onChange={(e) => handlePickupPointChange(e.target.value)}
+                  className={styles.pickupPointSelect}
+                >
+                  <option value="">Select pickup point</option>
+                  {pickupPoints.map((point) => (
+                    <option
+                      key={point.pickup_point_id}
+                      value={String(point.pickup_point_id)}
+                    >
+                      {point.name}
+                    </option>
+                  ))}
+                </select>
+                <img
+                  className={styles.pickupPointIcon}
+                  alt=""
+                  src="Polygon 2.svg"
                 />
-                <div className={styles.radioButton}>
-                  <div className={styles.radioButtonCircle} />
-                  {selectedTransportation ===
-                    String(transport.transport_id) && (
-                    <div className={styles.radioButtonSelected} />
+              </div>
+            )}
+
+            {(() => {
+              if (!selectedTransportation) return false;
+              const selectedTransport = transportations.find(
+                (t) => t.transport_id === Number(selectedTransportation)
+              );
+              if (!selectedTransport) return false;
+              return selectedTransport.type
+                .toLowerCase()
+                .includes("school bus");
+            })() && (
+              <div className={styles.optionItem}>
+                <label className={styles.label}>Custom Pickup Point</label>
+                <input
+                  type="text"
+                  value={pickupPointCustom}
+                  onChange={handlePickupPointCustom}
+                  placeholder="Enter custom pickup point"
+                  className={styles.customInput}
+                />
+              </div>
+            )}
+
+            <div className={styles.optionItem}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={transportationPolicy}
+                  onChange={handleTransportationPolicy}
+                  className={styles.hiddenCheckbox}
+                />
+                <div className={styles.checkBox}>
+                  <div className={styles.checkBoxSquare} />
+                  {transportationPolicy && (
+                    <img
+                      className={styles.checkBoxIcon}
+                      alt=""
+                      src={checkBoxIcon}
+                    />
                   )}
                 </div>
-                <div className={styles.label}>{transport.type}</div>
+                <div className={styles.label}>Transportation policy</div>
               </label>
             </div>
-          ))}
-
-          {(() => {
-            if (!selectedTransportation) return false;
-            const selectedTransport = transportations.find(
-              (t) => t.transport_id === Number(selectedTransportation)
-            );
-            if (!selectedTransport) return false;
-            return selectedTransport.type !== "Own car";
-          })() && (
-            <div ref={pickupInputRef} className={`${styles.pickupPointField}`}>
-              <div className={styles.label}>Pickup point</div>
-              <select
-                value={selectedPickupPoint ?? ""}
-                onChange={(e) => handlePickupPointChange(e.target.value)}
-                className={styles.pickupPointSelect}
-              >
-                <option value="">Select pickup point</option>
-                {pickupPoints.map((point) => (
-                  <option
-                    key={point.pickup_point_id}
-                    value={String(point.pickup_point_id)}
-                  >
-                    {point.name}
-                  </option>
-                ))}
-              </select>
-              <img
-                className={styles.pickupPointIcon}
-                alt=""
-                src="Polygon 2.svg"
-              />
-            </div>
-          )}
-
-          {(() => {
-            if (!selectedTransportation) return false;
-            const selectedTransport = transportations.find(
-              (t) => t.transport_id === Number(selectedTransportation)
-            );
-            if (!selectedTransport) return false;
-            return selectedTransport.type !== "Own car";
-          })() && (
-            <div className={styles.optionItem}>
-              <label className={styles.label}>Custom Pickup Point</label>
-              <input
-                type="text"
-                value={pickupPointCustom}
-                onChange={handlePickupPointCustom}
-                placeholder="Enter custom pickup point"
-                className={styles.customInput}
-              />
-            </div>
-          )}
-
-          <div className={styles.optionItem}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={transportationPolicy}
-                onChange={handleTransportationPolicy}
-                className={styles.hiddenCheckbox}
-              />
-              <div className={styles.checkBox}>
-                <div className={styles.checkBoxSquare} />
-                {transportationPolicy && (
-                  <img
-                    className={styles.checkBoxIcon}
-                    alt=""
-                    src={checkBoxIcon}
-                  />
-                )}
-              </div>
-              <div className={styles.label}>Transportation policy</div>
-            </label>
           </div>
-        </div>
+        )}
 
         <div className={styles.residenceHallSection}>
           <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                errors?.residence_id || forceError?.residence_id
+                (errors?.residence_id || forceError?.residence_id) &&
+                !selectedResidence
                   ? styles.facilitiesSectionErrorLabel
                   : ""
               }`}
@@ -438,11 +468,7 @@ const FacilitiesSection = ({
             </div>
           </div>
 
-          {/* ===================================================================== */}
-          {/* ▼▼▼ BAGIAN JSX INI SUDAH DIPERBARUI ▼▼▼ */}
-          {/* ===================================================================== */}
           {(() => {
-            // Kalkulasi tipe transportasi yang dipilih
             const selectedTransport = transportations.find(
               (t) => t.transport_id === Number(selectedTransportation)
             );
@@ -452,19 +478,15 @@ const FacilitiesSection = ({
             const isTransportRestricted =
               transportType === "own car" || transportType === "school bus";
 
-            // Lakukan mapping dan filter di dalamnya
             return residenceHalls.map((residence) => {
               const isDormitoryOption = residence.type
                 .toLowerCase()
                 .includes("dormitory");
 
-              // Jika transportasi yang dipilih adalah Own Car/School Bus DAN opsi ini adalah asrama,
-              // maka jangan tampilkan (return null).
               if (isTransportRestricted && isDormitoryOption) {
                 return null;
               }
 
-              // Jika tidak, tampilkan seperti biasa.
               return (
                 <div key={residence.residence_id} className={styles.optionItem}>
                   <label className={styles.radioLabel}>
@@ -495,9 +517,6 @@ const FacilitiesSection = ({
               );
             });
           })()}
-          {/* ===================================================================== */}
-          {/* ▲▲▲ AKHIR DARI BAGIAN JSX YANG DIPERBARUI ▲▲▲ */}
-          {/* ===================================================================== */}
 
           <div className={styles.optionItem}>
             <label className={styles.checkboxLabel}>
