@@ -474,6 +474,7 @@ class RegistrationController extends Controller
                     'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
                     'registration_date' => $draft->registration_date_draft,
                     'enrollment_status' => 'ACTIVE',
+                    'inactive_status' => null,
                     'nik' => $validated['nik'],
                     'kitas' => $validated['kitas'],
                     'nisn' => $validated['nisn'],
@@ -923,7 +924,7 @@ class RegistrationController extends Controller
         $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
         return ApplicationForm::create([
             'enrollment_id' => $enrollment->enrollment_id,
-            'status' => 'Submitted',
+            'status' => 'Confirmed',
             'submitted_at' => now(),
             'version' => $nextVersion,
         ]);
