@@ -75,7 +75,7 @@
 
     // Initial load
     useEffect(() => {
-      fetchRegistrations();
+      fetchRegistrations({ per_page: perPage });
       // eslint-disable-next-line 
     }, []);
 
