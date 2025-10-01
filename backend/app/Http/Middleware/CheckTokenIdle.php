@@ -18,7 +18,7 @@ class CheckTokenIdle
         $token = $request->user()?->currentAccessToken();
 
         if ($token && $token->last_used_at) {
-            if (now()->diffInMinutes($token->last_used_at) > 5) {
+            if (now()->diffInMinutes($token->last_used_at) > 120) {
                 $token->delete();
                 return response()->json([
                     'success' => false,

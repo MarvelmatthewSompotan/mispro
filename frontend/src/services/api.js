@@ -2,24 +2,24 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 export const login = async (email, password) => {
   const res = await fetch(`${API_BASE_URL}/login`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ email, password }),
   });
 
   if (!res.ok) {
-    throw new Error('Login gagal');
+    throw new Error("Login gagal");
   }
 
   const data = await res.json();
-  localStorage.setItem('token', data.token);
+  localStorage.setItem("token", data.token);
   return data;
 };
 
 export const getMe = async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(`${API_BASE_URL}/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -27,14 +27,14 @@ export const getMe = async () => {
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch user data');
+    throw new Error("Failed to fetch user data");
   }
 
   return await res.json();
 };
 
 export const getRegistrationOptions = async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(`${API_BASE_URL}/registration-option`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -42,7 +42,7 @@ export const getRegistrationOptions = async () => {
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch registration option');
+    throw new Error("Failed to fetch registration option");
   }
 
   return await res.json();
@@ -53,11 +53,11 @@ export const startRegistration = async (
   semester,
   registrationDate
 ) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(`${API_BASE_URL}/registration/start`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
@@ -68,29 +68,29 @@ export const startRegistration = async (
   });
 
   if (!res.ok) {
-    throw new Error('Failed to start registration');
+    throw new Error("Failed to start registration");
   }
 
   return await res.json();
 };
 
 export const logout = async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   await fetch(`${API_BASE_URL}/logout`, {
-    method: 'POST',
+    method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  localStorage.removeItem('token');
+  localStorage.removeItem("token");
 };
 
 export const submitRegistrationForm = async (draftId, formData) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(`${API_BASE_URL}/registration/store/${draftId}`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(formData),
@@ -98,7 +98,7 @@ export const submitRegistrationForm = async (draftId, formData) => {
 
   if (!res.ok) {
     const errorData = await res.json();
-    const error = new Error('Failed to submit registration form');
+    const error = new Error("Failed to submit registration form");
     error.response = {
       data: errorData,
       status: res.status,
@@ -110,7 +110,7 @@ export const submitRegistrationForm = async (draftId, formData) => {
 };
 
 export const searchStudent = async (searchTerm) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(
     `${API_BASE_URL}/students/search?search=${encodeURIComponent(searchTerm)}`,
     {
@@ -121,14 +121,14 @@ export const searchStudent = async (searchTerm) => {
   );
 
   if (!res.ok) {
-    throw new Error('Failed to search student');
+    throw new Error("Failed to search student");
   }
 
   return await res.json();
 };
 
 export const getStudentLatestApplication = async (studentId) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(
     `${API_BASE_URL}/students/${studentId}/latest-application`,
     {
@@ -139,27 +139,27 @@ export const getStudentLatestApplication = async (studentId) => {
   );
 
   if (!res.ok) {
-    throw new Error('Failed to get latest application data');
+    throw new Error("Failed to get latest application data");
   }
 
   return await res.json();
 };
 
 export const getRegistrationPreview = async (applicationId, versionId) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(
     `${API_BASE_URL}/registration/preview/${applicationId}/version/${versionId}`,
     {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     }
   );
 
   if (!res.ok) {
-    throw new Error('Failed to fetch registration preview');
+    throw new Error("Failed to fetch registration preview");
   }
 
   return await res.json();
@@ -167,22 +167,22 @@ export const getRegistrationPreview = async (applicationId, versionId) => {
 
 // --- FUNGSI BARU UNTUK HALAMAN STUDENT LIST ---
 export const getStudents = async ({
-  search = '',
+  search = "",
   school_year_id = null,
   semester_id = null,
   section_id = null,
 } = {}) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   const params = new URLSearchParams();
-  if (search) params.append('search', search);
-  if (school_year_id) params.append('school_year_id', school_year_id);
-  if (semester_id) params.append('semester_id', semester_id);
+  if (search) params.append("search", search);
+  if (school_year_id) params.append("school_year_id", school_year_id);
+  if (semester_id) params.append("semester_id", semester_id);
 
   if (Array.isArray(section_id)) {
-    section_id.forEach((id) => params.append('section_id[]', id));
+    section_id.forEach((id) => params.append("section_id[]", id));
   } else if (section_id) {
-    params.append('section_id', section_id);
+    params.append("section_id", section_id);
   }
 
   const res = await fetch(`${API_BASE_URL}/students?${params.toString()}`, {
@@ -192,28 +192,47 @@ export const getStudents = async ({
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch student data');
+    throw new Error("Failed to fetch student data");
   }
 
   return await res.json();
 };
 
-// --- FUNGSI BARU UNTUK UPDATE PROFIL MAHASISWA ---
+// --- FUNGSI BARU UNTUK UPDATE PROFIL MAHASISWA (MODIFIED) ---
 export const updateStudent = async (studentId, studentData) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
+  const formData = new FormData();
+
+  formData.append("_method", "PATCH");
+
+  // Loop through the data object and append each key-value pair to FormData
+  for (const key in studentData) {
+    if (Object.prototype.hasOwnProperty.call(studentData, key)) {
+      const value = studentData[key];
+      // The 'photo' key will hold a File object if a new one is selected.
+      // Make sure not to append null or undefined values.
+      if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
+    }
+  }
+
+  // Use fetch with FormData
   const res = await fetch(`${API_BASE_URL}/students/${studentId}/update`, {
-    method: 'PATCH',
+    method: "POST", // Use POST for multipart/form-data requests
     headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
+      // IMPORTANT: Do NOT set 'Content-Type'.
+      // The browser will automatically set it to 'multipart/form-data'
+      // with the correct boundary when the body is a FormData object.
+      Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(studentData),
+    body: formData,
   });
 
   if (!res.ok) {
     const errorData = await res.json();
-    const error = new Error('Failed to update student data');
+    const error = new Error("Failed to update student data");
     error.response = {
       data: errorData,
       status: res.status,
@@ -226,22 +245,22 @@ export const updateStudent = async (studentId, studentData) => {
 
 // --- FUNGSI INI DIKEMBALIKAN UNTUK HALAMAN REGISTRATION ---
 export const getRegistrations = async ({
-  search = '',
+  search = "",
   school_year_id = null,
   semester_id = null,
   section_id = null,
 } = {}) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   const params = new URLSearchParams();
-  if (search) params.append('search', search);
-  if (school_year_id) params.append('school_year_id', school_year_id);
-  if (semester_id) params.append('semester_id', semester_id);
+  if (search) params.append("search", search);
+  if (school_year_id) params.append("school_year_id", school_year_id);
+  if (semester_id) params.append("semester_id", semester_id);
 
   if (Array.isArray(section_id)) {
-    section_id.forEach((id) => params.append('section_id[]', id));
+    section_id.forEach((id) => params.append("section_id[]", id));
   } else if (section_id) {
-    params.append('section_id', section_id);
+    params.append("section_id", section_id);
   }
 
   const res = await fetch(`${API_BASE_URL}/registration?${params.toString()}`, {
@@ -251,7 +270,7 @@ export const getRegistrations = async ({
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch registration data');
+    throw new Error("Failed to fetch registration data");
   }
 
   return await res.json();
@@ -259,7 +278,7 @@ export const getRegistrations = async ({
 
 // --- FUNGSI BARU UNTUK HISTORY ---
 export const getStudentHistoryDates = async (studentId) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(
     `${API_BASE_URL}/students/${studentId}/history-dates`,
     {
@@ -270,14 +289,14 @@ export const getStudentHistoryDates = async (studentId) => {
   );
 
   if (!res.ok) {
-    throw new Error('Failed to fetch student history dates');
+    throw new Error("Failed to fetch student history dates");
   }
 
   return await res.json();
 };
 
 export const getHistoryDetail = async (versionId) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const res = await fetch(`${API_BASE_URL}/students/history/${versionId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -285,7 +304,7 @@ export const getHistoryDetail = async (versionId) => {
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch history detail');
+    throw new Error("Failed to fetch history detail");
   }
 
   return await res.json();

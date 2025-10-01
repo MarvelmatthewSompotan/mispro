@@ -331,7 +331,10 @@ const FacilitiesSection = ({
             <div className={styles.sectionTitle}>
               <div
                 className={`${styles.sectionTitleText} ${
-                  errors?.pickup_point_id || forceError?.pickup_point_id
+                  (errors?.pickup_point_id &&
+                    !selectedPickupPoint &&
+                    !pickupPointCustom) ||
+                  (errors?.transportation_policy && !transportationPolicy)
                     ? styles.facilitiesSectionErrorLabel
                     : ""
                 }`}
@@ -458,8 +461,8 @@ const FacilitiesSection = ({
           <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                (errors?.residence_id || forceError?.residence_id) &&
-                !selectedResidence
+                (errors?.residence_id && !selectedResidence) ||
+                (errors?.residence_hall_policy && !residencePolicy)
                   ? styles.facilitiesSectionErrorLabel
                   : ""
               }`}

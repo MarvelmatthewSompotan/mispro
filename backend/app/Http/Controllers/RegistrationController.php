@@ -932,6 +932,12 @@ class RegistrationController extends Controller
 
     private function createApplicationFormVersion($applicationForm, $validated, $student, $enrollment)
     {
+
+        if ($student && $student->photo_path) {
+            $validated['photo_path'] = $student->photo_path;
+            $validated['photo_url']  = asset('storage/' . $student->photo_path);
+        }
+
         $dataSnapshot = [
             'student_id' => $student->student_id,
             'registration_id' => $enrollment->registration_id,
