@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo } from 'react';
-// Ganti import CSS biasa dengan CSS Module
 import styles from '../styles/Pagination.module.css'; 
+import Arrow from '../../assets/Vector.png';
 
 // Props interface untuk komponen Pagination
 const Pagination = ({  
@@ -44,7 +44,7 @@ const Pagination = ({
                     className={styles.paginationButton} // Class khusus tombol jika perlu
                     title="Previous Page"
                 >
-                    &#x25C0; 
+                    <img src={Arrow} alt="Previous" width={20} height={20} />
                 </button>
                 
                 {/* Wrapper untuk Angka Halaman Aktif */}
@@ -59,12 +59,12 @@ const Pagination = ({
                     className={styles.paginationButton} // Class khusus tombol jika perlu
                     title="Next Page"
                 >
-                    &#x25B6; 
+                    <img src={Arrow} alt="Next" width={20} height={20} style={{ transform: 'rotate(180deg)' }} />
                 </button>
             </div>
         </div>
     );
 };
 
-// Hapus FunctionComponent dari type karena ini adalah functional component
+
 export default Pagination;
