@@ -64,6 +64,7 @@ class Student extends Model
         'student_status', 
         'academic_status', 
         'enrollment_status',
+        'inactive_status',
         'age',
         'nik',
         'kitas',
