@@ -14,6 +14,7 @@ return [
     | and production domains which access your API via a frontend SPA.
     |
     */
+    'personal_access_token_model' => App\Models\PersonalAccessToken::class,
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
@@ -47,7 +48,7 @@ return [
     |
     */
 
-    'expiration' => 5,
+    'expiration' => 720,
 
     /*
     |--------------------------------------------------------------------------

@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\ApplicationFormVersion;
+use App\Services\AuditTrailService;
 
 class StudentController extends Controller
 {
+    protected $auditTrail;
+
+    public function __construct(AuditTrailService $auditTrail)
+    {
+        $this->auditTrail = $auditTrail;
+    }
+
     public function index(Request $request)
     {
         $query = Student::select(
@@ -148,6 +156,7 @@ class StudentController extends Controller
                 'city_regency' => $requestData['city_regency'] ?? '',
                 'province' => $requestData['province'] ?? '',
                 'other' => $requestData['other'] ?? '',
+                'photo' => $requestData['photo_path'] ?? '',
             ],
             'program' => [
                 'section_id' => $requestData['section_id'] ?? '',
@@ -335,15 +344,12 @@ class StudentController extends Controller
             // --- Update data di tabel terkait ---
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
             $student->update(array_filter($studentData, fn($v) => !is_null($v)));
-            \Log::info($request->all());
             if ($request->hasFile('photo')) {
-                \Log::info('Upload file masuk');
                 $timestamp = now()->format('Y-m-d_H-i-s');
                 $extension = $request->file('photo')->getClientOriginalExtension();
                 $fileName = "{$timestamp}.{$extension}";
                 $folder = "students/{$student->student_id}";
                 $photoPath = $request->file('photo')->storeAs($folder, $fileName, 'public');
-                \Log::info('Photo path tersimpan: '.$photoPath);
                 $student->photo_path = $photoPath;
                 $student->save();
             }
@@ -461,6 +467,11 @@ class StudentController extends Controller
             ]);
 
             DB::commit();
+
+             $this->auditTrail->log('update_student', [
+                'student_id' => $student->student_id,
+                'changes'    => $validated,
+            ]);
 
             return response()->json([
                 'success' => true,

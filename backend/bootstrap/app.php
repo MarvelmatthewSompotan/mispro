@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'idle' => \App\Http\Middleware\CheckTokenIdle::class,
+            'lifetime' => \App\Http\Middleware\CheckTokenLifetime::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

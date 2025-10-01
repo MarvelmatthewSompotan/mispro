@@ -25,9 +25,17 @@ use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ApplicationPreviewResource;
+use App\Services\AuditTrailService;
 
 class RegistrationController extends Controller
 {
+    protected $auditTrail;
+
+    public function __construct(AuditTrailService $auditTrail)
+    {
+        $this->auditTrail = $auditTrail;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -564,6 +572,11 @@ class RegistrationController extends Controller
             
             // Clear draft
             $draft->delete();
+            
+            $this->auditTrail->log('registration', [
+                'student_id' => $student->student_id,
+                'changes'    => $validated,
+            ]);
             
             DB::commit();
             
