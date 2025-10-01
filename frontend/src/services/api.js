@@ -230,6 +230,8 @@ export const getRegistrations = async ({
   school_year_id = null,
   semester_id = null,
   section_id = null,
+  page = 1,
+  per_page = 10,
 } = {}) => {
   const token = localStorage.getItem('token');
 
@@ -237,6 +239,8 @@ export const getRegistrations = async ({
   if (search) params.append('search', search);
   if (school_year_id) params.append('school_year_id', school_year_id);
   if (semester_id) params.append('semester_id', semester_id);
+  if (page) params.append('page', page); 
+  if (per_page) params.append('per_page', per_page);
 
   if (Array.isArray(section_id)) {
     section_id.forEach((id) => params.append('section_id[]', id));
