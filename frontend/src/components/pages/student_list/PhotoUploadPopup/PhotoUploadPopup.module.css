@@ -1,0 +1,98 @@
+/* src/components/PhotoUploadPopup/PhotoUploadPopup.module.css */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.popupContainer {
+  position: relative;
+  background-color: #fff;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+  z-index: 10;
+}
+.dragAndDrop {
+  position: relative;
+  height: 360px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+.dragAndDropYourFileHereParent {
+  align-self: stretch;
+  flex: 1;
+  border-radius: 12px;
+  border: 4px dashed #5f84fe;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+}
+.dragAndDropTitle {
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #5f84fe;
+}
+.or {
+  font-weight: 600;
+  color: #000;
+  font-size: 14px;
+}
+.dropYourFileWrapper {
+  align-self: stretch;
+  flex: 1;
+  border-radius: 12px;
+  background-color: #5f84fe;
+  border: 4px dashed #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dropYourFile {
+  font-weight: 600;
+  font-size: 20px;
+  color: #fff;
+}
+.browseButton {
+  border-radius: 5px;
+  background-color: #5f84fe;
+  display: flex;
+  padding: 10px 20px;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.browseText {
+  font-weight: 600;
+  font-size: 16px;
+}

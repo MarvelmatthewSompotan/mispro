@@ -65,6 +65,7 @@ const StudentList = () => {
         school_year_id: selectedYear || undefined,
         semester_id: selectedSemester || undefined,
         section_id: selectedSections.length > 0 ? selectedSections : undefined,
+        
       });
     }, 300);
 

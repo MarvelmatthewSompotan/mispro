@@ -27,7 +27,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar'])->group(f
     Route::get('/', [StudentController::class, 'index']);
     Route::get('/search', [StudentController::class, 'searchStudents']);
     Route::get('/{student_id}/latest-application', [StudentController::class, 'getLatestApplication']);
-    Route::post('/{student_id}/update', [StudentController::class, 'updateStudent']);
+    Route::patch('/{student_id}/update', [StudentController::class, 'updateStudent']);
     Route::get('/{studentId}/history-dates', [StudentController::class, 'getStudentHistoryDates']);
     Route::get('/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
   });

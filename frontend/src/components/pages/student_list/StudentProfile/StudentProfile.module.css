@@ -53,30 +53,66 @@
   background-color: #5f84fe;
   color: #fff;
 }
+/* File: src/components/pages/StudentProfile.module.css */
+
 /* --- Sidebar Kiri (Foto & ID) --- */
 .sidebar {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: center;
   gap: 16px;
+  font-family: Poppins, Arial, sans-serif;
 }
+
 .profileImage {
   width: 154px;
-  position: relative;
-  background-color: #d9d9d9;
   height: 208px;
+  background-color: #d9d9d9;
   object-fit: cover;
+  border-radius: 8px;
 }
+
+.addPhotoButton {
+  width: 154px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #5f84fe;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.addPhotoButton:hover {
+  background-color: #4a6dce;
+}
+
 .studentIdContainer {
-  align-self: stretch;
+  width: 154px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  padding: 6px 12px;
+  padding: 8px 12px;
   gap: 10px;
   font-size: 16px;
+
+  border-radius: 5px;
+}
+
+.idLabel {
+  color: #6c757d;
+}
+
+.idValue {
+  color: #212529;
+  font-weight: bold;
 }
 /* --- Kontainer Informasi Kanan --- */
 .infoContainer {

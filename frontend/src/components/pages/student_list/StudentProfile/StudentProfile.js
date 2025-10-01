@@ -20,7 +20,10 @@ import styles from "./StudentProfile.module.css";
 import placeholderImage from "../../../../assets/user.png";
 import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate.js";
 import UpdatedNotification from "../UpdateNotification/UpdateNotification.js";
+import PhotoUploadPopup from "../PhotoUploadPopup/PhotoUploadPopup.js";
 import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+gsap.registerPlugin(ScrollToPlugin);
 
 const RadioDisplay = ({
   label,
@@ -119,6 +122,9 @@ const StudentProfile = () => {
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const [selectedVersionId, setSelectedVersionId] = useState(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [isPhotoPopupOpen, setIsPhotoPopupOpen] = useState(false);
   const citizenshipOptions = [
     { value: "Indonesia", label: "Indonesia" },
     { value: "Non Indonesia", label: "Non Indonesia" },
@@ -152,6 +158,12 @@ const StudentProfile = () => {
       .catch((err) => console.error("Failed to fetch options:", err));
   }, []);
 
+  const handleFileSelect = (file) => {
+    setSelectedPhoto(file);
+    setPhotoPreview(URL.createObjectURL(file));
+    setIsPhotoPopupOpen(false); // Menutup popup setelah file dipilih
+  };
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -169,6 +181,7 @@ const StudentProfile = () => {
           ...studentData.facilities,
           ...studentData.parentGuardian,
           ...studentData.termOfPayment,
+          photo_url: studentData.studentInfo?.photo_url,
         };
         setProfileData(combinedData);
         setFormData(combinedData);
@@ -600,6 +613,8 @@ const StudentProfile = () => {
     setIsEditing(false);
     setErrors({});
     setValidationMessages({ nik: "", kitas: "", nisn: "" });
+    setSelectedPhoto(null);
+    setPhotoPreview(null);
   };
 
   const validateForm = () => {
@@ -614,7 +629,6 @@ const StudentProfile = () => {
     const requiredStudentFields = {
       first_name: "First name is required",
       nickname: "Nickname is required",
-      nisn: "NISN is required",
       gender: "Gender is required",
       family_rank: "Rank is required",
       citizenship: "Citizenship is required",
@@ -622,7 +636,6 @@ const StudentProfile = () => {
       place_of_birth: "Place of birth is required",
       date_of_birth: "Date of birth is required",
       email: "A valid email is required",
-      previous_school: "Previous school is required",
       phone_number: "Phone number is required",
       academic_status: "Academic status is required",
       street: "Street is required",
@@ -636,6 +649,36 @@ const StudentProfile = () => {
         studentInfoErrors[field] = requiredStudentFields[field];
       }
     }
+
+    let isNisnRequired = true;
+    if (options && fullFormData.section_id && fullFormData.class_id) {
+      const selectedSection = options.sections?.find(
+        (s) => String(s.section_id) === String(fullFormData.section_id)
+      );
+      const selectedClass = options.classes?.find(
+        (c) => String(c.class_id) === String(fullFormData.class_id)
+      );
+
+      if (selectedSection) {
+        if (selectedSection.name === "ECP") {
+          isNisnRequired = false;
+        } else if (
+          selectedSection.name === "Elementary School" &&
+          selectedClass &&
+          ["1", "2"].includes(selectedClass.grade)
+        ) {
+          isNisnRequired = false;
+        }
+      }
+    }
+
+    if (
+      isNisnRequired &&
+      (!fullFormData.nisn || !String(fullFormData.nisn).trim())
+    ) {
+      studentInfoErrors.nisn = "NISN is required.";
+    }
+
     if (fullFormData.email && !emailRegex.test(fullFormData.email)) {
       studentInfoErrors.email = "Invalid email format.";
     }
@@ -678,7 +721,31 @@ const StudentProfile = () => {
     if (!fullFormData.residence_id) {
       facilitiesErrors.residence_id = "Residence Hall is required.";
     }
-    if (fullFormData.transportation_id && fullFormData.transportation_policy !== "Signed") {
+    if (fullFormData.transportation_id && options?.transportations) {
+      const selectedTransport = options.transportations.find(
+        (t) => String(t.transport_id) === String(fullFormData.transportation_id)
+      );
+
+      if (
+        selectedTransport &&
+        selectedTransport.type.toLowerCase().includes("school bus")
+      ) {
+        const isPickupPointSelected = !!fullFormData.pickup_point_id;
+        const isCustomPickupPointFilled =
+          !!fullFormData.pickup_point_custom?.trim();
+
+        if (!isPickupPointSelected && !isCustomPickupPointFilled) {
+          facilitiesErrors.pickup_point_id =
+            "Pickup point must be selected or specified.";
+          // Anda mungkin perlu menambahkan elemen untuk menampilkan error ini di JSX
+        }
+      }
+    }
+
+    if (
+      fullFormData.transportation_id &&
+      fullFormData.transportation_policy !== "Signed"
+    ) {
       facilitiesErrors.transportation_policy = "Policy must be signed.";
     }
     if (fullFormData.residence_hall_policy !== "Signed") {
@@ -783,12 +850,34 @@ const StudentProfile = () => {
   // Fungsi ini akan dijalankan saat tombol "Yes, I'm sure" di popup diklik
   const handleConfirmUpdate = async () => {
     setIsUpdating(true);
+    const dataToSend = { ...formData, ...studentInfo };
+    if (selectedPhoto) {
+      dataToSend.photo = selectedPhoto;
+    }
+
     try {
-      await updateStudent(studentId, formData);
+      // 1. Tangkap response dari API update
+      const response = await updateStudent(studentId, dataToSend);
+
+      // 2. Buat ulang data profil dari response API, BUKAN dari fetch ulang
+      const updatedData = response.data.request_data;
+      const combinedData = {
+        student_id: response.data.student_id,
+        ...updatedData,
+      };
+
+      // 3. Update state secara manual
+      setProfileData(combinedData);
+      setFormData(combinedData);
+      setStudentInfo(updatedData); // Asumsi studentInfo fields ada di request_data
+
       setShowSuccess(true);
       setIsEditing(false);
-      setIsPopupOpen(false); // Tutup popup setelah berhasil
-      fetchData();
+      setIsPopupOpen(false);
+      setSelectedPhoto(null);
+      setPhotoPreview(null);
+
+      // fetchData(); // <-- Anda tidak perlu baris ini lagi!
     } catch (error) {
       console.error("Failed to update student:", error);
       alert(`Update failed: ${error.message}`);
@@ -796,7 +885,6 @@ const StudentProfile = () => {
       setIsUpdating(false);
     }
   };
-
   const getNameById = (type, id) => {
     if (!options || !id || !options[type] || !options[type].length) return id;
     const keyName = Object.keys(options[type][0])[0];
@@ -977,12 +1065,26 @@ const StudentProfile = () => {
         <div className={styles.sidebar}>
           <img
             className={styles.profileImage}
-            src={placeholderImage}
+            src={
+              photoPreview ||
+              (profileData && profileData.photo_url) ||
+              placeholderImage
+            }
             alt="Student"
           />
+
+          {isEditing && (
+            <div
+              className={styles.addPhotoButton}
+              onClick={() => setIsPhotoPopupOpen(true)}
+            >
+              Add photo
+            </div>
+          )}
+
           <div className={styles.studentIdContainer}>
-            <div className={styles.fieldLabel}>ID</div>
-            <b className={styles.fieldValue}>{formData.student_id}</b>
+            <span className={styles.idLabel}>ID</span>
+            <b className={styles.idValue}>{formData.student_id}</b>
           </div>
         </div>
 
@@ -2002,11 +2104,23 @@ const StudentProfile = () => {
               <b>FACILITIES</b>
             </div>
             <div className={styles.sectionContent}>
-              {/* [LOGIKA BARU] Seluruh blok transportasi hanya tampil jika asrama TIDAK dipilih */}
               {!isDormitorySelected && (
                 <>
                   <div className={styles.optionsRow}>
-                    <div className={styles.optionLabel}>Transportation</div>
+                    {/* Label utama "Transportation" dengan logika error gabungan */}
+                    <div
+                      className={`${styles.optionLabel} ${
+                        (errors.facilities?.pickup_point_id &&
+                          !formData.pickup_point_id &&
+                          !formData.pickup_point_custom) ||
+                        (errors.facilities?.transportation_policy &&
+                          formData.transportation_policy !== "Signed")
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Transportation
+                    </div>
                     {options?.transportations.map((t) => (
                       <RadioDisplay
                         key={t.transport_id}
@@ -2024,7 +2138,6 @@ const StudentProfile = () => {
                   </div>
 
                   {/* Blok untuk pickup point & custom pickup point */}
-                  {/* Tampil jika transportasi dipilih & bukan 'Own car' */}
                   {formData.transportation_id &&
                     selectedTransportType.toLowerCase() !== "own car" && (
                       <>
@@ -2089,19 +2202,34 @@ const StudentProfile = () => {
                       </>
                     )}
 
-                  <div className={styles.optionsRow}>
-                    <CheckboxDisplay
-                      label="Transportation Policy"
-                      isSelected={formData.transportation_policy === "Signed"}
-                      isEditing={isEditing}
-                      name="transportation_policy"
-                      onChange={handleChange}
-                    />
-                    {errors.facilities?.transportation_policy && (
-                      <div className={styles.inlineErrorMessage}>
-                        {errors.facilities.transportation_policy}
+                  {/* Pesan error real-time untuk pickup point (hanya muncul jika error) */}
+                  {errors.facilities?.pickup_point_id &&
+                    !formData.pickup_point_id &&
+                    !formData.pickup_point_custom && (
+                      <div className={styles.inlineErrorMessageFullWidth}>
+                        Pickup point must be selected or specified for School
+                        Bus.
                       </div>
                     )}
+
+                  {/* Transportation Policy dengan label dan pesan error real-time */}
+                  <div className={styles.optionsRow}>
+                    <div>
+                      <CheckboxDisplay
+                        label="Transportation Policy"
+                        isSelected={formData.transportation_policy === "Signed"}
+                        isEditing={isEditing}
+                        name="transportation_policy"
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    {errors.facilities?.transportation_policy &&
+                      formData.transportation_policy !== "Signed" && (
+                        <div className={styles.inlineErrorMessage}>
+                          Policy must be signed.
+                        </div>
+                      )}
                   </div>
                 </>
               )}
@@ -2110,11 +2238,17 @@ const StudentProfile = () => {
               <div className={styles.optionsRow}>
                 <div
                   className={`${styles.optionLabel} ${
-                    errors.facilities?.residence_id ? styles.errorLabel : ""
+                    (errors.facilities?.residence_id &&
+                      !formData.residence_id) ||
+                    (errors.facilities?.residence_hall_policy &&
+                      formData.residence_hall_policy !== "Signed")
+                      ? styles.errorLabel
+                      : ""
                   }`}
                 >
                   Residence Hall
                 </div>
+
                 {filteredResidenceHalls.map((r) => (
                   <RadioDisplay
                     key={r.residence_id}
@@ -2143,11 +2277,12 @@ const StudentProfile = () => {
                   name="residence_hall_policy"
                   onChange={handleChange}
                 />
-                {errors.facilities?.residence_hall_policy && (
-                  <div className={styles.inlineErrorMessage}>
-                    {errors.facilities.residence_hall_policy}
-                  </div>
-                )}
+                {errors.facilities?.transportation_policy &&
+                  formData.transportation_policy !== "Signed" && (
+                    <div className={styles.inlineErrorMessage}>
+                      Policy must be signed.
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -3376,6 +3511,12 @@ const StudentProfile = () => {
       <UpdatedNotification
         isOpen={showSuccess}
         onClose={() => setShowSuccess(false)}
+      />
+
+      <PhotoUploadPopup
+        isOpen={isPhotoPopupOpen}
+        onClose={() => setIsPhotoPopupOpen(false)}
+        onFileSelect={handleFileSelect}
       />
     </div>
   );

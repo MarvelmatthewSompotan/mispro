@@ -198,17 +198,36 @@ export const getStudents = async ({
   return await res.json();
 };
 
-// --- FUNGSI BARU UNTUK UPDATE PROFIL MAHASISWA ---
+// --- FUNGSI BARU UNTUK UPDATE PROFIL MAHASISWA (MODIFIED) ---
 export const updateStudent = async (studentId, studentData) => {
   const token = localStorage.getItem('token');
+  const formData = new FormData();
+
+  formData.append('_method', 'PATCH');
+
+  // Loop through the data object and append each key-value pair to FormData
+  for (const key in studentData) {
+    if (Object.prototype.hasOwnProperty.call(studentData, key)) {
+      const value = studentData[key];
+      // The 'photo' key will hold a File object if a new one is selected.
+      // Make sure not to append null or undefined values.
+      if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
+    }
+  }
+
+  // Use fetch with FormData
   const res = await fetch(`${API_BASE_URL}/students/${studentId}/update`, {
-    method: 'PATCH',
+    method: 'POST', // Use POST for multipart/form-data requests
     headers: {
-      'Content-Type': 'application/json',
+      // IMPORTANT: Do NOT set 'Content-Type'.
+      // The browser will automatically set it to 'multipart/form-data'
+      // with the correct boundary when the body is a FormData object.
       Accept: 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(studentData),
+    body: formData,
   });
 
   if (!res.ok) {
@@ -239,8 +258,8 @@ export const getRegistrations = async ({
   if (search) params.append('search', search);
   if (school_year_id) params.append('school_year_id', school_year_id);
   if (semester_id) params.append('semester_id', semester_id);
-  if (page) params.append('page', page); 
-  if (per_page) params.append('per_page', per_page);
+  if (page) params.append('page', page);
+  if (per_page) params.append('per_page', per_page);
 
   if (Array.isArray(section_id)) {
     section_id.forEach((id) => params.append('section_id[]', id));
