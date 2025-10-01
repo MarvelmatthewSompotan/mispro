@@ -32,9 +32,9 @@ return new class extends Migration
             $table->string('photo_path', 255)->nullable();
             $table->string('previous_school', 100)->nullable();
             $table->string('religion', 30);
+            $table->enum('active', ['YES','NO']);
+            $table->string('status', 50)->nullable();
             $table->string('academic_status_other', 50)->nullable();
-            $table->enum('enrollment_status', ['ACTIVE','INACTIVE',]);
-            $table->string('inactive_status', 50)->nullable();
             $table->enum('student_status', ['New','Old','Transferee']);
             $table->enum('academic_status', ['REGULAR','SIT-IN','OTHER']);
             $table->timestamp('registration_date')->useCurrent();
