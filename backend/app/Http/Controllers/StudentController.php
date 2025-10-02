@@ -157,7 +157,7 @@ class StudentController extends Controller
                 'city_regency' => $requestData['city_regency'] ?? '',
                 'province' => $requestData['province'] ?? '',
                 'other' => $requestData['other'] ?? '',
-                'photo' => $requestData['photo_url'] ?? '',
+                'photo_url' => $requestData['photo_url'] ?? '',
             ],
             'program' => [
                 'section_id' => $requestData['section_id'] ?? '',
@@ -470,7 +470,7 @@ class StudentController extends Controller
 
             DB::commit();
 
-             $this->auditTrail->log('update_student', [
+            $this->auditTrail->log('update_student', [
                 'student_id' => $student->student_id,
                 'changes'    => $validated,
             ]);
