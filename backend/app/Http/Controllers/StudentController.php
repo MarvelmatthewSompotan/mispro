@@ -157,7 +157,7 @@ class StudentController extends Controller
                 'city_regency' => $requestData['city_regency'] ?? '',
                 'province' => $requestData['province'] ?? '',
                 'other' => $requestData['other'] ?? '',
-                'photo' => $requestData['photo_url'] ?? '',
+                'photo_url' => $requestData['photo_url'] ?? '',
             ],
             'program' => [
                 'section_id' => $requestData['section_id'] ?? '',

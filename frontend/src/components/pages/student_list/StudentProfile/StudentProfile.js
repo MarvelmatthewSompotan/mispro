@@ -17,7 +17,6 @@ import {
 } from "../../../../services/api";
 import Select from "react-select";
 import styles from "./StudentProfile.module.css";
-import placeholderImage from "../../../../assets/user.png";
 import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate.js";
 import UpdatedNotification from "../UpdateNotification/UpdateNotification.js";
 import PhotoUploadPopup from "../PhotoUploadPopup/PhotoUploadPopup.js";
@@ -331,6 +330,7 @@ const StudentProfile = () => {
           financial_policy_contract: snapshotData.financial_policy_contract,
           discount_name: snapshotData.discount_name,
           discount_notes: snapshotData.discount_notes,
+          photo_url: snapshotData.photo_url,
         };
 
         setStudentInfo(studentInfoSnapshot);
@@ -1067,10 +1067,9 @@ const StudentProfile = () => {
             className={styles.profileImage}
             src={
               photoPreview ||
-              (profileData && profileData.photo_url) ||
-              placeholderImage
+              (formData && formData.photo_url)  
             }
-            alt="Student"
+            alt=""
           />
 
           {isEditing && (
