@@ -48,7 +48,8 @@ class StudentController extends Controller
                 $query->where('enrollments.section_id', $sectionIds);
             }
         }
-
+        
+        // Search
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
@@ -156,7 +157,7 @@ class StudentController extends Controller
                 'city_regency' => $requestData['city_regency'] ?? '',
                 'province' => $requestData['province'] ?? '',
                 'other' => $requestData['other'] ?? '',
-                'photo' => $requestData['photo_path'] ?? '',
+                'photo_url' => $requestData['photo_url'] ?? '',
             ],
             'program' => [
                 'section_id' => $requestData['section_id'] ?? '',
@@ -426,6 +427,7 @@ class StudentController extends Controller
 
             // Gabungkan data lama + input baru
             $newRequestData = array_merge($oldRequestData, $validated);
+            unset($newRequestData['photo']);
             
             if ($student->photo_path) {
                 $newRequestData['photo_path'] = $student->photo_path;
@@ -468,7 +470,7 @@ class StudentController extends Controller
 
             DB::commit();
 
-             $this->auditTrail->log('update_student', [
+            $this->auditTrail->log('update_student', [
                 'student_id' => $student->student_id,
                 'changes'    => $validated,
             ]);
@@ -477,9 +479,7 @@ class StudentController extends Controller
                 'success' => true,
                 'message' => 'Student updated and new application form version created',
                 'version_id' => $newVersion->version_id,
-                'data' => array_merge($newSnapshot, [
-                    'photo_url' => $student->photo_path ? asset('storage/'.$student->photo_path) : null,
-                ]),
+                'data' => $newSnapshot,
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();

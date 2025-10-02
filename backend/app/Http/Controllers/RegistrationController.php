@@ -945,32 +945,51 @@ class RegistrationController extends Controller
 
     private function createApplicationFormVersion($applicationForm, $validated, $student, $enrollment)
     {
-        $dataSnapshot = [
-            'student_id' => $student->student_id,
-            'registration_id' => $enrollment->registration_id,
-            'enrollment_id' => $enrollment->enrollment_id,
-            'registration_number' =>$enrollment->enrollment_id,
-            'registration_date' =>$enrollment->registration_date,
-            'application_id' => $applicationForm->application_id,
-            'semester' => $enrollment->semester->number, 
-            'school_year' => $enrollment->schoolYear->year, 
-            'request_data' => $validated,
-            'timestamp' => now(),
-            'action' => 'registration'
-        ];
+        $latestVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment.student', function($q) use ($student) {
+            $q->where('student_id', $student->student_id);
+        })
+        ->orderByDesc('version_id')
+        ->first();
+
+        $oldSnapshot = $latestVersion ? json_decode($latestVersion->data_snapshot, true) : [];
+        $oldRequestData = $oldSnapshot['request_data'] ?? [];
+
+        $newRequestData = array_merge($oldRequestData, $validated);
+
+        unset($newRequestData['photo']);
         
+        if ($student->photo_path) {
+            $newRequestData['photo_path'] = $student->photo_path;
+            $newRequestData['photo_url']  = asset('storage/' . $student->photo_path);
+        }
+
+        $dataSnapshot = [
+            'student_id'     => $student->student_id,
+            'registration_id'=> $enrollment->registration_id,
+            'enrollment_id'  => $enrollment->enrollment_id,
+            'registration_number' => $enrollment->enrollment_id,
+            'registration_date'   => $enrollment->registration_date,
+            'application_id' => $applicationForm->application_id,
+            'semester'       => $enrollment->semester->number, 
+            'school_year'    => $enrollment->schoolYear->year, 
+            'request_data'   => $newRequestData,
+            'timestamp'      => now(),
+            'action'         => 'registration'
+        ];
+
         $maxVersion = ApplicationFormVersion::where('application_id', $applicationForm->application_id)
             ->max('version');
         
         $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
-        $userName = auth()->user()->name;
+        $userName = auth()->user()->name ?? 'system';
 
         return ApplicationFormVersion::create([
             'application_id' => $applicationForm->application_id,
-            'version' => $nextVersion,
-            'updated_by' => $userName,
-            'action' => 'registration',
-            'data_snapshot' => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
+            'version'        => $nextVersion,
+            'updated_by'     => $userName,
+            'action'         => 'registration',
+            'data_snapshot'  => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
         ]);
     }
+
 }

@@ -210,7 +210,7 @@ const FormButtonSection = ({
     }
     if (
       !allFormData.facilities ||
-      !allFormData.facilities.residence_hall_policy
+      allFormData.facilities.residence_hall_policy !== "Signed"
     ) {
       errors.facilities = { ...errors.facilities, residence_hall_policy: true };
     }
