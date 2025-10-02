@@ -1,0 +1,22 @@
+:root {
+    /* ==================== WARNA UTAMA ==================== */
+    --main-accent: #5F84FE;     
+    --secondary-accent: #D3E7FF;
+    /* ==================== WARNA LATAR ==================== */
+    --main-background: #F8F8F9;   
+    --secondary-background: #FFFFFF; 
+    --main-accent-hoverstate: #335BE2;
+    --main-accent-disabledstate: #CACDD9;
+    /* ==================== WARNA TAMBAHAN ==================== */  
+    --main-text: #000000;
+    --text-accent: #FFFFFF;
+    --cream: #FFFAEC;
+    --main-grey: #7A7A7A;
+    --green: #00F413;
+    --red: #EE0808;
+    --dark-red: #CD0000;
+    --black: #000000;
+    --yellow: #FFDD00;
+    --orange: #FF7B00;
+
+  }
