@@ -15,7 +15,7 @@ class CheckTokenLifetime
             $token = $user->currentAccessToken();
 
             if ($token) {
-                $lifetimeMinutes = 2; 
+                $lifetimeMinutes = 720; 
 
                 $createdAt = $token->created_at;
 
