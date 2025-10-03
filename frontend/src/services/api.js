@@ -16,25 +16,25 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
  */
 const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
   const headers = {
-    Accept: 'application/json',
+    Accept: "application/json",
     ...options.headers,
   };
 
   // Jangan set Content-Type jika body adalah FormData
   if (!(options.body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
+    headers["Content-Type"] = "application/json";
   }
 
   if (requiresAuth) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     } else {
       // Jika butuh auth tapi token tidak ada, langsung gagalkan
-      console.error('No token found for authenticated request');
+      console.error("No token found for authenticated request");
       // Arahkan ke login
-      window.location.href = '/login';
-      return Promise.reject(new Error('Authentication token is missing.'));
+      window.location.href = "/login";
+      return Promise.reject(new Error("Authentication token is missing."));
     }
   }
 
@@ -45,12 +45,12 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
 
   // Cek jika status 401 (Unauthorized / Token Expired)
   if (res.status === 401) {
-    console.error('Token is expired or invalid. Logging out...');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user'); // Hapus juga data lain jika ada
-    window.location.href = '/login';
+    console.error("Token is expired or invalid. Logging out...");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user"); // Hapus juga data lain jika ada
+    window.location.href = "/login";
     // Hentikan proses dan lempar error agar promise di .catch() terpanggil
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
 
   if (!res.ok) {
@@ -74,16 +74,16 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
 export const login = async (email, password) => {
   // `requiresAuth` diset `false` karena login belum punya token
   const data = await apiFetch(
-    '/login',
+    "/login",
     {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ email, password }),
     },
     false
   );
   // Simpan token setelah login berhasil
   if (data.token) {
-    localStorage.setItem('token', data.token);
+    localStorage.setItem("token", data.token);
   }
   return data;
 };
@@ -91,25 +91,25 @@ export const login = async (email, password) => {
 export const logout = async () => {
   try {
     // Endpoint logout tetap butuh token untuk tahu sesi mana yang harus dihapus di backend
-    await apiFetch('/logout', { method: 'POST' });
+    await apiFetch("/logout", { method: "POST" });
   } catch (error) {
     // Abaikan error saat logout (misal: token sudah expired), yang penting data di local storage bersih
     console.warn(
-      'Logout failed on server, proceeding to clear local data.',
+      "Logout failed on server, proceeding to clear local data.",
       error
     );
   } finally {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
   }
 };
 
-export const getMe = () => apiFetch('/me');
+export const getMe = () => apiFetch("/me");
 
-export const getRegistrationOptions = () => apiFetch('/registration-option');
+export const getRegistrationOptions = () => apiFetch("/registration-option");
 
 export const startRegistration = (schoolYear, semester, registrationDate) => {
-  return apiFetch('/registration/start', {
-    method: 'POST',
+  return apiFetch("/registration/start", {
+    method: "POST",
     body: JSON.stringify({
       school_year_id: schoolYear,
       semester_id: semester,
@@ -120,7 +120,7 @@ export const startRegistration = (schoolYear, semester, registrationDate) => {
 
 export const submitRegistrationForm = (draftId, formData) => {
   return apiFetch(`/registration/store/${draftId}`, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(formData),
   });
 };
@@ -140,26 +140,26 @@ export const getRegistrationPreview = (applicationId, versionId) => {
 };
 
 export const getStudents = ({
-  search = '',
+  search = "",
   school_year_id,
   semester_id,
   section_id,
 } = {}) => {
   const params = new URLSearchParams();
-  if (search) params.append('search', search);
-  if (school_year_id) params.append('school_year_id', school_year_id);
-  if (semester_id) params.append('semester_id', semester_id);
+  if (search) params.append("search", search);
+  if (school_year_id) params.append("school_year_id", school_year_id);
+  if (semester_id) params.append("semester_id", semester_id);
   if (Array.isArray(section_id)) {
-    section_id.forEach((id) => params.append('section_id[]', id));
+    section_id.forEach((id) => params.append("section_id[]", id));
   } else if (section_id) {
-    params.append('section_id', section_id);
+    params.append("section_id", section_id);
   }
   return apiFetch(`/students?${params.toString()}`);
 };
 
 export const updateStudent = (studentId, studentData) => {
   const formData = new FormData();
-  formData.append('_method', 'PATCH');
+  formData.append("_method", "PATCH");
   for (const key in studentData) {
     if (Object.prototype.hasOwnProperty.call(studentData, key)) {
       const value = studentData[key];
@@ -170,13 +170,13 @@ export const updateStudent = (studentId, studentData) => {
   }
   // Wrapper apiFetch sudah pintar menangani FormData
   return apiFetch(`/students/${studentId}/update`, {
-    method: 'POST',
+    method: "POST",
     body: formData,
   });
 };
 
 export const getRegistrations = ({
-  search = '',
+  search = "",
   school_year_id = null,
   semester_id = null,
   section_id = null,
@@ -184,15 +184,15 @@ export const getRegistrations = ({
   per_page = 10,
 } = {}) => {
   const params = new URLSearchParams();
-  if (search) params.append('search', search);
-  if (school_year_id) params.append('school_year_id', school_year_id);
-  if (semester_id) params.append('semester_id', semester_id);
-  if (page) params.append('page', page);
-  if (per_page) params.append('per_page', per_page);
+  if (search) params.append("search", search);
+  if (school_year_id) params.append("school_year_id", school_year_id);
+  if (semester_id) params.append("semester_id", semester_id);
+  if (page) params.append("page", page);
+  if (per_page) params.append("per_page", per_page);
   if (Array.isArray(section_id)) {
-    section_id.forEach((id) => params.append('section_id[]', id));
+    section_id.forEach((id) => params.append("section_id[]", id));
   } else if (section_id) {
-    params.append('section_id', section_id);
+    params.append("section_id", section_id);
   }
   return apiFetch(`/registration?${params.toString()}`);
 };
