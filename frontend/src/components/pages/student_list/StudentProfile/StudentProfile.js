@@ -17,11 +17,11 @@ import {
 } from "../../../../services/api";
 import Select from "react-select";
 import styles from "./StudentProfile.module.css";
-import placeholderImage from "../../../../assets/user.png";
 import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate.js";
 import UpdatedNotification from "../UpdateNotification/UpdateNotification.js";
 import PhotoUploadPopup from "../PhotoUploadPopup/PhotoUploadPopup.js";
 import gsap from "gsap";
+import StudentProfileHeader from "./StudentProfileHeader/StudentProfileHeader.js";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -130,6 +130,20 @@ const StudentProfile = () => {
     { value: "Non Indonesia", label: "Non Indonesia" },
   ];
   const historyRef = useRef(null);
+
+  const [editableHeaderStatus, setEditableHeaderStatus] = useState({
+    activity: "Active",
+    graduation: "Not Graduated",
+  });
+
+  const handleHeaderStatusChange = (e) => {
+    const { name, value } = e.target;
+    setEditableHeaderStatus((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  
 
   const [validationMessages, setValidationMessages] = useState({
     nik: "",
@@ -331,6 +345,7 @@ const StudentProfile = () => {
           financial_policy_contract: snapshotData.financial_policy_contract,
           discount_name: snapshotData.discount_name,
           discount_notes: snapshotData.discount_notes,
+          photo_url: snapshotData.photo_url,
         };
 
         setStudentInfo(studentInfoSnapshot);
@@ -989,105 +1004,28 @@ const StudentProfile = () => {
 
   return (
     <div className={styles.profilePage}>
-      <div className={styles.topActionHeader}>
-        {!isEditing && (
-          <div className={styles.historyContainer} ref={historyRef}>
-            <button
-              className={styles.actionButton}
-              onClick={handleViewHistoryClick}
-              // Atribut 'disabled' tidak lagi diperlukan karena komponennya disembunyikan
-            >
-              {selectedVersionId
-                ? "Back to Latest Version"
-                : "View version history"}
-            </button>
-            {isHistoryVisible && (
-              <ul className={styles.historyDropdown}>
-                {isLoadingHistory ? (
-                  <li className={styles.historyInfoItem}>Loading...</li>
-                ) : historyDates.length > 0 ? (
-                  historyDates.map((version) => (
-                    <li
-                      key={version.version_id}
-                      className={styles.historyItem}
-                      onClick={() =>
-                        handleHistoryDateChange(version.version_id)
-                      }
-                    >
-                      {new Date(version.updated_at).toLocaleString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </li>
-                  ))
-                ) : (
-                  <li className={styles.historyInfoItem}>No history found.</li>
-                )}
-              </ul>
-            )}
-          </div>
-        )}
-
-        {isEditing ? (
-          <>
-            <button
-              className={styles.actionButton}
-              onClick={handleCancel}
-              disabled={isUpdating}
-            >
-              Cancel
-            </button>
-            <button
-              className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
-              onClick={handleSaveClick}
-              disabled={isUpdating}
-            >
-              {isUpdating ? "Saving..." : "Save"}
-            </button>
-          </>
-        ) : (
-          // Tombol Edit hanya akan muncul jika TIDAK sedang melihat histori
-          !selectedVersionId && (
-            <button
-              className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
-              onClick={() => setIsEditing(true)}
-            >
-              Edit
-            </button>
-          )
-        )}
-      </div>
+      <StudentProfileHeader
+        studentInfo={studentInfo}
+        formData={formData}
+        photoPreview={photoPreview}
+        isEditing={isEditing}
+        isUpdating={isUpdating}
+        selectedVersionId={selectedVersionId}
+        isHistoryVisible={isHistoryVisible}
+        isLoadingHistory={isLoadingHistory}
+        historyDates={historyDates}
+        historyRef={historyRef}
+        onViewHistoryClick={handleViewHistoryClick}
+        onHistoryDateChange={handleHistoryDateChange}
+        onEditClick={() => setIsEditing(true)}
+        onCancelClick={handleCancel}
+        onSaveClick={handleSaveClick}
+        onAddPhotoClick={() => setIsPhotoPopupOpen(true)}
+        editableStatus={editableHeaderStatus}
+        onStatusChange={handleHeaderStatusChange}
+      />
 
       <div className={styles.profileContent}>
-        <div className={styles.sidebar}>
-          <img
-            className={styles.profileImage}
-            src={
-              photoPreview ||
-              (profileData && profileData.photo_url) ||
-              placeholderImage
-            }
-            alt="Student"
-          />
-
-          {isEditing && (
-            <div
-              className={styles.addPhotoButton}
-              onClick={() => setIsPhotoPopupOpen(true)}
-            >
-              Add photo
-            </div>
-          )}
-
-          <div className={styles.studentIdContainer}>
-            <span className={styles.idLabel}>ID</span>
-            <b className={styles.idValue}>{formData.student_id}</b>
-          </div>
-        </div>
-
         <div className={styles.infoContainer}>
           {/* STUDENT'S INFORMATION */}
           <div id="studentInfo" className={styles.infoSection}>

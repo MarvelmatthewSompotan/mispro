@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Student;
+use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
 use App\Models\ApplicationFormVersion;
-use App\Services\AuditTrailService;
 
 class StudentController extends Controller
 {
@@ -18,8 +20,20 @@ class StudentController extends Controller
         $this->auditTrail = $auditTrail;
     }
 
+    /**
+     * @param \Illuminate\Http\Request $request
+     */
     public function index(Request $request)
     {
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $schoolYearStr = ($currentMonth >= 7) 
+            ? $currentYear . '/' . ($currentYear + 1)
+            : ($currentYear - 1) . '/' . $currentYear;
+        
+        $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
+        $defaultSchoolYearId = $schoolYear?->school_year_id;
+
         $query = Student::select(
             'students.student_id',
             DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
@@ -29,14 +43,24 @@ class StudentController extends Controller
             'enrollments.semester_id',
             'students.nisn',
             'students.nik',
-            'students.registration_date'
+            'students.registration_date',
+            'students.active',
+            'students.status as student_status',
+            'enrollments.status as enrollment_status'
         )
-        ->join('enrollments', 'enrollments.student_id', '=', 'students.student_id');
+        ->join('enrollments', 'enrollments.student_id', '=', 'students.student_id')
+        ->join('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+        ->where('students.active', 'YES')
+        ->where('application_forms.status', 'Confirmed')
+        ->where('enrollments.status', 'ACTIVE');
         
         // Filter
         if ($request->filled('school_year_id')) {
             $query->where('enrollments.school_year_id', $request->input('school_year_id'));
+        } else {
+            $query->where('enrollments.school_year_id', $defaultSchoolYearId);
         }
+
         if ($request->filled('semester_id')) {
             $query->where('enrollments.semester_id', $request->input('semester_id'));
         }
@@ -58,13 +82,10 @@ class StudentController extends Controller
             });
         }
         
+        $perPage = $request->input('per_page', 25);
         $students= $query
             ->orderBy('enrollments.registration_date', 'desc')
-            ->get()
-            ->unique(function ($item) {
-                return $item->nisn . '|' . $item->nik;
-            })
-            ->values();
+            ->paginate($perPage);
 
         return response()->json([
             'success' => true,

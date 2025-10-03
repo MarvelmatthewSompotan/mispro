@@ -96,3 +96,104 @@
   font-weight: 600;
   font-size: 16px;
 }
+
+/* TAMBAHAN BARU untuk Cropper di PhotoUploadPopup.module.css */
+
+.cropperContainer {
+  position: relative;
+  width: 100%;
+  height: 360px; /* Sesuaikan tinggi sesuai kebutuhan */
+  background: #333;
+}
+
+.controls {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.controls label {
+  text-align: center;
+  font-weight: 600;
+  color: #495057;
+}
+
+.zoomRange {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #dee2e6;
+  border-radius: 5px;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.zoomRange:hover {
+  opacity: 1;
+}
+
+.zoomRange::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #5f84fe;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.zoomRange::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #5f84fe;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px;
+}
+
+.cancelButton, .saveButton {
+  padding: 12px 22px;
+  border-radius: 5px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelButton {
+  background-color: #e9ecef;
+  color: #495057;
+  border: 1px solid #ced4da;
+}
+
+.cancelButton:hover {
+  background-color: #dee2e6;
+}
+
+.saveButton {
+  background-color: #5f84fe;
+  color: #fff;
+}
+
+.saveButton:hover {
+  background-color: #4c6ef5;
+}
+
+.saveButton:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+}

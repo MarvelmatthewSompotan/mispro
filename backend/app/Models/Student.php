@@ -61,13 +61,12 @@ class Student extends Model
         'previous_school', 
         'religion',
         'academic_status_other',
-        'student_status', 
         'academic_status', 
-        'enrollment_status',
-        'inactive_status',
         'age',
         'nik',
         'kitas',
+        'active',
+        'status',
     ];
 
     // Direct Relationships

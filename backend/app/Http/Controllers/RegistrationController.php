@@ -48,9 +48,8 @@ class RegistrationController extends Controller
             ->join('students', 'students.student_id', '=', 'enrollments.student_id')
             ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
             ->leftJoin('application_form_versions', function($join) {
-                // Ubah baris ini untuk menggunakan kolom 'action' yang baru
                 $join->on('application_form_versions.application_id', '=', 'application_forms.application_id')
-                     ->where('application_form_versions.action', '=', 'registration');
+                    ->where('application_form_versions.action', '=', 'registration');
             })
             ->addSelect('application_form_versions.version_id as registration_version_id');
 
@@ -82,13 +81,32 @@ class RegistrationController extends Controller
         // Order by created_at supaya kelihatan histori pendaftaran
         $query->orderBy('enrollments.registration_date', 'desc');
 
-        $perPage = $request->input('per_page', 20);
+        $perPage = $request->input('per_page', 25);
         $data = $query->paginate($perPage);
+        $totalRegistered = ApplicationForm::count();
 
         return response()->json([
             'success' => true,
             'message' => $data->isEmpty() ? 'No students found' : 'Students retrieved successfully',
+            'total_registered' => $totalRegistered,
             'data' => $data
+        ], 200);
+    }
+
+    public function updateStatus(Request $request, $application_id)
+    {
+        $request->validate([
+            'status' => 'required|in:Confirmed,Cenceled',
+        ]);
+
+        $form = ApplicationForm::findOrFail($application_id);
+        $form->status = $request->status;
+        $form->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully',
+            'data' => $form
         ], 200);
     }
 
@@ -481,8 +499,8 @@ class RegistrationController extends Controller
                     'academic_status' => $validated['academic_status'],
                     'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
                     'registration_date' => $draft->registration_date_draft,
-                    'enrollment_status' => 'ACTIVE',
-                    'inactive_status' => null,
+                    'active' => 'YES',
+                    'status' => 'Not Graduate',
                     'nik' => $validated['nik'],
                     'kitas' => $validated['kitas'],
                     'nisn' => $validated['nisn'],
@@ -502,7 +520,7 @@ class RegistrationController extends Controller
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
-                    'is_active' => true,
+                    'status' => 'ACTIVE',
                 ]);
                 
                 // Create application form
@@ -557,7 +575,7 @@ class RegistrationController extends Controller
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
-                    'is_active' => true,
+                    'status' => 'ACTIVE',
                 ]);
                 // Create application form
                 $applicationForm = $this->createApplicationForm($enrollment);
@@ -645,30 +663,6 @@ class RegistrationController extends Controller
                 'error' => 'Preview failed: ' . $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 
     // Helper methods
@@ -802,7 +796,8 @@ class RegistrationController extends Controller
             'phone_number' => $validated['phone_number'],
             'academic_status' => $validated['academic_status'],
             'academic_status_other' => $validated['academic_status'] === 'OTHER' ? $validated['academic_status_other'] : null,
-            'enrollment_status' => 'ACTIVE',
+            'status' => 'Not Graduate',
+            'active' => 'YES',
             'nik' => $validated['nik'],
             'kitas' => $validated['kitas'],
             'nisn' => $validated['nisn'],
