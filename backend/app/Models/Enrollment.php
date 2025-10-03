@@ -47,6 +47,7 @@ class Enrollment extends Model
         'transportation_policy',
         'status',
         'registration_date',
+        'status',
     ];
 
     public function applicationForm() : HasOne
