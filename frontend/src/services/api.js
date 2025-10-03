@@ -3,11 +3,7 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 /**
- * Wrapper function untuk fetch API.
- * Fungsi ini secara otomatis menangani:
- * 1. Penambahan Authorization header untuk rute yang memerlukan otentikasi.
- * 2. Pengecekan response. Jika response 401 (Unauthorized), akan otomatis logout.
- * 3. Parsing JSON dari response.
+
  *
  * @param {string} endpoint - Endpoint API yang akan dipanggil (misal: '/me').
  * @param {object} options - Opsi konfigurasi untuk fetch (method, body, dll).
