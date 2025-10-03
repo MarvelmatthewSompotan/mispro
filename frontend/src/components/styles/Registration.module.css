@@ -207,3 +207,38 @@ input[type="checkbox"]:checked + .customCheckbox::after {
   padding: 6px 18px !important;
   font-size: 16px !important;
 }
+
+.regStatus {
+  position: relative;
+  border-radius: 6px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-align: center; /* Sesuaikan agar teks di tengah */
+  font-size: 14px;
+  color: #fff;
+  font-family: Poppins, sans-serif;
+   border: none;
+   max-width: 120px; /* Batasi lebar agar tidak terlalu lebar di kolom */
+}
+
+/* Style untuk teks status di dalam button (sesuai permintaan .cancelled) */
+.statusText {
+  position: relative;
+  line-height: 100%;
+  font-weight: 600;
+}
+
+/* Status Confirmed (Hijau) */
+.statusConfirmed {
+   background-color: #04b34b; /* Hijau yang lebih cerah */
+}
+
+/* Status Cancelled (Merah) */
+.statusCancelled {
+  background-color: #ee0808; 
+}

@@ -125,6 +125,15 @@ export const submitRegistrationForm = (draftId, formData) => {
   });
 };
 
+export const updateRegistrationStatus = (applicationId, newStatus) => {
+  return apiFetch(`/registration/${applicationId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      status: newStatus, // 'Confirmed' atau 'Cancelled'
+    }),
+  });
+};
+
 export const searchStudent = (searchTerm) => {
   return apiFetch(`/students/search?search=${encodeURIComponent(searchTerm)}`);
 };

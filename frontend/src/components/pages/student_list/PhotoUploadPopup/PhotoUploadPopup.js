@@ -64,6 +64,7 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
     } finally {
       setIsCropping(false);
     }
+    // eslint-disable-next-line
   }, [imageSrc, croppedAreaPixels, onFileSelect]);
 
   // Fungsi untuk mereset state dan menutup popup

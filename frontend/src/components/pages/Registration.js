@@ -1,19 +1,20 @@
 // src/components/pages/Registration.js
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "../atoms/Button";
-import PopUpForm from "./PopUpForm";
-import Pagination from "../atoms/Pagination";
-import styles from "../styles/Registration.module.css";
-import searchIcon from "../../assets/Search-icon.png";
-import { getRegistrations, getRegistrationOptions } from "../../services/api";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Button from '../atoms/Button';
+import PopUpForm from './PopUpForm';
+import Pagination from '../atoms/Pagination';
+import StatusConfirmationPopup from './StatusConfirmationPopup';
+import styles from '../styles/Registration.module.css';
+import searchIcon from '../../assets/Search-icon.png';
+import { getRegistrations, getRegistrationOptions } from '../../services/api';
 
 const Registration = () => {
   const navigate = useNavigate();
   const [registrationData, setRegistrationData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -26,6 +27,8 @@ const Registration = () => {
   const [selectedSemester, setSelectedSemester] = useState(null);
   const [showPopupForm, setShowPopupForm] = useState(false);
   const REFRESH_INTERVAL = 5000;
+  const [showStatusPopup, setShowStatusPopup] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState(null);
 
   // Fetch options (sections, years, semesters)
   useEffect(() => {
@@ -36,7 +39,7 @@ const Registration = () => {
         setSchoolYears(opts.school_years || []);
         setSemesters(opts.semesters || []);
       } catch (err) {
-        console.error("Error fetching registration options:", err);
+        console.error('Error fetching registration options:', err);
       }
     };
     fetchOptions();
@@ -65,7 +68,7 @@ const Registration = () => {
         setTotalRecords(res.data.total || 0);
         setCurrentPage(res.data.current_page || 1);
       } catch (err) {
-        console.error("Error fetching registrations:", err);
+        console.error('Error fetching registrations:', err);
         setRegistrationData([]);
         setTotalPages(1);
         setTotalRecords(0);
@@ -123,7 +126,7 @@ const Registration = () => {
         semester_id: selectedSemester || undefined,
         section_id: selectedSections.length > 0 ? selectedSections : undefined,
       };
-      console.log("Auto refreshing registration list (background)...");
+      console.log('Auto refreshing registration list (background)...');
 
       // 3. Saat memanggil refresh, beri tanda bahwa ini adalah background refresh
       // Ini akan mencegah 'setLoading(true)' dipanggil
@@ -155,7 +158,7 @@ const Registration = () => {
   const handleClosePopup = () => setShowPopupForm(false);
 
   const handleCreateForm = (formData) => {
-    navigate("/registration-form", {
+    navigate('/registration-form', {
       state: {
         ...formData,
         fromPopup: true,
@@ -167,9 +170,79 @@ const Registration = () => {
   const handleRowClick = (row) => {
     const applicationId = row.application_form?.application_id || null;
     const version = row.version_id ?? null;
-    navigate("/print", {
+    navigate('/print', {
       state: { applicationId, version },
     });
+  };
+
+  // --- NEW HANDLER FOR STATUS BUTTON CLICK ---
+  const handleStatusClick = (e, row) => {
+    e.stopPropagation(); // Mencegah handleRowClick (navigate) terpicu
+    setSelectedRegistration(row);
+    setShowStatusPopup(true);
+  };
+
+  const handleCloseStatusPopup = () => {
+    setShowStatusPopup(false);
+    setSelectedRegistration(null);
+  };
+
+  // Mengupdate status di state lokal dan me-refresh data
+  const handleUpdateStatus = (id, newStatus) => {
+    // Opsi 1: Update di state lokal (Lebih cepat, tapi harus yakin API sukses)
+    // newStatus sekarang adalah 'Confirmed' atau 'Cancelled'
+    setRegistrationData((prevData) =>
+      prevData.map((reg) => {
+        if (reg.registration_id === id && reg.application_form) {
+          return {
+            ...reg,
+            application_form: {
+              ...reg.application_form,
+              status: newStatus,
+            },
+          };
+        }
+        return reg;
+      })
+    );
+    // Opsi 2: Refresh data dari server (Lebih aman)
+    fetchRegistrations(
+      {
+        search: search || undefined,
+        school_year_id: selectedYear || undefined,
+        semester_id: selectedSemester || undefined,
+        section_id: selectedSections.length > 0 ? selectedSections : undefined,
+      },
+      currentPage
+    );
+  };
+  // ------------------------------------------
+
+  // Helper function to get status display (Membandingkan dengan KAPITAL PENUH untuk tampilan)
+  const getStatusDisplay = (row) => {
+    const status = row.application_form?.status;
+    const statusText = status ? status.toUpperCase() : 'CONFIRMED';
+
+    let buttonClass = '';
+    // Perbandingan menggunakan KAPITAL PENUH
+    if (statusText === 'CONFIRMED') {
+      buttonClass = styles.statusConfirmed;
+    } else if (statusText === 'CANCELLED') {
+      buttonClass = styles.statusCancelled;
+    } else {
+      // Fallback untuk status yang tidak dikenal
+      buttonClass = styles.statusConfirmed;
+    }
+
+    return (
+      <button
+        className={`${styles.regStatus} ${buttonClass}`}
+        onClick={(e) => handleStatusClick(e, row)}
+        type='button'
+      >
+        <span className={styles.statusText}>{statusText}</span>
+      </button>
+    );
   };
 
   return (
@@ -184,13 +257,13 @@ const Registration = () => {
       {/* Search Bar */}
       <div className={styles.searchBar}>
         <input
-          type="text"
-          placeholder="Find name or student id"
+          type='text'
+          placeholder='Find name or student id'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={styles.searchInput}
         />
-        <img src={searchIcon} alt="Search" className={styles.searchIconImg} />
+        <img src={searchIcon} alt='Search' className={styles.searchIconImg} />
       </div>
 
       {/* Filters */}
@@ -204,7 +277,7 @@ const Registration = () => {
               className={styles.filterCheckboxLabel}
             >
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={selectedSections.includes(section.section_id)}
                 onChange={() => handleSectionToggle(section.section_id)}
               />
@@ -215,11 +288,11 @@ const Registration = () => {
 
           {/* School Year */}
           <select
-            value={selectedYear || ""}
+            value={selectedYear || ''}
             onChange={(e) => setSelectedYear(e.target.value || null)}
             className={styles.yearSelect}
           >
-            <option value="">Select School Year</option>
+            <option value=''>Select School Year</option>
             {schoolYears.map((y) => (
               <option key={y.school_year_id} value={y.school_year_id}>
                 {y.year}
@@ -229,11 +302,11 @@ const Registration = () => {
 
           {/* Semester */}
           <select
-            value={selectedSemester || ""}
+            value={selectedSemester || ''}
             onChange={(e) => setSelectedSemester(e.target.value || null)}
             className={styles.semesterSelect}
           >
-            <option value="">Select Semester</option>
+            <option value=''>Select Semester</option>
             {semesters.map((s) => (
               <option key={s.semester_id} value={s.semester_id}>
                 {s.name}
@@ -245,13 +318,13 @@ const Registration = () => {
 
       {/* Results Info */}
       <div className={styles.resultsInfo}>
-        Showing{" "}
+        Showing{' '}
         {loading
-          ? "..."
+          ? '...'
           : `${(currentPage - 1) * perPage + 1}-${Math.min(
               currentPage * perPage,
               totalRecords
-            )} of ${totalRecords}`}{" "}
+            )} of ${totalRecords}`}{' '}
         results
       </div>
 
@@ -261,9 +334,11 @@ const Registration = () => {
           <thead>
             <tr className={styles.tableHeaderRow}>
               <th className={styles.tableHeaderCell}>Created at</th>
+              <th className={styles.tableHeaderCell}>Name</th>{' '}
+              {/* Pindah Name ke sini */}
               <th className={styles.tableHeaderCell}>Registration ID</th>
               <th className={styles.tableHeaderCell}>Section</th>
-              <th className={styles.tableHeaderCell}>Name</th>
+              <th className={styles.tableHeaderCell}>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -272,28 +347,32 @@ const Registration = () => {
                 <tr
                   key={idx}
                   className={styles.tableRow}
+                  // Hanya navigate jika status belum diklik (dicegah di handleStatusClick)
                   onClick={() => handleRowClick(row)}
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <td className={styles.tableCell}>
                     {new Date(row.registration_date).toLocaleDateString(
-                      "id-ID",
+                      'id-ID',
                       {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
                       }
                     )}
                   </td>
+                  <td className={styles.tableCellName}>{row.full_name}</td>
                   <td className={styles.tableCell}>{row.registration_id}</td>
                   <td className={styles.tableCell}>{row.section?.name}</td>
-                  <td className={styles.tableCellName}>{row.full_name}</td>
+                  {/* --- STATUS BUTTON --- */}
+                  <td className={styles.tableCell}>{getStatusDisplay(row)}</td>
+                  {/* ---------------------------------- */}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="4" className={styles.tableCell}>
-                  {loading ? "Loading..." : "No data available"}
+                <td colSpan='5' className={styles.tableCell}>
+                  {loading ? 'Loading...' : 'No data available'}
                 </td>
               </tr>
             )}
@@ -305,9 +384,9 @@ const Registration = () => {
       {!loading && totalPages > 1 && (
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "20px",
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: '20px',
           }}
         >
           <Pagination
@@ -322,6 +401,16 @@ const Registration = () => {
       {showPopupForm && (
         <PopUpForm onClose={handleClosePopup} onCreate={handleCreateForm} />
       )}
+
+      {/* --- STATUS CONFIRMATION POPUP --- */}
+      {showStatusPopup && selectedRegistration && (
+        <StatusConfirmationPopup
+          registration={selectedRegistration}
+          onClose={handleCloseStatusPopup}
+          onUpdateStatus={handleUpdateStatus} // Fungsi untuk refresh data/state
+        />
+      )}
+      {/* ------------------------------------ */}
     </div>
   );
 };
