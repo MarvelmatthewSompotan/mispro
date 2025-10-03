@@ -1,8 +1,7 @@
-// File: src/components/pages/StudentProfileHeader.js (Pembaruan)
+// File: src/components/pages/StudentProfileHeader.js
+
 import React from "react";
 import styles from "./StudentProfileHeader.module.css";
-// Anda mungkin perlu file gambar panah bawah jika belum ada
-// import chevronDown from './chevron-down.svg'; 
 
 const StudentProfileHeader = ({
   studentInfo,
@@ -10,62 +9,68 @@ const StudentProfileHeader = ({
   photoPreview,
   isEditing,
   isUpdating,
+  selectedVersionId,
+  isHistoryVisible,
+  isLoadingHistory,
+  historyDates,
+  historyRef,
+  onViewHistoryClick,
+  onHistoryDateChange,
   onEditClick,
   onCancelClick,
   onSaveClick,
   onAddPhotoClick,
-  editableStatus,
-  onStatusChange,
+  editableStatus, // <-- Prop added
+  onStatusChange, // <-- Prop added
 }) => {
   return (
     <div className={styles.profileHeader}>
+      {/* Kolom Kiri: Foto */}
       <div className={styles.headerPhotoSection}>
         <img
           className={styles.profileImage}
           src={photoPreview || (formData && formData.photo_url)}
           alt=""
         />
-        {/* Tombol Edit Photo sekarang hanya akan muncul di mode edit dan posisinya akan diatur oleh CSS */}
-        {/* Blok ini dihapus dari sini, akan dipindahkan ke .headerInfoSection */}
       </div>
 
+      {/* Kolom Tengah: Info & Status */}
       <div className={styles.headerInfoSection}>
         <div className={styles.studentIdContainer}>
           <span className={styles.idLabel}>Student ID</span>
           <b className={styles.idValue}>{formData.student_id}</b>
         </div>
 
+        {/* --- [MODIFIED] Conditional rendering for View vs. Edit mode --- */}
         {isEditing ? (
-          <>
-            <div className={styles.statusAndEditPhotoContainer}> {/* Kontainer baru */}
-              <div className={styles.statusTagContainer}>
-                <div className={`${styles.statusTag} ${styles.statusTagActive}`}>
-                  {editableStatus.activity}
-                </div>
-                <div className={styles.statusDropdownWrapper}>
-                  <select
-                    name="graduation"
-                    value={editableStatus.graduation}
-                    onChange={onStatusChange}
-                    className={styles.statusDropdown}
-                  >
-                    <option value="Not Graduated">Not Graduated</option> {/* Tambahkan value */}
-                    <option value="Graduated">Graduated</option>
-                    <option value="Expelled">Expelled</option> {/* Opsi baru */}
-                    <option value="Withdraw">Withdraw</option> {/* Opsi baru */}
-                    <option value="Withdraw">Transfer</option> {/* Opsi baru */}
-                  </select>
-                  <span className={styles.dropdownArrow}>▼</span>
-                </div>
+          // EDIT MODE
+          <div className={styles.statusAndEditPhotoContainer}>
+            <div className={styles.statusGroup}>
+              <div className={`${styles.statusTag} ${styles.statusTagActive}`}>
+                Active
               </div>
-              {/* Tombol Edit Photo dipindahkan ke sini saat isEditing */}
-              <button className={styles.editPhotoButton} onClick={onAddPhotoClick}>
-                Edit photo
-              </button>
+              <div className={styles.statusDropdownWrapper}>
+                <select
+                  name="graduation"
+                  value={editableStatus.graduation}
+                  onChange={onStatusChange}
+                  className={styles.statusDropdown}
+                >
+                  <option value="Not Graduated">Not Graduated</option>
+                  <option value="Graduated">Graduated</option>
+                </select>
+                <span className={styles.dropdownArrow}>▼</span>
+              </div>
             </div>
-          </>
+            <button
+              className={styles.editPhotoButton}
+              onClick={onAddPhotoClick}
+            >
+              Edit photo
+            </button>
+          </div>
         ) : (
-          // --- TAMPILAN VIEW MODE (Tidak Berubah) ---
+          // VIEW MODE
           <div className={styles.statusTagContainer}>
             <div className={`${styles.statusTag} ${styles.statusTagNotActive}`}>
               Not Active
@@ -77,7 +82,46 @@ const StudentProfileHeader = ({
         )}
       </div>
 
+      {/* Kolom Kanan: Tombol Aksi */}
       <div className={styles.headerActionSection}>
+        {!isEditing && (
+          <div className={styles.historyContainer} ref={historyRef}>
+            <button
+              className={styles.actionButton}
+              onClick={onViewHistoryClick}
+            >
+              {selectedVersionId
+                ? "Back to Latest Version"
+                : "View version history"}
+            </button>
+            {isHistoryVisible && (
+              <ul className={styles.historyDropdown}>
+                {isLoadingHistory ? (
+                  <li className={styles.historyInfoItem}>Loading...</li>
+                ) : historyDates.length > 0 ? (
+                  historyDates.map((version) => (
+                    <li
+                      key={version.version_id}
+                      className={styles.historyItem}
+                      onClick={() => onHistoryDateChange(version.version_id)}
+                    >
+                      {new Date(version.updated_at).toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </li>
+                  ))
+                ) : (
+                  <li className={styles.historyInfoItem}>No history found.</li>
+                )}
+              </ul>
+            )}
+          </div>
+        )}
+
         {isEditing ? (
           <>
             <button
@@ -92,16 +136,18 @@ const StudentProfileHeader = ({
               onClick={onSaveClick}
               disabled={isUpdating}
             >
-              Save changes
+              {isUpdating ? "Saving..." : "Save changes"}
             </button>
           </>
         ) : (
-          <button
-            className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
-            onClick={onEditClick}
-          >
-            Edit
-          </button>
+          !selectedVersionId && (
+            <button
+              className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
+              onClick={onEditClick}
+            >
+              Edit
+            </button>
+          )
         )}
       </div>
     </div>
