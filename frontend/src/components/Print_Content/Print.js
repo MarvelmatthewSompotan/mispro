@@ -2,17 +2,17 @@ import React, { useRef, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import styles from "../styles/Print.module.css";
+import styles from "./Print.module.css";
 import kop from "../../assets/LogoMIS_Print.png";
 import footer from "../../assets/Footer.png";
-import StudentsInformationContent from "../Print_Content/StudentsInformation_Content/StudentsInformation_Content";
-import ProgramContent from "../Print_Content/Program_Content/Program_Content";
-import FacilitiesContent from "../Print_Content/Facilities_Content/Facilities_Content";
-import ParentsGuardianInformationContent from "../Print_Content/ParentsGuardianInformation_Content/ParentsGuardianInformation_Content";
-import TermofPaymentContent from "../Print_Content/TermofPayment_Content/TermofPayment_Content";
-import PledgeContent from "../Print_Content/Pledge_Content/Pledge_Content";
-import SignatureContent from "../Print_Content/Signature_Content/Signature_Content";
-import OtherDetailContent from "../Print_Content/OtherDetail_Content/OtherDetail_Content";
+import StudentsInformationContent from "./StudentsInformation_Content/StudentsInformation_Content";
+import ProgramContent from "./Program_Content/Program_Content";
+import FacilitiesContent from "./Facilities_Content/Facilities_Content";
+import ParentsGuardianInformationContent from "./ParentsGuardianInformation_Content/ParentsGuardianInformation_Content";
+import TermofPaymentContent from "./TermofPayment_Content/TermofPayment_Content";
+import PledgeContent from "./Pledge_Content/Pledge_Content";
+import SignatureContent from "./Signature_Content/Signature_Content";
+import OtherDetailContent from "./OtherDetail_Content/OtherDetail_Content";
 import {
   getRegistrationPreview,
   getRegistrationOptions,

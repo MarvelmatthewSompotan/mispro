@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import PopUpConfirm from "../../PopUpConfirm";
+import PopUpConfirm from "../PopUp/PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
 import DuplicateStudentPopup from "../PopUp/DuplicateStudentPopup";
+import Button from "../../../../atoms/Button";
 
 const FormButtonSection = ({
   validationState,
@@ -453,20 +454,22 @@ const FormButtonSection = ({
         </div>
       </div>
       <div className={styles.buttonSection}>
-        <button
+        <Button
           className={styles.resetButton}
           onClick={handleReset}
+          variant="outline"
           type="button"
         >
           Reset
-        </button>
-        <button
+        </Button>
+        <Button
           className={styles.submitButton}
           onClick={handleSubmit}
+          variant="solid"
           type="button"
         >
           Submit
-        </button>
+        </Button>
       </div>
 
       {showConfirmation && (

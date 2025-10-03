@@ -1,17 +1,17 @@
 // eslint-disable-next-line
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Main from "../layout/Main";
-import StudentStatusSection from "./registration/StudentStatus/StudentStatusSection";
-import StudentInformationSection from "./registration/StudentInformation/StudentInformationSection";
-import ProgramSection from "./registration/Program/ProgramSection";
-import FacilitiesSection from "./registration/Facilities/FacilitiesSection";
-import ParentGuardianSection from "./registration/ParentGuardian/ParentGuardianSection";
-import TermOfPaymentSection from "./registration/TermOfPayment/TermOfPaymentSection";
-import OtherDetailSection from "./registration/OtherDetail/OtherDetailSection";
-import FormButtonSection from "./registration/FormButtonSection/FormButtonSection";
-import styles from "../styles/RegistrationForm.module.css";
-import { getRegistrationOptions } from "../../services/api";
+import Main from "../../../layout/Main";
+import StudentStatusSection from "./StudentStatus/StudentStatusSection";
+import StudentInformationSection from "./StudentInformation/StudentInformationSection";
+import ProgramSection from "./Program/ProgramSection";
+import FacilitiesSection from "./Facilities/FacilitiesSection";
+import ParentGuardianSection from "./ParentGuardian/ParentGuardianSection";
+import TermOfPaymentSection from "./TermOfPayment/TermOfPaymentSection";
+import OtherDetailSection from "./OtherDetail/OtherDetailSection";
+import FormButtonSection from "./FormButtonSection/FormButtonSection";
+import styles from "./RegistrationForm.module.css";
+import { getRegistrationOptions } from "../../../../services/api";
 import { gsap } from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
@@ -49,11 +49,7 @@ const RegistrationForm = () => {
   // Guard akses langsung: wajib datang dari PopUpForm
   useEffect(() => {
     const s = location.state || {};
-    const isValid =
-      s.fromPopup &&
-      s.draftId &&
-      s.schoolYear &&
-      s.semester;
+    const isValid = s.fromPopup && s.draftId && s.schoolYear && s.semester;
 
     if (!isValid) {
       navigate("/registration", { replace: true });

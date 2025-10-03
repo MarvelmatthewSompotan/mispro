@@ -3,7 +3,7 @@ import {
   searchStudent,
   getStudentLatestApplication,
   getRegistrationOptions,
-} from "../../../../services/api";
+} from "../../../../../services/api";
 import styles from "./StudentStatusSection.module.css";
 
 const StudentStatusSection = ({

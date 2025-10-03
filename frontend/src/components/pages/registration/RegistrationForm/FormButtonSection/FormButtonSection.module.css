@@ -66,64 +66,28 @@
 
 .resetButton {
   width: 130px;
-  border-radius: 5px;
-  border: 2px solid #5f84fe;
-  box-sizing: border-box;
   height: 40px;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
   padding: 15px;
-  background: transparent;
+  box-sizing: border-box;
   font-family: "Poppins", Arial, sans-serif;
   font-weight: 500;
   font-size: 16px;
-  color: #5f84fe;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.resetButton:hover {
-  background: rgba(95, 132, 254, 0.1);
-}
-
-.resetButton:active {
-  transform: translateY(1px);
 }
 
 .submitButton {
   width: 130px;
-  border-radius: 5px;
-  background-color: #5f84fe;
   height: 40px;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
   padding: 15px;
   box-sizing: border-box;
-  color: #fff;
-  border: none;
   font-family: "Poppins", Arial, sans-serif;
   font-weight: 500;
   font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.submitButton:hover:not(:disabled) {
-  background: #4a6fe8;
-}
-
-.submitButton:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.submitButton:disabled {
-  background: #b0b0b0;
-  cursor: not-allowed;
-  opacity: 0.7;
 }
 
 /* Responsive design */

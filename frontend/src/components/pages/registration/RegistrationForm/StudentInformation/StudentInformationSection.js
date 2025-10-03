@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
-import { getRegistrationOptions } from "../../../../services/api";
+import { getRegistrationOptions } from "../../../../../services/api";
 const genderOptions = ["MALE", "FEMALE"];
 const citizenshipOptions = ["Indonesia", "Non Indonesia"];
 

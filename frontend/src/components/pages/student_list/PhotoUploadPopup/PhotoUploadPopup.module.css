@@ -84,13 +84,8 @@
   color: #fff;
 }
 .browseButton {
-  border-radius: 5px;
-  background-color: #5f84fe;
   display: flex;
   padding: 10px 20px;
-  color: #fff;
-  border: none;
-  cursor: pointer;
 }
 .browseText {
   font-weight: 600;
@@ -131,8 +126,8 @@
   border-radius: 5px;
   outline: none;
   opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
 }
 
 .zoomRange:hover {
@@ -164,36 +159,11 @@
   padding: 16px;
 }
 
-.cancelButton, .saveButton {
+.cancelButton,
+.saveButton {
   padding: 12px 22px;
-  border-radius: 5px;
-  border: none;
   font-size: 16px;
   font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.cancelButton {
-  background-color: #e9ecef;
-  color: #495057;
-  border: 1px solid #ced4da;
-}
-
-.cancelButton:hover {
-  background-color: #dee2e6;
-}
-
-.saveButton {
-  background-color: #5f84fe;
-  color: #fff;
-}
-
-.saveButton:hover {
-  background-color: #4c6ef5;
-}
-
-.saveButton:disabled {
-  background-color: #adb5bd;
-  cursor: not-allowed;
-}
+/* Color/border are handled by Button atom */

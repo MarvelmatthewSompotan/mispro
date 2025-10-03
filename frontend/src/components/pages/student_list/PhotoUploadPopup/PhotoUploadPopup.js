@@ -3,6 +3,7 @@ import React, { useState, useCallback, useRef } from "react";
 import Cropper from "react-easy-crop";
 import styles from "./PhotoUploadPopup.module.css";
 import getCroppedImg from "./cropImage"; // Kita akan buat file helper ini
+import Button from "../../../atoms/Button";
 
 const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -143,19 +144,21 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
               />
             </div>
             <div className={styles.actionButtons}>
-              <button
+              <Button
                 className={styles.cancelButton}
                 onClick={() => setImageSrc(null)}
+                variant="outline"
               >
                 Change Photo
-              </button>
-              <button
+              </Button>
+              <Button
                 className={styles.saveButton}
                 onClick={showCroppedImage}
                 disabled={isCropping}
+                variant="solid"
               >
                 {isCropping ? "Saving..." : "Save Photo"}
-              </button>
+              </Button>
             </div>
           </>
         ) : (
@@ -177,9 +180,13 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
                   Drag and drop your file here
                 </div>
                 <div className={styles.or}>or</div>
-                <button className={styles.browseButton} onClick={onBrowseClick}>
+                <Button
+                  className={styles.browseButton}
+                  onClick={onBrowseClick}
+                  variant="solid"
+                >
                   <div className={styles.browseText}>Browse</div>
-                </button>
+                </Button>
               </div>
             )}
           </div>
