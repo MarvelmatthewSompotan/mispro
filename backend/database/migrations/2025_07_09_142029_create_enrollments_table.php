@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-   
     public function up(): void
     {
         Schema::create('enrollments', function (Blueprint $table) {
@@ -26,7 +25,6 @@ return new class extends Migration
             $table->enum('residence_hall_policy', ['Signed', 'Not Signed']);
             $table->enum('transportation_policy', ['Signed', 'Not Signed'])->nullable();
             $table->enum('status', ['ACTIVE','INACTIVE']);
-            $table->boolean('is_active')->default(true);
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
             $table->foreign('class_id')->references('class_id')->on('classes')->onDelete('set null');
             $table->foreign('section_id')->references('section_id')->on('sections')->onDelete('set null'); 
