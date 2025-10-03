@@ -96,7 +96,7 @@ class RegistrationController extends Controller
     public function updateStatus(Request $request, $application_id)
     {
         $request->validate([
-            'status' => 'required|in:Confirmed,Cenceled',
+            'status' => 'required|in:Confirmed,Cancelled',
         ]);
 
         $form = ApplicationForm::findOrFail($application_id);

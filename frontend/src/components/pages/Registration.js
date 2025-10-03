@@ -1,119 +1,128 @@
-  import React, { useState, useEffect } from 'react';
-  import { useNavigate } from 'react-router-dom';
-  import Button from '../atoms/Button';
-  import PopUpForm from './PopUpForm';
-  import Pagination from '../atoms/Pagination';
-  import styles from '../styles/Registration.module.css';
-  import searchIcon from '../../assets/Search-icon.png';
-  import { getRegistrations, getRegistrationOptions } from '../../services/api';
+// src/components/pages/Registration.js
 
-  const Registration = () => {
-    const navigate = useNavigate();
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Button from '../atoms/Button';
+import PopUpForm from './PopUpForm';
+import Pagination from '../atoms/Pagination';
+import StatusConfirmationPopup from './StatusConfirmationPopup'; 
+import styles from '../styles/Registration.module.css';
+import searchIcon from '../../assets/Search-icon.png';
+import { getRegistrations, getRegistrationOptions } from '../../services/api'; 
 
-    // State data API
-    const [registrationData, setRegistrationData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
+const Registration = () => {
+  const navigate = useNavigate();
 
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalRecords, setTotalRecords] = useState(0);
-    const [perPage] = useState(25); // Jumlah data per halaman
+  // State data API
+  // CATATAN: registrationData harus memiliki field 'status' dari backend
+  const [registrationData, setRegistrationData] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
-    // Options dari backend
-    const [sections, setSections] = useState([]);
-    const [schoolYears, setSchoolYears] = useState([]);
-    const [semesters, setSemesters] = useState([]);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [perPage] = useState(25); // Jumlah data per halaman
 
-    // Filter state
-    const [selectedSections, setSelectedSections] = useState([]);
-    const [selectedYear, setSelectedYear] = useState(null);
-    const [selectedSemester, setSelectedSemester] = useState(null);
+  // Options dari backend
+  const [sections, setSections] = useState([]);
+  const [schoolYears, setSchoolYears] = useState([]);
+  const [semesters, setSemesters] = useState([]);
 
-    const [showPopupForm, setShowPopupForm] = useState(false);
+  // Filter state
+  const [selectedSections, setSelectedSections] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedSemester, setSelectedSemester] = useState(null);
 
-    // Fetch options (sections, years, semesters)
-    useEffect(() => {
-      const fetchOptions = async () => {
-        try {
-          const opts = await getRegistrationOptions();
-          setSections(opts.sections || []);
-          setSchoolYears(opts.school_years || []);
-          setSemesters(opts.semesters || []);
-        } catch (err) {
-          console.error('Error fetching registration options:', err);
-        }
-      };
-      fetchOptions();
-    }, []);
+  const [showPopupForm, setShowPopupForm] = useState(false);
 
-    // Fetch registrations dari API dengan pagination
-    const fetchRegistrations = async (filters = {}, page = 1) => {
+  // --- NEW STATE FOR STATUS POPUP ---
+  const [showStatusPopup, setShowStatusPopup] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState(null);
+  // ---------------------------------
+
+  // Fetch options (sections, years, semesters)
+  useEffect(() => {
+    const fetchOptions = async () => {
       try {
-        setLoading(true);
-        const res = await getRegistrations({
-          ...filters,
-          page: page,
-          per_page: perPage
-        });
-        
-        // Update data dan pagination info
-        setRegistrationData(res.data.data || []);
-        setTotalPages(res.data.last_page || 1);
-        setTotalRecords(res.data.total || 0);
-        setCurrentPage(res.data.current_page || 1);
+        const opts = await getRegistrationOptions();
+        setSections(opts.sections || []);
+        setSchoolYears(opts.school_years || []);
+        setSemesters(opts.semesters || []);
       } catch (err) {
-        console.error('Error fetching registrations:', err);
-        setRegistrationData([]);
-        setTotalPages(1);
-        setTotalRecords(0);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching registration options:', err);
       }
     };
+    fetchOptions();
+  }, []);
 
-    // Initial load
-    useEffect(() => {
-      fetchRegistrations({ per_page: perPage });
-      // eslint-disable-next-line 
-    }, []);
+  // Fetch registrations dari API dengan pagination
+  const fetchRegistrations = async (filters = {}, page = 1) => {
+    try {
+      setLoading(true);
+      const res = await getRegistrations({
+        ...filters,
+        page: page,
+        per_page: perPage
+      });
+      
+      // Update data dan pagination info
+      setRegistrationData(res.data.data || []); 
+      setTotalPages(res.data.last_page || 1);
+      setTotalRecords(res.data.total || 0);
+      setCurrentPage(res.data.current_page || 1);
+    } catch (err) {
+      console.error('Error fetching registrations:', err);
+      setRegistrationData([]);
+      setTotalPages(1);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Auto fetch ketika filter/search berubah
-    useEffect(() => {
-      setCurrentPage(1); // Reset ke halaman 1 saat filter berubah
+  // Initial load
+  useEffect(() => {
+    fetchRegistrations({ per_page: perPage });
+    // eslint-disable-next-line 
+  }, []);
+
+  // Auto fetch ketika filter/search berubah
+  useEffect(() => {
+    setCurrentPage(1); // Reset ke halaman 1 saat filter berubah
+    fetchRegistrations({
+      search: search || undefined,
+      school_year_id: selectedYear || undefined,
+      semester_id: selectedSemester || undefined,
+      section_id: selectedSections.length > 0 ? selectedSections : undefined,
+    }, 1);
+    // eslint-disable-next-line 
+  }, [search, selectedYear, selectedSemester, selectedSections]);
+
+  // Handle pagination change
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
       fetchRegistrations({
         search: search || undefined,
         school_year_id: selectedYear || undefined,
         semester_id: selectedSemester || undefined,
         section_id: selectedSections.length > 0 ? selectedSections : undefined,
-      }, 1);
-      // eslint-disable-next-line 
-    }, [search, selectedYear, selectedSemester, selectedSections]);
+      }, newPage);
+    }
+  };
 
-    // Handle pagination change
-    const handlePageChange = (newPage) => {
-      if (newPage >= 1 && newPage <= totalPages) {
-        setCurrentPage(newPage);
-        fetchRegistrations({
-          search: search || undefined,
-          school_year_id: selectedYear || undefined,
-          semester_id: selectedSemester || undefined,
-          section_id: selectedSections.length > 0 ? selectedSections : undefined,
-        }, newPage);
-      }
-    };
+  // Toggle section checkbox
+  const handleSectionToggle = (id) => {
+    setSelectedSections((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
 
-    // Toggle section checkbox
-    const handleSectionToggle = (id) => {
-      setSelectedSections((prev) =>
-        prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-      );
-    };
-
-    // Popup form handlers
-    const handleNewForm = () => setShowPopupForm(true);
-    const handleClosePopup = () => setShowPopupForm(false);
+  // Popup form handlers
+  const handleNewForm = () => setShowPopupForm(true);
+  const handleClosePopup = () => setShowPopupForm(false);
 
   const handleCreateForm = (formData) => {
     navigate('/registration-form', {
@@ -128,13 +137,80 @@
   // Row click → navigate ke print page
   const handleRowClick = (row) => {
     const applicationId = row.application_form?.application_id || null;
-    const version = row.version_id ?? null;
-    console.log('Row data:', row);
-    console.log('Application ID:', applicationId);
-    console.log('Version:', version);
+    const version = row.registration_version_id ?? null; // Menggunakan registration_version_id
+    // console.log('Row data:', row);
+    // console.log('Application ID:', applicationId);
+    // console.log('Version:', version);
     navigate('/print', {
       state: { applicationId, version },
     });
+  };
+
+  // --- NEW HANDLER FOR STATUS BUTTON CLICK ---
+  const handleStatusClick = (e, row) => {
+    e.stopPropagation(); // Mencegah handleRowClick (navigate) terpicu
+    setSelectedRegistration(row);
+    setShowStatusPopup(true);
+  };
+
+  const handleCloseStatusPopup = () => {
+    setShowStatusPopup(false);
+    setSelectedRegistration(null);
+  };
+
+  // Mengupdate status di state lokal dan me-refresh data
+  const handleUpdateStatus = (id, newStatus) => {
+      // Opsi 1: Update di state lokal (Lebih cepat, tapi harus yakin API sukses)
+      // newStatus sekarang adalah 'Confirmed' atau 'Cancelled'
+      setRegistrationData(prevData => 
+        prevData.map(reg => {
+          if (reg.registration_id === id && reg.application_form) {
+            return {
+              ...reg,
+              application_form: {
+                ...reg.application_form,
+                status: newStatus 
+              }
+            };
+          }
+          return reg;
+        })
+      );
+      // Opsi 2: Refresh data dari server (Lebih aman)
+      fetchRegistrations({
+        search: search || undefined,
+        school_year_id: selectedYear || undefined,
+        semester_id: selectedSemester || undefined,
+        section_id: selectedSections.length > 0 ? selectedSections : undefined,
+      }, currentPage);
+  };
+  // ------------------------------------------
+
+  // Helper function to get status display (Membandingkan dengan KAPITAL PENUH untuk tampilan)
+  const getStatusDisplay = (row) => {
+    const status = row.application_form?.status;
+    const statusText = status ? status.toUpperCase() : 'CONFIRMED'; 
+    
+    let buttonClass = '';
+    // Perbandingan menggunakan KAPITAL PENUH
+    if (statusText === 'CONFIRMED') { 
+        buttonClass = styles.statusConfirmed;
+    } else if (statusText === 'CANCELLED') { 
+        buttonClass = styles.statusCancelled;
+    } else {
+        // Fallback untuk status yang tidak dikenal
+        buttonClass = styles.statusConfirmed;
+    }
+
+    return (
+        <button 
+            className={`${styles.regStatus} ${buttonClass}`}
+            onClick={(e) => handleStatusClick(e, row)}
+            type="button"
+        >
+            <span className={styles.statusText}>{statusText}</span>
+        </button>
+    );
   };
 
     return (                                                                                                                                                                                                                                                                                                    
@@ -219,9 +295,10 @@
             <thead>
               <tr className={styles.tableHeaderRow}>
                 <th className={styles.tableHeaderCell}>Created at</th>
+                <th className={styles.tableHeaderCell}>Name</th> {/* Pindah Name ke sini */}
                 <th className={styles.tableHeaderCell}>Registration ID</th>
                 <th className={styles.tableHeaderCell}>Section</th>
-                <th className={styles.tableHeaderCell}>Name</th>
+                <th className={styles.tableHeaderCell}>Status</th> 
               </tr>
             </thead>
             <tbody>
@@ -230,7 +307,8 @@
                   <tr
                     key={idx}
                     className={styles.tableRow}
-                    onClick={() => handleRowClick(row)}
+                    // Hanya navigate jika status belum diklik (dicegah di handleStatusClick)
+                    onClick={() => handleRowClick(row)} 
                     style={{ cursor: 'pointer' }}
                   >
                     <td className={styles.tableCell}>
@@ -243,14 +321,19 @@
                         }
                       )}
                     </td>
+                    <td className={styles.tableCellName}>{row.full_name}</td>
                     <td className={styles.tableCell}>{row.registration_id}</td>
                     <td className={styles.tableCell}>{row.section?.name}</td>
-                    <td className={styles.tableCellName}>{row.full_name}</td>
+                    {/* --- STATUS BUTTON --- */}
+                    <td className={styles.tableCell}>
+                       {getStatusDisplay(row)}
+                    </td>
+                    {/* ---------------------------------- */}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan='4' className={styles.tableCell}>
+                  <td colSpan='5' className={styles.tableCell}>
                     {loading ? 'Loading...' : 'No data available'}
                   </td>
                 </tr>
@@ -274,6 +357,16 @@
         {showPopupForm && (
           <PopUpForm onClose={handleClosePopup} onCreate={handleCreateForm} />
         )}
+
+        {/* --- STATUS CONFIRMATION POPUP --- */}
+        {showStatusPopup && selectedRegistration && (
+          <StatusConfirmationPopup
+            registration={selectedRegistration}
+            onClose={handleCloseStatusPopup}
+            onUpdateStatus={handleUpdateStatus} // Fungsi untuk refresh data/state
+          />
+        )}
+        {/* ------------------------------------ */}
       </div>
     );
   };
