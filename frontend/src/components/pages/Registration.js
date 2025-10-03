@@ -19,7 +19,7 @@
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalRecords, setTotalRecords] = useState(0);
-    const [perPage] = useState(10); // Jumlah data per halaman
+    const [perPage] = useState(25); // Jumlah data per halaman
 
     // Options dari backend
     const [sections, setSections] = useState([]);

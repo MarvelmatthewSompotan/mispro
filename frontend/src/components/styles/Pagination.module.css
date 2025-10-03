@@ -63,22 +63,40 @@
 }
 
 .pageNumberWrapper {
-    /* Menggantikan .page-number-wrapper */
-    width: 64px;
-    border-bottom: 1px solid #6a6a6a;
+    /* MENGGANTIKAN .page-number-wrapper (Perubahan ada di sini) */
+    width: 64px; /* Lebar tetap */
+    border-bottom: 1px solid #6a6a6a; /* Garis bawah */
     box-sizing: border-box;
-    height: 32px;
-    overflow: hidden;
+    height: 40px; 
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 5px 10px; 
     font-size: 14px;
     color: #5f84fe;
 }
 
 .pageNumberWrapper span {
     font-weight: 600;
+}
+
+/* Style baru untuk elemen input yang menggantikan angka halaman */
+.pageNumberInput {
+    background: none;
+    border: none;
+    outline: none;
+    
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: inherit;
+    
+    width: 100%; 
+    height: 100%;
+    /* Tambahkan line-height agar teks center vertikal */
+    line-height: 20px; 
+    padding: 0; /* Hapus padding default browser pada input */
+    margin: 0;
 }
