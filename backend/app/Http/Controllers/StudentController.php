@@ -179,6 +179,8 @@ class StudentController extends Controller
                 'province' => $requestData['province'] ?? '',
                 'other' => $requestData['other'] ?? '',
                 'photo_url' => $requestData['photo_url'] ?? '',
+                'student_active' => $requestData['student_active'] ?? '',
+                'status' => $requestData['status'] ?? '',
             ],
             'program' => [
                 'section_id' => $requestData['section_id'] ?? '',
@@ -244,6 +246,8 @@ class StudentController extends Controller
                 'discount_name' => $requestData['discount_name'] ?? '',
                 'discount_notes' => $requestData['discount_notes'] ?? '',
             ],
+            'enrollment_status' => $requestData['enrollment_status'] ?? '',
+            'application_form_status' => $requestData['application_form_status'] ?? '',
             'student_status' => 'Old',
             'input_name' => $student_id
         ];
@@ -298,6 +302,7 @@ class StudentController extends Controller
                 'nik' => 'sometimes|nullable|integer',
                 'kitas' => 'sometimes|nullable|string',
                 'photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg|max:5048',
+                'status' => 'sometimes|required|in:Not Graduate,Graduate,Expelled,Transferred',
 
                 // Address
                 'street'       => 'sometimes|nullable|string',
@@ -366,6 +371,18 @@ class StudentController extends Controller
             // --- Update data di tabel terkait ---
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
             $student->update(array_filter($studentData, fn($v) => !is_null($v)));
+            if (isset($validated['status'])) {
+                $inactiveStatuses = ['graduate', 'expelled', 'transferred'];
+
+                if (in_array(strtolower($validated['status']), $inactiveStatuses)) {
+                    $student->active = 'NO';
+                } else {
+                    $student->active = 'YES';
+                }
+
+                $student->save();
+            }
+
             if ($request->hasFile('photo')) {
                 $timestamp = now()->format('Y-m-d_H-i-s');
                 $extension = $request->file('photo')->getClientOriginalExtension();
@@ -449,7 +466,8 @@ class StudentController extends Controller
             // Gabungkan data lama + input baru
             $newRequestData = array_merge($oldRequestData, $validated);
             unset($newRequestData['photo']);
-            
+
+            $newRequestData['active'] = $student->active;
             if ($student->photo_path) {
                 $newRequestData['photo_path'] = $student->photo_path;
                 $newRequestData['photo_url']  = asset('storage/' . $student->photo_path);
