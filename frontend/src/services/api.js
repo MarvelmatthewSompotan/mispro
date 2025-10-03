@@ -60,7 +60,7 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
     error.response = { data: errorData, status: res.status };
     throw error;
   }
-  
+
   // Jika response tidak memiliki body (misal: status 204 No Content), kembalikan null
   if (res.status === 204) {
     return null;
@@ -94,7 +94,10 @@ export const logout = async () => {
     await apiFetch('/logout', { method: 'POST' });
   } catch (error) {
     // Abaikan error saat logout (misal: token sudah expired), yang penting data di local storage bersih
-    console.warn('Logout failed on server, proceeding to clear local data.', error);
+    console.warn(
+      'Logout failed on server, proceeding to clear local data.',
+      error
+    );
   } finally {
     localStorage.removeItem('token');
   }
@@ -131,10 +134,17 @@ export const getStudentLatestApplication = (studentId) => {
 };
 
 export const getRegistrationPreview = (applicationId, versionId) => {
-  return apiFetch(`/registration/preview/${applicationId}/version/${versionId}`);
+  return apiFetch(
+    `/registration/preview/${applicationId}/version/${versionId}`
+  );
 };
 
-export const getStudents = ({ search = '', school_year_id = null, semester_id = null, section_id = null } = {}) => {
+export const getStudents = ({
+  search = '',
+  school_year_id,
+  semester_id,
+  section_id,
+} = {}) => {
   const params = new URLSearchParams();
   if (search) params.append('search', search);
   if (school_year_id) params.append('school_year_id', school_year_id);
@@ -165,7 +175,14 @@ export const updateStudent = (studentId, studentData) => {
   });
 };
 
-export const getRegistrations = ({ search = '', school_year_id = null, semester_id = null, section_id = null, page = 1, per_page = 10 } = {}) => {
+export const getRegistrations = ({
+  search = '',
+  school_year_id = null,
+  semester_id = null,
+  section_id = null,
+  page = 1,
+  per_page = 10,
+} = {}) => {
   const params = new URLSearchParams();
   if (search) params.append('search', search);
   if (school_year_id) params.append('school_year_id', school_year_id);
@@ -180,6 +197,8 @@ export const getRegistrations = ({ search = '', school_year_id = null, semester_
   return apiFetch(`/registration?${params.toString()}`);
 };
 
-export const getStudentHistoryDates = (studentId) => apiFetch(`/students/${studentId}/history-dates`);
+export const getStudentHistoryDates = (studentId) =>
+  apiFetch(`/students/${studentId}/history-dates`);
 
-export const getHistoryDetail = (versionId) => apiFetch(`/students/history/${versionId}`);
+export const getHistoryDetail = (versionId) =>
+  apiFetch(`/students/history/${versionId}`);

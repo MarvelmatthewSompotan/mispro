@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
-import styles from "./StudentList.module.css";
-import { useNavigate } from "react-router-dom";
-import searchIcon from "../../../assets/Search-icon.png";
-import { getStudents, getRegistrationOptions } from "../../../services/api";
+import React, { useState, useEffect } from 'react';
+import styles from './StudentList.module.css';
+import { useNavigate } from 'react-router-dom';
+import searchIcon from '../../../assets/Search-icon.png';
+import { getStudents, getRegistrationOptions } from '../../../services/api';
 
 const StudentList = () => {
   const navigate = useNavigate();
   const [studentData, setStudentData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [sections, setSections] = useState([]);
   const [schoolYears, setSchoolYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
@@ -34,7 +34,7 @@ const StudentList = () => {
         }
         setGradeMap(newGradeMap);
       } catch (err) {
-        console.error("Error fetching registration options:", err);
+        console.error('Error fetching registration options:', err);
       }
     };
     fetchOptions();
@@ -45,10 +45,9 @@ const StudentList = () => {
     try {
       setLoading(true);
       const res = await getStudents(filters);
-      // Data dari endpoint /students ada di res.data
-      setStudentData(res.data || []);
+      setStudentData(res.data?.data || []);
     } catch (err) {
-      console.error("Error fetching student data:", err);
+      console.error('Error fetching student data:', err);
     } finally {
       setLoading(false);
     }
@@ -65,7 +64,6 @@ const StudentList = () => {
         school_year_id: selectedYear || undefined,
         semester_id: selectedSemester || undefined,
         section_id: selectedSections.length > 0 ? selectedSections : undefined,
-        
       });
     }, 300);
 
@@ -83,13 +81,13 @@ const StudentList = () => {
       {/* Search Bar */}
       <div className={styles.searchContainer}>
         <input
-          type="text"
-          placeholder="Find name or student id"
+          type='text'
+          placeholder='Find name or student id'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={styles.searchInput}
         />
-        <img src={searchIcon} alt="Search" className={styles.searchIcon} />
+        <img src={searchIcon} alt='Search' className={styles.searchIcon} />
       </div>
 
       {/* Filters */}
@@ -100,7 +98,7 @@ const StudentList = () => {
           {sections.map((section) => (
             <label key={section.section_id} className={styles.checkboxLabel}>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={selectedSections.includes(section.section_id)}
                 onChange={() => handleSectionToggle(section.section_id)}
               />
@@ -111,11 +109,11 @@ const StudentList = () => {
 
           {/* School Year */}
           <select
-            value={selectedYear || ""}
+            value={selectedYear || ''}
             onChange={(e) => setSelectedYear(e.target.value || null)}
             className={styles.filterSelect}
           >
-            <option value="">Select School Year</option>
+            <option value=''>Select School Year</option>
             {schoolYears.map((y) => (
               <option key={y.school_year_id} value={y.school_year_id}>
                 {y.year}
@@ -125,11 +123,11 @@ const StudentList = () => {
 
           {/* Semester */}
           <select
-            value={selectedSemester || ""}
+            value={selectedSemester || ''}
             onChange={(e) => setSelectedSemester(e.target.value || null)}
             className={styles.filterSelect}
           >
-            <option value="">Select Semester</option>
+            <option value=''>Select Semester</option>
             {semesters.map((s) => (
               <option key={s.semester_id} value={s.semester_id}>
                 {s.name}
@@ -141,7 +139,7 @@ const StudentList = () => {
 
       {/* Results Info */}
       <div className={styles.resultsCount}>
-        Showing {loading ? "..." : studentData.length} results
+        Showing {loading ? '...' : studentData.length} results
       </div>
 
       {/* Table */}
@@ -158,10 +156,10 @@ const StudentList = () => {
           <tbody>
             {!loading && studentData.length > 0 ? (
               studentData.map((student) => {
-                const grade = gradeMap.get(student.class_id) || "N/A";
+                const grade = gradeMap.get(student.class_id) || 'N/A';
                 const sectionName =
                   sections.find((s) => s.section_id === student.section_id)
-                    ?.name || "N/A";
+                    ?.name || 'N/A';
 
                 return (
                   <tr
@@ -172,7 +170,7 @@ const StudentList = () => {
                         state: { fromList: true },
                       })
                     }
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: 'pointer' }}
                   >
                     <td className={styles.tableCell}>{student.student_id}</td>
                     <td className={styles.tableCellName}>
@@ -185,8 +183,8 @@ const StudentList = () => {
               })
             ) : (
               <tr>
-                <td colSpan="4" className={styles.tableCell}>
-                  {loading ? "Loading..." : "No data available"}
+                <td colSpan='4' className={styles.tableCell}>
+                  {loading ? 'Loading...' : 'No data available'}
                 </td>
               </tr>
             )}
