@@ -68,6 +68,8 @@ class Student extends Model
         'age',
         'nik',
         'kitas',
+        'active',
+        'status',
     ];
 
     // Direct Relationships
