@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+// src/components/pages/student_list/StudentList.js
+
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
 import searchIcon from "../../../assets/Search-icon.png";
@@ -16,6 +18,7 @@ const StudentList = () => {
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(null);
   const [gradeMap, setGradeMap] = useState(new Map());
+  const REFRESH_INTERVAL = 5000;
 
   // Fetch options (sections, years, semesters)
   useEffect(() => {
@@ -40,10 +43,15 @@ const StudentList = () => {
     fetchOptions();
   }, []);
 
-  // Fetch data dari API menggunakan getStudents
-  const fetchStudents = async (filters = {}) => {
+  // 1. Tambahkan parameter 'options' untuk membedakan jenis fetch
+  const fetchStudents = useCallback(async (filters = {}, options = {}) => {
+    const { isBackgroundRefresh = false } = options;
+
     try {
-      setLoading(true);
+      // 2. Hanya tampilkan loading jika BUKAN background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true);
+      }
       const res = await getStudents(filters);
       setStudentData(res.data?.data || []);
     } catch (err) {
@@ -51,24 +59,49 @@ const StudentList = () => {
     } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => {
-    fetchStudents();
-  }, []);
+  }, []); // Dependensi kosong karena getStudents stabil
 
-  // Auto fetch ketika filter/search berubah
+  // Fetch data awal saat komponen pertama kali dimuat
   useEffect(() => {
+    fetchStudents(); // Panggilan awal tetap menampilkan loading
+  }, [fetchStudents]);
+
+  // Auto fetch ketika filter/search berubah (debounce)
+  useEffect(() => {
+    const filters = {
+      search: search || undefined,
+      school_year_id: selectedYear || undefined,
+      semester_id: selectedSemester || undefined,
+      section_id: selectedSections.length > 0 ? selectedSections : undefined,
+    };
+
     const timer = setTimeout(() => {
-      fetchStudents({
+      fetchStudents(filters); // Perubahan filter juga tetap menampilkan loading
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search, selectedYear, selectedSemester, selectedSections, fetchStudents]);
+
+  // useEffect BARU untuk auto-refresh
+  useEffect(() => {
+    const refreshData = () => {
+      const currentFilters = {
         search: search || undefined,
         school_year_id: selectedYear || undefined,
         semester_id: selectedSemester || undefined,
         section_id: selectedSections.length > 0 ? selectedSections : undefined,
-      });
-    }, 300);
+      };
+      console.log("Auto refreshing student list (background)...");
 
-    return () => clearTimeout(timer);
-  }, [search, selectedYear, selectedSemester, selectedSections]);
+      // 3. Beri tanda bahwa ini adalah background refresh
+      fetchStudents(currentFilters, { isBackgroundRefresh: true });
+    };
+
+    const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
+
+    // Wajib: Hentikan interval saat pindah halaman
+    return () => clearInterval(intervalId);
+  }, [search, selectedYear, selectedSemester, selectedSections, fetchStudents]);
 
   const handleSectionToggle = (id) => {
     setSelectedSections((prev) =>
