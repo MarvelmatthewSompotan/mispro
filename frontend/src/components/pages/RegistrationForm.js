@@ -10,7 +10,7 @@ import ParentGuardianSection from "./registration/ParentGuardian/ParentGuardianS
 import TermOfPaymentSection from "./registration/TermOfPayment/TermOfPaymentSection";
 import OtherDetailSection from "./registration/OtherDetail/OtherDetailSection";
 import FormButtonSection from "./registration/FormButtonSection/FormButtonSection";
-import styles from "./RegistrationForm.module.css";
+import styles from "../styles/RegistrationForm.module.css";
 import { getRegistrationOptions } from "../../services/api";
 import { gsap } from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";

@@ -437,6 +437,16 @@ class RegistrationController extends Controller
             $status = $validated['student_status'];
             $student = null;
             
+            // check current school year
+            $currentMonth = now()->month;
+            $currentYear = now()->year;
+            $schoolYearStr = ($currentMonth >= 7) 
+                ? $currentYear . '/' . ($currentYear + 1)
+                : ($currentYear - 1) . '/' . $currentYear;
+
+            $currentSchoolYear = SchoolYear::where('year', $schoolYearStr)->first();
+            $enrollmentStatus = ($draft->school_year_id === $currentSchoolYear->school_year_id) ? 'ACTIVE' : 'INACTIVE';
+
             if ($status === 'New' || $status === 'Transferee') {
                 // Check existing student
                 $possibleStudents = Student::where(function($query) use ($validated) {
@@ -520,7 +530,7 @@ class RegistrationController extends Controller
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
-                    'status' => 'ACTIVE',
+                    'status' => $enrollmentStatus,
                 ]);
                 
                 // Create application form
@@ -575,7 +585,7 @@ class RegistrationController extends Controller
                     'residence_id' => $residenceHall->residence_id,
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
-                    'status' => 'ACTIVE',
+                    'status' => $enrollmentStatus,
                 ]);
                 // Create application form
                 $applicationForm = $this->createApplicationForm($enrollment);
@@ -949,7 +959,12 @@ class RegistrationController extends Controller
         $oldSnapshot = $latestVersion ? json_decode($latestVersion->data_snapshot, true) : [];
         $oldRequestData = $oldSnapshot['request_data'] ?? [];
 
-        $newRequestData = array_merge($oldRequestData, $validated);
+        $newRequestData = array_merge($oldRequestData, $validated, [
+            'student_active' => $student->active,          
+            'status' => $student->status,
+            'enrollment_status' => $enrollment->status,
+            'application_form_status' => $applicationForm->status, 
+        ]);
 
         unset($newRequestData['photo']);
         
