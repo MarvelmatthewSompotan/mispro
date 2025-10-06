@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./WrongSectionPopup.module.css"; // Kita akan buat file CSS ini di langkah berikutnya
+import Button from "../../../../atoms/Button";
 
 const WrongSectionPopup = ({ onClose }) => {
   return (
@@ -14,9 +15,13 @@ const WrongSectionPopup = ({ onClose }) => {
           This student is being registered in a new section. Please use the
           'New' student status for this registration.
         </p>
-        <button className={styles.closeButton} onClick={onClose}>
+        <Button
+          className={styles.closeButton}
+          onClick={onClose}
+          variant="solid"
+        >
           Understood
-        </button>
+        </Button>
       </div>
     </div>
   );

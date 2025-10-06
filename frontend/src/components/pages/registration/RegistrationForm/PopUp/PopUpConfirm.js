@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import styles from "../styles/PopUpConfirm.module.css";
-import { submitRegistrationForm } from "../../services/api";
-import WrongSectionPopup from "./registration/PopUp/WrongSectionPopup";
+import styles from "./PopUpConfirm.module.css";
+import { submitRegistrationForm } from "../../../../../services/api";
+import WrongSectionPopup from "./WrongSectionPopup";
+import Button from "../../../../atoms/Button";
 
 const PopUpConfirm = React.memo(
   ({
@@ -28,7 +29,7 @@ const PopUpConfirm = React.memo(
               version: response.data.version,
               fromSubmission: true,
             },
-            replace: true, 
+            replace: true,
           });
           onConfirm();
         } else {
@@ -237,22 +238,20 @@ const PopUpConfirm = React.memo(
               Are you sure you want to continue?
             </div>
             <div className={styles.bAddSubjectParent}>
-              <button
-                className={styles.bAddSubject1}
+              <Button
                 onClick={onCancel}
-                type="button"
                 disabled={isSubmitting}
+                variant="outline"
               >
                 Cancel
-              </button>
-              <button
-                className={styles.bAddSubject}
+              </Button>
+              <Button
                 onClick={handleConfirm}
-                type="button"
                 disabled={isSubmitting}
+                variant="solid"
               >
                 {isSubmitting ? "Submitting..." : "Yes, I'm sure"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

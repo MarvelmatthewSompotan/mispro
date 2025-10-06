@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./FacilitiesSection.module.css";
-import checkBoxIcon from "../../../../assets/CheckBox.png";
-import { getRegistrationOptions } from "../../../../services/api";
+import checkBoxIcon from "../../../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../../../services/api";
 
 const FacilitiesSection = ({
   onDataChange,

@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./DuplicateStudentPopup.module.css";
+import Button from "../../../../atoms/Button";
 
 const DuplicateStudentPopup = ({ onClose }) => {
   return (
@@ -13,9 +14,9 @@ const DuplicateStudentPopup = ({ onClose }) => {
         <p className={styles.message}>
           Please select "Old" status and input the student's name.
         </p>
-        <button className={styles.closeButton} onClick={onClose}>
+        <Button  onClick={onClose} variant="solid" type="button">
           Understood
-        </button>
+        </Button>
       </div>
     </div>
   );

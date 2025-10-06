@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./PopUpConfirmUpdate.module.css";
+import Button from "../../../atoms/Button";
 
 const ConfirmUpdatePopup = ({ isOpen, onClose, onConfirm, isUpdating }) => {
   if (!isOpen) {
@@ -21,20 +22,22 @@ const ConfirmUpdatePopup = ({ isOpen, onClose, onConfirm, isUpdating }) => {
           Are you sure you want to continue?
         </div>
         <div className={styles.buttonGroup}>
-          <button
+          <Button
             className={styles.cancelButton}
             onClick={onClose}
             disabled={isUpdating}
+            variant="outline"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             className={styles.confirmButton}
             onClick={onConfirm}
             disabled={isUpdating}
+            variant="solid"
           >
             {isUpdating ? "Saving..." : "Yes, I'm sure"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
   padding: 32px;
   margin: 0 auto;
   background: #fafbff;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .topBar {
@@ -14,11 +14,9 @@
 }
 
 .newFormBtn {
-  background: #7b7bfa !important;
-  color: #fff !important;
   margin-right: 16px;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: "Poppins", sans-serif;
+  font-weight: Regular;
 }
 
 .printBtn {
@@ -49,8 +47,8 @@
   color: #5f84fe;
   opacity: 0.8;
   font-size: 15px;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: "Poppins", sans-serif;
+  font-weight: Regular;
 }
 
 .searchIconImg {
@@ -222,8 +220,8 @@ input[type="checkbox"]:checked + .customCheckbox::after {
   font-size: 14px;
   color: #fff;
   font-family: Poppins, sans-serif;
-   border: none;
-   max-width: 120px; /* Batasi lebar agar tidak terlalu lebar di kolom */
+  border: none;
+  max-width: 120px; /* Batasi lebar agar tidak terlalu lebar di kolom */
 }
 
 /* Style untuk teks status di dalam button (sesuai permintaan .cancelled) */
@@ -235,10 +233,10 @@ input[type="checkbox"]:checked + .customCheckbox::after {
 
 /* Status Confirmed (Hijau) */
 .statusConfirmed {
-   background-color: #04b34b; /* Hijau yang lebih cerah */
+  background-color: #04b34b; /* Hijau yang lebih cerah */
 }
 
 /* Status Cancelled (Merah) */
 .statusCancelled {
-  background-color: #ee0808; 
+  background-color: #ee0808;
 }

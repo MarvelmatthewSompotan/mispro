@@ -59,32 +59,7 @@
 
 .cancelButton,
 .confirmButton {
-  border-radius: 5px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 20px;
+  height: 40px; /* keep same height */
+  padding: 0 20px; /* keep spacing */
   box-sizing: border-box;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  font-size: 14px;
-}
-
-.cancelButton {
-  background-color: #5f84fe;
-  color: #fff;
-}
-
-.confirmButton {
-  background-color: #fff;
-  border: 2px solid #5f84fe;
-  color: #5f84fe;
-}
-
-.confirmButton:disabled,
-.cancelButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }

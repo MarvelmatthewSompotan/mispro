@@ -44,30 +44,6 @@
   line-height: 1.5;
   color: #6b7280; /* Medium gray */
 }
-
-/* -- Perubahan di sini -- */
-.buttonBox {
-  /* Box pembungkus kini tidak memiliki style visual */
-  display: flex;
-  justify-content: center;
-}
-
-.closeButton {
-  background-color: #4f46e5; /* Warna solid (Indigo) */
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.9rem; /* Ukuran font diperkecil */
-  padding: 8px 24px; /* Padding diperkecil (lebih pendek, cukup lebar) */
-  transition: background-color 0.2s ease;
-}
-
-.closeButton:hover {
-  background-color: #4338ca; /* Warna lebih gelap saat hover */
-}
-
 /* Keyframe animations */
 @keyframes fadeIn {
   from {

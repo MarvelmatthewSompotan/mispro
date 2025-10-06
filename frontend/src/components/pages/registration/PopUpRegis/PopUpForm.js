@@ -1,11 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import styles from '../styles/PopUpForm.module.css';
-import { startRegistration, getRegistrationOptions } from '../../services/api';
+import React, { useState, useRef, useEffect } from "react";
+import styles from "./PopUpForm.module.css";
+import {
+  startRegistration,
+  getRegistrationOptions,
+} from "../../../../services/api";
+import Button from "../../../atoms/Button";
 
 const PopUpForm = ({ onClose, onCreate }) => {
-  const [schoolYear, setSchoolYear] = useState('');
-  const [semester, setSemester] = useState('');
-  const [date, setDate] = useState('');
+  const [schoolYear, setSchoolYear] = useState("");
+  const [semester, setSemester] = useState("");
+  const [date, setDate] = useState("");
 
   const [schoolYearOptions, setSchoolYearOptions] = useState([]);
   const [semesterOptions, setSemesterOptions] = useState([]);
@@ -22,13 +26,13 @@ const PopUpForm = ({ onClose, onCreate }) => {
         setSemesterOptions(data.semesters || []);
       })
       .catch((err) => {
-        console.error('Error fetching registration options:', err);
+        console.error("Error fetching registration options:", err);
       });
   }, []);
 
   // Set today's date once on mount
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     setDate(today);
   }, []);
 
@@ -47,12 +51,12 @@ const PopUpForm = ({ onClose, onCreate }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (schoolYear && semester) {
-      console.log('Submitting with data:', { schoolYear, semester }); // Debug log
+      console.log("Submitting with data:", { schoolYear, semester }); // Debug log
 
       // Call startRegistration to generate draft ID
       startRegistration(schoolYear, semester)
         .then((response) => {
-          console.log('Success response:', response); // Debug log
+          console.log("Success response:", response); // Debug log
           if (response.success) {
             // Pakai tanggal dari server agar konsisten
             onCreate({
@@ -63,22 +67,22 @@ const PopUpForm = ({ onClose, onCreate }) => {
             });
           } else {
             alert(
-              'Failed to start registration: ' +
-                (response.error || 'Unknown error')
+              "Failed to start registration: " +
+                (response.error || "Unknown error")
             );
           }
         })
         .catch((error) => {
-          console.error('Error starting registration:', error);
+          console.error("Error starting registration:", error);
           if (error.response) {
-            console.error('Error response:', error.response);
-            console.error('Error status:', error.response.status);
-            console.error('Error data:', error.response.data);
+            console.error("Error response:", error.response);
+            console.error("Error status:", error.response.status);
+            console.error("Error data:", error.response.data);
           }
-          alert('Failed to start registration: ' + error.message);
+          alert("Failed to start registration: " + error.message);
         });
     } else {
-      alert('Please fill all fields');
+      alert("Please fill all fields");
     }
   };
 
@@ -99,7 +103,7 @@ const PopUpForm = ({ onClose, onCreate }) => {
               onChange={(e) => setSchoolYear(e.target.value)}
               required
             >
-              <option value=''>Select year</option>
+              <option value="">Select year</option>
               {schoolYearOptions.map((sy) => (
                 <option key={sy.school_year_id} value={sy.school_year_id}>
                   {sy.year}
@@ -117,7 +121,7 @@ const PopUpForm = ({ onClose, onCreate }) => {
               onChange={(e) => setSemester(e.target.value)}
               required
             >
-              <option value=''>Select semester</option>
+              <option value="">Select semester</option>
               {semesterOptions.map((s) => (
                 <option key={s.semester_id} value={s.semester_id}>
                   {s.name}
@@ -131,7 +135,7 @@ const PopUpForm = ({ onClose, onCreate }) => {
             <input
               ref={dateRef}
               className={styles.dateField}
-              type='date'
+              type="date"
               value={date}
               readOnly
             />
@@ -139,20 +143,16 @@ const PopUpForm = ({ onClose, onCreate }) => {
         </div>
 
         <div className={styles.bAddSubjectParent}>
-          <div
+          <Button
             className={styles.bAddSubject}
             onClick={onClose}
-            style={{ cursor: 'pointer' }}
+            variant="outline"
           >
-            <div className={styles.cancel}>Cancel</div>
-          </div>
-          <button
-            className={styles.bAddSubject1}
-            type='submit'
-            style={{ cursor: 'pointer' }}
-          >
-            <div className={styles.cancel}>Create</div>
-          </button>
+            Cancel
+          </Button>
+          <Button className={styles.bAddSubject1} type="submit" variant="solid">
+            Create
+          </Button>
         </div>
       </form>
     </div>

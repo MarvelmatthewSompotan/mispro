@@ -64,21 +64,6 @@
   gap: 12px;
 }
 
-.statusTag {
-  border-radius: 6px;
-  padding: 6px 12px;
-  color: #fff;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.statusTagNotActive {
-  background-color: #ee0808;
-}
-
-.statusTagGraduated {
-  background-color: #ff7b00;
-}
 
 /* --- Style BARU untuk MODE EDIT --- */
 .statusAndEditPhotoContainer {
@@ -95,53 +80,7 @@
   gap: 12px;
 }
 
-.statusTagActive {
-  background-color: #00f413;
-}
-
-.statusDropdownWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.statusDropdown {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-color: #7a7a7a;
-  color: #ffff;
-  border: none;
-  border-radius: 5px;
-  font-weight: 600;
-  font-size: 14px;
-  font-family: Poppins, Arial, sans-serif;
-  cursor: pointer;
-  min-width: 163px;
-  height: 28px;
-  padding: 0 32px 0 12px;
-  box-sizing: border-box;
-}
-
-.statusDropdown option {
-  background-color: #ffffff;
-  color: #070707;
-}
-
-.dropdownArrow {
-  position: absolute;
-  right: 12px;
-  pointer-events: none;
-  color: #fff;
-  font-size: 10px;
-  transform: scaleY(0.8);
-}
-
 .editPhotoButton {
-  background-color: #5f84fe;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
   height: 40px;
   display: flex;
   align-items: center;
@@ -151,11 +90,6 @@
   font-family: Poppins, Arial, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-}
-
-.editPhotoButton:hover {
-  opacity: 0.9;
 }
 
 .headerActionSection {
@@ -164,28 +98,6 @@
   align-items: center;
   align-self: flex-start;
   gap: 16px;
-}
-
-.actionButton {
-  border-radius: 5px;
-  border: 2px solid #5f84fe;
-  box-sizing: border-box;
-  height: 40px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 15px;
-  color: #5f84fe;
-  background-color: #fff;
-  cursor: pointer;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.actionButtonPrimary {
-  background-color: #5f84fe;
-  color: #fff;
 }
 
 .historyContainer {

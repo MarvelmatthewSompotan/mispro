@@ -2,21 +2,22 @@ import React, { useRef, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import styles from "../styles/Print.module.css";
+import styles from "./Print.module.css";
 import kop from "../../assets/LogoMIS_Print.png";
 import footer from "../../assets/Footer.png";
-import StudentsInformationContent from "../Print_Content/StudentsInformation_Content/StudentsInformation_Content";
-import ProgramContent from "../Print_Content/Program_Content/Program_Content";
-import FacilitiesContent from "../Print_Content/Facilities_Content/Facilities_Content";
-import ParentsGuardianInformationContent from "../Print_Content/ParentsGuardianInformation_Content/ParentsGuardianInformation_Content";
-import TermofPaymentContent from "../Print_Content/TermofPayment_Content/TermofPayment_Content";
-import PledgeContent from "../Print_Content/Pledge_Content/Pledge_Content";
-import SignatureContent from "../Print_Content/Signature_Content/Signature_Content";
-import OtherDetailContent from "../Print_Content/OtherDetail_Content/OtherDetail_Content";
+import StudentsInformationContent from "./StudentsInformation_Content/StudentsInformation_Content";
+import ProgramContent from "./Program_Content/Program_Content";
+import FacilitiesContent from "./Facilities_Content/Facilities_Content";
+import ParentsGuardianInformationContent from "./ParentsGuardianInformation_Content/ParentsGuardianInformation_Content";
+import TermofPaymentContent from "./TermofPayment_Content/TermofPayment_Content";
+import PledgeContent from "./Pledge_Content/Pledge_Content";
+import SignatureContent from "./Signature_Content/Signature_Content";
+import OtherDetailContent from "./OtherDetail_Content/OtherDetail_Content";
 import {
   getRegistrationPreview,
   getRegistrationOptions,
 } from "../../services/api";
+import Button from "../../components/atoms/Button";
 
 function Print() {
   const location = useLocation();
@@ -211,50 +212,31 @@ function Print() {
         style={{
           position: "fixed",
           top: 0,
-          left: 0,
+          left: -20,
           right: 0,
           width: "100%",
           display: "flex",
           justifyContent: "flex-end",
           gap: "10px",
-          padding: "20px 20px",
+          padding: "20px 20px 0px 0px",
           background: "#fff",
           boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           zIndex: 9999,
         }}
       >
-        <button
+        <Button
           onClick={() => navigate("/home")}
-          style={{
-            padding: "6px 12px",
-            background: "#fff",
-            color: "#7b7bfa",
-            border: "2px solid #7b7bfa",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: "600",
-          }}
+          variant="outline"
         >
           Back to Home
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={downloadPDF}
           disabled={isPrinting}
-          style={{
-            marginRight: "40px",
-            padding: "6px 12px",
-            background: isPrinting ? "#aaa" : "#7b7bfa",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: isPrinting ? "not-allowed" : "pointer",
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: "600",
-          }}
+          variant="solid"
         >
-          {isPrinting ? "Generating PDF..." : "Print"}
-        </button>
+          {isPrinting ? "Generating PDF..." : "Export as PDF"}
+        </Button>
       </div>
 
       {/* Konten PDF */}

@@ -2,6 +2,7 @@
 
 import React from "react";
 import styles from "./StudentProfileHeader.module.css";
+import Button from "../../../../atoms/Button";
 
 const StudentProfileHeader = ({
   studentInfo,
@@ -41,43 +42,29 @@ const StudentProfileHeader = ({
           <b className={styles.idValue}>{formData.student_id}</b>
         </div>
 
-        {/* --- [MODIFIED] Conditional rendering for View vs. Edit mode --- */}
         {isEditing ? (
-          // EDIT MODE
+          // --- EDIT MODE (STATIC) ---
           <div className={styles.statusAndEditPhotoContainer}>
             <div className={styles.statusGroup}>
-              <div className={`${styles.statusTag} ${styles.statusTagActive}`}>
-                Active
-              </div>
-              <div className={styles.statusDropdownWrapper}>
-                <select
-                  name="graduation"
-                  value={editableStatus.graduation}
-                  onChange={onStatusChange}
-                  className={styles.statusDropdown}
-                >
-                  <option value="Not Graduated">Not Graduated</option>
-                  <option value="Graduated">Graduated</option>
-                </select>
-                <span className={styles.dropdownArrow}>▼</span>
-              </div>
+              <Button variant="active">Active</Button>
+              <Button variant="not-graduated" showDropdownIcon={true}>
+                Not Graduated
+              </Button>
             </div>
-            <button
+            <Button
               className={styles.editPhotoButton}
               onClick={onAddPhotoClick}
+              variant="solid"
             >
               Edit photo
-            </button>
+            </Button>
           </div>
         ) : (
-          // VIEW MODE
+          // --- VIEW MODE (STATIC) ---
           <div className={styles.statusTagContainer}>
-            <div className={`${styles.statusTag} ${styles.statusTagNotActive}`}>
-              Not Active
-            </div>
-            <div className={`${styles.statusTag} ${styles.statusTagGraduated}`}>
-              Graduated
-            </div>
+            {/* Tombol status di-set statis menjadi "Not Active" dan "Graduated" */}
+            <Button variant="not-active">Not Active</Button>
+            <Button variant="graduated">Graduated</Button>
           </div>
         )}
       </div>
@@ -86,14 +73,11 @@ const StudentProfileHeader = ({
       <div className={styles.headerActionSection}>
         {!isEditing && (
           <div className={styles.historyContainer} ref={historyRef}>
-            <button
-              className={styles.actionButton}
-              onClick={onViewHistoryClick}
-            >
+            <Button variant="outline" onClick={onViewHistoryClick}>
               {selectedVersionId
                 ? "Back to Latest Version"
                 : "View version history"}
-            </button>
+            </Button>
             {isHistoryVisible && (
               <ul className={styles.historyDropdown}>
                 {isLoadingHistory ? (
@@ -124,29 +108,32 @@ const StudentProfileHeader = ({
 
         {isEditing ? (
           <>
-            <button
+            <Button
               className={styles.actionButton}
               onClick={onCancelClick}
               disabled={isUpdating}
+              variant="outline"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
               onClick={onSaveClick}
               disabled={isUpdating}
+              variant="solid"
             >
               {isUpdating ? "Saving..." : "Save changes"}
-            </button>
+            </Button>
           </>
         ) : (
           !selectedVersionId && (
-            <button
+            <Button
               className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
               onClick={onEditClick}
+              variant="solid"
             >
               Edit
-            </button>
+            </Button>
           )
         )}
       </div>

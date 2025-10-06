@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
-import Logo from "../atoms/logo/Logo";
-import LoginForm from "../atoms/loginForm/LoginForm";
-import group from "../../assets/Group.png";
-import "../styles/LoginPage.css";
+import Logo from "../../atoms/logo/Logo";
+import LoginForm from "../../atoms/loginForm/LoginForm";
+import group from "../../../assets/Group.png";
+import "./LoginPage.css";
 
 const LoginPage = () => {
   useEffect(() => {
@@ -10,7 +10,7 @@ const LoginPage = () => {
   }, []);
 
   return (
-    <div className="login-page" style={{ backgroundColor: '#f0f8ff' }}>
+    <div className="login-page" style={{ backgroundColor: "#f0f8ff" }}>
       <div className="login-left">
         <Logo />
         <LoginForm />

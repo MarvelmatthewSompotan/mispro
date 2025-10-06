@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ProgramSection.module.css";
 import Select from "react-select";
-import { getRegistrationOptions } from "../../../../services/api";
+import { getRegistrationOptions } from "../../../../../services/api";
 
 const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
   // STATE LOKAL

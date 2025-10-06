@@ -4,14 +4,14 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Import komponen halaman
-import LoginPage from "../components/pages/LoginPage";
+import LoginPage from "../components/pages/login/LoginPage.js";
 import Home from "../components/pages/Home";
 import StudentList from "../components/pages/student_list/StudentList";
 import TeacherList from "../components/pages/TeacherList";
 import HomeroomList from "../components/pages/HomeroomList";
-import Registration from "../components/pages/Registration";
-import RegistrationPage from "../components/pages/RegistrationForm";
-import Print from "../components/pages/Print";
+import Registration from "../components/pages/registration/Registration.js";
+import RegistrationPage from "../components/pages/registration/RegistrationForm/RegistrationForm.js";
+import Print from "../components/Print_Content/Print.js";
 import MainLayout from "../components/layout/Main";
 import StudentProfile from "../components/pages/student_list/StudentProfile/StudentProfile.js";
 
