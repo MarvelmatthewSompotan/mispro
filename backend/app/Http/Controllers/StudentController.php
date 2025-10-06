@@ -34,6 +34,20 @@ class StudentController extends Controller
         $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
         $defaultSchoolYearId = $schoolYear?->school_year_id;
 
+        $latestEnrollments = DB::table('enrollments as e1')
+        ->select('e1.student_id', 'e1.enrollment_id')
+        ->when($request->filled('school_year_id'), function ($q) use ($request) {
+            $q->where('e1.school_year_id', $request->input('school_year_id'));
+        }, function ($q) use ($defaultSchoolYearId) {
+            $q->where('e1.school_year_id', $defaultSchoolYearId);
+        })
+        ->whereRaw('e1.registration_date = (
+            SELECT MAX(e2.registration_date)
+            FROM enrollments AS e2
+            WHERE e2.student_id = e1.student_id
+            AND e2.school_year_id = e1.school_year_id
+        )');
+
         $query = Student::select(
             'students.student_id',
             DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
@@ -48,21 +62,19 @@ class StudentController extends Controller
             'students.status as student_status',
             'enrollments.status as enrollment_status'
         )
-        ->join('enrollments', 'enrollments.student_id', '=', 'students.student_id')
+        ->joinSub($latestEnrollments, 'latest_enrollments', function ($join) {
+            $join->on('latest_enrollments.student_id', '=', 'students.student_id');
+        })
+        ->join('enrollments', 'enrollments.enrollment_id', '=', 'latest_enrollments.enrollment_id')
         ->join('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
         ->where('students.active', 'YES')
-        ->where('application_forms.status', 'Confirmed')
-        ->where('enrollments.status', 'ACTIVE');
+        ->where('application_forms.status', 'Confirmed');
         
         // Filter
         if ($request->filled('school_year_id')) {
             $query->where('enrollments.school_year_id', $request->input('school_year_id'));
         } else {
             $query->where('enrollments.school_year_id', $defaultSchoolYearId);
-        }
-
-        if ($request->filled('semester_id')) {
-            $query->where('enrollments.semester_id', $request->input('semester_id'));
         }
         if ($request->filled('section_id')) {
             $sectionIds = $request->input('section_id');
