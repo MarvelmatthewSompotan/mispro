@@ -1,6 +1,6 @@
 // File: src/components/pages/StudentProfileHeader.js
 
-import React from "react";
+import React, { useState } from "react";
 import styles from "./StudentProfileHeader.module.css";
 import Button from "../../../../atoms/Button";
 
@@ -21,9 +21,37 @@ const StudentProfileHeader = ({
   onCancelClick,
   onSaveClick,
   onAddPhotoClick,
-  editableStatus, // <-- Prop added
-  onStatusChange, // <-- Prop added
+  editableStatus, 
+  onStatusChange,
 }) => {
+
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+
+  const getStatusVariant = (status) => {
+    const lowerCaseStatus =
+      status?.toLowerCase().replace(" ", "-") || "not-graduated";
+    return lowerCaseStatus;
+  };
+
+  const handleDropdownToggle = () => {
+    setDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleStatusSelect = (status) => {
+    if (onStatusChange) {
+      onStatusChange({
+        target: {
+          name: "statusreg",
+          value: status,
+        },
+      });
+    }
+    setDropdownOpen(false);
+  };
+
+  // Daftar opsi untuk dropdown
+  const statusOptions = ["Not Graduated", "Graduated", "Expelled", "Withdraw"];
+
   return (
     <div className={styles.profileHeader}>
       {/* Kolom Kiri: Foto */}
@@ -43,13 +71,32 @@ const StudentProfileHeader = ({
         </div>
 
         {isEditing ? (
-          // --- EDIT MODE (STATIC) ---
           <div className={styles.statusAndEditPhotoContainer}>
             <div className={styles.statusGroup}>
               <Button variant="active">Active</Button>
-              <Button variant="not-graduated" showDropdownIcon={true}>
-                Not Graduated
-              </Button>
+              <div className={styles.statusDropdownWrapper}>
+                <Button
+                  variant={getStatusVariant(editableStatus?.statusreg)}
+                  showDropdownIcon={true}
+                  onClick={handleDropdownToggle}
+                >
+                  {editableStatus?.statusreg || "Not Graduated"}
+                </Button>
+                {isDropdownOpen && (
+                  <div className={styles.statusDropdownMenu}>
+                    {statusOptions.map((option) => (
+                      <Button
+                        key={option}
+                        variant={getStatusVariant(option)}
+                        fullWidth={true}
+                        onClick={() => handleStatusSelect(option)}
+                      >
+                        {option}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <Button
               className={styles.editPhotoButton}
