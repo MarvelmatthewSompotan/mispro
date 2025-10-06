@@ -26,7 +26,9 @@ return new class extends Migration
             $table->string('religion', 30)->nullable();
             $table->string('nik', 25)->nullable();
             $table->string('section', 25)->nullable();
+            $table->integer('section_id', 25)->nullable();
             $table->string('grade', 10)->nullable();
+            $table->integer('grade_id', 25)->nullable();
             $table->string('father_name', 100)->nullable();
             $table->string('father_occupation', 255)->nullable();
             $table->string('father_company', 255)->nullable();
