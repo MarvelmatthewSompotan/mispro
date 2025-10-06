@@ -200,6 +200,8 @@ class StudentController extends Controller
                 'class_id' => $requestData['class_id'] ?? '',
                 'major_id' => $requestData['major_id'] ?? '',
                 'program_other' => $requestData['program_other'] ?? '',
+                'school_year_id' => $requestData['school_year_id'] ?? '',
+                'school_year' => $requestData['school_year'] ?? '', 
             ],
             'facilities' => [
                 'transportation_id' => $requestData['transportation_id'] ?? '',
@@ -314,7 +316,7 @@ class StudentController extends Controller
                 'nik' => 'sometimes|nullable|integer',
                 'kitas' => 'sometimes|nullable|string',
                 'photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg|max:5048',
-                'status' => 'sometimes|required|in:Not Graduate,Graduate,Expelled,Transferred',
+                'status' => 'sometimes|required|in:Not Graduate,Graduate,Expelled,Withdraw',
 
                 // Address
                 'street'       => 'sometimes|nullable|string',
@@ -384,7 +386,7 @@ class StudentController extends Controller
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
             $student->update(array_filter($studentData, fn($v) => !is_null($v)));
             if (isset($validated['status'])) {
-                $inactiveStatuses = ['graduate', 'expelled', 'transferred'];
+                $inactiveStatuses = ['graduate', 'expelled', 'withdraw'];
 
                 if (in_array(strtolower($validated['status']), $inactiveStatuses)) {
                     $student->active = 'NO';

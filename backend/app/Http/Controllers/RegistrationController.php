@@ -964,6 +964,8 @@ class RegistrationController extends Controller
             'status' => $student->status,
             'enrollment_status' => $enrollment->status,
             'application_form_status' => $applicationForm->status, 
+            'school_year_id'          => $enrollment->school_year_id,
+            'school_year'             => $enrollment->schoolYear->year,
         ]);
 
         unset($newRequestData['photo']);

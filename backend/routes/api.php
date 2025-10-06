@@ -1,12 +1,13 @@
 <?php
 
+use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
-use App\Http\Controllers\AuditLogController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -21,6 +22,9 @@ Route::middleware('auth:sanctum', 'lifetime')->group(function() {
 });
 
 Route::get('/registration-option', [MasterDataController::class, 'getRegistrationOption']);
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar'])->group(function () {
+  Route::post('/school-year/add', [MasterDataController::class, 'addSchoolYear']);
+});
 
 Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar'])->group(function () {
   Route::prefix('students')->group(function () {

@@ -16,6 +16,29 @@ use App\Models\Transportation;
 
 class MasterDataController extends Controller
 {
+    public function addSchoolYear()
+    {
+        $lastSchoolYear = SchoolYear::orderByDesc('school_year_id')->first();
+
+        if (!$lastSchoolYear) {
+            $newYear = date('Y') . '/' .(date('Y') + 1);
+        } else {
+            [$startYear,  $endYear] = explode('/', $lastSchoolYear->year);
+            $nextStart = (int)$startYear + 1;
+            $nextEnd = (int)$endYear + 1;
+            $newYear = $nextStart . '/' . $nextEnd;
+        }
+
+        $schoolYear = SchoolYear::create([
+            'year' => $newYear,
+        ]);
+
+        return response()->json([
+            'message' => 'New school year added successfully.',
+            'school_year' => $schoolYear,
+        ]);
+    }
+
     public function getRegistrationOption()
     {
         $sections = Section::select('section_id', 'name')->get();
@@ -41,6 +64,7 @@ class MasterDataController extends Controller
             'financial_policy_contract' => ['Signed', 'Not Signed'],
             'inactive_status' => ['GRADUATE', 'TRANSFEREE', 'EXPELLED'],
             'pickup_points' => $pickupPoints,
+            'active_status' => ['Not Graduate','Graduate', 'Expelled', 'Withdraw']
         ]);
     }
 }
