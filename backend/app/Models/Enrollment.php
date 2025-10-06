@@ -8,13 +8,11 @@ use App\Models\Semester;
 use App\Models\SchoolYear;
 use App\Models\SchoolClass;
 use App\Models\DiscountType;
-use App\Models\StudentPhoto;
 use App\Models\ResidenceHall;
 use App\Models\Transportation;
 use App\Models\PickupPoint;
 use App\Models\ApplicationForm;
 use App\Models\StudentDiscount;
-use App\Models\StudentDocument;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -120,18 +118,6 @@ class Enrollment extends Model
         'enrollment_id',
         'discount_type_id'
         );
-    }
-
-    public function studentDocument() : HasMany
-    {
-        return $this->hasMany(
-        StudentDocument::class, 'enrollment_id', 'enrollment_id');
-    }
-
-    public function studentPhoto() : HasMany
-    {
-        return $this->hasMany(
-        StudentPhoto::class, 'enrollment_id', 'enrollment_id');
     }
 
     public function getPickupPoint()

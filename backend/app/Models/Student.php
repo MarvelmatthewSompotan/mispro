@@ -11,7 +11,6 @@ use App\Models\Enrollment;
 use App\Models\SchoolYear;
 use App\Models\SchoolClass;
 use App\Models\DiscountType;
-use App\Models\StudentPhoto;
 use App\Models\FatherAddress;
 use App\Models\MotherAddress;
 use App\Models\ResidenceHall;
@@ -21,7 +20,6 @@ use App\Models\Transportation;
 use App\Models\ApplicationForm;
 use App\Models\GuardianAddress;
 use App\Models\StudentDiscount;
-use App\Models\StudentDocument;
 use App\Models\StudentGuardian;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Database\Eloquent\Model;
@@ -134,30 +132,6 @@ class Student extends Model
             'discount_type_id', 
             $this->studentDiscount->pluck('discount_type_id')
             )->get();
-    }
-
-    public function studentDocument() : HasManyThrough
-    {
-        return $this->hasManyThrough(
-            StudentDocument::class,
-            Enrollment::class,
-            'student_id',
-            'enrollment_id',
-            'student_id',
-            'enrollment_id'
-        );
-    }
-
-    public function studentPhoto() : HasManyThrough
-    {
-        return $this->hasManyThrough(
-            StudentPhoto::class,
-            Enrollment::class,
-            'student_id',
-            'enrollment_id',
-            'student_id',
-            'enrollment_id'
-        );
     }
 
     public function guardians() : BelongsToMany
