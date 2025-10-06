@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './StatusConfirmationPopup.module.css';
-import WarningSign from '../../assets/Warning_Sign.png';
+import WarningSign from '../../../../assets/Warning_Sign.png';
 import { updateRegistrationStatus } from '../../../../services/api';
 import Button from '../../../atoms/Button';
 
