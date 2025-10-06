@@ -109,15 +109,17 @@ class StudentController extends Controller
     {
         $keyword = $request->input('search');
         if (!$keyword) {
-            return response()->json([]);
+            return response()->json(['new' => [], 'old' => []]);
         }
 
+        // new database
         $students = Student::select(
                 'student_id',
                 DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"),
                 'nisn',
                 'nik',
-                'registration_date'
+                'registration_date',
+                DB::raw("'new' as source")
             )
             ->where(function ($query) use ($keyword) {
                 $query->where('student_id', 'like', "%$keyword%")
@@ -134,8 +136,55 @@ class StudentController extends Controller
             })
             ->values()
             ->take(10); 
+            
+            $existingNames = $students->pluck('full_name')->map(fn($name) => strtolower(trim($name)));
 
-        return response()->json($students);
+            $studentOld = DB::table('student_old')
+                ->select(
+                    DB::raw('studentold_id as student_id'),
+                    DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"),
+                    'nisn',
+                    'nik',
+                    DB::raw('NULL as registration_date'),
+                    'section_id',
+                    DB::raw("'old' as source")
+                )
+                ->where(function ($query) use ($keyword) {
+                    $query->where('studentold_id', 'like', "%$keyword%")
+                        ->orWhere('first_name', 'like', "%$keyword%")
+                        ->orWhere('middle_name', 'like', "%$keyword%")
+                        ->orWhere('last_name', 'like', "%$keyword%")
+                        ->orWhere(DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name)"), 'like', "%$keyword%");
+                })
+                ->orderByDesc('section_id')
+                ->limit(50)
+                ->get();
+
+        $response = [
+            'new' => $students->map(function ($item) {
+                return [
+                    'student_id' => $item->student_id,
+                    'full_name' => $item->full_name,
+                    'nisn' => $item->nisn,
+                    'nik' => $item->nik,
+                    'registration_date' => $item->registration_date,
+                    'source' => 'new'
+                ];
+            })->values(),
+
+            'old' => $studentOld->map(function ($item) {
+                return [
+                    'student_id' => $item->student_id,
+                    'full_name' => $item->full_name,
+                    'nisn' => $item->nisn,
+                    'nik' => $item->nik,
+                    'section_id' => $item->section_id,
+                    'source' => 'old'
+                ];
+            })->values(),
+        ];
+
+        return response()->json($response);
     }
 
 
