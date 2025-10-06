@@ -17,6 +17,7 @@ import {
   getRegistrationPreview,
   getRegistrationOptions,
 } from "../../services/api";
+import Button from "../../components/atoms/Button";
 
 function Print() {
   const location = useLocation();
@@ -211,50 +212,31 @@ function Print() {
         style={{
           position: "fixed",
           top: 0,
-          left: 0,
+          left: -20,
           right: 0,
           width: "100%",
           display: "flex",
           justifyContent: "flex-end",
           gap: "10px",
-          padding: "20px 20px",
+          padding: "20px 20px 0px 0px",
           background: "#fff",
           boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           zIndex: 9999,
         }}
       >
-        <button
+        <Button
           onClick={() => navigate("/home")}
-          style={{
-            padding: "6px 12px",
-            background: "#fff",
-            color: "#7b7bfa",
-            border: "2px solid #7b7bfa",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: "600",
-          }}
+          variant="outline"
         >
           Back to Home
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={downloadPDF}
           disabled={isPrinting}
-          style={{
-            marginRight: "40px",
-            padding: "6px 12px",
-            background: isPrinting ? "#aaa" : "#7b7bfa",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: isPrinting ? "not-allowed" : "pointer",
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: "600",
-          }}
+          variant="solid"
         >
-          {isPrinting ? "Generating PDF..." : "Print"}
-        </button>
+          {isPrinting ? "Generating PDF..." : "Export as PDF"}
+        </Button>
       </div>
 
       {/* Konten PDF */}
