@@ -481,7 +481,8 @@ class StudentController extends Controller
             $newRequestData = array_merge($oldRequestData, $validated);
             unset($newRequestData['photo']);
 
-            $newRequestData['active'] = $student->active;
+            $newRequestData['student_active'] = $student->active;
+            unset($newRequestData['active']);
             if ($student->photo_path) {
                 $newRequestData['photo_path'] = $student->photo_path;
                 $newRequestData['photo_url']  = asset('storage/' . $student->photo_path);

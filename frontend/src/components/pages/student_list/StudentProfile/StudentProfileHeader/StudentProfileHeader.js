@@ -1,8 +1,18 @@
-// File: src/components/pages/StudentProfileHeader.js
+// File: src/components/pages/StudentProfileHeader/StudentProfileHeader.js
 
 import React, { useState } from "react";
 import styles from "./StudentProfileHeader.module.css";
 import Button from "../../../../atoms/Button";
+
+const getStatusVariant = (status) => {
+  if (!status) return "not-graduated";
+  const lowerStatus = status.toLowerCase();
+  if (lowerStatus.includes("not graduate")) return "not-graduated";
+  if (lowerStatus.includes("graduate")) return "graduated";
+  if (lowerStatus.includes("expelled")) return "expelled";
+  if (lowerStatus.includes("withdraw")) return "withdraw";
+  return "not-graduated"; // Default variant
+};
 
 const StudentProfileHeader = ({
   studentInfo,
@@ -20,38 +30,12 @@ const StudentProfileHeader = ({
   onEditClick,
   onCancelClick,
   onSaveClick,
+  statusOptions,
   onAddPhotoClick,
-  editableStatus, 
-  onStatusChange,
+  editableStatus, // <-- Prop added
+  onStatusChange, // <-- Prop added
 }) => {
-
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
-
-  const getStatusVariant = (status) => {
-    const lowerCaseStatus =
-      status?.toLowerCase().replace(" ", "-") || "not-graduated";
-    return lowerCaseStatus;
-  };
-
-  const handleDropdownToggle = () => {
-    setDropdownOpen(!isDropdownOpen);
-  };
-
-  const handleStatusSelect = (status) => {
-    if (onStatusChange) {
-      onStatusChange({
-        target: {
-          name: "statusreg",
-          value: status,
-        },
-      });
-    }
-    setDropdownOpen(false);
-  };
-
-  // Daftar opsi untuk dropdown
-  const statusOptions = ["Not Graduated", "Graduated", "Expelled", "Withdraw"];
-
+  const [isStatusDropdownOpen, setStatusDropdownOpen] = useState(false);
   return (
     <div className={styles.profileHeader}>
       {/* Kolom Kiri: Foto */}
@@ -67,34 +51,59 @@ const StudentProfileHeader = ({
       <div className={styles.headerInfoSection}>
         <div className={styles.studentIdContainer}>
           <span className={styles.idLabel}>Student ID</span>
-          <b className={styles.idValue}>{formData.student_id}</b>
+          <b className={styles.idValue}>
+            {formData.student_id || studentInfo.student_id}
+          </b>
+        </div>
+
+        <div className={styles.schoolYearContainer}>
+          <span className={styles.yearLabel}>School year</span>
+          <b className={styles.yearValue}>{formData.school_year || "-"}</b>
         </div>
 
         {isEditing ? (
+          // --- EDIT MODE ---
           <div className={styles.statusAndEditPhotoContainer}>
             <div className={styles.statusGroup}>
-              <Button variant="active">Active</Button>
-              <div className={styles.statusDropdownWrapper}>
+              {/* This button now reflects the state but is not clickable */}
+              <Button
+                variant={
+                  studentInfo.student_active === "YES" ? "active" : "not-active"
+                }
+              >
+                {studentInfo.student_active === "YES" ? "Active" : "Not Active"}
+              </Button>
+
+              {/* New Status Dropdown Button */}
+              <div className={styles.historyContainer}>
+                {" "}
+                {/* Re-using history container for positioning */}
                 <Button
-                  variant={getStatusVariant(editableStatus?.statusreg)}
+                  variant={getStatusVariant(studentInfo.status)}
                   showDropdownIcon={true}
-                  onClick={handleDropdownToggle}
+                  onClick={() => setStatusDropdownOpen(!isStatusDropdownOpen)}
                 >
-                  {editableStatus?.statusreg || "Not Graduated"}
+                  {studentInfo.status || "Select Status"}
                 </Button>
-                {isDropdownOpen && (
-                  <div className={styles.statusDropdownMenu}>
-                    {statusOptions.map((option) => (
-                      <Button
-                        key={option}
-                        variant={getStatusVariant(option)}
-                        fullWidth={true}
-                        onClick={() => handleStatusSelect(option)}
-                      >
-                        {option}
-                      </Button>
-                    ))}
-                  </div>
+                {isStatusDropdownOpen && (
+                  <ul className={styles.historyDropdown}>
+                    {statusOptions.length > 0 ? (
+                      statusOptions.map((option) => (
+                        <li
+                          key={option}
+                          className={styles.historyItem}
+                          onClick={() => {
+                            onStatusChange(option);
+                            setStatusDropdownOpen(false);
+                          }}
+                        >
+                          {option}
+                        </li>
+                      ))
+                    ) : (
+                      <li className={styles.historyInfoItem}>No options.</li>
+                    )}
+                  </ul>
                 )}
               </div>
             </div>
@@ -107,11 +116,18 @@ const StudentProfileHeader = ({
             </Button>
           </div>
         ) : (
-          // --- VIEW MODE (STATIC) ---
+          // --- VIEW MODE ---
           <div className={styles.statusTagContainer}>
-            {/* Tombol status di-set statis menjadi "Not Active" dan "Graduated" */}
-            <Button variant="not-active">Not Active</Button>
-            <Button variant="graduated">Graduated</Button>
+            <Button
+              variant={
+                studentInfo.student_active === "YES" ? "active" : "not-active"
+              }
+            >
+              {studentInfo.student_active === "YES" ? "Active" : "Not Active"}
+            </Button>
+            <Button variant={getStatusVariant(studentInfo.status)}>
+              {studentInfo.status || "Not Graduated"}
+            </Button>
           </div>
         )}
       </div>

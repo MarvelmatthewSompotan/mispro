@@ -62,7 +62,7 @@ class MasterDataController extends Controller
             'tuition_fees' => ['Full Payment', 'Installment'],
             'residence_payment' => ['Full Payment', 'Installment'],
             'financial_policy_contract' => ['Signed', 'Not Signed'],
-            'inactive_status' => ['GRADUATE', 'TRANSFEREE', 'EXPELLED'],
+            'inactive_status' => ['GRADUATE', 'EXPELLED', 'WITHDRAW'],
             'pickup_points' => $pickupPoints,
             'active_status' => ['Not Graduate','Graduate', 'Expelled', 'Withdraw']
         ]);

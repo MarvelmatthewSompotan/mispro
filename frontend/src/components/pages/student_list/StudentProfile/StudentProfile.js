@@ -117,6 +117,7 @@ const StudentProfile = () => {
   const [studentInfo, setStudentInfo] = useState({});
   const [academicStatusOptions, setAcademicStatusOptions] = useState([]);
   const [genderOptions, setGenderOptions] = useState([]);
+  const [statusOptions, setStatusOptions] = useState([]);
   const [scrollTrigger, setScrollTrigger] = useState(0);
   const [historyDates, setHistoryDates] = useState([]);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
@@ -130,20 +131,6 @@ const StudentProfile = () => {
     { value: "Non Indonesia", label: "Non Indonesia" },
   ];
   const historyRef = useRef(null);
-
-  const [editableHeaderStatus, setEditableHeaderStatus] = useState({
-    activity: "Active",
-    graduation: "Not Graduated",
-  });
-
-  const handleHeaderStatusChange = (e) => {
-    const { name, value } = e.target;
-    setEditableHeaderStatus((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-  
 
   const [validationMessages, setValidationMessages] = useState({
     nik: "",
@@ -168,6 +155,7 @@ const StudentProfile = () => {
         setGenderOptions(
           data.genders?.map((opt) => ({ value: opt, label: opt })) || []
         );
+        setStatusOptions(data.active_status || []);
       })
       .catch((err) => console.error("Failed to fetch options:", err));
   }, []);
@@ -185,6 +173,8 @@ const StudentProfile = () => {
         getStudentLatestApplication(studentId),
         getRegistrationOptions(),
       ]);
+
+      console.log("LANGKAH 1: Data mentah dari API:", studentRes);
       setOptions(optionsRes);
       if (studentRes.success) {
         const studentData = studentRes.data;
@@ -211,6 +201,17 @@ const StudentProfile = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const handleStatusChange = (newStatus) => {
+    const inactiveStatuses = ["Graduate", "Expelled", "Withdraw"];
+    const newActiveStatus = inactiveStatuses.includes(newStatus) ? "NO" : "YES";
+
+    setStudentInfo((prev) => ({
+      ...prev,
+      status: newStatus,
+      student_active: newActiveStatus,
+    }));
+  };
 
   // --- [BARU] Handler untuk mengambil dan menampilkan history ---
   const handleViewHistoryClick = async () => {
@@ -297,6 +298,8 @@ const StudentProfile = () => {
           class_id: snapshotData.class_id,
           major_id: snapshotData.major_id,
           program_other: snapshotData.program_other,
+          school_year_id: snapshotData.school_year_id,
+          school_year: snapshotData.school_year,
           transportation_id: snapshotData.transportation_id,
           pickup_point_id: snapshotData.pickup_point_id, // facilities fields
           pickup_point_custom: snapshotData.pickup_point_custom,
@@ -879,12 +882,13 @@ const StudentProfile = () => {
       const combinedData = {
         student_id: response.data.student_id,
         ...updatedData,
+        
       };
 
       // 3. Update state secara manual
       setProfileData(combinedData);
       setFormData(combinedData);
-      setStudentInfo(updatedData); // Asumsi studentInfo fields ada di request_data
+      setStudentInfo(combinedData); // Asumsi studentInfo fields ada di request_data
 
       setShowSuccess(true);
       setIsEditing(false);
@@ -1002,6 +1006,11 @@ const StudentProfile = () => {
       (t) => String(t.transport_id) === String(formData.transportation_id)
     )?.type || "";
 
+  console.log(
+    "LANGKAH 2: State formData yang akan dikirim ke Header:",
+    formData
+  );
+
   return (
     <div className={styles.profilePage}>
       <StudentProfileHeader
@@ -1021,8 +1030,8 @@ const StudentProfile = () => {
         onCancelClick={handleCancel}
         onSaveClick={handleSaveClick}
         onAddPhotoClick={() => setIsPhotoPopupOpen(true)}
-        editableStatus={editableHeaderStatus}
-        onStatusChange={handleHeaderStatusChange}
+        statusOptions={statusOptions}
+        onStatusChange={handleStatusChange}
       />
 
       <div className={styles.profileContent}>
