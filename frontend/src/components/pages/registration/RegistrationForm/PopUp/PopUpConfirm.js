@@ -239,7 +239,6 @@ const PopUpConfirm = React.memo(
             </div>
             <div className={styles.bAddSubjectParent}>
               <Button
-                className={styles.bAddSubject1}
                 onClick={onCancel}
                 disabled={isSubmitting}
                 variant="outline"
@@ -247,7 +246,6 @@ const PopUpConfirm = React.memo(
                 Cancel
               </Button>
               <Button
-                className={styles.bAddSubject}
                 onClick={handleConfirm}
                 disabled={isSubmitting}
                 variant="solid"
