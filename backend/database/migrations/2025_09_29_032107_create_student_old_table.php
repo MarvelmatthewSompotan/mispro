@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-   
     public function up(): void
     {
         Schema::create('student_old_table', function (Blueprint $table) {
@@ -26,7 +25,9 @@ return new class extends Migration
             $table->string('religion', 30)->nullable();
             $table->string('nik', 25)->nullable();
             $table->string('section', 25)->nullable();
-            $table->string('grade', 10)->nullable();
+            $table->unsignedTinyInteger('section_id')->nullable();
+            $table->string('class', 10)->nullable();
+            $table->unsignedTinyInteger('class_id')->nullable();
             $table->string('father_name', 100)->nullable();
             $table->string('father_occupation', 255)->nullable();
             $table->string('father_company', 255)->nullable();

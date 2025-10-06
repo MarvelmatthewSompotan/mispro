@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import styles from "./StatusConfirmationPopup.module.css";
-import { FaExclamationTriangle } from "react-icons/fa";
-import { updateRegistrationStatus } from "../../../../services/api";
-import Button from "../../../atoms/Button";
+import React, { useState } from 'react';
+import styles from './StatusConfirmationPopup.module.css';
+import WarningSign from '../../../../assets/Warning_Sign.png';
+import { updateRegistrationStatus } from '../../../../services/api';
+import Button from '../../../atoms/Button';
 
 const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -15,24 +15,24 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
 
   // Status dan ID Aplikasi untuk API
   // Mengambil status dari application_form
-  const currentStatus = registration.application_form?.status || "Confirmed";
+  const currentStatus = registration.application_form?.status || 'Confirmed';
   const applicationId = registration.application_form?.application_id;
 
-  const isConfirmed = currentStatus.toLowerCase() === "confirmed";
+  const isConfirmed = currentStatus.toLowerCase() === 'confirmed';
 
-  const targetStatusAPI = isConfirmed ? "Cancelled" : "Confirmed";
+  const targetStatusAPI = isConfirmed ? 'Cancelled' : 'Confirmed';
 
-  const actionMessage = isConfirmed ? "membatalkan" : "mengkonfirmasi";
+  const actionMessage = isConfirmed ? 'membatalkan' : 'mengkonfirmasi';
 
   const handleUpdate = async () => {
     if (!applicationId) {
-      alert("Application ID is missing. Cannot update status.");
+      alert('Application ID is missing. Cannot update status.');
       return;
     }
 
     // Debugging: Cek payload terakhir yang akan dikirim
-    console.log("Application ID:", applicationId);
-    console.log("Target Status (API Payload - Capitalized):", targetStatusAPI);
+    console.log('Application ID:', applicationId);
+    console.log('Target Status (API Payload - Capitalized):', targetStatusAPI);
 
     setIsUpdating(true);
     try {
@@ -43,7 +43,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
       onUpdateStatus(registration.registration_id, targetStatusAPI);
       onClose();
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Kesalahan koneksi";
+      const errorMessage = error.response?.data?.message || 'Connection Error';
       alert(`Failed to update status: ${errorMessage}`);
     } finally {
       setIsUpdating(false);
@@ -53,45 +53,53 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.popUp} onClick={(e) => e.stopPropagation()}>
-        <FaExclamationTriangle className={styles.icon} />
-        <h2 className={styles.title}>Update Status Pendaftaran</h2>
+        <img src={WarningSign} alt='Warning' className={styles.icon} />
+        <h2 className={styles.title}>Confirm Update Registration Status</h2>
 
         <p className={styles.message}>
-          Anda akan **{actionMessage}** pendaftaran untuk siswa ini. Mohon
-          konfirmasi tindakan Anda.
+          Please double-check to make sure that all the information you've
+          entered is correct. Once submitted, changes may not be possible.
         </p>
 
         <div className={styles.registrationInfo}>
-          {/* DISPLAY: Registration ID dan Student ID tetap ditampilkan */}
-          <p>
-            <strong>Registration ID:</strong> {registrationId}
-          </p>
-          <p>
-            <strong>Student ID:</strong> {studentId}
-          </p>
-          <p>
-            <strong>Nama Siswa:</strong> {registration.full_name}
-          </p>
-          <p>
-            <strong>Status Saat Ini:</strong>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Name</span>
+            <span className={styles.separator}>:</span>
+            <span className={styles.infoValue}>{registration.full_name}</span>
+          </div>
+
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Student ID</span>
+            <span className={styles.separator}>:</span>
+            <span className={styles.infoValue}>{studentId}</span>
+          </div>
+
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Registration ID</span>
+            <span className={styles.separator}>:</span>
+            <span className={styles.infoValue}>{registrationId}</span>
+          </div>
+
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Status</span>
+            <span className={styles.separator}>:</span>
             <span
-              style={{
-                fontWeight: "bold",
-                color: isConfirmed ? "#059669" : "#ff3860",
-              }}
+              className={styles.infoValue}
+              style={{ color: isConfirmed ? '#00F413' : '#EE0808' }}
             >
-              {currentStatus.toUpperCase()}
+              {currentStatus.charAt(0).toUpperCase() +
+                currentStatus.slice(1).toLowerCase()}
             </span>
-          </p>
+          </div>
         </div>
 
-        <div className={styles.bAddSubjectParent}>
+        <div className={styles.rowBtn}>
           {/* Tombol Cancel*/}
           <Button
             className={styles.bAddSubject1}
             onClick={onClose}
             disabled={isUpdating}
-            variant="outline"
+            variant='outline'
           >
             Cancel
           </Button>
@@ -101,11 +109,11 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
             className={styles.bAddSubject}
             onClick={handleUpdate}
             disabled={isUpdating}
-            variant="solid"
+            variant='solid'
           >
             {isUpdating
-              ? `Proses ${
-                  targetStatusAPI === "Confirmed" ? "Konfirmasi" : "Pembatalan"
+              ? `${
+                  targetStatusAPI === 'Confirmed' ? 'Confirming' : 'Cancelling'
                 }...`
               : `Yes, I'm sure`}
           </Button>
