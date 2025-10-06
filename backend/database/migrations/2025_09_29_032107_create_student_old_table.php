@@ -27,8 +27,8 @@ return new class extends Migration
             $table->string('nik', 25)->nullable();
             $table->string('section', 25)->nullable();
             $table->unsignedTinyInteger('section_id')->nullable();
-            $table->string('grade', 10)->nullable();
-            $table->unsignedTinyInteger('grade_id')->nullable();
+            $table->string('class', 10)->nullable();
+            $table->unsignedTinyInteger('class_id')->nullable();
             $table->string('father_name', 100)->nullable();
             $table->string('father_occupation', 255)->nullable();
             $table->string('father_company', 255)->nullable();
