@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
 use App\Models\ApplicationFormVersion;
+use App\Models\StudentOld;
 
 class StudentController extends Controller
 {
@@ -137,10 +138,8 @@ class StudentController extends Controller
             ->values()
             ->take(10); 
             
-            $existingNames = $students->pluck('full_name')->map(fn($name) => strtolower(trim($name)));
-
-            $studentOld = DB::table('student_old')
-                ->select(
+            // old database
+            $studentOld = StudentOld::select(
                     DB::raw('studentold_id as student_id'),
                     DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"),
                     'nisn',
