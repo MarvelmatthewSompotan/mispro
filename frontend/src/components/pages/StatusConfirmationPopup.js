@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from '../styles/StatusConfirmationPopup.module.css'; 
-import { FaExclamationTriangle } from 'react-icons/fa'; 
+import WarningSign from '../../assets/Warning_Sign.png'; 
 import { updateRegistrationStatus } from '../../services/api'; 
 
 const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
@@ -20,10 +20,6 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   const isConfirmed = currentStatus.toLowerCase() === 'confirmed';
   
   const targetStatusAPI = isConfirmed ? 'Cancelled' : 'Confirmed'; 
-
-  const actionMessage = isConfirmed 
-    ? "membatalkan" 
-    : "mengkonfirmasi";
   
   const handleUpdate = async () => {
     if (!applicationId) {
@@ -44,7 +40,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
       onUpdateStatus(registration.registration_id, targetStatusAPI);
       onClose(); 
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Kesalahan koneksi";
+      const errorMessage = error.response?.data?.message || "Connection Error";
       alert(`Failed to update status: ${errorMessage}`);
     } finally {
       setIsUpdating(false);
@@ -55,30 +51,48 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.popUp} onClick={(e) => e.stopPropagation()}>
-        <FaExclamationTriangle className={styles.icon} />
-        <h2 className={styles.title}>Update Status Pendaftaran</h2>
+        <img src={WarningSign} alt="Warning" className={styles.icon} />
+        <h2 className={styles.title}>Confirm Update Registration Status</h2>
         
         <p className={styles.message}>
-          Anda akan **{actionMessage}** pendaftaran untuk siswa ini. 
-          Mohon konfirmasi tindakan Anda.
+          Please double-check to make sure that all the information you've entered is correct. Once submitted, changes may not be possible.
         </p>
         
         <div className={styles.registrationInfo}>
-          {/* DISPLAY: Registration ID dan Student ID tetap ditampilkan */}
-          <p><strong>Registration ID:</strong> {registrationId}</p>
-          <p><strong>Student ID:</strong> {studentId}</p>
-          <p><strong>Nama Siswa:</strong> {registration.full_name}</p>
-          <p><strong>Status Saat Ini:</strong> 
-            <span style={{ fontWeight: 'bold', color: isConfirmed ? '#059669' : '#ff3860' }}>
-              {currentStatus.toUpperCase()}
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Name</span>
+            <span className={styles.separator}>:</span>
+            <span className={styles.infoValue}>{registration.full_name}</span>
+          </div>
+
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Student ID</span>
+            <span className={styles.separator}>:</span>
+            <span className={styles.infoValue}>{studentId}</span>
+          </div>
+
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Registration ID</span>
+            <span className={styles.separator}>:</span>
+            <span className={styles.infoValue}>{registrationId}</span>
+          </div>
+
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Status</span>
+            <span className={styles.separator}>:</span>
+            <span 
+              className={styles.infoValue} 
+              style={{ color: isConfirmed ? '#00F413' : '#EE0808' }}
+            >
+              {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1).toLowerCase()} 
             </span>
-          </p>
+          </div>
         </div>
 
-        <div className={styles.bAddSubjectParent}>
+        <div className={styles.rowBtn}>
           {/* Tombol Cancel*/}
           <button 
-            className={styles.bAddSubject1} 
+            className={styles.cancelBtn} 
             onClick={onClose}
             type="button"
             disabled={isUpdating}
@@ -88,13 +102,13 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
           
           {/* Tombol Yes, I'm sure */}
           <button
-            className={styles.bAddSubject}
+            className={styles.yesBtn}
             onClick={handleUpdate}
             type="button"
             disabled={isUpdating}
           >
             {isUpdating 
-              ? `Proses ${targetStatusAPI === 'Confirmed' ? 'Konfirmasi' : 'Pembatalan'}...`
+              ? `${targetStatusAPI === 'Confirmed' ? 'Confirming' : 'Cancelling'}...`
               : `Yes, I'm sure`}
           </button>
         </div>

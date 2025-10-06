@@ -161,7 +161,6 @@ const Registration = () => {
   // Mengupdate status di state lokal dan me-refresh data
   const handleUpdateStatus = (id, newStatus) => {
       // Opsi 1: Update di state lokal (Lebih cepat, tapi harus yakin API sukses)
-      // newStatus sekarang adalah 'Confirmed' atau 'Cancelled'
       setRegistrationData(prevData => 
         prevData.map(reg => {
           if (reg.registration_id === id && reg.application_form) {
