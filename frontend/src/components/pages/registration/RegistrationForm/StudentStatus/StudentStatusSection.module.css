@@ -113,13 +113,27 @@
 }
 .studentIdValue {
   flex: 1;
-  position: relative;
   line-height: 100%;
   font-family: "Poppins", Arial, sans-serif;
   font-weight: 400;
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
   transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 3px;
+  margin: 0;
+  width: auto;
+  min-width: 240px;
+  max-width: 100%;
+  border-bottom: 2px solid transparent;
+}
+
+.studentIdValue.errorInput::placeholder {
+  color: var(--red); 
+  opacity: 1; 
+  font-style: italic; 
 }
 
 .studentIdValue:focus,
@@ -177,6 +191,20 @@
   max-height: 200px;
   overflow-y: auto;
   margin-top: 4px;
+}
+
+.searchInputError {
+  font-family: Poppins, Arial, sans-serif;
+  font-size: 12px;
+  color: #ff4444;
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+/* Styling untuk border input saat error */
+.studentIdValue.errorInput {
+  border-bottom: 2px solid #ff4444 !important; /* Tambahkan border bawah merah */
+  padding-bottom: 1px; /* Sedikit padding agar border tidak menempel */
 }
 
 .dropdownItem {
@@ -356,8 +384,8 @@
   padding: 8px 12px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-accent); 
-  background-color: var(--main-grey); 
+  color: var(--text-accent);
+  background-color: var(--main-grey);
   border-bottom: 1px solid var(--main-background);
   text-transform: capitalize;
   font-family: Poppins, Arial, sans-serif;

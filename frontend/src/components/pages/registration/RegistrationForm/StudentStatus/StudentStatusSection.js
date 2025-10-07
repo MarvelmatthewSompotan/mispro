@@ -248,7 +248,11 @@ const StudentStatusSection = ({
                     <div className={styles.searchInputRow}>
                       <input
                         id="studentSearch"
-                        className={styles.studentIdValue}
+                        className={`${styles.studentIdValue} ${
+                          errors?.input_name || forceError?.input_name
+                            ? styles.errorInput
+                            : ""
+                        }`}
                         type="text"
                         autoComplete="off"
                         value={studentSearch}
@@ -256,20 +260,12 @@ const StudentStatusSection = ({
                         onFocus={() =>
                           searchResults.length > 0 && setShowDropdown(true)
                         }
-                        placeholder="Enter Name or ID"
-                        style={{
-                          border: "none",
-                          outline: "none",
-                          background: "transparent",
-                          fontFamily: "Poppins, Arial, sans-serif",
-                          fontWeight: "bold",
-                          fontSize: 16,
-                          padding: 3,
-                          margin: 0,
-                          width: "auto",
-                          minWidth: 240,
-                          maxWidth: "100%",
-                        }}
+                 
+                        placeholder={
+                          errors?.input_name || forceError?.input_name
+                            ? "Search and select a student"
+                            : "Enter Name or ID"
+                        }
                       />
                       {isSearching && (
                         <div className={styles.searching}>Searching...</div>
