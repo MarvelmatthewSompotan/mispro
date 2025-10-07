@@ -288,7 +288,7 @@ const StudentStatusSection = ({
                           {searchResults.new?.length > 0 && (
                             <>
                               <div className={styles.dropdownHeader}>
-                                new database:
+                                New data :
                               </div>
                               {searchResults.new.map((student) => (
                                 <div
@@ -310,7 +310,7 @@ const StudentStatusSection = ({
                           {searchResults.old?.length > 0 && (
                             <>
                               <div className={styles.dropdownHeader}>
-                                old database:
+                                Previous data :
                               </div>
                               {searchResults.old.map((student) => (
                                 <div
