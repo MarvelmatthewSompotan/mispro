@@ -187,8 +187,73 @@ class StudentController extends Controller
     }
 
 
-    public function getLatestApplication($student_id)
+    public function getLatestApplication($student_id, Request $request)
     {
+        $source = $request->input('source', 'new');
+        
+        if ($source === 'old') {
+            $student = StudentOld::where('studentold_id', $student_id)
+                ->orderByDesc('section_id')
+                ->first();
+
+            if (!$student) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'error' => 'No old student found with this ID',
+                    ], 404
+                );
+            }
+
+            $formattedData = [
+                'studentInfo' => [
+                    'first_name' => $student->first_name ?? '',
+                    'middle_name' => $student->middle_name ?? '',
+                    'last_name' => $student->last_name ?? '',
+                    'nickname' => $student->nickname ?? '',
+                    'religion' => $student->religion ?? '',
+                    'place_of_birth' => $student->place_of_birth ?? '',
+                    'date_of_birth' => $student->date_of_birth ?? '',
+                    'email' => $student->student_email ?? '',
+                    'phone_number' => $student->student_phone ?? '',
+                    'previous_school' => $student->previous_school ?? '',
+                    'gender' => $student->gender ?? '',
+                    'nisn' => $student->nisn ?? '',
+                    'nik' => $student->nik ?? '',
+                    'street' => $student->student_address ?? '',
+                ],
+                'program' => [
+                    'section_id' => $student->section_id ?? '',
+                    'class_id' => $student->class_id ?? '',
+                ],
+                'parentGuardian' => [
+                    'father_name' => $student->father_name ?? '',
+                    'father_company' => $student->father_company ?? '',
+                    'father_occupation' => $student->father_occupation ?? '',
+                    'father_phone' => $student->father_phone ?? '',
+                    'father_email' => $student->father_email ?? '',
+                    'father_address_street' => $student->father_address ?? '',
+                    'mother_name' => $student->mother_name ?? '',
+                    'mother_company' => $student->mother_company ?? '',
+                    'mother_occupation' => $student->mother_occupation ?? '',
+                    'mother_phone' => $student->mother_phone ?? '',
+                    'mother_email' => $student->mother_email ?? '',
+                    'mother_address_street' => $student->mother_address ?? '',
+                    'guardian_name' => $student->guardian_name ?? '',
+                    'relation_to_student' => $student->relation_to_student ?? '',
+                    'guardian_phone' => $student->guardian_phone ?? '',
+                    'guardian_address_street' => $student->guardian_address ?? '',
+                ],
+                'student_status' => 'Old',
+                'input_name' => $student->studentold_id
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $formattedData
+            ]);
+        }
+
         $latestVersion = ApplicationFormVersion::with(['applicationForm.enrollment.student'])
             ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
                 $q->where('student_id', $student_id);
@@ -317,7 +382,6 @@ class StudentController extends Controller
         return response()->json([
             'success' => true,
             'data' => $formattedData,
-            'student' => $latestVersion->applicationForm->enrollment->student ?? null,
         ]);
     }
 
@@ -529,7 +593,9 @@ class StudentController extends Controller
             $newRequestData = array_merge($oldRequestData, $validated);
             unset($newRequestData['photo']);
 
-            $newRequestData['active'] = $student->active;
+            $newRequestData['student_active'] = $student->active;
+            unset($newRequestData['active']);
+            
             if ($student->photo_path) {
                 $newRequestData['photo_path'] = $student->photo_path;
                 $newRequestData['photo_url']  = asset('storage/' . $student->photo_path);
