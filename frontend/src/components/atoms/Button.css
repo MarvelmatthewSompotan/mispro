@@ -99,11 +99,11 @@
 
 .has-dropdown-icon {
   justify-content: space-between;
-  padding: 6px 7px;
 }
 
 .dropdown-icon {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 12px;
   margin-left: 8px;
+  transform: scale(2); 
 }

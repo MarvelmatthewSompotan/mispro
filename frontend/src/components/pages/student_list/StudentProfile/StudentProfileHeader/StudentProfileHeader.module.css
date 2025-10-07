@@ -1,3 +1,5 @@
+/* File: src/components/pages/StudentProfileHeader/StudentProfileHeader.module.css */
+
 /* --- Layout Utama Header --- */
 .profileHeader {
   width: 100%;
@@ -46,6 +48,25 @@
   gap: 10px;
   font-size: 16px;
 }
+
+/* === [NEW] Styles for School Year === */
+.schoolYearContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.yearLabel {
+  color: #6c757d;
+}
+
+.yearValue {
+  color: #212529;
+  font-weight: bold;
+}
+/* === End of New Styles === */
 
 .idLabel {
   color: #6c757d;

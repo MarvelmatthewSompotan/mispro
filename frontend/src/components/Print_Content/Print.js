@@ -212,29 +212,22 @@ function Print() {
         style={{
           position: "fixed",
           top: 0,
-          left: -20,
+          left: -40,
           right: 0,
           width: "100%",
           display: "flex",
           justifyContent: "flex-end",
           gap: "10px",
-          padding: "20px 20px 0px 0px",
+          padding: "20px 20px",
           background: "#fff",
           boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           zIndex: 9999,
         }}
       >
-        <Button
-          onClick={() => navigate("/home")}
-          variant="outline"
-        >
+        <Button onClick={() => navigate("/home")} variant="outline">
           Back to Home
         </Button>
-        <Button
-          onClick={downloadPDF}
-          disabled={isPrinting}
-          variant="solid"
-        >
+        <Button onClick={downloadPDF} disabled={isPrinting} variant="solid">
           {isPrinting ? "Generating PDF..." : "Export as PDF"}
         </Button>
       </div>
