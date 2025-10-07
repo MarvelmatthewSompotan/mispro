@@ -69,8 +69,6 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
   return await res.json();
 };
 
-// --- FUNGSI API YANG SUDAH DI-REFAKTOR ---
-
 export const login = async (email, password) => {
   // `requiresAuth` diset `false` karena login belum punya token
   const data = await apiFetch(
@@ -106,6 +104,19 @@ export const logout = async () => {
 export const getMe = () => apiFetch("/me");
 
 export const getRegistrationOptions = () => apiFetch("/registration-option");
+
+/**
+ * Menambahkan school year baru ke database.
+ * Backend akan otomatis meng-increment tahun ajaran terakhir.
+ * @returns {Promise<any>} - Data dari response API, termasuk school year yang baru dibuat.
+ */
+export const addSchoolYear = () => {
+  // Mengirim body kosong karena backend yang akan menangani logika increment
+  return apiFetch("/school-year/add", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+};
 
 export const startRegistration = (schoolYear, semester, registrationDate) => {
   return apiFetch("/registration/start", {
@@ -180,7 +191,7 @@ export const updateStudent = (studentId, studentData) => {
       }
     }
   }
-  // Wrapper apiFetch sudah pintar menangani FormData
+
   return apiFetch(`/students/${studentId}/update`, {
     method: "POST",
     body: formData,
