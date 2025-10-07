@@ -17,7 +17,7 @@ const StudentStatusSection = ({
   const [status, setStatus] = useState("");
   const [statusOptions, setStatusOptions] = useState([]);
   const [studentSearch, setStudentSearch] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState({ new: [], old: [] });
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef(null);
@@ -49,7 +49,7 @@ const StudentStatusSection = ({
   const handleStatusChange = (option) => {
     setStatus(option);
     setStudentSearch("");
-    setSearchResults([]);
+    setSearchResults({ new: [], old: [] });
 
     // Jika user memilih "New" atau "Transferee" setelah mengisi data "Old",
     // panggil fungsi reset dari parent.
@@ -81,28 +81,31 @@ const StudentStatusSection = ({
       try {
         const results = await searchStudent(value);
         setSearchResults(results);
-        setShowDropdown(true);
+        setShowDropdown(results.new?.length > 0 || results.old?.length > 0);
       } catch (err) {
         console.error("Error searching student:", err);
-        setSearchResults([]);
+        setSearchResults({ new: [], old: [] });
         setShowDropdown(false);
       } finally {
         setIsSearching(false);
       }
     } else {
-      setSearchResults([]);
+      setSearchResults({ new: [], old: [] });
       setShowDropdown(false);
     }
   };
 
   const handleSelectStudent = async (student) => {
     setStudentSearch(student.full_name || student.student_id);
-    setSearchResults([]);
+    setSearchResults({ new: [], old: [] });
     setShowDropdown(false);
     setIsSearching(true);
 
     try {
-      const latestData = await getStudentLatestApplication(student.student_id);
+      const latestData = await getStudentLatestApplication(
+        student.student_id,
+        student.source
+      );
       if (latestData.success && latestData.data) {
         console.log("Received application data:", latestData.data); // Debug log
 
@@ -159,16 +162,22 @@ const StudentStatusSection = ({
 
   // Calculate dropdown width based on content
   const getDropdownWidth = () => {
-    if (searchResults.length === 0) return "auto";
+    // Gabungkan kedua array menjadi satu, ini sudah benar
+    const allResults = [
+      ...(searchResults.new || []),
+      ...(searchResults.old || []),
+    ];
 
-    // Find the longest text to determine width
-    const longestText = searchResults.reduce((longest, student) => {
+    // FIX 1: Gunakan allResults untuk mengecek panjangnya
+    if (allResults.length === 0) return "auto";
+
+    // FIX 2: Gunakan allResults untuk fungsi .reduce()
+    const longestText = allResults.reduce((longest, student) => {
       const text = `${student.full_name} (${student.student_id})`;
       return text.length > longest.length ? text : longest;
     }, "");
 
-    // Estimate width based on character count (roughly 8px per character)
-    const estimatedWidth = Math.max(longestText.length * 8, 300); // Minimum 300px
+    const estimatedWidth = Math.max(longestText.length * 8, 300);
     return `${estimatedWidth}px`;
   };
 
@@ -268,27 +277,59 @@ const StudentStatusSection = ({
                     </div>
 
                     {/* Popup Dropdown */}
-                    {showDropdown && searchResults.length > 0 && (
-                      <div
-                        className={styles.searchDropdown}
-                        style={{ width: getDropdownWidth() }}
-                      >
-                        {searchResults.map((student) => (
-                          <div
-                            key={student.student_id}
-                            className={styles.dropdownItem}
-                            onClick={() => handleSelectStudent(student)}
-                          >
-                            <span className={styles.studentName}>
-                              {student.full_name}
-                            </span>
-                            <span className={styles.studentId}>
-                              ({student.student_id})
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    {showDropdown &&
+                      (searchResults.new?.length > 0 ||
+                        searchResults.old?.length > 0) && (
+                        <div
+                          className={styles.searchDropdown}
+                          style={{ width: getDropdownWidth() }}
+                        >
+                          {/* Bagian untuk "new database" */}
+                          {searchResults.new?.length > 0 && (
+                            <>
+                              <div className={styles.dropdownHeader}>
+                                new database:
+                              </div>
+                              {searchResults.new.map((student) => (
+                                <div
+                                  key={`new-${student.student_id}`}
+                                  className={styles.dropdownItem}
+                                  onClick={() => handleSelectStudent(student)}
+                                >
+                                  <span className={styles.studentName}>
+                                    {student.full_name}
+                                  </span>
+                                  <span className={styles.studentId}>
+                                    ({student.student_id})
+                                  </span>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                          {/* Bagian untuk "old database" */}
+                          {searchResults.old?.length > 0 && (
+                            <>
+                              <div className={styles.dropdownHeader}>
+                                old database:
+                              </div>
+                              {searchResults.old.map((student) => (
+                                <div
+                                  key={`old-${student.student_id}`}
+                                  className={styles.dropdownItem}
+                                  onClick={() => handleSelectStudent(student)}
+                                >
+                                  <span className={styles.studentName}>
+                                    {student.full_name}
+                                  </span>
+                                  <span className={styles.studentId}>
+                                    ({student.student_id})
+                                  </span>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      )}
                   </div>
                 </div>
               )}

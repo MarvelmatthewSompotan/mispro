@@ -351,3 +351,13 @@
   color: #ff4444 !important;
   font-weight: 600;
 }
+
+.dropdownHeader {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c757d; /* Warna abu-abu */
+  background-color: #f8f9fa; /* Latar belakang sedikit abu-abu */
+  border-bottom: 1px solid #dee2e6;
+  text-transform: capitalize;
+}

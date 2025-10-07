@@ -127,7 +127,7 @@ export const submitRegistrationForm = (draftId, formData) => {
 
 export const updateRegistrationStatus = (applicationId, newStatus) => {
   return apiFetch(`/registration/${applicationId}/status`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: JSON.stringify({
       status: newStatus, // 'Confirmed' atau 'Cancelled'
     }),
@@ -138,8 +138,11 @@ export const searchStudent = (searchTerm) => {
   return apiFetch(`/students/search?search=${encodeURIComponent(searchTerm)}`);
 };
 
-export const getStudentLatestApplication = (studentId) => {
-  return apiFetch(`/students/${studentId}/latest-application`);
+export const getStudentLatestApplication = (studentId, source) => {
+  if (!source) {
+    return Promise.reject(new Error("Parameter 'source' diperlukan."));
+  }
+  return apiFetch(`/students/${studentId}/latest-application?source=${source}`);
 };
 
 export const getRegistrationPreview = (applicationId, versionId) => {
