@@ -3,6 +3,7 @@ import styles from "./PopUpForm.module.css";
 import {
   startRegistration,
   getRegistrationOptions,
+  addSchoolYear,
 } from "../../../../services/api";
 import Button from "../../../atoms/Button";
 
@@ -13,22 +14,44 @@ const PopUpForm = ({ onClose, onCreate }) => {
 
   const [schoolYearOptions, setSchoolYearOptions] = useState([]);
   const [semesterOptions, setSemesterOptions] = useState([]);
+  const [isAddingYear, setIsAddingYear] = useState(false);
 
   const schoolYearRef = useRef(null);
   const semesterRef = useRef(null);
   const dateRef = useRef(null);
 
-  // Fetch registration options for PopUpForm
-  useEffect(() => {
+  // Fungsi fetchOptions tidak perlu diubah
+  const fetchOptions = () => {
     getRegistrationOptions()
       .then((data) => {
         setSchoolYearOptions(data.school_years || []);
         setSemesterOptions(data.semesters || []);
       })
       .catch((err) => {
-        console.error("Error fetching registration options:", err);
+        // Jangan tampilkan error di console jika popup tidak terlihat
+        // Ini mencegah spam di console saat komponen berjalan di background
+        // console.error("Error fetching registration options:", err);
       });
-  }, []);
+  };
+
+  // 1. Logika auto-refresh dan pengambilan data awal digabung di sini
+  useEffect(() => {
+    // Ambil data pertama kali saat komponen dimuat
+    fetchOptions();
+
+    // Atur interval untuk refresh data setiap 5 detik
+    const REFRESH_INTERVAL = 5000;
+    const intervalId = setInterval(fetchOptions, REFRESH_INTERVAL);
+
+    // Penting: Hentikan interval saat komponen ditutup (unmount)
+    // untuk mencegah memory leak dan pemanggilan API yang tidak perlu.
+    return () => clearInterval(intervalId);
+  }, []); // Dependency array kosong `[]` agar efek ini hanya berjalan sekali saat mount
+
+  // 2. Hapus useEffect lama yang hanya memanggil fetchOptions sekali
+  // useEffect(() => {
+  //   fetchOptions();
+  // }, []);
 
   // Set today's date once on mount
   useEffect(() => {
@@ -48,17 +71,38 @@ const PopUpForm = ({ onClose, onCreate }) => {
     }
   }, [schoolYear, semester, date]);
 
+  const handleAddNewSchoolYear = async () => {
+    setIsAddingYear(true);
+    try {
+      const newSchoolYearData = await addSchoolYear();
+      // Panggil fetchOptions untuk refresh list setelah berhasil menambah
+      fetchOptions();
+      if (newSchoolYearData && newSchoolYearData.school_year_id) {
+        setSchoolYear(newSchoolYearData.school_year_id);
+      }
+    } catch (error) {
+      console.error("Error adding new school year:", error);
+      alert("Failed to add new school year. Please try again.");
+    } finally {
+      setIsAddingYear(false);
+    }
+  };
+
+  const handleSchoolYearChange = (e) => {
+    const { value } = e.target;
+    if (value === "add_new") {
+      handleAddNewSchoolYear();
+    } else {
+      setSchoolYear(value);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (schoolYear && semester) {
-      console.log("Submitting with data:", { schoolYear, semester }); // Debug log
-
-      // Call startRegistration to generate draft ID
       startRegistration(schoolYear, semester)
         .then((response) => {
-          console.log("Success response:", response); // Debug log
           if (response.success) {
-            // Pakai tanggal dari server agar konsisten
             onCreate({
               schoolYear,
               semester,
@@ -74,11 +118,6 @@ const PopUpForm = ({ onClose, onCreate }) => {
         })
         .catch((error) => {
           console.error("Error starting registration:", error);
-          if (error.response) {
-            console.error("Error response:", error.response);
-            console.error("Error status:", error.response.status);
-            console.error("Error data:", error.response.data);
-          }
           alert("Failed to start registration: " + error.message);
         });
     } else {
@@ -100,8 +139,9 @@ const PopUpForm = ({ onClose, onCreate }) => {
               ref={schoolYearRef}
               className={styles.schoolYear}
               value={schoolYear}
-              onChange={(e) => setSchoolYear(e.target.value)}
+              onChange={handleSchoolYearChange}
               required
+              disabled={isAddingYear}
             >
               <option value="">Select year</option>
               {schoolYearOptions.map((sy) => (
@@ -109,6 +149,12 @@ const PopUpForm = ({ onClose, onCreate }) => {
                   {sy.year}
                 </option>
               ))}
+              <option
+                value="add_new"
+                style={{ color: "var(--main-accent)" }}
+              >
+                + Add more
+              </option>
             </select>
           </div>
 

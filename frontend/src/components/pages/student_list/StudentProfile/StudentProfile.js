@@ -170,7 +170,7 @@ const StudentProfile = () => {
     try {
       setLoading(true);
       const [studentRes, optionsRes] = await Promise.all([
-        getStudentLatestApplication(studentId),
+        getStudentLatestApplication(studentId, "new"),
         getRegistrationOptions(),
       ]);
 
@@ -882,7 +882,6 @@ const StudentProfile = () => {
       const combinedData = {
         student_id: response.data.student_id,
         ...updatedData,
-        
       };
 
       // 3. Update state secara manual
@@ -898,8 +897,25 @@ const StudentProfile = () => {
 
       // fetchData(); // <-- Anda tidak perlu baris ini lagi!
     } catch (error) {
-      console.error("Failed to update student:", error);
-      alert(`Update failed: ${error.message}`);
+      if (error.response && error.response.data) {
+        // Cek apakah error ini adalah error validasi dari backend kita
+        if (error.response.data.type === "validation") {
+          console.error("Validation Errors:", error.response.data.errors);
+          alert(
+            "Update failed due to validation errors. Please check the console (F12) for more details."
+          );
+        } else {
+          // Error server lainnya (misal: 500 Internal Server Error)
+          console.error("Server Error:", error.response.data);
+          alert(
+            `Update failed: ${error.response.data.message || error.message}`
+          );
+        }
+      } else {
+        // Error jaringan atau error lainnya
+        console.error("Failed to update student:", error);
+        alert(`Update failed: ${error.message}`);
+      }
     } finally {
       setIsUpdating(false);
     }

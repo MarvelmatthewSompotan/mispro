@@ -356,9 +356,9 @@
   padding: 8px 12px;
   font-size: 14px;
   font-weight: 600;
-  color: #6c757d; /* Warna abu-abu */
-  background-color: #f8f9fa; /* Latar belakang sedikit abu-abu */
-  border-bottom: 1px solid #dee2e6;
+  color: var(--text-accent); 
+  background-color: var(--main-grey); 
+  border-bottom: 1px solid var(--main-background);
   text-transform: capitalize;
   font-family: Poppins, Arial, sans-serif;
 }
