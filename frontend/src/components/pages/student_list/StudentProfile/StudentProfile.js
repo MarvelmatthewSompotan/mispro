@@ -690,46 +690,50 @@ const StudentProfile = () => {
       }
     }
 
-    if (
-      isNisnRequired &&
-      (!fullFormData.nisn || !String(fullFormData.nisn).trim())
-    ) {
+    // Konversi NISN, NIK, KITAS ke string untuk validasi yang aman
+    const nisnAsString = String(fullFormData.nisn || "").trim();
+    const nikAsString = String(fullFormData.nik || "").trim();
+    const kitasAsString = String(fullFormData.kitas || "").trim();
+
+    if (isNisnRequired && !nisnAsString) {
       studentInfoErrors.nisn = "NISN is required.";
     }
 
     if (fullFormData.email && !emailRegex.test(fullFormData.email)) {
       studentInfoErrors.email = "Invalid email format.";
     }
-    if (fullFormData.citizenship === "Indonesia" && !fullFormData.nik?.trim()) {
-      studentInfoErrors.nik = "NIK is required.";
-    }
-    if (
-      fullFormData.citizenship === "Non Indonesia" &&
-      !fullFormData.kitas?.trim()
-    ) {
-      studentInfoErrors.kitas = "KITAS is required.";
-    }
 
     if (fullFormData.citizenship === "Indonesia") {
-      if (!fullFormData.nik?.trim()) studentInfoErrors.nik = "NIK is required.";
-      else if (fullFormData.nik.length !== 16)
+      if (!nikAsString) {
+        studentInfoErrors.nik = "NIK is required.";
+      } else if (nikAsString.length !== 16) {
         studentInfoErrors.nik = "NIK must be 16 digits.";
+      } else if (!/^\d+$/.test(nikAsString)) {
+        studentInfoErrors.nik = "NIK must only contain numbers.";
+      }
     }
+
     if (fullFormData.citizenship === "Non Indonesia") {
-      if (!fullFormData.kitas?.trim())
+      if (!kitasAsString) {
         studentInfoErrors.kitas = "KITAS is required.";
-      else if (fullFormData.kitas.length < 11 || fullFormData.kitas.length > 16)
+      } else if (kitasAsString.length < 11 || kitasAsString.length > 16) {
         studentInfoErrors.kitas = "KITAS must be 11-16 characters.";
+      }
     }
-    if (fullFormData.nisn && fullFormData.nisn.length !== 10) {
+
+    if (nisnAsString && nisnAsString.length !== 10) {
       studentInfoErrors.nisn = "NISN must be 10 digits.";
+    } else if (!/^\d+$/.test(nisnAsString)) {
+      studentInfoErrors.nisn = "NISN must only contain numbers.";
     }
+
     if (
       fullFormData.academic_status === "OTHER" &&
-      !fullFormData.academic_status_other?.trim()
+      !String(fullFormData.academic_status_other || "").trim()
     ) {
       studentInfoErrors.academic_status = "Please specify the academic status.";
     }
+
     if (Object.keys(studentInfoErrors).length > 0) {
       newErrors.studentInfo = studentInfoErrors;
     }
