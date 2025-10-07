@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\Guardian;
 use App\Models\Enrollment;
 use App\Models\SchoolYear;
+use App\Models\StudentOld;
 use App\Models\PickupPoint;
 use App\Models\SchoolClass;
 use Illuminate\Support\Str;
@@ -21,11 +22,11 @@ use App\Models\ResidenceHall;
 use App\Models\Transportation;
 use App\Models\ApplicationForm;
 use Illuminate\Support\Facades\DB;
+use App\Services\AuditTrailService;
+use Illuminate\Support\Facades\Auth;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ApplicationPreviewResource;
-use App\Services\AuditTrailService;
 
 class RegistrationController extends Controller
 {
@@ -447,6 +448,14 @@ class RegistrationController extends Controller
             $currentSchoolYear = SchoolYear::where('year', $schoolYearStr)->first();
             $enrollmentStatus = ($draft->school_year_id === $currentSchoolYear->school_year_id) ? 'ACTIVE' : 'INACTIVE';
 
+            $source = $request->input('source');
+            if ($status === 'Old' && !in_array($source, ['new', 'old'])) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid source for Old student. Must be "new" or "old".'
+                ], 422);
+            }
+
             if ($status === 'New' || $status === 'Transferee') {
                 // Check existing student
                 $possibleStudents = Student::where(function($query) use ($validated) {
@@ -544,6 +553,8 @@ class RegistrationController extends Controller
                 
             } else if ($status === 'Old') {
                 $existingStudentId = $validated['input_name'];
+                $source = $request->input('source');
+
                 if (!$existingStudentId) {
                     return response()->json([
                         'success' => false,
@@ -551,51 +562,116 @@ class RegistrationController extends Controller
                     ], 422);
                 }
                 
-                // Find existing student
-                $student = Student::find($existingStudentId);
-                if (!$student) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'Student not found'
-                    ], 404);
+                if ($source === 'new') {
+                    $student = Student::find($existingStudentId);
+                    if (!$student) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'Student not found'
+                        ], 404);
+                    }
+
+                    $sameSection = $student->enrollments()
+                        ->where('section_id', $validated['section_id'])
+                        ->exists();
+
+                    if (!$sameSection) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'For different section, please register as New Student.'
+                        ], 422);
+                    }
+
+                    $enrollment = $student->enrollments()->create([
+                        'registration_date' => $draft->registration_date_draft,
+                        'registration_id' => $registrationId,
+                        'class_id' => $schoolClass->class_id,
+                        'section_id' => $section->section_id,
+                        'major_id' => $major->major_id,
+                        'semester_id' => $draft->semester_id,
+                        'school_year_id' => $draft->school_year_id,
+                        'program_id' => $program->program_id,
+                        'transport_id' => $transportation ? $transportation->transport_id : null,
+                        'pickup_point_id' => $pickupPoint ? $pickupPoint->pickup_point_id : null,
+                        'residence_id' => $residenceHall->residence_id,
+                        'residence_hall_policy' => $validated['residence_hall_policy'], 
+                        'transportation_policy' => $validated['transportation_policy'],
+                        'status' => $enrollmentStatus,
+                    ]);
+                    // Create application form
+                    $applicationForm = $this->createApplicationForm($enrollment);
+
+                    // Create application form version dengan data snapshot
+                    $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
+
+                    $this->updateStudentData($student, $validated, $registrationId, $draft);
+                    
+                    $this->updateStudentRelatedData($student, $validated, $enrollment);
+                } else if ($source === 'old') {
+                    $oldStudent = StudentOld::find($existingStudentId);
+                    if (!$oldStudent) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'Old student data not found'
+                        ], 404);
+                    }
+
+                    $generatedId = $this->generateStudentId(
+                        $draft->school_year_id,  
+                        $validated['section_id'], 
+                        $validated['major_id']
+                    );
+
+                    $student = Student::create([
+                        'student_id' => $generatedId,
+                        'student_status' => 'Old',
+                        'first_name' => $validated['first_name'] ?? $oldStudent->first_name,
+                        'middle_name' => $validated['middle_name'] ?? $oldStudent->middle_name,
+                        'last_name' => $validated['last_name'] ?? $oldStudent->last_name,
+                        'nickname' => $validated['nickname'] ?? $oldStudent->nickname,
+                        'gender' => $validated['gender'] ?? strtoupper($oldStudent->gender),
+                        'age' => $validated['age'] ?: $this->calculateAge($validated['date_of_birth']),
+                        'family_rank' => $validated['family_rank'] ?? '',
+                        'citizenship' => $validated['citizenship'] ?? 'Indonesia',
+                        'country' => $validated['country'] ?? '',
+                        'religion' => $validated['religion'] ?? $oldStudent->religion,
+                        'place_of_birth' => $validated['place_of_birth'] ?? $oldStudent->place_of_birth,
+                        'date_of_birth' => $validated['date_of_birth'] ?? $oldStudent->date_of_birth,
+                        'email' => $validated['email'] ?? $oldStudent->student_email,
+                        'previous_school' => $validated['previous_school'] ?? $oldStudent->previous_school,
+                        'phone_number' => $validated['phone_number'] ?? $oldStudent->student_phone,
+                        'academic_status' => $validated['academic_status'],
+                        'academic_status_other' => $validated['academic_status_other'] ?? null,
+                        'registration_date' => $draft->registration_date_draft,
+                        'active' => 'YES',
+                        'status' => 'Not Graduate',
+                        'nik' => $validated['nik'] ?? $oldStudent->nik,
+                        'nisn' => $validated['nisn'] ?? $oldStudent->nisn,
+                    ]);
+
+                    $enrollment = $student->enrollments()->create([
+                        'registration_date' => $draft->registration_date_draft,
+                        'registration_id' => $registrationId,
+                        'class_id' => $schoolClass->class_id,
+                        'section_id' => $section->section_id,
+                        'major_id' => $major->major_id,
+                        'semester_id' => $draft->semester_id,
+                        'school_year_id' => $draft->school_year_id,
+                        'program_id' => $program->program_id,
+                        'transport_id' => $transportation ? $transportation->transport_id : null,
+                        'pickup_point_id' => $pickupPoint ? $pickupPoint->pickup_point_id : null,
+                        'residence_id' => $residenceHall->residence_id,
+                        'residence_hall_policy' => $validated['residence_hall_policy'], 
+                        'transportation_policy' => $validated['transportation_policy'],
+                        'status' => $enrollmentStatus,
+                    ]);
+
+                    $applicationForm = $this->createApplicationForm($enrollment);
+                    $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
+
+                    $this->createStudentRelatedData($student, $validated, $enrollment);
                 }
-
-                $sameSection = $student->enrollments()
-                    ->where('section_id', $validated['section_id'])
-                    ->exists();
-
-                if (!$sameSection) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'For different section, please register as New Student.'
-                    ], 422);
-                }
-
-                $enrollment = $student->enrollments()->create([
-                    'registration_date' => $draft->registration_date_draft,
-                    'registration_id' => $registrationId,
-                    'class_id' => $schoolClass->class_id,
-                    'section_id' => $section->section_id,
-                    'major_id' => $major->major_id,
-                    'semester_id' => $draft->semester_id,
-                    'school_year_id' => $draft->school_year_id,
-                    'program_id' => $program->program_id,
-                    'transport_id' => $transportation ? $transportation->transport_id : null,
-                    'pickup_point_id' => $pickupPoint ? $pickupPoint->pickup_point_id : null,
-                    'residence_id' => $residenceHall->residence_id,
-                    'residence_hall_policy' => $validated['residence_hall_policy'], 
-                    'transportation_policy' => $validated['transportation_policy'],
-                    'status' => $enrollmentStatus,
-                ]);
-                // Create application form
-                $applicationForm = $this->createApplicationForm($enrollment);
-
-                // Create application form version dengan data snapshot
-                $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
-
-                $this->updateStudentData($student, $validated, $registrationId, $draft);
                 
-                $this->updateStudentRelatedData($student, $validated, $enrollment);
             }
             
             // Clear draft
@@ -615,7 +691,7 @@ class RegistrationController extends Controller
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
                     'application_id' => $applicationForm->application_id,
-                    'version' => $applicationFormVersion->version_id,
+                    'version' => $applicationFormVersion->version,
                     'registration_number' =>$enrollment->enrollment_id
                 ],
             ], 200);
