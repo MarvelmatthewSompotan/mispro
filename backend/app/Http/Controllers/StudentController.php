@@ -639,11 +639,10 @@ class StudentController extends Controller
                 'action'         => 'Update',
             ];
 
-            $maxVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment.student', function($q) use ($student_id) {
-                $q->where('student_id', $student_id);
-            })->max('version');
-
+            $applicationId = $latestVersion->application_id;
+            $maxVersion = ApplicationFormVersion::where('application_id', $applicationId)->max('version');
             $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
+            
             $userName = auth()->user()->name ?? 'system';
 
             $newVersion = ApplicationFormVersion::create([
