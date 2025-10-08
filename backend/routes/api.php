@@ -4,6 +4,7 @@ use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\MasterDataController;
@@ -46,6 +47,10 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar'])->group(f
     Route::get('/preview/{applicationId}/version/{versionId}', [RegistrationController::class, 'showPreview']);
     Route::patch('/{id}/status', [RegistrationController::class, 'updateStatus']);
   });
+});
+
+Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
+    Route::get('/logbook', [LogbookController::class, 'index']);
 });
 
 ?>
