@@ -23,16 +23,11 @@ const PopUpConfirm = React.memo(
         const response = await submitRegistrationForm(draftId, transformedData);
 
         if (response.success) {
-          console.log("Navigating to print with:", {
-            applicationId: response.data.application_id,
-            version: response.data.version,
-          });
           navigate("/print", {
             state: {
               applicationId: response.data.application_id,
               version: response.data.version,
               fromSubmission: true,
-              previewDataFromForm: allFormData,
             },
             replace: true,
           });

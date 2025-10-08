@@ -22,8 +22,7 @@ import Button from "../../components/atoms/Button";
 function Print() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { applicationId, version, fromSubmission, previewDataFromForm } =
-    location.state || {};
+  const { applicationId, version } = location.state || {};
   const printRef = useRef();
   const [previewData, setPreviewData] = useState(null);
   const [sectionOptions, setSectionOptions] = useState([]);
@@ -32,44 +31,65 @@ function Print() {
   const [classOptions, setClassOptions] = useState([]);
   const [majorOptions, setMajorOptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isPrinting, setIsPrinting] = useState(false);
 
-  // Efek ini menangani navigasi tombol 'back' browser
+  // 🔹 State untuk loading tombol Print
+  const [isPrinting, setIsPrinting] = useState(false);
+  // Tambahkan state baru setelah line 35:
+  const [isFromSubmission, setIsFromSubmission] = useState(false);
+
+  // Tambahkan useEffect setelah useEffect yang sudah ada (setelah line 112):
   useEffect(() => {
-    if (!fromSubmission) return;
+    // Cek apakah datang dari form submission
+    const isFromFormSubmission = location.state?.fromSubmission || false;
+    setIsFromSubmission(isFromFormSubmission);
+  }, [location.state]);
+
+  // Tambahkan useEffect untuk handle back navigation:
+  useEffect(() => {
+    if (!isFromSubmission) return;
 
     const handleBackNavigation = () => {
+      // Redirect ke registration page saat back
       navigate("/registration", { replace: true });
     };
+
     window.addEventListener("popstate", handleBackNavigation);
+
     return () => {
       window.removeEventListener("popstate", handleBackNavigation);
     };
-  }, [navigate, fromSubmission]);
+  }, [navigate, isFromSubmission]);
 
-  // Efek ini menangani akses langsung ke URL /print
   useEffect(() => {
-    if (!fromSubmission && !applicationId) {
+    // Jika user akses langsung ke /print tanpa fromSubmission flag
+    if (!location.state?.fromSubmission && !location.state?.applicationId) {
       navigate("/registration", { replace: true });
     }
-  }, [fromSubmission, applicationId, navigate]);
+  }, [location.state, navigate]);
 
-  // Fungsi untuk download PDF
+  // Fungsi untuk download PDF manual
   const downloadPDF = async () => {
-    if (!printRef.current || !previewData) return;
+    if (!printRef.current || !previewData?.student_id) return;
 
     setIsPrinting(true);
     try {
       const element = printRef.current;
+
+      // render canvas dengan kualitas tinggi
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         ignoreElements: (el) => el.classList.contains("no-print"),
       });
+
+      // simpan jadi JPEG (lebih kecil dari PNG)
       const imgData = canvas.toDataURL("image/jpeg", 0.85);
+
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      // tambah image ke PDF dengan kompresi
       pdf.addImage(
         imgData,
         "JPEG",
@@ -80,11 +100,13 @@ function Print() {
         undefined,
         "FAST"
       );
+
       const studentName =
         `${previewData.request_data.first_name} ${previewData.request_data.last_name}`.replace(
           /[\\?%*:|"<>]/g,
           "-"
         );
+
       pdf.save(`${studentName}_Application_Form.pdf`);
     } catch (error) {
       console.error("Failed to generate PDF:", error);
@@ -93,63 +115,34 @@ function Print() {
     }
   };
 
-  // --- BLOK useEffect UTAMA YANG DIMODIFIKASI ---
   useEffect(() => {
-    const fetchOptions = async () => {
+    const fetchAllData = async () => {
       try {
-        const optionsResp = await getRegistrationOptions();
+        const [previewResp, optionsResp] = await Promise.all([
+          getRegistrationPreview(applicationId, version),
+          getRegistrationOptions(),
+        ]);
+
+        setPreviewData(previewResp.data);
         setSectionOptions(optionsResp.sections || []);
         setProgramOptions(optionsResp.programs || []);
         setPickupPointOptions(optionsResp.pickup_points || []);
         setClassOptions(optionsResp.classes || []);
         setMajorOptions(optionsResp.majors || []);
       } catch (error) {
-        console.error("Failed to fetch options:", error);
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    const fetchPreviewFromAPI = async () => {
-      try {
-        const previewResp = await getRegistrationPreview(
-          applicationId,
-          version
-        );
-        setPreviewData(previewResp.data);
-      } catch (error) {
-        console.error("Failed to fetch preview from API:", error);
-        setPreviewData(null);
-      }
-    };
-
-    const processData = async () => {
-      setLoading(true);
-      await fetchOptions();
-
-      if (fromSubmission && previewDataFromForm) {
-        // Alur 1: Datang dari submit form
-        const reconstructedData = {
-          application_id: applicationId,
-          version: version,
-          request_data: {
-            ...previewDataFromForm.studentStatus,
-            ...previewDataFromForm.studentInfo,
-            ...previewDataFromForm.program,
-            ...previewDataFromForm.facilities,
-            ...previewDataFromForm.parentGuardian,
-            ...previewDataFromForm.termOfPayment,
-          },
-        };
-        setPreviewData(reconstructedData);
-      } else if (applicationId) {
-        // Alur 2: Datang dari klik list registrasi
-        await fetchPreviewFromAPI();
-      }
-
+    if (applicationId) {
+      fetchAllData();
+    } else {
+      console.error("No applicationId provided in navigation state");
       setLoading(false);
-    };
-
-    processData();
-  }, [applicationId, version, fromSubmission, previewDataFromForm]);
+    }
+  }, [applicationId, version]);
 
   if (loading)
     return (
@@ -164,6 +157,22 @@ function Print() {
         }}
       >
         Loading preview...
+      </div>
+    );
+
+  if (!applicationId)
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          fontSize: "18px",
+          fontWeight: "bold",
+        }}
+      >
+        No application ID found
       </div>
     );
 
@@ -182,6 +191,13 @@ function Print() {
         No preview data found
       </div>
     );
+  // eslint-disable-next-line
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const options = { day: "numeric", month: "long", year: "numeric" };
+    return new Intl.DateTimeFormat("en-GB", options).format(date);
+  };
 
   const getSemesterNumber = (semester) => {
     if (!semester) return "";
@@ -190,6 +206,7 @@ function Print() {
 
   return (
     <div className={styles.printWrapper}>
+      {/* 🔹 Tombol kontrol */}
       <div
         className="no-print"
         style={{
@@ -215,6 +232,7 @@ function Print() {
         </Button>
       </div>
 
+      {/* Konten PDF */}
       <div ref={printRef} className={styles.printPageA4}>
         <div className={styles.header}>
           <div className={styles.headerRow}>
