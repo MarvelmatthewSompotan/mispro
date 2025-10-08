@@ -691,7 +691,7 @@ class RegistrationController extends Controller
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
                     'application_id' => $applicationForm->application_id,
-                    'version' => $applicationFormVersion->version,
+                    'version' => $applicationFormVersion->version_id,
                     'registration_number' =>$enrollment->enrollment_id
                 ],
             ], 200);
@@ -1012,15 +1012,10 @@ class RegistrationController extends Controller
 
     private function createApplicationForm($enrollment)
     {
-        $maxVersion = ApplicationForm::whereHas('enrollment', function($query) use ($enrollment) {
-            $query->where('student_id', $enrollment->student_id);
-        })->max('version');
-        $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
         return ApplicationForm::create([
             'enrollment_id' => $enrollment->enrollment_id,
             'status' => 'Confirmed',
             'submitted_at' => now(),
-            'version' => $nextVersion,
         ]);
     }
 
