@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('student_email', 255)->nullable();
             $table->string('previous_school', 255)->nullable();
             $table->string('religion', 30)->nullable();
-            $table->unsignedTinyInteger('nik')->nullable();
+            $table->unsignedBigInteger('nik')->nullable();
             $table->string('section', 25)->nullable();
             $table->unsignedTinyInteger('section_id')->nullable();
             $table->string('class', 10)->nullable();
