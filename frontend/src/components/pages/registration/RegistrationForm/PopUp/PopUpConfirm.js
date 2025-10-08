@@ -78,7 +78,8 @@ const PopUpConfirm = React.memo(
 
     const transformFormData = (formData) => {
       const studentStatus = formData.studentStatus?.student_status || 'New';
-      const inputName = formData.studentStatus?.input_name || '';
+      const rawInputName = formData.studentStatus?.input_name || '';
+      const inputName = rawInputName ? String(rawInputName) : '';
 
       if (studentStatus === 'Old' && !inputName) {
         throw new Error('Student ID is required for Old student status');
@@ -87,6 +88,7 @@ const PopUpConfirm = React.memo(
       const transformed = {
         student_status: studentStatus,
         input_name: inputName,
+        source: formData.studentStatus?.source || null,
         first_name: formData.studentInfo?.first_name || '',
         middle_name: formData.studentInfo?.middle_name || '',
         last_name: formData.studentInfo?.last_name || '',
@@ -102,12 +104,16 @@ const PopUpConfirm = React.memo(
         email: formData.studentInfo?.email || '',
         phone_number: formData.studentInfo?.phone_number || '',
         previous_school: formData.studentInfo?.previous_school || '',
-        academic_status: formData.studentInfo?.academic_status || 'OTHER',
+        academic_status: formData.studentInfo?.academic_status
+          ? formData.studentInfo.academic_status.toUpperCase()
+          : 'OTHER',
         academic_status_other:
           formData.studentInfo?.academic_status === 'OTHER'
             ? formData.studentInfo?.academic_status_other || ''
             : null,
-        gender: formData.studentInfo?.gender || '',
+        gender: formData.studentInfo?.gender
+          ? formData.studentInfo.gender.toUpperCase()
+          : '',
         family_rank: formData.studentInfo?.family_rank || '',
         age: formData.studentInfo?.age || '',
         nisn: formData.studentInfo?.nisn || '',
