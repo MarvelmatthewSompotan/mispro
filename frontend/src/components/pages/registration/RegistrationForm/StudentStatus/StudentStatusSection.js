@@ -117,6 +117,7 @@ const StudentStatusSection = ({
           onDataChange({
             student_status: "Old",
             input_name: student.student_id,
+            source: student.source,
           });
         }
       } else {
@@ -129,6 +130,7 @@ const StudentStatusSection = ({
           onDataChange({
             student_status: "Old",
             input_name: student.student_id,
+            source: student.source,
           });
         }
       }
@@ -139,6 +141,7 @@ const StudentStatusSection = ({
         onDataChange({
           student_status: "Old",
           input_name: student.student_id,
+          source: student.source,
         });
       }
     } finally {
@@ -260,7 +263,6 @@ const StudentStatusSection = ({
                         onFocus={() =>
                           searchResults.length > 0 && setShowDropdown(true)
                         }
-                 
                         placeholder={
                           errors?.input_name || forceError?.input_name
                             ? "Search and select a student"
@@ -290,7 +292,12 @@ const StudentStatusSection = ({
                                 <div
                                   key={`new-${student.student_id}`}
                                   className={styles.dropdownItem}
-                                  onClick={() => handleSelectStudent(student)}
+                                  onClick={() =>
+                                    handleSelectStudent({
+                                      ...student,
+                                      source: "new",
+                                    })
+                                  }
                                 >
                                   <span className={styles.studentName}>
                                     {student.full_name}
@@ -312,7 +319,12 @@ const StudentStatusSection = ({
                                 <div
                                   key={`old-${student.student_id}`}
                                   className={styles.dropdownItem}
-                                  onClick={() => handleSelectStudent(student)}
+                                  onClick={() =>
+                                    handleSelectStudent({
+                                      ...student,
+                                      source: "old",
+                                    })
+                                  }
                                 >
                                   <span className={styles.studentName}>
                                     {student.full_name}

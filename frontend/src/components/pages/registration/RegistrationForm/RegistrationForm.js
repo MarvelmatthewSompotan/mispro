@@ -31,7 +31,7 @@ const RegistrationForm = () => {
     termOfPayment: {},
   });
   const [resetKey, setResetKey] = useState(0);
-  const [setPrefillTrigger] = useState(0);
+  const [ setPrefillTrigger] = useState(0);
   const [sharedData, setSharedData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [validationState, setValidationState] = useState({});
