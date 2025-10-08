@@ -691,7 +691,7 @@ class RegistrationController extends Controller
                     'student_id' => $student->student_id,
                     'registration_id' => $registrationId,
                     'application_id' => $applicationForm->application_id,
-                    'version' => $applicationFormVersion->version,
+                    'version' => $applicationFormVersion->version_id,
                     'registration_number' =>$enrollment->enrollment_id
                 ],
             ], 200);
