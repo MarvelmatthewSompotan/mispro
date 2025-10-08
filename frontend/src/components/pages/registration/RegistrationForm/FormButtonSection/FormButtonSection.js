@@ -93,11 +93,9 @@ const FormButtonSection = ({
 
     const nikAsString = String(studentInfo.nik || "").trim();
     if (studentInfo.citizenship === "Indonesia") {
-      if (
-        !nikAsString ||
-        nikAsString.length !== 16 ||
-        !/^\d+$/.test(nikAsString)
-      ) {
+      // Pola regex baru untuk NIK
+      const nikRegex = /^[1-9][0-9]{15}$/;
+      if (!nikRegex.test(nikAsString)) {
         errors.studentInfo = { ...errors.studentInfo, nik: true };
       }
     }
