@@ -38,8 +38,9 @@ const FormButtonSection = ({
       errors.studentStatus = { ...errors.studentStatus, student_status: true };
     } else if (
       studentStatus.student_status === "Old" &&
-      !studentStatus.input_name
+      !studentStatus.is_selected // <-- UPDATED LOGIC HERE
     ) {
+      // This error is triggered if status is "Old" but a student was NOT selected from the dropdown
       errors.studentStatus = { ...errors.studentStatus, input_name: true };
     }
 

@@ -61,6 +61,7 @@ const StudentStatusSection = ({
       onDataChange({
         student_status: option,
         input_name: "",
+        is_selected: false, // LOGIC: Reset selection state
       });
     }
   };
@@ -68,11 +69,12 @@ const StudentStatusSection = ({
   const handleSearchChange = async (value) => {
     setStudentSearch(value);
 
-    // Update input_name setiap kali user mengetik
+    // LOGIC: Update parent state to indicate user is typing, but no selection is made
     if (onDataChange) {
       onDataChange({
         student_status: "Old",
-        input_name: "",
+        input_name: value, // Pass the typed value for validation feedback
+        is_selected: false, // Explicitly set to false as no selection has occurred
       });
     }
 
@@ -96,7 +98,8 @@ const StudentStatusSection = ({
   };
 
   const handleSelectStudent = async (student) => {
-    setStudentSearch(student.full_name || student.student_id);
+    // LOGIC: Set display text to be user-friendly, not the raw ID
+    setStudentSearch(`${student.full_name} (${student.student_id})`);
     setSearchResults({ new: [], old: [] });
     setShowDropdown(false);
     setIsSearching(true);
@@ -108,16 +111,16 @@ const StudentStatusSection = ({
       );
       if (latestData.success && latestData.data) {
         console.log("Received application data:", latestData.data); // Debug log
-
         // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
 
-        // Kirim input_name ke parent component
+        // LOGIC: Kirim data ke parent component DENGAN flag is_selected: true
         if (onDataChange) {
           onDataChange({
             student_status: "Old",
-            input_name: student.student_id,
+            input_name: student.student_id, // The actual ID for submission
             source: student.source,
+            is_selected: true, // Explicitly set to true on selection
           });
         }
       } else {
@@ -125,23 +128,23 @@ const StudentStatusSection = ({
           "No application data found for student:",
           student.student_id
         );
-        // Handle case ketika tidak ada data application
         if (onDataChange) {
           onDataChange({
             student_status: "Old",
             input_name: student.student_id,
             source: student.source,
+            is_selected: true, // Also true here, because student IS selected
           });
         }
       }
     } catch (err) {
       console.error("Error getting latest application:", err);
-      // Handle error case
       if (onDataChange) {
         onDataChange({
           student_status: "Old",
           input_name: student.student_id,
           source: student.source,
+          is_selected: true, // Also true here, because student IS selected
         });
       }
     } finally {
@@ -165,21 +168,15 @@ const StudentStatusSection = ({
 
   // Calculate dropdown width based on content
   const getDropdownWidth = () => {
-    // Gabungkan kedua array menjadi satu, ini sudah benar
     const allResults = [
       ...(searchResults.new || []),
       ...(searchResults.old || []),
     ];
-
-    // FIX 1: Gunakan allResults untuk mengecek panjangnya
     if (allResults.length === 0) return "auto";
-
-    // FIX 2: Gunakan allResults untuk fungsi .reduce()
     const longestText = allResults.reduce((longest, student) => {
       const text = `${student.full_name} (${student.student_id})`;
       return text.length > longest.length ? text : longest;
     }, "");
-
     const estimatedWidth = Math.max(longestText.length * 8, 300);
     return `${estimatedWidth}px`;
   };
@@ -261,20 +258,22 @@ const StudentStatusSection = ({
                         value={studentSearch}
                         onChange={(e) => handleSearchChange(e.target.value)}
                         onFocus={() =>
-                          searchResults.length > 0 && setShowDropdown(true)
+                          (searchResults.new?.length > 0 ||
+                            searchResults.old?.length > 0) &&
+                          setShowDropdown(true)
                         }
-                        placeholder={
-                          errors?.input_name || forceError?.input_name
-                            ? "Search and select a student"
-                            : "Enter Name or ID"
-                        }
+                        placeholder={"Enter Name or ID"}
                       />
                       {isSearching && (
                         <div className={styles.searching}>Searching...</div>
                       )}
+                      {(errors?.input_name || forceError?.input_name) && (
+                        <div className={styles.inlineErrorText}>
+                          Please search and select a student!
+                        </div>
+                      )}
                     </div>
 
-                    {/* Popup Dropdown */}
                     {showDropdown &&
                       (searchResults.new?.length > 0 ||
                         searchResults.old?.length > 0) && (
@@ -282,7 +281,6 @@ const StudentStatusSection = ({
                           className={styles.searchDropdown}
                           style={{ width: getDropdownWidth() }}
                         >
-                          {/* Bagian untuk "new database" */}
                           {searchResults.new?.length > 0 && (
                             <>
                               <div className={styles.dropdownHeader}>
@@ -309,7 +307,6 @@ const StudentStatusSection = ({
                               ))}
                             </>
                           )}
-                          {/* Bagian untuk "old database" */}
                           {searchResults.old?.length > 0 && (
                             <>
                               <div className={styles.dropdownHeader}>
