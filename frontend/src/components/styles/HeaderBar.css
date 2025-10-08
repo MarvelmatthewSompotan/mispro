@@ -1,8 +1,8 @@
 .header-bar {
   width: 100%;
   height: 76px;
-  background: #fff;
-  border-bottom: 1px solid #ececec;
+  background: var(--secondary-background);
+  border-bottom: 2px solid #ececec;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -33,7 +33,7 @@
 .hamburger-line {
   width: 16px;
   height: 2px;
-  background: #000;
+  background: var(--main-grey);
   border-radius: 2px;
 }
 .header-bar-center {
