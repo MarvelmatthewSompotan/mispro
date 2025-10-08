@@ -186,7 +186,6 @@ class StudentController extends Controller
         return response()->json($response);
     }
 
-
     public function getLatestApplication($student_id, Request $request)
     {
         $source = $request->input('source', 'new');
@@ -502,8 +501,26 @@ class StudentController extends Controller
 
                 if (in_array(strtolower($validated['status']), $inactiveStatuses)) {
                     $student->active = 'NO';
+
+                    $latestEnrollment = $student->enrollments()
+                        ->orderByDesc('registration_date')
+                        ->first();
+                    
+                    if ($latestEnrollment) {
+                        $latestEnrollment->status = 'INACTIVE';
+                        $latestEnrollment->save();
+                    }
                 } else {
                     $student->active = 'YES';
+                    
+                    $latestEnrollment = $student->enrollments()
+                        ->orderByDesc('registration_date')
+                        ->first();
+
+                    if ($latestEnrollment) {
+                        $latestEnrollment->status = 'ACTIVE';
+                        $latestEnrollment->save();
+                    }
                 }
 
                 $student->save();
@@ -601,10 +618,12 @@ class StudentController extends Controller
                 $newRequestData['photo_url']  = asset('storage/' . $student->photo_path);
             }
 
-            // Ambil enrollment terbaru student
             $latestEnrollment = $student->enrollments()
-            ->orderByDesc('registration_date')
-            ->first();
+                ->orderByDesc('registration_date')
+                ->first();
+            $latestEnrollment->refresh();
+            $newRequestData['enrollment_status'] = $latestEnrollment->status;
+
 
             $newSnapshot = [
                 'student_id'     => $student->student_id,
@@ -672,13 +691,31 @@ class StudentController extends Controller
 
     public function getStudentHistoryDates($studentId)
     {
-        $dates = ApplicationFormVersion::whereHas('applicationForm.enrollment', function ($q) use ($studentId) {
+        $histories = ApplicationFormVersion::whereHas('applicationForm.enrollment', function ($q) use ($studentId) {
                 $q->where('student_id', $studentId);
             })
+            ->with(['applicationForm.enrollment.schoolYear'])
             ->orderBy('updated_at', 'desc')
             ->get(['version_id', 'application_id', 'updated_at']);
 
-        return response()->json($dates);
+        $grouped = $histories->groupBy(function ($item) {
+            return $item->applicationForm->enrollment->schoolYear->year ?? 'Unknown Year';
+        });
+
+        $formatted = $grouped->map(function ($items, $year) {
+            return [
+                'school_year' => $year,
+                'dates' => $items->map(function ($item) {
+                    return [
+                        'version_id' => $item->version_id,
+                        'application_id' => $item->application_id,
+                        'updated_at' => $item->updated_at->format('d F H:i'),
+                    ];
+                })->values(),
+            ];
+        })->values();
+
+        return response()->json($formatted);
     }
 
     public function getHistoryDetail($versionId)
