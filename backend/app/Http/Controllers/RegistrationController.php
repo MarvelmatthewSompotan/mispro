@@ -1012,15 +1012,10 @@ class RegistrationController extends Controller
 
     private function createApplicationForm($enrollment)
     {
-        $maxVersion = ApplicationForm::whereHas('enrollment', function($query) use ($enrollment) {
-            $query->where('student_id', $enrollment->student_id);
-        })->max('version');
-        $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
         return ApplicationForm::create([
             'enrollment_id' => $enrollment->enrollment_id,
             'status' => 'Confirmed',
             'submitted_at' => now(),
-            'version' => $nextVersion,
         ]);
     }
 
