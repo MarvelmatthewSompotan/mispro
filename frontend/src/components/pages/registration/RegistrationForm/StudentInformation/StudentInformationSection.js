@@ -825,7 +825,7 @@ const StudentInformationSection = ({
                   />
                   {nikError && (
                     <div className={styles.inlineErrorMessage}>
-                      NIK must be exactly 16 numbers
+                      NIK must be exactly 16 digits
                     </div>
                   )}
                 </div>

@@ -30,16 +30,10 @@ const RegistrationForm = () => {
     parentGuardian: {},
     termOfPayment: {},
   });
-
   const [resetKey, setResetKey] = useState(0);
-
   const [setPrefillTrigger] = useState(0);
-
-  // Add shared data state to avoid multiple API calls
   const [sharedData, setSharedData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // State untuk validasi
   const [validationState, setValidationState] = useState({});
   const [errors, setErrors] = useState({});
   const [forceError, setForceError] = useState({});
