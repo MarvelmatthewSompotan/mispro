@@ -146,20 +146,24 @@ const StudentProfileHeader = ({
                 {isLoadingHistory ? (
                   <li className={styles.historyInfoItem}>Loading...</li>
                 ) : historyDates.length > 0 ? (
-                  historyDates.map((version) => (
-                    <li
-                      key={version.version_id}
-                      className={styles.historyItem}
-                      onClick={() => onHistoryDateChange(version.version_id)}
-                    >
-                      {new Date(version.updated_at).toLocaleString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </li>
+                  historyDates.map((group, index) => (
+                    <React.Fragment key={group.school_year || index}>
+                      <li className={styles.historySchoolYear}>
+                        {group.school_year}
+                      </li>
+                      {group.dates.map((version) => (
+                        <li
+                          key={version.version_id}
+                          className={styles.historyItem}
+                          onClick={() =>
+                            onHistoryDateChange(version.version_id)
+                          }
+                        >
+                          {/* Backend sudah memformat tanggalnya */}
+                          {version.updated_at}
+                        </li>
+                      ))}
+                    </React.Fragment>
                   ))
                 ) : (
                   <li className={styles.historyInfoItem}>No history found.</li>
