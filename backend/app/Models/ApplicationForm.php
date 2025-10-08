@@ -21,8 +21,7 @@ class ApplicationForm extends Model
         'application_id',
         'enrollment_id', 
         'status', 
-        'submitted_at', 
-        'version'
+        'submitted_at',
     ];
     
     public function enrollment() : BelongsTo
