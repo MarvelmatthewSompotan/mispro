@@ -225,3 +225,4 @@ export const getStudentHistoryDates = (studentId) =>
 
 export const getHistoryDetail = (versionId) =>
   apiFetch(`/students/history/${versionId}`);
+

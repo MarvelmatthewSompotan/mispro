@@ -5,17 +5,21 @@ import { NavLink } from "react-router-dom";
 import Icon from "../atoms/Icon";
 import homeIcon from "../../assets/Home-icon.png";
 import studentIcon from "../../assets/StudentList-icon.png";
+import logbookIcon from "../../assets/logbook.png";
 import teacherIcon from "../../assets/TeacherList-icon.png";
 import homeroomIcon from "../../assets/HomeroomList-icon.png";
 import registrationIcon from "../../assets/Registration-icon.png";
+import usersIcon from "../../assets/user.png";
 import "../styles/SidebarMenu.css"; // Menggunakan file CSS yang sudah ada
 
 const menus = [
   { to: "/home", icon: homeIcon, label: "Home" },
   { to: "/students", icon: studentIcon, label: "Student List" },
+  { to: "/logbook", icon: logbookIcon, label: "Logbook" },
   { to: "/teachers", icon: teacherIcon, label: "Teacher List" },
   { to: "/homerooms", icon: homeroomIcon, label: "Homeroom List" },
   { to: "/registration", icon: registrationIcon, label: "Registration" },
+  { to: "/users", icon: usersIcon, label: "Users" },
 ];
 
 // Terima prop 'isOpen' dari komponen Main.js

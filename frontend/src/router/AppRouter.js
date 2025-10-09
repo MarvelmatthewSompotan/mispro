@@ -14,6 +14,8 @@ import RegistrationPage from "../components/pages/registration/RegistrationForm/
 import Print from "../components/Print_Content/Print.js";
 import MainLayout from "../components/layout/Main";
 import StudentProfile from "../components/pages/student_list/StudentProfile/StudentProfile.js";
+import Logbook from "../components/pages/logbook/Logbook.js";
+import Users from "../components/pages/users/Users.js";
 
 // Import komponen penjaga rute
 import ProtectedRoute from "./ProtectedRoute";
@@ -65,6 +67,16 @@ const AppRouter = () => (
       }
     />
     <Route
+      path="/logbook"
+      element={
+        <ProtectedRoute>
+          <MainLayout>
+            <Logbook />
+          </MainLayout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
       path="/homerooms"
       element={
         <ProtectedRoute>
@@ -80,6 +92,16 @@ const AppRouter = () => (
         <ProtectedRoute>
           <MainLayout>
             <Registration />
+          </MainLayout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/users"
+      element={
+        <ProtectedRoute>
+          <MainLayout>
+            <Users />
           </MainLayout>
         </ProtectedRoute>
       }

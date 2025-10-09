@@ -1,0 +1,106 @@
+.logbookPage {
+  background-color: var(--main-background);
+  padding: 24px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+.logbookContainer {
+  background-color: var(--secondary-background);
+  padding: 48px 32px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.logbookHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  padding-bottom: 16px;
+}
+
+.logbookHeader h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--main-text);
+}
+
+.selectionControls {
+  display: flex;
+  gap: 16px;
+}
+
+.btnChipDanger,
+.btnChipPrimary {
+  border-radius: 35px;
+  padding: 8px 16px !important; /* !important untuk override padding default Button */
+  font-size: 14px;
+  font-weight: 600;
+  border: none !important; /* !important untuk override border default Button */
+  cursor: pointer;
+}
+
+.btnChipDanger {
+  background-color: #ffd3d3; /* Disarankan menambah variabel --red-background */
+  color: var(--red);
+}
+
+.btnChipDanger:hover {
+  background-color: #ffd3d3;
+  color: var(--red);
+}
+
+.btnChipPrimary {
+  background-color: var(--secondary-accent);
+  color: var(--main-accent);
+}
+
+.btnChipPrimary:hover {
+  background-color: var(--secondary-accent);
+  color: var(--main-accent);
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 0.5px solid var(--main-grey);
+}
+
+.logbookTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.logbookTable td {
+  text-align: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--main-grey);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--main-text);
+  white-space: nowrap; /* Mencegah teks turun baris */
+}
+
+.logbookTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.cellPhoto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.studentPhoto {
+  width: 40px; /* Disesuaikan agar tidak terlalu besar */
+  height: 54px;
+  object-fit: cover;
+  border-radius: 4px;
+}
