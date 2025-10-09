@@ -22,8 +22,6 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
 
   const targetStatusAPI = isConfirmed ? 'Cancelled' : 'Confirmed';
 
-  const actionMessage = isConfirmed ? 'membatalkan' : 'mengkonfirmasi';
-
   const handleUpdate = async () => {
     if (!applicationId) {
       alert('Application ID is missing. Cannot update status.');

@@ -1,10 +1,11 @@
-// src/components/pages/student_list/StudentList.js
-
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
 import searchIcon from "../../../assets/Search-icon.png";
 import { getStudents, getRegistrationOptions } from "../../../services/api";
+import Pagination from "../../atoms/Pagination"; 
+
+const ITEMS_PER_PAGE = 25; // Tentukan jumlah item per halaman (sesuaikan dengan backend)
 
 const StudentList = () => {
   const navigate = useNavigate();
@@ -19,6 +20,12 @@ const StudentList = () => {
   const [selectedSemester, setSelectedSemester] = useState(null);
   const [gradeMap, setGradeMap] = useState(new Map());
   const REFRESH_INTERVAL = 5000;
+
+  // 2. Tambahkan State untuk Paginasi
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
+
 
   // Fetch options (sections, years, semesters)
   useEffect(() => {
@@ -43,71 +50,105 @@ const StudentList = () => {
     fetchOptions();
   }, []);
 
-  // 1. Tambahkan parameter 'options' untuk membedakan jenis fetch
+
+  // 3. Modifikasi fetchStudents untuk menerima 'page' dan 'limit'
   const fetchStudents = useCallback(async (filters = {}, options = {}) => {
     const { isBackgroundRefresh = false } = options;
+    // eslint-disable-next-line
+    const { page = 1, per_page = ITEMS_PER_PAGE } = filters; 
 
     try {
-      // 2. Hanya tampilkan loading jika BUKAN background refresh
       if (!isBackgroundRefresh) {
         setLoading(true);
       }
-      const res = await getStudents(filters);
-      setStudentData(res.data?.data || []);
+
+      const res = await getStudents(filters); 
+      
+      const data = res.data?.data || [];
+      const totalCount = res.data?.total || data.length; 
+      const lastPage = res.data?.last_page || 1;
+      const fetchedCurrentPage = res.data?.current_page || page;
+
+
+      setStudentData(data);
+      setTotalData(totalCount);
+      setTotalPages(lastPage);
+      setCurrentPage(fetchedCurrentPage);
+
     } catch (err) {
       console.error("Error fetching student data:", err);
     } finally {
-      setLoading(false);
+      if (!isBackgroundRefresh) {
+        setLoading(false);
+      }
     }
-  }, []); // Dependensi kosong karena getStudents stabil
+  }, []);
+
+
+  // Helper untuk mendapatkan filter saat ini
+  const getCurrentFilters = useCallback((page) => ({
+    search: search || undefined,
+    school_year_id: selectedYear || undefined,
+    semester_id: selectedSemester || undefined,
+    section_id: selectedSections.length > 0 ? selectedSections : undefined,
+    page: page, 
+    per_page: ITEMS_PER_PAGE, 
+  }), [search, selectedYear, selectedSemester, selectedSections]);
+
 
   // Fetch data awal saat komponen pertama kali dimuat
   useEffect(() => {
-    fetchStudents(); // Panggilan awal tetap menampilkan loading
-  }, [fetchStudents]);
+    // Panggilan awal mengambil halaman 1
+    fetchStudents(getCurrentFilters(1)); 
+    // eslint-disable-next-line
+  }, [fetchStudents]); 
 
   // Auto fetch ketika filter/search berubah (debounce)
   useEffect(() => {
-    const filters = {
-      search: search || undefined,
-      school_year_id: selectedYear || undefined,
-      semester_id: selectedSemester || undefined,
-      section_id: selectedSections.length > 0 ? selectedSections : undefined,
-    };
+    // Jika filter berubah, kita harus kembali ke halaman 1
+    const newFilters = getCurrentFilters(1); 
 
     const timer = setTimeout(() => {
-      fetchStudents(filters); // Perubahan filter juga tetap menampilkan loading
+      setCurrentPage(1); 
+      fetchStudents(newFilters);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [search, selectedYear, selectedSemester, selectedSections, fetchStudents]);
+  }, [search, selectedYear, selectedSemester, selectedSections, fetchStudents, getCurrentFilters]);
 
-  // useEffect BARU untuk auto-refresh
+  // useEffect untuk auto-refresh
   useEffect(() => {
     const refreshData = () => {
-      const currentFilters = {
-        search: search || undefined,
-        school_year_id: selectedYear || undefined,
-        semester_id: selectedSemester || undefined,
-        section_id: selectedSections.length > 0 ? selectedSections : undefined,
-      };
+      // Auto-refresh menggunakan currentPage saat ini
+      const currentFilters = getCurrentFilters(currentPage);
       console.log("Auto refreshing student list (background)...");
 
-      // 3. Beri tanda bahwa ini adalah background refresh
+      // Beri tanda bahwa ini adalah background refresh
       fetchStudents(currentFilters, { isBackgroundRefresh: true });
     };
 
     const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
 
-    // Wajib: Hentikan interval saat pindah halaman
     return () => clearInterval(intervalId);
-  }, [search, selectedYear, selectedSemester, selectedSections, fetchStudents]);
+  }, [search, selectedYear, selectedSemester, selectedSections, fetchStudents, currentPage, getCurrentFilters]);
 
   const handleSectionToggle = (id) => {
     setSelectedSections((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
   };
+
+  // 4. Handler untuk Paginasi
+  const handlePageChange = useCallback((page) => {
+    if (page < 1 || page > totalPages) return;
+    
+    // Setel state di sini dulu untuk responsifitas UI
+    setCurrentPage(page);
+
+    const newFilters = getCurrentFilters(page);
+    fetchStudents(newFilters);
+  }, [fetchStudents, getCurrentFilters, totalPages]);
+
 
   return (
     <div className={styles.studentListContainer}>
@@ -127,7 +168,6 @@ const StudentList = () => {
       <div className={styles.filterContainer}>
         <div className={styles.filterTitle}>Filters</div>
         <div className={styles.filterControls}>
-          {/* Sections */}
           {sections.map((section) => (
             <label key={section.section_id} className={styles.checkboxLabel}>
               <input
@@ -139,8 +179,6 @@ const StudentList = () => {
               {section.name}
             </label>
           ))}
-
-          {/* School Year */}
           <select
             value={selectedYear || ""}
             onChange={(e) => setSelectedYear(e.target.value || null)}
@@ -153,8 +191,6 @@ const StudentList = () => {
               </option>
             ))}
           </select>
-
-          {/* Semester */}
           <select
             value={selectedSemester || ""}
             onChange={(e) => setSelectedSemester(e.target.value || null)}
@@ -170,9 +206,10 @@ const StudentList = () => {
         </div>
       </div>
 
+
       {/* Results Info */}
       <div className={styles.resultsCount}>
-        Showing {loading ? "..." : studentData.length} results
+        Showing {loading ? "..." : totalData} results
       </div>
 
       {/* Table */}
@@ -224,6 +261,15 @@ const StudentList = () => {
           </tbody>
         </table>
       </div>
+
+      {/* 5. Implementasi Komponen Pagination */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   );
 };

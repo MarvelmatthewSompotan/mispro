@@ -23,9 +23,7 @@
     --font-primary: 'Poppins', sans-serif; /* Font utama aplikasi */
     /* ==================== FONT SIZES & WEIGHTS ==================== */
     --font-size-base: 16px;      /* Ukuran font dasar */
-    --font-size-large: 1.25rem;  /* Ukuran font besar (misalnya untuk judul) */
     --font-weight-regular: 400;  /* Berat font standar */
     --font-weight-bold: 700;     /* Berat font tebal */
     --line-height-base: 1.5;     /* Tinggi baris standar */
-
   }
