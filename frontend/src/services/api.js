@@ -44,12 +44,11 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
   });
 
   // Cek jika status 401 (Unauthorized / Token Expired)
-  if (res.status === 401) {
+  if (res.status === 401 && requiresAuth) {
     console.error("Token is expired or invalid. Logging out...");
     localStorage.removeItem("token");
-    localStorage.removeItem("user"); // Hapus juga data lain jika ada
+    localStorage.removeItem("user");
     window.location.href = "/login";
-    // Hentikan proses dan lempar error agar promise di .catch() terpanggil
     throw new Error("Unauthorized");
   }
 
@@ -225,4 +224,3 @@ export const getStudentHistoryDates = (studentId) =>
 
 export const getHistoryDetail = (versionId) =>
   apiFetch(`/students/history/${versionId}`);
-
