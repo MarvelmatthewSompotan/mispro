@@ -1,5 +1,13 @@
 
 
+.logbookContainer {
+  background-color: var(--main-background);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
 .logbookHeader {
   display: flex;
   flex-direction: column;
