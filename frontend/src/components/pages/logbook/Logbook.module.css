@@ -1,20 +1,4 @@
-.logbookPage {
-  background-color: var(--main-background);
-  padding: 24px;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  box-sizing: border-box;
-}
 
-.logbookContainer {
-  background-color: var(--secondary-background);
-  padding: 48px 32px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
 
 .logbookHeader {
   display: flex;

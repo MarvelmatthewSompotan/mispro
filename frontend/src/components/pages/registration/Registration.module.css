@@ -1,10 +1,4 @@
-.registrationPage {
-  flex: 1;
-  padding: 32px;
-  margin: 0 auto;
-  background: #fafbff;
-  font-family: "Poppins", sans-serif;
-}
+
 
 .topBar {
   display: flex;
