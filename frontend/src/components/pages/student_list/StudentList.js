@@ -5,7 +5,7 @@ import searchIcon from "../../../assets/Search-icon.png";
 import { getStudents, getRegistrationOptions } from "../../../services/api";
 import Pagination from "../../atoms/Pagination"; 
 
-const ITEMS_PER_PAGE = 25; // Tentukan jumlah item per halaman (sesuaikan dengan backend)
+const ITEMS_PER_PAGE = 25; // Jumlah data yang di Display
 
 const StudentList = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const StudentList = () => {
   const [gradeMap, setGradeMap] = useState(new Map());
   const REFRESH_INTERVAL = 5000;
 
-  // 2. Tambahkan State untuk Paginasi
+  // State Paginasi
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalData, setTotalData] = useState(0);
@@ -50,8 +50,6 @@ const StudentList = () => {
     fetchOptions();
   }, []);
 
-
-  // 3. Modifikasi fetchStudents untuk menerima 'page' dan 'limit'
   const fetchStudents = useCallback(async (filters = {}, options = {}) => {
     const { isBackgroundRefresh = false } = options;
     // eslint-disable-next-line
