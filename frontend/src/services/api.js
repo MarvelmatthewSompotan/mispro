@@ -166,16 +166,25 @@ export const getStudents = ({
   school_year_id,
   semester_id,
   section_id,
+  // TAMBAH PARAMETER PAGINASI BARU
+  page = 1, 
+  per_page = 10,
 } = {}) => {
   const params = new URLSearchParams();
   if (search) params.append("search", search);
   if (school_year_id) params.append("school_year_id", school_year_id);
   if (semester_id) params.append("semester_id", semester_id);
+  
+  // TAMBAH PARAMETER PAGINASI KE URL
+  params.append("page", page);
+  params.append("per_page", per_page);
+
   if (Array.isArray(section_id)) {
     section_id.forEach((id) => params.append("section_id[]", id));
   } else if (section_id) {
     params.append("section_id", section_id);
   }
+  // Diasumsikan API endpoint untuk student list adalah /students
   return apiFetch(`/students?${params.toString()}`);
 };
 
