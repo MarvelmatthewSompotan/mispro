@@ -10,7 +10,7 @@
 .mainContent {
   flex-grow: 1;
   padding: 24px;
-  background-color: #f9fafb;
+  background-color: var(--main-background);
   transition: margin-left 0.3s ease-in-out;
   min-height: calc(100vh - 76px); /* Pastikan konten mengisi tinggi layar */
   box-sizing: border-box;

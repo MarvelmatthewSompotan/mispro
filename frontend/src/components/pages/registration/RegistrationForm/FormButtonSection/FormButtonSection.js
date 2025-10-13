@@ -38,8 +38,9 @@ const FormButtonSection = ({
       errors.studentStatus = { ...errors.studentStatus, student_status: true };
     } else if (
       studentStatus.student_status === "Old" &&
-      !studentStatus.input_name
+      !studentStatus.is_selected // <-- UPDATED LOGIC HERE
     ) {
+      // This error is triggered if status is "Old" but a student was NOT selected from the dropdown
       errors.studentStatus = { ...errors.studentStatus, input_name: true };
     }
 
@@ -92,11 +93,9 @@ const FormButtonSection = ({
 
     const nikAsString = String(studentInfo.nik || "").trim();
     if (studentInfo.citizenship === "Indonesia") {
-      if (
-        !nikAsString ||
-        nikAsString.length !== 16 ||
-        !/^\d+$/.test(nikAsString)
-      ) {
+      // Pola regex baru untuk NIK
+      const nikRegex = /^[1-9][0-9]{15}$/;
+      if (!nikRegex.test(nikAsString)) {
         errors.studentInfo = { ...errors.studentInfo, nik: true };
       }
     }

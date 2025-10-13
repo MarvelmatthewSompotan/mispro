@@ -130,12 +130,6 @@
   border-bottom: 2px solid transparent;
 }
 
-.studentIdValue.errorInput::placeholder {
-  color: var(--red); 
-  opacity: 1; 
-  font-style: italic; 
-}
-
 .studentIdValue:focus,
 .studentIdValue.hasValue {
   font-weight: bold;
@@ -161,7 +155,16 @@
   position: relative;
 }
 
-/* New unified search container */
+.inlineErrorText {
+  font-family: Poppins, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--red);
+  margin-left: 16px;
+  white-space: nowrap; 
+  font-style: italic;
+}
+
 .searchContainer {
   position: relative;
   display: flex;
@@ -203,7 +206,7 @@
 
 /* Styling untuk border input saat error */
 .studentIdValue.errorInput {
-  border-bottom: 2px solid #ff4444 !important; /* Tambahkan border bawah merah */
+  border-bottom: 2px solid var(--red) !important; /* Tambahkan border bawah merah */
   padding-bottom: 1px; /* Sedikit padding agar border tidak menempel */
 }
 

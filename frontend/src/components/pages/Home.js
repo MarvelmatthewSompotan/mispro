@@ -3,10 +3,10 @@ import StatCard from '../molecules/StatCard';
 import WelcomeBanner from '../molecules/WelcomeBanner';
 
 const Home = () => (
-  <div style={{ padding: 32, backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
+  <div >
     <WelcomeBanner name="Admin" />
     
-    <div style={{ marginTop: 24 }}>
+    <div>
       <h2>Dashboard Statistics</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16, marginTop: 16 }}>
         <StatCard value="150" label="Total Students" />

@@ -162,3 +162,14 @@
   font-weight: 500;
   color: #888;
 }
+
+.historySchoolYear {
+  font-family: var(--font-primary);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700; /* Bold */
+  color: var(--text-accent);
+  background-color: var(--main-grey); /* Latar belakang abu-abu muda */
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+}

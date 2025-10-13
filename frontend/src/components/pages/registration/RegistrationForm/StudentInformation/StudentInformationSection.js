@@ -242,7 +242,8 @@ const StudentInformationSection = ({
   };
 
   const validateNIK = (value) => {
-    if (value && value.length !== 16) {
+    const nikRegex = /^[1-9][0-9]{15}$/;
+    if (value && !nikRegex.test(value)) {
       setNikError(true);
       return false;
     }
@@ -260,7 +261,8 @@ const StudentInformationSection = ({
   };
 
   const validateNISN = (value) => {
-    if (value && value.length !== 10) {
+    const nisnRegex = /^\d{10}$/; 
+    if (value && !nisnRegex.test(value)) {
       setNisnError(true);
       return false;
     }

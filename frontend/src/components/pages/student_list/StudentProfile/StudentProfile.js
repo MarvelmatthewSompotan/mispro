@@ -53,7 +53,7 @@ const RadioDisplay = ({
     return (
       <div
         className={styles.clickableLabel}
-        onClick={() => onChange(name, value)} // Panggil handler dengan name & value
+        onClick={() => onChange(name, value)}
         style={{ cursor: "pointer" }}
       >
         {content}
@@ -85,7 +85,6 @@ const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
   if (isEditing) {
     return (
       <label className={styles.clickableLabel}>
-        {/* Checkbox asli untuk fungsionalitas */}
         <input
           type="checkbox"
           name={name}
@@ -145,7 +144,6 @@ const StudentProfile = () => {
     // eslint-disable-next-line
   }, []);
 
-  // Fetch options untuk dropdowns
   useEffect(() => {
     getRegistrationOptions()
       .then((data) => {
@@ -166,41 +164,69 @@ const StudentProfile = () => {
     setIsPhotoPopupOpen(false); // Menutup popup setelah file dipilih
   };
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [studentRes, optionsRes] = await Promise.all([
-        getStudentLatestApplication(studentId, "new"),
-        getRegistrationOptions(),
-      ]);
+  const fetchData = useCallback(
+    async (options = {}) => {
+      const { isBackgroundRefresh = false } = options;
+      try {
+        if (!isBackgroundRefresh) {
+          setLoading(true);
+        }
 
-      console.log("LANGKAH 1: Data mentah dari API:", studentRes);
-      setOptions(optionsRes);
-      if (studentRes.success) {
-        const studentData = studentRes.data;
-        const combinedData = {
-          student_id: studentData.input_name,
-          ...studentData.studentInfo,
-          ...studentData.program,
-          ...studentData.facilities,
-          ...studentData.parentGuardian,
-          ...studentData.termOfPayment,
-          photo_url: studentData.studentInfo?.photo_url,
-        };
-        setProfileData(combinedData);
-        setFormData(combinedData);
-        setStudentInfo(studentData.studentInfo || {});
+        const [studentRes, optionsRes] = await Promise.all([
+          getStudentLatestApplication(studentId, "new"),
+          getRegistrationOptions(),
+        ]);
+
+        console.log("LANGKAH 1: Data mentah dari API:", studentRes);
+        setOptions(optionsRes);
+        if (studentRes.success) {
+          const studentData = studentRes.data;
+          const combinedData = {
+            student_id: studentData.input_name,
+            ...studentData.studentInfo,
+            ...studentData.program,
+            ...studentData.facilities,
+            ...studentData.parentGuardian,
+            ...studentData.termOfPayment,
+            photo_url: studentData.studentInfo?.photo_url,
+          };
+          setProfileData(combinedData);
+          setFormData(combinedData);
+          setStudentInfo(studentData.studentInfo || {});
+        }
+      } catch (err) {
+        console.error("Error fetching student profile data:", err);
+      } finally {
+        // Hanya hentikan loading jika BUKAN background refresh
+        if (!isBackgroundRefresh) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      console.error("Error fetching student profile data:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [studentId]);
+    },
+    [studentId]
+  );
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    // Jangan jalankan auto-refresh jika pengguna sedang mengedit form
+    if (isEditing) {
+      return;
+    }
+
+    const REFRESH_INTERVAL = 5000; // 5 detik
+
+    const intervalId = setInterval(() => {
+      console.log("🔄 Auto refreshing student profile (background)...");
+      // Panggil fetchData dengan opsi untuk refresh di latar belakang
+      fetchData({ isBackgroundRefresh: true });
+    }, REFRESH_INTERVAL);
+
+    // Wajib: Hentikan interval saat komponen unmount atau saat isEditing menjadi true
+    return () => clearInterval(intervalId);
+  }, [isEditing, fetchData]);
 
   const handleStatusChange = (newStatus) => {
     const inactiveStatuses = ["Graduate", "Expelled", "Withdraw"];

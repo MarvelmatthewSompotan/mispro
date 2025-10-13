@@ -221,7 +221,6 @@ const Registration = () => {
   };
   // ------------------------------------------
 
-
   const getStatusDisplay = (row) => {
     const status = row.application_form?.status?.toLowerCase() || "confirmed";
     const variant = status === "confirmed" ? "confirmed" : "cancelled";
@@ -234,7 +233,7 @@ const Registration = () => {
   };
 
   return (
-    <div className={styles.registrationPage}>
+    <div>
       {/* Top Bar */}
       <div className={styles.topBar}>
         <Button onClick={handleNewForm} variant="solid">
