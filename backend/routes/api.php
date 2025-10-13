@@ -50,7 +50,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar'])->group(f
 });
 
 Route::middleware(['auth:sanctum', 'role:admin,registrar'])->group(function () {
-    Route::get('/logbook', [LogbookController::class, 'index']);
+    Route::post('/logbook', [LogbookController::class, 'index']);
 });
 
 ?>
