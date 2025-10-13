@@ -21,6 +21,7 @@
 
     /* ==================== FONT FAMILIES ==================== */
     --font-primary: 'Poppins', sans-serif; /* Font utama aplikasi */
+    --font-secondary: 'Inter';
     /* ==================== FONT SIZES & WEIGHTS ==================== */
     --font-size-base: 16px;      /* Ukuran font dasar */
     --font-weight-regular: 400;  /* Berat font standar */

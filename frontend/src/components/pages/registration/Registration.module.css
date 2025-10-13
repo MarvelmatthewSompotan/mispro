@@ -1,5 +1,3 @@
-
-
 .topBar {
   display: flex;
   justify-content: flex-end;
@@ -22,12 +20,13 @@
   display: flex;
   align-items: center;
   margin-bottom: 24px;
+  margin-top: 20px;
   padding-bottom: 5px;
   position: relative;
 
-  width: 500px;
-  border: 2px solid #5f84fe;
-  border-radius: 5px;
+  width: 426px;
+  border: 2px solid #7a7a7a;
+  border-radius: 5px; 
 }
 
 .searchInput {
@@ -57,7 +56,6 @@
 
 .searchIcon {
   font-size: 22px;
-  color: #b6c6fa;
   margin-right: 8px;
 }
 
@@ -233,4 +231,43 @@ input[type="checkbox"]:checked + .customCheckbox::after {
 /* Status Cancelled (Merah) */
 .statusCancelled {
   background-color: #ee0808;
+}
+
+.frameParent {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between; /* Untuk memisahkan judul/tombol kiri dan elemen kanan */
+  gap: 20px;
+  text-align: left;
+  font-size: 32px;
+  color: #000;
+  font-family: Poppins;
+  margin-bottom: 32px; /* Tambahkan margin bawah untuk pemisah */
+}
+
+.title {
+  position: relative;
+  line-height: 100%;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.ufileAltParent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 24px;
+  color: var(--main-accent);
+  cursor: pointer; /* Agar bisa diklik, misal untuk print/export */
+}
+
+.div {
+  position: relative;
+  font-weight: 600;
+  font-size: 16px; /* Sesuaikan ukuran angka agar lebih kecil dari ikon */
+  font-family: var(--font-primary);
 }
