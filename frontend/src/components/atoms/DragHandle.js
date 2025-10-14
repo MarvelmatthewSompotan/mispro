@@ -1,5 +1,6 @@
 import React from "react";
 import "../styles/Controls.css";
+import dragIcon from "../../assets/DragHandle.svg";
 
 // Terima 'listeners' dari dnd-kit
 const DragHandle = ({ listeners }) => (
@@ -10,20 +11,7 @@ const DragHandle = ({ listeners }) => (
     aria-label="Drag to reorder column"
     {...listeners}
   >
-    <svg
-      width="12"
-      height="18"
-      viewBox="0 0 12 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="2.5" cy="2.5" r="2.5" fill="currentColor" />
-      <circle cx="2.5" cy="9" r="2.5" fill="currentColor" />
-      <circle cx="2.5" cy="15.5" r="2.5" fill="currentColor" />
-      <circle cx="9.5" cy="2.5" r="2.5" fill="currentColor" />
-      <circle cx="9.5" cy="9" r="2.5" fill="currentColor" />
-      <circle cx="9.5" cy="15.5" r="2.5" fill="currentColor" />
-    </svg>
+    <img src={dragIcon} alt="Drag Handle" width="12" height="18" />
   </button>
 );
 
