@@ -210,24 +210,6 @@ const StudentProfile = () => {
     fetchData();
   }, [fetchData]);
 
-  useEffect(() => {
-    // Jangan jalankan auto-refresh jika pengguna sedang mengedit form
-    if (isEditing) {
-      return;
-    }
-
-    const REFRESH_INTERVAL = 5000; // 5 detik
-
-    const intervalId = setInterval(() => {
-      console.log("🔄 Auto refreshing student profile (background)...");
-      // Panggil fetchData dengan opsi untuk refresh di latar belakang
-      fetchData({ isBackgroundRefresh: true });
-    }, REFRESH_INTERVAL);
-
-    // Wajib: Hentikan interval saat komponen unmount atau saat isEditing menjadi true
-    return () => clearInterval(intervalId);
-  }, [isEditing, fetchData]);
-
   const handleStatusChange = (newStatus) => {
     const inactiveStatuses = ["Graduate", "Expelled", "Withdraw"];
     const newActiveStatus = inactiveStatuses.includes(newStatus) ? "NO" : "YES";
@@ -313,6 +295,8 @@ const StudentProfile = () => {
           city_regency: snapshotData.city_regency,
           province: snapshotData.province,
           other: snapshotData.other,
+          student_active: snapshotData.student_active ?? studentInfo.student_active ?? "YES",
+          status: snapshotData.status ?? studentInfo.status ?? "Not Graduated",
         };
 
         // Re-construct formData dari snapshot
@@ -662,13 +646,26 @@ const StudentProfile = () => {
   };
 
   const validateForm = () => {
+    // ——— Helpers ringkas & aman ———
+    const isFilled = (v) =>
+      v !== null && v !== undefined && String(v).trim() !== "";
+    const normStr = (v) => String(v ?? "").trim();
+    const lower = (v) => normStr(v).toLowerCase();
+    const upper = (v) => normStr(v).toUpperCase();
+    const toInt = (v) => {
+      const n = parseInt(normStr(v), 10);
+      return Number.isNaN(n) ? undefined : n;
+    };
+
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // Menggabungkan data dari kedua state untuk validasi yang komprehensif
     const fullFormData = { ...formData, ...studentInfo };
 
-    // 1. Validasi Student Information
+    // ——————————————————————————————————————————————————————————————
+    // 1) Validasi Student Information
+    // ——————————————————————————————————————————————————————————————
     const studentInfoErrors = {};
     const requiredStudentFields = {
       first_name: "First name is required",
@@ -688,49 +685,79 @@ const StudentProfile = () => {
       city_regency: "City/Regency is required",
       province: "Province is required",
     };
+
     for (const field in requiredStudentFields) {
-      if (!fullFormData[field] || String(fullFormData[field]).trim() === "") {
+      if (!isFilled(fullFormData[field])) {
         studentInfoErrors[field] = requiredStudentFields[field];
       }
     }
 
-    let isNisnRequired = true;
+    // Cari selected section/class sekali saja (tanpa ubah logika)
+    let selectedSection, selectedClass;
     if (options && fullFormData.section_id && fullFormData.class_id) {
-      const selectedSection = options.sections?.find(
+      selectedSection = options.sections?.find(
         (s) => String(s.section_id) === String(fullFormData.section_id)
       );
-      const selectedClass = options.classes?.find(
+      selectedClass = options.classes?.find(
         (c) => String(c.class_id) === String(fullFormData.class_id)
       );
+    }
 
-      if (selectedSection) {
-        if (selectedSection.name === "ECP") {
-          isNisnRequired = false;
-        } else if (
-          selectedSection.name === "Elementary School" &&
-          selectedClass &&
-          ["1", "2"].includes(selectedClass.grade)
-        ) {
-          isNisnRequired = false;
-        }
+    // ——— Previous School required? (default: required) ———
+    let isPreviousSchoolRequired = true;
+    if (selectedSection && selectedClass) {
+      const secName = lower(selectedSection.name);
+      const gradeStr = upper(selectedClass.grade);
+
+      // ECP + Grade N => tidak required
+      if (secName === "ecp" && gradeStr === "N") {
+        isPreviousSchoolRequired = false;
+      }
+    }
+
+    if (isPreviousSchoolRequired && !isFilled(fullFormData.previous_school)) {
+      studentInfoErrors.previous_school = "Previous school is required.";
+    }
+
+    // ——— NISN required? (default: required) ———
+    let isNisnRequired = true;
+    if (selectedSection && selectedClass) {
+      const secName = lower(selectedSection.name);
+      const gradeNum = toInt(selectedClass.grade);
+
+      // NISN tidak required untuk: ECP, atau Elementary School grade 1–2
+      if (
+        secName === "ecp" ||
+        (secName === "elementary school" && (gradeNum === 1 || gradeNum === 2))
+      ) {
+        isNisnRequired = false;
       }
     }
 
     // Konversi NISN, NIK, KITAS ke string untuk validasi yang aman
-    const nisnAsString = String(fullFormData.nisn || "").trim();
-    const nikAsString = String(fullFormData.nik || "").trim();
-    const kitasAsString = String(fullFormData.kitas || "").trim();
+    const nisnAsString = normStr(fullFormData.nisn);
+    const nikAsString = normStr(fullFormData.nik);
+    const kitasAsString = normStr(fullFormData.kitas);
 
-    if (isNisnRequired && !nisnAsString) {
+    // ——— NISN: required vs format dipisah ———
+    if (isFilled(nisnAsString)) {
+      if (nisnAsString.length !== 10) {
+        studentInfoErrors.nisn = "NISN must be 10 digits.";
+      } else if (!/^\d+$/.test(nisnAsString)) {
+        studentInfoErrors.nisn = "NISN must only contain numbers.";
+      }
+    } else if (isNisnRequired) {
       studentInfoErrors.nisn = "NISN is required.";
     }
 
-    if (fullFormData.email && !emailRegex.test(fullFormData.email)) {
+    // ——— Email format (required sudah di atas) ———
+    if (isFilled(fullFormData.email) && !emailRegex.test(fullFormData.email)) {
       studentInfoErrors.email = "Invalid email format.";
     }
 
+    // ——— NIK (untuk WNI) ———
     if (fullFormData.citizenship === "Indonesia") {
-      if (!nikAsString) {
+      if (!isFilled(nikAsString)) {
         studentInfoErrors.nik = "NIK is required.";
       } else if (nikAsString.length !== 16) {
         studentInfoErrors.nik = "NIK must be 16 digits.";
@@ -739,23 +766,20 @@ const StudentProfile = () => {
       }
     }
 
+    // ——— KITAS (untuk WNA) ———
     if (fullFormData.citizenship === "Non Indonesia") {
-      if (!kitasAsString) {
+      if (!isFilled(kitasAsString)) {
         studentInfoErrors.kitas = "KITAS is required.";
       } else if (kitasAsString.length < 11 || kitasAsString.length > 16) {
         studentInfoErrors.kitas = "KITAS must be 11-16 characters.";
       }
+      // (tidak ada regex khusus di requirement; dipertahankan)
     }
 
-    if (nisnAsString && nisnAsString.length !== 10) {
-      studentInfoErrors.nisn = "NISN must be 10 digits.";
-    } else if (!/^\d+$/.test(nisnAsString)) {
-      studentInfoErrors.nisn = "NISN must only contain numbers.";
-    }
-
+    // ——— Academic Status OTHER ———
     if (
       fullFormData.academic_status === "OTHER" &&
-      !String(fullFormData.academic_status_other || "").trim()
+      !isFilled(fullFormData.academic_status_other)
     ) {
       studentInfoErrors.academic_status = "Please specify the academic status.";
     }
@@ -764,11 +788,15 @@ const StudentProfile = () => {
       newErrors.studentInfo = studentInfoErrors;
     }
 
-    // 2. Validasi Facilities
+    // ——————————————————————————————————————————————————————————————
+    // 2) Validasi Facilities
+    // ——————————————————————————————————————————————————————————————
     const facilitiesErrors = {};
+
     if (!fullFormData.residence_id) {
       facilitiesErrors.residence_id = "Residence Hall is required.";
     }
+
     if (fullFormData.transportation_id && options?.transportations) {
       const selectedTransport = options.transportations.find(
         (t) => String(t.transport_id) === String(fullFormData.transportation_id)
@@ -776,16 +804,16 @@ const StudentProfile = () => {
 
       if (
         selectedTransport &&
-        selectedTransport.type.toLowerCase().includes("school bus")
+        lower(selectedTransport.type).includes("school bus")
       ) {
         const isPickupPointSelected = !!fullFormData.pickup_point_id;
-        const isCustomPickupPointFilled =
-          !!fullFormData.pickup_point_custom?.trim();
+        const isCustomPickupPointFilled = isFilled(
+          fullFormData.pickup_point_custom
+        );
 
         if (!isPickupPointSelected && !isCustomPickupPointFilled) {
           facilitiesErrors.pickup_point_id =
             "Pickup point must be selected or specified.";
-          // Anda mungkin perlu menambahkan elemen untuk menampilkan error ini di JSX
         }
       }
     }
@@ -796,67 +824,71 @@ const StudentProfile = () => {
     ) {
       facilitiesErrors.transportation_policy = "Policy must be signed.";
     }
+
     if (fullFormData.residence_hall_policy !== "Signed") {
       facilitiesErrors.residence_hall_policy = "Policy must be signed.";
     }
+
     if (Object.keys(facilitiesErrors).length > 0) {
       newErrors.facilities = facilitiesErrors;
     }
 
-    // 3. Validasi Parent/Guardian Information (Versi Lengkap)
+    // ——————————————————————————————————————————————————————————————
+    // 3) Validasi Parent/Guardian Information (Versi Lengkap)
+    // ——————————————————————————————————————————————————————————————
     const parentErrors = {};
+
     // Ayah
-    if (!fullFormData.father_name?.trim())
+    if (!isFilled(fullFormData.father_name))
       parentErrors.father_name = "Father's name is required.";
-    if (!fullFormData.father_phone?.trim())
+    if (!isFilled(fullFormData.father_phone))
       parentErrors.father_phone = "Father's phone is required.";
     if (
-      !fullFormData.father_email?.trim() ||
-      !emailRegex.test(fullFormData.father_email)
-    ) {
+      !isFilled(fullFormData.father_email) ||
+      !emailRegex.test(normStr(fullFormData.father_email))
+    )
       parentErrors.father_email = "A valid email for the father is required.";
-    }
-    if (!fullFormData.father_address_street?.trim())
+    if (!isFilled(fullFormData.father_address_street))
       parentErrors.father_address_street =
         "Father's street address is required.";
-    if (!fullFormData.father_address_village?.trim())
+    if (!isFilled(fullFormData.father_address_village))
       parentErrors.father_address_village = "Father's village is required.";
-    if (!fullFormData.father_address_district?.trim())
+    if (!isFilled(fullFormData.father_address_district))
       parentErrors.father_address_district = "Father's district is required.";
-    if (!fullFormData.father_address_city_regency?.trim())
+    if (!isFilled(fullFormData.father_address_city_regency))
       parentErrors.father_address_city_regency =
         "Father's city/regency is required.";
-    if (!fullFormData.father_address_province?.trim())
+    if (!isFilled(fullFormData.father_address_province))
       parentErrors.father_address_province = "Father's province is required.";
 
     // Ibu
-    if (!fullFormData.mother_name?.trim())
+    if (!isFilled(fullFormData.mother_name))
       parentErrors.mother_name = "Mother's name is required.";
-    if (!fullFormData.mother_phone?.trim())
+    if (!isFilled(fullFormData.mother_phone))
       parentErrors.mother_phone = "Mother's phone is required.";
     if (
-      !fullFormData.mother_email?.trim() ||
-      !emailRegex.test(fullFormData.mother_email)
-    ) {
+      !isFilled(fullFormData.mother_email) ||
+      !emailRegex.test(normStr(fullFormData.mother_email))
+    )
       parentErrors.mother_email = "A valid email for the mother is required.";
-    }
-    if (!fullFormData.mother_address_street?.trim())
+    if (!isFilled(fullFormData.mother_address_street))
       parentErrors.mother_address_street =
         "Mother's street address is required.";
-    if (!fullFormData.mother_address_village?.trim())
+    if (!isFilled(fullFormData.mother_address_village))
       parentErrors.mother_address_village = "Mother's village is required.";
-    if (!fullFormData.mother_address_district?.trim())
+    if (!isFilled(fullFormData.mother_address_district))
       parentErrors.mother_address_district = "Mother's district is required.";
-    if (!fullFormData.mother_address_city_regency?.trim())
+    if (!isFilled(fullFormData.mother_address_city_regency))
       parentErrors.mother_address_city_regency =
         "Mother's city/regency is required.";
-    if (!fullFormData.mother_address_province?.trim())
+    if (!isFilled(fullFormData.mother_address_province))
       parentErrors.mother_address_province = "Mother's province is required.";
 
     if (Object.keys(parentErrors).length > 0) {
       newErrors.parentGuardian = parentErrors;
     }
 
+    // ——— Finalize ———
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -1405,7 +1437,6 @@ const StudentProfile = () => {
                         }
                       />
                       {validationMessages.nisn && (
-                        /* ===== UBAH CLASSNAME DI SINI ===== */
                         <div className={styles.inlineErrorMessageRight}>
                           {validationMessages.nisn}
                         </div>
