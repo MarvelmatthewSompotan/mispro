@@ -1,6 +1,6 @@
 import React from "react";
 import "../styles/Controls.css";
-import sortIcon from "../../assets/sort.png";
+import sortIcon from "../../assets/sort.svg";
 
 const SortButton = ({ disabled = false, direction = "none", onClick, title = "Sort" }) => {
   return (

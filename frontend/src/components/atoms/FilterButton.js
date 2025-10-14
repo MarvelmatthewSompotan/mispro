@@ -1,6 +1,6 @@
 import React from "react";
 import "../styles/Controls.css";
-import filterIcon from "../../assets/filter.png";
+import filterIcon from "../../assets/filter.svg";
 
 const FilterButton = ({ disabled = false, onClick, title = "Filter" }) => {
   return (

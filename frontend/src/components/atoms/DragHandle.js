@@ -1,6 +1,6 @@
 import React from "react";
 import "../styles/Controls.css";
-import dragIcon from "../../assets/DragHandle.png";
+import dragIcon from "../../assets/DragHandle.svg";
 
 // Terima 'listeners' dari dnd-kit
 const DragHandle = ({ listeners }) => (
