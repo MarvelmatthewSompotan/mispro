@@ -19,13 +19,13 @@
 .schoolName {
   font-size: 18px;
   font-weight: var(--font-weight-bold);
-  font-family: var(--font-primary);
+  font-family: var(--font-secondary);
   margin-bottom: 2px;
   color: var(--main-text);
 }
 .schoolAddress {
   font-size: 12px;
-  font-family: var(--font-primary);
+  font-family: var(--font-secondary);
   color: var(--main-text);
   line-height: 1.2;
   margin-bottom: 1px;
