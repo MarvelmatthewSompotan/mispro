@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import styles from "./Logbook.module.css";
 import TableHeaderController from "../../molecules/TableHeaderController/TableHeaderController";
 import Button from "../../atoms/Button";
+import ExportLogbookPopup from "./ExportLogbookPopup/ExportLogbookPopup"; // 1. Impor komponen popup
+import jsPDF from "jspdf"; // 2. Impor jsPDF
+import autoTable from "jspdf-autotable";
 // 1. Impor dari dnd-kit
 import {
   DndContext,
@@ -159,6 +162,8 @@ const Logbook = () => {
   const [selectedColumns, setSelectedColumns] = useState(
     new Set(INITIAL_HEADERS)
   );
+  const [isPopupOpen, setPopupOpen] = useState(false);
+
   const sensors = useSensors(useSensor(PointerSensor));
 
   const handleColumnSelect = (columnTitle, isChecked) => {
@@ -189,12 +194,131 @@ const Logbook = () => {
     }
   };
 
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const visibleColumns = columns.filter((header) =>
+      selectedColumns.has(header)
+    );
+    const tableHeaders = visibleColumns;
+
+    // Penjelasan 1: Modifikasi Pembuatan tableBody
+    // Saat header adalah "Photo", kita berikan string kosong agar URL tidak tercetak.
+    // Gambar akan ditangani oleh fungsi didDrawCell.
+    const tableBody = logbookData.map((item) => {
+      return visibleColumns.map((header) => {
+        const key = HEADER_KEY_MAP[header];
+        if (header === "Photo") {
+          return ""; // Jangan tampilkan URL sebagai teks
+        }
+        return item[key] || "-";
+      });
+    });
+
+    doc.setFontSize(18);
+    doc.text("Student Logbook (Section: ECP, School Year: 2025/2026)", 14, 20);
+    doc.setFontSize(10);
+    const creationDate = new Date().toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    doc.text(`Created: ${creationDate}`, 14, 26);
+
+    autoTable(doc, {
+      head: [tableHeaders],
+      body: tableBody,
+      startY: 30,
+
+      // Penjelasan 2: Ganti Tema dan Atur Style Garis
+      // Kita gunakan 'grid' agar ada border di semua sel, sesuai contoh.
+      // Atur warna garis agar lebih soft (abu-abu muda).
+      theme: "grid",
+      styles: {
+        font: "helvetica", // Font standar yang didukung PDF
+        fontSize: 8,
+        cellPadding: 2,
+        valign: "middle",
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [200, 200, 200], // Warna garis abu-abu
+      },
+      headStyles: {
+        fillColor: "#3B60B3", // Warna header biru dari kode Anda
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        halign: "center",
+      },
+
+      // Penjelasan 3: Kunci Utama - Mengatur Lebar Kolom secara Spesifik
+      // Ini akan memaksa text wrapping pada kolom yang lebar (seperti Alamat)
+      // dan memberikan ruang yang pas untuk kolom lainnya.
+      columnStyles: {
+        Photo: { cellWidth: 20, halign: "center" },
+        "Student ID": { cellWidth: 15, halign: "center" },
+        "Full Name": { cellWidth: 30 },
+        Grade: { cellWidth: 10, halign: "center" },
+        Section: { cellWidth: 15 },
+        "School Year": { cellWidth: 15, halign: "center" },
+        Gender: { cellWidth: 12 },
+        "Registration Date": { cellWidth: 18, halign: "center" },
+        Address: { cellWidth: 45 }, // Beri ruang lebih & text akan wrap
+        // Tambahkan kolom lain jika perlu pengaturan khusus
+        // Kolom yang tidak diatur di sini akan menggunakan lebar 'auto'
+      },
+
+      didDrawCell: (data) => {
+        const photoColumnIndex = visibleColumns.indexOf("Photo");
+        if (
+          data.column.index === photoColumnIndex &&
+          data.cell.section === "body"
+        ) {
+          const studentData = logbookData[data.row.index];
+          if (studentData && studentData.photo_url) {
+            try {
+              const imgWidth = 15;
+              const imgHeight = 20;
+              const cell = data.cell;
+              // Posisikan gambar di tengah sel
+              const xPos = cell.x + (cell.width - imgWidth) / 2;
+              const yPos = cell.y + (cell.height - imgHeight) / 2;
+              doc.addImage(
+                studentData.photo_url,
+                "JPEG",
+                xPos,
+                yPos,
+                imgWidth,
+                imgHeight
+              );
+            } catch (e) {
+              console.error(`Error adding image for row ${data.row.index}:`, e);
+            }
+          }
+        }
+      },
+      rowPageBreak: "avoid",
+      bodyStyles: { minCellHeight: 22 }, // Pastikan ada ruang untuk foto
+    });
+
+    const date = new Date().toISOString().slice(0, 10);
+    doc.save(`Student_Logbook_${date}.pdf`);
+    setPopupOpen(false);
+  };
+
   return (
     <div className={styles.logbookPage}>
       <div className={styles.logbookContainer}>
         <header className={styles.logbookHeader}>
           <h1>Logbooks</h1>
-          <Button variant="solid">Download PDF</Button>
+          <Button variant="solid" onClick={() => setPopupOpen(true)}>
+            Download PDF
+          </Button>
         </header>
         <div className={styles.selectionControls}>
           <Button className={styles.btnChipDanger} onClick={unselectAllColumns}>
@@ -269,6 +393,15 @@ const Logbook = () => {
           </DndContext>
         </div>
       </div>
+      <ExportLogbookPopup
+        isOpen={isPopupOpen}
+        onClose={() => setPopupOpen(false)}
+        onDownload={handleDownloadPdf}
+        columns={columns}
+        selectedColumns={selectedColumns}
+        data={logbookData}
+        headerKeyMap={HEADER_KEY_MAP}
+      />
     </div>
   );
 };

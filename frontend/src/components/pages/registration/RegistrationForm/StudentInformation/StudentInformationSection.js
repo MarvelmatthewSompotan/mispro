@@ -241,7 +241,7 @@ useEffect(() => {
   };
 
   const validateNISN = (value) => {
-    const nisnRegex = /^\d{10}$/; 
+    const nisnRegex = /^\d{10}$/;
     if (value && !nisnRegex.test(value)) {
       setNisnError(true);
       return false;
@@ -943,19 +943,36 @@ useEffect(() => {
                 )}
               </div>
             </div>
-            <div className={styles.previousSchoolField}>
-              <label className={styles.label} htmlFor="previousSchool">
+            <div
+              className={`${styles.previousSchoolField} ${
+                previousSchoolError ? styles.errorFieldWrapper : ""
+              }`}
+            >
+              <label
+                className={`${styles.label} ${
+                  previousSchoolError ? styles.errorLabel : ""
+                }`}
+                htmlFor="previousSchool"
+              >
                 Previous school
               </label>
               <input
                 id="previousSchool"
                 className={`${styles.valueHighlight} ${
                   previousSchool ? "hasValue" : ""
-                }`}
+                } ${previousSchoolError ? styles.errorInput : ""}`}
                 type="text"
                 value={previousSchool}
                 onChange={(e) => {
                   handlePreviousSchool(e.target.value);
+                  if (previousSchoolError && e.target.value.trim()) {
+                    setPreviousSchoolError(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (previousSchoolError) {
+                    setPreviousSchoolError(false);
+                  }
                 }}
                 placeholder="Previous School"
               />
