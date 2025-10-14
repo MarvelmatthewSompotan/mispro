@@ -1,0 +1,29 @@
+.atom-radio-button {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.atom-radio-button input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.custom-radio {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  background-image: url("../../assets/RB_Deactive.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.atom-radio-button input[type="radio"]:checked + .custom-radio {
+  background-image: url("../../assets/RB_Active.png");
+}
+
+/* Selector untuk .radio-label sudah dihapus */
