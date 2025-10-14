@@ -1,0 +1,76 @@
+.usersContainer {
+    padding: 20px;
+}
+
+/* Style untuk h2 Users */
+.pageTitle {
+    margin: 0;
+    font-size: 24px;
+    color: var(--main-text);
+}
+
+/* STYLE BARU/MODIFIKASI UNTUK MEMPOSISIKAN SEARCH DAN BUTTON */
+/* ---------------------------------------------------------------------- */
+
+/* Kontainer yang membungkus Search Bar dan Button, menggunakan Flexbox */
+.usersHeaderContent {
+    display: flex;
+    /* Mendorong Search Bar ke kiri dan Button ke kanan */
+    justify-content: space-between; 
+    align-items: center; /* Menyelaraskan vertikal di tengah */
+    margin-top: 20px; /* Jarak dari judul Users */
+    width: 100%; /* Memastikan kontainer mengambil lebar penuh */
+}
+
+/* Update existing button2Parent style */
+/* Menghilangkan margin-top karena sekarang diatur oleh .usersHeaderContent */
+.button2Parent {
+    display: flex;
+    justify-content: flex-end; /* Memastikan Button tetap di kanan jika ada ruang */
+    /* margin-top: 20px; <--- DIHAPUS */
+}
+
+/* ---------------------------------------------------------------------- */
+/* STYLE SEARCH BAR (TIDAK DIUBAH, HANYA DIPASTIKAN URUTANNYA BENAR) */
+/* ---------------------------------------------------------------------- */
+
+/* Search Bar Styles - copied from Registration.module.css */
+.searchBar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    margin-top: 20px;
+    padding-bottom: 5px;
+    position: relative;
+    width: 426px;
+    border: 2px solid #7a7a7a;
+    border-radius: 5px; 
+}
+
+.searchInput {
+    flex: 1;
+    padding: 8px 0px 0px 15px;
+    margin-right: 0;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+.searchInput::placeholder {
+    color: #5f84fe;
+    opacity: 0.8;
+    font-size: 15px;
+    font-family: "Poppins", sans-serif;
+    font-weight: Regular;
+}
+
+.searchIconImg {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
