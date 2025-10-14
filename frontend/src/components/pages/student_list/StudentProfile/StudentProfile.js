@@ -130,6 +130,17 @@ const StudentProfile = () => {
     { value: "Non Indonesia", label: "Non Indonesia" },
   ];
   const historyRef = useRef(null);
+  const refreshHistoryDates = useCallback(async () => {
+    setIsLoadingHistory(true);
+    try {
+      const dates = await getStudentHistoryDates(studentId);
+      setHistoryDates(dates);
+    } catch (err) {
+      console.error("Failed to refresh history dates:", err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [studentId]);
 
   const [validationMessages, setValidationMessages] = useState({
     nik: "",
@@ -233,19 +244,12 @@ const StudentProfile = () => {
     }
 
     // Toggle tampilan dropdown
-    setIsHistoryVisible(!isHistoryVisible);
+    const willOpen = !isHistoryVisible;
+    setIsHistoryVisible(willOpen);
 
-    // Jika dropdown dibuka dan data history belum ada, fetch data
-    if (!isHistoryVisible && historyDates.length === 0) {
-      setIsLoadingHistory(true);
-      try {
-        const dates = await getStudentHistoryDates(studentId);
-        setHistoryDates(dates);
-      } catch (error) {
-        console.error("Failed to fetch history dates:", error);
-      } finally {
-        setIsLoadingHistory(false);
-      }
+    // Selalu refresh saat mau dibuka
+    if (willOpen) {
+      await refreshHistoryDates();
     }
   };
 
@@ -295,7 +299,8 @@ const StudentProfile = () => {
           city_regency: snapshotData.city_regency,
           province: snapshotData.province,
           other: snapshotData.other,
-          student_active: snapshotData.student_active ?? studentInfo.student_active ?? "YES",
+          student_active:
+            snapshotData.student_active ?? studentInfo.student_active ?? "YES",
           status: snapshotData.status ?? studentInfo.status ?? "Not Graduated",
         };
 
@@ -950,12 +955,12 @@ const StudentProfile = () => {
       setProfileData(combinedData);
       setFormData(combinedData);
       setStudentInfo(combinedData); // Asumsi studentInfo fields ada di request_data
-
       setShowSuccess(true);
       setIsEditing(false);
       setIsPopupOpen(false);
       setSelectedPhoto(null);
       setPhotoPreview(null);
+      await refreshHistoryDates();
 
       // fetchData(); // <-- Anda tidak perlu baris ini lagi!
     } catch (error) {
