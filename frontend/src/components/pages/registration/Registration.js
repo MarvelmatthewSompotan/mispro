@@ -1,24 +1,24 @@
 // src/components/pages/Registration.js
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "../../atoms/Button";
-import PopUpForm from "./PopUpRegis/PopUpForm";
-import Pagination from "../../atoms/Pagination";
-import StatusConfirmationPopup from "./PopUpRegis/StatusConfirmationPopup";
-import styles from "./Registration.module.css";
-import searchIcon from "../../../assets/Search-icon.png";
-import copyIcon from "../../../assets/Copy_icon.png";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Button from '../../atoms/Button';
+import PopUpForm from './PopUpRegis/PopUpForm';
+import Pagination from '../../atoms/Pagination';
+import StatusConfirmationPopup from './PopUpRegis/StatusConfirmationPopup';
+import styles from './Registration.module.css';
+import searchIcon from '../../../assets/Search-icon.png';
+import copyIcon from '../../../assets/Copy_icon.png';
 import {
   getRegistrations,
   getRegistrationOptions,
-} from "../../../services/api";
+} from '../../../services/api';
 
 const Registration = () => {
   const navigate = useNavigate();
   const [registrationData, setRegistrationData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -43,7 +43,7 @@ const Registration = () => {
         setSchoolYears(opts.school_years || []);
         setSemesters(opts.semesters || []);
       } catch (err) {
-        console.error("Error fetching registration options:", err);
+        console.error('Error fetching registration options:', err);
       }
     };
     fetchOptions();
@@ -72,7 +72,7 @@ const Registration = () => {
         setTotalRecords(res.data.total || 0);
         setCurrentPage(res.data.current_page || 1);
       } catch (err) {
-        console.error("Error fetching registrations:", err);
+        console.error('Error fetching registrations:', err);
         setRegistrationData([]);
         setTotalPages(1);
         setTotalRecords(0);
@@ -130,7 +130,7 @@ const Registration = () => {
         semester_id: selectedSemester || undefined,
         section_id: selectedSections.length > 0 ? selectedSections : undefined,
       };
-      console.log("Auto refreshing registration list (background)...");
+      console.log('Auto refreshing registration list (background)...');
 
       // 3. Saat memanggil refresh, beri tanda bahwa ini adalah background refresh
       // Ini akan mencegah 'setLoading(true)' dipanggil
@@ -162,7 +162,7 @@ const Registration = () => {
   const handleClosePopup = () => setShowPopupForm(false);
 
   const handleCreateForm = (formData) => {
-    navigate("/registration-form", {
+    navigate('/registration-form', {
       state: {
         ...formData,
         fromPopup: true,
@@ -172,9 +172,9 @@ const Registration = () => {
   };
 
   const handleRowClick = (row) => {
-    const applicationId = row.application_form?.application_id || null;
+    const applicationId = row.application_id || null;
     const version = row.version_id ?? null;
-    navigate("/print", {
+    navigate('/print', {
       state: { applicationId, version },
     });
   };
@@ -223,8 +223,8 @@ const Registration = () => {
   // ------------------------------------------
 
   const getStatusDisplay = (row) => {
-    const status = row.application_form?.status?.toLowerCase() || "confirmed";
-    const variant = status === "confirmed" ? "confirmed" : "cancelled";
+    const status = row.application_form?.status?.toLowerCase() || 'confirmed';
+    const variant = status === 'confirmed' ? 'confirmed' : 'cancelled';
 
     return (
       <Button variant={variant} onClick={(e) => handleStatusClick(e, row)}>
@@ -235,43 +235,56 @@ const Registration = () => {
 
   return (
     <div>
-    <div className={styles.frameParent}>
-      {/* Kolom Kiri: Judul dan Search Bar */}
-      <div>
-        <div className={styles.title}>Registration</div>
-      
-        <div className={styles.searchBar}>
-          <input
-            type="text"
-            placeholder="Find name or registration id"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={styles.searchInput}
-          />
-          <img src={searchIcon} alt="Search" className={styles.searchIconImg} style={{ right: '12px' }}/>
-        </div>
-      </div>
+      <div className={styles.frameParent}>
+        {/* Kolom Kiri: Judul dan Search Bar */}
+        <div>
+          <div className={styles.title}>Registration</div>
 
-      {/* Kolom Kanan: New Form dan Ikon/Angka */}
-      <div>
-        {/*New Form */}
-        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-            <Button onClick={handleNewForm} variant="solid">
+          <div className={styles.searchBar}>
+            <input
+              type='text'
+              placeholder='Find name or registration id'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={styles.searchInput}
+            />
+            <img
+              src={searchIcon}
+              alt='Search'
+              className={styles.searchIconImg}
+              style={{ right: '12px' }}
+            />
+          </div>
+        </div>
+
+        {/* Kolom Kanan: New Form dan Ikon/Angka */}
+        <div>
+          {/*New Form */}
+          <div
+            style={{
+              marginBottom: '20px',
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <Button onClick={handleNewForm} variant='solid'>
               New Form
             </Button>
-        </div>
-        
-        {/* Ikon File dan Angka Total Data */}
-        <div className={styles.ufileAltParent} title="Total Registrations">
-          <img src={copyIcon} alt="Total Registrations" style={{ width: '16px', height: '20px' }} /> 
-          
-          {/* Angka Total Data (mengambil dari totalRecords) */}
-          <div className={styles.div}>
-            {loading ? "..." : totalRecords}
+          </div>
+
+          {/* Ikon File dan Angka Total Data */}
+          <div className={styles.ufileAltParent} title='Total Registrations'>
+            <img
+              src={copyIcon}
+              alt='Total Registrations'
+              style={{ width: '16px', height: '20px' }}
+            />
+
+            {/* Angka Total Data (mengambil dari totalRecords) */}
+            <div className={styles.div}>{loading ? '...' : totalRecords}</div>
           </div>
         </div>
       </div>
-    </div>
 
       {/* Filters */}
       <div className={styles.filtersSection}>
@@ -284,7 +297,7 @@ const Registration = () => {
               className={styles.filterCheckboxLabel}
             >
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={selectedSections.includes(section.section_id)}
                 onChange={() => handleSectionToggle(section.section_id)}
               />
@@ -295,11 +308,11 @@ const Registration = () => {
 
           {/* School Year */}
           <select
-            value={selectedYear || ""}
+            value={selectedYear || ''}
             onChange={(e) => setSelectedYear(e.target.value || null)}
             className={styles.yearSelect}
           >
-            <option value="">Select School Year</option>
+            <option value=''>Select School Year</option>
             {schoolYears.map((y) => (
               <option key={y.school_year_id} value={y.school_year_id}>
                 {y.year}
@@ -309,11 +322,11 @@ const Registration = () => {
 
           {/* Semester */}
           <select
-            value={selectedSemester || ""}
+            value={selectedSemester || ''}
             onChange={(e) => setSelectedSemester(e.target.value || null)}
             className={styles.semesterSelect}
           >
-            <option value="">Select Semester</option>
+            <option value=''>Select Semester</option>
             {semesters.map((s) => (
               <option key={s.semester_id} value={s.semester_id}>
                 {s.name}
@@ -325,13 +338,13 @@ const Registration = () => {
 
       {/* Results Info */}
       <div className={styles.resultsInfo}>
-        Showing{" "}
+        Showing{' '}
         {loading
-          ? "..."
+          ? '...'
           : `${(currentPage - 1) * perPage + 1}-${Math.min(
               currentPage * perPage,
               totalRecords
-            )} of ${totalRecords}`}{" "}
+            )} of ${totalRecords}`}{' '}
         results
       </div>
 
@@ -341,7 +354,7 @@ const Registration = () => {
           <thead>
             <tr className={styles.tableHeaderRow}>
               <th className={styles.tableHeaderCell}>Created at</th>
-              <th className={styles.tableHeaderCell}>Name</th>{" "}
+              <th className={styles.tableHeaderCell}>Name</th>{' '}
               {/* Pindah Name ke sini */}
               <th className={styles.tableHeaderCell}>Registration ID</th>
               <th className={styles.tableHeaderCell}>Section</th>
@@ -356,15 +369,15 @@ const Registration = () => {
                   className={styles.tableRow}
                   // Hanya navigate jika status belum diklik (dicegah di handleStatusClick)
                   onClick={() => handleRowClick(row)}
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <td className={styles.tableCell}>
                     {new Date(row.registration_date).toLocaleDateString(
-                      "id-ID",
+                      'id-ID',
                       {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
                       }
                     )}
                   </td>
@@ -378,8 +391,8 @@ const Registration = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className={styles.tableCell}>
-                  {loading ? "Loading..." : "No data available"}
+                <td colSpan='5' className={styles.tableCell}>
+                  {loading ? 'Loading...' : 'No data available'}
                 </td>
               </tr>
             )}
@@ -391,9 +404,9 @@ const Registration = () => {
       {!loading && totalPages > 1 && (
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "20px",
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: '20px',
           }}
         >
           <Pagination

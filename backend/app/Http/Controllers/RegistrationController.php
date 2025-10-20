@@ -42,11 +42,21 @@ class RegistrationController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Enrollment::with(['student', 'section', 'schoolYear', 'semester', 'applicationForm'])
-            ->select('enrollments.*')
+        $query = Enrollment::query()
+            ->select(
+                'enrollments.*',
+                'application_forms.application_id',
+                'school_years.year as school_year',
+                'classes.grade',
+                'sections.name as section_name',
+                'application_forms.status as application_status'
+            )
             ->selectRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name")
             ->addSelect('application_form_versions.version_id')
             ->join('students', 'students.student_id', '=', 'enrollments.student_id')
+            ->leftJoin('school_years', 'enrollments.school_year_id', '=', 'school_years.school_year_id')
+            ->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id')
+            ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id')           
             ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
             ->leftJoin('application_form_versions', function($join) {
                 $join->on('application_form_versions.application_id', '=', 'application_forms.application_id')
@@ -54,34 +64,95 @@ class RegistrationController extends Controller
             })
             ->addSelect('application_form_versions.version_id as registration_version_id');
 
-        // Filter
-        if ($request->filled('school_year_id')) {
-            $query->where('enrollments.school_year_id', $request->input('school_year_id'));
+        // Filter Range
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $start = Carbon::parse($request->input('start_date'))->startOfDay();
+            $end = Carbon::parse($request->input('end_date'))->endOfDay();
+            $query->whereBetween('enrollments.registration_date', [$start, $end]);
         }
-        if ($request->filled('semester_id')) {
-            $query->where('enrollments.semester_id', $request->input('semester_id'));
+
+        // Filter Search
+        if ($regisId = $request->input('search_id')) {
+            $query->where('registration_id', 'like', "%$regisId%");
         }
-        if ($request->filled('section_id')) {
-            $sectionIds = $request->input('section_id');
-            if (is_array($sectionIds)) {
-                $query->whereIn('enrollments.section_id', $sectionIds);
-            } else {
-                $query->where('enrollments.section_id', $sectionIds);
+
+        if ($name = $request->input('search_name')) {
+            $query->where(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$name%");
+        }
+
+        // Filter Checkbox
+        if ($request->input('school_year')) {
+            $schoolYear = $request->input('school_year');
+            $query->whereIn('school_years.year', (array)$schoolYear);
+        }
+
+        if ($request->filled('grade')) {
+            $grades = (array) $request->input('grade');
+            $query->whereIn('classes.grade', $grades);
+        }
+
+        if ($request->filled('section')) {
+            $sections = (array) $request->input('section');
+            $query->whereIn('sections.name', $sections);
+        }
+
+        if ($request->filled('status')) {
+            $statuses = (array) $request->input('status');
+            $query->whereIn('application_forms.status', $statuses);
+        }
+
+        // Sort
+        $sorts = $request->input('sort', []);
+
+        $sortable = [
+            'registration_date' => 'enrollments.registration_date',
+            'registration_id' => 'enrollments.registration_id',
+            'school_year' => 'school_years.year',
+            'full_name' => "CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)",
+            'grade' => 'classes.grade',
+            'section' => 'sections.name',
+            'application_status' => 'application_forms.status',
+        ];
+
+        if (empty($sorts)) {
+            $query->orderBy('enrollments.registration_date', 'desc');
+        } else {
+            foreach ($sorts as $sort) {
+                $field = $sort['field'] ?? null;
+                $order = strtolower($sort['order'] ?? 'asc');
+
+                if (!$field || !array_key_exists($field, $sortable)) continue;
+
+                if ($field === 'registration_id') {
+                    $query->orderByRaw("
+                        CASE
+                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%ES%' THEN 1    
+                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%MS%' THEN 2    
+                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%HS%' THEN 3    
+                            ELSE 4
+                        END $order
+                    ")->orderByRaw("
+                        CAST(SUBSTRING_INDEX(enrollments.registration_id, '/', 1) AS UNSIGNED) $order
+                    ")->orderByRaw("
+                        CAST(SUBSTRING_INDEX(enrollments.registration_id, '-', -1) AS UNSIGNED) $order
+                    ");
+                } elseif ($field === 'full_name') {
+                    $query->orderByRaw($sortable[$field] . ' ' . $order);
+                } elseif ($field === 'application_status') {
+                    $query->orderByRaw("
+                        CASE application_forms.status
+                            WHEN 'Cancelled' THEN 1
+                            WHEN 'Confirmed' THEN 2
+                            ELSE 3
+                        END $order
+                    ");
+                } else {
+                    $query->orderByRaw($sortable[$field] . ' ' . $order);
+                }
             }
         }
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function($q) use ($search) {
-                $q->where('students.student_id', 'like', "%$search%")
-                ->orWhere(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$search%");
-            });
-        }
-
-        // Order by created_at supaya kelihatan histori pendaftaran
-        $query->orderBy('enrollments.registration_date', 'desc');
-
+        
+        // Pagination
         $perPage = $request->input('per_page', 25);
         $data = $query->paginate($perPage);
         $totalRegistered = ApplicationForm::count();
@@ -603,6 +674,12 @@ class RegistrationController extends Controller
 
                     // Create application form version dengan data snapshot
                     $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
+
+                    if ($student->status !== 'Graduate') {
+                        $student->active = 'YES';
+                        $student->status = 'Not Graduate';
+                        $student->save();
+                    }
 
                     $this->updateStudentData($student, $validated, $registrationId, $draft);
                     
