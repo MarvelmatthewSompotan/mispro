@@ -18,12 +18,15 @@
 }
 .schoolName {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-secondary);
   margin-bottom: 2px;
+  color: var(--main-text);
 }
 .schoolAddress {
   font-size: 12px;
-  color: #333;
+  font-family: var(--font-secondary);
+  color: var(--main-text);
   line-height: 1.2;
   margin-bottom: 1px;
 }

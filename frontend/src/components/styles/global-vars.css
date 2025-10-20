@@ -20,10 +20,40 @@
     --orange: #FF7B00;
 
     /* ==================== FONT FAMILIES ==================== */
-    --font-primary: 'Poppins', sans-serif; /* Font utama aplikasi */
+    --font-primary: 'Poppins', sans-serif; 
+    --font-secondary: 'Inter Custom', sans-serif; 
     /* ==================== FONT SIZES & WEIGHTS ==================== */
     --font-size-base: 16px;      /* Ukuran font dasar */
     --font-weight-regular: 400;  /* Berat font standar */
     --font-weight-bold: 700;     /* Berat font tebal */
+    --font-weight-black: 900;    /* Berat font ekstra (Black) */
     --line-height-base: 1.5;     /* Tinggi baris standar */
   }
+
+/* ==================== DEFINISI FONT INTER ==================== */
+/* Inter Regular (Inter_18pt-Regular.ttf) */
+@font-face {
+  font-family: 'Inter Custom';
+  src: url('../../assets/fonts/Inter_18pt-Regular.ttf') format('truetype');
+  font-weight: 400; 
+  font-style: normal;
+  font-display: swap; 
+}
+
+/* Inter Bold (Inter_18pt-Bold.ttf) */
+@font-face {
+  font-family: 'Inter Custom';
+  src: url('../../assets/fonts/Inter_18pt-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Inter Black (Inter_18pt-Black.ttf) */
+@font-face {
+  font-family: 'Inter Custom';
+  src: url('../../assets/fonts/Inter_18pt-Black.ttf') format('truetype');
+  font-weight: 900; 
+  font-style: normal;
+  font-display: swap;
+}

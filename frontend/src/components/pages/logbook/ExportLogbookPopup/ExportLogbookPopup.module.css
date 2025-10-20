@@ -1,0 +1,108 @@
+/* Menggunakan variabel dari global-vars.css */
+
+.popupOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2001;
+  }
+  
+  .popupContainer {
+    background-color: var(--secondary-background);
+    width: 80%;
+    max-width: 900px;
+    height: 85%;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .popupHeader {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--main-accent-disabledstate);
+  }
+  
+  .popupHeader h2 {
+    margin: 0;
+    font-size: 1.5rem; /* 24px */
+    font-weight: 600;
+    color: var(--main-text);
+    font-family: var(--font-primary);
+  }
+  
+  .popupContent {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0 16px;
+  }
+  
+  .tableWrapper {
+    border: 1px solid var(--main-grey);
+    border-top: none;
+    border-bottom: none;
+  }
+  
+  .popupTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .popupTable th,
+  .popupTable td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--main-accent-disabledstate);
+    font-family: var(--font-primary);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  
+  .popupTable th {
+    font-weight: 600;
+    background-color: var(--main-background);
+    color: var(--main-text);
+    position: sticky;
+    top: 0;
+  }
+  
+  .popupTable tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .popupTable tbody tr:hover {
+    background-color: var(--main-background);
+  }
+  
+  .photoCell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .studentPhoto {
+    width: 40px;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .popupActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 24px 32px;
+    border-top: 1px solid var(--main-accent-disabledstate);
+    background-color: var(--secondary-background);
+  }
+  
+  /* Anda mungkin perlu menyesuaikan Button component atau stylenya */
+  /* Jika Button component tidak memiliki 'variant=outline', Anda bisa buat class baru */

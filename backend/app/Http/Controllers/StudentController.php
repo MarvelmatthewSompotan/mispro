@@ -35,13 +35,12 @@ class StudentController extends Controller
         $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
         $defaultSchoolYearId = $schoolYear?->school_year_id;
 
+        $targetSchoolYearId = $request->input('school_year_id', $defaultSchoolYearId);
+
+
         $latestEnrollments = DB::table('enrollments as e1')
         ->select('e1.student_id', 'e1.enrollment_id')
-        ->when($request->filled('school_year_id'), function ($q) use ($request) {
-            $q->where('e1.school_year_id', $request->input('school_year_id'));
-        }, function ($q) use ($defaultSchoolYearId) {
-            $q->where('e1.school_year_id', $defaultSchoolYearId);
-        })
+        ->where('e1.school_year_id', $targetSchoolYearId)
         ->whereRaw('e1.registration_date = (
             SELECT MAX(e2.registration_date)
             FROM enrollments AS e2
@@ -52,14 +51,13 @@ class StudentController extends Controller
         $query = Student::select(
             'students.student_id',
             DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
+            'students.photo_path',
             'enrollments.section_id',
             'enrollments.class_id',
             'enrollments.school_year_id',
-            'enrollments.semester_id',
-            'students.nisn',
-            'students.nik',
-            'students.registration_date',
-            'students.active',
+            'school_years.year as school_year',
+            'classes.grade',
+            'sections.name as section_name',
             'students.status as student_status',
             'enrollments.status as enrollment_status'
         )
@@ -68,38 +66,101 @@ class StudentController extends Controller
         })
         ->join('enrollments', 'enrollments.enrollment_id', '=', 'latest_enrollments.enrollment_id')
         ->join('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
-        ->where('students.active', 'YES')
-        ->where('application_forms.status', 'Confirmed');
+        ->join('school_years', 'enrollments.school_year_id', '=', 'school_years.school_year_id')
+        ->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id')
+        ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id');
         
-        // Filter
-        if ($request->filled('school_year_id')) {
-            $query->where('enrollments.school_year_id', $request->input('school_year_id'));
-        } else {
-            $query->where('enrollments.school_year_id', $defaultSchoolYearId);
+        $query->where('application_forms.status', 'Confirmed');
+        
+        $isStudentStatusFiltered = $request->filled('student_status');
+        $isEnrollmentStatusFiltered = $request->filled('enrollment_status');
+
+        if (!$isStudentStatusFiltered && !$isEnrollmentStatusFiltered) {
+            $query->where('students.active', 'YES');
+        }
+
+        // Filter Search
+        if ($request->filled('search_name')) {
+            $searchName = $request->input('search_name');
+            $query->where(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$searchName%");
+        }
+
+        // Filter checkbox
+        if ($request->filled('class_id')) {
+            $classIds = (array) $request->input('class_id');
+            $query->whereIn('enrollments.class_id', $classIds);
         }
         if ($request->filled('section_id')) {
-            $sectionIds = $request->input('section_id');
-            if (is_array($sectionIds)) {
-                $query->whereIn('enrollments.section_id', $sectionIds);
-            } else {
-                $query->where('enrollments.section_id', $sectionIds);
+            $sectionIds = (array) $request->input('section_id');
+            $query->whereIn('enrollments.section_id', $sectionIds);
+        }
+        if ($isEnrollmentStatusFiltered) {
+            $enrollmentStatuses = (array) $request->input('enrollment_status');
+            $query->whereIn('enrollments.status', $enrollmentStatuses);
+        }
+        if ($isStudentStatusFiltered) {
+            $studentStatuses = (array) $request->input('student_status');
+            $query->whereIn('students.status', $studentStatuses);
+        }
+        
+        // Sort
+        $sorts = $request->input('sort', []);
+
+        $sortable = [
+            'student_id' => 'students.student_id',
+            'full_name' => "CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)", // DIUBAH MENJADI STRING
+            'grade' => 'classes.grade',
+            'section' => 'sections.name',
+            'enrollment_status' => 'enrollments.status',
+            'student_status' => 'students.status',
+        ];
+        
+        if (empty($sorts)) {
+            $query->orderBy('students.student_id', 'asc');
+        } else {
+            foreach ($sorts as $sort) {
+                $field = $sort['field'] ?? null;
+                $order = strtolower($sort['order'] ?? 'asc');
+
+                if (!$field || !array_key_exists($field, $sortable)) continue;
+
+                if ($field === 'full_name') {
+                    $query->orderByRaw($sortable[$field] . ' ' . $order);
+                } else {
+                    $query->orderBy($sortable[$field], $order);
+                }
             }
         }
-        
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function($q) use ($search) {
-                $q->where('students.student_id', 'like', "%$search%")
-                ->orWhere(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$search%");
-            });
-        }
-        
-        $perPage = $request->input('per_page', 25);
-        $students= $query
-            ->orderBy('enrollments.registration_date', 'desc')
-            ->paginate($perPage);
 
+        // Pagination
+        $perPage = $request->input('per_page', 25);
+        $students= $query->paginate($perPage);
+
+        // Transform data (photo_url)
+        $students->getCollection()->transform(function ($student) {
+
+            $photoUrl = null;
+            try {
+                $latestApplicationFormVersion = DB::table('application_forms AS af')
+                    ->join('enrollments AS e', 'af.enrollment_id', '=', 'e.enrollment_id')
+                    ->join('application_form_versions AS afv', 'af.application_id', '=', 'afv.application_id')
+                    ->where('e.student_id', $student->student_id)
+                    ->select('afv.data_snapshot')
+                    ->orderByDesc('afv.version_id')
+                    ->first();
+
+                if ($latestApplicationFormVersion && $latestApplicationFormVersion->data_snapshot) {
+                    $decode = json_decode($latestApplicationFormVersion->data_snapshot);
+                    $photoUrl = $decode->request_data->photo_url ?? null;
+                } 
+            } catch (\Exception $e) {
+            }
+
+            $student->photo_url = $photoUrl;
+
+            return $student;
+        });
+        
         return response()->json([
             'success' => true,
             'data' => $students

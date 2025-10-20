@@ -53,6 +53,8 @@ const FormButtonSection = ({
       errors.studentInfo = { ...errors.studentInfo, nickname: true };
     }
 
+    
+
     let isNisnRequired = true;
     const sectionId = allFormData.program?.section_id;
     const classId = allFormData.program?.class_id;
@@ -73,6 +75,31 @@ const FormButtonSection = ({
           isNisnRequired = false;
         }
       }
+    }
+
+    let isPreviousSchoolRequired = true;
+    
+
+    if (sharedData && sectionId && classId) {
+      const selectedSection = sharedData.sections?.find(
+        (s) => s.section_id === sectionId
+      );
+      const selectedClass = sharedData.classes?.find(
+        (c) => c.class_id === classId
+      );
+
+      if (selectedSection && selectedClass) {
+        if (selectedSection.name === "ECP" && selectedClass.grade === "N") {
+          isPreviousSchoolRequired = false;
+        }
+      }
+    }
+
+    if (
+      isPreviousSchoolRequired &&
+      !String(studentInfo.previous_school || "").trim()
+    ) {
+      errors.studentInfo = { ...errors.studentInfo, previous_school: true };
     }
 
     const nisnAsString = String(studentInfo.nisn || "").trim();

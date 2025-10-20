@@ -1,8 +1,15 @@
+.logbookPage {
+  background-color: var(--main-background);
 
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+}
 
 .logbookContainer {
-  background-color: var(--main-background);
-  border-radius: 8px;
+  background-color: var(--secondary-background);
+  padding: 48px 32px;
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -31,15 +38,15 @@
 .btnChipDanger,
 .btnChipPrimary {
   border-radius: 35px;
-  padding: 8px 16px !important; /* !important untuk override padding default Button */
+  padding: 8px 16px !important;
   font-size: 14px;
   font-weight: 600;
-  border: none !important; /* !important untuk override border default Button */
+  border: none !important; 
   cursor: pointer;
 }
 
 .btnChipDanger {
-  background-color: #ffd3d3; /* Disarankan menambah variabel --red-background */
+  background-color: #ffd3d3;
   color: var(--red);
 }
 
@@ -76,7 +83,7 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--main-text);
-  white-space: nowrap; /* Mencegah teks turun baris */
+  white-space: nowrap;
 }
 
 .logbookTable tbody tr:last-child td {
@@ -91,7 +98,7 @@
 }
 
 .studentPhoto {
-  width: 40px; /* Disesuaikan agar tidak terlalu besar */
+  width: 40px; 
   height: 54px;
   object-fit: cover;
   border-radius: 4px;
