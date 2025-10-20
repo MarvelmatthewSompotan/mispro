@@ -45,7 +45,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar'])->group(f
     Route::get('/context/{draft_id}', [RegistrationController::class, 'getRegistrationContext']);
     Route::post('/store/{draft_id}', [RegistrationController::class, 'store']);
     Route::get('/preview/{applicationId}/version/{versionId}', [RegistrationController::class, 'showPreview']);
-    Route::patch('/{id}/status', [RegistrationController::class, 'updateStatus']);
+    Route::patch('/{application_id}/status', [RegistrationController::class, 'updateStatus']);
   });
 });
 

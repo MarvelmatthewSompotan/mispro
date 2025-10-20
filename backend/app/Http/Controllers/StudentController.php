@@ -108,7 +108,7 @@ class StudentController extends Controller
 
         $sortable = [
             'student_id' => 'students.student_id',
-            'full_name' => "CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)", // DIUBAH MENJADI STRING
+            'full_name' => "CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)",
             'grade' => 'classes.grade',
             'section' => 'sections.name',
             'enrollment_status' => 'enrollments.status',
@@ -127,7 +127,7 @@ class StudentController extends Controller
                 if ($field === 'full_name') {
                     $query->orderByRaw($sortable[$field] . ' ' . $order);
                 } else {
-                    $query->orderBy($sortable[$field], $order);
+                    $query->orderBy($sortable[$field] . ' ' . $order);
                 }
             }
         }
