@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserManagementController;
@@ -16,6 +17,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
     Route::get('/audit-logs/{id}', [AuditLogController::class, 'show']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin, registrar, head registrar, teacher'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
