@@ -1,0 +1,61 @@
+.tableRow {
+    display: grid;
+    grid-template-columns: 150px 2fr 3fr 150px 120px;
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--secondary-accent); 
+    
+    background-color: var(--secondary-background);
+    color: var(--main-text);
+    font-family: var(--font-primary);
+    font-weight: var(--font-weight-regular);
+    min-height: 56px; 
+}
+
+.tableRow:last-child {
+    border-bottom: none; 
+}
+
+.tableCell {
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px; 
+}
+
+.actionCell {
+    padding: 16px 24px; 
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+}
+
+.actionContainer {
+    display: flex;
+    gap: 12px;
+}
+
+.actionButton {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.actionButton:hover {
+    background-color: var(--secondary-accent);
+}
+
+.icon {
+    width: 25px; 
+    height: 25px;
+    transition: color 0.2s;
+}

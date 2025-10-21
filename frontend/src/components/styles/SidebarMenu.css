@@ -46,6 +46,11 @@
   font-weight: 600;
 }
 
+/* Tambahkan styling untuk icon saat active */
+.sidebar-menu-item.active .sidebar-menu-icon {
+  filter: brightness(0) invert(1);
+}
+
 .sidebar-menu-item:hover {
   background: var(--secondary-accent);
 }

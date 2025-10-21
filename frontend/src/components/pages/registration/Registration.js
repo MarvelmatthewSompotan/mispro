@@ -8,6 +8,7 @@ import Pagination from "../../atoms/Pagination";
 import StatusConfirmationPopup from "./PopUpRegis/StatusConfirmationPopup";
 import styles from "./Registration.module.css";
 import searchIcon from "../../../assets/Search-icon.png";
+import copyIcon from "../../../assets/Copy_icon.png";
 import {
   getRegistrations,
   getRegistrationOptions,
@@ -234,24 +235,43 @@ const Registration = () => {
 
   return (
     <div>
-      {/* Top Bar */}
-      <div className={styles.topBar}>
-        <Button onClick={handleNewForm} variant="solid">
-          New Form
-        </Button>
+    <div className={styles.frameParent}>
+      {/* Kolom Kiri: Judul dan Search Bar */}
+      <div>
+        <div className={styles.title}>Registration</div>
+      
+        <div className={styles.searchBar}>
+          <input
+            type="text"
+            placeholder="Find name or registration id"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className={styles.searchInput}
+          />
+          <img src={searchIcon} alt="Search" className={styles.searchIconImg} style={{ right: '12px' }}/>
+        </div>
       </div>
 
-      {/* Search Bar */}
-      <div className={styles.searchBar}>
-        <input
-          type="text"
-          placeholder="Find name or student id"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className={styles.searchInput}
-        />
-        <img src={searchIcon} alt="Search" className={styles.searchIconImg} />
+      {/* Kolom Kanan: New Form dan Ikon/Angka */}
+      <div>
+        {/*New Form */}
+        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleNewForm} variant="solid">
+              New Form
+            </Button>
+        </div>
+        
+        {/* Ikon File dan Angka Total Data */}
+        <div className={styles.ufileAltParent} title="Total Registrations">
+          <img src={copyIcon} alt="Total Registrations" style={{ width: '16px', height: '20px' }} /> 
+          
+          {/* Angka Total Data (mengambil dari totalRecords) */}
+          <div className={styles.div}>
+            {loading ? "..." : totalRecords}
+          </div>
+        </div>
       </div>
+    </div>
 
       {/* Filters */}
       <div className={styles.filtersSection}>

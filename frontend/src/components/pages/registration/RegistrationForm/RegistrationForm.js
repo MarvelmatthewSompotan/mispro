@@ -364,6 +364,7 @@ const RegistrationForm = () => {
         </div>
         <div id="studentInfo">
           <StudentInformationSection
+            key={resetKey}
             prefill={formSections.studentInfo || {}}
             onValidationChange={handleStudentInfoValidationChange}
             onDataChange={handleStudentInfoDataChange}
@@ -394,6 +395,7 @@ const RegistrationForm = () => {
         </div>
         <div id="parentGuardian">
           <ParentGuardianSection
+            key={resetKey}
             formData={formSections.parentGuardian || {}}
             onDataChange={handleParentGuardianDataChange}
             errors={errors.parentGuardian || {}}

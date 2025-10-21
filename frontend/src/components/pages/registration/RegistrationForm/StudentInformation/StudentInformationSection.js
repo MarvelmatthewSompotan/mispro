@@ -96,67 +96,47 @@ const StudentInformationSection = ({
       });
   }, []);
 
-  useEffect(() => {
-    if (prefill && Object.keys(prefill).length > 0) {
-      if (prefill.first_name) setFirstName(prefill.first_name);
-      if (prefill.middle_name) setMiddleName(prefill.middle_name);
-      if (prefill.last_name) setLastName(prefill.last_name);
-      if (prefill.nickname) setNickname(prefill.nickname);
-      if (prefill.nisn) setNisn(prefill.nisn);
-      if (prefill.nik) setNik(prefill.nik);
-      if (prefill.kitas) setKitas(prefill.kitas);
-      if (prefill.country) setForeignCountry(prefill.country);
-      if (prefill.gender) setGender(prefill.gender);
-      if (prefill.family_rank) setRank(prefill.family_rank);
-      if (prefill.citizenship) setCitizenship(prefill.citizenship);
-      if (prefill.religion) setReligion(prefill.religion);
-      if (prefill.place_of_birth) setPlaceOfBirth(prefill.place_of_birth);
-      if (prefill.date_of_birth) setDateOfBirth(prefill.date_of_birth);
-      if (prefill.email) setEmail(prefill.email);
-      if (prefill.previous_school) setPreviousSchool(prefill.previous_school);
-      if (prefill.phone_number) setPhone(prefill.phone_number);
-      if (prefill.academic_status) setAcademicStatus(prefill.academic_status);
-      if (prefill.academic_status_other)
-        setAcademicStatusOther(prefill.academic_status_other);
-      if (prefill.street) setStreet(prefill.street);
-      if (prefill.rt) setRt(prefill.rt);
-      if (prefill.rw) setRw(prefill.rw);
-      if (prefill.village) setVillage(prefill.village);
-      if (prefill.district) setDistrict(prefill.district);
-      if (prefill.city_regency) setCity(prefill.city_regency);
-      if (prefill.province) setProvince(prefill.province);
-      if (prefill.other) setOtherAddress(prefill.other);
-    } else if (Object.keys(prefill).length === 0) {
-      setFirstName("");
-      setMiddleName("");
-      setLastName("");
-      setNickname("");
-      setNisn("");
-      setNik("");
-      setKitas("");
-      setForeignCountry("");
-      setGender("");
-      setAge("");
-      setRank("");
-      setCitizenship("");
-      setReligion("");
-      setPlaceOfBirth("");
-      setDateOfBirth("");
-      setEmail("");
-      setPreviousSchool("");
-      setPhone("");
-      setAcademicStatus("");
-      setAcademicStatusOther("");
-      setStreet("");
-      setRt("");
-      setRw("");
-      setVillage("");
-      setDistrict("");
-      setCity("");
-      setProvince("");
-      setOtherAddress("");
-    }
-  }, [prefill]);
+useEffect(() => {
+  if (prefill && Object.keys(prefill).length > 0) {
+    // ... logic prefill
+  } else if (Object.keys(prefill).length === 0) {
+    // ... logic reset (yang memicu loop)
+  }
+}, [prefill]);
+
+useEffect(() => {
+  // Hanya lakukan aksi jika prefill berubah
+  if (prefill && Object.keys(prefill).length > 0) {
+    // Jika ada data prefill, isi state lokal
+    setFirstName(prefill.first_name || "");
+    setMiddleName(prefill.middle_name || "");
+    setLastName(prefill.last_name || "");
+    setNickname(prefill.nickname || "");
+    setNisn(prefill.nisn || "");
+    setNik(prefill.nik || "");
+    setKitas(prefill.kitas || "");
+    setForeignCountry(prefill.country || "");
+    setGender(prefill.gender || "");
+    setRank(prefill.family_rank || "");
+    setCitizenship(prefill.citizenship || "");
+    setReligion(prefill.religion || "");
+    setPlaceOfBirth(prefill.place_of_birth || "");
+    setDateOfBirth(prefill.date_of_birth || "");
+    setEmail(prefill.email || "");
+    setPreviousSchool(prefill.previous_school || "");
+    setPhone(prefill.phone_number || "");
+    setAcademicStatus(prefill.academic_status || "");
+    setAcademicStatusOther(prefill.academic_status_other || "");
+    setStreet(prefill.street || "");
+    setRt(prefill.rt || "0"); // Default ke "0"
+    setRw(prefill.rw || "0"); // Default ke "0"
+    setVillage(prefill.village || "");
+    setDistrict(prefill.district || "");
+    setCity(prefill.city_regency || "");
+    setProvince(prefill.province || "");
+    setOtherAddress(prefill.other || "");
+  }
+}, [prefill]);
 
   useEffect(() => {
     if (errors) {
