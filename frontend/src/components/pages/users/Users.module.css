@@ -1,68 +1,58 @@
 .usersContainer {
     padding: 20px;
+    background-color: var(--secondary-background);
+    min-height: 100vh;
+    font-family: var(--font-primary); 
 }
 
-/* Style untuk h2 Users */
 .pageTitle {
     margin: 0;
     font-size: 24px;
-    color: var(--main-text);
+    color: var(--main-text); 
 }
 
-/* STYLE BARU/MODIFIKASI UNTUK MEMPOSISIKAN SEARCH DAN BUTTON */
-/* ---------------------------------------------------------------------- */
-
-/* Kontainer yang membungkus Search Bar dan Button, menggunakan Flexbox */
 .usersHeaderContent {
     display: flex;
-    /* Mendorong Search Bar ke kiri dan Button ke kanan */
     justify-content: space-between; 
-    align-items: center; /* Menyelaraskan vertikal di tengah */
-    margin-top: 20px; /* Jarak dari judul Users */
-    width: 100%; /* Memastikan kontainer mengambil lebar penuh */
+    align-items: center; 
+    margin-top: 20px; 
+    width: 100%; 
 }
 
-/* Update existing button2Parent style */
-/* Menghilangkan margin-top karena sekarang diatur oleh .usersHeaderContent */
 .button2Parent {
     display: flex;
-    justify-content: flex-end; /* Memastikan Button tetap di kanan jika ada ruang */
-    /* margin-top: 20px; <--- DIHAPUS */
+    justify-content: flex-end; 
 }
 
-/* ---------------------------------------------------------------------- */
-/* STYLE SEARCH BAR (TIDAK DIUBAH, HANYA DIPASTIKAN URUTANNYA BENAR) */
-/* ---------------------------------------------------------------------- */
-
-/* Search Bar Styles - copied from Registration.module.css */
 .searchBar {
     display: flex;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 24px;    
     margin-top: 20px;
-    padding-bottom: 5px;
+    padding: 8px 15px;
     position: relative;
     width: 426px;
-    border: 2px solid #7a7a7a;
+    border: 2px solid var(--main-grey); 
     border-radius: 5px; 
 }
 
 .searchInput {
     flex: 1;
-    padding: 8px 0px 0px 15px;
     margin-right: 0;
     box-sizing: border-box;
     border: none;
     outline: none;
     background: transparent;
+    padding-right: 30px;
+    font-family: var(--font-primary); 
 }
 
 .searchInput::placeholder {
-    color: #5f84fe;
     opacity: 0.8;
     font-size: 15px;
-    font-family: "Poppins", sans-serif;
-    font-weight: Regular;
+    font-family: var(--font-primary); 
+    font-weight: var(--font-weight-regular);
+    color: var(--main-grey); 
 }
 
 .searchIconImg {
@@ -74,3 +64,33 @@
     height: 20px;
     pointer-events: none;
 }
+
+.tableContainer {
+    width: 100%;
+    box-sizing: border-box;
+    border-right: 1px solid var(--main-grey);
+    border-left: 1px solid var(--main-grey);
+    border-top: 1px solid var(--main-grey);
+    background-color: var(--secondary-background);
+    font-family: var(--font-primary);
+    margin-top: 20px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tableLayout {
+    display: grid;
+    grid-template-columns: 150px 2fr 3fr 150px 120px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.tableHeader {
+    composes: tableLayout; 
+    border-bottom: 4px solid var(--main-grey); 
+}
+
+.tableBody {
+    display: flex;
+    flex-direction: column;
+}
+
