@@ -15,37 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
         User::firstOrCreate(
-            ['email' => 'admin@gmail.com'],
+            ['email' => env('ADMIN_EMAIL')],
             [
-                'name' => 'Admin',
-                'password' => Hash::make('admin123'),
+                'username' => env('ADMIN_USERNAME'),
+                'password' => Hash::make(env('ADMIN_PASSWORD')),
                 'role' => 'admin',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'registrar@gmail.com'],
-            [
-                'name' => 'Registrar',
-                'password' => Hash::make('registrar123'),
-                'role' => 'registrar',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'user@gmail.com'],
-            [
-                'name' => 'user',
-                'password' => Hash::make('user123'),
-                'role' => 'user',
             ]
         );
 

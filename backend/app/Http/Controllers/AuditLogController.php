@@ -9,7 +9,7 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
-        $logs = AuditLog::with('user:id,name,email')
+        $logs = AuditLog::with('user:id,username,email')
             ->when($request->action, fn($q) => $q->where('action', $request->action))
             ->when($request->user_id, fn($q) => $q->where('user_id', $request->user_id))
             ->latest()
@@ -20,7 +20,7 @@ class AuditLogController extends Controller
 
     public function show($id)
     {
-        $log = AuditLog::with('user:id,name,email')->findOrFail($id);
+        $log = AuditLog::with('user:id,username,email')->findOrFail($id);
 
         return response()->json($log);
     }

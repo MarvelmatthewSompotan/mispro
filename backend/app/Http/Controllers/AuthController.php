@@ -20,7 +20,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
+            'email' => [
+                'required',
+                'email',
+                'regex:/^[A-Za-z0-9._%+-]+@mis-mdo\.sch\.id$/',
+            ],
             'password' => 'required',
         ]);
 
@@ -66,7 +70,7 @@ class AuthController extends Controller
             'token'   => $token,
             'user'    => [
                 'user_id' => $user->user_id,
-                'name'    => $user->name,
+                'username'    => $user->username,
                 'email'   => $user->email,
                 'role'    => $user->role
             ]

@@ -1141,7 +1141,7 @@ class RegistrationController extends Controller
             ->max('version');
         
         $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
-        $userName = auth()->user()->name ?? 'system';
+        $userName = auth()->user()->username ?? 'system';
 
         return ApplicationFormVersion::create([
             'application_id' => $applicationForm->application_id,

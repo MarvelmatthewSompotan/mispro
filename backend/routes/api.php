@@ -9,12 +9,20 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\UserManagementController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
     Route::get('/audit-logs/{id}', [AuditLogController::class, 'show']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::get('/users', [UserManagementController::class, 'index']);
+    Route::post('/users', [UserManagementController::class, 'store']);
+    Route::patch('/users/{user_id}', [UserManagementController::class, 'update']);
+    Route::delete('/users/{user_id}', [UserManagementController::class, 'destroy']);
 });
 
 Route::middleware('auth:sanctum', 'lifetime')->group(function() {

@@ -20,7 +20,7 @@ class RoleMiddleware
         if (!$user || !in_array($user->role, $roles)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized. Access only for roles: ' . implode(', ', $roles),
             ], 403);
         }
         

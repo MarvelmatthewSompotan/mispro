@@ -704,7 +704,7 @@ class StudentController extends Controller
             $maxVersion = ApplicationFormVersion::where('application_id', $applicationId)->max('version');
             $nextVersion = $maxVersion ? $maxVersion + 1 : 1;
             
-            $userName = auth()->user()->name ?? 'system';
+            $userName = auth()->user()->username ?? 'system';
 
             $newVersion = ApplicationFormVersion::create([
                 'application_id' => $latestVersion->application_id,
