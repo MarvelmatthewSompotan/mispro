@@ -12,7 +12,10 @@ class User extends Authenticatable
     use HasApiTokens;
     
     protected $primaryKey = 'user_id';
-    public $timestamps = false;
+    public $timestamps = true;
+
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
 
     protected $fillable = [
         'user_id',
@@ -20,8 +23,6 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'created_at',
-        'updated_at',
     ];
 
     protected $hidden = [
