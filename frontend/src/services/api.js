@@ -161,29 +161,38 @@ export const getRegistrationPreview = (applicationId, versionId) => {
   );
 };
 
-export const getStudents = ({
-  search = "",
-  school_year_id,
-  semester_id,
-  section_id,
-  // TAMBAH PARAMETER PAGINASI BARU
-  page = 1, 
-  per_page = 10,
-} = {}) => {
+export const getStudents = (filters = {}) => {
   const params = new URLSearchParams();
-  if (search) params.append("search", search);
-  if (school_year_id) params.append("school_year_id", school_year_id);
-  if (semester_id) params.append("semester_id", semester_id);
-  
-  // TAMBAH PARAMETER PAGINASI KE URL
-  params.append("page", page);
-  params.append("per_page", per_page);
 
-  if (Array.isArray(section_id)) {
-    section_id.forEach((id) => params.append("section_id[]", id));
-  } else if (section_id) {
-    params.append("section_id", section_id);
+  // --- Parameter Wajib (Paginasi) ---
+  params.append("page", filters.page || 1);
+  params.append("per_page", filters.per_page || 25);
+
+  // --- Parameter Filter Opsional ---
+  if (filters.search_name) {
+    params.append("search_name", filters.search_name);
   }
+  if (filters.school_year_id) {
+    params.append("school_year_id", filters.school_year_id);
+  }
+
+  // Filter Array (contoh: class_id[]=1&class_id[]=2)
+  filters.class_id?.forEach((id) => params.append("class_id[]", id));
+  filters.section_id?.forEach((id) => params.append("section_id[]", id));
+  filters.enrollment_status?.forEach((status) =>
+    params.append("enrollment_status[]", status)
+  );
+  filters.student_status?.forEach((status) =>
+    params.append("student_status[]", status)
+  );
+
+  // --- Parameter Sort Opsional ---
+  // (contoh: sort[0][field]=grade&sort[0][order]=asc)
+  filters.sort?.forEach((s, index) => {
+    params.append(`sort[${index}][field]`, s.field);
+    params.append(`sort[${index}][order]`, s.order);
+  });
+
   // Diasumsikan API endpoint untuk student list adalah /students
   return apiFetch(`/students?${params.toString()}`);
 };

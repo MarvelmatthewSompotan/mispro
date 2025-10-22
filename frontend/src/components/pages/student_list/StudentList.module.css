@@ -2,38 +2,45 @@
   flex: 1;
   padding: 32px;
   margin: 0 auto;
-  background: #fafbff;
-  font-family: "Poppins", Arial, sans-serif; /* Menambahkan font-family agar konsisten */
+  background: #ffffff;
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+.pageTitle {
+  font-size: 32px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 24px;
 }
 
 /* --- Search Bar --- */
 .searchContainer {
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 5px;
+  justify-content: center;
+  margin-bottom: 32px;
   position: relative;
-  width: 500px;
-  border: 2px solid #5f84fe;
+  width: 426px;
+  border: 2px solid #7a7a7a;
   border-radius: 5px;
+  background-color: #fff;
 }
 
 .searchInput {
   flex: 1;
-  padding: 8px 0px 0px 15px;
-  margin-right: 0;
+  padding: 12px 18px;
   box-sizing: border-box;
-  /* Menambahkan properti dasar agar input terlihat */
   border: none;
   outline: none;
   background: transparent;
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .searchInput::placeholder {
-  color: #5f84fe;
-  opacity: 0.8;
-  font-size: 15px;
+  color: #7a7a7a;
+  opacity: 1;
+  font-size: 14px;
 }
 
 .searchIcon {
@@ -44,126 +51,105 @@
   width: 20px;
   height: 20px;
   pointer-events: none;
+  opacity: 0.7;
 }
 
-/* --- Filters Section --- */
-.filterContainer {
-  margin-bottom: 16px;
-}
-
-.filterTitle {
-  font-weight: 700;
-  font-size: 22px;
-  margin-bottom: 8px;
-}
-
-.filterControls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.checkboxLabel {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.checkboxLabel input[type="checkbox"] {
-  opacity: 0;
-  width: 22px;
-  height: 22px;
-  margin-right: 4px;
-  position: absolute; /* Mengubah ke absolute agar tidak menggeser teks */
-  z-index: 2;
-  cursor: pointer;
-}
-
-.customCheckbox {
-  width: 22px;
-  height: 22px;
-  border: 2px solid #5f84fe;
-  border-radius: 4px;
-  display: inline-block;
-  background: #fff;
-  box-sizing: border-box;
-  margin-right: 8px;
-}
-
-.checkboxLabel input[type="checkbox"]:checked + .customCheckbox {
-  background: #5f84fe;
-  border-color: #5f84fe;
-}
-
-.checkboxLabel input[type="checkbox"]:checked + .customCheckbox::after {
-  content: "";
-  display: block;
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 6px;
-  height: 12px;
-  border: solid #fff;
-  border-width: 0 3px 3px 0;
-  transform: rotate(45deg);
-}
-
-.filterSelect {
-  padding: 5px 5px;
-  border-radius: 6px;
-  border: 1px solid #b6c6fa;
-  font-size: 15px;
-  width: 180px;
-}
-
-/* --- Results Count & Table --- */
-.resultsCount {
-  color: #b6c6fa;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
+/* --- Table Structure --- */
 .tableContainer {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px #0001;
-  overflow: hidden;
-}
-
-.studentTable {
+  border: 1px solid #7a7a7a;
+  overflow-x: auto;
   width: 100%;
-  border-collapse: collapse;
 }
 
-.tableHeaderRow {
-  background: #fafbff;
-  border-bottom: 2px solid #b6c6fa;
+.tableHeaderGrid,
+.studentDataRow {
+  display: grid;
+  grid-template-columns:
+    minmax(107.97px, 1fr)
+    minmax(132px, 1fr)
+    minmax(196px, 1fr)
+    minmax(104.51px, 1fr)
+    minmax(104.51px, 1fr)
+    minmax(144px, 1fr)
+    minmax(137px, 1fr)
+    minmax(178px, 1fr);
 }
 
-.tableHeader {
-  padding: 16px 12px;
-  text-align: left;
-  font-weight: 700;
-}
-
-.tableRow {
-  border-bottom: 1px solid #eee;
+.studentDataRow {
+  box-sizing: border-box;
+  border-top: 1px solid #7a7a7a;
+  min-height: 100px;
+  cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.tableRow:hover {
-  background-color: #a0b6ff; /* Mengganti warna hover agar lebih soft */
+.studentDataRow:hover {
+  background-color: #fafbff;
+}
+
+.tableHeaderGrid > * {
+  min-width: 0;
+}
+
+.tableBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.messageCell {
+  padding: 48px 24px;
+  text-align: center;
+  color: #7a7a7a;
+  font-size: 16px;
+  border-top: 1px solid #7a7a7a;
 }
 
 .tableCell {
-  padding: 16px 12px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
 }
 
-.tableCellName {
-  padding: 16px 12px;
-  font-weight: 700;
+.photo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.statusText {
+  position: relative;
+  line-height: 100%;
+  font-weight: 600;
+}
+
+.active {
+  border-radius: 6px;
+  background-color: #00f413;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  color: #fff;
+}
+
+.status {
+  border-radius: 6px;
+  background-color: #7a7a7a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  color: #fff;
+}
+
+.studentDataRow > .tableCell {
+  justify-content: flex-start;
 }
