@@ -42,7 +42,7 @@ class UserManagementController extends Controller
                     'regex:/^[A-Za-z0-9._%+-]+@mis-mdo\.sch\.id$/'
                 ],
                 'password' => 'required|min:8',
-                'role' => ['required', Rule::in(['admin', 'head registrar', 'registrar', 'teacher'])],
+                'role' => ['required', Rule::in(['admin', 'head_registrar', 'registrar', 'teacher'])],
             ]);
 
             $user = User::create([
@@ -80,7 +80,7 @@ class UserManagementController extends Controller
                     'regex:/^[A-Za-z0-9._%+-]+@mis-mdo\.sch\.id$/'
                 ],
                 'password' => 'nullable|min:8',
-                'role' => ['sometimes', Rule::in(['admin', 'head registrar', 'registrar', 'teacher'])],
+                'role' => ['sometimes', Rule::in(['admin', 'head_registrar', 'registrar', 'teacher'])],
             ]);
 
             if (!empty($validated['password'])) {
