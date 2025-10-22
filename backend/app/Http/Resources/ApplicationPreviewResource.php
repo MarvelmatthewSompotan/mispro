@@ -25,7 +25,7 @@ class ApplicationPreviewResource extends JsonResource
             'submitted_at' => $this->submitted_at,
             'student' => [
                 'student_id' => $student->student_id,
-                'student_status' => $student->student_status,
+                'student_status' => $enrollment->student_status,
                 'first_name' => $student->first_name,
                 'middle_name' => $student->middle_name,
                 'last_name' => $student->last_name,

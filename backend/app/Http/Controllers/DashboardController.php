@@ -22,11 +22,11 @@ class DashboardController extends Controller
             $todayRegistrations = ApplicationForm::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
 
             $newStudentsToday = ApplicationForm::whereBetween('created_at', [$startOfDay, $endOfDay])
-                ->whereHas('enrollment.student', fn($q) => $q->where('student_status', 'New'))
+                ->whereHas('enrollment', fn($q) => $q->where('student_status', 'New'))
                 ->count();
 
             $returningStudentsToday = ApplicationForm::whereBetween('created_at', [$startOfDay, $endOfDay])
-                ->whereHas('enrollment.student', fn($q) => $q->where('student_status', 'Old'))
+                ->whereHas('enrollment', fn($q) => $q->where('student_status', 'Old'))
                 ->count();
             
             $latestRegistrations = ApplicationForm::with(['enrollment.student', 'enrollment.schoolClass', 'enrollment.section', 'enrollment.schoolYear'])
