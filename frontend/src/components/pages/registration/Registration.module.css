@@ -1,39 +1,68 @@
-.topBar {
+/* --- Style Utama (Tidak Berubah) --- */
+.registrationContainer {
+  padding: 20px;
+  background-color: var(--secondary-background);
+  min-height: 100vh;
+  font-family: var(--font-primary);
+}
+
+.frameParent {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
   display: flex;
-  justify-content: flex-end;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  text-align: left;
+  font-size: 32px;
+  color: #000;
+  font-family: Poppins;
+  margin-bottom: 32px;
+}
+
+.title {
+  position: relative;
+  line-height: 100%;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: 34px;
+}
+
+.ufileAltParent {
+  display: flex;
   align-items: center;
-  margin-bottom: 24px;
+  justify-content: center;
+  gap: 6px;
+  font-size: 24px;
+  color: var(--main-accent);
+  cursor: pointer;
 }
 
-.newFormBtn {
-  margin-right: 16px;
-  font-family: "Poppins", sans-serif;
-  font-weight: Regular;
-}
-
-.printBtn {
-  background: #7bfa7b !important;
-  color: #fff !important;
+.div {
+  position: relative;
+  font-weight: 600;
+  font-size: 16px;
+  font-family: var(--font-primary);
 }
 
 .searchBar {
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
   margin-top: 20px;
-  padding-bottom: 5px;
   position: relative;
-
   width: 426px;
   border: 2px solid #7a7a7a;
-  border-radius: 5px; 
+  border-radius: 5px;
 }
 
 .searchInput {
   flex: 1;
-  padding: 8px 0px 0px 15px;
-  margin-right: 0;
+  padding: 8px 15px;
   box-sizing: border-box;
+  border: none;
+  background: transparent;
+  outline: none;
 }
 
 .searchInput::placeholder {
@@ -41,7 +70,6 @@
   opacity: 0.8;
   font-size: 15px;
   font-family: "Poppins", sans-serif;
-  font-weight: Regular;
 }
 
 .searchIconImg {
@@ -54,220 +82,109 @@
   pointer-events: none;
 }
 
-.searchIcon {
-  font-size: 22px;
-  margin-right: 8px;
-}
 
-.filtersSection {
-  margin-bottom: 16px;
-}
-
-.filtersTitle {
-  font-weight: 700;
-  font-size: 22px;
-  margin-bottom: 8px;
-}
-
-.filtersRow {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.filterCheckboxLabel {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.filterCheckboxLabel input[type="checkbox"] {
-  opacity: 0;
-  width: 22px;
-  height: 22px;
-  margin-right: 4px;
-  position: relative;
-  z-index: 2;
-  cursor: pointer;
-}
-
-.customCheckbox {
-  width: 22px;
-  height: 22px;
-  border: 2px solid #5f84fe;
-  border-radius: 4px;
-  display: inline-block;
-  position: relative;
+/* --- STRUKTUR GRID BARU (Menggantikan .tableWrapper & .registrationTable) --- */
+.tableContainer {
   background: #fff;
-  box-sizing: border-box;
-  margin-right: 8px;
-}
-
-input[type="checkbox"]:checked + .customCheckbox {
-  background: #5f84fe;
-  border-color: #5f84fe;
-}
-
-input[type="checkbox"]:checked + .customCheckbox::after {
-  content: "";
-  display: block;
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 6px;
-  height: 12px;
-  border: solid #fff;
-  border-width: 0 3px 3px 0;
-  transform: rotate(45deg);
-}
-
-.yearSelect,
-.semesterSelect {
-  padding: 2px 0px;
-  border-radius: 6px;
-  border: 1px solid #b6c6fa;
-  font-size: 15px;
-  width: 180px;
-}
-
-.seeAllForms {
-  color: #7b7bfa;
-  margin-left: 8px;
-  font-weight: 500;
-  text-decoration: underline;
-  background-color: transparent;
-  border-color: transparent;
-}
-
-.resultsInfo {
-  color: #b6c6fa;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.tableWrapper {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px #0001;
-  overflow: hidden;
-}
-
-.registrationTable {
+  border: 1px solid var(--main-grey);
+  overflow-x: auto; /* Untuk responsivitas jika layar terlalu kecil */
   width: 100%;
-  border-collapse: collapse;
 }
 
-.tableHeaderRow {
-  background: #fafbff;
-  border-bottom: 2px solid #b6c6fa;
+.tableHeaderGrid,
+.registrationDataRow {
+  display: grid;
+  
+  /* --- PERUBAHAN 2: Ganti 'px' menjadi 'minmax' dan 'fr' untuk fleksibilitas --- */
+  /* Kolom akan memiliki lebar minimum, tetapi bisa tumbuh secara proporsional */
+  grid-template-columns: 
+    minmax(185px, 1fr)  /* Registration Date */
+    minmax(206px, 1fr)  /* Registration ID */
+    minmax(196px, 1fr)  /* Student Name */
+    minmax(104px, 1fr)    /* Grade (paling kecil) */
+    minmax(206px, 1fr)  /* Section */
+    minmax(206px, 1fr); /* Status */
+
+  border-bottom: 4px solid var(--main-grey, #7a7a7a);
 }
 
-.tableHeaderCell {
-  padding: 16px 12px;
-  text-align: left;
-  font-weight: 700;
-}
-
-.tableRow {
-  border-bottom: 1px solid #eee;
+.registrationDataRow {
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--main-grey, #7a7a7a);
+  border-top: none; /* Hanya butuh border bawah per baris */
+  min-height: 60px; /* Sesuaikan tinggi baris data */
+  cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.tableRow:hover {
-  background-color: #a0b6ff;
+.registrationDataRow:hover {
+  background-color: #f7f7f7;
+}
+
+.registrationDataRow:last-child {
+  border-bottom: none;
+}
+
+
+
+.tableBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.messageCell {
+  padding: 48px 24px;
+  text-align: center;
+  color: #7a7a7a;
+  font-size: 16px;
+
 }
 
 .tableCell {
-  padding: 16px 12px;
-}
-
-.tableCellName {
-  padding: 16px 12px;
-  font-weight: 700;
-}
-
-.viewBtn {
-  background: #39fa39 !important;
-  color: #fff !important;
-  font-weight: 700;
-  padding: 6px 18px !important;
-  font-size: 16px !important;
-}
-
-.regStatus {
-  position: relative;
-  border-radius: 6px;
-  width: 100%;
+  padding: 16px 24px;
   display: flex;
+  align-items: center; /* Rata tengah vertikal */
+  justify-content: flex-start; /* Default rata kiri horizontal */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+
+}
+
+.tableCell:last-child {
+  border-right: none;
+}
+
+/* --- Style untuk Badge Status (Mengikuti Pola StudentList) --- */
+.statusText {
+  position: relative;
+  line-height: 100%;
+  font-weight: 600;
+  color: #fff;
+}
+
+.statusConfirmed,
+.statusCancelled {
+  border-radius: 6px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 6px 12px;
   box-sizing: border-box;
   cursor: pointer;
-  text-align: center; /* Sesuaikan agar teks di tengah */
+  text-align: center;
   font-size: 14px;
-  color: #fff;
   font-family: Poppins, sans-serif;
   border: none;
-  max-width: 120px; /* Batasi lebar agar tidak terlalu lebar di kolom */
 }
 
-/* Style untuk teks status di dalam button (sesuai permintaan .cancelled) */
-.statusText {
-  position: relative;
-  line-height: 100%;
-  font-weight: 600;
-}
-
-/* Status Confirmed (Hijau) */
 .statusConfirmed {
-  background-color: #04b34b; /* Hijau yang lebih cerah */
+  background-color: var(--green, #00C853);
 }
 
-/* Status Cancelled (Merah) */
 .statusCancelled {
-  background-color: #ee0808;
-}
-
-.frameParent {
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between; /* Untuk memisahkan judul/tombol kiri dan elemen kanan */
-  gap: 20px;
-  text-align: left;
-  font-size: 32px;
-  color: #000;
-  font-family: Poppins;
-  margin-bottom: 32px; /* Tambahkan margin bawah untuk pemisah */
-}
-
-.title {
-  position: relative;
-  line-height: 100%;
-  font-family: var(--font-primary);
-  font-weight: var(--font-weight-bold);
-}
-
-.ufileAltParent {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 24px;
-  color: var(--main-accent);
-  cursor: pointer; /* Agar bisa diklik, misal untuk print/export */
-}
-
-.div {
-  position: relative;
-  font-weight: 600;
-  font-size: 16px; /* Sesuaikan ukuran angka agar lebih kecil dari ikon */
-  font-family: var(--font-primary);
+  background-color: var(--red, #D32F2F);
 }
