@@ -1,20 +1,14 @@
-/* Menggunakan layout Vertikal dan variabel global */
 .columnController {
-    /* Hapus width: 100%; karena lebar diatur oleh grid di parent */
     position: relative;
     background-color: var(--secondary-background); 
     
     box-sizing: border-box;
-    /* PENYESUAIAN: Mengurangi padding vertikal (atas/bawah) menjadi 16px */
     padding: 16px 24px; 
-    
-    /* PENTING: Mengubah arah flex menjadi kolom (vertikal) */
     display: flex;
     flex-direction: column; 
     
-    align-items: flex-start; /* Sejajarkan konten ke kiri */
+    align-items: flex-start; 
     justify-content: center;
-    /* PENYESUAIAN: Mengurangi gap antara title dan action */
     gap: 8px; 
     
     text-align: left;
@@ -24,7 +18,6 @@
 }
 
 .columnName {
-    /* Agar judul mengambil lebar penuh */
     align-self: stretch; 
     display: flex;
     align-items: center;
@@ -34,23 +27,18 @@
     position: relative;
     line-height: var(--line-height-base);
     font-weight: var(--font-weight-bold);
-    /* Ukuran font tetap standar untuk header */
     font-size: 16px; 
 }
 
 .action {
     display: flex;
-    /* Arah ikon Sort dan Filter tetap horizontal */
     flex-direction: row; 
     align-items: center;
-    gap: 8px; /* Jarak antar ikon */
+    gap: 8px; 
     flex-shrink: 0; 
-    /* Tetapkan tinggi minimum agar sejajar dengan kolom aktif (misalnya 20px, tergantung ukuran ikon) */
     min-height: 24px; 
 }
 
-/* Style baru: Digunakan saat tidak ada ikon Sort/Filter yang aktif */
 .disabledAction {
-    /* Membuatnya tidak terlihat tetapi tetap mempertahankan ruang */
     visibility: hidden; 
 }

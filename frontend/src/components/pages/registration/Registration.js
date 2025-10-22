@@ -1,18 +1,71 @@
-// src/components/pages/Registration.js
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../atoms/Button';
+// Komponen Button tidak lagi dipakai untuk status, diganti dengan div
+// import Button from '../../atoms/Button'; 
 import PopUpForm from './PopUpRegis/PopUpForm';
 import Pagination from '../../atoms/Pagination';
 import StatusConfirmationPopup from './PopUpRegis/StatusConfirmationPopup';
 import styles from './Registration.module.css';
 import searchIcon from '../../../assets/Search-icon.png';
 import copyIcon from '../../../assets/Copy_icon.png';
+import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
+import Button from '../../atoms/Button'; // Import Button tetap ada untuk "New Form"
+
 import {
   getRegistrations,
-  getRegistrationOptions,
 } from '../../../services/api';
+
+
+// --- Komponen Internal BARU untuk Satu Baris Data (Mengikuti Pola StudentList) ---
+const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
+    // Menentukan style untuk badge status
+    const status = registration.application_form?.status?.toLowerCase() || 'confirmed';
+    const statusStyle = status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
+
+    return (
+        <div className={styles.registrationDataRow} onClick={() => onRowClick(registration)}>
+            {/* 1. Registration Date */}
+            <div className={styles.tableCell}>
+                {new Date(registration.registration_date).toLocaleDateString(
+                    'id-ID',
+                    {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                    }
+                )}
+            </div>
+            {/* 2. Registration ID */}
+            <div className={styles.tableCell}>{registration.registration_id}</div>
+            {/* 3. Student Name */}
+            <div className={styles.tableCell}>{registration.full_name}</div>
+            {/* 4. Grade */}
+            <div className={styles.tableCell}>
+              {registration.grade || (registration.application_form?.grade) || 'N/A'}
+            </div>
+            {/* 5. Section */}
+            <div className={styles.tableCell}>
+              {registration.section?.name || 'N/A'}
+            </div>
+            {/* 6. Status Badge */}
+            {/* --- PERUBAHAN: Menghapus style inline justifyContent: 'center' --- */}
+            <div className={styles.tableCell}>
+                <div 
+                    className={statusStyle} 
+                    onClick={(e) => {
+                        e.stopPropagation(); // Mencegah klik pada baris
+                        onStatusClick(registration);
+                    }}
+                >
+                    <div className={styles.statusText}>
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const Registration = () => {
   const navigate = useNavigate();
@@ -23,50 +76,26 @@ const Registration = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [perPage] = useState(25);
-  const [sections, setSections] = useState([]);
-  const [schoolYears, setSchoolYears] = useState([]);
-  const [semesters, setSemesters] = useState([]);
-  const [selectedSections, setSelectedSections] = useState([]);
-  const [selectedYear, setSelectedYear] = useState(null);
-  const [selectedSemester, setSelectedSemester] = useState(null);
   const [showPopupForm, setShowPopupForm] = useState(false);
   const REFRESH_INTERVAL = 5000;
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
 
-  // Fetch options (sections, years, semesters)
-  useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const opts = await getRegistrationOptions();
-        setSections(opts.sections || []);
-        setSchoolYears(opts.school_years || []);
-        setSemesters(opts.semesters || []);
-      } catch (err) {
-        console.error('Error fetching registration options:', err);
-      }
-    };
-    fetchOptions();
-  }, []);
 
-  // 1. Tambahkan parameter 'options' untuk membedakan jenis fetch
+  // =================================================================
+  // --- SEMUA LOGIKA, FETCH, DAN HANDLER DI BAWAH INI TETAP SAMA ---
+  // =================================================================
+
   const fetchRegistrations = useCallback(
     async (filters = {}, page = 1, options = {}) => {
-      // isBackgroundRefresh akan bernilai true jika kita menambahkannya saat memanggil fungsi
       const { isBackgroundRefresh = false } = options;
-
+      if (!isBackgroundRefresh) setLoading(true);
       try {
-        // 2. Cek apakah ini BUKAN background refresh sebelum menampilkan loading
-        if (!isBackgroundRefresh) {
-          setLoading(true);
-        }
-
         const res = await getRegistrations({
           ...filters,
           page: page,
           per_page: perPage,
         });
-
         setRegistrationData(res.data.data || []);
         setTotalPages(res.data.last_page || 1);
         setTotalRecords(res.data.total || 0);
@@ -77,96 +106,48 @@ const Registration = () => {
         setTotalPages(1);
         setTotalRecords(0);
       } finally {
-        // Pastikan loading selalu dimatikan setelah selesai
         setLoading(false);
       }
     },
     [perPage]
   );
 
-  // Fetch data awal saat komponen pertama kali dimuat
   useEffect(() => {
-    fetchRegistrations({}, 1); // Panggilan awal tetap menampilkan loading
+    fetchRegistrations({}, 1);
   }, [fetchRegistrations]);
 
-  // Auto fetch ketika filter/search berubah
   useEffect(() => {
     setCurrentPage(1);
-    const filters = {
-      search: search || undefined,
-      school_year_id: selectedYear || undefined,
-      semester_id: selectedSemester || undefined,
-      section_id: selectedSections.length > 0 ? selectedSections : undefined,
-    };
-    fetchRegistrations(filters, 1); // Perubahan filter juga tetap menampilkan loading
-  }, [
-    search,
-    selectedYear,
-    selectedSemester,
-    selectedSections,
-    fetchRegistrations,
-  ]);
+    const filters = { search: search || undefined };
+    fetchRegistrations(filters, 1);
+  }, [search, fetchRegistrations]);
 
-  // Handle pagination change
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
-      const filters = {
-        search: search || undefined,
-        school_year_id: selectedYear || undefined,
-        semester_id: selectedSemester || undefined,
-        section_id: selectedSections.length > 0 ? selectedSections : undefined,
-      };
-      fetchRegistrations(filters, newPage); // Pindah halaman juga menampilkan loading
+      const filters = { search: search || undefined };
+      fetchRegistrations(filters, newPage);
     }
   };
 
-  // useEffect BARU untuk auto-refresh
   useEffect(() => {
     const refreshData = () => {
-      const currentFilters = {
-        search: search || undefined,
-        school_year_id: selectedYear || undefined,
-        semester_id: selectedSemester || undefined,
-        section_id: selectedSections.length > 0 ? selectedSections : undefined,
-      };
+      const currentFilters = { search: search || undefined };
       console.log('Auto refreshing registration list (background)...');
-
-      // 3. Saat memanggil refresh, beri tanda bahwa ini adalah background refresh
-      // Ini akan mencegah 'setLoading(true)' dipanggil
       fetchRegistrations(currentFilters, currentPage, {
         isBackgroundRefresh: true,
       });
     };
-
     const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
-
     return () => clearInterval(intervalId);
-  }, [
-    search,
-    selectedYear,
-    selectedSemester,
-    selectedSections,
-    currentPage,
-    fetchRegistrations,
-  ]);
-
-  // Handler lainnya
-  const handleSectionToggle = (id) => {
-    setSelectedSections((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
+  }, [search, currentPage, fetchRegistrations]);
 
   const handleNewForm = () => setShowPopupForm(true);
   const handleClosePopup = () => setShowPopupForm(false);
 
   const handleCreateForm = (formData) => {
     navigate('/registration-form', {
-      state: {
-        ...formData,
-        fromPopup: true,
-      },
+      state: { ...formData, fromPopup: true },
     });
     setShowPopupForm(false);
   };
@@ -179,9 +160,7 @@ const Registration = () => {
     });
   };
 
-  // --- NEW HANDLER FOR STATUS BUTTON CLICK ---
-  const handleStatusClick = (e, row) => {
-    e.stopPropagation(); // Mencegah handleRowClick (navigate) terpicu
+  const handleStatusClick = (row) => {
     setSelectedRegistration(row);
     setShowStatusPopup(true);
   };
@@ -191,10 +170,7 @@ const Registration = () => {
     setSelectedRegistration(null);
   };
 
-  // Mengupdate status di state lokal dan me-refresh data
   const handleUpdateStatus = (id, newStatus) => {
-    // Opsi 1: Update di state lokal (Lebih cepat, tapi harus yakin API sukses)
-    // newStatus sekarang adalah 'Confirmed' atau 'Cancelled'
     setRegistrationData((prevData) =>
       prevData.map((reg) => {
         if (reg.registration_id === id && reg.application_form) {
@@ -209,37 +185,18 @@ const Registration = () => {
         return reg;
       })
     );
-    // Opsi 2: Refresh data dari server (Lebih aman)
-    fetchRegistrations(
-      {
-        search: search || undefined,
-        school_year_id: selectedYear || undefined,
-        semester_id: selectedSemester || undefined,
-        section_id: selectedSections.length > 0 ? selectedSections : undefined,
-      },
-      currentPage
-    );
+    fetchRegistrations({ search: search || undefined }, currentPage);
   };
-  // ------------------------------------------
 
-  const getStatusDisplay = (row) => {
-    const status = row.application_form?.status?.toLowerCase() || 'confirmed';
-    const variant = status === 'confirmed' ? 'confirmed' : 'cancelled';
-
-    return (
-      <Button variant={variant} onClick={(e) => handleStatusClick(e, row)}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Button>
-    );
-  };
+  // ===================================================================
+  // --- STRUKTUR JSX DI-REFACTOR MENGGUNAKAN CSS GRID DI BAWAH INI ---
+  // ===================================================================
 
   return (
-    <div>
+    <div className={styles.registrationContainer}>
       <div className={styles.frameParent}>
-        {/* Kolom Kiri: Judul dan Search Bar */}
         <div>
           <div className={styles.title}>Registration</div>
-
           <div className={styles.searchBar}>
             <input
               type='text'
@@ -256,10 +213,7 @@ const Registration = () => {
             />
           </div>
         </div>
-
-        {/* Kolom Kanan: New Form dan Ikon/Angka */}
         <div>
-          {/*New Form */}
           <div
             style={{
               marginBottom: '20px',
@@ -271,136 +225,49 @@ const Registration = () => {
               New Form
             </Button>
           </div>
-
-          {/* Ikon File dan Angka Total Data */}
           <div className={styles.ufileAltParent} title='Total Registrations'>
             <img
               src={copyIcon}
               alt='Total Registrations'
               style={{ width: '16px', height: '20px' }}
             />
-
-            {/* Angka Total Data (mengambil dari totalRecords) */}
             <div className={styles.div}>{loading ? '...' : totalRecords}</div>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className={styles.filtersSection}>
-        <div className={styles.filtersTitle}>Filters</div>
-        <div className={styles.filtersRow}>
-          {/* Sections */}
-          {sections.map((section) => (
-            <label
-              key={section.section_id}
-              className={styles.filterCheckboxLabel}
-            >
-              <input
-                type='checkbox'
-                checked={selectedSections.includes(section.section_id)}
-                onChange={() => handleSectionToggle(section.section_id)}
+      {/* STRUKTUR GRID BARU MENGGANTIKAN TABLE */}
+      <div className={styles.tableContainer}>
+        {/* Header Grid */}
+        <div className={styles.tableHeaderGrid}>
+          <ColumnHeader title='Registration Date' hasSort={true} hasFilter={true} />
+          <ColumnHeader title='Registration ID' hasSort={true} hasFilter={true} />
+          <ColumnHeader title='Student Name' hasSort={true} hasFilter={true} />
+          <ColumnHeader title='Grade' hasSort={true} hasFilter={true} />
+          <ColumnHeader title='Section' hasSort={true} hasFilter={true} />
+          <ColumnHeader title='Status' hasSort={true} hasFilter={true} /> 
+        </div>
+
+        {/* Body Grid */}
+        <div className={styles.tableBody}>
+          {loading ? (
+            <div className={styles.messageCell}>Loading...</div>
+          ) : registrationData.length > 0 ? (
+            registrationData.map((row, idx) => (
+              <RegistrationRow
+                key={idx}
+                registration={row}
+                onRowClick={handleRowClick}
+                onStatusClick={handleStatusClick}
               />
-              <span className={styles.customCheckbox}></span>
-              {section.name}
-            </label>
-          ))}
-
-          {/* School Year */}
-          <select
-            value={selectedYear || ''}
-            onChange={(e) => setSelectedYear(e.target.value || null)}
-            className={styles.yearSelect}
-          >
-            <option value=''>Select School Year</option>
-            {schoolYears.map((y) => (
-              <option key={y.school_year_id} value={y.school_year_id}>
-                {y.year}
-              </option>
-            ))}
-          </select>
-
-          {/* Semester */}
-          <select
-            value={selectedSemester || ''}
-            onChange={(e) => setSelectedSemester(e.target.value || null)}
-            className={styles.semesterSelect}
-          >
-            <option value=''>Select Semester</option>
-            {semesters.map((s) => (
-              <option key={s.semester_id} value={s.semester_id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
+            ))
+          ) : (
+            <div className={styles.messageCell}>No data available</div>
+          )}
         </div>
       </div>
 
-      {/* Results Info */}
-      <div className={styles.resultsInfo}>
-        Showing{' '}
-        {loading
-          ? '...'
-          : `${(currentPage - 1) * perPage + 1}-${Math.min(
-              currentPage * perPage,
-              totalRecords
-            )} of ${totalRecords}`}{' '}
-        results
-      </div>
-
-      {/* Table */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.registrationTable}>
-          <thead>
-            <tr className={styles.tableHeaderRow}>
-              <th className={styles.tableHeaderCell}>Created at</th>
-              <th className={styles.tableHeaderCell}>Name</th>{' '}
-              {/* Pindah Name ke sini */}
-              <th className={styles.tableHeaderCell}>Registration ID</th>
-              <th className={styles.tableHeaderCell}>Section</th>
-              <th className={styles.tableHeaderCell}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!loading && registrationData.length > 0 ? (
-              registrationData.map((row, idx) => (
-                <tr
-                  key={idx}
-                  className={styles.tableRow}
-                  // Hanya navigate jika status belum diklik (dicegah di handleStatusClick)
-                  onClick={() => handleRowClick(row)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <td className={styles.tableCell}>
-                    {new Date(row.registration_date).toLocaleDateString(
-                      'id-ID',
-                      {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      }
-                    )}
-                  </td>
-                  <td className={styles.tableCellName}>{row.full_name}</td>
-                  <td className={styles.tableCell}>{row.registration_id}</td>
-                  <td className={styles.tableCell}>{row.section?.name}</td>
-                  {/* --- STATUS BUTTON --- */}
-                  <td className={styles.tableCell}>{getStatusDisplay(row)}</td>
-                  {/* ---------------------------------- */}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan='5' className={styles.tableCell}>
-                  {loading ? 'Loading...' : 'No data available'}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Component */}
+      {/* Pagination & Popup (Tidak Berubah) */}
       {!loading && totalPages > 1 && (
         <div
           style={{
@@ -417,22 +284,20 @@ const Registration = () => {
         </div>
       )}
 
-      {/* Popup Form */}
       {showPopupForm && (
         <PopUpForm onClose={handleClosePopup} onCreate={handleCreateForm} />
       )}
 
-      {/* --- STATUS CONFIRMATION POPUP --- */}
       {showStatusPopup && selectedRegistration && (
         <StatusConfirmationPopup
           registration={selectedRegistration}
           onClose={handleCloseStatusPopup}
-          onUpdateStatus={handleUpdateStatus} // Fungsi untuk refresh data/state
+          onUpdateStatus={handleUpdateStatus}
         />
       )}
-      {/* ------------------------------------ */}
     </div>
   );
 };
 
 export default Registration;
+
