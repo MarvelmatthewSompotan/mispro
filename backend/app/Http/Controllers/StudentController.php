@@ -127,7 +127,7 @@ class StudentController extends Controller
                 if ($field === 'full_name') {
                     $query->orderByRaw($sortable[$field] . ' ' . $order);
                 } else {
-                    $query->orderBy($sortable[$field] . ' ' . $order);
+                    $query->orderBy($sortable[$field], $order);
                 }
             }
         }

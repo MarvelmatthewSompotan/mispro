@@ -58,7 +58,7 @@
 .tableContainer {
   background: #fff;
   border: 1px solid #7a7a7a;
-  overflow-x: auto;
+
   width: 100%;
 }
 
@@ -118,9 +118,8 @@
 }
 
 .photo {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  width: 60px;
+  height: 81px;
   object-fit: cover;
 }
 

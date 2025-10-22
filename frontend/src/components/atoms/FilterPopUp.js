@@ -1,7 +1,8 @@
+// FilterPopUp.js (Diperbarui)
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./FilterPopUp.module.css";
 
-// Hook kustom untuk mendeteksi klik di luar popup
+// Hook kustom (tidak berubah)
 function useClickOutside(ref, handler) {
   useEffect(() => {
     const listener = (event) => {
@@ -21,32 +22,39 @@ function useClickOutside(ref, handler) {
 
 const FilterPopup = ({
   options = [],
-  valueKey, // Kunci untuk 'value' (cth: 'class_id')
-  labelKey, // Kunci untuk 'label' (cth: 'grade')
-  onSubmit, // Fungsi dari ColumnHeader (handleFilterSubmit)
-  onClose, // Fungsi dari ColumnHeader (untuk menutup)
+  valueKey,
+  labelKey,
+  onSubmit,
+  onClose,
+  filterType = "checkbox", // <-- PROP BARU: defaultnya 'checkbox'
 }) => {
   const popupRef = useRef(null);
-  // State internal untuk melacak checkbox yang dicentang
+  // State untuk checkbox
   const [selected, setSelected] = useState([]);
+  // --- STATE BARU ---
+  // State untuk search input
+  const [searchTerm, setSearchTerm] = useState("");
+  // ------------------
 
-  // Panggil 'onClose' saat klik di luar popup
   useClickOutside(popupRef, onClose);
 
-  // Handler saat checkbox diubah
+  // Handler checkbox (tidak berubah)
   const handleToggle = (value) => {
     setSelected((prev) =>
-      prev.includes(value)
-        ? prev.filter((v) => v !== value)
-        : [...prev, value]
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
     );
   };
 
-  // Handler saat tombol 'Apply' diklik
+  // --- Handler Tombol Apply (DIMODIFIKASI) ---
   const handleApplyClick = () => {
-    onSubmit(selected); // Kirim array berisi value (cth: [13, 10])
+    if (filterType === "checkbox") {
+      onSubmit(selected); // Kirim array (cth: [13, 10])
+    } else {
+      onSubmit(searchTerm); // Kirim string (cth: "David")
+    }
     onClose(); // Tutup popup
   };
+  // ----------------------------------------
 
   return (
     <div className={styles.popupContainer} ref={popupRef}>
@@ -56,29 +64,47 @@ const FilterPopup = ({
           &times;
         </button>
       </div>
+
+      {/* --- Bagian Body (DIMODIFIKASI) --- */}
       <div className={styles.popupBody}>
-        {options.length > 0 ? (
-          options.map((opt) => {
-            // Ambil value dan label secara dinamis
-            const value = opt[valueKey];
-            const label = opt[labelKey];
-            return (
-              <label key={value} className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={selected.includes(value)}
-                  onChange={() => handleToggle(value)}
-                  className={styles.checkboxInput}
-                />
-                <span className={styles.customCheckbox}></span>
-                {label}
-              </label>
-            );
-          })
+        {filterType === "checkbox" ? (
+          // Mode Checkbox (Logika lama)
+          options.length > 0 ? (
+            options.map((opt) => {
+              const value = opt[valueKey];
+              const label = opt[labelKey];
+              return (
+                <label key={value} className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(value)}
+                    onChange={() => handleToggle(value)}
+                    className={styles.checkboxInput}
+                  />
+                  <span className={styles.customCheckbox}></span>
+                  {label}
+                </label>
+              );
+            })
+          ) : (
+            <div className={styles.noOptions}>No options available</div>
+          )
         ) : (
-          <div className={styles.noOptions}>No options available</div>
+          // Mode Search (Logika baru)
+          <div className={styles.searchPopupBody}>
+            <input
+              type="text"
+              className={styles.searchInputPopup}
+              placeholder="Enter name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
+            />
+          </div>
         )}
       </div>
+      {/* ---------------------------------- */}
+
       <div className={styles.popupFooter}>
         <button onClick={onClose} className={styles.actionBtn}>
           Cancel

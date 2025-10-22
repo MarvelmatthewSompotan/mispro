@@ -19,10 +19,9 @@ const ColumnHeader = ({
   onSort,
   onFilterChange,
   filterOptions = [],
-
-  // --- Props BARU dari StudentList (untuk mencocokkan data) ---
-  valueKey, // cth: 'class_id'
-  labelKey, // cth: 'grade'
+  valueKey,
+  labelKey,
+  filterType,
 }) => {
   // --- STATE BARU untuk mengontrol popup ---
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -75,6 +74,7 @@ const ColumnHeader = ({
             labelKey={labelKey}
             onSubmit={handleFilterSubmit}
             onClose={() => setIsFilterOpen(false)}
+            filterType={filterType}
           />
         )}
       </div>

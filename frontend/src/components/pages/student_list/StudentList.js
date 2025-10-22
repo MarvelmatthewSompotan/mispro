@@ -1,9 +1,9 @@
+// StudentList.js
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
 import searchIcon from "../../../assets/Search-icon.png";
-import placeholderPhoto from "../../../assets/user.png";
-import { getStudents, getRegistrationOptions } from "../../../services/api"; 
+import { getStudents, getRegistrationOptions } from "../../../services/api";
 import Pagination from "../../atoms/Pagination";
 import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
 
@@ -19,7 +19,7 @@ const StudentRow = ({ student, onClick }) => {
       {/* 1. Photo (Disesuaikan: pakai photo_url) */}
       <div className={styles.tableCell}>
         <img
-          src={student.photo_url || placeholderPhoto} // Fallback ke placeholder
+          src={student.photo_url} // Fallback ke placeholder
           alt="avatar"
           className={styles.photo}
         />
@@ -99,7 +99,7 @@ const StudentList = () => {
       try {
         const allParams = {
           ...filters,
-          search_name: searchName || undefined,
+          search_name: searchName || filters.search_name || undefined,
           sort: sorts.length > 0 ? sorts : undefined,
           page: page,
           per_page: ITEMS_PER_PAGE,
@@ -125,8 +125,11 @@ const StudentList = () => {
         const opts = await getRegistrationOptions(); // Panggil API Anda
         setFilterOptions((prev) => ({
           ...prev,
+          // Asumsi: opts.sections = [{section_id: 1, section_name: '...'}, ...]
           sections: opts.sections || [],
+          // Asumsi: opts.classes = [{class_id: 1, grade: '10'}, ...]
           classes: opts.classes || [],
+          // Asumsi: opts.school_years = [{school_year_id: 1, school_year: '...'}, ...]
           schoolYears: opts.school_years || [],
         }));
       } catch (err) {
@@ -140,18 +143,27 @@ const StudentList = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setCurrentPage(1); // Reset ke halaman 1
-      fetchStudents(1);
-    }, 300); // Waktu tunggu 300ms
+
+      if (!filters.search_name) {
+        fetchStudents(1);
+      }
+    }, 300);
     return () => clearTimeout(timer);
-  }, [searchName]); // Hanya trigger saat searchName berubah
+  }, [searchName, filters.search_name]);
 
   // --- useEffect untuk Filter dan Sort ---
   useEffect(() => {
-    if (!searchName) {
-      // Hindari double-fetch saat search
+    // Hindari double-fetch saat search bar atas
+    // atau saat filter popup search_name berubah
+    if (!searchName && !filters.search_name) {
+      fetchStudents(1);
+    } else if (filters.search_name) {
+      // Jika filter popup search_name yang dipakai,
+      // pastikan search bar atas dikosongkan
+      if (searchName) setSearchName("");
       fetchStudents(1);
     }
-  }, [filters, sorts, fetchStudents]); // Pastikan fetchStudents ada di dependency array
+  }, [filters, sorts, fetchStudents]);
 
   const handlePageChange = (page) => {
     fetchStudents(page);
@@ -188,21 +200,30 @@ const StudentList = () => {
     });
   };
 
-  // --- FUNGSI BARU: Handler untuk Filter ---
-  const handleFilterChange = (filterKey, selectedValues) => {
+  // --- FUNGSI BARU: Handler untuk Filter (DIUBAH) ---
+  const handleFilterChange = (filterKey, selectedValue) => {
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters };
 
-      if (selectedValues && selectedValues.length > 0) {
-        let paramKey = filterKey;
-        if (filterKey === "grade") paramKey = "class_id";
-        if (filterKey === "section") paramKey = "section_id";
+      // Cek Tipe data. Array (checkbox) atau String (search)
+      const isArray = Array.isArray(selectedValue);
 
-        newFilters[paramKey] = selectedValues;
+      if (isArray && selectedValue.length > 0) {
+        // Logika lama untuk array/checkbox
+        newFilters[filterKey] = selectedValue;
+      } else if (!isArray && selectedValue) {
+        // Logika baru untuk string/search
+        newFilters[filterKey] = selectedValue;
       } else {
-        // Jika array value kosong, hapus key dari state filter
+        // Hapus key jika array kosong ATAU string kosong
         delete newFilters[filterKey];
       }
+
+      // Jika popup 'search_name' yang dipakai, kosongkan state search bar atas
+      if (filterKey === "search_name" && selectedValue) {
+        setSearchName("");
+      }
+
       return newFilters;
     });
   };
@@ -237,77 +258,80 @@ const StudentList = () => {
             fieldKey="student_id" // (Backend sortable key)
             sortOrder={getSortOrder("student_id")}
             onSort={handleSortChange}
-            hasFilter={false}
+            hasFilter={false} // Sesuai Postman & api.js
           />
           <ColumnHeader
             title="Student Name"
             hasSort={true}
-            fieldKey="full_name" // (Backend sortable key)
+            fieldKey="full_name"
             sortOrder={getSortOrder("full_name")}
             onSort={handleSortChange}
-            hasFilter={false}
+            hasFilter={true} // <-- DIUBAH
+            filterType="search" // <-- DITAMBAHKAN
+            filterKey="search_name" // <-- DITAMBAHKAN
+            onFilterChange={handleFilterChange} // <-- DITAMBAHKAN
           />
           <ColumnHeader
             title="Grade"
             hasSort={true}
-            fieldKey="grade"
+            fieldKey="grade" // (Backend sortable key)
             sortOrder={getSortOrder("grade")}
             onSort={handleSortChange}
             hasFilter={true}
             filterKey="class_id" // (Backend filter key)
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.classes}
-            valueKey="class_id" // <-- TAMBAHKAN INI
-            labelKey="grade"
+            valueKey="class_id" // <-- DIUBAH: Kunci untuk value
+            labelKey="grade" // <-- DIUBAH: Kunci untuk label
           />
           <ColumnHeader
             title="Section"
-            hasSort={true}
-            fieldKey="section"
+            hasSort={true} // Sesuai notes
+            fieldKey="section" // (Backend sortable key)
             sortOrder={getSortOrder("section")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey="section_id"
+            filterKey="section_id" // (Backend filter key)
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.sections}
-            valueKey="class_id" // <-- TAMBAHKAN INI
-            labelKey="grade" // Kirim opsi ke <FilterButton>
+            valueKey="section_id" // <-- DIUBAH: Kunci untuk value
+            labelKey="name" // <-- DIUBAH: Kunci untuk label
           />
           <ColumnHeader
             title="School Year"
-            hasSort={false} // API tidak bisa sort by school_year
+            hasSort={false} // Sesuai notes & Postman
             hasFilter={true}
-            filterKey="school_year_id"
+            filterKey="school_year_id" // (Backend filter key)
             onFilterChange={handleFilterChange}
-            filterOptions={filterOptions.schoolYears} // Kirim opsi ke <FilterButton>
-            valueKey="class_id" // <-- TAMBAHKAN INI
-            labelKey="grade"
+            filterOptions={filterOptions.schoolYears}
+            valueKey="school_year_id" // <-- DIUBAH: Kunci untuk value
+            labelKey="year" // <-- DIUBAH: Kunci untuk label
           />
           <ColumnHeader
             title="Enrollment"
             hasSort={true}
-            fieldKey="enrollment_status"
+            fieldKey="enrollment_status" // (Backend sortable key)
             sortOrder={getSortOrder("enrollment_status")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey="enrollment_status"
+            filterKey="enrollment_status" // (Backend filter key)
             onFilterChange={handleFilterChange}
-            filterOptions={filterOptions.enrollmentStatus} // Kirim opsi ke <FilterButton>
-            valueKey="class_id" // <-- TAMBAHKAN INI
-            labelKey="grade"
+            filterOptions={filterOptions.enrollmentStatus}
+            valueKey="id" // <-- DIUBAH: Sesuai state hardcode
+            labelKey="name" // <-- DIUBAH: Sesuai state hardcode
           />
           <ColumnHeader
             title="Status"
             hasSort={true}
-            fieldKey="student_status"
+            fieldKey="student_status" // (Backend sortable key)
             sortOrder={getSortOrder("student_status")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey="student_status"
+            filterKey="student_status" // (Backend filter key)
             onFilterChange={handleFilterChange}
-            filterOptions={filterOptions.studentStatus} // Kirim opsi ke <FilterButton>
-            valueKey="class_id" // <-- TAMBAHKAN INI
-            labelKey="grade"
+            filterOptions={filterOptions.studentStatus}
+            valueKey="id" // <-- DIUBAH: Sesuai state hardcode
+            labelKey="name" // <-- DIUBAH: Sesuai state hardcode
           />
         </div>
 
@@ -320,7 +344,11 @@ const StudentList = () => {
               <StudentRow
                 key={student.student_id}
                 student={student} // Kirim seluruh objek student
-                onClick={() => navigate(`/students/${student.student_id}`)}
+                onClick={() =>
+                  navigate(`/students/${student.student_id}`, {
+                    state: { fromList: true },
+                  })
+                }
               />
             ))
           ) : (
