@@ -1,8 +1,27 @@
+// SortButton.js
 import React from "react";
 import "../styles/Controls.css";
 import sortIcon from "../../assets/sort.svg";
+import kananIcon from "../../assets/kanan.svg";
+import kiriIcon from "../../assets/kiri.svg";
+import "./SortButton.css";
 
-const SortButton = ({ disabled = false, direction = "none", onClick, title = "Sort" }) => {
+/**
+ * direction:
+ *  - "none" → icon sort.svg (default)
+ *  - "asc"  → icon kiri.svg (A→Z, kecil→besar)
+ *  - "desc" → icon kanan.svg (Z→A, besar→kecil)
+ */
+const SortButton = ({
+  disabled = false,
+  direction = "none",
+  onClick,
+  title = "Sort",
+}) => {
+  let iconSrc = sortIcon; // default (none)
+  if (direction === "asc") iconSrc = kiriIcon;
+  else if (direction === "desc") iconSrc = kananIcon;
+
   return (
     <button
       type="button"
@@ -10,13 +29,14 @@ const SortButton = ({ disabled = false, direction = "none", onClick, title = "So
       onClick={disabled ? undefined : onClick}
       aria-label={title}
       title={title}
-      disabled={disabled} // Tambahkan atribut disabled
+      disabled={disabled}
     >
       <img
-        src={sortIcon}
-        alt="Sort Icon"
-        width="24"
-        height="24"
+        src={iconSrc}
+        alt={`Sort ${direction}`}
+        width="20"
+        height="20"
+        className={`sort-icon ${direction}`}
       />
     </button>
   );

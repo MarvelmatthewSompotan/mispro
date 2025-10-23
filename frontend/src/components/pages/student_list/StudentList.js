@@ -76,7 +76,7 @@ const StudentList = () => {
   const [filters, setFilters] = useState({});
 
   // State untuk menampung semua sort
-  const [sorts, setSorts] = useState([{ field: "student_id", order: "asc" }]);
+  const [sorts, setSorts] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
     sections: [],
     classes: [],
@@ -172,31 +172,15 @@ const StudentList = () => {
 
   // --- FUNGSI BARU: Handler untuk Sort ---
   const handleSortChange = (fieldKey) => {
-    setSorts((prevSorts) => {
-      const existingSortIndex = prevSorts.findIndex(
-        (s) => s.field === fieldKey
-      );
-      let newSorts = [...prevSorts];
+    setSorts((prev) => {
+      const current = prev[0]?.field === fieldKey ? prev[0] : null;
+      let next;
+      if (!current) next = { field: fieldKey, order: "asc" }; // default → ASC
+      else if (current.order === "asc")
+        next = { field: fieldKey, order: "desc" }; // ASC → DESC
+      else next = null; // DESC → NONE
 
-      if (existingSortIndex > -1) {
-        const existingSort = newSorts[existingSortIndex];
-        // 1. Jika sudah ada: Balik urutannya (asc -> desc)
-        if (existingSort.order === "asc") {
-          existingSort.order = "desc";
-        } else {
-          // 2. Jika sudah 'desc': Hapus dari sorting
-          newSorts.splice(existingSortIndex, 1);
-        }
-      } else {
-        // 3. Jika belum ada: Tambahkan sebagai 'asc'
-        newSorts.push({ field: fieldKey, order: "asc" });
-      }
-
-      // 4. Jika tidak ada sort, kembalikan ke default
-      if (newSorts.length === 0) {
-        newSorts = [{ field: "student_id", order: "asc" }];
-      }
-
+      const newSorts = next ? [next] : [];
       return newSorts;
     });
   };
@@ -284,7 +268,7 @@ const StudentList = () => {
             labelKey="grade"
           />
           <ColumnHeader
-            title="Section"
+            title="section"
             hasSort={true}
             fieldKey="section"
             sortOrder={getSortOrder("section")}

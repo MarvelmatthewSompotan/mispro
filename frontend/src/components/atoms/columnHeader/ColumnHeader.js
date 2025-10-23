@@ -66,15 +66,31 @@ const ColumnHeader = ({
         }`}
       >
         {hasSort && (
-          <div className={`${styles.control} ${disableSort ? styles.isDisabled : ""}`} title={disableSort ? "Sort disabled" : undefined}>
-            <SortButton order={sortOrder} onClick={handleSortClick} />
+          <div
+            className={`${styles.control} ${
+              disableSort ? styles.isDisabled : ""
+            }`}
+            title={disableSort ? "Sort disabled" : undefined}
+          >
+            <SortButton
+              direction={sortOrder || "none"}
+              onClick={handleSortClick}
+            />
           </div>
         )}
 
         {/* FilterButton sekarang membuka popup */}
         {hasFilter && (
-          <div className={`${styles.control} ${disableFilter ? styles.isDisabled : ""}`} title={disableFilter ? "Filter disabled" : undefined}>
-            <FilterButton onClick={handleFilterToggle} />
+          <div
+            className={`${styles.control} ${
+              disableFilter ? styles.isDisabled : ""
+            }`}
+            title={disableFilter ? "Filter disabled" : undefined}
+          >
+            <FilterButton
+              onClick={handleFilterToggle}
+              isActive={isFilterOpen}
+            />
           </div>
         )}
 
