@@ -408,8 +408,8 @@ const Registration = () => {
           <ColumnHeader
             title='Section'
             hasSort={true}
-            fieldKey='section_name'
-            sortOrder={getSortOrder('section_name')}
+            fieldKey='section'
+            sortOrder={getSortOrder('section')}
             onSort={handleSortChange}
             hasFilter={true}
             filterKey='section'
