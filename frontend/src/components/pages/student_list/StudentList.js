@@ -6,6 +6,7 @@ import searchIcon from "../../../assets/Search-icon.png";
 import { getStudents, getRegistrationOptions } from "../../../services/api";
 import Pagination from "../../atoms/Pagination";
 import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
+import placeholder from "../../../assets/user.svg";
 
 const ITEMS_PER_PAGE = 25; // Sesuai dengan JSON backend
 const StudentRow = ({ student, onClick }) => {
@@ -19,9 +20,9 @@ const StudentRow = ({ student, onClick }) => {
       {/* 1. Photo (Disesuaikan: pakai photo_url) */}
       <div className={styles.tableCell}>
         <img
-          src={student.photo_url} // Fallback ke placeholder
-          alt="avatar"
-          className={styles.photo}
+          src={student.photo_url || placeholder}
+          alt=""
+          className={student.photo_url ? styles.photo : styles.placeholderPhoto}
         />
       </div>
       {/* 2. Student ID (Sudah Benar) */}
@@ -75,7 +76,7 @@ const StudentList = () => {
   const [filters, setFilters] = useState({});
 
   // State untuk menampung semua sort
-  const [sorts, setSorts] = useState([{ field: "student_id", order: "asc" }]);
+  const [sorts, setSorts] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
     sections: [],
     classes: [],
@@ -171,55 +172,32 @@ const StudentList = () => {
 
   // --- FUNGSI BARU: Handler untuk Sort ---
   const handleSortChange = (fieldKey) => {
-    setSorts((prevSorts) => {
-      const existingSortIndex = prevSorts.findIndex(
-        (s) => s.field === fieldKey
-      );
-      let newSorts = [...prevSorts];
+    setSorts((prev) => {
+      const current = prev[0]?.field === fieldKey ? prev[0] : null;
+      let next;
+      if (!current) next = { field: fieldKey, order: "asc" }; // default → ASC
+      else if (current.order === "asc")
+        next = { field: fieldKey, order: "desc" }; // ASC → DESC
+      else next = null; // DESC → NONE
 
-      if (existingSortIndex > -1) {
-        const existingSort = newSorts[existingSortIndex];
-        // 1. Jika sudah ada: Balik urutannya (asc -> desc)
-        if (existingSort.order === "asc") {
-          existingSort.order = "desc";
-        } else {
-          // 2. Jika sudah 'desc': Hapus dari sorting
-          newSorts.splice(existingSortIndex, 1);
-        }
-      } else {
-        // 3. Jika belum ada: Tambahkan sebagai 'asc'
-        newSorts.push({ field: fieldKey, order: "asc" });
-      }
-
-      // 4. Jika tidak ada sort, kembalikan ke default
-      if (newSorts.length === 0) {
-        newSorts = [{ field: "student_id", order: "asc" }];
-      }
-
+      const newSorts = next ? [next] : [];
       return newSorts;
     });
   };
 
-  // --- FUNGSI BARU: Handler untuk Filter (DIUBAH) ---
   const handleFilterChange = (filterKey, selectedValue) => {
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters };
-
-      // Cek Tipe data. Array (checkbox) atau String (search)
       const isArray = Array.isArray(selectedValue);
 
       if (isArray && selectedValue.length > 0) {
-        // Logika lama untuk array/checkbox
         newFilters[filterKey] = selectedValue;
       } else if (!isArray && selectedValue) {
-        // Logika baru untuk string/search
         newFilters[filterKey] = selectedValue;
       } else {
-        // Hapus key jika array kosong ATAU string kosong
         delete newFilters[filterKey];
       }
 
-      // Jika popup 'search_name' yang dipakai, kosongkan state search bar atas
       if (filterKey === "search_name" && selectedValue) {
         setSearchName("");
       }
@@ -248,17 +226,22 @@ const StudentList = () => {
       </div>
 
       <div className={styles.tableContainer}>
-        {/* Header Grid (Disesuaikan: Tambahkan props) */}
         <div className={styles.tableHeaderGrid}>
-          <ColumnHeader title="Photo" hasSort={false} hasFilter={false} />
+          <ColumnHeader
+            title="Photo"
+            hasSort={true}
+            hasFilter={true}
+            disableFilter={true}
+            disableSort={true}
+          />
 
           <ColumnHeader
             title="Student ID"
             hasSort={true}
-            fieldKey="student_id" // (Backend sortable key)
+            fieldKey="student_id"
             sortOrder={getSortOrder("student_id")}
             onSort={handleSortChange}
-            hasFilter={false} // Sesuai Postman & api.js
+            hasFilter={false}
           />
           <ColumnHeader
             title="Student Name"
@@ -266,76 +249,76 @@ const StudentList = () => {
             fieldKey="full_name"
             sortOrder={getSortOrder("full_name")}
             onSort={handleSortChange}
-            hasFilter={true} // <-- DIUBAH
-            filterType="search" // <-- DITAMBAHKAN
-            filterKey="search_name" // <-- DITAMBAHKAN
-            onFilterChange={handleFilterChange} // <-- DITAMBAHKAN
+            hasFilter={true}
+            filterType="search"
+            filterKey="search_name"
+            onFilterChange={handleFilterChange}
           />
           <ColumnHeader
             title="Grade"
             hasSort={true}
-            fieldKey="grade" // (Backend sortable key)
+            fieldKey="grade"
             sortOrder={getSortOrder("grade")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey="class_id" // (Backend filter key)
+            filterKey="class_id"
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.classes}
-            valueKey="class_id" // <-- DIUBAH: Kunci untuk value
-            labelKey="grade" // <-- DIUBAH: Kunci untuk label
+            valueKey="class_id"
+            labelKey="grade"
           />
           <ColumnHeader
-            title="Section"
-            hasSort={true} // Sesuai notes
-            fieldKey="section" // (Backend sortable key)
+            title="section"
+            hasSort={true}
+            fieldKey="section"
             sortOrder={getSortOrder("section")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey="section_id" // (Backend filter key)
+            filterKey="section_id"
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.sections}
-            valueKey="section_id" // <-- DIUBAH: Kunci untuk value
-            labelKey="name" // <-- DIUBAH: Kunci untuk label
+            valueKey="section_id"
+            labelKey="name"
           />
           <ColumnHeader
             title="School Year"
-            hasSort={false} // Sesuai notes & Postman
+            hasSort={true}
             hasFilter={true}
-            filterKey="school_year_id" // (Backend filter key)
+            filterKey="school_year_id"
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.schoolYears}
-            valueKey="school_year_id" // <-- DIUBAH: Kunci untuk value
-            labelKey="year" // <-- DIUBAH: Kunci untuk label
+            valueKey="school_year_id"
+            labelKey="year"
+            disableSort={true}
           />
           <ColumnHeader
             title="Enrollment"
             hasSort={true}
-            fieldKey="enrollment_status" // (Backend sortable key)
+            fieldKey="enrollment_status"
             sortOrder={getSortOrder("enrollment_status")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey="enrollment_status" // (Backend filter key)
+            filterKey="enrollment_status"
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.enrollmentStatus}
-            valueKey="id" // <-- DIUBAH: Sesuai state hardcode
-            labelKey="name" // <-- DIUBAH: Sesuai state hardcode
+            valueKey="id"
+            labelKey="name"
           />
           <ColumnHeader
             title="Status"
             hasSort={true}
-            fieldKey="student_status" // (Backend sortable key)
+            fieldKey="student_status"
             sortOrder={getSortOrder("student_status")}
             onSort={handleSortChange}
             hasFilter={true}
             filterKey="student_status" // (Backend filter key)
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.studentStatus}
-            valueKey="id" // <-- DIUBAH: Sesuai state hardcode
-            labelKey="name" // <-- DIUBAH: Sesuai state hardcode
+            valueKey="id"
+            labelKey="name"
           />
         </div>
 
-        {/* Body Grid (Disesuaikan: Menggunakan StudentRow baru) */}
         <div className={styles.tableBody}>
           {loading ? (
             <div className={styles.messageCell}>Loading...</div>
@@ -343,7 +326,7 @@ const StudentList = () => {
             studentData.map((student) => (
               <StudentRow
                 key={student.student_id}
-                student={student} // Kirim seluruh objek student
+                student={student}
                 onClick={() =>
                   navigate(`/students/${student.student_id}`, {
                     state: { fromList: true },

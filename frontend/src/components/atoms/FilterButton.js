@@ -1,8 +1,18 @@
+// FilterButton.js
 import React from "react";
 import "../styles/Controls.css";
 import filterIcon from "../../assets/filter.svg";
+import filterActiveIcon from "../../assets/filterActive.svg"; // ⬅️ Tambahkan
 
-const FilterButton = ({ disabled = false, onClick, title = "Filter" }) => {
+
+const FilterButton = ({
+  disabled = false,
+  onClick,
+  title = "Filter",
+  isActive = false, // ⬅️ prop baru
+}) => {
+  const iconSrc = isActive ? filterActiveIcon : filterIcon;
+
   return (
     <button
       type="button"
@@ -10,9 +20,15 @@ const FilterButton = ({ disabled = false, onClick, title = "Filter" }) => {
       onClick={disabled ? undefined : onClick}
       aria-label={title}
       title={title}
-      disabled={disabled} // Tambahkan atribut disabled
+      disabled={disabled}
     >
-      <img src={filterIcon} alt="Filter Icon" width="24" height="24" />
+      <img
+        src={iconSrc}
+        alt="Filter Icon"
+        width="24"
+        height="24"
+        style={{ transition: "filter 0.2s ease, transform 0.2s ease" }}
+      />
     </button>
   );
 };
