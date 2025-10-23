@@ -15,6 +15,21 @@
   border-bottom: 3.5px solid #7a7a7a;
 }
 
+/* Tambahkan ini ke ColumnHeader.module.css */
+.popupDateRange {
+  /*     Perhitungan untuk menggeser pop-up ke kiri.
+    1. Geser ke kiri sebesar lebar pop-up (320px).
+    2. Tambahkan margin kiri/padding kolom (24px).
+    Hasilnya akan membuat pop-up dimulai dari tepi kiri kolom.
+  */
+  right: auto;
+  left: 0; /* Mulai dari tepi kiri kolom (ColumnHeader) */
+
+  /* Hapus: top: calc(100% + 10px); karena ini sudah didefinisikan di FilterPopUp.module.css */
+
+  /* Untuk memastikan pop up "keluar" sedikit dari tabel, kita akan menggunakan teknik posisi pada FilterPopup.module.css */
+}
+
 .columnName {
   align-self: stretch;
   display: flex;

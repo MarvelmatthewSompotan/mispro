@@ -1,7 +1,8 @@
 /* FilterPopup.module.css */
 .popupContainer {
   position: absolute;
-  top: 100%; /* Muncul tepat di bawah header */
+  /* top: calc(100% + 10px); */
+  top: 100%;
   right: 0;
   width: 280px;
   background: #ffffff;
@@ -10,7 +11,19 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 100;
   margin-bottom: 8px; /* Jarak dari tombol filter */
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+.popupDateRange {
+  /* Atur agar pop up muncul di luar dan sejajar dengan kiri kolom (Registration Date) */
+  right: auto; /* Hilangkan rata kanan default */
+  left: 0; /* Tetapkan ke kiri dari ColumnHeader container */
+  transform: translateX(-24px);
+  /* Untuk filter Date Range, kita ingin pop-up berada di luar tabel (di atas atau di bawah, tapi di sini akan berada di bawah tombol filter) */
+  top: calc(100% + 10px); /* Geser sedikit ke bawah agar tidak menempel */
+
+  /* Tambahkan lebar yang mungkin lebih besar untuk input tanggal */
+  width: 320px;
 }
 
 .popupHeader {
@@ -85,7 +98,7 @@
 
 /* Tanda centang */
 .checkboxInput:checked + .customCheckbox::after {
-  content: "";
+  content: '';
   display: block;
   position: absolute;
   left: 5px;
@@ -105,10 +118,36 @@
 
 .popupFooter {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 8px;
   padding: 12px 16px;
   border-top: 1px solid #dfe0eb;
+}
+
+.popupFooter {
+  display: flex;
+  justify-content: space-between; /* <-- PERUBAHAN: Ganti flex-end agar ada ruang untuk Reset */
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #dfe0eb;
+}
+
+/* KELOMPOK TOMBOL KANAN (Cancel dan Apply) */
+.actionBtnGroup {
+  /* <-- BARU: Tambahkan wrapper untuk Cancel/Apply agar tetap bersebelahan */
+  display: flex;
+  gap: 8px;
+}
+
+.resetBtn {
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  background: #fff;
+  color: #555;
 }
 
 .actionBtn,
@@ -139,12 +178,52 @@
   width: 100%;
   padding: 10px 12px;
   font-size: 14px;
-  font-family: "Poppins", Arial, sans-serif;
- 
+  font-family: 'Poppins', Arial, sans-serif;
 }
 
 .searchInputPopup:focus {
   outline: none;
   border: 2px solid #1f1f20;
   border-radius: 5px;
+}
+
+.dateRangePopupBody {
+  /* Memastikan konten di dalam body pop-up berorientasi kolom */
+  display: flex;
+  flex-direction: column;
+  padding: 10px 15px; /* Sesuaikan dengan padding .popupBody yang lain */
+  max-height: 200px; /* Batas tinggi agar tetap ringkas */
+}
+
+/* --- Label Tanggal (Start Date/End Date) --- */
+.dateLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333; /* Warna teks gelap */
+  margin-bottom: 5px;
+  margin-top: 10px;
+}
+
+/* Hilangkan margin-top untuk label pertama */
+.dateLabel:first-child {
+  margin-top: 0;
+}
+
+/* --- Input Tanggal (Date Input) --- */
+.dateInput {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 5px; /* Jarak antar input */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Penting untuk menjaga padding di dalam width 100% */
+  font-size: 14px;
+  color: #555;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.dateInput:focus {
+  border-color: #007bff; /* Contoh warna fokus biru */
+  box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.25);
 }

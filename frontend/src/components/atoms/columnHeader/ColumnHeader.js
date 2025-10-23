@@ -1,11 +1,12 @@
 /*
  * ColumnHeader.js (DIUPDATE DENGAN LOGIKA POPUP)
  */
-import React, { useState } from "react"; // Import useState
-import styles from "./ColumnHeader.module.css";
-import SortButton from "../SortButton";
-import FilterButton from "../FilterButton"; // Ini adalah FilterButton.js Anda
-import FilterPopup from "../FilterPopUp"; // Import popup yang baru dibuat
+import React, { useState } from 'react'; // Import useState
+import styles from './ColumnHeader.module.css';
+import SortButton from '../SortButton';
+import FilterButton from '../FilterButton'; // Ini adalah FilterButton.js Anda
+import FilterPopup from '../FilterPopUp'; // Import popup yang baru dibuat
+import filterPopupStyles from '../FilterPopUp.module.css';
 
 const ColumnHeader = ({
   title,
@@ -22,6 +23,7 @@ const ColumnHeader = ({
   valueKey,
   labelKey,
   filterType,
+  currentFilterValue,
 }) => {
   // --- STATE BARU untuk mengontrol popup ---
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -58,7 +60,7 @@ const ColumnHeader = ({
 
       <div
         className={`${styles.action} ${
-          !showActions ? styles.disabledAction : ""
+          !showActions ? styles.disabledAction : ''
         }`}
       >
         {hasSort && <SortButton order={sortOrder} onClick={handleSortClick} />}
@@ -75,6 +77,9 @@ const ColumnHeader = ({
             onSubmit={handleFilterSubmit}
             onClose={() => setIsFilterOpen(false)}
             filterType={filterType}
+            filterKey={filterKey}
+            className={filterType === 'date-range' ? styles.popupDateRange : ''}
+            initialValue={currentFilterValue}
           />
         )}
       </div>
