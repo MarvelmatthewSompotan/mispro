@@ -21,13 +21,11 @@ class StudentParent extends Model
         'father_name',
         'father_occupation',
         'father_company',
-        'father_company_addresses',
         'father_phone',
         'father_email',
         'mother_name',
         'mother_occupation',
         'mother_company',
-        'mother_company_addresses',
         'mother_phone',
         'mother_email'
     ];
