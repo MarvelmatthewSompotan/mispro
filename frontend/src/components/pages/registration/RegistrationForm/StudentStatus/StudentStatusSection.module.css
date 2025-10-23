@@ -111,6 +111,7 @@
   padding: 12px;
   gap: 10px;
 }
+
 .studentIdValue {
   flex: 1;
   line-height: 100%;
@@ -339,7 +340,7 @@
   background-color: #fffaec;
 }
 .container {
-  width: 100%;
+  
   position: relative;
   background-color: #fff;
   overflow: visible !important;
@@ -348,6 +349,7 @@
   align-items: flex-start;
   justify-content: center;
   gap: 10px;
+  padding: 0 16px 0 16px;
   text-align: left;
   font-size: 20px;
   color: #000;

@@ -2,15 +2,16 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  background-color: var(--secondary-background);
   box-sizing: border-box;
+  padding-bottom: 100px;
 }
 
 .formInfo {
   background-color: #e4eefa;
   border-left: 7px solid #8dc1ff;
   padding: 16px 24px;
-  margin-bottom: 24px;
+  margin: 16px 16px 24px 16px;
   border-radius: 4px;
 }
 
