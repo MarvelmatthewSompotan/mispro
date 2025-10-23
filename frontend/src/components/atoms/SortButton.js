@@ -2,8 +2,8 @@
 import React from "react";
 import "../styles/Controls.css";
 import sortIcon from "../../assets/sort.svg";
-import kananIcon from "../../assets/kanan.svg";
-import kiriIcon from "../../assets/kiri.svg";
+import bawahIcon from "../../assets/bawah.svg";
+import atasIcon from "../../assets/atas.svg";
 import "./SortButton.css";
 
 /**
@@ -19,8 +19,8 @@ const SortButton = ({
   title = "Sort",
 }) => {
   let iconSrc = sortIcon; // default (none)
-  if (direction === "asc") iconSrc = kiriIcon;
-  else if (direction === "desc") iconSrc = kananIcon;
+  if (direction === "asc") iconSrc = atasIcon;
+  else if (direction === "desc") iconSrc = bawahIcon;
 
   return (
     <button
