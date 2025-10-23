@@ -234,7 +234,7 @@ const Registration = () => {
   };
 
   return (
-    <div>
+    <div className={styles.container}>
       <div className={styles.frameParent}>
         {/* Kolom Kiri: Judul dan Search Bar */}
         <div>

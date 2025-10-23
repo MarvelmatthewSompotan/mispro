@@ -8,11 +8,11 @@ import Pagination from "../../atoms/Pagination";
 import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
 import placeholder from "../../../assets/user.svg";
 
-const ITEMS_PER_PAGE = 25; // Sesuai dengan JSON backend
+const ITEMS_PER_PAGE = 25; 
 const StudentRow = ({ student, onClick }) => {
   const enrollmentStyle =
     student.enrollment_status === "ACTIVE" ? styles.active : styles.status;
-
+    
   const statusStyle = styles.status;
 
   return (
@@ -154,13 +154,9 @@ const StudentList = () => {
 
   // --- useEffect untuk Filter dan Sort ---
   useEffect(() => {
-    // Hindari double-fetch saat search bar atas
-    // atau saat filter popup search_name berubah
     if (!searchName && !filters.search_name) {
       fetchStudents(1);
     } else if (filters.search_name) {
-      // Jika filter popup search_name yang dipakai,
-      // pastikan search bar atas dikosongkan
       if (searchName) setSearchName("");
       fetchStudents(1);
     }
