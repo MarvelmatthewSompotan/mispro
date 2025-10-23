@@ -40,3 +40,15 @@
 .disabledAction {
   visibility: hidden;
 }
+
+.control {
+  display: flex;
+  align-items: center;
+}
+
+.isDisabled {
+  opacity: 0.4;
+  pointer-events: none;   /* blok interaksi */
+  cursor: not-allowed;
+  filter: grayscale(100%);
+}

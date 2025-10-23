@@ -22,6 +22,8 @@ const ColumnHeader = ({
   valueKey,
   labelKey,
   filterType,
+  disableSort = false,
+  disableFilter = false,
 }) => {
   // --- STATE BARU untuk mengontrol popup ---
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -31,6 +33,7 @@ const ColumnHeader = ({
 
   // Handler untuk SortButton (tetap sama)
   const handleSortClick = () => {
+    if (disableSort) return; // blok jika disabled
     if (onSort) {
       onSort(fieldKey);
     }
@@ -38,6 +41,7 @@ const ColumnHeader = ({
 
   // Handler untuk FilterButton (sekarang BUKA/TUTUP popup)
   const handleFilterToggle = () => {
+    if (disableFilter) return; // blok jika disabled
     setIsFilterOpen((prev) => !prev);
   };
 
@@ -61,10 +65,18 @@ const ColumnHeader = ({
           !showActions ? styles.disabledAction : ""
         }`}
       >
-        {hasSort && <SortButton order={sortOrder} onClick={handleSortClick} />}
+        {hasSort && (
+          <div className={`${styles.control} ${disableSort ? styles.isDisabled : ""}`} title={disableSort ? "Sort disabled" : undefined}>
+            <SortButton order={sortOrder} onClick={handleSortClick} />
+          </div>
+        )}
 
         {/* FilterButton sekarang membuka popup */}
-        {hasFilter && <FilterButton onClick={handleFilterToggle} />}
+        {hasFilter && (
+          <div className={`${styles.control} ${disableFilter ? styles.isDisabled : ""}`} title={disableFilter ? "Filter disabled" : undefined}>
+            <FilterButton onClick={handleFilterToggle} />
+          </div>
+        )}
 
         {/* Render Popup secara kondisional */}
         {hasFilter && isFilterOpen && (

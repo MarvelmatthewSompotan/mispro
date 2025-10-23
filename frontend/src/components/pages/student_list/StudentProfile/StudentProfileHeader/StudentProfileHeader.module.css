@@ -31,6 +31,16 @@
   border-radius: 8px;
 }
 
+.profilePlaceholder {
+  width: 154px;
+  height: 208px;
+  background-color: #f0f0f0;
+  object-fit: contain;
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
 .headerInfoSection {
   flex: 1;
   display: flex;
@@ -84,7 +94,6 @@
   align-items: flex-start;
   gap: 12px;
 }
-
 
 /* --- Style BARU untuk MODE EDIT --- */
 .statusAndEditPhotoContainer {

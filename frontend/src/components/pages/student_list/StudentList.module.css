@@ -58,7 +58,6 @@
 .tableContainer {
   background: #fff;
   border: 1px solid #7a7a7a;
-
   width: 100%;
 }
 
@@ -70,9 +69,9 @@
     minmax(132px, 1fr)
     minmax(196px, 1fr)
     minmax(104.51px, 1fr)
-    minmax(104.51px, 1fr)
+    minmax(120px, 1fr)
     minmax(144px, 1fr)
-    minmax(137px, 1fr)
+    minmax(145px, 1fr)
     minmax(178px, 1fr);
 }
 
@@ -123,6 +122,15 @@
   object-fit: cover;
 }
 
+.placeholderPhoto {
+  width: 60px;
+  height: 81px;
+  object-fit: contain; 
+  background-color: #ffffff; 
+  padding: 8px; 
+  box-sizing: border-box; 
+}
+
 .statusText {
   position: relative;
   line-height: 100%;
@@ -152,3 +160,4 @@
 .studentDataRow > .tableCell {
   justify-content: flex-start;
 }
+
