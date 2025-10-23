@@ -21,3 +21,18 @@
   background: transparent;
   color: var(--main-grey);
 }
+
+.control-btn img {
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.control-btn:hover img {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.control-btn.active img {
+  opacity: 1;
+  filter: brightness(1.1);
+}

@@ -308,7 +308,7 @@ const Registration = () => {
   // ===================================================================
 
   return (
-    <div className={styles.registrationContainer}>
+    <div className={styles.container}>
       <div className={styles.frameParent}>
         <div>
           <div className={styles.title}>Registration</div>

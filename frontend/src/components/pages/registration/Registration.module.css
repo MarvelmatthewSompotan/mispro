@@ -49,11 +49,15 @@
 .searchBar {
   display: flex;
   align-items: center;
-  margin-top: 20px;
+  justify-content: center;
+  margin-bottom: 32px;
   position: relative;
   width: 426px;
+  margin-top: 20px;
   border: 2px solid #7a7a7a;
   border-radius: 5px;
+  background-color: #fff;
+  height: 40px; /* pastikan tinggi konsisten */
 }
 
 .searchInput {
@@ -182,4 +186,21 @@
 
 .statusCancelled {
   background-color: var(--red, #d32f2f);
+}
+
+.ufileAltParent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 32px;
+  color: var(--main-accent);
+  cursor: pointer; /* Agar bisa diklik, misal untuk print/export */
+}
+
+.div {
+  position: relative;
+  font-weight: 600;
+  font-size: 16px; /* Sesuaikan ukuran angka agar lebih kecil dari ikon */
+  font-family: var(--font-primary);
 }

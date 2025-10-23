@@ -224,7 +224,6 @@ const TermOfPaymentSection = ({
           </div>
         </div>
       </div>
-
       <div className={styles.discountSection}>
         <div className={styles.sectionTitle}>
           <div className={styles.sectionTitleText}>Discount</div>
