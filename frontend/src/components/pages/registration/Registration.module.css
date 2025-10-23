@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 24px;
+  font-size: 32px;
   color: var(--main-accent);
   cursor: pointer;
 }
@@ -186,21 +186,4 @@
 
 .statusCancelled {
   background-color: var(--red, #d32f2f);
-}
-
-.ufileAltParent {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 32px;
-  color: var(--main-accent);
-  cursor: pointer; /* Agar bisa diklik, misal untuk print/export */
-}
-
-.div {
-  position: relative;
-  font-weight: 600;
-  font-size: 16px; /* Sesuaikan ukuran angka agar lebih kecil dari ikon */
-  font-family: var(--font-primary);
 }
