@@ -30,7 +30,36 @@ const ColumnHeader = ({
   // --- STATE BARU untuk mengontrol popup ---
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   // ----------------------------------------
+  const isFilterApplied = () => {
+    if (!currentFilterValue) {
+      return false;
+    }
 
+    if (filterType === 'date-range') {
+      // Untuk date-range, currentFilterValue adalah array [start_date, end_date]
+      return (
+        Array.isArray(currentFilterValue) &&
+        (currentFilterValue[0] || currentFilterValue[1])
+      );
+    }
+
+    if (filterType === 'checkbox') {
+      // Untuk checkbox, currentFilterValue adalah array of values
+      return Array.isArray(currentFilterValue) && currentFilterValue.length > 0;
+    }
+
+    if (filterType === 'search') {
+      // Untuk search, currentFilterValue adalah string
+      return (
+        typeof currentFilterValue === 'string' &&
+        currentFilterValue.trim().length > 0
+      );
+    }
+
+    // Default untuk filter tipe lain atau jika nilainya tidak null/undefined
+    // (misalnya, jika filterKey-nya langsung ada di filters)
+    return true;
+  };
   const showActions = hasSort || hasFilter;
 
   // Handler untuk SortButton (tetap sama)
@@ -92,6 +121,7 @@ const ColumnHeader = ({
             <FilterButton
               onClick={handleFilterToggle}
               isActive={isFilterOpen}
+              isApplied={isFilterApplied()}
             />
           </div>
         )}

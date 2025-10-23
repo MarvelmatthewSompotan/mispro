@@ -80,9 +80,7 @@ const Registration = () => {
   const [selectedRegistration, setSelectedRegistration] = useState(null);
   const [search, setSearch] = useState(''); // DIKEMBALIKAN (dari search bar atas)
   const [filters, setFilters] = useState({});
-  const [sorts, setSorts] = useState([
-    { field: 'registration_id', order: 'asc' },
-  ]); // Default sort
+  const [sorts, setSorts] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
     sections: [],
     classes: [],
@@ -169,27 +167,24 @@ const Registration = () => {
   }, [filters, sorts, fetchRegistrations]);
 
   const handleSortChange = (fieldKey) => {
-    setSorts((prevSorts) => {
-      const existingSortIndex = prevSorts.findIndex(
-        (s) => s.field === fieldKey
-      );
-      let newSorts = [...prevSorts];
+    setSorts((prev) => {
+      // Ambil sort saat ini yang field-nya sama dengan fieldKey
+      const current = prev[0]?.field === fieldKey ? prev[0] : null;
+      let next;
 
-      if (existingSortIndex > -1) {
-        const existingSort = newSorts[existingSortIndex];
-        if (existingSort.order === 'asc') {
-          existingSort.order = 'desc';
-        } else {
-          newSorts.splice(existingSortIndex, 1);
-        }
+      if (!current) {
+        // Kasus 1: Sort belum aktif, set ke ASC
+        next = { field: fieldKey, order: 'asc' };
+      } else if (current.order === 'asc') {
+        // Kasus 2: Saat ini ASC, ganti ke DESC
+        next = { field: fieldKey, order: 'desc' };
       } else {
-        newSorts.push({ field: fieldKey, order: 'asc' });
+        // Kasus 3: Saat ini DESC, reset ke NONE
+        next = null;
       }
 
-      if (newSorts.length === 0) {
-        newSorts = [{ field: 'registration_id', order: 'asc' }];
-      }
-
+      // Hasilnya selalu array yang berisi 0 atau 1 objek sort
+      const newSorts = next ? [next] : [];
       return newSorts;
     });
   };
