@@ -1,8 +1,8 @@
-/* --- Style Utama (Tidak Berubah) --- */
 .registrationContainer {
   padding: 20px;
   background-color: var(--secondary-background);
-  min-height: 100vh;
+  margin-top: 16px;
+  margin-bottom: 16px;
   font-family: var(--font-primary);
 }
 

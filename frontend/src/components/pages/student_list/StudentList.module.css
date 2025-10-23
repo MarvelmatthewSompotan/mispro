@@ -1,9 +1,10 @@
 .studentListContainer {
   flex: 1;
-  padding: 38px 32px 38px 32px;
+  padding: 20px;
   margin-top: 16px;
+  margin-bottom: 16px;
   background: #ffffff;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
 }
 
 .pageTitle {

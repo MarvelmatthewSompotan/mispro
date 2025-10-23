@@ -1,10 +1,10 @@
 // SortButton.js
-import React from "react";
-import "../styles/Controls.css";
-import sortIcon from "../../assets/sort.svg";
-import bawahIcon from "../../assets/bawah.svg";
-import atasIcon from "../../assets/atas.svg";
-import "./SortButton.css";
+import React from 'react';
+import '../styles/Controls.css';
+import sortIcon from '../../assets/sort.svg';
+import bawahIcon from '../../assets/bawah.svg';
+import atasIcon from '../../assets/atas.svg';
+import './SortButton.css';
 
 /**
  * direction:
@@ -14,18 +14,18 @@ import "./SortButton.css";
  */
 const SortButton = ({
   disabled = false,
-  direction = "none",
+  direction = 'none',
   onClick,
-  title = "Sort",
+  title = 'Sort',
 }) => {
   let iconSrc = sortIcon; // default (none)
-  if (direction === "asc") iconSrc = atasIcon;
-  else if (direction === "desc") iconSrc = bawahIcon;
+  if (direction === 'asc') iconSrc = bawahIcon;
+  else if (direction === 'desc') iconSrc = atasIcon;
 
   return (
     <button
-      type="button"
-      className={`control-btn ${disabled ? "disabled" : ""}`}
+      type='button'
+      className={`control-btn ${disabled ? 'disabled' : ''}`}
       onClick={disabled ? undefined : onClick}
       aria-label={title}
       title={title}
@@ -34,8 +34,8 @@ const SortButton = ({
       <img
         src={iconSrc}
         alt={`Sort ${direction}`}
-        width="20"
-        height="20"
+        width='20'
+        height='20'
         className={`sort-icon ${direction}`}
       />
     </button>
