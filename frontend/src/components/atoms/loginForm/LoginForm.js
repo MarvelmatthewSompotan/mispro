@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Input from "../../atoms/input/Input";
-import Checkbox from "../../atoms/checkbox/Checkbox";
 import Button from "../Button";
 import Label from "../Label";
 import "../../styles/LoginForm.css";
@@ -69,15 +68,6 @@ const LoginForm = () => {
         onChange={handleChange}
         disabled={isLoading} // 3. Nonaktifkan input saat loading
       />
-      <div className="login-form-options">
-        <Checkbox
-          checked={form.staySignedIn}
-          onChange={handleChange}
-          name="staySignedIn"
-          label="Stay signed in"
-          disabled={isLoading} // 3. Nonaktifkan checkbox saat loading
-        />
-      </div>
       <Button type="submit" disabled={isLoading} variant="solid">
         {/* 4. Ubah konten tombol saat loading */}
         {isLoading ? "Logging in..." : "Login"}
