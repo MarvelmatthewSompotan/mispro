@@ -76,8 +76,16 @@ class RegistrationController extends Controller
             $query->where('registration_id', 'like', "%$regisId%");
         }
 
-        if ($name = $request->input('search_name')) {
-            $query->where(DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)"), 'like', "%$name%");
+        // Filter Global
+        if ($search = trim($request->input('search', ''))) {
+            $query->where(function ($q) use ($search) {
+                $search = strtolower($search);
+                $q->whereRaw('LOWER(students.student_id) LIKE ?', ["%{$search}%"])
+                ->orWhereRaw("LOWER(CONCAT_WS(' ', COALESCE(students.first_name,''), COALESCE(students.middle_name,''), COALESCE(students.last_name,''))) LIKE ?", ["%{$search}%"]);
+            });
+        } elseif ($request->filled('search_name')) {
+            $searchName = strtolower(trim($request->input('search_name')));
+            $query->whereRaw("LOWER(CONCAT_WS(' ', COALESCE(students.first_name,''), COALESCE(students.middle_name,''), COALESCE(students.last_name,''))) LIKE ?", ["%{$searchName}%"]);
         }
 
         // Filter Checkbox
