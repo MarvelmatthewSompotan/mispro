@@ -5,7 +5,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 // Import komponen halaman
 import LoginPage from "../components/pages/login/LoginPage.js";
-import Home from "../components/pages/Home";
+import Home from "../components/pages/home/Home.js";
 import StudentList from "../components/pages/student_list/StudentList";
 import TeacherList from "../components/pages/TeacherList";
 import HomeroomList from "../components/pages/HomeroomList";
