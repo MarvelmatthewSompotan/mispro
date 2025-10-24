@@ -41,10 +41,10 @@ class Enrollment extends Model
         'transport_id',
         'pickup_point_id',
         'residence_id',
+        'student_status',
         'residence_hall_policy',
         'transportation_policy',
         'status',
-        'registration_date',
     ];
 
     public function applicationForm() : HasOne

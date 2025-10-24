@@ -15,8 +15,8 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
 
   // Status dan ID Aplikasi untuk API
   // Mengambil status dari application_form
-  const currentStatus = registration.application_form?.status || 'Confirmed';
-  const applicationId = registration.application_form?.application_id;
+  const currentStatus = registration.application_status || 'N/A';
+  const applicationId = registration.application_id;
 
   const isConfirmed = currentStatus.toLowerCase() === 'confirmed';
 

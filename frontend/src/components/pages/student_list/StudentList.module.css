@@ -1,16 +1,14 @@
 .studentListContainer {
-  flex: 1;
-  padding: 38px 32px 38px 32px;
-  background: #ffffff;
-  margin: 16px 0 16px 0;
-  font-family: "Poppins", Arial, sans-serif;
+  padding: 25px 32px 25px 32px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  background-color: var(--secondary-background);
 }
 
 .pageTitle {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 32px;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 24px;
 }
 
 /* --- Search Bar --- */
@@ -20,6 +18,7 @@
   justify-content: center;
   margin-bottom: 32px;
   position: relative;
+  margin-top: 20px;
   width: 426px;
   border: 2px solid #7a7a7a;
   border-radius: 5px;
@@ -42,9 +41,10 @@
 }
 
 .searchInput::placeholder {
-  color: #7a7a7a;
-  opacity: 1;
-  font-size: 14px;
+  color: #5f84fe;
+  opacity: 0.8;
+  font-size: 15px;
+  font-family: "Poppins", sans-serif;
 }
 
 .searchIcon {
@@ -55,13 +55,12 @@
   width: 20px;
   height: 20px;
   pointer-events: none;
-  opacity: 0.7;
 }
 
 /* --- Table Structure --- */
 .tableContainer {
   background: #fff;
-  border: 1px solid #7a7a7a;
+  border: 1px solid var(--main-grey);
   width: 100%;
 }
 
@@ -77,11 +76,12 @@
     minmax(144px, 1fr)
     minmax(145px, 1fr)
     minmax(178px, 1fr);
+  border-bottom: 4px solid #7a7a7a;
 }
 
 .studentDataRow {
   box-sizing: border-box;
-  border-top: 1px solid #7a7a7a;
+  border-top: none;
   min-height: 100px;
   cursor: pointer;
   transition: background-color 0.2s ease;

@@ -570,7 +570,6 @@ class RegistrationController extends Controller
                 // Create new student
                 $student = Student::create([
                     'student_id' => $generatedId,
-                    'student_status' => $validated['student_status'],
                     'first_name' => $validated['first_name'],
                     'middle_name' => $validated['middle_name'],
                     'last_name' => $validated['last_name'],
@@ -611,6 +610,7 @@ class RegistrationController extends Controller
                     'residence_hall_policy' => $validated['residence_hall_policy'], 
                     'transportation_policy' => $validated['transportation_policy'],
                     'status' => $enrollmentStatus,
+                    'student_status' => $validated['student_status'],
                 ]);
                 
                 // Create application form
@@ -668,6 +668,7 @@ class RegistrationController extends Controller
                         'residence_hall_policy' => $validated['residence_hall_policy'], 
                         'transportation_policy' => $validated['transportation_policy'],
                         'status' => $enrollmentStatus,
+                        'student_status' => 'Old',
                     ]);
                     // Create application form
                     $applicationForm = $this->createApplicationForm($enrollment);
@@ -701,7 +702,6 @@ class RegistrationController extends Controller
 
                     $student = Student::create([
                         'student_id' => $generatedId,
-                        'student_status' => 'Old',
                         'first_name' => $validated['first_name'] ?? $oldStudent->first_name,
                         'middle_name' => $validated['middle_name'] ?? $oldStudent->middle_name,
                         'last_name' => $validated['last_name'] ?? $oldStudent->last_name,
@@ -741,6 +741,7 @@ class RegistrationController extends Controller
                         'residence_hall_policy' => $validated['residence_hall_policy'], 
                         'transportation_policy' => $validated['transportation_policy'],
                         'status' => $enrollmentStatus,
+                        'student_status' => 'Old',
                     ]);
 
                     $applicationForm = $this->createApplicationForm($enrollment);
@@ -940,7 +941,6 @@ class RegistrationController extends Controller
     {
         // Update student data jika ada perubahan
         $student->update([
-            'student_status' => $validated['student_status'],
             'registration_id' => $registrationId,
             'first_name' => $validated['first_name'],
             'middle_name' => $validated['middle_name'],
@@ -1151,5 +1151,4 @@ class RegistrationController extends Controller
             'data_snapshot'  => json_encode($dataSnapshot, JSON_PRETTY_PRINT),
         ]);
     }
-
 }
