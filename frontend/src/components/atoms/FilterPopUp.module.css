@@ -1,7 +1,6 @@
 /* FilterPopup.module.css */
 .popupContainer {
   position: absolute;
-  /* top: calc(100% + 10px); */
   top: 100%;
   right: 0;
   width: 280px;
@@ -15,14 +14,10 @@
 }
 
 .popupDateRange {
-  /* Atur agar pop up muncul di luar dan sejajar dengan kiri kolom (Registration Date) */
-  right: auto; /* Hilangkan rata kanan default */
-  left: 0; /* Tetapkan ke kiri dari ColumnHeader container */
+  right: auto;
+  left: 0;
   transform: translateX(-24px);
-  /* Untuk filter Date Range, kita ingin pop-up berada di luar tabel (di atas atau di bawah, tapi di sini akan berada di bawah tombol filter) */
-  top: calc(100% + 10px); /* Geser sedikit ke bawah agar tidak menempel */
-
-  /* Tambahkan lebar yang mungkin lebih besar untuk input tanggal */
+  top: calc(100% + 10px); 
   width: 320px;
 }
 
@@ -76,7 +71,6 @@
   background-color: #f9f9f9;
 }
 
-/* Sembunyikan checkbox asli */
 .checkboxInput {
   opacity: 0;
   width: 0;
@@ -84,7 +78,6 @@
   position: absolute;
 }
 
-/* Buat custom checkbox */
 .customCheckbox {
   width: 18px;
   height: 18px;
@@ -96,7 +89,6 @@
   background: #fff;
 }
 
-/* Tanda centang */
 .checkboxInput:checked + .customCheckbox::after {
   content: '';
   display: block;
@@ -110,9 +102,8 @@
   transform: rotate(45deg);
 }
 
-/* Ubah background saat dicentang */
 .checkboxInput:checked + .customCheckbox {
-  background: #007bff; /* Ganti dengan warna primer Anda */
+  background: #007bff;
   border-color: #007bff;
 }
 

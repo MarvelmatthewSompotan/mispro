@@ -3,6 +3,10 @@ import styles from "./Logbook.module.css";
 import TableHeaderController from "../../molecules/TableHeaderController/TableHeaderController";
 import Button from "../../atoms/Button";
 import ExportLogbookPopup from "./ExportLogbookPopup/ExportLogbookPopup";
+import FilterPopup from "../../atoms/FilterPopUp";
+import FilterButton from "../../atoms/FilterButton";
+import SortButton from "../../atoms/SortButton";
+import filterStyles from "../../atoms/FilterPopUp.module.css";
 
 // 1. Impor dari dnd-kit
 import {
@@ -138,7 +142,18 @@ const HEADER_KEY_MAP = {
 };
 
 // Komponen perantara untuk logika sortable
-const SortableHeader = ({ header, selectedColumns, handleColumnSelect }) => {
+const SortableHeader = ({
+  header,
+  selectedColumns,
+  handleColumnSelect,
+  sortDirection,
+  onSortClick,
+  isFilterActive,
+  isFilterApplied,
+  onFilterClick,
+  showFilterPopup,
+  filterPopupNode,
+}) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: header });
 
@@ -158,6 +173,14 @@ const SortableHeader = ({ header, selectedColumns, handleColumnSelect }) => {
       showCheckbox={true}
       isChecked={selectedColumns.has(header)}
       onChange={(e) => handleColumnSelect(header, e.target.checked)}
+      // 🔽 Tambahkan semua props yang sebelumnya hilang:
+      sortDirection={sortDirection}
+      onSortClick={onSortClick}
+      isFilterActive={isFilterActive}
+      isFilterApplied={isFilterApplied}
+      onFilterClick={onFilterClick}
+      showFilterPopup={showFilterPopup}
+      filterPopupNode={filterPopupNode}
     />
   );
 };
@@ -168,6 +191,11 @@ const Logbook = () => {
     new Set(INITIAL_HEADERS)
   );
   const [isExportPopupOpen, setIsExportPopupOpen] = useState(false);
+  const [sortDirections, setSortDirections] = useState({});
+  // NEW: filter yang sedang dibuka
+  const [activeFilter, setActiveFilter] = useState(null); // { column, type, initialValue }
+  // NEW: tanda “sudah ter-apply” untuk icon filter (belum benar-benar memfilter data)
+  const [appliedFilters, setAppliedFilters] = useState({});
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -185,6 +213,41 @@ const Logbook = () => {
   };
   const unselectAllColumns = () => {
     setSelectedColumns(new Set());
+  };
+
+  const handleSortClick = (header) => {
+    setSortDirections((prev) => {
+      const current = prev[header] || "none";
+      const next =
+        current === "none" ? "asc" : current === "asc" ? "desc" : "none";
+      return { ...prev, [header]: next };
+    });
+  };
+
+  const getFilterType = (header) => {
+    if (header === "Registration Date") return "date-range";
+    if (header === "Student ID" || header === "Full Name") return "search";
+    return "checkbox";
+  };
+
+  const handleFilterClick = (header) => {
+    const type =
+      header === "Registration Date"
+        ? "date-range"
+        : header === "Full Name" || header === "Student ID"
+        ? "search"
+        : "checkbox";
+    setActiveFilter({
+      column: header,
+      type,
+      initialValue: appliedFilters[header] ?? "",
+    });
+  };
+
+  const handleFilterClose = () => setActiveFilter(null);
+  const handleFilterSubmit = (value) => {
+    setAppliedFilters((prev) => ({ ...prev, [activeFilter.column]: value }));
+    setActiveFilter(null);
   };
 
   // Fungsi untuk menangani akhir dari proses drag
@@ -246,11 +309,45 @@ const Logbook = () => {
                         header={header}
                         selectedColumns={selectedColumns}
                         handleColumnSelect={handleColumnSelect}
+                        sortDirection={sortDirections[header] || "none"}
+                        onSortClick={() => handleSortClick(header)}
+                        isFilterActive={activeFilter?.column === header}
+                        isFilterApplied={
+                          appliedFilters[header] != null &&
+                          appliedFilters[header] !== "" &&
+                          !(
+                            Array.isArray(appliedFilters[header]) &&
+                            appliedFilters[header].length === 0
+                          )
+                        }
+                        onFilterClick={() => handleFilterClick(header)}
+                        showFilterPopup={activeFilter?.column === header}
+                        filterPopupNode={
+                          activeFilter?.column === header ? (
+                            <FilterPopup
+                              options={[]}
+                              valueKey=""
+                              labelKey=""
+                              filterType={activeFilter.type}
+                              filterKey={activeFilter.column}
+                              initialValue={activeFilter.initialValue}
+                              onSubmit={handleFilterSubmit}
+                              onClose={handleFilterClose}
+                              className={
+                                activeFilter.type === "date-range"
+                                  ? filterStyles.popupDateRange // ✅ gunakan filterStyles di sini
+                                  : ""
+                              }
+                            />
+                          ) : null
+                        }
                       />
                     ))}
                   </SortableContext>
                 </tr>
               </thead>
+
+              {/* tbody tetap; BELUM menerapkan sort/filter ke data */}
               <tbody>
                 {logbookData.map((item) => (
                   <tr key={item.student_id}>
@@ -265,12 +362,11 @@ const Logbook = () => {
                               isSelected ? styles.selectedCell : ""
                             }`}
                           >
-                            {" "}
                             <img
                               src={item[dataKey]}
                               alt={item.full_name}
                               className={styles.studentPhoto}
-                            />{" "}
+                            />
                           </td>
                         );
                       }
@@ -279,8 +375,7 @@ const Logbook = () => {
                           key={header}
                           className={isSelected ? styles.selectedCell : ""}
                         >
-                          {" "}
-                          {item[dataKey] || "-"}{" "}
+                          {item[dataKey] || "-"}
                         </td>
                       );
                     })}

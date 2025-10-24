@@ -215,6 +215,73 @@ export const updateStudent = (studentId, studentData) => {
   });
 };
 
+// api.js
+export const getLogbook = ({
+  // Search (string)
+  search_full_name = '',      // fullname concat & scoped by school_year
+  search_father_name = '',
+  search_mother_name = '',
+  search_religion = '',
+  search_country = '',
+  search_family_rank = '',
+
+  // Checkbox (array) — kecuali school_year single-select
+  grade = [],
+  section = [],
+  gender = [],
+  transportation = [],
+  school_year = null,         // single
+
+  // Range
+  registration_start_date = '', // 'YYYY-MM-DD'
+  registration_end_date = '',
+  age_min = '',               // dalam tahun (angka), backend yang hitung
+  age_max = '',
+
+  // Sort (array of {field, order})
+  sort = [],
+
+  // Pagination (opsional)
+  page = 1,
+  per_page = 25,
+} = {}) => {
+  const params = new URLSearchParams();
+  params.append('page', page);
+  params.append('per_page', per_page);
+
+  // Search
+  if (search_full_name) params.append('search_full_name', search_full_name);
+  if (search_religion) params.append('search_religion', search_religion);
+  if (search_country) params.append('search_country', search_country);
+  if (search_father_name) params.append('search_father_name', search_father_name);
+  if (search_mother_name) params.append('search_mother_name', search_mother_name);
+  if (search_family_rank) params.append('search_family_rank', search_family_rank);
+
+  // Checkbox arrays
+  (Array.isArray(grade) ? grade : []).forEach(v => params.append('grade[]', v));
+  (Array.isArray(section) ? section : []).forEach(v => params.append('section[]', v));
+  (Array.isArray(gender) ? gender : []).forEach(v => params.append('gender[]', v));
+  (Array.isArray(transportation) ? transportation : []).forEach(v => params.append('transportation[]', v));
+  if (school_year) params.append('school_year', school_year); // single select
+
+  // Date range
+  if (registration_start_date) params.append('registration_start_date', registration_start_date);
+  if (registration_end_date) params.append('registration_end_date', registration_end_date);
+
+  // Age range
+  if (age_min !== '' && age_min !== null) params.append('age_min', age_min);
+  if (age_max !== '' && age_max !== null) params.append('age_max', age_max);
+
+  // Sort (multi-field)
+  sort?.forEach((s, i) => {
+    params.append(`sort[${i}][field]`, s.field);
+    params.append(`sort[${i}][order]`, s.order); // 'asc' | 'desc'
+  });
+
+  return apiFetch(`/logbook?${params.toString()}`);
+};
+
+
 export const getRegistrations = ({
   search_name = '',
   search_id = null, // <-- BARU: Filter ID
