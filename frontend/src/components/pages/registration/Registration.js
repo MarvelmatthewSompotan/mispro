@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Komponen Button tidak lagi dipakai untuk status, diganti dengan div
-// import Button from '../../atoms/Button'; 
+// import Button from '../../atoms/Button';
 import PopUpForm from './PopUpRegis/PopUpForm';
 import Pagination from '../../atoms/Pagination';
 import StatusConfirmationPopup from './PopUpRegis/StatusConfirmationPopup';
@@ -13,65 +13,63 @@ import Button from '../../atoms/Button'; // Import Button tetap ada untuk "New F
 
 import {
   getRegistrations,
+  getRegistrationOptions,
 } from '../../../services/api';
-
 
 // --- Komponen Internal BARU untuk Satu Baris Data (Mengikuti Pola StudentList) ---
 const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
-    // Menentukan style untuk badge status
-    const status = registration.application_form?.status?.toLowerCase() || 'confirmed';
-    const statusStyle = status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
+  // Menentukan style untuk badge status
+  const status = registration.application_status?.toLowerCase() || 'confirmed';
+  const statusStyle =
+    status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
 
-    return (
-        <div className={styles.registrationDataRow} onClick={() => onRowClick(registration)}>
-            {/* 1. Registration Date */}
-            <div className={styles.tableCell}>
-                {new Date(registration.registration_date).toLocaleDateString(
-                    'id-ID',
-                    {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                    }
-                )}
-            </div>
-            {/* 2. Registration ID */}
-            <div className={styles.tableCell}>{registration.registration_id}</div>
-            {/* 3. Student Name */}
-            <div className={styles.tableCell}>{registration.full_name}</div>
-            {/* 4. Grade */}
-            <div className={styles.tableCell}>
-              {registration.grade || (registration.application_form?.grade) || 'N/A'}
-            </div>
-            {/* 5. Section */}
-            <div className={styles.tableCell}>
-              {registration.section?.name || 'N/A'}
-            </div>
-            {/* 6. Status Badge */}
-            {/* --- PERUBAHAN: Menghapus style inline justifyContent: 'center' --- */}
-            <div className={styles.tableCell}>
-                <div 
-                    className={statusStyle} 
-                    onClick={(e) => {
-                        e.stopPropagation(); // Mencegah klik pada baris
-                        onStatusClick(registration);
-                    }}
-                >
-                    <div className={styles.statusText}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </div>
-                </div>
-            </div>
+  return (
+    <div
+      className={styles.registrationDataRow}
+      onClick={() => onRowClick(registration)}
+    >
+      {/* 1. Registration Date */}
+      <div className={styles.tableCell}>
+        {new Date(registration.registration_date).toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })}
+      </div>
+      {/* 2. Registration ID */}
+      <div className={styles.tableCell}>{registration.registration_id}</div>
+      {/* 3. Student Name */}
+      <div className={styles.tableCell}>{registration.full_name}</div>
+      {/* 4. Grade */}
+      <div className={styles.tableCell}>{registration.grade || 'N/A'}</div>
+      {/* 5. Section */}
+      <div className={styles.tableCell}>
+        {registration.section_name || 'N/A'}
+      </div>
+      {/* 6. Status Badge */}
+      {/* --- PERUBAHAN: Menghapus style inline justifyContent: 'center' --- */}
+      <div className={styles.tableCell}>
+        <div
+          className={statusStyle}
+          onClick={(e) => {
+            e.stopPropagation(); // Mencegah klik pada baris
+            onStatusClick(registration);
+          }}
+        >
+          <div className={styles.statusText}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
-
 
 const Registration = () => {
   const navigate = useNavigate();
   const [registrationData, setRegistrationData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  // const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -80,67 +78,197 @@ const Registration = () => {
   const REFRESH_INTERVAL = 5000;
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
-
-
+  const [search, setSearch] = useState(''); // DIKEMBALIKAN (dari search bar atas)
+  const [filters, setFilters] = useState({});
+  const [sorts, setSorts] = useState([]);
+  const [filterOptions, setFilterOptions] = useState({
+    sections: [],
+    classes: [],
+    applicationStatus: [
+      { id: 'Confirmed', name: 'Confirmed' },
+      { id: 'Cancelled', name: 'Cancelled' },
+    ],
+  });
+  const fetchControllerRef = useRef(null);
   // =================================================================
   // --- SEMUA LOGIKA, FETCH, DAN HANDLER DI BAWAH INI TETAP SAMA ---
   // =================================================================
 
   const fetchRegistrations = useCallback(
-    async (filters = {}, page = 1, options = {}) => {
+    async (filters = {}, page = 1, sorts = [], options = {}) => {
+      // <-- TAMBAHKAN sorts
       const { isBackgroundRefresh = false } = options;
       if (!isBackgroundRefresh) setLoading(true);
+
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      fetchControllerRef.current?.abort();
+      fetchControllerRef.current = controller;
+
+      let currentSearch = search;
+      const allParams = {
+        ...filters,
+        ...(currentSearch ? { search: currentSearch } : {}),
+        sort: sorts.length > 0 ? sorts : undefined,
+        page: page,
+        per_page: perPage,
+      };
       try {
-        const res = await getRegistrations({
-          ...filters,
-          page: page,
-          per_page: perPage,
-        });
+        const res = await getRegistrations(allParams, { signal });
         setRegistrationData(res.data.data || []);
         setTotalPages(res.data.last_page || 1);
-        setTotalRecords(res.data.total || 0);
+        setTotalRecords(res.total_registered || 0);
         setCurrentPage(res.data.current_page || 1);
       } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Previous fetch aborted due to new input');
+          return;
+        }
         console.error('Error fetching registrations:', err);
         setRegistrationData([]);
         setTotalPages(1);
         setTotalRecords(0);
       } finally {
-        setLoading(false);
+        if (!isBackgroundRefresh) setLoading(false);
       }
     },
-    [perPage]
+    [perPage, search]
   );
 
   useEffect(() => {
-    fetchRegistrations({}, 1);
-  }, [fetchRegistrations]);
+    const fetchFilterOptions = async () => {
+      try {
+        const opts = await getRegistrationOptions();
+        setFilterOptions((prev) => ({
+          ...prev,
+          sections: opts.sections || [],
+          classes: opts.classes || [],
+        }));
+      } catch (err) {
+        console.error('Error fetching registration options:', err);
+      }
+    };
+    fetchFilterOptions();
+  }, []);
 
   useEffect(() => {
-    setCurrentPage(1);
-    const filters = { search: search || undefined };
-    fetchRegistrations(filters, 1);
-  }, [search, fetchRegistrations]);
+    const timer = setTimeout(() => {
+      if (search) {
+        setCurrentPage(1);
+        setFilters((prev) => {
+          if (prev.search_name) {
+            const newFilters = { ...prev };
+            delete newFilters.search_name;
+            return newFilters;
+          }
+          return prev;
+        });
+        fetchRegistrations(filters, 1, sorts);
+      }
+    }, 400);
+    return () => {
+      clearTimeout(timer);
+      fetchControllerRef.current?.abort();
+    };
+  }, [search, filters, sorts, fetchRegistrations]);
+
+  useEffect(() => {
+    // Hindari double-fetch saat search bar atas berubah
+    if (search) return;
+
+    fetchRegistrations(filters, 1, sorts);
+  }, [filters, sorts, fetchRegistrations, search]);
+
+  const handleSortChange = (fieldKey) => {
+    setSorts((prev) => {
+      // Ambil sort saat ini yang field-nya sama dengan fieldKey
+      const current = prev[0]?.field === fieldKey ? prev[0] : null;
+      let next;
+
+      if (!current) {
+        // Kasus 1: Sort belum aktif, set ke ASC
+        next = { field: fieldKey, order: 'asc' };
+      } else if (current.order === 'asc') {
+        // Kasus 2: Saat ini ASC, ganti ke DESC
+        next = { field: fieldKey, order: 'desc' };
+      } else {
+        // Kasus 3: Saat ini DESC, reset ke NONE
+        next = null;
+      }
+
+      // Hasilnya selalu array yang berisi 0 atau 1 objek sort
+      const newSorts = next ? [next] : [];
+      return newSorts;
+    });
+  };
+
+  const handleFilterChange = (filterKey, selectedValue) => {
+    setFilters((prevFilters) => {
+      const newFilters = { ...prevFilters };
+      // Cek jika itu Date Range
+      if (filterKey === 'date_range' && Array.isArray(selectedValue)) {
+        const [startDate, endDate] = selectedValue;
+        if (startDate || endDate) {
+          newFilters['start_date'] = startDate || undefined;
+          newFilters['end_date'] = endDate || undefined;
+        } else {
+          delete newFilters['start_date'];
+          delete newFilters['end_date'];
+        }
+        // Hapus filterKey "date_range" itu sendiri
+        delete newFilters[filterKey];
+      } else {
+        // Logika Checkbox (Array) dan Search Input (String)
+        const isArray = Array.isArray(selectedValue);
+
+        if (isArray && selectedValue.length > 0) {
+          newFilters[filterKey] = selectedValue;
+        } else if (!isArray && selectedValue) {
+          newFilters[filterKey] = selectedValue;
+        } else {
+          delete newFilters[filterKey];
+        }
+
+        if (filterKey === 'search_name' && selectedValue) {
+          setSearch('');
+        }
+      }
+
+      return newFilters;
+    });
+  };
+
+  const getSortOrder = (fieldKey) => {
+    return sorts.find((s) => s.field === fieldKey)?.order;
+  };
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
-      const filters = { search: search || undefined };
-      fetchRegistrations(filters, newPage);
+      fetchRegistrations(filters, newPage, sorts);
     }
   };
 
   useEffect(() => {
+    fetchRegistrations(filters, 1, sorts);
+  }, [fetchRegistrations]);
+
+  useEffect(() => {
     const refreshData = () => {
-      const currentFilters = { search: search || undefined };
+      // Gunakan state filters dan sorts
+      const currentFilters = {
+        ...filters,
+        search: search || filters.search || undefined,
+      };
       console.log('Auto refreshing registration list (background)...');
-      fetchRegistrations(currentFilters, currentPage, {
+      fetchRegistrations(currentFilters, currentPage, sorts, {
         isBackgroundRefresh: true,
       });
     };
     const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
     return () => clearInterval(intervalId);
-  }, [search, currentPage, fetchRegistrations]);
+  }, [search, currentPage, fetchRegistrations, filters, sorts]);
 
   const handleNewForm = () => setShowPopupForm(true);
   const handleClosePopup = () => setShowPopupForm(false);
@@ -185,7 +313,11 @@ const Registration = () => {
         return reg;
       })
     );
-    fetchRegistrations({ search: search || undefined }, currentPage);
+    fetchRegistrations(
+      { ...filters, search: search || undefined },
+      currentPage,
+      sorts
+    );
   };
 
   // ===================================================================
@@ -200,7 +332,7 @@ const Registration = () => {
           <div className={styles.searchBar}>
             <input
               type='text'
-              placeholder='Find name or registration id'
+              placeholder='Find name or student id'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={styles.searchInput}
@@ -240,12 +372,84 @@ const Registration = () => {
       <div className={styles.tableContainer}>
         {/* Header Grid */}
         <div className={styles.tableHeaderGrid}>
-          <ColumnHeader title='Registration Date' hasSort={true} hasFilter={true} />
-          <ColumnHeader title='Registration ID' hasSort={true} hasFilter={true} />
-          <ColumnHeader title='Student Name' hasSort={true} hasFilter={true} />
-          <ColumnHeader title='Grade' hasSort={true} hasFilter={true} />
-          <ColumnHeader title='Section' hasSort={true} hasFilter={true} />
-          <ColumnHeader title='Status' hasSort={true} hasFilter={true} /> 
+          <ColumnHeader
+            title='Registration Date'
+            hasSort={true}
+            fieldKey='registration_date'
+            sortOrder={getSortOrder('registration_date')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterType='date-range'
+            filterKey='date_range'
+            onFilterChange={handleFilterChange}
+            currentFilterValue={[filters.start_date, filters.end_date]}
+          />
+          <ColumnHeader
+            title='Registration ID'
+            hasSort={true}
+            fieldKey='registration_id'
+            sortOrder={getSortOrder('registration_id')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterType='search'
+            filterKey='search_id'
+            onFilterChange={handleFilterChange}
+            currentFilterValue={filters.search_id}
+          />
+          <ColumnHeader
+            title='Student Name'
+            hasSort={true}
+            fieldKey='full_name'
+            sortOrder={getSortOrder('full_name')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterType='search' // <-- Tipe filter search input
+            filterKey='search_name' // <-- Key untuk backend
+            onFilterChange={handleFilterChange}
+            currentFilterValue={filters.search_name}
+          />
+          <ColumnHeader
+            title='Grade'
+            hasSort={true}
+            fieldKey='grade'
+            sortOrder={getSortOrder('grade')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterKey='grade'
+            onFilterChange={handleFilterChange}
+            filterOptions={filterOptions.classes}
+            valueKey='grade'
+            labelKey='grade'
+            currentFilterValue={filters.grade}
+          />
+          <ColumnHeader
+            title='Section'
+            hasSort={true}
+            fieldKey='section'
+            sortOrder={getSortOrder('section')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterKey='section'
+            onFilterChange={handleFilterChange}
+            filterOptions={filterOptions.sections}
+            valueKey='name'
+            labelKey='name'
+            currentFilterValue={filters.section}
+          />
+          <ColumnHeader
+            title='Status'
+            hasSort={true}
+            fieldKey='application_status'
+            sortOrder={getSortOrder('application_status')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterKey='status'
+            onFilterChange={handleFilterChange}
+            filterOptions={filterOptions.applicationStatus} // <-- Opsi Confirmed/Cancelled
+            valueKey='id'
+            labelKey='name'
+            currentFilterValue={filters.status}
+          />
         </div>
 
         {/* Body Grid */}
@@ -300,4 +504,3 @@ const Registration = () => {
 };
 
 export default Registration;
-

@@ -578,6 +578,7 @@ textarea[value]:not([value=""]) {
   gap: 24px; /* Standard gap antar container */
   text-align: left;
   font-size: 20px;
+  padding: 0 16px 0 16px;
   color: #000;
   font-family: Poppins;
   box-sizing: border-box;

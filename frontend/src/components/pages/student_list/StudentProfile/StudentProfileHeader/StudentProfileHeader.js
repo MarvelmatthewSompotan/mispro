@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import styles from "./StudentProfileHeader.module.css";
 import Button from "../../../../atoms/Button";
+import placeholder from "../../../../../assets/user.svg";
 
 const getStatusVariant = (status) => {
   if (!status) return "not-graduated";
@@ -36,13 +37,23 @@ const StudentProfileHeader = ({
   onStatusChange, // <-- Prop added
 }) => {
   const [isStatusDropdownOpen, setStatusDropdownOpen] = useState(false);
+
+  const hasPreview = !!photoPreview;
+  const hasFormDataUrl = !!(formData && formData.photo_url);
+
+  const imageUrl =
+    photoPreview || (formData && formData.photo_url) || placeholder;
+  const imageClass =
+    hasPreview || hasFormDataUrl
+      ? styles.profileImage
+      : styles.profilePlaceholder;
   return (
     <div className={styles.profileHeader}>
       {/* Kolom Kiri: Foto */}
       <div className={styles.headerPhotoSection}>
         <img
-          className={styles.profileImage}
-          src={photoPreview || (formData && formData.photo_url)}
+          className={imageClass} // Gunakan variabel kelas
+          src={imageUrl} // Gunakan variabel URL
           alt=""
         />
       </div>

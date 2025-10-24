@@ -110,7 +110,9 @@ const AppRouter = () => (
       path="/registration-form"
       element={
         <ProtectedRoute>
-          <RegistrationPage />
+          <MainLayout>
+            <RegistrationPage />
+          </MainLayout>
         </ProtectedRoute>
       }
     />

@@ -1,8 +1,8 @@
-/* --- Style Utama (Tidak Berubah) --- */
 .registrationContainer {
   padding: 20px;
   background-color: var(--secondary-background);
-  min-height: 100vh;
+  margin-top: 16px;
+  margin-bottom: 16px;
   font-family: var(--font-primary);
 }
 
@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 24px;
+  font-size: 32px;
   color: var(--main-accent);
   cursor: pointer;
 }
@@ -49,11 +49,15 @@
 .searchBar {
   display: flex;
   align-items: center;
-  margin-top: 20px;
+  justify-content: center;
+  margin-bottom: 32px;
   position: relative;
   width: 426px;
+  margin-top: 20px;
   border: 2px solid #7a7a7a;
   border-radius: 5px;
+  background-color: #fff;
+  height: 40px; /* pastikan tinggi konsisten */
 }
 
 .searchInput {
@@ -69,7 +73,7 @@
   color: #5f84fe;
   opacity: 0.8;
   font-size: 15px;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .searchIconImg {
@@ -82,27 +86,26 @@
   pointer-events: none;
 }
 
-
 /* --- STRUKTUR GRID BARU (Menggantikan .tableWrapper & .registrationTable) --- */
 .tableContainer {
   background: #fff;
   border: 1px solid var(--main-grey);
-  overflow-x: auto; /* Untuk responsivitas jika layar terlalu kecil */
+
   width: 100%;
 }
 
 .tableHeaderGrid,
 .registrationDataRow {
   display: grid;
-  
+
   /* --- PERUBAHAN 2: Ganti 'px' menjadi 'minmax' dan 'fr' untuk fleksibilitas --- */
   /* Kolom akan memiliki lebar minimum, tetapi bisa tumbuh secara proporsional */
-  grid-template-columns: 
-    minmax(185px, 1fr)  /* Registration Date */
-    minmax(206px, 1fr)  /* Registration ID */
-    minmax(196px, 1fr)  /* Student Name */
-    minmax(104px, 1fr)    /* Grade (paling kecil) */
-    minmax(206px, 1fr)  /* Section */
+  grid-template-columns:
+    minmax(185px, 1fr) /* Registration Date */
+    minmax(206px, 1fr) /* Registration ID */
+    minmax(196px, 1fr) /* Student Name */
+    minmax(104px, 1fr) /* Grade (paling kecil) */
+    minmax(206px, 1fr) /* Section */
     minmax(206px, 1fr); /* Status */
 
   border-bottom: 4px solid var(--main-grey, #7a7a7a);
@@ -125,8 +128,6 @@
   border-bottom: none;
 }
 
-
-
 .tableBody {
   display: flex;
   flex-direction: column;
@@ -137,7 +138,6 @@
   text-align: center;
   color: #7a7a7a;
   font-size: 16px;
-
 }
 
 .tableCell {
@@ -151,7 +151,6 @@
   font-size: 14px;
   color: #333;
   font-weight: 500;
-
 }
 
 .tableCell:last-child {
@@ -182,9 +181,9 @@
 }
 
 .statusConfirmed {
-  background-color: var(--green, #00C853);
+  background-color: var(--green, #00c853);
 }
 
 .statusCancelled {
-  background-color: var(--red, #D32F2F);
+  background-color: var(--red, #d32f2f);
 }
