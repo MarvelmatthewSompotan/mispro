@@ -269,7 +269,7 @@ input[type="checkbox"]:checked + .customCheckbox::after {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 32px;
+  font-size: 32xpx;
   color: var(--main-accent);
   cursor: pointer; /* Agar bisa diklik, misal untuk print/export */
 }
