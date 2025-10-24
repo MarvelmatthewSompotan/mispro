@@ -70,10 +70,10 @@
   grid-template-columns:
     minmax(107.97px, 1fr)
     minmax(132px, 1fr)
-    minmax(196px, 1fr)
+    minmax(200px, 1fr)
     minmax(104.51px, 1fr)
     minmax(120px, 1fr)
-    minmax(144px, 1fr)
+    minmax(150px, 1fr)
     minmax(145px, 1fr)
     minmax(178px, 1fr);
   border-bottom: 4px solid #7a7a7a;
