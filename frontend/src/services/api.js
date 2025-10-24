@@ -169,7 +169,9 @@ export const getStudents = (filters = {}) => {
   params.append('per_page', filters.per_page || 25);
 
   // --- Parameter Filter Opsional ---
-  if (filters.search_name) {
+  if (filters.search) {
+    params.append('search', filters.search);
+  } else if (filters.search_name) {
     params.append('search_name', filters.search_name);
   }
   if (filters.school_year_id) {
@@ -216,8 +218,9 @@ export const updateStudent = (studentId, studentData) => {
 };
 
 export const getRegistrations = ({
+  search = '',
   search_name = '',
-  search_id = null, // <-- BARU: Filter ID
+  search_id = '', // <-- BARU: Filter ID
   start_date = null, // <-- BARU: Filter Tanggal Awal
   end_date = null, // <-- BARU: Filter Tanggal Akhir
   grade = null, // <-- BARU: Grade
@@ -233,7 +236,11 @@ export const getRegistrations = ({
 
   // --- Parameter Filter Opsional (String/Date) ---
   // 'search' untuk Student Name (filter bar atas/popup)
-  if (search_name) params.append('search_name', search_name);
+  if (search) {
+    params.append('search', search);
+  } else if (search_name) {
+    params.append('search_name', search_name);
+  }
   if (search_id) params.append('search_id', search_id);
   if (start_date) params.append('start_date', start_date);
   if (end_date) params.append('end_date', end_date);
