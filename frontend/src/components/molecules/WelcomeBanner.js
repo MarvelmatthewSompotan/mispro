@@ -1,17 +1,22 @@
 import React from 'react';
-import Card from '../atoms/Card';
-import Avatar from '../atoms/Avatar';
-import mascot from '../../assets/mascot.png';
-import '../styles/WelcomeBanner.css';
+import mascot from '../../assets/hello_mascot.png';
+import styles from '../styles/WelcomeBanner.module.css';
 
-const WelcomeBanner = ({ name = 'Sarah' }) => (
-  <Card className="welcome-banner">
-    <div>
-      <div className="welcome-banner-title">Hello {name}!</div>
-      <div className="welcome-banner-subtitle">Welcome back</div>
+const WelcomeBanner = ({ name = 'Sarah' }) => {
+  return (
+    <div className={styles.container}>
+      <div className={styles.frameParent}>
+        <div className={styles.frameGroup}>
+          <div className={styles.containerText}>
+            <div className={styles.title}>Hello {name}!!</div>
+            <div className={styles.text1}>It's good to see you back</div>
+          </div>
+          <div className={styles.date}>Last login: dd/mm/yy - hh:mm</div>
+        </div>
+        <img className={styles.mascotIcon} alt="Mascot" src={mascot} />
+      </div>
     </div>
-    <Avatar src={mascot} alt="Mascot" size={80} />
-  </Card>
-);
+  );
+};
 
-export default WelcomeBanner; 
+export default WelcomeBanner;

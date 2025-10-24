@@ -70,7 +70,7 @@ const StudentList = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   // --- STATE BARU untuk Filter & Sort ---
-  const [searchName, setSearchName] = useState('');
+  const [search, setSearch] = useState('');
 
   // State untuk menampung semua filter dari ColumnHeader
   const [filters, setFilters] = useState({});
@@ -100,7 +100,8 @@ const StudentList = () => {
       try {
         const allParams = {
           ...filters,
-          search_name: searchName || filters.search_name || undefined,
+          search: search || undefined,
+          search_name: search ? undefined : filters.search_name || undefined,
           sort: sorts.length > 0 ? sorts : undefined,
           page: page,
           per_page: ITEMS_PER_PAGE,
@@ -117,7 +118,7 @@ const StudentList = () => {
         setLoading(false);
       }
     },
-    [searchName, filters, sorts] // fetchStudents akan dibuat ulang jika ini berubah
+    [search, filters, sorts]
   );
 
   useEffect(() => {
@@ -140,29 +141,33 @@ const StudentList = () => {
     fetchFilterOptions();
   }, []); // Hanya jalan sekali saat komponen mount
 
+  useEffect(() => {
+    if (search && filters.search_name) {
+      setFilters((prev) => {
+        const newFilters = { ...prev };
+        delete newFilters.search_name;
+        return newFilters;
+      });
+    }
+  }, [search, filters.search_name, setFilters]);
+
   // --- useEffect untuk Debounce Search (Disesuaikan) ---
   useEffect(() => {
     const timer = setTimeout(() => {
       setCurrentPage(1); // Reset ke halaman 1
 
-      if (!filters.search_name) {
+      if (search || !filters.search_name) {
         fetchStudents(1);
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchName, filters.search_name]);
+  }, [search, filters.search_name, fetchStudents]);
 
   // --- useEffect untuk Filter dan Sort ---
   useEffect(() => {
-    if (!searchName && !filters.search_name) {
-      fetchStudents(1);
-    } else if (filters.search_name) {
-      // Jika filter popup search_name yang dipakai,
-      // pastikan search bar atas dikosongkan
-      if (searchName) setSearchName('');
-      fetchStudents(1);
-    }
-  }, [filters, sorts, fetchStudents]);
+    if (search) return;
+    fetchStudents(1);
+  }, [filters, sorts, fetchStudents, search]);
 
   const handlePageChange = (page) => {
     fetchStudents(page);
@@ -197,7 +202,7 @@ const StudentList = () => {
       }
 
       if (filterKey === 'search_name' && selectedValue) {
-        setSearchName('');
+        setSearch('');
       }
 
       return newFilters;
@@ -216,8 +221,8 @@ const StudentList = () => {
         <input
           type='text'
           placeholder='Find name or student id'
-          value={searchName}
-          onChange={(e) => setSearchName(e.target.value)}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           className={styles.searchInput}
         />
         <img src={searchIcon} alt='Search' className={styles.searchIcon} />

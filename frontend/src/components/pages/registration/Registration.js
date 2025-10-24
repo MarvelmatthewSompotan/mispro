@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Komponen Button tidak lagi dipakai untuk status, diganti dengan div
 // import Button from '../../atoms/Button';
@@ -89,6 +89,7 @@ const Registration = () => {
       { id: 'Cancelled', name: 'Cancelled' },
     ],
   });
+  const fetchControllerRef = useRef(null);
   // =================================================================
   // --- SEMUA LOGIKA, FETCH, DAN HANDLER DI BAWAH INI TETAP SAMA ---
   // =================================================================
@@ -98,21 +99,32 @@ const Registration = () => {
       // <-- TAMBAHKAN sorts
       const { isBackgroundRefresh = false } = options;
       if (!isBackgroundRefresh) setLoading(true);
-      try {
-        const allParams = {
-          ...filters,
-          search: search || filters.search || undefined, // Gunakan search bar atas jika filter kosong
-          sort: sorts.length > 0 ? sorts : undefined,
-          page: page,
-          per_page: perPage,
-        };
 
-        const res = await getRegistrations(allParams); // Kirim allParams ke getRegistrations
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      fetchControllerRef.current?.abort();
+      fetchControllerRef.current = controller;
+
+      let currentSearch = search;
+      const allParams = {
+        ...filters,
+        ...(currentSearch ? { search: currentSearch } : {}),
+        sort: sorts.length > 0 ? sorts : undefined,
+        page: page,
+        per_page: perPage,
+      };
+      try {
+        const res = await getRegistrations(allParams, { signal });
         setRegistrationData(res.data.data || []);
         setTotalPages(res.data.last_page || 1);
         setTotalRecords(res.total_registered || 0);
         setCurrentPage(res.data.current_page || 1);
       } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Previous fetch aborted due to new input');
+          return;
+        }
         console.error('Error fetching registrations:', err);
         setRegistrationData([]);
         setTotalPages(1);
@@ -142,29 +154,31 @@ const Registration = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setCurrentPage(1);
-      // Cek jika search bar atas tidak kosong DAN filter 'search' popup tidak dipakai
-      if (search && !filters.search) {
-        fetchRegistrations({ search }, 1, sorts);
-      } else if (!search && !filters.search) {
-        // Jika semua kosong, fetch normal
+      if (search) {
+        setCurrentPage(1);
+        setFilters((prev) => {
+          if (prev.search_name) {
+            const newFilters = { ...prev };
+            delete newFilters.search_name;
+            return newFilters;
+          }
+          return prev;
+        });
         fetchRegistrations(filters, 1, sorts);
       }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [search]); // Hanya tergantung pada search bar atas
+    }, 400);
+    return () => {
+      clearTimeout(timer);
+      fetchControllerRef.current?.abort();
+    };
+  }, [search, filters, sorts, fetchRegistrations]);
 
   useEffect(() => {
     // Hindari double-fetch saat search bar atas berubah
     if (search) return;
 
-    // Jika filter popup search yang dipakai, kosongkan state search bar atas
-    if (filters.search) {
-      if (search) setSearch('');
-    }
-
-    fetchRegistrations(filters, 1, sorts); // Selalu fetch saat filters/sorts berubah
-  }, [filters, sorts, fetchRegistrations]);
+    fetchRegistrations(filters, 1, sorts);
+  }, [filters, sorts, fetchRegistrations, search]);
 
   const handleSortChange = (fieldKey) => {
     setSorts((prev) => {
@@ -216,8 +230,7 @@ const Registration = () => {
           delete newFilters[filterKey];
         }
 
-        // Jika filter popup 'search' yang dipakai, kosongkan state search bar atas
-        if (filterKey === 'search' && selectedValue) {
+        if (filterKey === 'search_name' && selectedValue) {
           setSearch('');
         }
       }
@@ -300,7 +313,11 @@ const Registration = () => {
         return reg;
       })
     );
-    fetchRegistrations({ search: search || undefined }, currentPage);
+    fetchRegistrations(
+      { ...filters, search: search || undefined },
+      currentPage,
+      sorts
+    );
   };
 
   // ===================================================================
@@ -315,7 +332,7 @@ const Registration = () => {
           <div className={styles.searchBar}>
             <input
               type='text'
-              placeholder='Find name or registration id'
+              placeholder='Find name or student id'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={styles.searchInput}

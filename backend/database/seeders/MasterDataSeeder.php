@@ -69,7 +69,7 @@ class MasterDataSeeder extends Seeder
         }
 
         // school year
-        $years = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030'];
+        $years = ['2024/2025','2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030'];
         foreach($years as $year) {
             SchoolYear::create(['year' => $year]);
         }
