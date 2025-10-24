@@ -1,20 +1,157 @@
+/* === STYLES DASAR BARU (BERLAKU UNTUK SEMUA KARTU) === */
 .stat-card {
+  flex: 1; 
+  height: 144px;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 11px 12px;
+  box-sizing: border-box;
+  gap: 0px;
+  text-align: left;
+  font-size: 12px;
+  font-family: var(--font-primary);
+}
+
+/* === STYLES STRUKTURAL (BERLAKU UNTUK SEMUA KARTU) === */
+.card-main {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.card-header {
+  align-self: stretch;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 80px;
-  padding: 24px 32px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 2px 12px #0001;
+  gap: 20px;
 }
-.stat-card-value {
+.card-label {
+  position: relative;
+  line-height: 100%;
+  font-size: 12px;
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-medium);
+}
+.card-icon-header { 
+  height: 28px;
+  width: 28px;
+  position: relative;
+}
+.card-value-row {
+  align-self: stretch;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
   font-size: 32px;
-  font-weight: 700;
-  color: #7b7bfa;
 }
-.stat-card-label {
-  font-size: 16px;
-  color: #7b7bfa;
+.card-value { 
+  position: relative;
+  line-height: 100%;
+  font-weight: 600;
+  font-size: 32px;
+}
+.card-icon-value { 
+  height: 24px;
+  width: 24px;
+  position: relative;
+}
+.card-footer {
+  align-self: stretch;
+  position: relative;
+  line-height: 100%;
   font-weight: 500;
-} 
+}
+
+.stat-card.gradient {
+  background: linear-gradient(106.26deg, #5f84fe, #1278f2);
+  box-shadow: none;
+  
+}
+.gradient .card-label,
+.gradient .card-value,
+.gradient .card-footer {
+  color: var(--text-accent);
+}
+.gradient .card-icon-header,
+.gradient .card-icon-value {
+  color: var(--text-accent); 
+}
+
+/* === VARIAN PUTIH (DEFAULT) === */
+.stat-card.white {
+  box-shadow: -5px 3px 15px -4px rgba(0, 0, 0, 0.25);
+  background-color: #fff;
+  color: #5f84fe; 
+}
+.white .card-label,
+.white .card-value,
+.white .card-footer {
+  color: #5f84fe;
+}
+.white .card-icon-header,
+.white .card-icon-value {
+  color: #5f84fe;
+}
+
+/* === VARIAN MERAH === */
+.stat-card.red {
+  box-shadow: -5px 3px 15px -4px rgba(0, 0, 0, 0.25);
+  background-color: var(--secondary-background); 
+}
+
+.red .card-label,
+.red .card-value,
+.red .card-footer {
+  color: var(--red);
+}
+
+.red .card-icon-header,
+.red .card-icon-value {
+  color: var(--red);
+}
+
+/* === VARIAN BIRU (BARU) === */
+.stat-card.blue {
+  box-shadow: -5px 3px 15px -4px rgba(0, 0, 0, 0.25);
+  background-color: var(--secondary-background); 
+}
+
+.blue .card-label,
+.blue .card-value,
+.blue .card-footer {
+  color: var(--main-accent);
+}
+
+.blue .card-icon-header,
+.blue .card-icon-value {
+  color: var(--main-accent);
+}
+
+/* === VARIAN KUNING (BARU) === */
+.stat-card.yellow {
+  box-shadow: -5px 3px 15px -4px rgba(0, 0, 0, 0.25);
+  background-color: var(--secondary-background); 
+}
+
+.yellow .card-label,
+.yellow .card-value,
+.yellow .card-footer {
+  color: var(--yellow);
+}
+
+.yellow .card-icon-header,
+.yellow .card-icon-value {
+  color: var(--yellow);
+}
+
+/* === TAMBAHAN BARU UNTUK FUNGSI KLIK === */
+.stat-card.clickable {
+  cursor: pointer;
+}
