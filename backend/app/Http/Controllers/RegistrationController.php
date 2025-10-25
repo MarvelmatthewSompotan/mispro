@@ -24,6 +24,7 @@ use App\Models\ApplicationForm;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Auth;
+use App\Events\ApplicationFormCreated;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ApplicationPreviewResource;
@@ -623,7 +624,8 @@ class RegistrationController extends Controller
                 
                 // Create application form
                 $applicationForm = $this->createApplicationForm($enrollment);
-                
+                event(new ApplicationFormCreated($applicationForm));
+
                 // Create application form version dengan data snapshot
                 $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
@@ -680,6 +682,7 @@ class RegistrationController extends Controller
                     ]);
                     // Create application form
                     $applicationForm = $this->createApplicationForm($enrollment);
+                    event(new ApplicationFormCreated($applicationForm));
 
                     // Create application form version dengan data snapshot
                     $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
@@ -753,6 +756,8 @@ class RegistrationController extends Controller
                     ]);
 
                     $applicationForm = $this->createApplicationForm($enrollment);
+                    event(new ApplicationFormCreated($applicationForm));
+
                     $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
                     $this->createStudentRelatedData($student, $validated, $enrollment);
