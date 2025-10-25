@@ -1,67 +1,60 @@
-import React, { useState } from "react";
-import StatCard from "../../molecules/StatCard";
-import WelcomeBanner from "../../molecules/WelcomeBanner";
-import styles from "../home/Home.module.css";
-import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
-// import TableRow from '../../molecules/TableRow/TableRow'; // <-- Dihapus
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import StatCard from '../../molecules/StatCard';
+import WelcomeBanner from '../../molecules/WelcomeBanner';
+import styles from '../home/Home.module.css';
+import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
+import { getDashboard } from '../../../services/api';
 
-// Impor ikon yang sebelumnya ada di TableRow.js
-// Sesuaikan path ini jika perlu
-import upenIcon from "../../../assets/edit_pen.png";
-import utrashAltIcon from "../../../assets/trash_icon.png";
-
-const MOCK_USERS = [
-  {
-    id: "01928345938498375",
-    username: "thisisjustanordinaryusername",
-    email: "K1",
-    role: "Elementary School",
-  },
-  {
-    id: "23478092347",
-    username: "thisisjustanordinaryusername",
-    email: "12",
-    role: "User",
-  },
-  // Menambahkan contoh data lain untuk demonstrasi
-  {
-    id: "5561289047",
-    username: "john_doe_tester",
-    email: "N",
-    role: "User",
-  },
-];
-
-// Data untuk kartu yang bisa diganti
-const newStudentData = [
-  {
-    value: "432",
-    label: "New students (Today)",
-    footerText: "Increased 20% from yesterday",
-  },
-  {
-    value: "3980",
-    label: "New students (Last Year)",
-    footerText: "Increased 15% from last year",
-  },
-];
-
-const returnStudentData = [
-  {
-    value: "432",
-    label: "Return students (Today)",
-    footerText: "Increased 20% from yesterday",
-  },
-  {
-    value: "4150",
-    label: "Return students (Last Year)",
-    footerText: "Increased 18% from last year",
-  },
-];
+const formatGrowthText = (percent, period) => {
+  const absPercent = Math.abs(percent);
+  const trend = percent < 0 ? 'decreased' : 'increased';
+  return `${trend} ${absPercent}% from ${period}`;
+};
 
 const Home = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [newStudentSlide, setNewStudentSlide] = useState(0);
   const [returnStudentSlide, setReturnStudentSlide] = useState(0);
+  const REFRESH_INTERVAL = 5000;
+  const fetchControllerRef = useRef(null);
+
+  const fetchDashboard = useCallback(async (options = {}) => {
+    const { isBackgroundRefresh = false } = options;
+    if (!isBackgroundRefresh) setLoading(true);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+    fetchControllerRef.current?.abort();
+    fetchControllerRef.current = controller;
+
+    try {
+      const res = await getDashboard({ signal });
+      setDashboardData(res.data);
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Previous dashboard fetch aborted.');
+        return;
+      }
+      console.error('Failed to load dashboard data:', error);
+    } finally {
+      if (!isBackgroundRefresh) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
+
+  useEffect(() => {
+    const refreshData = () => {
+      console.log('Auto refreshing dashboard data (background)...');
+      fetchDashboard({ isBackgroundRefresh: true });
+    };
+
+    const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
+    return () => clearInterval(intervalId);
+  }, [fetchDashboard]);
 
   const handleNewStudentClick = () => {
     setNewStudentSlide((prev) => (prev === 0 ? 1 : 0));
@@ -71,19 +64,91 @@ const Home = () => {
     setReturnStudentSlide((prev) => (prev === 0 ? 1 : 0));
   };
 
+  if (loading) {
+    return (
+      <div className={styles.loading}>
+        <div className={styles.spinner}></div>
+        <div>Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  if (!dashboardData) {
+    return <div className={styles.error}>Failed to load dashboard data.</div>;
+  }
+
+  const {
+    username,
+    last_login,
+    total_registrations,
+    total_registration_growth_percent,
+    today_registration,
+    today_registration_growth_percent,
+    new_students_today,
+    new_students_today_growth_percent,
+    returning_students_today,
+    returning_students_today_growth_percent,
+    new_students_current_year,
+    returning_students_current_year,
+    new_students_yearly_growth_percent,
+    returning_students_yearly_growth_percent,
+    latest_registrations,
+  } = dashboardData;
+
+  const newStudentData = [
+    {
+      value: new_students_today,
+      label: 'New students (Today)',
+      footerText: formatGrowthText(
+        new_students_today_growth_percent,
+        'yesterday'
+      ),
+    },
+    {
+      value: new_students_current_year,
+      label: 'New students (This Year)',
+      footerText: formatGrowthText(
+        new_students_yearly_growth_percent,
+        'last year'
+      ),
+    },
+  ];
+
+  const returnStudentData = [
+    {
+      value: returning_students_today,
+      label: 'Returning students (Today)',
+      footerText: formatGrowthText(
+        returning_students_today_growth_percent,
+        'yesterday'
+      ),
+    },
+    {
+      value: returning_students_current_year,
+      label: 'Returning students (This Year)',
+      footerText: formatGrowthText(
+        returning_students_yearly_growth_percent,
+        'last year'
+      ),
+    },
+  ];
+
   return (
     <div className={styles.homeContainer}>
       <div className={styles.topContentWrapper}>
-        <WelcomeBanner name="Admin" />
+        <WelcomeBanner name={username} lastLogin={last_login} />
         <div className={styles.statCardGrid}>
           {/* Kartu 1: Sekarang dibungkus seperti yang lain */}
           <div className={styles.cardWithDotsWrapper}>
             <StatCard
-              value="150"
-              label="Total registration"
-              variant="gradient"
-              footerText="Increased 20% from last year"
-              style={{ flex: "none" }} // <-- Tambahkan style ini
+              value={total_registrations}
+              label='Total registration'
+              variant='gradient'
+              footerText={formatGrowthText(
+                total_registration_growth_percent,
+                'last year'
+              )}
+              style={{ flex: 'none' }} // <-- Tambahkan style ini
             />
             {/* Placeholder agar sejajar */}
             <div className={styles.dotsPlaceholder} />
@@ -92,11 +157,14 @@ const Home = () => {
           {/* Kartu 2: Sekarang dibungkus seperti yang lain */}
           <div className={styles.cardWithDotsWrapper}>
             <StatCard
-              value="432"
-              label="Total registration (Today)"
-              variant="red"
-              footerText="Increased 20% from yesterday"
-              style={{ flex: "none" }} // <-- Tambahkan style ini
+              value={today_registration}
+              label='Total registration (Today)'
+              variant='red'
+              footerText={formatGrowthText(
+                today_registration_growth_percent,
+                'yesterday'
+              )}
+              style={{ flex: 'none' }} // <-- Tambahkan style ini
             />
             {/* Placeholder agar sejajar */}
             <div className={styles.dotsPlaceholder} />
@@ -107,20 +175,20 @@ const Home = () => {
             <StatCard
               value={newStudentData[newStudentSlide].value}
               label={newStudentData[newStudentSlide].label}
-              variant="blue"
+              variant='blue'
               footerText={newStudentData[newStudentSlide].footerText}
               onClick={handleNewStudentClick}
-              style={{ flex: "none" }} // <-- Style ini sudah ada
+              style={{ flex: 'none' }} // <-- Style ini sudah ada
             />
             <div className={styles.paginationDots}>
               <span
                 className={`${styles.dot} ${
-                  newStudentSlide === 0 ? styles.active : ""
+                  newStudentSlide === 0 ? styles.active : ''
                 }`}
               ></span>
               <span
                 className={`${styles.dot} ${
-                  newStudentSlide === 1 ? styles.active : ""
+                  newStudentSlide === 1 ? styles.active : ''
                 }`}
               ></span>
             </div>
@@ -131,20 +199,20 @@ const Home = () => {
             <StatCard
               value={returnStudentData[returnStudentSlide].value}
               label={returnStudentData[returnStudentSlide].label}
-              variant="yellow"
+              variant='yellow'
               footerText={returnStudentData[returnStudentSlide].footerText}
               onClick={handleReturnStudentClick}
-              style={{ flex: "none" }} // <-- Style ini sudah ada
+              style={{ flex: 'none' }} // <-- Style ini sudah ada
             />
             <div className={styles.paginationDots}>
               <span
                 className={`${styles.dot} ${
-                  returnStudentSlide === 0 ? styles.active : ""
+                  returnStudentSlide === 0 ? styles.active : ''
                 }`}
               ></span>
               <span
                 className={`${styles.dot} ${
-                  returnStudentSlide === 1 ? styles.active : ""
+                  returnStudentSlide === 1 ? styles.active : ''
                 }`}
               ></span>
             </div>
@@ -158,88 +226,41 @@ const Home = () => {
         <div className={styles.tableContainer}>
           {/* Table Header Row */}
           <div className={styles.tableHeader}>
-            {/* 1. User ID: Sort/Filter dinonaktifkan */}
-            <ColumnHeader title="Student ID" />
-
-            {/* 2. Username */}
-            <ColumnHeader title="Student Name" />
-
-            {/* 3. User Email */}
-            <ColumnHeader title="Grade" />
-
-            {/* 4. Role */}
-            <ColumnHeader title="Section" />
-
-            {/* 5. Actions: Sort/Filter dinonaktifkan */}
-            <ColumnHeader title="School Year" />
+            <ColumnHeader title='Student ID' />
+            <ColumnHeader title='Student Name' />
+            <ColumnHeader title='Grade' />
+            <ColumnHeader title='Section' />
+            <ColumnHeader title='School Year' />
+            <ColumnHeader title='Status' />
           </div>
 
-          {/* Ubah menjadi grid */}
           <div className={styles.tableBody}>
-            {/* JSX dari TableRow sekarang ada di sini */}
-            {MOCK_USERS.map((user) => {
-              // Logika dari TableRow.js dipindahkan ke sini
-              const handleEdit = () =>
-                console.log(`Mengedit User ID: ${user.id}`);
-              const handleDelete = () =>
-                console.log(`Menghapus User ID: ${user.id}`);
-
-              // JSX untuk ikon aksi dari TableRow.js
-              const actionIcons = (
-                <div className={styles.actionContainer}>
-                  <button
-                    className={styles.actionButton}
-                    onClick={handleEdit}
-                    aria-label="Edit User"
+            {latest_registrations?.length > 0 ? (
+              latest_registrations.map((student) => (
+                <div key={student.student_id} className={styles.tableRow}>
+                  <div className={styles.tableCell}>{student.student_id}</div>
+                  <div className={styles.tableCell}>{student.full_name}</div>
+                  <div className={styles.tableCell}>{student.grade}</div>
+                  <div className={styles.tableCell}>{student.section}</div>
+                  <div className={styles.tableCell}>{student.school_year}</div>
+                  <div
+                    className={`${styles.tableCell} ${
+                      student.status?.toLowerCase() === 'confirmed'
+                        ? styles.statusConfirmed
+                        : student.status?.toLowerCase() === 'cancelled'
+                        ? styles.statusCancelled
+                        : ''
+                    }`}
                   >
-                    <img
-                      src={upenIcon}
-                      alt="Edit"
-                      className={styles.icon + " " + styles.editIcon}
-                    />
-                  </button>
-                  <button
-                    className={styles.actionButton}
-                    onClick={handleDelete}
-                    aria-label="Delete User"
-                  >
-                    <img
-                      src={utrashAltIcon}
-                      alt="Delete"
-                      className={styles.icon + " " + styles.deleteIcon}
-                    />
-                  </button>
+                    {student.status}
+                  </div>
                 </div>
-              );
-
-              // JSX dari return statement TableRow.js
-              // Meskipun header di Home.js berbeda (Grade, Section),
-              // kode asli Anda me-render MOCK_USERS (id, username, email, role)
-              // dan TableRow.js me-render 4 properti itu + 1 kolom aksi.
-              // Saya mempertahankan perilaku itu agar "tidak mengubah struktur".
-              return (
-                <div key={user.id} className={styles.tableRow}>
-                  {/* 1. User ID */}
-                  <div className={styles.tableCell} title={user.id}>
-                    {user.id}
-                  </div>
-                  {/* 2. Username */}
-                  <div className={styles.tableCell} title={user.username}>
-                    {user.username}
-                  </div>
-                  {/* 3. User Email */}
-                  <div className={styles.tableCell} title={user.email}>
-                    {user.email}
-                  </div>
-                  {/* 4. Role */}
-                  <div className={styles.tableCell} title={user.role}>
-                    {user.role}
-                  </div>
-                  {/* 5. Actions */}
-                  <div className={styles.actionCell}>{actionIcons}</div>
-                </div>
-              );
-            })}
+              ))
+            ) : (
+              <div className={styles.emptyState}>
+                No recent registrations found.
+              </div>
+            )}
           </div>
         </div>
       </div>
