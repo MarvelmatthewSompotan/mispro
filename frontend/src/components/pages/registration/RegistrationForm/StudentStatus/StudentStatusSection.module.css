@@ -396,12 +396,16 @@
   font-family: Poppins, Arial, sans-serif;
 }
 
-.dropdownHeader + .dropdownItem {
-  background-color: #e6f0ff;
+/* --- Aturan Final Highlight Item Teratas --- */
+
+/* Ini adalah kelas yang memberi warna biru pada item */
+.topItemHighlight {
+  background-color: #e6f0ff; /* Warna highlight biru muda */
   border-top: 1px solid #cce0ff;
   border-bottom: 1px solid #cce0ff;
 }
 
-.dropdownHeader + .dropdownItem:hover {
-  background-color: #d9e8ff; 
+/* (Opsional) Efek hover untuk item yang sedang di-highlight */
+.topItemHighlight:hover {
+  background-color: #d9e8ff; /* Warna biru sedikit lebih gelap saat hover */
 }

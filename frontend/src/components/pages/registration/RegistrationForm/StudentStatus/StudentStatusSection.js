@@ -286,10 +286,13 @@ const StudentStatusSection = ({
                               <div className={styles.dropdownHeader}>
                                 New data :
                               </div>
-                              {searchResults.new.map((student) => (
+                              {searchResults.new.map((student, index) => (
                                 <div
                                   key={`new-${student.student_id}`}
-                                  className={styles.dropdownItem}
+                                  className={`${styles.dropdownItem} ${
+                                    // Logika: Jika ini item pertama (index 0), beri highlight
+                                    index === 0 ? styles.topItemHighlight : ""
+                                  }`}
                                   onClick={() =>
                                     handleSelectStudent({
                                       ...student,
@@ -312,10 +315,18 @@ const StudentStatusSection = ({
                               <div className={styles.dropdownHeader}>
                                 Previous data :
                               </div>
-                              {searchResults.old.map((student) => (
+                              {searchResults.old.map((student, index) => (
                                 <div
                                   key={`old-${student.student_id}`}
-                                  className={styles.dropdownItem}
+                                  className={`${styles.dropdownItem} ${
+                                    // Logika: Beri highlight HANYA JIKA ini item pertama (index 0)
+                                    // DAN daftar 'new' tidak ada atau kosong.
+                                    index === 0 &&
+                                    (!searchResults.new ||
+                                      searchResults.new.length === 0)
+                                      ? styles.topItemHighlight
+                                      : ""
+                                  }`}
                                   onClick={() =>
                                     handleSelectStudent({
                                       ...student,
