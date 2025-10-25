@@ -762,12 +762,13 @@ const StudentProfile = () => {
 
     // ——— NIK (untuk WNI) ———
     if (fullFormData.citizenship === "Indonesia") {
+      // [UPDATE] Menggunakan regex dari FormButtonSection.js
+      const nikRegex = /^[1-9][0-9]{15}$/;
       if (!isFilled(nikAsString)) {
         studentInfoErrors.nik = "NIK is required.";
-      } else if (nikAsString.length !== 16) {
-        studentInfoErrors.nik = "NIK must be 16 digits.";
-      } else if (!/^\d+$/.test(nikAsString)) {
-        studentInfoErrors.nik = "NIK must only contain numbers.";
+      } else if (!nikRegex.test(nikAsString)) {
+        studentInfoErrors.nik =
+          "NIK must be 16 valid digits (not start with 0).";
       }
     }
 
@@ -778,7 +779,11 @@ const StudentProfile = () => {
       } else if (kitasAsString.length < 11 || kitasAsString.length > 16) {
         studentInfoErrors.kitas = "KITAS must be 11-16 characters.";
       }
-      // (tidak ada regex khusus di requirement; dipertahankan)
+
+      // [UPDATE] Menambahkan validasi 'country' dari FormButtonSection.js
+      if (!isFilled(fullFormData.country)) {
+        studentInfoErrors.country = "Country of origin is required.";
+      }
     }
 
     // ——— Academic Status OTHER ———
@@ -897,6 +902,8 @@ const StudentProfile = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // ... (sisa kode di dalam komponen)
 
   useEffect(() => {
     if (Object.keys(errors).length > 0 && scrollTrigger > 0) {
@@ -1385,10 +1392,22 @@ const StudentProfile = () => {
                   </div>
                 )}
               </div>
+
               {studentInfo.citizenship === "Non Indonesia" && (
                 <div className={styles.row}>
-                  <div className={styles.field}>
-                    <label htmlFor="country" className={styles.fieldLabel}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.country
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="country"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.country ? styles.errorLabel : ""
+                      }`}
+                    >
                       Country of origin
                     </label>
                     {isEditing ? (
@@ -1398,8 +1417,14 @@ const StudentProfile = () => {
                         name="country"
                         value={studentInfo.country || ""}
                         onChange={handleStudentInfoChange}
-                        className={styles.formInput}
-                        placeholder="Country of origin"
+                        className={`${styles.formInput} ${
+                          errors.studentInfo?.country ? styles.errorInput : ""
+                        }`}
+                        placeholder={
+                          errors.studentInfo?.country
+                            ? errors.studentInfo.country
+                            : "Country of origin"
+                        }
                       />
                     ) : (
                       <b className={styles.fieldValue}>

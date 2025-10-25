@@ -219,31 +219,31 @@ export const updateStudent = (studentId, studentData) => {
 
 // api.js
 export const getLogbook = ({
-  // Search (string)
-  search_full_name = '', // fullname concat & scoped by school_year
-  search_father_name = '',
-  search_mother_name = '',
+  // Search (string) - Sesuai LogbookController
+  search_name = '',
+  search_family_rank = '',
   search_religion = '',
   search_country = '',
-  search_family_rank = '',
+  search_father = '',
+  search_mother = '',
 
-  // Checkbox (array) — kecuali school_year single-select
-  grade = [],
-  section = [],
-  gender = [],
-  transportation = [],
-  school_year = null, // single
+  // Checkbox (array) - Sesuai LogbookController
+  grades = [],
+  sections = [],
+  school_years = [], // Controller menerima array
+  genders = [],
+  transportations = [],
 
-  // Range
-  registration_start_date = '', // 'YYYY-MM-DD'
-  registration_end_date = '',
-  age_min = '', // dalam tahun (angka), backend yang hitung
-  age_max = '',
+  // Range - Sesuai LogbookController
+  start_date = '', // registration date start
+  end_date = '', // registration date end
+  min_age = '',
+  max_age = '',
 
   // Sort (array of {field, order})
   sort = [],
 
-  // Pagination (opsional)
+  // Pagination
   page = 1,
   per_page = 25,
 } = {}) => {
@@ -252,40 +252,38 @@ export const getLogbook = ({
   params.append('per_page', per_page);
 
   // Search
-  if (search_full_name) params.append('search_full_name', search_full_name);
-  if (search_religion) params.append('search_religion', search_religion);
-  if (search_country) params.append('search_country', search_country);
-  if (search_father_name)
-    params.append('search_father_name', search_father_name);
-  if (search_mother_name)
-    params.append('search_mother_name', search_mother_name);
+  if (search_name) params.append('search_name', search_name);
   if (search_family_rank)
     params.append('search_family_rank', search_family_rank);
+  if (search_religion) params.append('search_religion', search_religion);
+  if (search_country) params.append('search_country', search_country);
+  if (search_father) params.append('search_father', search_father);
+  if (search_mother) params.append('search_mother', search_mother);
 
-  // Checkbox arrays
-  (Array.isArray(grade) ? grade : []).forEach((v) =>
-    params.append('grade[]', v)
+  // Checkbox arrays (menggunakan nama plural sesuai controller)
+  (Array.isArray(grades) ? grades : []).forEach((v) =>
+    params.append('grades[]', v)
   );
-  (Array.isArray(section) ? section : []).forEach((v) =>
-    params.append('section[]', v)
+  (Array.isArray(sections) ? sections : []).forEach((v) =>
+    params.append('sections[]', v)
   );
-  (Array.isArray(gender) ? gender : []).forEach((v) =>
-    params.append('gender[]', v)
+  (Array.isArray(school_years) ? school_years : []).forEach((v) =>
+    params.append('school_years[]', v)
   );
-  (Array.isArray(transportation) ? transportation : []).forEach((v) =>
-    params.append('transportation[]', v)
+  (Array.isArray(genders) ? genders : []).forEach((v) =>
+    params.append('genders[]', v)
   );
-  if (school_year) params.append('school_year', school_year); // single select
+  (Array.isArray(transportations) ? transportations : []).forEach((v) =>
+    params.append('transportations[]', v)
+  );
 
-  // Date range
-  if (registration_start_date)
-    params.append('registration_start_date', registration_start_date);
-  if (registration_end_date)
-    params.append('registration_end_date', registration_end_date);
+  // Date range (sesuai controller)
+  if (start_date) params.append('start_date', start_date);
+  if (end_date) params.append('end_date', end_date);
 
-  // Age range
-  if (age_min !== '' && age_min !== null) params.append('age_min', age_min);
-  if (age_max !== '' && age_max !== null) params.append('age_max', age_max);
+  // Age range (sesuai controller)
+  if (min_age !== '' && min_age !== null) params.append('min_age', min_age);
+  if (max_age !== '' && max_age !== null) params.append('max_age', max_age);
 
   // Sort (multi-field)
   sort?.forEach((s, i) => {
@@ -293,6 +291,7 @@ export const getLogbook = ({
     params.append(`sort[${i}][order]`, s.order); // 'asc' | 'desc'
   });
 
+  // Panggil endpoint /logbook
   return apiFetch(`/logbook?${params.toString()}`);
 };
 

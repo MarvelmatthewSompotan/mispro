@@ -53,8 +53,6 @@ const FormButtonSection = ({
       errors.studentInfo = { ...errors.studentInfo, nickname: true };
     }
 
-    
-
     let isNisnRequired = true;
     const sectionId = allFormData.program?.section_id;
     const classId = allFormData.program?.class_id;
@@ -78,7 +76,6 @@ const FormButtonSection = ({
     }
 
     let isPreviousSchoolRequired = true;
-    
 
     if (sharedData && sectionId && classId) {
       const selectedSection = sharedData.sections?.find(
@@ -135,6 +132,13 @@ const FormButtonSection = ({
         kitasAsString.length > 16
       ) {
         errors.studentInfo = { ...errors.studentInfo, kitas: true };
+      }
+    }
+
+    const countryAsString = String(studentInfo.country || "").trim();
+    if (studentInfo.citizenship === "Non Indonesia") {
+      if (!countryAsString) {
+        errors.studentInfo = { ...errors.studentInfo, country: true };
       }
     }
 

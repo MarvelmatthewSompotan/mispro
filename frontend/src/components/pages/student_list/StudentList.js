@@ -1,17 +1,19 @@
 // StudentList.js
-import React, { useState, useEffect, useCallback } from 'react';
-import styles from './StudentList.module.css';
-import { useNavigate } from 'react-router-dom';
-import searchIcon from '../../../assets/Search-icon.png';
-import { getStudents, getRegistrationOptions } from '../../../services/api';
-import Pagination from '../../atoms/Pagination';
-import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
-import placeholder from '../../../assets/user.svg';
+import React, { useState, useEffect, useCallback } from "react";
+import styles from "./StudentList.module.css";
+import { useNavigate } from "react-router-dom";
+import searchIcon from "../../../assets/Search-icon.png";
+import { getStudents, getRegistrationOptions } from "../../../services/api";
+import Pagination from "../../atoms/Pagination";
+import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
+import placeholder from "../../../assets/user.svg";
 
 const ITEMS_PER_PAGE = 25;
+const REFRESH_INTERVAL = 5000; // --- TAMBAHAN ---
+
 const StudentRow = ({ student, onClick }) => {
   const enrollmentStyle =
-    student.enrollment_status === 'ACTIVE' ? styles.active : styles.status;
+    student.enrollment_status === "ACTIVE" ? styles.active : styles.status;
 
   const statusStyle = styles.status;
 
@@ -21,7 +23,7 @@ const StudentRow = ({ student, onClick }) => {
       <div className={styles.tableCell}>
         <img
           src={student.photo_url || placeholder}
-          alt=''
+          alt=""
           className={student.photo_url ? styles.photo : styles.placeholderPhoto}
         />
       </div>
@@ -70,7 +72,7 @@ const StudentList = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   // --- STATE BARU untuk Filter & Sort ---
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   // State untuk menampung semua filter dari ColumnHeader
   const [filters, setFilters] = useState({});
@@ -82,21 +84,24 @@ const StudentList = () => {
     classes: [],
     schoolYears: [],
     enrollmentStatus: [
-      { id: 'ACTIVE', name: 'Active' },
-      { id: 'INACTIVE', name: 'Inactive' },
+      { id: "ACTIVE", name: "Active" },
+      { id: "INACTIVE", name: "Inactive" },
     ],
     studentStatus: [
-      { id: 'Not Graduate', name: 'Not Graduate' },
-      { id: 'Graduate', name: 'Graduate' },
-      { id: 'Withdraw', name: 'Withdraw' },
-      { id: 'Expelled', name: 'Expelled' },
+      { id: "Not Graduate", name: "Not Graduate" },
+      { id: "Graduate", name: "Graduate" },
+      { id: "Withdraw", name: "Withdraw" },
+      { id: "Expelled", name: "Expelled" },
     ],
   });
 
   // --- Logika Fetching Data (Disesuaikan) ---
   const fetchStudents = useCallback(
-    async (page = 1) => {
-      setLoading(true);
+    async (page = 1, options = {}) => {
+      // --- MODIFIKASI ---
+      const { isBackgroundRefresh = false } = options; // --- TAMBAHAN ---
+      if (!isBackgroundRefresh) setLoading(true); // --- MODIFIKASI ---
+
       try {
         const allParams = {
           ...filters,
@@ -113,9 +118,9 @@ const StudentList = () => {
         setTotalPages(res.data?.last_page || 1);
         setCurrentPage(res.data?.current_page || 1);
       } catch (err) {
-        console.error('Error fetching student data:', err);
+        console.error("Error fetching student data:", err);
       } finally {
-        setLoading(false);
+        if (!isBackgroundRefresh) setLoading(false); // --- MODIFIKASI ---
       }
     },
     [search, filters, sorts]
@@ -135,7 +140,7 @@ const StudentList = () => {
           schoolYears: opts.school_years || [],
         }));
       } catch (err) {
-        console.error('Error fetching registration options:', err);
+        console.error("Error fetching registration options:", err);
       }
     };
     fetchFilterOptions();
@@ -169,6 +174,22 @@ const StudentList = () => {
     fetchStudents(1);
   }, [filters, sorts, fetchStudents, search]);
 
+  // --- TAMBAHAN: useEffect untuk Background Refresh ---
+  useEffect(() => {
+    const refreshData = () => {
+      console.log("Auto refreshing student list (background)...");
+      // fetchStudents dipanggil dengan page saat ini, dan opsi background
+      fetchStudents(currentPage, {
+        isBackgroundRefresh: true,
+      });
+    };
+
+    const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, [currentPage, fetchStudents]); // fetchStudents sudah mencakup (search, filters, sorts)
+  // --------------------------------------------------
+
   const handlePageChange = (page) => {
     fetchStudents(page);
   };
@@ -178,9 +199,9 @@ const StudentList = () => {
     setSorts((prev) => {
       const current = prev[0]?.field === fieldKey ? prev[0] : null;
       let next;
-      if (!current) next = { field: fieldKey, order: 'asc' }; // default → ASC
-      else if (current.order === 'asc')
-        next = { field: fieldKey, order: 'desc' }; // ASC → DESC
+      if (!current) next = { field: fieldKey, order: "asc" }; // default → ASC
+      else if (current.order === "asc")
+        next = { field: fieldKey, order: "desc" }; // ASC → DESC
       else next = null; // DESC → NONE
 
       const newSorts = next ? [next] : [];
@@ -201,8 +222,8 @@ const StudentList = () => {
         delete newFilters[filterKey];
       }
 
-      if (filterKey === 'search_name' && selectedValue) {
-        setSearch('');
+      if (filterKey === "search_name" && selectedValue) {
+        setSearch("");
       }
 
       return newFilters;
@@ -219,19 +240,19 @@ const StudentList = () => {
 
       <div className={styles.searchContainer}>
         <input
-          type='text'
-          placeholder='Find name or student id'
+          type="text"
+          placeholder="Find name or student id"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={styles.searchInput}
         />
-        <img src={searchIcon} alt='Search' className={styles.searchIcon} />
+        <img src={searchIcon} alt="Search" className={styles.searchIcon} />
       </div>
 
       <div className={styles.tableContainer}>
         <div className={styles.tableHeaderGrid}>
           <ColumnHeader
-            title='Photo'
+            title="Photo"
             hasSort={true}
             hasFilter={true}
             disableFilter={true}
@@ -239,91 +260,92 @@ const StudentList = () => {
           />
 
           <ColumnHeader
-            title='Student ID'
+            title="Student ID"
             hasSort={true}
-            fieldKey='student_id'
-            sortOrder={getSortOrder('student_id')}
+            fieldKey="student_id"
+            sortOrder={getSortOrder("student_id")}
             onSort={handleSortChange}
             hasFilter={false}
           />
           <ColumnHeader
-            title='Student Name'
+            title="Student Name"
             hasSort={true}
-            fieldKey='full_name'
-            sortOrder={getSortOrder('full_name')}
+            fieldKey="full_name"
+            sortOrder={getSortOrder("full_name")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterType='search'
-            filterKey='search_name'
+            filterType="search"
+            filterKey="search_name"
             onFilterChange={handleFilterChange}
             currentFilterValue={filters.search_name}
           />
           <ColumnHeader
-            title='Grade'
+            title="Grade"
             hasSort={true}
-            fieldKey='grade'
-            sortOrder={getSortOrder('grade')}
+            fieldKey="grade"
+            sortOrder={getSortOrder("grade")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey='class_id'
+            filterKey="class_id"
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.classes}
-            valueKey='class_id'
-            labelKey='grade'
+            valueKey="class_id"
+            labelKey="grade"
             currentFilterValue={filters.class_id}
           />
           <ColumnHeader
-            title='section'
+            title="section"
             hasSort={true}
-            fieldKey='section'
-            sortOrder={getSortOrder('section')}
+            fieldKey="section"
+            sortOrder={getSortOrder("section")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey='section_id'
+            filterKey="section_id"
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.sections}
-            valueKey='section_id'
-            labelKey='name'
+            valueKey="section_id"
+            labelKey="name"
             currentFilterValue={filters.section_id}
           />
           <ColumnHeader
-            title='School Year'
+            title="School Year"
             hasSort={true}
             hasFilter={true}
-            filterKey='school_year_id'
+            filterKey="school_year_id"
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.schoolYears}
-            valueKey='school_year_id'
-            labelKey='year'
+            valueKey="school_year_id"
+            labelKey="year"
             disableSort={true}
             currentFilterValue={filters.school_year_id}
+            singleSelect={true}
           />
           <ColumnHeader
-            title='Enrollment'
+            title="Enrollment"
             hasSort={true}
-            fieldKey='enrollment_status'
-            sortOrder={getSortOrder('enrollment_status')}
+            fieldKey="enrollment_status"
+            sortOrder={getSortOrder("enrollment_status")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey='enrollment_status'
+            filterKey="enrollment_status"
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.enrollmentStatus}
-            valueKey='id'
-            labelKey='name'
+            valueKey="id"
+            labelKey="name"
             currentFilterValue={filters.enrollment_status}
           />
           <ColumnHeader
-            title='Status'
+            title="Status"
             hasSort={true}
-            fieldKey='student_status'
-            sortOrder={getSortOrder('student_status')}
+            fieldKey="student_status"
+            sortOrder={getSortOrder("student_status")}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey='student_status' // (Backend filter key)
+            filterKey="student_status" // (Backend filter key)
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.studentStatus}
-            valueKey='id'
-            labelKey='name'
+            valueKey="id"
+            labelKey="name"
             currentFilterValue={filters.student_status}
           />
         </div>

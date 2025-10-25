@@ -23,7 +23,9 @@ const TableHeaderController = React.forwardRef(
       onFilterClick,
       showFilterPopup = false,
       filterPopupNode = null,
-      ...props // Props lain seperti 'attributes'
+      disableSort = false,
+      disableFilter = false,
+      ...props
     },
     ref
   ) => {
@@ -45,12 +47,12 @@ const TableHeaderController = React.forwardRef(
               )}
               <>
                 <SortButton
-                  disabled={controlsDisabled}
+                  disabled={disableSort || controlsDisabled}
                   direction={sortDirection} // NEW
                   onClick={onSortClick} // NEW
                 />
                 <FilterButton
-                  disabled={controlsDisabled}
+                  disabled={disableFilter || controlsDisabled}
                   onClick={onFilterClick} // NEW
                   isActive={isFilterActive} // NEW (ganti icon saat popup terbuka)
                   isApplied={isFilterApplied} // NEW (ganti icon saat filter tersimpan)

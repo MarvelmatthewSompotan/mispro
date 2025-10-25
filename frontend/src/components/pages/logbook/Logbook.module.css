@@ -99,16 +99,6 @@
   border-bottom: none;
 }
 
-.cellPhoto {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%; /* pastikan sejajar tinggi dengan cell lain */
-  padding: 16px;
-  border-bottom: 1px solid var(--main-grey);
-  box-sizing: border-box;
-}
-
 /* Foto menyesuaikan tinggi baris */
 .studentPhoto {
   height: 81px; /* tinggi tetap proporsional */
@@ -116,5 +106,5 @@
   max-height: 100%;
   object-fit: cover;
   border-radius: 4px;
-  display: block;
+  display: inline-block;
 }

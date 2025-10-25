@@ -360,6 +360,8 @@ class LogbookController extends Controller
                 
                 $decoded = json_decode($latestVersion->data_snapshot);
                 $photoUrl = $decoded->request_data->photo_url ?? null;
+
+                
                 
                 return [
                     'photo' => $photoPath,

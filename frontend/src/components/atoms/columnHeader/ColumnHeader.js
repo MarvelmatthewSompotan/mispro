@@ -26,6 +26,7 @@ const ColumnHeader = ({
   currentFilterValue,
   disableSort = false,
   disableFilter = false,
+  singleSelect = false,
 }) => {
   // --- STATE BARU untuk mengontrol popup ---
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -138,6 +139,7 @@ const ColumnHeader = ({
             filterKey={filterKey}
             className={filterType === 'date-range' ? styles.popupDateRange : ''}
             initialValue={currentFilterValue}
+            singleSelect={singleSelect}
           />
         )}
       </div>
