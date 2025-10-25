@@ -318,6 +318,7 @@ const StudentList = () => {
             labelKey="year"
             disableSort={true}
             currentFilterValue={filters.school_year_id}
+            singleSelect={true}
           />
           <ColumnHeader
             title="Enrollment"

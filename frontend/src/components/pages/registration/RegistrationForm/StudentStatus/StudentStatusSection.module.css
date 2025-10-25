@@ -395,3 +395,13 @@
   text-transform: capitalize;
   font-family: Poppins, Arial, sans-serif;
 }
+
+.dropdownHeader + .dropdownItem {
+  background-color: #e6f0ff;
+  border-top: 1px solid #cce0ff;
+  border-bottom: 1px solid #cce0ff;
+}
+
+.dropdownHeader + .dropdownItem:hover {
+  background-color: #d9e8ff; 
+}
