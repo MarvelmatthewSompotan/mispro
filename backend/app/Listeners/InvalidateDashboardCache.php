@@ -22,7 +22,11 @@ class InvalidateDashboardCache
      */
     public function handle(ApplicationFormCreated $event): void
     {
-        \Log::info('✅ Listener InvalidateDashboardCache terpanggil!');
-        Cache::forget('dashboard_stats');
+        $applicationForm = $event->applicationForm;
+        $schoolYear = $applicationForm->enrollment->schoolYear->year ?? 'unknown';
+
+        Cache::flush();
+
+        \Log::info("🧹 Dashboard cache flushed globally due to new registration for school year: {$schoolYear}");
     }
 }
