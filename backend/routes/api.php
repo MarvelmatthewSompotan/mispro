@@ -24,13 +24,12 @@ Route::middleware(['auth:sanctum', 'role:admin,registrar,head_registrar,teacher'
 });
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-    Route::get('/users', [UserManagementController::class, 'index']);
     Route::post('/users', [UserManagementController::class, 'store']);
     Route::patch('/users/{user_id}', [UserManagementController::class, 'update']);
     Route::delete('/users/{user_id}', [UserManagementController::class, 'destroy']);
 });
 
-Route::middleware(['auth:sanctum', 'role:registrar,head_registrar,teacher'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
     Route::get('/users', [UserManagementController::class, 'index']);
 });
 
