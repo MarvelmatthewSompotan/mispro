@@ -365,3 +365,17 @@ export const getHistoryDetail = (versionId) =>
 export const getDashboard = () => {
   return apiFetch('/dashboard', { method: 'GET' });
 };
+
+export const getUsers = ({ page = 1, per_page = 25 } = {}) => {
+  const params = new URLSearchParams();
+  params.append('page', page);
+  params.append('per_page', per_page);
+
+  return apiFetch(`/users?${params.toString()}`);
+};
+
+export const deleteUser = (userId) => {
+  return apiFetch(`/users/${userId}`, {
+    method: 'DELETE',
+  });
+};
