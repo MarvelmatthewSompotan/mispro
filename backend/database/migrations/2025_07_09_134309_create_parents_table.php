@@ -22,8 +22,6 @@ return new class extends Migration
             $table->string('mother_company', 100)->nullable();
             $table->string('mother_phone', 20)->nullable();
             $table->string('mother_email', 100)->nullable();
-            $table->string('father_company_addresses')->nullable();
-            $table->string('mother_company_addresses')->nullable();
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
         });
     }
