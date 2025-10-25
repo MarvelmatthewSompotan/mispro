@@ -96,47 +96,47 @@ const StudentInformationSection = ({
       });
   }, []);
 
-useEffect(() => {
-  if (prefill && Object.keys(prefill).length > 0) {
-    // ... logic prefill
-  } else if (Object.keys(prefill).length === 0) {
-    // ... logic reset (yang memicu loop)
-  }
-}, [prefill]);
+  useEffect(() => {
+    if (prefill && Object.keys(prefill).length > 0) {
+      // ... logic prefill
+    } else if (Object.keys(prefill).length === 0) {
+      // ... logic reset (yang memicu loop)
+    }
+  }, [prefill]);
 
-useEffect(() => {
-  // Hanya lakukan aksi jika prefill berubah
-  if (prefill && Object.keys(prefill).length > 0) {
-    // Jika ada data prefill, isi state lokal
-    setFirstName(prefill.first_name || "");
-    setMiddleName(prefill.middle_name || "");
-    setLastName(prefill.last_name || "");
-    setNickname(prefill.nickname || "");
-    setNisn(prefill.nisn || "");
-    setNik(prefill.nik || "");
-    setKitas(prefill.kitas || "");
-    setForeignCountry(prefill.country || "");
-    setGender(prefill.gender || "");
-    setRank(prefill.family_rank || "");
-    setCitizenship(prefill.citizenship || "");
-    setReligion(prefill.religion || "");
-    setPlaceOfBirth(prefill.place_of_birth || "");
-    setDateOfBirth(prefill.date_of_birth || "");
-    setEmail(prefill.email || "");
-    setPreviousSchool(prefill.previous_school || "");
-    setPhone(prefill.phone_number || "");
-    setAcademicStatus(prefill.academic_status || "");
-    setAcademicStatusOther(prefill.academic_status_other || "");
-    setStreet(prefill.street || "");
-    setRt(prefill.rt || "0"); // Default ke "0"
-    setRw(prefill.rw || "0"); // Default ke "0"
-    setVillage(prefill.village || "");
-    setDistrict(prefill.district || "");
-    setCity(prefill.city_regency || "");
-    setProvince(prefill.province || "");
-    setOtherAddress(prefill.other || "");
-  }
-}, [prefill]);
+  useEffect(() => {
+    // Hanya lakukan aksi jika prefill berubah
+    if (prefill && Object.keys(prefill).length > 0) {
+      // Jika ada data prefill, isi state lokal
+      setFirstName(prefill.first_name || "");
+      setMiddleName(prefill.middle_name || "");
+      setLastName(prefill.last_name || "");
+      setNickname(prefill.nickname || "");
+      setNisn(prefill.nisn || "");
+      setNik(prefill.nik || "");
+      setKitas(prefill.kitas || "");
+      setForeignCountry(prefill.country || "");
+      setGender(prefill.gender || "");
+      setRank(prefill.family_rank || "");
+      setCitizenship(prefill.citizenship || "");
+      setReligion(prefill.religion || "");
+      setPlaceOfBirth(prefill.place_of_birth || "");
+      setDateOfBirth(prefill.date_of_birth || "");
+      setEmail(prefill.email || "");
+      setPreviousSchool(prefill.previous_school || "");
+      setPhone(prefill.phone_number || "");
+      setAcademicStatus(prefill.academic_status || "");
+      setAcademicStatusOther(prefill.academic_status_other || "");
+      setStreet(prefill.street || "");
+      setRt(prefill.rt || "0"); // Default ke "0"
+      setRw(prefill.rw || "0"); // Default ke "0"
+      setVillage(prefill.village || "");
+      setDistrict(prefill.district || "");
+      setCity(prefill.city_regency || "");
+      setProvince(prefill.province || "");
+      setOtherAddress(prefill.other || "");
+    }
+  }, [prefill]);
 
   useEffect(() => {
     if (errors) {
@@ -704,26 +704,35 @@ useEffect(() => {
             </div>
           </div>
           {citizenship === "Non Indonesia" && (
-            <div className={styles.row}>
-              <div className={styles.nicknameField}>
-                <label className={styles.label} htmlFor="foreignCountry">
-                  Country of origin
-                </label>
+            <div className={styles.nicknameField}>
+              <label
+                className={`${styles.label} ${
+                  errors.country ? styles.errorLabel : ""
+                }`}
+                htmlFor="foreignCountry"
+              >
+                Country of origin
+              </label>
+              <div className={styles.inputWithError}>
                 <input
                   id="foreignCountry"
                   className={`${styles.valueHighlight} ${
                     foreignCountry ? "hasValue" : ""
-                  }`}
+                  } ${errors.country ? styles.errorInput : ""}`}
                   type="text"
                   value={foreignCountry}
-                  onChange={(e) => {
-                    handleForeignCountry(e.target.value);
-                  }}
+                  onChange={(e) => handleForeignCountry(e.target.value)}
                   placeholder="Country of Origin"
                 />
+                {errors.country && (
+                  <div className={styles.inlineErrorMessage}>
+                    Country of Origin is required
+                  </div>
+                )}
               </div>
             </div>
           )}
+
           <div className={styles.row}>
             {citizenship === "Non Indonesia" && (
               <div className={styles.nicknameField}>

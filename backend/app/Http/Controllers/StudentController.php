@@ -478,7 +478,7 @@ class StudentController extends Controller
                 // Student
                 'first_name'   => 'sometimes|string',
                 'middle_name'  => 'sometimes|nullable|string',
-                'last_name'    => 'sometimes|string',
+                'last_name'    => 'sometimes|nullable|string',
                 'nickname'     => 'sometimes|nullable|string',
                 'citizenship' => 'sometimes|nullable',
                 'country' => 'sometimes|nullable',
