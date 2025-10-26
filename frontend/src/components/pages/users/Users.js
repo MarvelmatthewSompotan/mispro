@@ -7,6 +7,7 @@ import upenIcon from '../../../assets/edit_pen.png';
 import utrashAltIcon from '../../../assets/trash_icon.png';
 import PopUpForm from '../registration/PopUpRegis/PopUpForm';
 import { getUsers, deleteUser, postUser } from '../../../services/api';
+import useAuth from '../../../hooks/useAuth';
 
 const REFRESH_INTERVAL = 5000;
 
@@ -19,6 +20,7 @@ const formatRole = (role) => {
 };
 
 const Users = () => {
+  const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -156,9 +158,11 @@ const Users = () => {
         </div>
         {/* Tombol New User */}
         <div className={styles.button2Parent}>
-          <Button variant='solid' onClick={() => setShowUserPopup(true)}>
-            New User
-          </Button>
+          {isAdmin() && (
+            <Button variant='solid' onClick={() => setShowUserPopup(true)}>
+              New User
+            </Button>
+          )}
           {showUserPopup && (
             <PopUpForm
               type='user'
@@ -222,23 +226,25 @@ const Users = () => {
                           className={`${styles.icon} ${styles.editIcon}`}
                         />
                       </button>
-                      <button
-                        className={styles.actionButton}
-                        onClick={() => setConfirmDeleteUser(user)}
-                        disabled={deletingUserId === user.user_id}
-                        aria-label='Delete User'
-                      >
-                        <img
-                          src={utrashAltIcon}
-                          alt='Delete'
-                          className={`${styles.icon} ${styles.deleteIcon}`}
-                        />
-                        {deletingUserId === user.user_id && (
-                          <span className={styles.deletingText}>
-                            Deleting...
-                          </span>
-                        )}
-                      </button>
+                      {isAdmin() && (
+                        <button
+                          className={styles.actionButton}
+                          onClick={() => setConfirmDeleteUser(user)}
+                          disabled={deletingUserId === user.user_id}
+                          aria-label='Delete User'
+                        >
+                          <img
+                            src={utrashAltIcon}
+                            alt='Delete'
+                            className={`${styles.icon} ${styles.deleteIcon}`}
+                          />
+                          {deletingUserId === user.user_id && (
+                            <span className={styles.deletingText}>
+                              Deleting...
+                            </span>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
