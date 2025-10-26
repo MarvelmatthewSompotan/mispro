@@ -1077,7 +1077,13 @@ const StudentProfile = () => {
       : false;
   }, [options, formData?.residence_id]);
 
-  if (loading) return <div style={{ padding: "20px" }}></div>;
+  if (loading)
+    return (
+      <div className={styles.loading}>
+        <div className={styles.spinner}></div>
+        <div>Loading student profile...</div>
+      </div>
+    );
   if (!formData)
     return <div style={{ padding: "20px" }}>Student not found.</div>;
 
