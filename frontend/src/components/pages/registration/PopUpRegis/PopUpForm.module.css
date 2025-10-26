@@ -36,7 +36,7 @@
   position: relative;
   font-size: 20px;
   line-height: 100%;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: Regular;
 }
 
@@ -57,7 +57,7 @@
   box-sizing: border-box;
   outline: none;
   margin: 0;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   font-weight: 400;
   color: rgba(128, 128, 128, 0.6) !important;
   transition: all 0.2s ease;
@@ -80,14 +80,14 @@
   background-color: #fff;
 }
 
-.schoolYear option[value=""] {
+.schoolYear option[value=''] {
   color: rgba(128, 128, 128, 0.6);
 }
 
 .semester {
   width: 100%;
   position: relative;
-  line-height: 100%;
+  line-height: 40px;
   display: inline-block;
   flex-shrink: 0;
   border-radius: 5px;
@@ -99,7 +99,7 @@
   box-sizing: border-box;
   outline: none;
   margin: 0;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   font-weight: 400;
   color: rgba(128, 128, 128, 0.6) !important;
   transition: all 0.2s ease;
@@ -122,7 +122,7 @@
   background-color: #fff;
 }
 
-.semester option[value=""] {
+.semester option[value=''] {
   color: rgba(128, 128, 128, 0.6);
 }
 
@@ -139,7 +139,7 @@
   box-sizing: border-box;
   outline: none;
   margin: 0;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   font-weight: 400;
   color: rgba(128, 128, 128, 0.6);
   transition: all 0.2s ease;
@@ -179,8 +179,65 @@
   color: #5f84fe;
 }
 
-input[type="date"].schoolYear {
+input[type='date'].schoolYear {
   color: #000;
 }
 
+.fieldWrapper > input[type='text'].schoolYear,
+.fieldWrapper > input[type='email'].schoolYear,
+.fieldWrapper > input[type='password'].schoolYear,
+.fieldWrapper > select.schoolYear {
+  border: 1.5px solid #f5f5f5 !important;
+  background-color: #f5f5f5 !important;
+  padding: 0 12px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
 
+.schoolYear:focus,
+.schoolYear.hasValue,
+.fieldWrapper > input[type='email'].schoolYear:focus,
+.fieldWrapper > input[type='email'].schoolYear.hasValue,
+.fieldWrapper > input[type='text'].schoolYear:focus,
+.fieldWrapper > input[type='text'].schoolYear.hasValue,
+.fieldWrapper > input[type='password'].schoolYear:focus,
+.fieldWrapper > input[type='password'].schoolYear.hasValue {
+  border: 1.5px solid #5f84fe !important;
+  background-color: #f5faff !important;
+  color: #000 !important;
+}
+
+.bAddSubjectParent {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 10px;
+  color: #5f84fe;
+}
+
+/* Gaya untuk tombol saat loading (Processing...) */
+/* Kita targetkan tombol solid yang disabled. Jika Button Anda menerapkan class 'solid' */
+.bAddSubjectParent button[disabled] {
+  opacity: 0.8;
+  cursor: wait; /* Mengganti kursor */
+  /* Opsional: Ubah warna sedikit agar terlihat berbeda dari state non-disabled */
+  background-color: #7995ff; /* Warna biru sedikit lebih gelap atau terang */
+}
+
+.loadingButton {
+  /* Gaya untuk Button saat Loading */
+  background-color: #3b5998 !important; /* Warna sedikit berbeda, misalnya biru tua */
+  color: #ffffff !important; /* Pastikan teks tetap putih */
+  cursor: wait !important; /* Ganti kursor menjadi wait/loading */
+  opacity: 0.9;
+  pointer-events: none; /* Mencegah klik berulang */
+}
+
+/* Jika Anda ingin gaya hover juga dinonaktifkan saat loading */
+.loadingButton:hover {
+  background-color: #3b5998 !important;
+  cursor: wait !important;
+}

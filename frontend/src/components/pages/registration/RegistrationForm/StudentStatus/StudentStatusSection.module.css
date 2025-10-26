@@ -115,7 +115,7 @@
 .studentIdValue {
   flex: 1;
   line-height: 100%;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   font-weight: 400;
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
@@ -162,7 +162,7 @@
   font-weight: 500;
   color: var(--red);
   margin-left: 16px;
-  white-space: nowrap; 
+  white-space: nowrap;
   font-style: italic;
 }
 
@@ -236,7 +236,7 @@
 }
 
 .studentName {
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   font-size: 14px;
   font-weight: 500;
   color: #333;
@@ -245,7 +245,7 @@
 }
 
 .studentId {
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   font-size: 12px;
   font-weight: 400;
   color: #666;
@@ -255,7 +255,7 @@
 
 /* Searching indicator */
 .searching {
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   font-size: 12px;
   font-weight: 400;
   color: #666;
@@ -269,7 +269,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 6px 8px;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   font-size: 16px;
   font-weight: 400;
   background: #fff;
@@ -340,7 +340,6 @@
   background-color: #fffaec;
 }
 .container {
-  
   position: relative;
   background-color: #fff;
   overflow: visible !important;
@@ -400,12 +399,12 @@
 
 /* Ini adalah kelas yang memberi warna biru pada item */
 .topItemHighlight {
-  background-color: #e6f0ff; /* Warna highlight biru muda */
+  background-color: #a7cdff; /* Warna highlight biru muda */
   border-top: 1px solid #cce0ff;
   border-bottom: 1px solid #cce0ff;
 }
 
 /* (Opsional) Efek hover untuk item yang sedang di-highlight */
 .topItemHighlight:hover {
-  background-color: #d9e8ff; /* Warna biru sedikit lebih gelap saat hover */
+  background-color: #7fb6ff; /* Warna biru sedikit lebih gelap saat hover */
 }

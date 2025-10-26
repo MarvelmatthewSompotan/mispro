@@ -5,7 +5,8 @@ import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
 import searchIcon from '../../../assets/Search-icon.png';
 import upenIcon from '../../../assets/edit_pen.png';
 import utrashAltIcon from '../../../assets/trash_icon.png';
-import { getUsers, deleteUser } from '../../../services/api';
+import PopUpForm from '../registration/PopUpRegis/PopUpForm';
+import { getUsers, deleteUser, postUser } from '../../../services/api';
 
 const REFRESH_INTERVAL = 5000;
 
@@ -30,6 +31,7 @@ const Users = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [popupType, setPopupType] = useState('');
   const [showPopup, setShowPopup] = useState(false);
+  const [showUserPopup, setShowUserPopup] = useState(false);
 
   const fetchUsers = useCallback(
     async (options = {}) => {
@@ -72,37 +74,12 @@ const Users = () => {
     return () => clearInterval(intervalId);
   }, [fetchUsers]);
 
-  const onButton2ContainerClick = useCallback(() => {
-    console.log('Tombol New User diklik!');
-  }, []);
-
   const filteredUsers = users.filter((user) =>
     [user.username, user.user_id]
       .join(' ')
       .toLowerCase()
       .includes(search.toLowerCase())
   );
-
-  const handleDelete = async (user) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete user "${user.username}"?`
-      )
-    )
-      return;
-
-    setDeletingUserId(user.user_id);
-    try {
-      await deleteUser(user.user_id);
-      alert(`User "${user.username}" has been deleted.`);
-      await fetchUsers(); // refresh daftar user
-    } catch (error) {
-      console.error('Failed to delete user:', error);
-      alert('Failed to delete user. Please try again.');
-    } finally {
-      setDeletingUserId(null);
-    }
-  };
 
   // === Fungsi Delete dengan modal ===
   const handleConfirmDelete = async () => {
@@ -127,6 +104,40 @@ const Users = () => {
     }
   };
 
+  const handleAddUser = async (userData, resetForm) => {
+    if (
+      !userData.username ||
+      !userData.email ||
+      !userData.password ||
+      !userData.role
+    ) {
+      setPopupType('error');
+      setPopupMessage('All fields are required.');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      return;
+    }
+
+    try {
+      const response = await postUser(userData);
+      const username = response.data?.username || userData.username;
+      setPopupType('success');
+      setPopupMessage(`User "${username}" has been added successfully.`);
+      setShowPopup(true);
+      await fetchUsers();
+
+      if (typeof resetForm === 'function') resetForm();
+      setShowUserPopup(false);
+    } catch (error) {
+      console.error('Failed to add user:', error);
+      setPopupType('error');
+      setPopupMessage('Failed to add user. Please try again.');
+      setShowPopup(true);
+    } finally {
+      setTimeout(() => setShowPopup(false), 3000);
+    }
+  };
+
   return (
     <div className={styles.usersContainer}>
       {/* Header Title */}
@@ -145,9 +156,16 @@ const Users = () => {
         </div>
         {/* Tombol New User */}
         <div className={styles.button2Parent}>
-          <Button variant='solid' onClick={onButton2ContainerClick}>
+          <Button variant='solid' onClick={() => setShowUserPopup(true)}>
             New User
           </Button>
+          {showUserPopup && (
+            <PopUpForm
+              type='user'
+              onClose={() => setShowUserPopup(false)}
+              onCreate={(data, resetForm) => handleAddUser(data, resetForm)}
+            />
+          )}
         </div>
       </div>
 

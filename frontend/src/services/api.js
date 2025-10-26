@@ -379,3 +379,10 @@ export const deleteUser = (userId) => {
     method: 'DELETE',
   });
 };
+
+export const postUser = async (userData) => {
+  return apiFetch('/users', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  });
+};

@@ -489,7 +489,11 @@ const Registration = () => {
       )}
 
       {showPopupForm && (
-        <PopUpForm onClose={handleClosePopup} onCreate={handleCreateForm} />
+        <PopUpForm
+          type='registration'
+          onClose={handleClosePopup}
+          onCreate={handleCreateForm}
+        />
       )}
 
       {showStatusPopup && selectedRegistration && (

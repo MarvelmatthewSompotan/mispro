@@ -64,7 +64,7 @@ class MasterDataController extends Controller
             'financial_policy_contract' => ['Signed', 'Not Signed'],
             'pickup_points' => $pickupPoints,
             'active_status' => ['Not Graduate', 'Graduate', 'Expelled', 'Withdraw'],
-            'role' => ['admin', 'registrar', 'head_registrar', 'teacher']
+            'roles' => ['admin', 'registrar', 'head_registrar', 'teacher']
         ]);
     }
 }
