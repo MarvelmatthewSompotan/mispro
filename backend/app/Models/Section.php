@@ -20,19 +20,16 @@ class Section extends Model
         'name',
     ];
 
-    // Relasi ke SchoolClass tetap ada (untuk data master)
     public function schoolClasses() : HasMany
     {
         return $this->hasMany(SchoolClass::class, 'section_id', 'section_id');
     }
 
-    // Relasi langsung ke Enrollment (untuk pilihan user)
     public function enrollments() : HasMany
     {
         return $this->hasMany(Enrollment::class, 'section_id', 'section_id');
     }
 
-    // Update method getStudentsAttribute
     public function getStudentsAttribute() 
     {
         return Student::whereIn(

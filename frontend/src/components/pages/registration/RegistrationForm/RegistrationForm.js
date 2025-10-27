@@ -314,17 +314,9 @@ const RegistrationForm = () => {
   if (isLoading) {
     return (
       <Main>
-        <div className={styles.formContainer}>
-          <div
-            style={{
-              textAlign: "center",
-              padding: "50px",
-              fontSize: "18px",
-              fontWeight: "medium",
-            }}
-          >
-            <p>Loading registration form...</p>
-          </div>
+        <div className={styles.loading}>
+          <div className={styles.spinner}></div>
+          <div>Loading registration form...</div>
         </div>
       </Main>
     );
@@ -337,7 +329,6 @@ const RegistrationForm = () => {
   return (
     <Main>
       <div className={styles.formContainer}>
-        
         {formData.schoolYear && (
           <div className={styles.formInfo}>
             <p>

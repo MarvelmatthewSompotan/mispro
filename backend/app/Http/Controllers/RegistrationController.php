@@ -333,7 +333,6 @@ class RegistrationController extends Controller
 
     public function store(Request $request, $draft_id)
     {
-        // Tambahkan logging untuk debug
         \Log::info('Registration store called', [
             'draft_id' => $draft_id,
             'request_data' => $request->all(),
@@ -387,17 +386,15 @@ class RegistrationController extends Controller
                 'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
 
-                // student address - Pastikan semua field wajib terisi
                 'street' => 'required|string',
                 'rt' => 'nullable|string',
                 'rw' => 'nullable|string',
                 'village' => 'required|string',
                 'district' => 'required|string',
-                'city_regency' => 'required|string', // Pastikan required
+                'city_regency' => 'required|string',
                 'province' => 'required|string',
                 'other' => 'nullable|string',
 
-                // program, class, major
                 'section_id' => 'required|exists:sections,section_id',
                 'program_id' => 'nullable|exists:programs,program_id',
                 'class_id' => 'required|exists:classes,class_id',
@@ -408,7 +405,6 @@ class RegistrationController extends Controller
                     }
                 },
                 
-                // Facilities
                 'transportation_id' => 'nullable|exists:transportations,transport_id',
                 'pickup_point_id' => 'nullable|integer|exists:pickup_points,pickup_point_id',
                 'pickup_point_custom' => 'nullable|string|max:255',
@@ -416,7 +412,6 @@ class RegistrationController extends Controller
                 'residence_id' => 'required|integer|exists:residence_halls,residence_id',
                 'residence_hall_policy' => 'required|in:Signed,Not Signed',
 
-                // student parent (father)
                 'father_name' => 'nullable|string',
                 'father_company' => 'nullable|string',
                 'father_occupation' => 'nullable|string',
@@ -448,7 +443,6 @@ class RegistrationController extends Controller
                 'mother_address_other' => 'nullable|string',
                 'mother_company_addresses' => 'nullable|string',
 
-                // student parent (guardian)
                 'guardian_name' => 'nullable|string',
                 'relation_to_student' => 'nullable|string',
                 'guardian_phone' => 'nullable|string',
@@ -462,12 +456,10 @@ class RegistrationController extends Controller
                 'guardian_address_province' => 'nullable|string',
                 'guardian_address_other' => 'nullable|string',
                 
-                // payment
                 'tuition_fees' => 'required|in:Full Payment,Installment',
                 'residence_payment' => 'required|in:Full Payment,Installment',
                 'financial_policy_contract' => 'required|in:Signed,Not Signed',
 
-                // discount
                 'discount_name' => 'nullable|string',
                 'discount_notes' => 'nullable|string',
             ]);
@@ -479,7 +471,6 @@ class RegistrationController extends Controller
                 $validated['program_id'] = $program->program_id;
             }
             
-            // data master
             $program = Program::findOrFail($validated['program_id']);
             $schoolClass = SchoolClass::findOrFail($validated['class_id']);
             $major = Major::findOrFail($validated['major_id']);
@@ -491,12 +482,6 @@ class RegistrationController extends Controller
             }
 
             $residenceHall = ResidenceHall::findOrFail($validated['residence_id']);
-
-            // // program 
-            // if ($program->name == 'Other' && !empty($validated['program_other'])) {
-            //     $customProgram = Program::firstOrCreate(['name' => $validated['program_other']]);
-            //     $program = $customProgram; 
-            // }
 
             $pickupPoint = null;
             if ($validated['pickup_point_id']) {
@@ -626,7 +611,7 @@ class RegistrationController extends Controller
                 $applicationForm = $this->createApplicationForm($enrollment);
                 event(new ApplicationFormCreated($applicationForm));
 
-                // Create application form version dengan data snapshot
+                // Create application form version
                 $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
                 // Create student address, parent, guardian for new student
@@ -684,7 +669,7 @@ class RegistrationController extends Controller
                     $applicationForm = $this->createApplicationForm($enrollment);
                     event(new ApplicationFormCreated($applicationForm));
 
-                    // Create application form version dengan data snapshot
+                    // Create application form version
                     $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
                     if ($student->status !== 'Graduate') {
@@ -852,7 +837,6 @@ class RegistrationController extends Controller
 
     private function createStudentRelatedData($student, $validated, $enrollment)
     {
-        // Create student address
         $student->studentAddress()->create([
             'street' => $validated['street'],
             'rt' => $validated['rt'],
@@ -864,7 +848,6 @@ class RegistrationController extends Controller
             'other' => $validated['other'],
         ]);
         
-        // Create student parent & addresses
         $studentParent = $student->studentParent()->create([
             'father_name' => $validated['father_name'],
             'father_company' => $validated['father_company'],
@@ -879,7 +862,6 @@ class RegistrationController extends Controller
             'mother_company_addresses' => $validated['mother_company_addresses'],
         ]);
         
-        // Create addresses
         $this->createParentAddresses($studentParent, $validated);
         $this->createGuardianData($student, $validated);
         $this->createPayment($student, $validated, $enrollment);
@@ -940,7 +922,6 @@ class RegistrationController extends Controller
             'financial_policy_contract' => $validated['financial_policy_contract'],
         ]);
 
-        // discount
         if ($validated['discount_name']) {
             $discountType = DiscountType::firstOrCreate(['name' => $validated['discount_name']]);
             $enrollment->studentDiscount()->create([
@@ -952,7 +933,6 @@ class RegistrationController extends Controller
 
     private function updateStudentData($student, $validated, $registrationId, $draft)
     {
-        // Update student data jika ada perubahan
         $student->update([
             'registration_id' => $registrationId,
             'first_name' => $validated['first_name'],
@@ -982,7 +962,6 @@ class RegistrationController extends Controller
 
     private function updateStudentRelatedData($student, $validated, $enrollment)
     {
-        // Update atau create address
         $student->studentAddress()->updateOrCreate(
             ['student_id' => $student->student_id],
             [
@@ -997,7 +976,6 @@ class RegistrationController extends Controller
             ]
         );
         
-        // Update atau create parent data
         $student->studentParent()->updateOrCreate(
             ['student_id' => $student->student_id],
             [
@@ -1015,7 +993,6 @@ class RegistrationController extends Controller
             ]
         );
         
-        // Update addresses
         $this->updateParentAddresses($student, $validated);
         $this->updateGuardianData($student, $validated);
         $this->updatePayment($student, $validated, $enrollment);
@@ -1023,11 +1000,9 @@ class RegistrationController extends Controller
 
     private function updateParentAddresses($student, $validated)
     {
-        // Dapatkan studentParent terlebih dahulu
         $studentParent = $student->studentParent;
         
         if ($studentParent) {
-            // Update father address
             $studentParent->fatherAddress()->updateOrCreate(
                 ['parent_id' => $studentParent->parent_id],
                 [
@@ -1043,7 +1018,6 @@ class RegistrationController extends Controller
                 ]
             );
 
-            // Update mother address
             $studentParent->motherAddress()->updateOrCreate(
                 ['parent_id' => $studentParent->parent_id],
                 [
@@ -1090,7 +1064,6 @@ class RegistrationController extends Controller
             'financial_policy_contract' => $validated['financial_policy_contract'],
         ]);
 
-        // discount
         if ($validated['discount_name']) {
             $discountType = DiscountType::updateOrCreate(['name' => $validated['discount_name']]);
             $enrollment->studentDiscount()->create([
