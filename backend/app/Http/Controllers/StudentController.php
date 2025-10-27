@@ -561,33 +561,39 @@ class StudentController extends Controller
             $student->update(array_filter($studentData, fn($v) => !is_null($v)));
             if (isset($validated['status'])) {
                 $inactiveStatuses = ['graduate', 'expelled', 'withdraw'];
+                $latestEnrollment = $student->enrollments()
+                    ->orderByDesc('registration_date')
+                    ->first();
+
+                $currentMonth = now()->month;
+                $currentYear = now()->year;
+                $schoolYearStr = ($currentMonth >= 7)
+                    ? $currentYear . '/' . ($currentYear + 1)
+                    : ($currentYear - 1) . '/' . $currentYear;
+
+                $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
+                $currentSchoolYearId = $schoolYear?->school_year_id;
 
                 if (in_array(strtolower($validated['status']), $inactiveStatuses)) {
                     $student->active = 'NO';
-
-                    $latestEnrollment = $student->enrollments()
-                        ->orderByDesc('registration_date')
-                        ->first();
-                    
                     if ($latestEnrollment) {
                         $latestEnrollment->status = 'INACTIVE';
                         $latestEnrollment->save();
                     }
                 } else {
                     $student->active = 'YES';
-                    
-                    $latestEnrollment = $student->enrollments()
-                        ->orderByDesc('registration_date')
-                        ->first();
-
                     if ($latestEnrollment) {
-                        $latestEnrollment->status = 'ACTIVE';
+                        $latestEnrollment->status =
+                            ($currentSchoolYearId && $latestEnrollment->school_year_id === $currentSchoolYearId)
+                            ? 'ACTIVE'
+                            : 'INACTIVE';
                         $latestEnrollment->save();
                     }
                 }
 
                 $student->save();
             }
+
 
             if ($request->hasFile('photo')) {
                 $timestamp = now()->format('Y-m-d_H-i-s');
