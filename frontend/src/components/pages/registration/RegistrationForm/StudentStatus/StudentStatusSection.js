@@ -359,8 +359,10 @@ const StudentStatusSection = ({
             <div className={styles.noteText}>
               <span>By selecting student's status </span>
               <span className={styles.noteTextBold}>New</span>
-              <span> or </span>
+              <span>, </span>
               <span className={styles.noteTextBold}>Transferee </span>
+              <span>, or </span>
+              <span className={styles.noteTextBold}>Old </span>
               <span>
                 will automatically generate a new registration number.
               </span>
