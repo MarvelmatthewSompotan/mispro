@@ -301,7 +301,7 @@
 }
 .header {
   align-self: stretch;
-  height: 322px;
+  height: 295px; 
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
@@ -311,7 +311,7 @@
   padding: 72px 0px 12px;
   box-sizing: border-box;
   gap: 15px;
-  padding-top: 100px;
+  padding-top: 83px; 
 }
 .header1 {
   align-self: stretch;
@@ -1055,7 +1055,7 @@
   background-color: #fff;
   height: 2570px;
   overflow: hidden;
-  padding: 10px 48px;
+  padding: 0px 48px;
   box-sizing: border-box;
   gap: 6px;
   text-align: left;
@@ -1114,7 +1114,6 @@
   margin-right: 16px;
 }
 
-/* === Loading style (match Home) === */
 .loading {
   display: flex;
   justify-content: center;

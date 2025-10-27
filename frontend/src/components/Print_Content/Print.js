@@ -198,7 +198,6 @@ function Print() {
 
   return (
     <div className={styles.printWrapper}>
-      {/* 🔹 Tombol kontrol */}
       <div
         className="no-print"
         style={{

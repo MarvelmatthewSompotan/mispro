@@ -1,24 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Komponen Button tidak lagi dipakai untuk status, diganti dengan div
-// import Button from '../../atoms/Button';
 import PopUpForm from './PopUpRegis/PopUpForm';
 import Pagination from '../../atoms/Pagination';
 import StatusConfirmationPopup from './PopUpRegis/StatusConfirmationPopup';
 import styles from './Registration.module.css';
 import searchIcon from '../../../assets/Search-icon.png';
-import copyIcon from '../../../assets/Copy_icon.png';
+import totalRegisIcon from '../../../assets/total_regis_icon.svg';
 import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
-import Button from '../../atoms/Button'; // Import Button tetap ada untuk "New Form"
+import Button from '../../atoms/Button'; 
 
 import {
   getRegistrations,
   getRegistrationOptions,
 } from '../../../services/api';
 
-// --- Komponen Internal BARU untuk Satu Baris Data (Mengikuti Pola StudentList) ---
 const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
-  // Menentukan style untuk badge status
   const status = registration.application_status?.toLowerCase() || 'confirmed';
   const statusStyle =
     status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
@@ -52,7 +48,7 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
         <div
           className={statusStyle}
           onClick={(e) => {
-            e.stopPropagation(); // Mencegah klik pada baris
+            e.stopPropagation(); 
             onStatusClick(registration);
           }}
         >
@@ -90,9 +86,6 @@ const Registration = () => {
     ],
   });
   const fetchControllerRef = useRef(null);
-  // =================================================================
-  // --- SEMUA LOGIKA, FETCH, DAN HANDLER DI BAWAH INI TETAP SAMA ---
-  // =================================================================
 
   const fetchRegistrations = useCallback(
     async (filters = {}, page = 1, sorts = [], options = {}) => {
@@ -187,17 +180,14 @@ const Registration = () => {
       let next;
 
       if (!current) {
-        // Kasus 1: Sort belum aktif, set ke ASC
         next = { field: fieldKey, order: 'asc' };
       } else if (current.order === 'asc') {
-        // Kasus 2: Saat ini ASC, ganti ke DESC
         next = { field: fieldKey, order: 'desc' };
       } else {
-        // Kasus 3: Saat ini DESC, reset ke NONE
         next = null;
       }
 
-      // Hasilnya selalu array yang berisi 0 atau 1 objek sort
+      
       const newSorts = next ? [next] : [];
       return newSorts;
     });
@@ -252,11 +242,11 @@ const Registration = () => {
 
   useEffect(() => {
     fetchRegistrations(filters, 1, sorts);
+    // eslint-disable-next-line
   }, [fetchRegistrations]);
 
   useEffect(() => {
     const refreshData = () => {
-      // Gunakan state filters dan sorts
       const currentFilters = {
         ...filters,
         search: search || filters.search || undefined,
@@ -320,10 +310,6 @@ const Registration = () => {
     );
   };
 
-  // ===================================================================
-  // --- STRUKTUR JSX DI-REFACTOR MENGGUNAKAN CSS GRID DI BAWAH INI ---
-  // ===================================================================
-
   return (
     <div className={styles.registrationContainer}>
       <div className={styles.frameParent}>
@@ -359,18 +345,16 @@ const Registration = () => {
           </div>
           <div className={styles.ufileAltParent} title='Total Registrations'>
             <img
-              src={copyIcon}
+              src={totalRegisIcon}
               alt='Total Registrations'
-              style={{ width: '16px', height: '20px' }}
+              className={styles.totalRecordsIcon} 
             />
             <div className={styles.div}>{loading ? '...' : totalRecords}</div>
           </div>
         </div>
       </div>
 
-      {/* STRUKTUR GRID BARU MENGGANTIKAN TABLE */}
       <div className={styles.tableContainer}>
-        {/* Header Grid */}
         <div className={styles.tableHeaderGrid}>
           <ColumnHeader
             title='Registration Date'
@@ -403,8 +387,8 @@ const Registration = () => {
             sortOrder={getSortOrder('full_name')}
             onSort={handleSortChange}
             hasFilter={true}
-            filterType='search' // <-- Tipe filter search input
-            filterKey='search_name' // <-- Key untuk backend
+            filterType='search' 
+            filterKey='search_name' 
             onFilterChange={handleFilterChange}
             currentFilterValue={filters.search_name}
           />
@@ -445,7 +429,7 @@ const Registration = () => {
             hasFilter={true}
             filterKey='status'
             onFilterChange={handleFilterChange}
-            filterOptions={filterOptions.applicationStatus} // <-- Opsi Confirmed/Cancelled
+            filterOptions={filterOptions.applicationStatus} 
             valueKey='id'
             labelKey='name'
             currentFilterValue={filters.status}
