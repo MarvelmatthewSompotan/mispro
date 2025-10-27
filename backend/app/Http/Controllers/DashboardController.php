@@ -28,7 +28,6 @@ class DashboardController extends Controller
             $currentMonth = now()->month;
             $currentYear = now()->year;
 
-            // Hitung tahun ajaran berjalan dan sebelumnya
             $schoolYearStr = ($currentMonth >= 7)
                 ? $currentYear . '/' . ($currentYear + 1)
                 : ($currentYear - 1) . '/' . $currentYear;
@@ -37,7 +36,7 @@ class DashboardController extends Controller
                 ? ($currentYear - 1) . '/' . $currentYear
                 : ($currentYear - 2) . '/' . ($currentYear - 1);
 
-            // 🔄 Auto invalidate meta cache jika tahun ajaran berubah
+            // Auto invalidate cache meta if new school year detected
             $lastCachedSchoolYear = Cache::get('last_cached_school_year');
             if ($lastCachedSchoolYear !== $schoolYearStr) {
                 // Hapus semua cache meta per user
@@ -46,7 +45,7 @@ class DashboardController extends Controller
                 \Log::info('Dashboard meta cache invalidated due to new school year: ' . $schoolYearStr);
             }
 
-            // ✅ CACHE 1: Meta Data (30 menit, dinamis per tahun ajaran)
+            // CACHE 1: Meta Data
             $metaCacheKey = 'dashboard_meta_' . $user->user_id . '_' . $schoolYearStr;
 
             $meta = Cache::remember($metaCacheKey, now()->addMinutes(30), function () use ($user, $schoolYearStr, $previousYearStr) {
@@ -62,7 +61,7 @@ class DashboardController extends Controller
                 ];
             });
 
-            // ✅ CACHE 2: Statistik Data (15 menit, dinamis per tahun ajaran dan tanggal)
+            // CACHE 2: Statistik Data 
             $statCacheKey = 'dashboard_stats_' . $schoolYearStr . '_' . now()->format('Ymd');
 
             $stats = Cache::remember($statCacheKey, now()->addMinutes(15), function () use ($schoolYearStr, $previousYearStr, $startOfDay, $endOfDay, $date) {
@@ -171,7 +170,7 @@ class DashboardController extends Controller
                 ];
             });
 
-            // 📊 Real-time Data (tidak di-cache)
+            // Real-time Data
             $latestRegistrations = ApplicationForm::with(['enrollment.student', 'enrollment.schoolClass', 'enrollment.section', 'enrollment.schoolYear'])
                 ->orderByDesc('created_at')
                 ->take(3)

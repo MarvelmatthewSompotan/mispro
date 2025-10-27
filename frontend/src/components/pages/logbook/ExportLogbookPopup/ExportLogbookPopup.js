@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from "react";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import styles from "./ExportLogbookPopup.module.css";
-import placeholder from "../../../../assets/user.svg";
+import React, { useState, useCallback } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import styles from './ExportLogbookPopup.module.css';
+import placeholder from '../../../../assets/user.svg';
 
 const loadImage = (url) =>
   new Promise((resolve) => {
@@ -11,19 +11,19 @@ const loadImage = (url) =>
       return;
     }
     const img = new Image();
-    img.crossOrigin = "Anonymous";
+    img.crossOrigin = 'Anonymous';
     img.onload = () => {
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0);
       try {
-        const dataURL = canvas.toDataURL("image/jpeg");
+        const dataURL = canvas.toDataURL('image/jpeg');
         resolve(dataURL);
       } catch (e) {
         console.error(
-          "Gagal konversi canvas ke DataURL (mungkin Tainted Canvas / CORS):",
+          'Gagal konversi canvas ke DataURL (mungkin Tainted Canvas / CORS):',
           url,
           e
         );
@@ -31,43 +31,43 @@ const loadImage = (url) =>
       }
     };
     img.onerror = (err) => {
-      console.error("Gagal me-load gambar dari URL:", url, err);
+      console.error('Gagal me-load gambar dari URL:', url, err);
       resolve(null);
     };
     try {
       img.src = url;
     } catch (e) {
-      console.error("Error saat set img.src (URL tidak valid?):", url, e);
+      console.error('Error saat set img.src (URL tidak valid?):', url, e);
       resolve(null);
     }
   });
 
 const HEADER_KEY_MAP = {
-  Photo: "photo_url",
-  "Student ID": "student_id",
-  "Full Name": "full_name",
-  Grade: "grade",
-  Section: "section",
-  "School Year": "school_year",
-  Gender: "gender",
-  "Registration Date": "registration_date",
-  Transportation: "transportation",
-  NISN: "nisn",
-  "Family Rank": "family_rank",
-  "Place DOB": "place_dob",
-  Age: "age",
-  Religion: "religion",
-  Country: "country",
-  Address: "address",
-  Phone: "phone",
-  "Father Name": "father_name",
-  "Father Occupation": "father_occupation",
-  "Father Phone": "father_phone",
-  "Mother Name": "mother_name",
-  "Mother Occupation": "mother_occupation",
-  "Mother Phone": "mother_phone",
-  NIK: "nik",
-  KITAS: "kitas",
+  Photo: 'photo_url',
+  'Student ID': 'student_id',
+  'Full Name': 'full_name',
+  Grade: 'grade',
+  Section: 'section',
+  'School Year': 'school_year',
+  Gender: 'gender',
+  'Registration Date': 'registration_date',
+  Transportation: 'transportation',
+  NISN: 'nisn',
+  'Family Rank': 'family_rank',
+  'Place DOB': 'place_dob',
+  Age: 'age',
+  Religion: 'religion',
+  Country: 'country',
+  Address: 'address',
+  Phone: 'phone',
+  'Father Name': 'father_name',
+  'Father Occupation': 'father_occupation',
+  'Father Phone': 'father_phone',
+  'Mother Name': 'mother_name',
+  'Mother Occupation': 'mother_occupation',
+  'Mother Phone': 'mother_phone',
+  NIK: 'nik',
+  KITAS: 'kitas',
 };
 // ---------------------------------------------
 
@@ -103,15 +103,15 @@ const ExportLogbookPopup = ({
 
       // 2. Siapkan Kolom & Header
       const columnsForPDFTable = columns.filter(
-        (column) => selectedColumns.has(column) && column !== "School Year"
+        (column) => selectedColumns.has(column) && column !== 'School Year'
       );
-      const tableHeaders = ["No.", ...columnsForPDFTable];
-      const photoColIndex = tableHeaders.indexOf("Photo");
+      const tableHeaders = ['No.', ...columnsForPDFTable];
+      const photoColIndex = tableHeaders.indexOf('Photo');
 
       // 3. Load semua gambar
       const loadedImages = await Promise.all(
         logbookData.map((student) =>
-          loadImage(student[HEADER_KEY_MAP["Photo"]])
+          loadImage(student[HEADER_KEY_MAP['Photo']])
         )
       );
 
@@ -119,13 +119,13 @@ const ExportLogbookPopup = ({
       const tableData = logbookData.map((student, index) => {
         const row = [index + 1];
         columnsForPDFTable.forEach((column) => {
-          if (column === "Photo") {
+          if (column === 'Photo') {
             row.push(loadedImages[index]);
           } else {
             const dataKey = HEADER_KEY_MAP[column];
             const cellData =
               student[dataKey] === null || student[dataKey] === undefined
-                ? "-"
+                ? '-'
                 : String(student[dataKey]);
             row.push(cellData);
           }
@@ -137,10 +137,10 @@ const ExportLogbookPopup = ({
       const doc = new jsPDF("landscape", "mm", [210, 330]);
       const margin = 7;
       const firstStudent = logbookData.length > 0 ? logbookData[0] : null;
-      const schoolYear = firstStudent ? firstStudent.school_year : "N/A";
+      const schoolYear = firstStudent ? firstStudent.school_year : 'N/A';
       const titleText = `Student Logbook (School Year: ${schoolYear})`;
 
-      doc.setFont("helvetica", "bold");
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(
         globalColors.mainText[0],
@@ -149,21 +149,21 @@ const ExportLogbookPopup = ({
       );
       doc.text(titleText, margin, 15);
 
-      doc.setFont("helvetica", "normal");
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       const now = new Date();
       const createdDate = `Created: ${now
         .getDate()
         .toString()
-        .padStart(2, "0")}/${(now.getMonth() + 1)
+        .padStart(2, '0')}/${(now.getMonth() + 1)
         .toString()
-        .padStart(2, "0")}/${now.getFullYear()} ${now
+        .padStart(2, '0')}/${now.getFullYear()} ${now
         .getHours()
         .toString()
-        .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now
+        .padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now
         .getSeconds()
         .toString()
-        .padStart(2, "0")}`;
+        .padStart(2, '0')}`;
       doc.text(createdDate, margin, 22);
 
       // 6. Panggil autoTable
@@ -172,10 +172,10 @@ const ExportLogbookPopup = ({
         body: tableData,
         startY: 28,
         margin: { left: margin, right: margin },
-        theme: "grid",
-        rowPageBreak: "avoid",
+        theme: 'grid',
+        rowPageBreak: 'avoid',
         styles: {
-          font: "helvetica",
+          font: 'helvetica',
           fontSize: 4,
           cellPadding: 2.0,
           textColor: globalColors.mainText,
@@ -188,24 +188,25 @@ const ExportLogbookPopup = ({
           fontSize: 4,
           fillColor: globalColors.secondaryBg,
           textColor: globalColors.mainText,
-          halign: "middle",
+          halign: 'middle',
           minCellHeight: 7,
         },
         bodyStyles: {
-          halign: "left",
+          halign: 'left',
         },
         columnStyles: {
           [photoColIndex]: {
             cellWidth: 10,
-            halign: "center",
+            halign: 'center',
           },
         },
+
 
         didDrawCell: (data) => {
           if (
             photoColIndex !== -1 &&
             data.column.index === photoColIndex &&
-            data.cell.section === "body"
+            data.cell.section === 'body'
           ) {
             const cellHeight = data.cell.height;
             const cellWidth = data.cell.width;
@@ -228,24 +229,24 @@ const ExportLogbookPopup = ({
               const y = data.cell.y + (cellHeight - imgHeight) / 2;
 
               try {
-                doc.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
+                doc.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
               } catch (e) {
-                console.error("Gagal menambah gambar ke PDF:", e);
+                console.error('Gagal menambah gambar ke PDF:', e);
                 doc.text(
-                  "X",
+                  'X',
                   data.cell.x + cellWidth / 2,
                   data.cell.y + cellHeight / 2,
-                  { halign: "center", valign: "middle" }
+                  { halign: 'center', valign: 'middle' }
                 );
               }
             } else {
               data.cell.text = [];
               // --- FIX: Variabel sekarang terdefinisi ---
               doc.text(
-                "-",
+                '-',
                 data.cell.x + cellWidth / 2,
                 data.cell.y + cellHeight / 2,
-                { halign: "center", valign: "middle" }
+                { halign: 'center', valign: 'middle' }
               );
             }
           }
@@ -258,7 +259,7 @@ const ExportLogbookPopup = ({
               `Page ${data.pageNumber} of ${pageCount}`,
               doc.internal.pageSize.width - margin,
               doc.internal.pageSize.height - 5,
-              { align: "right" }
+              { align: 'right' }
             );
           }
         },
@@ -266,11 +267,11 @@ const ExportLogbookPopup = ({
 
       // 7. Simpan PDF
       const fileName = `Student_Logbook_${
-        new Date().toISOString().split("T")[0]
+        new Date().toISOString().split('T')[0]
       }.pdf`;
       doc.save(fileName);
     } catch (err) {
-      console.error("Gagal membuat PDF:", err);
+      console.error('Gagal membuat PDF:', err);
     } finally {
       setIsDownloading(false);
     }
@@ -314,7 +315,7 @@ const ExportLogbookPopup = ({
                       <td className={styles.dataCell}>{index + 1}</td>
                       {selectedColumnsForPreview.map((column) => {
                         const dataKey = HEADER_KEY_MAP[column];
-                        if (column === "Photo") {
+                        if (column === 'Photo') {
                           return (
                             <td key={column} className={styles.photoCell}>
                               <img
@@ -327,7 +328,7 @@ const ExportLogbookPopup = ({
                         }
                         return (
                           <td key={column} className={styles.dataCell}>
-                            {student[dataKey] || "-"}
+                            {student[dataKey] || '-'}
                           </td>
                         );
                       })}
@@ -339,16 +340,16 @@ const ExportLogbookPopup = ({
           ) : (
             <div
               style={{
-                padding: "48px 24px",
-                textAlign: "center",
-                fontStyle: "italic",
-                color: "#7a7a7a",
-                minHeight: "200px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#f9f9f9",
-                borderRadius: "8px",
+                padding: '48px 24px',
+                textAlign: 'center',
+                fontStyle: 'italic',
+                color: '#7a7a7a',
+                minHeight: '200px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f9f9f9',
+                borderRadius: '8px',
               }}
             >
               Please select at least one column first to see the preview.
@@ -371,7 +372,7 @@ const ExportLogbookPopup = ({
               onClick={handleDownloadPDF}
               disabled={!hasSelectedColumns || isDownloading}
             >
-              {isDownloading ? "Downloading..." : "Download PDF"}
+              {isDownloading ? 'Downloading...' : 'Download PDF'}
             </button>
           </div>
         </div>

@@ -243,8 +243,9 @@ const Home = () => {
                   <div className={styles.tableCell}>{student.grade}</div>
                   <div className={styles.tableCell}>{student.section}</div>
                   <div className={styles.tableCell}>{student.school_year}</div>
-                  <div
-                    className={`${styles.tableCell} ${
+                  <div className={styles.tableCell}>
+                    <div
+                    className={` ${
                       student.status?.toLowerCase() === 'confirmed'
                         ? styles.statusConfirmed
                         : student.status?.toLowerCase() === 'cancelled'
@@ -253,6 +254,7 @@ const Home = () => {
                     }`}
                   >
                     {student.status}
+                    </div>
                   </div>
                 </div>
               ))

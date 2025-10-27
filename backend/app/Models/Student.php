@@ -67,7 +67,6 @@ class Student extends Model
         'status',
     ];
 
-    // Direct Relationships
     public function enrollments() : HasMany 
     {
         return $this->hasMany(Enrollment::class, 'student_id', 'student_id');
@@ -93,7 +92,6 @@ class Student extends Model
         return $this->hasMany(Payment::class, 'student_id', 'student_id');
     }
 
-    // Undirected Relationships
     public function applicationForms() : HasManyThrough
     {
         return $this->hasManyThrough(

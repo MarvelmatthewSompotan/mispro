@@ -79,17 +79,13 @@
 .tableRow {
   display: grid;
   grid-template-columns:
-    minmax(130px, 0.8fr) /* Student ID */
-    minmax(160px, 1.3fr) /* Student Name */
-    minmax(40px, 0.8fr) /* grade */
-    minmax(130px, 1.1fr) /* Section */
+    minmax(130px, 1fr) /* Student ID */
+    minmax(200px, 1.5fr) /* Student Name */
+    minmax(40px, 1fr) /* grade */
+    minmax(130px, 1fr) /* Section */
     minmax(130px, 1fr) /* School Year */
-    minmax(110px, 0.6fr); /* Status */
+    minmax(110px, 1fr); /* Status */
   border-bottom: 2px solid var(--main-grey);
-}
-
-.tableCell:nth-child(3) {
-  margin-left: 23px;
 }
 
 .tableHeader {
@@ -97,17 +93,12 @@
   font-size: 14px;
 }
 
-.tableBody {
-  display: flex;
-  flex-direction: column;
-}
-
 /* === STYLE DARI TABLEROW.MODULE.CSS DIMULAI DI SINI === */
 
 .tableRow {
   display: grid;
   align-items: center;
-  min-height: 50px;
+  min-height: 60px;
   border-bottom: 1px solid var(--main-grey);
   background-color: var(--secondary-background);
   color: var(--main-text);
@@ -120,10 +111,11 @@
 }
 
 .tableCell {
-  padding: 14px 20px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   overflow-wrap: break-word; /* biar teks bisa pindah baris */
+  justify-content: flex-start;
   word-break: break-word; /* pecah kata panjang */
   white-space: normal; /* ubah dari nowrap → normal */
   text-overflow: unset; /* hilangkan ellipsis */
