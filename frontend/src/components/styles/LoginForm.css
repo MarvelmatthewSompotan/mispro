@@ -53,6 +53,9 @@
 .login-form input.registration-input {
   width: 100% !important;
   height: 50px !important;
+  padding-top: 5px;
+  padding-bottom: 24px;
+  padding-right: 16px;
   box-sizing: border-box;
   padding-left: 16px !important;
 }

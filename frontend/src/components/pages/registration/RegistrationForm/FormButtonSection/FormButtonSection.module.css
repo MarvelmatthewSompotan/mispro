@@ -1,4 +1,4 @@
-/* CSS khusus untuk FormButtonSection */
+
 
 .container {
   width: 100%;
@@ -90,7 +90,7 @@
   font-size: 16px;
 }
 
-/* Responsive design */
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
