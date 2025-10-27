@@ -336,10 +336,9 @@ class StudentController extends Controller
 
         $dataSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
         
-        // Extract request_data dari snapshot
+        // Extract request_data from snapshot
         $requestData = $dataSnapshot['request_data'] ?? [];
         
-        // Mapping data sesuai dengan struktur yang diharapkan frontend
         $formattedData = [
             'studentInfo' => [
                 'first_name' => $requestData['first_name'] ?? '',
@@ -455,7 +454,6 @@ class StudentController extends Controller
     {
         DB::beginTransaction();
         try {
-             // --- Ambil versi terakhir untuk student ini ---
             $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
                 ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
                     $q->where('student_id', $student_id);
@@ -473,7 +471,6 @@ class StudentController extends Controller
             $student = Student::with(['studentAddress', 'studentParent', 'studentGuardian', 'enrollments'])
                 ->findOrFail($student_id);
 
-            // --- Validasi input ---
             $validated = $request->validate([
                 // Student
                 'first_name'   => 'sometimes|string',
@@ -560,7 +557,6 @@ class StudentController extends Controller
                 'transportation_policy'  => 'sometimes|nullable|string',
             ]);
 
-            // --- Update data di tabel terkait ---
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
             $student->update(array_filter($studentData, fn($v) => !is_null($v)));
             if (isset($validated['status'])) {
@@ -641,7 +637,6 @@ class StudentController extends Controller
                 'residence_id', 'transportation_id', 'pickup_point_id',
                 'pickup_point_custom', 'residence_hall_policy', 'transportation_policy'
             ])) {
-                // Ambil enrollment terbaru student ini
                 $latestEnrollment = $student->enrollments()
                     ->orderByDesc('registration_date')
                     ->first();
@@ -656,7 +651,6 @@ class StudentController extends Controller
                         'transportation_policy' => $request->transportation_policy ?? $latestEnrollment->transportation_policy,
                     ]);
                 } else {
-                    // Kalau belum ada enrollment → buat baru
                     $student->enrollments()->create([
                         'residence_id'          => $request->residence_id,
                         'transportation_id'     => $request->transportation_id,
@@ -669,11 +663,9 @@ class StudentController extends Controller
             }
 
 
-            // --- Buat snapshot baru di ApplicationFormVersion ---
             $oldSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
             $oldRequestData = $oldSnapshot['request_data'] ?? [];
 
-            // Gabungkan data lama + input baru
             $newRequestData = array_merge($oldRequestData, $validated);
             unset($newRequestData['photo']);
 
@@ -735,7 +727,6 @@ class StudentController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
-            // error validasi biar jelas
             return response()->json([
                 'success' => false,
                 'type' => 'validation',
@@ -743,7 +734,6 @@ class StudentController extends Controller
             ], 422);
         } catch (\Throwable $e) {
             DB::rollBack();
-            // error umum biar frontend bisa baca detail
             return response()->json([
                 'success' => false,
                 'type' => 'server',

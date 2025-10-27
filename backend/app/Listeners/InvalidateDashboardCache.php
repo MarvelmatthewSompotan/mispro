@@ -27,6 +27,6 @@ class InvalidateDashboardCache
 
         Cache::flush();
 
-        \Log::info("🧹 Dashboard cache flushed globally due to new registration for school year: {$schoolYear}");
+        \Log::info("Dashboard cache flushed globally due to new registration for school year: {$schoolYear}");
     }
 }

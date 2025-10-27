@@ -45,20 +45,16 @@ class AuthController extends Controller
         // Set session user
         Auth::login($user);
 
-        // Hapus token lama
         $user->tokens()->delete();
 
-        // Buat token baru
         $newToken = $user->createToken('auth_token');
 
-        // Update last_used_at saat login
         $newToken->accessToken->forceFill([
             'last_used_at' => now(),
         ])->save();
 
         $token = $newToken->plainTextToken;
 
-        // catat login sukses
         $this->auditTrail->log('login_success', [
             'user_id' => $user->user_id,
             'email'   => $user->email,
@@ -81,14 +77,12 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        // ambil token yang sedang dipakai
         $token = $request->user()->currentAccessToken();
 
         if ($token) {
             $token->delete();
         }
 
-        // catat logout
         $this->auditTrail->log('logout_success', [
             'user_id'  => $user->user_id,
             'email'    => $user->email,

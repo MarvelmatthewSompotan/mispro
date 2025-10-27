@@ -20,19 +20,16 @@ class Major extends Model
         'name',
     ];
 
-    // Relasi ke SchoolClass tetap ada (untuk data master)
     public function schoolClasses(): HasMany
     {
         return $this->hasMany(SchoolClass::class, 'major_id', 'major_id');
     }
 
-    // Relasi langsung ke Enrollment (untuk pilihan user)
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class, 'major_id', 'major_id');
     }
 
-    // Update method getStudentsAttribute
     public function getStudentsAttribute()
     {
         return Student::whereIn(
