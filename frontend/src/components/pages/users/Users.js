@@ -1,37 +1,37 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import styles from './Users.module.css';
-import Button from '../../atoms/Button';
-import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
-import searchIcon from '../../../assets/Search-icon.png';
-import upenIcon from '../../../assets/edit_pen.png';
-import utrashAltIcon from '../../../assets/trash_icon.png';
-import PopUpForm from '../registration/PopUpRegis/PopUpForm';
-import { getUsers, deleteUser, postUser } from '../../../services/api';
-import useAuth from '../../../hooks/useAuth';
+import React, { useCallback, useState, useEffect, useRef } from "react";
+import styles from "./Users.module.css";
+import Button from "../../atoms/Button";
+import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
+import searchIcon from "../../../assets/Search-icon.png";
+import upenIcon from "../../../assets/edit_pen.png";
+import utrashAltIcon from "../../../assets/trash_icon.png";
+import PopUpForm from "../../molecules/PopUp/PopUpRegis/PopUpForm";
+import { getUsers, deleteUser, postUser } from "../../../services/api";
+import useAuth from "../../../hooks/useAuth";
 
 const REFRESH_INTERVAL = 5000;
 
 const formatRole = (role) => {
-  if (!role) return '';
+  if (!role) return "";
   return role
-    .split('_')
+    .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .join(" ");
 };
 
 const Users = () => {
   const { isAdmin } = useAuth();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const fetchControllerRef = useRef(null);
   const [deletingUserId, setDeletingUserId] = useState(null);
 
   const [confirmDeleteUser, setConfirmDeleteUser] = useState(null);
-  const [popupMessage, setPopupMessage] = useState('');
-  const [popupType, setPopupType] = useState('');
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [showUserPopup, setShowUserPopup] = useState(false);
 
@@ -39,7 +39,7 @@ const Users = () => {
     async (options = {}) => {
       const { isBackgroundRefresh = false } = options;
       if (!isBackgroundRefresh) setLoading(true);
-      setError('');
+      setError("");
 
       const controller = new AbortController();
       const signal = controller.signal;
@@ -51,12 +51,12 @@ const Users = () => {
         if (response?.success) {
           setUsers(response.data.data || []);
         } else {
-          setError('Failed to load users');
+          setError("Failed to load users");
         }
       } catch (err) {
-        if (err.name === 'AbortError') return;
+        if (err.name === "AbortError") return;
         console.error(err);
-        setError('Error fetching user data');
+        setError("Error fetching user data");
       } finally {
         if (!isBackgroundRefresh) setLoading(false);
       }
@@ -70,7 +70,7 @@ const Users = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      console.log('Auto refreshing user list (background)...');
+      console.log("Auto refreshing user list (background)...");
       fetchUsers({ isBackgroundRefresh: true });
     }, REFRESH_INTERVAL);
     return () => clearInterval(intervalId);
@@ -78,7 +78,7 @@ const Users = () => {
 
   const filteredUsers = users.filter((user) =>
     [user.username, user.user_id]
-      .join(' ')
+      .join(" ")
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -90,14 +90,14 @@ const Users = () => {
 
     try {
       await deleteUser(confirmDeleteUser.user_id);
-      setPopupType('success');
+      setPopupType("success");
       setPopupMessage(`User "${confirmDeleteUser.username}" has been deleted.`);
       setShowPopup(true);
       await fetchUsers();
     } catch (error) {
-      console.error('Failed to delete user:', error);
-      setPopupType('error');
-      setPopupMessage('Failed to delete user. Please try again.');
+      console.error("Failed to delete user:", error);
+      setPopupType("error");
+      setPopupMessage("Failed to delete user. Please try again.");
       setShowPopup(true);
     } finally {
       setDeletingUserId(null);
@@ -113,8 +113,8 @@ const Users = () => {
       !userData.password ||
       !userData.role
     ) {
-      setPopupType('error');
-      setPopupMessage('All fields are required.');
+      setPopupType("error");
+      setPopupMessage("All fields are required.");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
       return;
@@ -123,17 +123,17 @@ const Users = () => {
     try {
       const response = await postUser(userData);
       const username = response.data?.username || userData.username;
-      setPopupType('success');
+      setPopupType("success");
       setPopupMessage(`User "${username}" has been added successfully.`);
       setShowPopup(true);
       await fetchUsers();
 
-      if (typeof resetForm === 'function') resetForm();
+      if (typeof resetForm === "function") resetForm();
       setShowUserPopup(false);
     } catch (error) {
-      console.error('Failed to add user:', error);
-      setPopupType('error');
-      setPopupMessage('Failed to add user. Please try again.');
+      console.error("Failed to add user:", error);
+      setPopupType("error");
+      setPopupMessage("Failed to add user. Please try again.");
       setShowPopup(true);
     } finally {
       setTimeout(() => setShowPopup(false), 3000);
@@ -148,24 +148,24 @@ const Users = () => {
         {/* Search Bar */}
         <div className={styles.searchBar}>
           <input
-            type='text'
-            placeholder='Find username or user ID'
+            type="text"
+            placeholder="Find username or user ID"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
           />
-          <img src={searchIcon} alt='Search' className={styles.searchIconImg} />
+          <img src={searchIcon} alt="Search" className={styles.searchIconImg} />
         </div>
         {/* Tombol New User */}
         <div className={styles.button2Parent}>
           {isAdmin() && (
-            <Button variant='solid' onClick={() => setShowUserPopup(true)}>
+            <Button variant="solid" onClick={() => setShowUserPopup(true)}>
               New User
             </Button>
           )}
           {showUserPopup && (
             <PopUpForm
-              type='user'
+              type="user"
               onClose={() => setShowUserPopup(false)}
               onCreate={(data, resetForm) => handleAddUser(data, resetForm)}
             />
@@ -182,11 +182,11 @@ const Users = () => {
         <div className={styles.tableContainer}>
           {/* Table Header */}
           <div className={styles.tableHeader}>
-            <ColumnHeader title='User ID' hasFilter={false} hasSort={false} />
-            <ColumnHeader title='Username' hasFilter={false} hasSort={true} />
-            <ColumnHeader title='User Email' hasFilter={false} hasSort={true} />
-            <ColumnHeader title='Role' hasFilter={true} hasSort={true} />
-            <ColumnHeader title='Actions' hasSort={false} hasFilter={false} />
+            <ColumnHeader title="User ID" hasFilter={false} hasSort={false} />
+            <ColumnHeader title="Username" hasFilter={false} hasSort={true} />
+            <ColumnHeader title="User Email" hasFilter={false} hasSort={true} />
+            <ColumnHeader title="Role" hasFilter={true} hasSort={true} />
+            <ColumnHeader title="Actions" hasSort={false} hasFilter={false} />
           </div>
 
           {/* Table Body */}
@@ -218,11 +218,11 @@ const Users = () => {
                         onClick={() =>
                           console.log(`Mengedit User ID: ${user.user_id}`)
                         }
-                        aria-label='Edit User'
+                        aria-label="Edit User"
                       >
                         <img
                           src={upenIcon}
-                          alt='Edit'
+                          alt="Edit"
                           className={`${styles.icon} ${styles.editIcon}`}
                         />
                       </button>
@@ -231,11 +231,11 @@ const Users = () => {
                           className={styles.actionButton}
                           onClick={() => setConfirmDeleteUser(user)}
                           disabled={deletingUserId === user.user_id}
-                          aria-label='Delete User'
+                          aria-label="Delete User"
                         >
                           <img
                             src={utrashAltIcon}
-                            alt='Delete'
+                            alt="Delete"
                             className={`${styles.icon} ${styles.deleteIcon}`}
                           />
                           {deletingUserId === user.user_id && (
@@ -265,16 +265,16 @@ const Users = () => {
             </p>
             <div className={styles.modalActions}>
               <Button
-                variant='solid'
+                variant="solid"
                 onClick={handleConfirmDelete}
                 disabled={deletingUserId === confirmDeleteUser.user_id}
               >
                 {deletingUserId === confirmDeleteUser.user_id
-                  ? 'Deleting...'
-                  : 'Yes, Delete'}
+                  ? "Deleting..."
+                  : "Yes, Delete"}
               </Button>
               <Button
-                variant='outline'
+                variant="outline"
                 onClick={() => setConfirmDeleteUser(null)}
               >
                 Cancel
@@ -288,7 +288,7 @@ const Users = () => {
       {showPopup && (
         <div
           className={`${styles.popup} ${
-            popupType === 'success' ? styles.success : styles.error
+            popupType === "success" ? styles.success : styles.error
           }`}
         >
           {popupMessage}

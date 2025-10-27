@@ -2,26 +2,18 @@ import React from "react";
 import styles from "./ParentGuardianSection.module.css";
 
 const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
-  // 1. State untuk melacak field yang sudah diubah/disentuh oleh pengguna
   const [touchedFields, setTouchedFields] = React.useState({});
 
-  // 2. useEffect untuk mereset 'touchedFields' setiap kali ada submit baru
   React.useEffect(() => {
-    // Setiap kali 'errors' dari parent berubah, itu artinya ada proses submit baru.
-    // Kita reset 'touchedFields' agar pengecekan error dimulai dari awal lagi.
     setTouchedFields({});
   }, [errors]);
 
-  // 3. handleChange yang diperbarui untuk menandai field sebagai "sudah disentuh"
   const handleChange = (key) => (e) => {
     const { value } = e.target;
     onDataChange({ [key]: value });
-
-    // Tandai field ini sebagai "sudah disentuh" agar error tidak muncul lagi
     setTouchedFields((prev) => ({ ...prev, [key]: true }));
   };
 
-  // Membuat variabel objek NESTED dari props formData yang FLAT.
   const father = {
     name: formData.father_name,
     company: formData.father_company,
@@ -85,7 +77,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
             </div>
             <div className={styles.parentInfoContent}>
               <div className={styles.fullWidthField}>
-                {/* Name */}
+            
                 <div
                   className={`${styles.fieldGroup} ${
                     errors?.father_name && !touchedFields.father_name
@@ -118,7 +110,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
-                {/* Company & Occupation (tidak wajib) */}
+            
                 <div className={styles.fieldGroup}>
                   <div className={styles.label}>Company name</div>
                   <input
@@ -145,7 +137,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
-                {/* Phone Number */}
+       
                 <div
                   className={`${styles.fieldGroup} ${
                     errors?.father_phone && !touchedFields.father_phone
@@ -177,7 +169,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     placeholder="089281560955"
                   />
                 </div>
-                {/* Email */}
+           
                 <div
                   className={`${styles.fieldGroup} ${
                     errors?.father_email && !touchedFields.father_email
@@ -211,7 +203,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
               </div>
               <div className={styles.addressSection}>
                 <div className={styles.twoColumnRow}>
-                  {/* Street */}
+               
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.father_address_street &&
@@ -245,7 +237,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       placeholder="JL. Sarundajang 01"
                     />
                   </div>
-                  {/* RT/RW (tidak wajib) */}
+           
                   <div className={styles.rtRwGroup}>
                     <div className={styles.rtField}>
                       <div className={styles.label}>RT</div>
@@ -274,7 +266,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
-                  {/* Village */}
+            
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.father_address_village &&
@@ -308,7 +300,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       placeholder="Girian"
                     />
                   </div>
-                  {/* District */}
+            
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.father_address_district &&
@@ -344,7 +336,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
-                  {/* City/Regency */}
+            
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.father_address_city_regency &&
@@ -378,7 +370,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       placeholder="Kotamobagu"
                     />
                   </div>
-                  {/* Province */}
+         
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.father_address_province &&
@@ -413,7 +405,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     />
                   </div>
                 </div>
-                {/* Other (tidak wajib) */}
+          
                 <div className={styles.otherField}>
                   <div className={styles.label}>Other</div>
                   <div className={styles.otherValue}>
@@ -434,7 +426,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
             </div>
           </div>
 
-          {/* Mother's Information */}
+      
           <div className={styles.parentInfoSection}>
             <div className={styles.sectionTitle}>
               <div className={styles.sectionTitleText}>
@@ -443,7 +435,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
             </div>
             <div className={styles.parentInfoContent}>
               <div className={styles.fullWidthField}>
-                {/* Name */}
+        
                 <div
                   className={`${styles.fieldGroup} ${
                     errors?.mother_name && !touchedFields.mother_name
@@ -476,7 +468,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
-                {/* Company & Occupation (tidak wajib) */}
+           
                 <div className={styles.fieldGroup}>
                   <div className={styles.label}>Company name</div>
                   <input
@@ -503,7 +495,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                 </div>
               </div>
               <div className={styles.twoColumnRow}>
-                {/* Phone Number */}
+              
                 <div
                   className={`${styles.fieldGroup} ${
                     errors?.mother_phone && !touchedFields.mother_phone
@@ -535,7 +527,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     placeholder="089281560955"
                   />
                 </div>
-                {/* Email */}
+             
                 <div
                   className={`${styles.fieldGroup} ${
                     errors?.mother_email && !touchedFields.mother_email
@@ -569,7 +561,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
               </div>
               <div className={styles.addressSection}>
                 <div className={styles.twoColumnRow}>
-                  {/* Street */}
+            
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.mother_address_street &&
@@ -603,7 +595,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       placeholder="JL. Sarundajang 01"
                     />
                   </div>
-                  {/* RT/RW (tidak wajib) */}
+            
                   <div className={styles.rtRwGroup}>
                     <div className={styles.rtField}>
                       <div className={styles.label}>RT</div>
@@ -632,7 +624,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
-                  {/* Village */}
+               
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.mother_address_village &&
@@ -666,7 +658,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       placeholder="Girian"
                     />
                   </div>
-                  {/* District */}
+              
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.mother_address_district &&
@@ -702,7 +694,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                   </div>
                 </div>
                 <div className={styles.twoColumnRow}>
-                  {/* City/Regency */}
+                
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.mother_address_city_regency &&
@@ -736,7 +728,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                       placeholder="Kotamobagu"
                     />
                   </div>
-                  {/* Province */}
+             
                   <div
                     className={`${styles.fieldGroup} ${
                       errors?.mother_address_province &&
@@ -771,7 +763,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
                     />
                   </div>
                 </div>
-                {/* Other (tidak wajib) */}
+       
                 <div className={styles.otherField}>
                   <div className={styles.label}>Other</div>
                   <div className={styles.otherValue}>
@@ -792,7 +784,7 @@ const ParentGuardianSection = ({ formData, onDataChange, errors }) => {
             </div>
           </div>
 
-          {/* Authorized Guardian's Information */}
+  
           <div className={styles.parentInfoSection}>
             <div className={styles.sectionTitle}>
               <div className={styles.sectionTitleText}>

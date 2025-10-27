@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import styles from './PopUpConfirm.module.css';
-import { submitRegistrationForm } from '../../../../../services/api';
-import WrongSectionPopup from './WrongSectionPopup';
-import Button from '../../../../atoms/Button';
+import { submitRegistrationForm } from '../../../../services/api';
+import WrongSectionPopup from '../../../pages/registration/RegistrationForm/PopUp/WrongSectionPopup';
+import Button from '../../../atoms/Button';
 
 const PopUpConfirm = React.memo(
   ({

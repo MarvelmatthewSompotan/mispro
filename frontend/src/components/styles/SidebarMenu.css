@@ -20,6 +20,25 @@
   transform: translateX(-100%);
 }
 
+.sidebar-menu.open {
+  transform: translateX(0) !important;
+}
+
+.sidebar-menu.icon-only {
+  width: 56px;
+  padding: 24px 12px;
+}
+.sidebar-menu.icon-only .sidebar-menu-item {
+  justify-content: center;
+  padding: 12px;
+}
+.sidebar-menu.icon-only .sidebar-menu-icon {
+  margin-right: 0;
+}
+.sidebar-menu.icon-only .sidebar-menu-label {
+  display: none;
+}
+
 .sidebar-menu-list {
   list-style: none;
   padding: 0;
@@ -60,4 +79,3 @@
   display: flex;
   align-items: center;
 }
-

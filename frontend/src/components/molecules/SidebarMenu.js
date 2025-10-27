@@ -1,6 +1,6 @@
 // src/components/molecules/SidebarMenu.js
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import Icon from "../atoms/Icon";
 import homeIcon from "../../assets/Home-icon.png";
@@ -24,9 +24,53 @@ const menus = [
 
 // Terima prop 'isOpen' dari komponen Main.js
 const SidebarMenu = ({ isOpen }) => {
+  const asideRef = useRef(null);
+  const [isIconOnly, setIsIconOnly] = useState(false);
+
+  useEffect(() => {
+    // Pakai ResizeObserver + window resize utk memutuskan kapan "icon-only".
+    const decideCompact = () => {
+      const vw = Math.max(
+        document.documentElement.clientWidth,
+        window.innerWidth || 0
+      );
+      // 1) Mode icon-only jika layar sangat sempit
+      const compact = vw < 560;
+      setIsIconOnly(compact);
+      if (compact) document.body.classList.add("sidebar-compact");
+      else document.body.classList.remove("sidebar-compact");
+
+      // 2) Lebar dinamis agar sidebar SELALU bisa muncul:
+      //    min 56px (ikon saja), max 280px, dan tak mepet ke tepi (beri buffer 16px)
+      const MIN = 56;
+      const MAX = 280;
+      const buffer = 16; // jarak aman dari tepi
+      // sisakan ruang konten: sidebar <= vw - buffer, tapi tetap di range MIN..MAX
+      const computed = Math.min(MAX, Math.max(MIN, vw - buffer));
+      document.documentElement.style.setProperty(
+        "--sidebar-current-width",
+        `${computed}px`
+      );
+    };
+
+    decideCompact();
+    const ro = new ResizeObserver(decideCompact);
+    if (asideRef.current) ro.observe(asideRef.current);
+    window.addEventListener("resize", decideCompact);
+    return () => {
+      window.removeEventListener("resize", decideCompact);
+      ro.disconnect();
+    };
+  }, []);
+
   return (
-    // Terapkan class 'open' berdasarkan prop 'isOpen'
-    <aside className={`sidebar-menu ${isOpen ? "open" : ""}`}>
+    // Tambahkan class 'icon-only' saat kompak
+    <aside
+      ref={asideRef}
+      className={`sidebar-menu ${isOpen ? "open" : ""} ${
+        isIconOnly ? "icon-only" : ""
+      }`}
+    >
       <nav>
         <ul className="sidebar-menu-list">
           {menus.map((menu) => (

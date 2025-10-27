@@ -30,13 +30,15 @@ const Main = ({ children }) => {
   useEffect(() => {
     const handleResize = () => {
       if (isDetailLikePage) {
+        // tetap tutup otomatis untuk halaman detail
         setSidebarOpen(false);
-      } else {
-        if (window.innerWidth < 1024) {
-          setSidebarOpen(false);
-        } else {
-          setSidebarOpen(true);
-        }
+        return;
+      }
+
+      // selain itu, biarkan hamburger yang kontrol di layar kecil
+      // kalau layar besar, buka otomatis
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(true);
       }
     };
 

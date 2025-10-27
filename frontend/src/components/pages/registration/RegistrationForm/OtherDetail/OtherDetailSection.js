@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import styles from "./OtherDetailSection.module.css";
 
 const OtherDetailSection = () => {
-  // State untuk form fields
+  
   const [studentRequirementStatus, setStudentRequirementStatus] =
     useState("complete");
   const [incompleteDocuments, setIncompleteDocuments] = useState("");
 
-  // Handler baru untuk mengelola perubahan status radio button
+
   const handleStatusChange = (e) => {
     const newStatus = e.target.value;
     setStudentRequirementStatus(newStatus);
 
-    // Jika status diubah menjadi "complete", kosongkan field incomplete documents
+ 
     if (newStatus === "complete") {
       setIncompleteDocuments("");
     }
@@ -71,7 +71,7 @@ const OtherDetailSection = () => {
             </div>
           </div>
 
-          {/* Tampilkan section ini hanya jika statusnya "incomplete" */}
+        
           {studentRequirementStatus === "incomplete" && (
             <div className={styles.documentsSection}>
               <div className={styles.documentsLabel}>Incomplete documents:</div>
