@@ -251,18 +251,6 @@ const ExportLogbookPopup = ({
               );
             }
           }
-
-          // Logika nomor halaman
-          const pageCount = doc.internal.getNumberOfPages();
-          if (pageCount > 1) {
-            doc.setFontSize(8);
-            doc.text(
-              `Page ${data.pageNumber} of ${pageCount}`,
-              doc.internal.pageSize.width - margin,
-              doc.internal.pageSize.height - 5,
-              { align: 'right' }
-            );
-          }
         },
       });
 
