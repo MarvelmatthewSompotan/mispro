@@ -312,7 +312,7 @@ const Registration = () => {
   };
 
   const handleDeleteClick = (row) => {
-    console.log("Delete registration clicked:", row.registration_id);
+    console.log(row.registration_id);
   };
 
   const handleCloseStatusPopup = () => {
