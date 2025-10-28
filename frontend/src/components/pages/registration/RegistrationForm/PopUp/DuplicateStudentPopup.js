@@ -7,7 +7,7 @@ const DuplicateStudentPopup = ({ onClose }) => {
     <div className={styles.overlay}>
       <div className={styles.popup}>
         <div className={styles.iconWrapper}>
-          {/* Icon can be an SVG or an emoji */}
+       
           ⚠️
         </div>
         <h3 className={styles.title}>Student Already Exists</h3>

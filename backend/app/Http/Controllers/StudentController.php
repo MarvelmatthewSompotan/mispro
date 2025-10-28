@@ -37,15 +37,18 @@ class StudentController extends Controller
 
         $targetSchoolYearId = $request->input('school_year_id', $defaultSchoolYearId);
 
+        $isStudentStatusFiltered = $request->filled('student_status');
 
         $latestEnrollments = DB::table('enrollments as e1')
         ->select('e1.student_id', 'e1.enrollment_id')
-        ->where('e1.school_year_id', $targetSchoolYearId)
+        ->when(!$isStudentStatusFiltered, function ($query) use ($targetSchoolYearId) {
+            $query->where('e1.school_year_id', $targetSchoolYearId);
+        })
         ->whereRaw('e1.registration_date = (
             SELECT MAX(e2.registration_date)
             FROM enrollments AS e2
             WHERE e2.student_id = e1.student_id
-            AND e2.school_year_id = e1.school_year_id
+            ' . (!$isStudentStatusFiltered ? 'AND e2.school_year_id = e1.school_year_id' : '') . '
         )');
 
         $latestPayments = DB::table('payments as p1')
@@ -82,13 +85,11 @@ class StudentController extends Controller
             $join->on('payments.student_id', '=', 'students.student_id');
         });
         
-        $query->where('application_forms.status', 'Confirmed');
-        
-        $isStudentStatusFiltered = $request->filled('student_status');
         $isEnrollmentStatusFiltered = $request->filled('enrollment_status');
 
         if (!$isStudentStatusFiltered && !$isEnrollmentStatusFiltered) {
-            $query->where('students.active', 'YES');
+            $query->where('students.active', 'YES')
+                ->where('application_forms.status', 'Confirmed');
         }
 
         // Filter Search
@@ -181,7 +182,13 @@ class StudentController extends Controller
         
         return response()->json([
             'success' => true,
-            'data' => $students
+            'data' => $students,
+            'meta' => [
+                'current_page' => $students->currentPage(),
+                'last_page' => $students->lastPage(),
+                'per_page' => $students->perPage(),
+                'total' => $students->total(),
+            ]
         ]);
     }
 

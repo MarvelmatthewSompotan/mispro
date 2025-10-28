@@ -34,4 +34,12 @@ class ApplicationForm extends Model
     {
         return $this->hasMany(ApplicationFormVersion::class, 'application_id', 'application_id');
     }
+
+    public function latestVersion()
+    {
+        return $this->hasOne(ApplicationFormVersion::class, 'application_id', 'application_id')
+                    ->where('action', 'registration')
+                    ->latest('version_id');
+    }
+
 }

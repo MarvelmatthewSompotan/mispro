@@ -1,4 +1,4 @@
-/* CSS khusus untuk FacilitiesSection */
+
 
 .container {
   width: 100%;
@@ -96,7 +96,7 @@
   gap: 10px;
 }
 
-/* Hidden inputs untuk accessibility */
+
 .hiddenRadio,
 .hiddenCheckbox {
   position: absolute;
@@ -105,7 +105,6 @@
   height: 0;
 }
 
-/* Radio button styles */
 .radioLabel {
   display: flex;
   flex-direction: row;
@@ -159,20 +158,18 @@
 }
 
 @keyframes grow-in {
-  /* Tahap Awal: Mulai dari ukuran 0 (tidak terlihat) */
+ 
   from {
     transform: scale(0);
     opacity: 0;
   }
-
-  /* Tahap Akhir: Selesai di ukuran normal */
   to {
     transform: scale(1);
     opacity: 1;
   }
 }
 
-/* Checkbox styles */
+
 .checkboxLabel {
   display: flex;
   flex-direction: row;
@@ -347,7 +344,7 @@ textarea::placeholder {
   }
 }
 
-/* Error label untuk sub label Facilities */
+
 .facilitiesSectionErrorLabel {
   color: #ff4444 !important;
   font-weight: 600;

@@ -28,7 +28,7 @@ const FacilitiesSection = ({
       setPickupPoints(sharedData.pickup_points || []);
       setResidenceHalls(sharedData.residence_halls || []);
     } else {
-      // Fallback to individual API call if shared data not available
+    
       getRegistrationOptions()
         .then((data) => {
           console.log("Facilities data received:", data);
@@ -42,14 +42,13 @@ const FacilitiesSection = ({
     }
   }, [sharedData]);
 
-  // Tambahkan ref untuk tracking apakah ini adalah prefill pertama kali
+ 
   const isInitialPrefill = useRef(true);
   const hasInitialized = useRef(false);
 
-  // Prefill hanya sekali saat component pertama kali mount atau saat prefill berubah signifikan
+ 
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-      // Jika ini prefill pertama kali atau prefill berubah signifikan
       if (isInitialPrefill.current || !hasInitialized.current) {
         console.log("Initial prefilling FacilitiesSection with:", prefill);
 
@@ -75,7 +74,7 @@ const FacilitiesSection = ({
         isInitialPrefill.current = false;
       }
     } else if (Object.keys(prefill).length === 0 && hasInitialized.current) {
-      // Jika prefill menjadi empty object (reset form), reset semua field
+  
       console.log("Resetting FacilitiesSection form");
       setSelectedTransportation("");
       setSelectedPickupPoint("");
@@ -93,12 +92,12 @@ const FacilitiesSection = ({
       selectedTransportation === String(value) ? "" : String(value);
     setSelectedTransportation(newSelectedId);
 
-    // Selalu reset pickup point saat transportasi berubah
+
     setSelectedPickupPoint("");
     setPickupPointCustom("");
 
-    // Logika baru yang lebih spesifik untuk mereset asrama
-    let newSelectedResidenceId = selectedResidence; // Asumsikan state tidak berubah
+  
+    let newSelectedResidenceId = selectedResidence; 
 
     const selectedTransport = transportations.find(
       (t) => t.transport_id === Number(newSelectedId)
@@ -107,28 +106,27 @@ const FacilitiesSection = ({
       ? selectedTransport.type.toLowerCase()
       : "";
 
-    // Cek apakah transportasi yang baru dipilih adalah Own Car / School Bus
+  
     if (transportType === "own car" || transportType === "school bus") {
-      // Jika ya, cek apakah pilihan asrama saat ini adalah sebuah "Dormitory"
+ 
       if (selectedResidence) {
         const currentResidence = residenceHalls.find(
           (r) => r.residence_id === Number(selectedResidence)
         );
 
-        // Jika pilihan saat ini adalah "Dormitory", baru kosongkan state-nya
+
         if (
           currentResidence &&
           currentResidence.type.toLowerCase().includes("dormitory")
         ) {
           setSelectedResidence("");
-          newSelectedResidenceId = ""; // Siapkan state kosong untuk dikirim
+          newSelectedResidenceId = ""; 
         }
-        // Jika yang terpilih bukan "Dormitory" (misal: "Non-Residence Hall"),
-        // maka state-nya tidak akan diubah dan pilihan tetap ada.
+        
       }
     }
 
-    // Kirim data terbaru ke parent component
+  
     onDataChange({
       transportation_id: newSelectedId ? Number(newSelectedId) : null,
       pickup_point_id: null,
@@ -195,12 +193,12 @@ const FacilitiesSection = ({
   };
 
   const handleResidenceChange = (value) => {
-    // 1. Tentukan ID residensial baru (bisa kosong jika opsi yang sama diklik ulang)
+   
     const newSelectedResidence =
       selectedResidence === String(value) ? "" : String(value);
-    setSelectedResidence(newSelectedResidence); // 2. Update state lokal untuk me-render ulang UI
+    setSelectedResidence(newSelectedResidence); 
 
-    // 3. Cek apakah pilihan baru adalah asrama (dormitory)
+  
     const selectedResidenceObj = residenceHalls.find(
       (r) => r.residence_id === Number(newSelectedResidence)
     );
@@ -208,21 +206,21 @@ const FacilitiesSection = ({
       ? selectedResidenceObj.type.toLowerCase().includes("dormitory")
       : false;
 
-    // 4. Siapkan data dasar yang akan selalu dikirim ke parent
+  
     let dataToSend = {
       residence_id: newSelectedResidence ? Number(newSelectedResidence) : null,
       residence_hall_policy: residencePolicy ? "Signed" : "Not Signed",
     };
 
-    // 5. Logika Kondisional untuk Data Transportasi
+
     if (isDormitory) {
-      // Jika asrama dipilih, reset semua state lokal & data transportasi
+  
       setSelectedTransportation("");
       setSelectedPickupPoint("");
       setPickupPointCustom("");
       setTransportationPolicy(false);
 
-      // Tambahkan data transportasi yang sudah direset ke dalam payload yang akan dikirim
+    
       dataToSend = {
         ...dataToSend,
         transportation_id: null,
@@ -231,8 +229,7 @@ const FacilitiesSection = ({
         transportation_policy: "Not Signed",
       };
     } else {
-      // Jika BUKAN asrama yang dipilih (atau pilihan dikosongkan),
-      // pertahankan data transportasi yang ada saat ini.
+   
       dataToSend = {
         ...dataToSend,
         transportation_id: selectedTransportation
@@ -247,7 +244,7 @@ const FacilitiesSection = ({
       };
     }
 
-    // 6. Kirim semua data yang sudah diperbarui ke parent dalam satu panggilan
+  
     onDataChange(dataToSend);
   };
 
@@ -255,7 +252,7 @@ const FacilitiesSection = ({
     const value = e.target.checked;
     setResidencePolicy(value);
 
-    // Kirim data lengkapnya
+  
     onDataChange({
       transportation_id: selectedTransportation
         ? Number(selectedTransportation)
@@ -267,7 +264,7 @@ const FacilitiesSection = ({
       pickup_point_custom: pickupPointCustom,
       transportation_policy: transportationPolicy ? "Signed" : "Not Signed",
       residence_id: selectedResidence ? Number(selectedResidence) : null,
-      residence_hall_policy: value ? "Signed" : "Not Signed", // Nilai yang diubah
+      residence_hall_policy: value ? "Signed" : "Not Signed", 
     });
   };
 

@@ -1,4 +1,4 @@
-/* CSS khusus untuk OtherDetailSection */
+
 
 .container {
   width: 75.5%;
@@ -155,13 +155,11 @@
 }
 
 @keyframes grow-in {
-  /* Tahap Awal: Mulai dari ukuran 0 (tidak terlihat) */
+ 
   from {
     transform: scale(0);
     opacity: 0;
   }
-
-  /* Tahap Akhir: Selesai di ukuran normal */
   to {
     transform: scale(1);
     opacity: 1;
@@ -277,7 +275,7 @@ textarea::placeholder {
   font-weight: 400;
 }
 
-/* Hidden inputs untuk accessibility */
+
 .hiddenRadio {
   position: absolute;
   opacity: 0;
@@ -285,7 +283,7 @@ textarea::placeholder {
   height: 0;
 }
 
-/* Radio button styles */
+
 .radioLabel {
   display: flex;
   flex-direction: row;
@@ -296,7 +294,6 @@ textarea::placeholder {
   padding: 12px;
 }
 
-/* Responsive design */
 @media (max-width: 1000px) {
   .container {
     flex-direction: column;

@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import styles from './PopUpForm.module.css';
+import React, { useState, useRef, useEffect } from "react";
+import styles from "./PopUpForm.module.css";
 import {
   startRegistration,
   getRegistrationOptions,
   addSchoolYear,
-} from '../../../../services/api';
-import Button from '../../../atoms/Button';
+} from "../../../../services/api";
+import Button from "../../../atoms/Button";
 
 const useInputStyling = (ref, value) => {
   useEffect(() => {
@@ -15,7 +15,7 @@ const useInputStyling = (ref, value) => {
   }, [value]);
 };
 
-const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
+const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
   const formRef = useRef();
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState({
@@ -25,16 +25,16 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
   });
 
   // Registration fields
-  const [schoolYear, setSchoolYear] = useState('');
-  const [semester, setSemester] = useState('');
-  const [date, setDate] = useState('');
+  const [schoolYear, setSchoolYear] = useState("");
+  const [semester, setSemester] = useState("");
+  const [date, setDate] = useState("");
   const [isAddingYear, setIsAddingYear] = useState(false);
 
   // User fields
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
 
   const schoolYearRef = useRef(null);
   const semesterRef = useRef(null);
@@ -56,13 +56,13 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
   useInputStyling(roleRef, role);
 
   const resetForm = () => {
-    setSchoolYear('');
-    setSemester('');
-    setDate(new Date().toISOString().split('T')[0]); // Reset date ke hari ini
-    setUsername('');
-    setEmail('');
-    setPassword('');
-    setRole('');
+    setSchoolYear("");
+    setSemester("");
+    setDate(new Date().toISOString().split("T")[0]); // Reset date ke hari ini
+    setUsername("");
+    setEmail("");
+    setPassword("");
+    setRole("");
     formRef.current?.reset();
   };
 
@@ -75,7 +75,7 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
         roles: data.roles || [],
       });
     } catch (err) {
-      console.error('Error fetching options:', err);
+      console.error("Error fetching options:", err);
     }
   };
 
@@ -86,8 +86,8 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
   }, []);
 
   useEffect(() => {
-    if (type === 'registration') {
-      setDate(new Date().toISOString().split('T')[0]);
+    if (type === "registration") {
+      setDate(new Date().toISOString().split("T")[0]);
     }
   }, [type]);
 
@@ -98,7 +98,7 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
       fetchOptions();
       if (newYear?.school_year_id) setSchoolYear(newYear.school_year_id);
     } catch (err) {
-      alert('Failed to add new school year');
+      alert("Failed to add new school year");
     } finally {
       setIsAddingYear(false);
     }
@@ -108,8 +108,8 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (type === 'registration') {
-        if (!schoolYear || !semester) return alert('Please fill all fields');
+      if (type === "registration") {
+        if (!schoolYear || !semester) return alert("Please fill all fields");
         const res = await startRegistration(schoolYear, semester);
         if (res.success) {
           onCreate(
@@ -122,18 +122,18 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
             resetForm
           );
         } else {
-          alert('Failed to start registration');
+          alert("Failed to start registration");
         }
-      } else if (type === 'user') {
+      } else if (type === "user") {
         if (!username || !email || !password || !role) {
           setLoading(false); // Matikan loading jika validasi gagal
-          return alert('Please fill all fields');
+          return alert("Please fill all fields");
         }
         onCreate({ username, email, password, role }, resetForm);
       }
     } catch (err) {
       console.error(err);
-      alert('An error occurred');
+      alert("An error occurred");
     } finally {
       setLoading(false);
     }
@@ -145,13 +145,13 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
         className={styles.popUpForm}
         onSubmit={handleSubmit}
         ref={formRef}
-        autoComplete='off'
+        autoComplete="off"
       >
         <div className={styles.createNewRegistration}>
-          {type === 'registration' ? 'Create New Registration' : 'Add New User'}
+          {type === "registration" ? "Create New Registration" : "Add New User"}
         </div>
 
-        {type === 'registration' ? (
+        {type === "registration" ? (
           <div className={styles.frameParent}>
             {/* School Year */}
             <div className={styles.fieldWrapper}>
@@ -160,20 +160,20 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
                 className={styles.schoolYear} // <-- CLASS DARI CSS LAMA
                 value={schoolYear}
                 onChange={(e) =>
-                  e.target.value === 'add_new'
+                  e.target.value === "add_new"
                     ? handleAddNewSchoolYear()
                     : setSchoolYear(e.target.value)
                 }
                 disabled={isAddingYear}
                 required
               >
-                <option value=''>Select Year</option>
+                <option value="">Select Year</option>
                 {options.schoolYears.map((sy) => (
                   <option key={sy.school_year_id} value={sy.school_year_id}>
                     {sy.year}
                   </option>
                 ))}
-                <option value='add_new' style={{ color: 'var(--main-accent)' }}>
+                <option value="add_new" style={{ color: "var(--main-accent)" }}>
                   + Add more
                 </option>
               </select>
@@ -188,7 +188,7 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
                 onChange={(e) => setSemester(e.target.value)}
                 required
               >
-                <option value=''>Select Semester</option>
+                <option value="">Select Semester</option>
                 {options.semesters.map((s) => (
                   <option key={s.semester_id} value={s.semester_id}>
                     {s.name}
@@ -202,7 +202,7 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
               <input
                 ref={dateRef} // <-- REF BARU
                 className={styles.dateField} // <-- CLASS DARI CSS LAMA
-                type='date'
+                type="date"
                 value={date}
                 readOnly
               />
@@ -215,12 +215,12 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
               <input
                 ref={usernameRef} // <-- REF BARU
                 className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input text
-                type='text'
-                placeholder='Username'
+                type="text"
+                placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                autoComplete='new-password'
+                autoComplete="new-password"
               />
             </div>
             {/* User Email */}
@@ -228,12 +228,12 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
               <input
                 ref={emailRef} // <-- REF BARU
                 className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input email
-                type='email'
-                placeholder='User Email'
+                type="email"
+                placeholder="User Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete='new-password'
+                autoComplete="new-password"
               />
             </div>
             {/* User Password */}
@@ -241,12 +241,12 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
               <input
                 ref={passwordRef} // <-- REF BARU
                 className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input password
-                type='password'
-                placeholder='User Password'
+                type="password"
+                placeholder="User Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete='new-password'
+                autoComplete="new-password"
               />
             </div>
             {/* Role (Select) */}
@@ -257,12 +257,12 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 required
-                autoComplete='off'
+                autoComplete="off"
               >
-                <option value=''>Select Role</option>
+                <option value="">Select Role</option>
                 {options.roles.map((r) => (
                   <option key={r} value={r}>
-                    {r.charAt(0).toUpperCase() + r.slice(1).replace('_', ' ')}
+                    {r.charAt(0).toUpperCase() + r.slice(1).replace("_", " ")}
                   </option>
                 ))}
               </select>
@@ -271,16 +271,16 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
         )}
 
         <div className={styles.bAddSubjectParent}>
-          <Button onClick={onClose} variant='outline'>
+          <Button onClick={onClose} variant="outline">
             Cancel
           </Button>
           <Button
-            type='submit'
-            variant='solid'
+            type="submit"
+            variant="solid"
             disabled={loading}
-            className={loading ? styles.loadingButton : ''}
+            className={loading ? styles.loadingButton : ""}
           >
-            {loading ? 'Processing...' : 'Create'}
+            {loading ? "Processing..." : "Create"}
           </Button>
         </div>
       </form>

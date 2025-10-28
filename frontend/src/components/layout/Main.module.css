@@ -36,3 +36,21 @@
   
  
 }
+
+/* Optional: taruh di :root atau di atas file */
+:root {
+  --sidebar-compact-width: 56px;
+  --sidebar-gap: 16px; /* jarak antara sidebar dan konten */
+}
+
+/* ... */
+
+body.sidebar-compact .mainContent.sidebarOpen {
+  /* 56px (sidebar icon) + 16px (gap) */
+  margin-left: calc(var(--sidebar-compact-width) + var(--sidebar-gap));
+}
+
+/* Saat sidebar tertutup tetap full width */
+.mainContent.sidebarClosed {
+  margin-left: 0;
+}

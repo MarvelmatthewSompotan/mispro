@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import PopUpConfirm from "../PopUp/PopUpConfirm";
+import PopUpConfirm from "../../../../molecules/PopUp/PopUpConfirm/PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
 import DuplicateStudentPopup from "../PopUp/DuplicateStudentPopup";
 import Button from "../../../../atoms/Button";
@@ -15,7 +15,7 @@ const FormButtonSection = ({
   sharedData,
 }) => {
   const navigate = useNavigate();
-  // eslint-disable-next-line
+
   const locationState = useLocation();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
@@ -29,22 +29,16 @@ const FormButtonSection = ({
 
     const errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // --- VALIDASI SEMUA SECTION ---
-
-    // Validasi Student Status Section
     const studentStatus = allFormData.studentStatus || {};
     if (!studentStatus.student_status) {
       errors.studentStatus = { ...errors.studentStatus, student_status: true };
     } else if (
       studentStatus.student_status === "Old" &&
-      !studentStatus.is_selected // <-- UPDATED LOGIC HERE
+      !studentStatus.is_selected
     ) {
-      // This error is triggered if status is "Old" but a student was NOT selected from the dropdown
       errors.studentStatus = { ...errors.studentStatus, input_name: true };
     }
 
-    // Validasi Student Information Section
     const studentInfo = allFormData.studentInfo || {};
     if (!studentInfo.first_name) {
       errors.studentInfo = { ...errors.studentInfo, first_name: true };
@@ -117,7 +111,6 @@ const FormButtonSection = ({
 
     const nikAsString = String(studentInfo.nik || "").trim();
     if (studentInfo.citizenship === "Indonesia") {
-      // Pola regex baru untuk NIK
       const nikRegex = /^[1-9][0-9]{15}$/;
       if (!nikRegex.test(nikAsString)) {
         errors.studentInfo = { ...errors.studentInfo, nik: true };
@@ -365,11 +358,9 @@ const FormButtonSection = ({
     setShowConfirmation(false);
   };
 
-  // BARU: Buat fungsi handler yang akan dipanggil jika backend menemukan duplikat
   const handleDuplicateFound = () => {
-    // 1. Tutup popup konfirmasi yang sedang aktif
     setShowConfirmation(false);
-    // 2. Tampilkan popup peringatan duplikat
+
     setShowDuplicatePopup(true);
   };
 
@@ -421,7 +412,6 @@ const FormButtonSection = ({
           onDuplicateFound={handleDuplicateFound}
         />
       )}
-      {/* BARU: Tambahkan render kondisional untuk popup peringatan duplikat */}
       {showDuplicatePopup && (
         <DuplicateStudentPopup onClose={() => setShowDuplicatePopup(false)} />
       )}

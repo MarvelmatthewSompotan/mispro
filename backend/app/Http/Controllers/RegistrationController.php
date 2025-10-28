@@ -59,10 +59,7 @@ class RegistrationController extends Controller
             ->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id')
             ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id')           
             ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
-            ->leftJoin('application_form_versions', function($join) {
-                $join->on('application_form_versions.application_id', '=', 'application_forms.application_id')
-                    ->where('application_form_versions.action', '=', 'registration');
-            })
+            ->leftJoin('application_form_versions', 'application_form_versions.version_id', '=', DB::raw('(SELECT MAX(version_id) FROM application_form_versions WHERE application_id = application_forms.application_id AND action = "registration")'))
             ->addSelect('application_form_versions.version_id as registration_version_id');
 
         // Filter Range
@@ -180,16 +177,64 @@ class RegistrationController extends Controller
             'status' => 'required|in:Confirmed,Cancelled',
         ]);
 
-        $form = ApplicationForm::findOrFail($application_id);
-        $form->status = $request->status;
-        $form->save();
+        DB::beginTransaction();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status updated successfully',
-            'data' => $form
-        ], 200);
+        try {
+            $form = ApplicationForm::with(['enrollment.student', 'enrollment.schoolYear', 'enrollment.semester'])
+                ->findOrFail($application_id);
+
+            // Update status di application_forms
+            $form->status = $request->status;
+            $form->save();
+
+            $student = $form->enrollment?->student;
+            $enrollment = $form->enrollment;
+
+            if ($student) {
+                if ($request->status === 'Cancelled') {
+                    $student->status = 'Withdraw';
+                    $student->active = 'NO';
+                    $enrollment->status = 'INACTIVE';
+                } elseif ($request->status === 'Confirmed') {
+                    $student->status = 'Not Graduate';
+                    $student->active = 'YES';
+                    $enrollment->status = 'ACTIVE';
+                }
+
+                $student->save(); 
+                $enrollment->save();
+
+                $this->createApplicationFormVersion(
+                    $form,
+                    [
+                        'status_update_reason' => $request->status === 'Cancelled'
+                            ? 'Application cancelled'
+                            : 'Application confirmed',
+                        'changed_status_by' => auth()->user()->username ?? 'system',
+                    ],
+                    $student,
+                    $enrollment
+                );
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'data' => $form
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
+
 
     /**
      * Start registration process with initial context

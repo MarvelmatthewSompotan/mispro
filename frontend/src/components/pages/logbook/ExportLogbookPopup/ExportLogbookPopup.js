@@ -203,22 +203,19 @@ const ExportLogbookPopup = ({
           },
         },
 
-        // --- PERBAIKAN ERROR 'no-undef' ADA DI SINI ---
         didDrawCell: (data) => {
           if (
             photoColIndex !== -1 &&
             data.column.index === photoColIndex &&
             data.cell.section === 'body'
           ) {
-            // --- FIX: Definisikan di scope luar ---
             const cellHeight = data.cell.height;
             const cellWidth = data.cell.width;
-            // ------------------------------------
 
             const imgData = data.cell.raw;
 
             if (imgData) {
-              data.cell.text = '';
+              data.cell.text = [];
 
               const aspectRatio = 59.97 / 81;
               let imgHeight = cellHeight - 1;
@@ -244,7 +241,7 @@ const ExportLogbookPopup = ({
                 );
               }
             } else {
-              data.cell.text = '';
+              data.cell.text = [];
               // --- FIX: Variabel sekarang terdefinisi ---
               doc.text(
                 '-',
@@ -253,18 +250,6 @@ const ExportLogbookPopup = ({
                 { halign: 'center', valign: 'middle' }
               );
             }
-          }
-
-          // Logika nomor halaman
-          const pageCount = doc.internal.getNumberOfPages();
-          if (pageCount > 1) {
-            doc.setFontSize(8);
-            doc.text(
-              `Page ${data.pageNumber} of ${pageCount}`,
-              doc.internal.pageSize.width - margin,
-              doc.internal.pageSize.height - 5,
-              { align: 'right' }
-            );
           }
         },
       });
