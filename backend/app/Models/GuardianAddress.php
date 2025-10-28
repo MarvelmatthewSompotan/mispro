@@ -6,13 +6,11 @@ use App\Models\Student;
 use App\Models\Guardian;
 use App\Models\StudentGuardian;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class GuardianAddress extends Model
 {
-    use HasFactory;
     protected $table = 'guardian_addresses';
     protected $primaryKey = 'guardian_address_id';
     public $timestamps = false;

@@ -5,14 +5,13 @@ namespace App\Models;
 use App\Models\Student;
 use App\Models\FatherAddress;
 use App\Models\MotherAddress;
+use App\Models\Enrollment;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StudentParent extends Model
 {
-    use HasFactory;
     protected $table = 'parents';
     protected $primaryKey = 'parent_id';
     public $timestamps = false;
@@ -29,7 +28,9 @@ class StudentParent extends Model
         'mother_occupation',
         'mother_company',
         'mother_phone',
-        'mother_email'
+        'mother_email',
+        'enrollment_id'
+
     ];
 
     public function student() : BelongsTo
@@ -45,5 +46,10 @@ class StudentParent extends Model
     public function motherAddress() : HasOne
     {
         return $this->hasOne(MotherAddress::class, 'parent_id', 'parent_id');
+    }
+
+    public function enrollment(): BelongsTo
+    {
+        return $this->belongsTo(Enrollment::class, 'enrollment_id', 'enrollment_id');
     }
 }

@@ -13,8 +13,12 @@ use App\Models\Transportation;
 use App\Models\PickupPoint;
 use App\Models\ApplicationForm;
 use App\Models\StudentDiscount;
+use App\Models\StudentParent;
+use App\Models\StudentAddress;
+use App\Models\StudentGuardian;
+use App\Models\FatherAddress;
+use App\Models\MotherAddress;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,7 +26,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Enrollment extends Model
 {
-    use HasFactory;
     protected $table = 'enrollments';
     protected $primaryKey = 'enrollment_id';
     public $timestamps = false;
@@ -109,6 +112,32 @@ class Enrollment extends Model
         return $this->hasOne(
         StudentDiscount::class, 'enrollment_id', 'enrollment_id');
     }
+
+    public function studentParent(): HasOne
+    {
+        return $this->hasOne(StudentParent::class, 'enrollment_id', 'enrollment_id');
+    }
+
+    public function studentAddress(): HasOne
+    {
+        return $this->hasOne(StudentAddress::class, 'enrollment_id', 'enrollment_id');
+    }
+
+    public function studentGuardian(): HasOne
+    {
+        return $this->hasOne(StudentGuardian::class, 'enrollment_id', 'enrollment_id');
+    }
+
+    public function fatherAddress(): HasOne
+    {
+        return $this->hasOne(FatherAddress::class, 'enrollment_id', 'enrollment_id');
+    }
+
+    public function motherAddress(): HasOne
+    {
+        return $this->hasOne(MotherAddress::class, 'enrollment_id', 'enrollment_id');
+    }
+
 
     public function discountTypes() : HasManyThrough
     {

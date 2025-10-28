@@ -4,14 +4,13 @@ namespace App\Models;
 
 use App\Models\Student;
 use App\Models\StudentParent;
+use App\Models\Enrollment;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class FatherAddress extends Model
 {
-    use HasFactory;
     protected $table = 'father_addresses';
     protected $primaryKey = 'father_address_id';
     public $timestamps = false;
@@ -27,11 +26,17 @@ class FatherAddress extends Model
         'city_regency',
         'province',
         'other',
+        'enrollment_id'
     ];
 
     public function parent() : BelongsTo
     {
         return $this->belongsTo(StudentParent::class, 'parent_id', 'parent_id');
+    }
+
+    public function enrollment(): BelongsTo
+    {
+        return $this->belongsTo(Enrollment::class, 'enrollment_id', 'enrollment_id');
     }
 
     public function student() : HasOneThrough

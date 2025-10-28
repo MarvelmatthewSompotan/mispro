@@ -5,13 +5,11 @@ namespace App\Models;
 use App\Models\Enrollment;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApplicationForm extends Model
 {
-    use HasFactory;
     protected $table = 'application_forms';
     protected $primaryKey = 'application_id';
     public $timestamps = true;
