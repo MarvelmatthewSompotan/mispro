@@ -14,10 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append([
-            \App\Http\Middleware\CorsMiddleware::class, // Custom CORS
-            \Illuminate\Http\Middleware\HandleCors::class, // Laravel CORS
-        ]);
+        $middleware->prepend(\App\Http\Middleware\CorsMiddleware::class);
 
         // CSRF protection
         $middleware->alias([
