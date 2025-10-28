@@ -128,18 +128,20 @@ const StudentProfileHeader = ({
           </div>
         ) : (
           // --- VIEW MODE ---
-          <div className={styles.statusTagContainer}>
-            <Button
-              variant={
-                studentInfo.student_active === "YES" ? "active" : "not-active"
-              }
-            >
-              {studentInfo.student_active === "YES" ? "Active" : "Not Active"}
-            </Button>
-            <Button variant={getStatusVariant(studentInfo.status)}>
-              {studentInfo.status || "Not Graduated"}
-            </Button>
-          </div>
+          !selectedVersionId && (
+            <div className={styles.statusTagContainer}>
+              <Button
+                variant={
+                  studentInfo.student_active === "YES" ? "active" : "not-active"
+                }
+              >
+                {studentInfo.student_active === "YES" ? "Active" : "Not Active"}
+              </Button>
+              <Button variant={getStatusVariant(studentInfo.status)}>
+                {studentInfo.status || "Not Graduated"}
+              </Button>
+            </div>
+          )
         )}
       </div>
 

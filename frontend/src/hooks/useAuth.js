@@ -21,12 +21,14 @@ const useAuth = () => {
   };
 
   const isAdmin = () => isUserRole('admin');
-
+  
+  const isRegistrar = () => isUserRole('registrar');
+  
   return {
     user,
     isAdmin,
+    isRegistrar,
     isUserRole,
-    // ... Anda bisa menambahkan fungsi lain seperti isRegistrar, dll.
   };
 };
 

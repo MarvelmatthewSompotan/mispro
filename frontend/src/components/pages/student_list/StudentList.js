@@ -294,7 +294,7 @@ const StudentList = () => {
             currentFilterValue={filters.class_id}
           />
           <ColumnHeader
-            title="section"
+            title="Section"
             hasSort={true}
             fieldKey="section"
             sortOrder={getSortOrder("section")}
