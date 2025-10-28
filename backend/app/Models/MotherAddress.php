@@ -5,11 +5,13 @@ namespace App\Models;
 use App\Models\Student;
 use App\Models\StudentParent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class MotherAddress extends Model
 {
+    use HasFactory;
     protected $table = 'mother_addresses';
     protected $primaryKey = 'mother_address_id';
     public $timestamps = false;

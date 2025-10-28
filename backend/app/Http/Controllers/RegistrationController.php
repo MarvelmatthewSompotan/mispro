@@ -458,7 +458,7 @@ class RegistrationController extends Controller
                 
                 'tuition_fees' => 'required|in:Full Payment,Installment',
                 'residence_payment' => 'required|in:Full Payment,Installment',
-                'financial_policy_contract' => 'required|in:Signed,Not Signed',
+                'financial_policy_contract' => 'required|in:Agree,Not Signed',
 
                 'discount_name' => 'nullable|string',
                 'discount_notes' => 'nullable|string',

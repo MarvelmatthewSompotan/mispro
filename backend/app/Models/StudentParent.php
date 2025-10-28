@@ -6,11 +6,13 @@ use App\Models\Student;
 use App\Models\FatherAddress;
 use App\Models\MotherAddress;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StudentParent extends Model
 {
+    use HasFactory;
     protected $table = 'parents';
     protected $primaryKey = 'parent_id';
     public $timestamps = false;

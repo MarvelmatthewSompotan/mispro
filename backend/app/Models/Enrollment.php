@@ -14,6 +14,7 @@ use App\Models\PickupPoint;
 use App\Models\ApplicationForm;
 use App\Models\StudentDiscount;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Enrollment extends Model
 {
+    use HasFactory;
     protected $table = 'enrollments';
     protected $primaryKey = 'enrollment_id';
     public $timestamps = false;
