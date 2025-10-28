@@ -115,7 +115,7 @@
 .studentIdValue {
   flex: 1;
   line-height: 100%;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   font-weight: 400;
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
@@ -144,8 +144,7 @@
   color: rgba(128, 128, 128, 0.6);
 }
 .studentIdField {
-  align-self: stretch;
-  width: 400px;
+  width: auto;
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -179,7 +178,7 @@
   flex-direction: row;
   align-items: center;
   gap: 12px;
-  width: 100%;
+  width: auto;
 }
 
 /* Popup dropdown styling */
@@ -236,7 +235,7 @@
 }
 
 .studentName {
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   font-size: 14px;
   font-weight: 500;
   color: #333;
@@ -245,7 +244,7 @@
 }
 
 .studentId {
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   font-size: 12px;
   font-weight: 400;
   color: #666;
@@ -255,7 +254,7 @@
 
 /* Searching indicator */
 .searching {
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   font-size: 12px;
   font-weight: 400;
   color: #666;
@@ -269,7 +268,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 6px 8px;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
   font-size: 16px;
   font-weight: 400;
   background: #fff;

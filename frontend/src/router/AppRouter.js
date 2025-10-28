@@ -2,8 +2,9 @@
 
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth"; 
 
-// Import komponen halaman
+// Komponen halaman
 import LoginPage from "../components/pages/login/LoginPage.js";
 import Home from "../components/pages/home/Home.js";
 import StudentList from "../components/pages/student_list/StudentList";
@@ -17,21 +18,37 @@ import StudentProfile from "../components/pages/student_list/StudentProfile/Stud
 import Logbook from "../components/pages/logbook/Logbook.js";
 import Users from "../components/pages/users/Users.js";
 
-// Import komponen penjaga rute
+
 import ProtectedRoute from "./ProtectedRoute";
+
+const RegistrarAccess = ({ children }) => {
+  const { isAdmin, isRegistrar } = useAuth();
+  if (!isAdmin() && !isRegistrar()) {
+    return <Navigate to="/home" replace />;
+  }
+  return children;
+};
+
+const AdminAccess = ({ children }) => {
+  const { isAdmin } = useAuth();
+  if (!isAdmin()) {
+    return <Navigate to="/home" replace />;
+  }
+  return children;
+};
 
 const AppRouter = () => (
   <Routes>
-    {/* Rute Publik: HANYA halaman login yang bisa diakses tanpa token */}
     <Route path="/login" element={<LoginPage />} />
 
-    {/* Rute Terproteksi: SEMUA halaman di bawah ini HARUS punya token untuk diakses */}
     <Route
       path="/home"
       element={
         <ProtectedRoute>
           <MainLayout>
-            <Home />
+            <RegistrarAccess>
+              <Home />
+            </RegistrarAccess>
           </MainLayout>
         </ProtectedRoute>
       }
@@ -41,7 +58,9 @@ const AppRouter = () => (
       element={
         <ProtectedRoute>
           <MainLayout>
-            <StudentList />
+            <RegistrarAccess>
+              <StudentList />
+            </RegistrarAccess>
           </MainLayout>
         </ProtectedRoute>
       }
@@ -51,7 +70,9 @@ const AppRouter = () => (
       element={
         <ProtectedRoute>
           <MainLayout>
-            <StudentProfile />
+            <RegistrarAccess>
+              <StudentProfile />
+            </RegistrarAccess>
           </MainLayout>
         </ProtectedRoute>
       }
@@ -61,7 +82,9 @@ const AppRouter = () => (
       element={
         <ProtectedRoute>
           <MainLayout>
-            <TeacherList />
+            <RegistrarAccess>
+              <TeacherList />
+            </RegistrarAccess>
           </MainLayout>
         </ProtectedRoute>
       }
@@ -71,7 +94,9 @@ const AppRouter = () => (
       element={
         <ProtectedRoute>
           <MainLayout>
-            <Logbook />
+            <RegistrarAccess>
+              <Logbook />
+            </RegistrarAccess>
           </MainLayout>
         </ProtectedRoute>
       }
@@ -81,7 +106,9 @@ const AppRouter = () => (
       element={
         <ProtectedRoute>
           <MainLayout>
-            <HomeroomList />
+            <RegistrarAccess>
+              <HomeroomList />
+            </RegistrarAccess>
           </MainLayout>
         </ProtectedRoute>
       }
@@ -91,27 +118,35 @@ const AppRouter = () => (
       element={
         <ProtectedRoute>
           <MainLayout>
-            <Registration />
+            <RegistrarAccess>
+              <Registration />
+            </RegistrarAccess>
           </MainLayout>
         </ProtectedRoute>
       }
     />
+
     <Route
       path="/users"
       element={
         <ProtectedRoute>
           <MainLayout>
-            <Users />
+            <AdminAccess>
+              <Users />
+            </AdminAccess>
           </MainLayout>
         </ProtectedRoute>
       }
     />
+
     <Route
       path="/registration-form"
       element={
         <ProtectedRoute>
           <MainLayout>
-            <RegistrationPage />
+            <RegistrarAccess>
+              <RegistrationPage />
+            </RegistrarAccess>
           </MainLayout>
         </ProtectedRoute>
       }
@@ -120,7 +155,9 @@ const AppRouter = () => (
       path="/print"
       element={
         <ProtectedRoute>
-          <Print />
+          <RegistrarAccess>
+            <Print />
+          </RegistrarAccess>
         </ProtectedRoute>
       }
     />

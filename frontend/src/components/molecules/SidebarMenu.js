@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import Icon from "../atoms/Icon";
+import useAuth from "../../hooks/useAuth"; // <-- DITAMBAHKAN
 import homeIcon from "../../assets/Home-icon.png";
 import studentIcon from "../../assets/StudentList-icon.png";
 import logbookIcon from "../../assets/logbook.png";
@@ -12,7 +13,8 @@ import registrationIcon from "../../assets/Registration-icon.png";
 import usersIcon from "../../assets/user.png";
 import "../styles/SidebarMenu.css"; // Menggunakan file CSS yang sudah ada
 
-const menus = [
+// Nama variabel diubah agar lebih jelas
+const allMenus = [
   { to: "/home", icon: homeIcon, label: "Home" },
   { to: "/students", icon: studentIcon, label: "Student List" },
   { to: "/logbook", icon: logbookIcon, label: "Logbook" },
@@ -24,8 +26,20 @@ const menus = [
 
 // Terima prop 'isOpen' dari komponen Main.js
 const SidebarMenu = ({ isOpen }) => {
+  const { isAdmin } = useAuth(); // <-- DITAMBAHKAN
   const asideRef = useRef(null);
   const [isIconOnly, setIsIconOnly] = useState(false);
+
+  // <-- DITAMBAHKAN: Logika untuk memfilter menu -->
+  const filteredMenus = allMenus.filter((menu) => {
+    // Jika menu adalah '/users', periksa apakah pengguna adalah admin
+    if (menu.to === "/users") {
+      return isAdmin();
+    }
+    // Jika bukan menu '/users', tampilkan seperti biasa
+    return true;
+  });
+  // <-- BATAS PENAMBAHAN -->
 
   useEffect(() => {
     // Pakai ResizeObserver + window resize utk memutuskan kapan "icon-only".
@@ -73,7 +87,8 @@ const SidebarMenu = ({ isOpen }) => {
     >
       <nav>
         <ul className="sidebar-menu-list">
-          {menus.map((menu) => (
+          {/* DIUBAH: Menggunakan 'filteredMenus' hasil filter, bukan 'allMenus' */}
+          {filteredMenus.map((menu) => (
             <li key={menu.label}>
               <NavLink
                 to={menu.to}

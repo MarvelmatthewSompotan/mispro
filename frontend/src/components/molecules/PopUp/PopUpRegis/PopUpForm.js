@@ -126,10 +126,10 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
         }
       } else if (type === "user") {
         if (!username || !email || !password || !role) {
-          setLoading(false); // Matikan loading jika validasi gagal
+          
           return alert("Please fill all fields");
         }
-        onCreate({ username, email, password, role }, resetForm);
+        await onCreate({ username, email, password, role }, resetForm);
       }
     } catch (err) {
       console.error(err);

@@ -80,7 +80,7 @@
   display: grid;
   grid-template-columns:
     minmax(130px, 1fr) /* Student ID */
-    minmax(150px, 1fr) /* Student Name */
+    minmax(200px, 1.5fr) /* Student Name */
     minmax(40px, 1fr) /* grade */
     minmax(130px, 1fr) /* Section */
     minmax(130px, 1fr) /* School Year */
@@ -88,14 +88,10 @@
   border-bottom: 2px solid var(--main-grey);
 }
 
-
-
 .tableHeader {
   font-weight: 600;
   font-size: 14px;
 }
-
-
 
 /* === STYLE DARI TABLEROW.MODULE.CSS DIMULAI DI SINI === */
 
@@ -108,7 +104,6 @@
   color: var(--main-text);
   font-family: var(--font-primary);
   font-weight: var(--font-weight-regular);
-  
 }
 
 .tableRow:last-child {

@@ -263,6 +263,7 @@ const StudentStatusSection = ({
                           setShowDropdown(true)
                         }
                         placeholder={"Enter Name or ID"}
+                        size={Math.max(20, studentSearch.length)}
                       />
                       {isSearching && (
                         <div className={styles.searching}>Searching...</div>

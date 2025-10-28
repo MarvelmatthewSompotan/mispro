@@ -4,7 +4,6 @@ import autoTable from 'jspdf-autotable';
 import styles from './ExportLogbookPopup.module.css';
 import placeholder from '../../../../assets/user.svg';
 
-// --- FUNGSI HELPER (di luar komponen) ---
 const loadImage = (url) =>
   new Promise((resolve) => {
     if (!url || url === placeholder) {
@@ -43,7 +42,6 @@ const loadImage = (url) =>
     }
   });
 
-// --- KONFIGURASI KONSTAN (di luar komponen) ---
 const HEADER_KEY_MAP = {
   Photo: 'photo_url',
   'Student ID': 'student_id',
@@ -136,7 +134,7 @@ const ExportLogbookPopup = ({
       });
 
       // 5. Inisialisasi Dokumen PDF
-      const doc = new jsPDF('landscape', 'mm', 'a4');
+      const doc = new jsPDF('landscape', 'mm', [210, 330]);
       const margin = 7;
       const firstStudent = logbookData.length > 0 ? logbookData[0] : null;
       const schoolYear = firstStudent ? firstStudent.school_year : 'N/A';
@@ -179,12 +177,12 @@ const ExportLogbookPopup = ({
         styles: {
           font: 'helvetica',
           fontSize: 4,
-          cellPadding: 1.9,
+          cellPadding: 2.0,
           textColor: globalColors.mainText,
           lineColor: globalColors.mainGrey,
           lineWidth: 0.2,
           valign: 'middle',
-          minCellHeight: 10,
+          minCellHeight: 1,
         },
         headStyles: {
           fontSize: 4,
@@ -250,6 +248,18 @@ const ExportLogbookPopup = ({
                 { halign: 'center', valign: 'middle' }
               );
             }
+          }
+
+          // Logika nomor halaman
+          const pageCount = doc.internal.getNumberOfPages();
+          if (pageCount > 1) {
+            doc.setFontSize(8);
+            doc.text(
+              `Page ${data.pageNumber} of ${pageCount}`,
+              doc.internal.pageSize.width - margin,
+              doc.internal.pageSize.height - 5,
+              { align: 'right' }
+            );
           }
         },
       });
