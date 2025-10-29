@@ -519,6 +519,12 @@ const StudentProfile = () => {
         'financial_policy_contract',
       ].includes(name);
 
+      newFormData[name] = isPolicyCheckbox
+        ? checked
+          ? 'Signed'
+          : 'Not Signed'
+        : value;
+
       if (radioNames.includes(name)) {
         // INI UNTUK RADIO BUTTON
         // Jika nilai yang diklik sama dengan nilai saat ini, kosongkan. Jika beda, isi dengan nilai baru.

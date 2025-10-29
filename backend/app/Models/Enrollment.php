@@ -21,6 +21,8 @@ use App\Models\StudentAddress;
 use App\Models\StudentGuardian;
 use App\Models\FatherAddress;
 use App\Models\MotherAddress;
+use App\Models\FatherAddress;
+use App\Models\MotherAddress;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
