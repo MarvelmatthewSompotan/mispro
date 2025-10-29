@@ -76,7 +76,6 @@
 }
 
 .searchInput::placeholder {
-  color: #5f84fe;
   opacity: 0.8;
   font-size: 15px;
   font-family: "Poppins", sans-serif;
@@ -93,7 +92,7 @@
 }
 
 .tableContainer {
-  background: #fff;
+  background: var(--secondary-background);
   border: 1px solid var(--main-grey);
   width: 100%;
 }
@@ -113,7 +112,7 @@
 
 .registrationDataRow {
   box-sizing: border-box;
-  border-bottom: 1px solid var(--main-grey, #7a7a7a);
+  border-bottom: 1px solid var(--main-grey);
   border-top: none;
   min-height: 60px;
   cursor: pointer;
