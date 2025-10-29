@@ -519,12 +519,6 @@ const StudentProfile = () => {
         "financial_policy_contract",
       ].includes(name);
 
-      newFormData[name] = isPolicyCheckbox
-        ? checked
-          ? "Signed"
-          : "Not Signed"
-        : value;
-
       if (radioNames.includes(name)) {
         // INI UNTUK RADIO BUTTON
         // Jika nilai yang diklik sama dengan nilai saat ini, kosongkan. Jika beda, isi dengan nilai baru.
@@ -532,7 +526,9 @@ const StudentProfile = () => {
           String(prevData[name]) === String(value) ? "" : value;
       } else if (isPolicyCheckbox) {
         // INI UNTUK CHECKBOX
-        newFormData[name] = checked ? "Signed" : "Not Signed";
+        const positiveValue =
+          name === "financial_policy_contract" ? "Agree" : "Signed";
+        newFormData[name] = checked ? positiveValue : "Not Signed";
       } else {
         // INI UNTUK SEMUA INPUT LAINNYA (text, select, date)
         newFormData[name] = value;
@@ -3528,7 +3524,7 @@ const StudentProfile = () => {
                 <div className={styles.paymentOptionGroup}>
                   <CheckboxDisplay
                     label="Agree"
-                    isSelected={formData.financial_policy_contract === "Signed"}
+                    isSelected={formData.financial_policy_contract === "Agree"}
                     isEditing={false} // <-- DIUBAH MENJADI STATIS
                     name="financial_policy_contract"
                     onChange={handleChange}

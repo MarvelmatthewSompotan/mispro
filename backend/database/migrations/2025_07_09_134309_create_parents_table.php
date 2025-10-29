@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('mother_phone', 20)->nullable();
             $table->string('mother_email', 100)->nullable();
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
+            
         });
     }
 

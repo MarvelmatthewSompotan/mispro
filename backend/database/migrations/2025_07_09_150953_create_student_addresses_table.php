@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('province', 100)->nullable();
             $table->text('other')->nullable();
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
+
         });
     }
 

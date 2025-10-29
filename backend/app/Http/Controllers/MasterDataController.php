@@ -61,7 +61,7 @@ class MasterDataController extends Controller
             'academic_status' => ['REGULAR', 'SIT-IN', 'OTHER'],
             'tuition_fees' => ['Full Payment', 'Installment'],
             'residence_payment' => ['Full Payment', 'Installment'],
-            'financial_policy_contract' => ['Signed', 'Not Signed'],
+            'financial_policy_contract' => ['Agree', 'Not Signed'],
             'pickup_points' => $pickupPoints,
             'active_status' => ['Not Graduate', 'Graduate', 'Expelled', 'Withdraw'],
             'roles' => ['admin', 'registrar', 'head_registrar', 'teacher']
