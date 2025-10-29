@@ -1,4 +1,3 @@
-/* === STYLES DASAR BARU (BERLAKU UNTUK SEMUA KARTU) === */
 .stat-card {
   flex: 1; 
   height: 144px;
@@ -17,7 +16,6 @@
   font-family: var(--font-primary);
 }
 
-/* === STYLES STRUKTURAL (BERLAKU UNTUK SEMUA KARTU) === */
 .card-main {
   align-self: stretch;
   display: flex;
@@ -84,40 +82,6 @@
   color: var(--text-accent); 
 }
 
-/* === VARIAN PUTIH (DEFAULT) === */
-.stat-card.white {
-  box-shadow: -5px 3px 15px -4px rgba(0, 0, 0, 0.25);
-  background-color: #fff;
-  color: #5f84fe; 
-}
-.white .card-label,
-.white .card-value,
-.white .card-footer {
-  color: #5f84fe;
-}
-.white .card-icon-header,
-.white .card-icon-value {
-  color: #5f84fe;
-}
-
-/* === VARIAN MERAH === */
-.stat-card.red {
-  box-shadow: -5px 3px 15px -4px rgba(0, 0, 0, 0.25);
-  background-color: var(--secondary-background); 
-}
-
-.red .card-label,
-.red .card-value,
-.red .card-footer {
-  color: var(--red);
-}
-
-.red .card-icon-header,
-.red .card-icon-value {
-  color: var(--red);
-}
-
-/* === VARIAN BIRU (BARU) === */
 .stat-card.blue {
   box-shadow: -5px 3px 15px -4px rgba(0, 0, 0, 0.25);
   background-color: var(--secondary-background); 
@@ -134,24 +98,6 @@
   color: var(--main-accent);
 }
 
-/* === VARIAN KUNING (BARU) === */
-.stat-card.yellow {
-  box-shadow: -5px 3px 15px -4px rgba(0, 0, 0, 0.25);
-  background-color: var(--secondary-background); 
-}
-
-.yellow .card-label,
-.yellow .card-value,
-.yellow .card-footer {
-  color: var(--yellow);
-}
-
-.yellow .card-icon-header,
-.yellow .card-icon-value {
-  color: var(--yellow);
-}
-
-/* === TAMBAHAN BARU UNTUK FUNGSI KLIK === */
 .stat-card.clickable {
   cursor: pointer;
 }

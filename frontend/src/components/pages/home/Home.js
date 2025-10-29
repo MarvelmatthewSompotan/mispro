@@ -138,7 +138,6 @@ const Home = () => {
       <div className={styles.topContentWrapper}>
         <WelcomeBanner name={username} lastLogin={last_login} />
         <div className={styles.statCardGrid}>
-          {/* Kartu 1: Sekarang dibungkus seperti yang lain */}
           <div className={styles.cardWithDotsWrapper}>
             <StatCard
               value={total_registrations}
@@ -148,29 +147,25 @@ const Home = () => {
                 total_registration_growth_percent,
                 'last year'
               )}
-              style={{ flex: 'none' }} // <-- Tambahkan style ini
+              style={{ flex: 'none' }} 
             />
-            {/* Placeholder agar sejajar */}
             <div className={styles.dotsPlaceholder} />
           </div>
 
-          {/* Kartu 2: Sekarang dibungkus seperti yang lain */}
           <div className={styles.cardWithDotsWrapper}>
             <StatCard
               value={today_registration}
               label='Total registration (Today)'
-              variant='red'
+              variant='blue'
               footerText={formatGrowthText(
                 today_registration_growth_percent,
                 'yesterday'
               )}
-              style={{ flex: 'none' }} // <-- Tambahkan style ini
+              style={{ flex: 'none' }} 
             />
-            {/* Placeholder agar sejajar */}
             <div className={styles.dotsPlaceholder} />
           </div>
 
-          {/* Kartu 3: Varian "blue" (Interaktif) */}
           <div className={styles.cardWithDotsWrapper}>
             <StatCard
               value={newStudentData[newStudentSlide].value}
@@ -178,7 +173,7 @@ const Home = () => {
               variant='blue'
               footerText={newStudentData[newStudentSlide].footerText}
               onClick={handleNewStudentClick}
-              style={{ flex: 'none' }} // <-- Style ini sudah ada
+              style={{ flex: 'none' }} 
             />
             <div className={styles.paginationDots}>
               <span
@@ -194,15 +189,14 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Kartu 4: Varian "yellow" (Interaktif) */}
           <div className={styles.cardWithDotsWrapper}>
             <StatCard
               value={returnStudentData[returnStudentSlide].value}
               label={returnStudentData[returnStudentSlide].label}
-              variant='yellow'
+              variant='blue'
               footerText={returnStudentData[returnStudentSlide].footerText}
               onClick={handleReturnStudentClick}
-              style={{ flex: 'none' }} // <-- Style ini sudah ada
+              style={{ flex: 'none' }} 
             />
             <div className={styles.paginationDots}>
               <span
@@ -222,9 +216,7 @@ const Home = () => {
 
       <div className={styles.mainContentArea}>
         <h3>Latest Registration</h3>
-        {/* Table Structure */}
         <div className={styles.tableContainer}>
-          {/* Table Header Row */}
           <div className={styles.tableHeader}>
             <ColumnHeader title='Student ID' />
             <ColumnHeader title='Student Name' />

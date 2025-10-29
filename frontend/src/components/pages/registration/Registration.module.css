@@ -25,12 +25,12 @@
   font-size: 32px;
 }
 
-.ufileAltParent {
+.totalRecords {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px; 
-  color: var(--main-accent);
+  color: var(--main-text);
   cursor: pointer;
 }
 

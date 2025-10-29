@@ -343,7 +343,7 @@ const Registration = () => {
               New Form
             </Button>
           </div>
-          <div className={styles.ufileAltParent} title='Total Registrations'>
+          <div className={styles.totalRecords} title='Total Registrations'>
             <img
               src={totalRegisIcon}
               alt='Total Registrations'
