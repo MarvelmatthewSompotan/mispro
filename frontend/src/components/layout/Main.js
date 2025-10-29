@@ -4,20 +4,26 @@ import HeaderBar from "../molecules/HeaderBar";
 import SidebarMenu from "../molecules/SidebarMenu";
 import styles from "./Main.module.css";
 
-const Main = ({ children }) => {
+// [MODIFIKASI 1] Terima props baru: showBackButton, onBackClick
+const Main = ({
+  children,
+  showBackButton: showBackButtonProp,
+  onBackClick: onBackClickProp,
+}) => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // --- Logika Internal (Sebagai Fallback) ---
   const isProfilePage = /^\/students\/.+/.test(location.pathname);
   const isRegistrationFormPage = /^\/registration-form(\/|$)/.test(
     location.pathname
   );
-  const isDetailLikePage = isProfilePage || isRegistrationFormPage;
-  const handleSidebarToggle = () => {
-    setSidebarOpen(!isSidebarOpen);
-  };
+  // Logika internal untuk menentukan apakah tombol back harus muncul
+  const isDetailLikePageInternal = isProfilePage || isRegistrationFormPage;
 
-  const handleBackClick = () => {
+  // Handler back click internal (sebagai fallback)
+  const internalHandleBackClick = () => {
     if (isRegistrationFormPage) {
       navigate("/registration");
     } else if (isProfilePage) {
@@ -26,35 +32,46 @@ const Main = ({ children }) => {
       navigate(-1);
     }
   };
+  // --- Akhir Logika Internal ---
+
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
 
   useEffect(() => {
     const handleResize = () => {
-      if (isDetailLikePage) {
-        // tetap tutup otomatis untuk halaman detail
+      // Gunakan 'isDetailLikePageInternal' untuk logika resize
+      if (isDetailLikePageInternal) {
         setSidebarOpen(false);
         return;
       }
-
-      // selain itu, biarkan hamburger yang kontrol di layar kecil
-      // kalau layar besar, buka otomatis
       if (window.innerWidth >= 1024) {
         setSidebarOpen(true);
       }
     };
-
     handleResize();
-
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
-  }, [isDetailLikePage, location.pathname]);
+  }, [isDetailLikePageInternal, location.pathname]);
+
+  // [MODIFIKASI 2] Tentukan nilai final yang akan dikirim ke HeaderBar
+  // Gunakan prop 'onBackClick' jika ada, jika tidak, gunakan handler internal
+  const finalOnBackClick = onBackClickProp || internalHandleBackClick;
+
+  // Gunakan prop 'showBackButton' jika ada (bahkan jika nilainya 'false'),
+  // jika tidak (undefined), gunakan logika internal
+  const finalShowBackButton =
+    showBackButtonProp !== undefined
+      ? showBackButtonProp
+      : isDetailLikePageInternal;
 
   return (
     <div className={styles.layoutContainer}>
+      {/* [MODIFIKASI 3] Kirim props final ke HeaderBar */}
       <HeaderBar
         onHamburgerClick={handleSidebarToggle}
-        onBackClick={handleBackClick}
-        showBackButton={isDetailLikePage}
+        onBackClick={finalOnBackClick}
+        showBackButton={finalShowBackButton}
       />
 
       <div className={styles.contentWrapper}>

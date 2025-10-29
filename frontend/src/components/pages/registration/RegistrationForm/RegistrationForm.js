@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useBlocker } from "react-router-dom";
 import Main from "../../../layout/Main";
 import StudentStatusSection from "./StudentStatus/StudentStatusSection";
 import StudentInformationSection from "./StudentInformation/StudentInformationSection";
@@ -10,6 +10,7 @@ import ParentGuardianSection from "./ParentGuardian/ParentGuardianSection";
 import TermOfPaymentSection from "./TermOfPayment/TermOfPaymentSection";
 import OtherDetailSection from "./OtherDetail/OtherDetailSection";
 import FormButtonSection from "./FormButtonSection/FormButtonSection";
+import ConfirmBackPopup from "../../../molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm";
 import styles from "./RegistrationForm.module.css";
 import { getRegistrationOptions } from "../../../../services/api";
 import { gsap } from "gsap";
@@ -37,6 +38,9 @@ const RegistrationForm = () => {
   const [validationState, setValidationState] = useState({});
   const [errors, setErrors] = useState({});
   const [forceError, setForceError] = useState({});
+  const blocker = useBlocker(true);
+
+  const [isBackPopupOpen, setIsBackPopupOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -310,6 +314,32 @@ const RegistrationForm = () => {
     };
   }, [sharedData, formData.schoolYear, formData.semester]);
 
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      setIsBackPopupOpen(true);
+    }
+  }, [blocker.state]);
+
+  // [BARU] Handler untuk tombol back di HeaderBar
+  const handleBackClick = () => {
+    navigate("/registration", { replace: true }); // Biarkan blocker menangkap ini
+  };
+
+  // [BARU] Handler untuk konfirmasi kembali (buang perubahan)
+  const handleConfirmBack = () => {
+    setIsBackPopupOpen(false);
+    if (blocker.state === "blocked") {
+      blocker.proceed(); // Lanjutkan navigasi
+    }
+  };
+
+  const handleClosePopup = () => {
+    setIsBackPopupOpen(false);
+    if (blocker.state === "blocked") {
+      blocker.reset(); // Batalkan navigasi
+    }
+  };
+
   // Show loading state while data is being fetched
   if (isLoading) {
     return (
@@ -327,7 +357,7 @@ const RegistrationForm = () => {
   const { schoolYearDisplay, semesterDisplay } = getDisplayValues();
 
   return (
-    <Main>
+    <Main showBackButton onBackClick={handleBackClick}>
       <div className={styles.formContainer}>
         {formData.schoolYear && (
           <div className={styles.formInfo}>
@@ -415,6 +445,11 @@ const RegistrationForm = () => {
         </div>
         <OtherDetailSection />
       </div>
+      <ConfirmBackPopup
+        isOpen={isBackPopupOpen}
+        onClose={handleClosePopup} // <-- Gunakan handler baru
+        onConfirm={handleConfirmBack}
+      />
     </Main>
   );
 };
