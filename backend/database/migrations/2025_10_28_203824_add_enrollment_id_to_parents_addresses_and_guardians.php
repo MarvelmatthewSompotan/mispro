@@ -24,6 +24,22 @@ return new class extends Migration
                   ->onDelete('cascade');
         }); 
 
+        Schema::table('father_addresses', function (Blueprint $table) {
+            $table->unsignedBigInteger('enrollment_id')->nullable()->after('parent_id');
+            $table->foreign('enrollment_id')
+                  ->references('enrollment_id')
+                  ->on('enrollments')
+                  ->onDelete('cascade');
+        });
+
+        Schema::table('mother_addresses', function (Blueprint $table) {
+            $table->unsignedBigInteger('enrollment_id')->nullable()->after('parent_id');
+            $table->foreign('enrollment_id')
+                  ->references('enrollment_id')
+                  ->on('enrollments')
+                  ->onDelete('cascade');
+        });
+
         Schema::table('student_guardians', function (Blueprint $table) {
             $table->unsignedBigInteger('enrollment_id')->nullable()->after('student_id');
             $table->foreign('enrollment_id')
@@ -41,6 +57,16 @@ return new class extends Migration
         });
 
         Schema::table('student_addresses', function (Blueprint $table) {
+            $table->dropForeign(['enrollment_id']);
+            $table->dropColumn('enrollment_id');
+        });
+
+         Schema::table('father_addresses', function (Blueprint $table) {
+            $table->dropForeign(['enrollment_id']);
+            $table->dropColumn('enrollment_id');
+        });
+
+        Schema::table('mother_addresses', function (Blueprint $table) {
             $table->dropForeign(['enrollment_id']);
             $table->dropColumn('enrollment_id');
         });

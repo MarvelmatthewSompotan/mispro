@@ -464,7 +464,6 @@ class RegistrationController extends Controller
                 'father_address_city_regency' => 'nullable|string',
                 'father_address_province' => 'nullable|string',
                 'father_address_other' => 'nullable|string',
-                'father_company_addresses' => 'nullable|string',
 
                 // student parent (mother)
                 'mother_name' => 'nullable|string',
@@ -480,7 +479,6 @@ class RegistrationController extends Controller
                 'mother_address_city_regency' => 'nullable|string',
                 'mother_address_province' => 'nullable|string',
                 'mother_address_other' => 'nullable|string',
-                'mother_company_addresses' => 'nullable|string',
 
                 'guardian_name' => 'nullable|string',
                 'relation_to_student' => 'nullable|string',
@@ -497,7 +495,7 @@ class RegistrationController extends Controller
                 
                 'tuition_fees' => 'required|in:Full Payment,Installment',
                 'residence_payment' => 'required|in:Full Payment,Installment',
-                'financial_policy_contract' => 'required|in:Agree,Not Signed',
+                'financial_policy_contract' => 'required|in:Signed,Not Signed',
 
                 'discount_name' => 'nullable|string',
                 'discount_notes' => 'nullable|string',
@@ -849,6 +847,27 @@ class RegistrationController extends Controller
 
             $enrollment_id = $enrollment->enrollment_id;
 
+            if (strtolower($enrollment->student_status ?? '') === 'new') {
+                $hasOtherApplication = ApplicationForm::whereHas('enrollment', function ($query) use ($student, $enrollment_id) {
+                    $query->where('student_id', $student->student_id)
+                            ->where('enrollment_id', '!=', $enrollment_id);
+                })->exists();
+
+                if ($hasOtherApplication) {
+                    \Log::warning('Attempted to delete NEW student registration with linked records', [
+                        'student_id' => $student->student_id,
+                        'application_id' => $application_id,
+                        'enrollment_id' => $enrollment_id,
+                        'student_status' => $enrollment->student_status,
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This registration cannot be deleted because it belongs to a NEW student who has other registration data linked to this student.'
+                    ], 400);
+                }
+            }
+
             // Hapus versi formulir
             $applicationForm->versions()->delete();
 
@@ -858,83 +877,56 @@ class RegistrationController extends Controller
             // Hapus pembayaran yang terkait dengan pendaftaran ini
             $student->payments()->where('enrollment_id', $enrollment_id)->delete();
 
-            // Ambil semua student_parent untuk enrollment ini
-            $studentParents = $student->studentParent()
-                ->where('enrollment_id', $enrollment_id)
-                ->get();
+            // Hapus data parent yang terkait enrollment ini
+            $student->studentParent()->where('enrollment_id', $enrollment_id)->delete();
 
-            foreach ($studentParents as $studentParent) {
-                $fatherAddress = $studentParents->fatherAddress;
-                $motherAddress = $studentParents->motherAddress;
+            // Hapus alamat orang tua
+            FatherAddress::where('enrollment_id', $enrollment_id)->delete();
+            MotherAddress::where('enrollment_id', $enrollment_id)->delete();
 
-                // Cek apakah father address ini masih dipakai enrollment lain
-                $isFatherAddressUsedByOthers = StudentParent::where('parent_id', $fatherAddress->parent_id)
-                    ->where('enrollment_id', '!=', $enrollment_id)
-                    ->exists();
 
-                // Cek apakah mother address ini masih dipakai enrollment lain
-                $isMotherAddressUsedByOthers = StudentParent::where('parent_id', $motherAddress->parent_id)
-                    ->where('enrollment_id', '!=', $enrollment_id)
-                    ->exists();
-
-                // Kalau tidak dipakai enrollment lain, hapus alamat 
-                if (!$isFatherAddressUsedByOthers) {
-                    if ($fatherAddress) {
-                        $fatherAddress->delete();
-                    }
-                    $fatherAddress->delete();
-                }
-                if (!$isMotherAddressUsedByOthers) {
-                    if ($motherAddress) {
-                        $motherAddress->delete();
-                    }
-                    $motherAddress->delete();
-                }
-
-                // Hapus data student_guardian ini
-                $studentParent->delete();
-            }
-            
-            // Ambil semua student_guardian untuk enrollment ini
-            $studentGuardians = $student->studentGuardians()
-                ->where('enrollment_id', $enrollment_id)
-                ->get();
+            // === HAPUS STUDENT GUARDIAN DAN ALAMATNYA ===
+            $studentGuardians = $student->studentGuardian()->where('enrollment_id', $enrollment_id)->get();
 
             foreach ($studentGuardians as $studentGuardian) {
                 $guardian = $studentGuardian->guardian;
 
-                // Cek apakah guardian ini masih dipakai enrollment lain
-                $isGuardianUsedByOthers = StudentGuardian::where('guardian_id', $guardian->guardian_id)
-                    ->where('enrollment_id', '!=', $enrollment_id)
-                    ->exists();
+                if ($guardian) {
+                    $isGuardianUsedByOthers = StudentGuardian::where('guardian_id', $guardian->guardian_id)
+                        ->where('enrollment_id', '!=', $enrollment_id)
+                        ->exists();
 
-                // Kalau tidak dipakai enrollment lain, hapus alamat dan guardian-nya
-                if (!$isGuardianUsedByOthers) {
-                    if ($guardian->guardianAddress) {
-                        $guardian->guardianAddress->delete();
+                    if (!$isGuardianUsedByOthers) {
+                        $guardian->guardianAddress()?->delete();
+                        $guardian->delete();
                     }
-                    $guardian->delete();
                 }
 
-                // Hapus data student_guardian ini
                 $studentGuardian->delete();
             }
 
-            // Hapus alamat siswa (jika punya enrollment_id)
             StudentAddress::where('enrollment_id', $enrollment_id)->delete();
 
-            // Hapus student kalau pendaftarannya new
             if (strtolower($enrollment->student_status ?? '') === 'new') {
-                $student->delete();
+                $hasOtherEnrollment = Enrollment::where('student_id', $student->student_id)
+                    ->where('enrollment_id', '!=', $enrollment_id)
+                    ->exists();
+
+                if (!$hasOtherEnrollment) {
+                    $student->delete();
+                }
             }
 
-            // Hapus enrollment dan application form
             $enrollment->delete();
             $applicationForm->delete();
 
             DB::commit();
 
-            return response()->json(['success' => true, 'message' => 'Registration and related data deleted successfully.']);
+            return response()->json([
+                'success' => true, 
+                'message' => 'Registration and related data deleted successfully.'
+            ], 200);
+
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -1011,6 +1003,7 @@ class RegistrationController extends Controller
             'city_regency' => $validated['city_regency'],
             'province' => $validated['province'],
             'other' => $validated['other'],
+            'enrollment_id' => $enrollment->enrollment_id,
         ]);
         
         $studentParent = $student->studentParent()->create([
@@ -1024,15 +1017,15 @@ class RegistrationController extends Controller
             'mother_occupation' => $validated['mother_occupation'],
             'mother_phone' => $validated['mother_phone'],
             'mother_email' => $validated['mother_email'],
-            'mother_company_addresses' => $validated['mother_company_addresses'],
+            'enrollment_id' => $enrollment->enrollment_id,
         ]);
         
-        $this->createParentAddresses($studentParent, $validated);
-        $this->createGuardianData($student, $validated);
+        $this->createParentAddresses($studentParent, $validated, $enrollment);
+        $this->createGuardianData($student, $validated, $enrollment);
         $this->createPayment($student, $validated, $enrollment);
     }
 
-    private function createParentAddresses($studentParent, $validated)
+    private function createParentAddresses($studentParent, $validated, $enrollment)
     {
         $studentParent->fatherAddress()->create([
             'street' => $validated['father_address_street'],
@@ -1043,7 +1036,7 @@ class RegistrationController extends Controller
             'city_regency' => $validated['father_address_city_regency'],
             'province' => $validated['father_address_province'],
             'other' => $validated['father_address_other'],
-            'father_company_addresses' => $validated['father_company_addresses'],
+            'enrollment_id' => $enrollment->enrollment_id,
         ]);
         $studentParent->motherAddress()->create([
             'street' => $validated['mother_address_street'],
@@ -1054,10 +1047,11 @@ class RegistrationController extends Controller
             'city_regency' => $validated['mother_address_city_regency'],
             'province' => $validated['mother_address_province'],
             'other' => $validated['mother_address_other'],
+            'enrollment_id' => $enrollment->enrollment_id,
         ]);
     }
 
-    private function createGuardianData($student, $validated)
+    private function createGuardianData($student, $validated, $enrollment)
     {
         $guardian = Guardian::create([
             'guardian_name' => $validated['guardian_name'],
@@ -1065,7 +1059,10 @@ class RegistrationController extends Controller
             'phone_number' => $validated['guardian_phone'],
             'guardian_email' => $validated['guardian_email'],
         ]);
-        $studentGuardian = $student->studentGuardian()->create(['guardian_id' => $guardian->guardian_id]);
+        $studentGuardian = $student->studentGuardian()->create([
+            'guardian_id' => $guardian->guardian_id,
+            'enrollment_id' => $enrollment->enrollment_id,
+        ]);
         $guardian->guardianAddress()->create([
             'street' => $validated['guardian_address_street'],
             'rt' => $validated['guardian_address_rt'],
@@ -1091,6 +1088,7 @@ class RegistrationController extends Controller
         if ($validated['discount_name']) {
             $discountType = DiscountType::firstOrCreate(['name' => $validated['discount_name']]);
             $enrollment->studentDiscount()->create([
+                'enrollment_id' => $enrollment->enrollment_id,
                 'discount_type_id' => $discountType->discount_type_id,
                 'notes' => $validated['discount_notes'],
             ]);
@@ -1129,7 +1127,10 @@ class RegistrationController extends Controller
     private function updateStudentRelatedData($student, $validated, $enrollment)
     {
         $student->studentAddress()->updateOrCreate(
-            ['student_id' => $student->student_id],
+            [
+                'student_id' => $student->student_id,
+                'enrollment_id' => $enrollment->enrollment_id,
+            ],
             [
                 'street' => $validated['street'],
                 'rt' => $validated['rt'],
@@ -1143,7 +1144,10 @@ class RegistrationController extends Controller
         );
         
         $student->studentParent()->updateOrCreate(
-            ['student_id' => $student->student_id],
+            [
+                'student_id' => $student->student_id,
+                'enrollment_id' => $enrollment->enrollment_id, 
+            ],
             [
                 'father_name' => $validated['father_name'],
                 'father_company' => $validated['father_company'],
@@ -1155,22 +1159,24 @@ class RegistrationController extends Controller
                 'mother_occupation' => $validated['mother_occupation'],
                 'mother_phone' => $validated['mother_phone'],
                 'mother_email' => $validated['mother_email'],
-                'mother_company_addresses' => $validated['mother_company_addresses'],
             ]
         );
         
-        $this->updateParentAddresses($student, $validated);
-        $this->updateGuardianData($student, $validated);
+        $this->updateParentAddresses($student, $validated, $enrollment);
+        $this->updateGuardianData($student, $validated, $enrollment);
         $this->updatePayment($student, $validated, $enrollment);
     }
 
-    private function updateParentAddresses($student, $validated)
+    private function updateParentAddresses($student, $validated, $enrollment)
     {
         $studentParent = $student->studentParent;
         
         if ($studentParent) {
             $studentParent->fatherAddress()->updateOrCreate(
-                ['parent_id' => $studentParent->parent_id],
+                [
+                    'parent_id' => $studentParent->parent_id,
+                    'enrollment_id' => $enrollment->enrollment_id,
+                ],
                 [
                     'street' => $validated['father_address_street'],
                     'rt' => $validated['father_address_rt'],
@@ -1180,12 +1186,14 @@ class RegistrationController extends Controller
                     'city_regency' => $validated['father_address_city_regency'],
                     'province' => $validated['father_address_province'],
                     'other' => $validated['father_address_other'],
-                    'father_company_addresses' => $validated['father_company_addresses'],
                 ]
             );
 
             $studentParent->motherAddress()->updateOrCreate(
-                ['parent_id' => $studentParent->parent_id],
+                [
+                    'parent_id' => $studentParent->parent_id,
+                    'enrollment_id' => $enrollment->enrollment_id,
+                ],
                 [
                     'street' => $validated['mother_address_street'],
                     'rt' => $validated['mother_address_rt'],
@@ -1200,16 +1208,31 @@ class RegistrationController extends Controller
         }
     }
 
-    private function updateGuardianData($student, $validated)
+    private function updateGuardianData($student, $validated, $enrollment)
     {
-        $guardian = Guardian::updateOrCreate([
-            'guardian_name' => $validated['guardian_name'],
-            'relation_to_student' => $validated['relation_to_student'],
-            'phone_number' => $validated['guardian_phone'],
-            'guardian_email' => $validated['guardian_email'],
-        ]);
-        $studentGuardian = $student->studentGuardian()->updateOrCreate(['guardian_id' => $guardian->guardian_id]);
-        $guardian->guardianAddress()->updateOrCreate([
+        $guardian = Guardian::updateOrCreate(
+            [
+                'guardian_id' => $validated['guardian_id'] ?? null
+            ],
+            [
+                'guardian_name' => $validated['guardian_name'],
+                'relation_to_student' => $validated['relation_to_student'],
+                'phone_number' => $validated['guardian_phone'],
+                'guardian_email' => $validated['guardian_email'],
+            ]
+        );
+        $studentGuardian = $student->studentGuardian()->updateOrCreate(
+            [
+                'student_id' => $student->student_id,
+                'guardian_id' => $guardian->guardian_id,
+                'enrollment_id' => $enrollment->enrollment_id,
+            ]
+        );
+        $guardian->guardianAddress()->updateOrCreate(
+            [
+                'guardian_id' => $guardian->guardian_id,
+            ],
+            [
             'street' => $validated['guardian_address_street'],
             'rt' => $validated['guardian_address_rt'],
             'rw' => $validated['guardian_address_rw'],
@@ -1223,7 +1246,12 @@ class RegistrationController extends Controller
 
     private function updatePayment($student, $validated, $enrollment)
     {
-        Payment::updateOrCreate([
+        Payment::updateOrCreate(
+        [
+            'student_id' => $student->student_id,
+            'enrollment_id' => $enrollment->enrollment_id,
+        ],
+        [
             'student_id' => $student->student_id,
             'enrollment_id'=> $enrollment->enrollment_id,
             'tuition_fees' => $validated['tuition_fees'],
@@ -1233,10 +1261,15 @@ class RegistrationController extends Controller
 
         if ($validated['discount_name']) {
             $discountType = DiscountType::updateOrCreate(['name' => $validated['discount_name']]);
-            $enrollment->studentDiscount()->create([
-                'discount_type_id' => $discountType->discount_type_id,
-                'notes' => $validated['discount_notes'],
-            ]);
+            $enrollment->studentDiscount()->updateOrCreate(
+                [
+                    'enrollment_id' => $enrollment->enrollment_id,
+                ],
+                [
+                    'discount_type_id' => $discountType->discount_type_id,
+                    'notes' => $validated['discount_notes'],
+                ]
+            );
         }
     }
 

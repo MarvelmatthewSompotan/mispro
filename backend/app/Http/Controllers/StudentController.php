@@ -51,14 +51,6 @@ class StudentController extends Controller
             ' . (!$isStudentStatusFiltered ? 'AND e2.school_year_id = e1.school_year_id' : '') . '
         )');
 
-        $latestPayments = DB::table('payments as p1')
-            ->select('p1.student_id', 'p1.financial_policy_contract')
-            ->whereRaw('p1.payment_id = (
-                SELECT MAX(p2.payment_id)
-                FROM payments AS p2
-                WHERE p2.student_id = p1.student_id
-            )');
-
         $query = Student::select(
             'students.student_id',
             DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
@@ -71,7 +63,6 @@ class StudentController extends Controller
             'sections.name as section_name',
             'students.status as student_status',
             'enrollments.status as enrollment_status',
-            'payments.financial_policy_contract as financial_policy_contract'
         )
         ->joinSub($latestEnrollments, 'latest_enrollments', function ($join) {
             $join->on('latest_enrollments.student_id', '=', 'students.student_id');
@@ -80,10 +71,7 @@ class StudentController extends Controller
         ->join('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
         ->join('school_years', 'enrollments.school_year_id', '=', 'school_years.school_year_id')
         ->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id')
-        ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id')
-        ->leftJoinSub($latestPayments, 'payments', function ($join) {
-            $join->on('payments.student_id', '=', 'students.student_id');
-        });
+        ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id');
         
         $isEnrollmentStatusFiltered = $request->filled('enrollment_status');
 
