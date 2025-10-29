@@ -8,13 +8,21 @@ import searchIcon from '../../../assets/Search-icon.png';
 import totalRegisIcon from '../../../assets/total_regis_icon.svg';
 import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
 import Button from '../../atoms/Button';
+import trashIcon from '../../../assets/trash_icon.png';
 
 import {
   getRegistrations,
   getRegistrationOptions,
 } from '../../../services/api';
 
-const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
+// --- Komponen Internal BARU untuk Satu Baris Data (Mengikuti Pola StudentList) ---
+const RegistrationRow = ({
+  registration,
+  onRowClick,
+  onStatusClick,
+  onDeleteClick,
+}) => {
+  // Menentukan style untuk badge status
   const status = registration.application_status?.toLowerCase() || 'confirmed';
   const statusStyle =
     status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
@@ -56,6 +64,18 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </div>
         </div>
+      </div>
+      <div className={styles.actionCell}>
+        <button
+          className={styles.actionButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteClick?.(registration);
+          }}
+          aria-label='Delete registration'
+        >
+          <img src={trashIcon} alt='Delete' className={styles.deleteIcon} />
+        </button>
       </div>
     </div>
   );
@@ -282,6 +302,10 @@ const Registration = () => {
     setShowStatusPopup(true);
   };
 
+  const handleDeleteClick = (row) => {
+    console.log(row.registration_id);
+  };
+
   const handleCloseStatusPopup = () => {
     setShowStatusPopup(false);
     setSelectedRegistration(null);
@@ -433,6 +457,7 @@ const Registration = () => {
             labelKey='name'
             currentFilterValue={filters.status}
           />
+          <ColumnHeader title='Actions' hasSort={false} hasFilter={false} />
         </div>
 
         {/* Body Grid */}
@@ -446,6 +471,7 @@ const Registration = () => {
                 registration={row}
                 onRowClick={handleRowClick}
                 onStatusClick={handleStatusClick}
+                onDeleteClick={handleDeleteClick}
               />
             ))
           ) : (
