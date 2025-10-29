@@ -43,7 +43,7 @@ const TermOfPaymentSection = ({
     if (prefill && Object.keys(prefill).length > 0) {
       setTuitionFees(prefill.tuition_fees || "");
       setResidencePayment(prefill.residence_payment || "");
-      setFinancialPolicy(prefill.financial_policy_contract === "Agree");
+      setFinancialPolicy(prefill.financial_policy_contract === "Signed");
       setDiscountName(prefill.discount_name || "");
       setDiscountNotes(prefill.discount_notes || "");
     }
@@ -53,7 +53,7 @@ const TermOfPaymentSection = ({
     onDataChange({
       tuition_fees: tuitionFees,
       residence_payment: residencePayment,
-      financial_policy_contract: financialPolicy ? "Agree" : "Not Signed",
+      financial_policy_contract: financialPolicy ? "Signed" : "Not Signed",
       discount_name: discountName,
       discount_notes: discountNotes,
     });
