@@ -203,18 +203,6 @@ class RegistrationController extends Controller
 
                 $student->save(); 
                 $enrollment->save();
-
-                $this->createApplicationFormVersion(
-                    $form,
-                    [
-                        'status_update_reason' => $request->status === 'Cancelled'
-                            ? 'Application cancelled'
-                            : 'Application confirmed',
-                        'changed_status_by' => auth()->user()->username ?? 'system',
-                    ],
-                    $student,
-                    $enrollment
-                );
             }
 
             DB::commit();
@@ -831,6 +819,102 @@ class RegistrationController extends Controller
         }
     }
 
+    public function destroy($application_id) {
+        DB::beginTransaction();
+        try {
+            $applicationForm = ApplicationForm::with([
+                    'versions',
+                    'enrollment',
+                    'enrollment.student.studentAddress',
+                    'enrollment.student.studentParent.fatherAddress',
+                    'enrollment.student.studentParent.motherAddress',
+                    'enrollment.student.studentGuardian.guardian.guardianAddress',
+                    'enrollment.student.payments',
+                    'enrollment.studentDiscount',
+                ])->where('application_id', $application_id)->first();
+            
+            if (!$applicationForm) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Application form not found.',
+                ], 404);
+            }
+
+            $enrollment = $applicationForm->enrollment;
+            $enrollment_id = $enrollment->enrollment_id;
+            $student = $enrollment?->student;
+
+            if (!$enrollment || !$student) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Enrollment or student not found for this application form.',
+                ], 404);
+            }
+
+            $applicationForm->versions()->delete();
+            
+            if ($enrollment->studentDiscount) {
+                $enrollment->studentDiscount->delete();
+            }
+            $registrationPayment = $student->payments()
+                ->where('enrollment_id', $enrollment_id)
+                ->first();
+
+            if ($registrationPayment) {
+                $registrationPayment->delete();
+            }
+            if ($student->studentParent) {
+                if ($student->studentParent->fatherAddress) {
+                    $student->studentParent->fatherAddress->delete();
+                }
+                if ($student->studentParent->motherAddress) {
+                    $student->studentParent->motherAddress->delete();
+                }
+                $student->studentParent->delete();
+            }
+            if ($student->studentGuardian) {
+                if ($student->studentGuardian->guardian && $student->studentGuardian->guardian->guardianAddress) {
+                    $student->studentGuardian->guardian->guardianAddress->delete();
+                }
+                if ($student->studentGuardian->guardian) {
+                    $student->studentGuardian->guardian->delete();
+                }
+                $student->studentGuardian->delete();
+            }
+            if ($student->studentAddress) {
+                $student->studentAddress->delete();
+            }
+
+            if (strtolower($enrollment->student_status ?? '') === 'new') {
+                $student->delete();
+            }
+                
+            $enrollment->delete();
+            $applicationForm->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration and all related data deleted successfully.'
+            ], 200);
+        }
+        catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Failed to delete registration', [
+                'error' => $e->getMessage(),
+                'application_form_id' => $application_id
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete registration data.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function showPreview($applicationId, $versionId)
     {
         try {
@@ -962,6 +1046,7 @@ class RegistrationController extends Controller
     {
         Payment::create([
             'student_id' => $student->student_id,
+            'enrollment_id'=> $enrollment->enrollment_id,
             'tuition_fees' => $validated['tuition_fees'],
             'residence_payment' => $validated['residence_payment'],
             'financial_policy_contract' => $validated['financial_policy_contract'],
@@ -1104,6 +1189,7 @@ class RegistrationController extends Controller
     {
         Payment::updateOrCreate([
             'student_id' => $student->student_id,
+            'enrollment_id'=> $enrollment->enrollment_id,
             'tuition_fees' => $validated['tuition_fees'],
             'residence_payment' => $validated['residence_payment'],
             'financial_policy_contract' => $validated['financial_policy_contract'],

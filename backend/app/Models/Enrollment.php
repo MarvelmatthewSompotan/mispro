@@ -13,6 +13,9 @@ use App\Models\Transportation;
 use App\Models\PickupPoint;
 use App\Models\ApplicationForm;
 use App\Models\StudentDiscount;
+use App\Models\Section;
+use App\Models\Major;
+use App\Models\Payment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -106,6 +109,11 @@ class Enrollment extends Model
     {
         return $this->hasOne(
         StudentDiscount::class, 'enrollment_id', 'enrollment_id');
+    }
+
+    public function payments() : HasOne
+    {
+        return $this->hasOne(Payment::class, 'enrollment_id', 'enrollment_id');
     }
 
     public function discountTypes() : HasManyThrough

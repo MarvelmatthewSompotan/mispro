@@ -376,8 +376,8 @@ class StudentController extends Controller
                 'province' => $requestData['province'] ?? '',
                 'other' => $requestData['other'] ?? '',
                 'photo_url' => $requestData['photo_url'] ?? '',
-                'student_active' => $requestData['student_active'] ?? '',
-                'status' => $requestData['status'] ?? '',
+                'student_active' => $latestVersion->applicationForm?->enrollment?->student?->active ?? '',
+                'status' => $latestVersion->applicationForm?->enrollment?->student?->status ?? '',
             ],
             'program' => [
                 'section_id' => $requestData['section_id'] ?? '',
