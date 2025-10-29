@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Student;
 use App\Models\StudentParent;
+use App\Models\Enrollment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -24,12 +25,18 @@ class MotherAddress extends Model
         'rw',
         'city_regency',
         'province',
-        'other'
+        'other',
+        'enrollment_id'
     ];
 
     public function parent() : BelongsTo
     {
         return $this->belongsTo(StudentParent::class, 'parent_id', 'parent_id');
+    }
+
+    public function enrollment(): BelongsTo
+    {
+        return $this->belongsTo(Enrollment::class, 'enrollment_id', 'enrollment_id');
     }
 
     public function student() : HasOneThrough

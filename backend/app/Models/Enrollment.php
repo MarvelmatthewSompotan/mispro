@@ -16,6 +16,8 @@ use App\Models\StudentDiscount;
 use App\Models\StudentParent;
 use App\Models\StudentAddress;
 use App\Models\StudentGuardian;
+use App\Models\FatherAddress;
+use App\Models\MotherAddress;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -125,6 +127,17 @@ class Enrollment extends Model
     {
         return $this->hasOne(StudentGuardian::class, 'enrollment_id', 'enrollment_id');
     }
+
+    public function fatherAddress(): HasOne
+    {
+        return $this->hasOne(FatherAddress::class, 'enrollment_id', 'enrollment_id');
+    }
+
+    public function motherAddress(): HasOne
+    {
+        return $this->hasOne(MotherAddress::class, 'enrollment_id', 'enrollment_id');
+    }
+
 
     public function discountTypes() : HasManyThrough
     {
