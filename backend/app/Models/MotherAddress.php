@@ -24,8 +24,7 @@ class MotherAddress extends Model
         'rw',
         'city_regency',
         'province',
-        'other',
-        'enrollment_id'
+        'other'
     ];
 
     public function parent() : BelongsTo
