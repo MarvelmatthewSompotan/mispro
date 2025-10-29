@@ -21,14 +21,17 @@ const useAuth = () => {
   };
 
   const isAdmin = () => isUserRole('admin');
-  
   const isRegistrar = () => isUserRole('registrar');
+  const isHeadRegistrar = () => isUserRole('head_registrar');
+  const isTeacher = () => isUserRole('teacher');
   
   return {
     user,
     isAdmin,
     isRegistrar,
     isUserRole,
+    isHeadRegistrar, 
+    isTeacher,
   };
 };
 
