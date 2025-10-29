@@ -18,9 +18,14 @@ use App\Models\SchoolClass;
 use Illuminate\Support\Str;
 use App\Models\DiscountType;
 use Illuminate\Http\Request;
+use App\Models\FatherAddress;
+use App\Models\MotherAddress;
 use App\Models\ResidenceHall;
+use App\Models\StudentAddress;
 use App\Models\Transportation;
 use App\Models\ApplicationForm;
+use App\Models\GuardianAddress;
+use App\Models\StudentGuardian;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +33,7 @@ use App\Events\ApplicationFormCreated;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ApplicationPreviewResource;
+use App\Models\StudentParent;
 
 class RegistrationController extends Controller
 {
@@ -819,87 +825,117 @@ class RegistrationController extends Controller
         }
     }
 
-    public function destroy($application_id) {
+    public function destroy($application_id)
+    {
         DB::beginTransaction();
+
         try {
             $applicationForm = ApplicationForm::with([
-                    'versions',
-                    'enrollment',
-                    'enrollment.student.studentAddress',
-                    'enrollment.student.studentParent.fatherAddress',
-                    'enrollment.student.studentParent.motherAddress',
-                    'enrollment.student.studentGuardian.guardian.guardianAddress',
-                    'enrollment.student.payments',
-                    'enrollment.studentDiscount',
-                ])->where('application_id', $application_id)->first();
-            
+                'versions',
+                'enrollment',
+                'enrollment.student',
+            ])->where('application_id', $application_id)->first();
+
             if (!$applicationForm) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Application form not found.',
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Application form not found.'], 404);
             }
 
             $enrollment = $applicationForm->enrollment;
-            $enrollment_id = $enrollment->enrollment_id;
             $student = $enrollment?->student;
 
             if (!$enrollment || !$student) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Enrollment or student not found for this application form.',
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Enrollment or student not found.'], 404);
             }
 
+            $enrollment_id = $enrollment->enrollment_id;
+
+            // Hapus versi formulir
             $applicationForm->versions()->delete();
-            
-            if ($enrollment->studentDiscount) {
-                $enrollment->studentDiscount->delete();
-            }
-            $registrationPayment = $student->payments()
+
+            // Hapus discount
+            $enrollment->studentDiscount()?->delete();
+
+            // Hapus pembayaran yang terkait dengan pendaftaran ini
+            $student->payments()->where('enrollment_id', $enrollment_id)->delete();
+
+            // Ambil semua student_parent untuk enrollment ini
+            $studentParents = $student->studentParent()
                 ->where('enrollment_id', $enrollment_id)
-                ->first();
+                ->get();
 
-            if ($registrationPayment) {
-                $registrationPayment->delete();
+            foreach ($studentParents as $studentParent) {
+                $fatherAddress = $studentParents->fatherAddress;
+                $motherAddress = $studentParents->motherAddress;
+
+                // Cek apakah father address ini masih dipakai enrollment lain
+                $isFatherAddressUsedByOthers = StudentParent::where('parent_id', $fatherAddress->parent_id)
+                    ->where('enrollment_id', '!=', $enrollment_id)
+                    ->exists();
+
+                // Cek apakah mother address ini masih dipakai enrollment lain
+                $isMotherAddressUsedByOthers = StudentParent::where('parent_id', $motherAddress->parent_id)
+                    ->where('enrollment_id', '!=', $enrollment_id)
+                    ->exists();
+
+                // Kalau tidak dipakai enrollment lain, hapus alamat 
+                if (!$isFatherAddressUsedByOthers) {
+                    if ($fatherAddress) {
+                        $fatherAddress->delete();
+                    }
+                    $fatherAddress->delete();
+                }
+                if (!$isMotherAddressUsedByOthers) {
+                    if ($motherAddress) {
+                        $motherAddress->delete();
+                    }
+                    $motherAddress->delete();
+                }
+
+                // Hapus data student_guardian ini
+                $studentParent->delete();
             }
-            if ($student->studentParent) {
-                if ($student->studentParent->fatherAddress) {
-                    $student->studentParent->fatherAddress->delete();
+            
+            // Ambil semua student_guardian untuk enrollment ini
+            $studentGuardians = $student->studentGuardians()
+                ->where('enrollment_id', $enrollment_id)
+                ->get();
+
+            foreach ($studentGuardians as $studentGuardian) {
+                $guardian = $studentGuardian->guardian;
+
+                // Cek apakah guardian ini masih dipakai enrollment lain
+                $isGuardianUsedByOthers = StudentGuardian::where('guardian_id', $guardian->guardian_id)
+                    ->where('enrollment_id', '!=', $enrollment_id)
+                    ->exists();
+
+                // Kalau tidak dipakai enrollment lain, hapus alamat dan guardian-nya
+                if (!$isGuardianUsedByOthers) {
+                    if ($guardian->guardianAddress) {
+                        $guardian->guardianAddress->delete();
+                    }
+                    $guardian->delete();
                 }
-                if ($student->studentParent->motherAddress) {
-                    $student->studentParent->motherAddress->delete();
-                }
-                $student->studentParent->delete();
-            }
-            if ($student->studentGuardian) {
-                if ($student->studentGuardian->guardian && $student->studentGuardian->guardian->guardianAddress) {
-                    $student->studentGuardian->guardian->guardianAddress->delete();
-                }
-                if ($student->studentGuardian->guardian) {
-                    $student->studentGuardian->guardian->delete();
-                }
-                $student->studentGuardian->delete();
-            }
-            if ($student->studentAddress) {
-                $student->studentAddress->delete();
+
+                // Hapus data student_guardian ini
+                $studentGuardian->delete();
             }
 
+            // Hapus alamat siswa (jika punya enrollment_id)
+            StudentAddress::where('enrollment_id', $enrollment_id)->delete();
+
+            // Hapus student kalau pendaftarannya new
             if (strtolower($enrollment->student_status ?? '') === 'new') {
                 $student->delete();
             }
-                
+
+            // Hapus enrollment dan application form
             $enrollment->delete();
             $applicationForm->delete();
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration and all related data deleted successfully.'
-            ], 200);
-        }
-        catch (\Exception $e) {
+            return response()->json(['success' => true, 'message' => 'Registration and related data deleted successfully.']);
+        } catch (\Exception $e) {
             DB::rollBack();
 
             \Log::error('Failed to delete registration', [
