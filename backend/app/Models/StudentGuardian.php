@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Student;
 use App\Models\Guardian;
 use App\Models\GuardianAddress;
+use App\Models\Enrollment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -19,6 +20,7 @@ class StudentGuardian extends Model
         'student_guardian_id',
         'student_id',
         'guardian_id',
+        'enrollment_id'
     ];
 
     public function guardian() : BelongsTo
@@ -30,6 +32,12 @@ class StudentGuardian extends Model
     {
         return $this->belongsTo(Student::class, 'student_id', 'student_id');
     }
+
+    public function enrollment(): BelongsTo
+    {
+        return $this->belongsTo(Enrollment::class, 'enrollment_id', 'enrollment_id');
+    }
+
     public function guardianAddress() : HasOneThrough
     {
         return $this->hasOneThrough(

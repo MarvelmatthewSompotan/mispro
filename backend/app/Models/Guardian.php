@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Guardian extends Model
 {
+
     protected $table = 'guardians';
     protected $primaryKey = 'guardian_id';
     public $timestamps = false;

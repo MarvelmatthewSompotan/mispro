@@ -134,7 +134,7 @@ const ExportLogbookPopup = ({
       });
 
       // 5. Inisialisasi Dokumen PDF
-      const doc = new jsPDF("landscape", "mm", [210, 330]);
+      const doc = new jsPDF('landscape', 'mm', [210, 330]);
       const margin = 7;
       const firstStudent = logbookData.length > 0 ? logbookData[0] : null;
       const schoolYear = firstStudent ? firstStudent.school_year : 'N/A';
@@ -181,7 +181,7 @@ const ExportLogbookPopup = ({
           textColor: globalColors.mainText,
           lineColor: globalColors.mainGrey,
           lineWidth: 0.2,
-          valign: "middle",
+          valign: 'middle',
           minCellHeight: 1,
         },
         headStyles: {
@@ -200,7 +200,6 @@ const ExportLogbookPopup = ({
             halign: 'center',
           },
         },
-
 
         didDrawCell: (data) => {
           if (

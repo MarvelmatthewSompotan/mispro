@@ -17,7 +17,7 @@
 
 /* (Button 1) */
 .button--outline {
-  background-color: transparent;
+  background-color: var(--secondary-background);
   color: var(--main-accent);
   border: 2px solid var(--main-accent);
 }

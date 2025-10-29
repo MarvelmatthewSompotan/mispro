@@ -4,7 +4,9 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import styles from "./Print.module.css";
 import kop from "../../assets/LogoMIS_Print.png";
-import footer from "../../assets/Footer.png";
+import footer from "../../assets/Footer_A4.svg";
+import footerF4Logos from "../../assets/Footer_F4.svg";
+import switchIcon from "../../assets/switch_icon.svg";
 import StudentsInformationContent from "./StudentsInformation_Content/StudentsInformation_Content";
 import ProgramContent from "./Program_Content/Program_Content";
 import FacilitiesContent from "./Facilities_Content/Facilities_Content";
@@ -31,25 +33,19 @@ function Print() {
   const [classOptions, setClassOptions] = useState([]);
   const [majorOptions, setMajorOptions] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // 🔹 State untuk loading tombol Print
   const [isPrinting, setIsPrinting] = useState(false);
-  // Tambahkan state baru setelah line 35:
   const [isFromSubmission, setIsFromSubmission] = useState(false);
+  const [pageSize, setPageSize] = useState("A4");
 
-  // Tambahkan useEffect setelah useEffect yang sudah ada (setelah line 112):
   useEffect(() => {
-    // Cek apakah datang dari form submission
     const isFromFormSubmission = location.state?.fromSubmission || false;
     setIsFromSubmission(isFromFormSubmission);
   }, [location.state]);
 
-  // Tambahkan useEffect untuk handle back navigation:
   useEffect(() => {
     if (!isFromSubmission) return;
 
     const handleBackNavigation = () => {
-      // Redirect ke registration page saat back
       navigate("/registration", { replace: true });
     };
 
@@ -61,13 +57,11 @@ function Print() {
   }, [navigate, isFromSubmission]);
 
   useEffect(() => {
-    // Jika user akses langsung ke /print tanpa fromSubmission flag
     if (!location.state?.fromSubmission && !location.state?.applicationId) {
       navigate("/registration", { replace: true });
     }
   }, [location.state, navigate]);
 
-  // Fungsi untuk download PDF manual
   const downloadPDF = async () => {
     if (!printRef.current || !previewData?.student_id) return;
 
@@ -75,28 +69,45 @@ function Print() {
     try {
       const element = printRef.current;
 
-      // render canvas dengan kualitas tinggi
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         ignoreElements: (el) => el.classList.contains("no-print"),
       });
 
-      // simpan jadi JPEG (lebih kecil dari PNG)
       const imgData = canvas.toDataURL("image/jpeg", 0.85);
 
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const isA4 = pageSize === "A4";
+      const pdfWidth = 210;
+      const pdfHeight = isA4 ? 297 : 330;
 
-      // tambah image ke PDF dengan kompresi
+      const pdf = new jsPDF("p", "mm", [pdfWidth, pdfHeight]);
+
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const canvasRatio = canvasHeight / canvasWidth;
+      const pdfRatio = pdfHeight / pdfWidth;
+
+      let imgWidthOnPdf, imgHeightOnPdf;
+
+      if (canvasRatio > pdfRatio) {
+        imgHeightOnPdf = pdfHeight;
+        imgWidthOnPdf = canvasWidth * (pdfHeight / canvasHeight);
+      } else {
+        imgWidthOnPdf = pdfWidth;
+        imgHeightOnPdf = canvasHeight * (pdfWidth / canvasHeight);
+      }
+
+      const x = (pdfWidth - imgWidthOnPdf) / 2;
+      const y = 0;
+
       pdf.addImage(
         imgData,
         "JPEG",
-        0,
-        0,
-        pdfWidth,
-        pdfHeight,
+        x,
+        y,
+        imgWidthOnPdf,
+        imgHeightOnPdf,
         undefined,
         "FAST"
       );
@@ -107,7 +118,7 @@ function Print() {
           "-"
         );
 
-      pdf.save(`${studentName}_Application_Form.pdf`);
+      pdf.save(`${studentName}_Application_Form (${pageSize}).pdf`);
     } catch (error) {
       console.error("Failed to generate PDF:", error);
     } finally {
@@ -196,26 +207,21 @@ function Print() {
     return semester.includes("1") ? "1 (One)" : "2 (Two)";
   };
 
+  const handlePageSizeToggle = () => {
+    setPageSize((prevSize) => (prevSize === "A4" ? "F4" : "A4"));
+  };
+
   return (
     <div className={styles.printWrapper}>
-      {/* 🔹 Tombol kontrol */}
-      <div
-        className="no-print"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: -40,
-          right: 0,
-          width: "100%",
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: "10px",
-          padding: "20px 20px",
-          background: "#fff",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-          zIndex: 9999,
-        }}
-      >
+      <div className={`no-print ${styles.printActionsBar}`}>
+        <h3>Page Format {pageSize}</h3>
+        <img
+          src={switchIcon}
+          alt="Switch View"
+          className={styles.switchIcon}
+          title="Switch View"
+          onClick={handlePageSizeToggle}
+        />
         <Button onClick={() => navigate("/registration")} variant="outline">
           Back to Registration
         </Button>
@@ -225,7 +231,12 @@ function Print() {
       </div>
 
       {/* Konten PDF */}
-      <div ref={printRef} className={styles.printPageA4}>
+      <div
+        ref={printRef}
+        className={
+          pageSize === "A4" ? styles.printPageA4 : styles.printPageF4
+        }
+      >
         <div className={styles.header}>
           <div className={styles.headerRow}>
             <img src={kop} alt="Header KOP" className={styles.headerKop} />
@@ -333,9 +344,20 @@ function Print() {
             <OtherDetailContent />
           </div>
         </div>
-        <div className={styles.footer}>
+
+        <div
+          className={
+            pageSize === "A4" ? styles.footerA4 : styles.footerF4
+          }
+        >
           <div className={styles.footerRow}>
-            <img src={footer} alt="Footer" className={styles.footerImg} />
+            <img
+              src={pageSize === "A4" ? footer : footerF4Logos}
+              alt="Footer"
+              className={
+                pageSize === "A4" ? styles.footerImgA4 : styles.footerImgF4
+              }
+            />
           </div>
         </div>
       </div>

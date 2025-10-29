@@ -15,7 +15,9 @@ return new class extends Migration
             $table->enum('tuition_fees', ['Full Payment', 'Installment']);
             $table->enum('residence_payment', ['Full Payment', 'Installment']);
             $table->enum('financial_policy_contract', ['Signed', 'Not Signed']);
+            $table->unsignedBigInteger('enrollment_id');
             $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
+            $table->foreign('enrollment_id')->references('enrollment_id')->on('enrollments')->onDelete('cascade');
         });
     }
 

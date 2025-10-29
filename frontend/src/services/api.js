@@ -386,3 +386,9 @@ export const postUser = async (userData) => {
     body: JSON.stringify(userData),
   });
 };
+
+export const deleteRegistration = (applicationId) => {
+  return apiFetch(`/registration/${applicationId}`, {
+    method: 'DELETE',
+  });
+};

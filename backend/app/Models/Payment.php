@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Enrollment;
 
 class Payment extends Model
 {
@@ -17,11 +18,17 @@ class Payment extends Model
         'student_id',
         'tuition_fees',
         'residence_payment',
-        'financial_policy_contract'
+        'financial_policy_contract',
+        'enrollment_id',
     ];
 
     public function student() : BelongsTo
     {
         return $this->belongsTo(Student::class, 'student_id', 'student_id');
+    }
+
+    public function enrollment() : BelongsTo
+    {
+        return $this->belongsTo(Enrollment::class, 'enrollment_id', 'enrollment_id');
     }
 }

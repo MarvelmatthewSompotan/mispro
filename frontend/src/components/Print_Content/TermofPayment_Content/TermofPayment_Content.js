@@ -98,7 +98,7 @@ function TermofPaymentContent({ data }) {
             <div className={styles.checkBox}>
               {renderCheckbox(data?.financial_policy_contract === 'Signed')}
             </div>
-            <div className={styles.fullPayment}>Agree</div>
+            <div className={styles.fullPayment}>Signed</div>
           </div>
         </div>
       </div>
