@@ -38,6 +38,10 @@ body {
 .login-blob-bottom {
   position: absolute;
   z-index: 1;
+
+  /* --- TAMBAHAN ANIMASI LOAD --- */
+  /* Muncul dengan jeda 0.2s, durasi 0.6s */
+  animation: blobLoadIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
 }
 
 .login-blob-top {
@@ -68,6 +72,17 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 31px;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  opacity: 1;
+  transform: scale(1);
+  animation: cardLoadIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.4s;
+}
+
+.login-card.is-fading {
+  opacity: 0;
+  transform: scale(0.95);
 }
 
 .login-logo {
@@ -155,51 +170,127 @@ body {
   border-bottom-left-radius: 248px;
 }
 
-.login-form-new .atom-button {
-  width: 145px;
-  height: 45px;
+.button-container {
+  width: 100%;
+  display: flex;
 }
 
-/* === TAMBAHKAN KODE DI BAWAH INI DI AKHIR FILE === */
+.button-container .atom-button {
+  width: 145px !important;
+  height: 45px !important;
+}
 
-/* Posisi Elips Baru untuk Mode Reset */
+/* Style untuk Mode Reset 
+ */
+
 .login-blob-top-reset,
 .login-blob-bottom-reset {
   position: absolute;
   z-index: 1;
 }
 
-/* Elips 3 (Kanan Atas) - Sesuai permintaan Anda */
 .login-blob-top-reset {
   width: 210px;
   height: auto;
-  top: -90px;
-  right: -70px; /* Diubah dari 'left' */
+  top: -70px;
+  right: -70px;
 }
 
-/* Elips 4 (Kiri Bawah) - Sesuai permintaan Anda */
 .login-blob-bottom-reset {
   width: 150px;
   height: auto;
-  bottom: -80px;
-  left: -60px; /* Diubah dari 'right' */
+  bottom: -60px;
+  left: -60px;
 }
 
-/* * Style untuk Mode Reset 
- */
-
-/* 1. Tukar posisi kontainer kiri dan kanan */
 .login-page-new.reset-mode {
   flex-direction: row-reverse;
 }
 
-/* 2. Balik border-radius gambar dan overlay */
 .login-page-new.reset-mode .login-illustration-new,
 .login-page-new.reset-mode .login-image-overlay {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  border-top-right-radius: 124px; /* Dibalik */
-  border-bottom-right-radius: 248px; /* Dibalik */
+  border-top-right-radius: 124px;
+  border-bottom-right-radius: 248px;
+}
+
+.login-illustration-new,
+.login-image-overlay {
+  transition: border-radius 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: imageLoadIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+}
+
+.login-blob-top,
+.login-blob-bottom,
+.login-blob-top-reset,
+.login-blob-bottom-reset {
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+  transition-delay: 0s;
+}
+
+.login-blob-top,
+.login-blob-bottom {
+  opacity: 1;
+  transform: scale(1);
+
+  transition-delay: 0.15s;
+}
+
+.login-blob-top-reset,
+.login-blob-bottom-reset {
+  opacity: 0;
+  transform: scale(0.5);
+  transition-delay: 0s;
+}
+
+.login-page-new.reset-mode .login-blob-top,
+.login-page-new.reset-mode .login-blob-bottom {
+  opacity: 0;
+  transform: scale(0.5) rotate(-30deg);
+  transition-delay: 0s;
+}
+
+.login-page-new.reset-mode .login-blob-top-reset,
+.login-page-new.reset-mode .login-blob-bottom-reset {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  transition-delay: 0.15s;
+}
+
+@keyframes cardLoadIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes blobLoadIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes imageLoadIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @media (max-width: 900px) {
@@ -223,5 +314,3 @@ body {
     max-width: 100%;
   }
 }
-
-

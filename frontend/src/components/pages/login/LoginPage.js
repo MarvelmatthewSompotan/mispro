@@ -29,6 +29,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [isFading, setIsFading] = useState(false);
 
   // --- TAMBAHKAN STATE INI ---
   const [isResetMode, setIsResetMode] = useState(false);
@@ -60,20 +61,14 @@ const LoginPage = () => {
     }
   };
 
-  // --- TAMBAHKAN FUNGSI INI ---
-  // Placeholder untuk logika reset password
   const handleResetSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
     console.log("Form reset disubmit dengan:", form);
-    // TODO: Ganti dengan logika API reset password Anda
-    // Misalnya: await resetPassword(form.email);
-    //
     alert("Fungsi reset password belum diimplementasikan.");
     setIsLoading(false);
   };
-  // ---------------------------
 
   useEffect(() => {
     console.log("LoginPage mounted - URL:", window.location.pathname);
@@ -83,9 +78,16 @@ const LoginPage = () => {
   // Fungsi untuk beralih mode
   const toggleMode = (e, mode) => {
     e.preventDefault();
-    setIsResetMode(mode === "reset");
-    setError(""); // Hapus error saat ganti mode
-    setForm({ email: "", password: "" }); // Kosongkan form saat ganti mode
+    setIsFading(true);
+    setTimeout(() => {
+      // Ganti state setelah fade-out
+      setIsResetMode(mode === "reset");
+      setError("");
+      setForm({ email: "", password: "" });
+
+      // Selesai, biarkan fade-in
+      setIsFading(false);
+    }, 300); // 300ms
   };
   // ----------------
 
@@ -99,39 +101,37 @@ const LoginPage = () => {
       {/* Container Kiri (Form) */}
       <div className={styles["login-left-new"]}>
         <div className={styles["login-card-wrapper"]}>
-          {/* --- UBAH INI (RENDER KONDISIONAL ELIPS) --- */}
-          {!isResetMode ? (
-            <>
-              {/* Elips Mode Login */}
-              <img
-                src={ellipseTop}
-                alt="Decorative ellipse 1"
-                className={styles["login-blob-top"]}
-              />
-              <img
-                src={ellipseBottom}
-                alt="Decorative ellipse 2"
-                className={styles["login-blob-bottom"]}
-              />
-            </>
-          ) : (
-            <>
-              {/* Elips Mode Reset */}
-              <img
-                src={ellipseTopReset}
-                alt="Decorative ellipse 3"
-                className={styles["login-blob-top-reset"]}
-              />
-              <img
-                src={ellipseBottomReset}
-                alt="Decorative ellipse 4"
-                className={styles["login-blob-bottom-reset"]}
-              />
-            </>
-          )}
+          {/* Elips Mode Login */}
+          <img
+            src={ellipseTop}
+            alt="Decorative ellipse 1"
+            className={styles["login-blob-top"]}
+          />
+          <img
+            src={ellipseBottom}
+            alt="Decorative ellipse 2"
+            className={styles["login-blob-bottom"]}
+          />
+
+          {/* Elips Mode Reset */}
+          <img
+            src={ellipseTopReset}
+            alt="Decorative ellipse 3"
+            className={styles["login-blob-top-reset"]}
+          />
+          <img
+            src={ellipseBottomReset}
+            alt="Decorative ellipse 4"
+            className={styles["login-blob-bottom-reset"]}
+          />
+
           {/* ------------------------------------------- */}
 
-          <div className={styles["login-card"]}>
+          <div
+            className={`${styles["login-card"]} ${
+              isFading ? styles["is-fading"] : ""
+            }`}
+          >
             <img
               src={logoMis}
               alt="Logo MIS"
@@ -169,7 +169,6 @@ const LoginPage = () => {
 
               {/* Field Password */}
               <div className={styles["input-group"]}>
-                {/* <label htmlFor="password">Password</label> <-- HAPUS LABEL */}
                 <input
                   type="password"
                   id="password"
@@ -182,7 +181,6 @@ const LoginPage = () => {
                 />
               </div>
 
-              {/* --- UBAH LINK (KONDISIONAL) --- */}
               <a
                 href="#"
                 className={styles["reset-login-link"]}
@@ -190,18 +188,16 @@ const LoginPage = () => {
               >
                 {isResetMode ? "Login" : "Reset login"}
               </a>
-              {/* -------------------------------- */}
 
-              {/* --- UBAH TOMBOL --- */}
-              <Button
-                type="submit"
-                variant="solid"
-                fullWidth={true}
-                disabled={isLoading}
-              >
-                {isLoading ? "Processing..." : isResetMode ? "Reset" : "Login"}
-              </Button>
-              {/* --------------------- */}
+              <div className={styles["button-container"]}>
+                <Button type="submit" variant="solid" disabled={isLoading}>
+                  {isLoading
+                    ? "Processing..."
+                    : isResetMode
+                    ? "Reset"
+                    : "Login"}
+                </Button>
+              </div>
             </form>
           </div>
         </div>
