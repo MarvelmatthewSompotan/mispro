@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Models\Student;
 use App\Models\StudentParent;
 use App\Models\Enrollment;
-use App\Models\Enrollment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
