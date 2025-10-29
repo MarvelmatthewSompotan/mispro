@@ -7,7 +7,12 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import {
+  useParams,
+  useLocation,
+  useNavigate,
+  useBlocker,
+} from "react-router-dom";
 import {
   getStudentLatestApplication,
   getRegistrationOptions,
@@ -20,9 +25,11 @@ import styles from "./StudentProfile.module.css";
 import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate.js";
 import UpdatedNotification from "../UpdateNotification/UpdateNotification.js";
 import PhotoUploadPopup from "../PhotoUploadPopup/PhotoUploadPopup.js";
+import Main from "../../../layout/Main.js";
 import gsap from "gsap";
 import StudentProfileHeader from "./StudentProfileHeader/StudentProfileHeader.js";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import ConfirmBackPopup from "../../../molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm.js";
 gsap.registerPlugin(ScrollToPlugin);
 
 const RadioDisplay = ({
@@ -124,11 +131,13 @@ const StudentProfile = () => {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const blocker = useBlocker(isEditing);
   const [isPhotoPopupOpen, setIsPhotoPopupOpen] = useState(false);
   const citizenshipOptions = [
     { value: "Indonesia", label: "Indonesia" },
     { value: "Non Indonesia", label: "Non Indonesia" },
   ];
+  const [isBackPopupOpen, setIsBackPopupOpen] = useState(false);
   const historyRef = useRef(null);
   const refreshHistoryDates = useCallback(async () => {
     setIsLoadingHistory(true);
@@ -220,6 +229,13 @@ const StudentProfile = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    // Jika blocker aktif dan mendeteksi navigasi ('blocked')
+    if (blocker.state === "blocked") {
+      setIsBackPopupOpen(true); // Tampilkan popup
+    }
+  }, [blocker.state]); // Dijalankan setiap kali state blocker berubah
 
   const handleStatusChange = (newStatus) => {
     const inactiveStatuses = ["Graduate", "Expelled", "Withdraw"];
@@ -648,6 +664,33 @@ const StudentProfile = () => {
     setValidationMessages({ nik: "", kitas: "", nisn: "" });
     setSelectedPhoto(null);
     setPhotoPreview(null);
+  };
+
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+
+  const handleConfirmBack = () => {
+    // 1. Jalankan logika 'cancel' Anda untuk reset form
+    handleCancel();
+
+    // 2. Tutup popup
+    setIsBackPopupOpen(false);
+
+    // 3. [BARU] Lanjutkan navigasi yang tadi diblokir
+    if (blocker.state === "blocked") {
+      blocker.proceed();
+    }
+  };
+
+  const handleClosePopup = () => {
+    // 1. Tutup popup
+    setIsBackPopupOpen(false);
+
+    // 2. Beri tahu blocker untuk 'reset' (membatalkan navigasi)
+    if (blocker.state === "blocked") {
+      blocker.reset();
+    }
   };
 
   const validateForm = () => {
@@ -1108,887 +1151,419 @@ const StudentProfile = () => {
   );
 
   return (
-    <div className={styles.profilePage}>
-      <StudentProfileHeader
-        studentInfo={studentInfo}
-        formData={formData}
-        photoPreview={photoPreview}
-        isEditing={isEditing}
-        isUpdating={isUpdating}
-        selectedVersionId={selectedVersionId}
-        isHistoryVisible={isHistoryVisible}
-        isLoadingHistory={isLoadingHistory}
-        historyDates={historyDates}
-        historyRef={historyRef}
-        onViewHistoryClick={handleViewHistoryClick}
-        onHistoryDateChange={handleHistoryDateChange}
-        onEditClick={() => setIsEditing(true)}
-        onCancelClick={handleCancel}
-        onSaveClick={handleSaveClick}
-        onAddPhotoClick={() => setIsPhotoPopupOpen(true)}
-        statusOptions={statusOptions}
-        onStatusChange={handleStatusChange}
-      />
+    <Main showBackButton onBackClick={handleBackClick}>
+      <div className={styles.profilePage}>
+        <StudentProfileHeader
+          studentInfo={studentInfo}
+          formData={formData}
+          photoPreview={photoPreview}
+          isEditing={isEditing}
+          isUpdating={isUpdating}
+          selectedVersionId={selectedVersionId}
+          isHistoryVisible={isHistoryVisible}
+          isLoadingHistory={isLoadingHistory}
+          historyDates={historyDates}
+          historyRef={historyRef}
+          onViewHistoryClick={handleViewHistoryClick}
+          onHistoryDateChange={handleHistoryDateChange}
+          onEditClick={() => setIsEditing(true)}
+          onCancelClick={handleCancel}
+          onSaveClick={handleSaveClick}
+          onAddPhotoClick={() => setIsPhotoPopupOpen(true)}
+          statusOptions={statusOptions}
+          onStatusChange={handleStatusChange}
+        />
 
-      <div className={styles.profileContent}>
-        <div className={styles.infoContainer}>
-          {/* STUDENT'S INFORMATION */}
-          <div id="studentInfo" className={styles.infoSection}>
-            <div
-              className={`${styles.sectionHeader} ${
-                isEditing ? styles.sectionHeaderEditing : ""
-              }`}
-            >
-              <b>STUDENT’S INFORMATION</b>
-            </div>
-            <div className={styles.sectionContent}>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.first_name
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="first_name"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.first_name ? styles.errorLabel : ""
-                    }`}
-                  >
-                    First name
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="first_name"
-                      type="text"
-                      name="first_name"
-                      value={studentInfo.first_name || ""}
-                      onChange={handleStudentInfoChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.first_name ? styles.errorInput : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.first_name || "First name"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.first_name || "-"}
-                    </b>
-                  )}
-                </div>
-                <div className={styles.field}>
-                  <label htmlFor="middle_name" className={styles.fieldLabel}>
-                    Middle name
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="middle_name"
-                      type="text"
-                      name="middle_name"
-                      value={studentInfo.middle_name || ""}
-                      onChange={handleStudentInfoChange}
-                      className={styles.formInput}
-                      placeholder="Middle name"
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.middle_name || "-"}
-                    </b>
-                  )}
-                </div>
+        <div className={styles.profileContent}>
+          <div className={styles.infoContainer}>
+            {/* STUDENT'S INFORMATION */}
+            <div id="studentInfo" className={styles.infoSection}>
+              <div
+                className={`${styles.sectionHeader} ${
+                  isEditing ? styles.sectionHeaderEditing : ""
+                }`}
+              >
+                <b>STUDENT’S INFORMATION</b>
               </div>
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <label htmlFor="last_name" className={styles.fieldLabel}>
-                    Last name
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="last_name"
-                      type="text"
-                      name="last_name"
-                      value={studentInfo.last_name || ""}
-                      onChange={handleStudentInfoChange}
-                      className={styles.formInput}
-                      placeholder="Last name"
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.last_name || "-"}
-                    </b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.nickname ? styles.errorFieldWrapper : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="nickname"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.nickname ? styles.errorLabel : ""
-                    }`}
-                  >
-                    Nickname
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="nickname"
-                      type="text"
-                      name="nickname"
-                      value={studentInfo.nickname || ""}
-                      onChange={handleStudentInfoChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.nickname ? styles.errorInput : ""
-                      }`}
-                      placeholder={errors.studentInfo?.nickname || "Nickname"}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.nickname || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.citizenship
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="citizenship"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.citizenship ? styles.errorLabel : ""
-                    }`}
-                  >
-                    Citizenship
-                  </label>
-                  {isEditing ? (
-                    <div className={styles.selectWrapper}>
-                      <Select
-                        id="citizenship"
-                        name="citizenship"
-                        options={citizenshipOptions}
-                        value={
-                          studentInfo.citizenship
-                            ? {
-                                value: studentInfo.citizenship,
-                                label: studentInfo.citizenship,
-                              }
-                            : null
-                        }
-                        onChange={(opt) =>
-                          handleStudentInfoSelectChange("citizenship", opt)
-                        }
-                        placeholder={
-                          errors.studentInfo?.citizenship ||
-                          "Select citizenship"
-                        }
-                        isClearable
-                        // Gunakan prefix 'react-select' dan biarkan CSS global yang menghandle error
-                        classNamePrefix={
-                          errors.studentInfo?.citizenship
-                            ? "react-select-error"
-                            : "react-select"
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.citizenship || "-"}
-                    </b>
-                  )}
-                </div>
-                {studentInfo.citizenship === "Indonesia" && (
-                  <div
-                    className={`${styles.field} ${
-                      errors.studentInfo?.nik ? styles.errorFieldWrapper : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="nik"
-                      className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.nik ? styles.errorLabel : ""
-                      }`}
-                    >
-                      NIK
-                    </label>
-                    {isEditing ? (
-                      <div className={styles.inputWithError}>
-                        <input
-                          id="nik"
-                          type="text"
-                          name="nik"
-                          value={studentInfo.nik || ""}
-                          onChange={handleStudentInfoChange}
-                          maxLength={16}
-                          className={`${styles.formInput} ${
-                            errors.studentInfo?.nik || validationMessages.nik
-                              ? styles.errorInput
-                              : ""
-                          }`}
-                          placeholder={
-                            errors.studentInfo?.nik || "NIK (16 digits)"
-                          }
-                        />
-                        {validationMessages.nik && (
-                          <div className={styles.inlineErrorMessageRight}>
-                            {validationMessages.nik}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {studentInfo.nik || "-"}
-                      </b>
-                    )}
-                  </div>
-                )}
-                {studentInfo.citizenship === "Non Indonesia" && (
-                  <div
-                    className={`${styles.field} ${
-                      errors.studentInfo?.kitas ? styles.errorFieldWrapper : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="kitas"
-                      className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.kitas ? styles.errorLabel : ""
-                      }`}
-                    >
-                      KITAS
-                    </label>
-                    {isEditing ? (
-                      <div className={styles.inputWithError}>
-                        <input
-                          id="kitas"
-                          type="text"
-                          name="kitas"
-                          value={studentInfo.kitas || ""}
-                          onChange={handleStudentInfoChange}
-                          maxLength={16}
-                          className={`${styles.formInput} ${
-                            errors.studentInfo?.kitas ||
-                            validationMessages.kitas
-                              ? styles.errorInput
-                              : ""
-                          }`}
-                          placeholder={
-                            errors.studentInfo?.kitas ||
-                            "KITAS (11-16 characters)"
-                          }
-                        />
-                        {validationMessages.kitas && (
-                          /* ===== UBAH CLASSNAME DI SINI ===== */
-                          <div className={styles.inlineErrorMessageRight}>
-                            {validationMessages.kitas}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {studentInfo.kitas || "-"}
-                      </b>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {studentInfo.citizenship === "Non Indonesia" && (
+              <div className={styles.sectionContent}>
                 <div className={styles.row}>
                   <div
                     className={`${styles.field} ${
-                      errors.studentInfo?.country
+                      errors.studentInfo?.first_name
                         ? styles.errorFieldWrapper
                         : ""
                     }`}
                   >
                     <label
-                      htmlFor="country"
+                      htmlFor="first_name"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.country ? styles.errorLabel : ""
+                        errors.studentInfo?.first_name ? styles.errorLabel : ""
                       }`}
                     >
-                      Country of origin
+                      First name
                     </label>
                     {isEditing ? (
                       <input
-                        id="country"
+                        id="first_name"
                         type="text"
-                        name="country"
-                        value={studentInfo.country || ""}
+                        name="first_name"
+                        value={studentInfo.first_name || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
-                          errors.studentInfo?.country ? styles.errorInput : ""
-                        }`}
-                        placeholder={
-                          errors.studentInfo?.country
-                            ? errors.studentInfo.country
-                            : "Country of origin"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {studentInfo.country || "-"}
-                      </b>
-                    )}
-                  </div>
-                </div>
-              )}
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.nisn ? styles.errorFieldWrapper : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="nisn"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.nisn ? styles.errorLabel : ""
-                    }`}
-                  >
-                    NISN
-                  </label>
-                  {isEditing ? (
-                    <div className={styles.inputWithError}>
-                      <input
-                        id="nisn"
-                        type="text"
-                        name="nisn"
-                        value={studentInfo.nisn || ""}
-                        onChange={handleStudentInfoChange}
-                        maxLength={10}
-                        className={`${styles.formInput} ${
-                          errors.studentInfo?.nisn || validationMessages.nisn
+                          errors.studentInfo?.first_name
                             ? styles.errorInput
                             : ""
                         }`}
                         placeholder={
-                          errors.studentInfo?.nisn || "NISN (10 digits)"
+                          errors.studentInfo?.first_name || "First name"
                         }
                       />
-                      {validationMessages.nisn && (
-                        <div className={styles.inlineErrorMessageRight}>
-                          {validationMessages.nisn}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.nisn || "-"}
-                    </b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.religion ? styles.errorFieldWrapper : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="religion"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.religion ? styles.errorLabel : ""
-                    }`}
-                  >
-                    Religion
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="religion"
-                      type="text"
-                      name="religion"
-                      value={studentInfo.religion || ""}
-                      onChange={handleStudentInfoChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.religion ? styles.errorInput : ""
-                      }`}
-                      placeholder={errors.studentInfo?.religion || "Religion"}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.religion || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.place_of_birth
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="place_of_birth"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.place_of_birth
-                        ? styles.errorLabel
-                        : ""
-                    }`}
-                  >
-                    Place of birth
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="place_of_birth"
-                      type="text"
-                      name="place_of_birth"
-                      value={studentInfo.place_of_birth || ""}
-                      onChange={handleStudentInfoChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.place_of_birth
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.place_of_birth || "Place of birth"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.place_of_birth || "-"}
-                    </b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.date_of_birth
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="date_of_birth"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.date_of_birth ? styles.errorLabel : ""
-                    }`}
-                  >
-                    Date of birth
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="date_of_birth"
-                      type="date"
-                      name="date_of_birth"
-                      value={formatDateForInput(studentInfo.date_of_birth)}
-                      onChange={handleStudentInfoChange}
-                      className={styles.formInput}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formatDateForDisplay(studentInfo.date_of_birth)}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.gender ? styles.errorFieldWrapper : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="gender"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.gender ? styles.errorLabel : ""
-                    }`}
-                  >
-                    Gender
-                  </label>
-                  {isEditing ? (
-                    <div className={styles.selectWrapper}>
-                      <Select
-                        id="gender"
-                        name="gender"
-                        options={genderOptions}
-                        value={
-                          studentInfo.gender
-                            ? {
-                                value: studentInfo.gender,
-                                label: studentInfo.gender,
-                              }
-                            : null
-                        }
-                        onChange={(opt) =>
-                          handleStudentInfoSelectChange("gender", opt)
-                        }
-                        placeholder={
-                          errors.studentInfo?.gender || "Select gender"
-                        }
-                        isClearable
-                        classNamePrefix={
-                          errors.studentInfo?.gender
-                            ? "react-select-error"
-                            : "react-select"
-                        }
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.first_name || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div className={styles.field}>
+                    <label htmlFor="middle_name" className={styles.fieldLabel}>
+                      Middle name
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="middle_name"
+                        type="text"
+                        name="middle_name"
+                        value={studentInfo.middle_name || ""}
+                        onChange={handleStudentInfoChange}
+                        className={styles.formInput}
+                        placeholder="Middle name"
                       />
-                    </div>
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.gender || "-"}
-                    </b>
-                  )}
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.middle_name || "-"}
+                      </b>
+                    )}
+                  </div>
                 </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.family_rank
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="family_rank"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.family_rank ? styles.errorLabel : ""
-                    }`}
-                  >
-                    Rank in the family
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="family_rank"
-                      type="number"
-                      name="family_rank"
-                      value={studentInfo.family_rank || ""}
-                      onChange={handleStudentInfoChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.family_rank ? styles.errorInput : ""
-                      }`}
-                      placeholder={errors.studentInfo?.family_rank || "Rank"}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.family_rank || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.email ? styles.errorFieldWrapper : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="email"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.email ? styles.errorLabel : ""
-                    }`}
-                  >
-                    Email address
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="email"
-                      type="email"
-                      name="email"
-                      value={studentInfo.email || ""}
-                      onChange={handleStudentInfoChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.email ? styles.errorInput : ""
-                      }`}
-                      placeholder={errors.studentInfo?.email || "Email Address"}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.email || "-"}
-                    </b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.previous_school
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="previous_school"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.previous_school
-                        ? styles.errorLabel
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <label htmlFor="last_name" className={styles.fieldLabel}>
+                      Last name
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="last_name"
+                        type="text"
+                        name="last_name"
+                        value={studentInfo.last_name || ""}
+                        onChange={handleStudentInfoChange}
+                        className={styles.formInput}
+                        placeholder="Last name"
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.last_name || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.nickname
+                        ? styles.errorFieldWrapper
                         : ""
                     }`}
                   >
-                    Previous School
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="previous_school"
-                      type="text"
-                      name="previous_school"
-                      value={studentInfo.previous_school || ""}
-                      onChange={handleStudentInfoChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.previous_school
-                          ? styles.errorInput
-                          : ""
+                    <label
+                      htmlFor="nickname"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.nickname ? styles.errorLabel : ""
                       }`}
-                      placeholder={
-                        errors.studentInfo?.previous_school || "Previous School"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.previous_school || "-"}
-                    </b>
-                  )}
+                    >
+                      Nickname
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="nickname"
+                        type="text"
+                        name="nickname"
+                        value={studentInfo.nickname || ""}
+                        onChange={handleStudentInfoChange}
+                        className={`${styles.formInput} ${
+                          errors.studentInfo?.nickname ? styles.errorInput : ""
+                        }`}
+                        placeholder={errors.studentInfo?.nickname || "Nickname"}
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.nickname || "-"}
+                      </b>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.phone_number
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="phone_number"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.phone_number ? styles.errorLabel : ""
-                    }`}
-                  >
-                    Phone number
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="phone_number"
-                      type="tel"
-                      name="phone_number"
-                      value={studentInfo.phone_number || ""}
-                      onChange={handleStudentInfoChange}
-                      className={`${styles.formInput} ${
-                        errors.studentInfo?.phone_number
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.studentInfo?.phone_number || "Phone Number"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.phone_number || "-"}
-                    </b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.studentInfo?.academic_status
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="academic_status"
-                    className={`${styles.fieldLabel} ${
-                      errors.studentInfo?.academic_status
-                        ? styles.errorLabel
+                <div className={styles.row}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.citizenship
+                        ? styles.errorFieldWrapper
                         : ""
                     }`}
                   >
-                    Academic status
-                  </label>
-                  {isEditing ? (
-                    <div className={styles.academicStatusWrapper}>
+                    <label
+                      htmlFor="citizenship"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.citizenship ? styles.errorLabel : ""
+                      }`}
+                    >
+                      Citizenship
+                    </label>
+                    {isEditing ? (
                       <div className={styles.selectWrapper}>
                         <Select
-                          id="academic_status"
-                          name="academic_status"
-                          options={academicStatusOptions}
+                          id="citizenship"
+                          name="citizenship"
+                          options={citizenshipOptions}
                           value={
-                            studentInfo.academic_status
+                            studentInfo.citizenship
                               ? {
-                                  value: studentInfo.academic_status,
-                                  label: studentInfo.academic_status,
+                                  value: studentInfo.citizenship,
+                                  label: studentInfo.citizenship,
                                 }
                               : null
                           }
                           onChange={(opt) =>
-                            handleStudentInfoSelectChange(
-                              "academic_status",
-                              opt
-                            )
+                            handleStudentInfoSelectChange("citizenship", opt)
                           }
                           placeholder={
-                            errors.studentInfo?.academic_status ||
-                            "Select status"
+                            errors.studentInfo?.citizenship ||
+                            "Select citizenship"
                           }
                           isClearable
+                          // Gunakan prefix 'react-select' dan biarkan CSS global yang menghandle error
                           classNamePrefix={
-                            errors.studentInfo?.academic_status
+                            errors.studentInfo?.citizenship
                               ? "react-select-error"
                               : "react-select"
                           }
                         />
                       </div>
-                      {studentInfo.academic_status === "OTHER" && (
-                        <input
-                          type="text"
-                          name="academic_status_other"
-                          value={studentInfo.academic_status_other || ""}
-                          onChange={handleStudentInfoChange}
-                          className={`${styles.formInput} ${styles.otherInput}`}
-                          placeholder="Please specify"
-                        />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.citizenship || "-"}
+                      </b>
+                    )}
+                  </div>
+                  {studentInfo.citizenship === "Indonesia" && (
+                    <div
+                      className={`${styles.field} ${
+                        errors.studentInfo?.nik ? styles.errorFieldWrapper : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="nik"
+                        className={`${styles.fieldLabel} ${
+                          errors.studentInfo?.nik ? styles.errorLabel : ""
+                        }`}
+                      >
+                        NIK
+                      </label>
+                      {isEditing ? (
+                        <div className={styles.inputWithError}>
+                          <input
+                            id="nik"
+                            type="text"
+                            name="nik"
+                            value={studentInfo.nik || ""}
+                            onChange={handleStudentInfoChange}
+                            maxLength={16}
+                            className={`${styles.formInput} ${
+                              errors.studentInfo?.nik || validationMessages.nik
+                                ? styles.errorInput
+                                : ""
+                            }`}
+                            placeholder={
+                              errors.studentInfo?.nik || "NIK (16 digits)"
+                            }
+                          />
+                          {validationMessages.nik && (
+                            <div className={styles.inlineErrorMessageRight}>
+                              {validationMessages.nik}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {studentInfo.nik || "-"}
+                        </b>
                       )}
                     </div>
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {studentInfo.academic_status_other ||
-                        studentInfo.academic_status ||
-                        "-"}
-                    </b>
+                  )}
+                  {studentInfo.citizenship === "Non Indonesia" && (
+                    <div
+                      className={`${styles.field} ${
+                        errors.studentInfo?.kitas
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="kitas"
+                        className={`${styles.fieldLabel} ${
+                          errors.studentInfo?.kitas ? styles.errorLabel : ""
+                        }`}
+                      >
+                        KITAS
+                      </label>
+                      {isEditing ? (
+                        <div className={styles.inputWithError}>
+                          <input
+                            id="kitas"
+                            type="text"
+                            name="kitas"
+                            value={studentInfo.kitas || ""}
+                            onChange={handleStudentInfoChange}
+                            maxLength={16}
+                            className={`${styles.formInput} ${
+                              errors.studentInfo?.kitas ||
+                              validationMessages.kitas
+                                ? styles.errorInput
+                                : ""
+                            }`}
+                            placeholder={
+                              errors.studentInfo?.kitas ||
+                              "KITAS (11-16 characters)"
+                            }
+                          />
+                          {validationMessages.kitas && (
+                            /* ===== UBAH CLASSNAME DI SINI ===== */
+                            <div className={styles.inlineErrorMessageRight}>
+                              {validationMessages.kitas}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {studentInfo.kitas || "-"}
+                        </b>
+                      )}
+                    </div>
                   )}
                 </div>
-              </div>
-              <div className={styles.addressGroup}>
-                <div className={styles.row}>
-                  <div
-                    className={`${styles.field} ${
-                      errors.studentInfo?.street ? styles.errorFieldWrapper : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="street"
-                      className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.street ? styles.errorLabel : ""
+
+                {studentInfo.citizenship === "Non Indonesia" && (
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.studentInfo?.country
+                          ? styles.errorFieldWrapper
+                          : ""
                       }`}
                     >
-                      Street
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="street"
-                        type="text"
-                        name="street"
-                        value={studentInfo.street || ""}
-                        onChange={handleStudentInfoChange}
-                        className={`${styles.formInput} ${
-                          errors.studentInfo?.street ? styles.errorInput : ""
+                      <label
+                        htmlFor="country"
+                        className={`${styles.fieldLabel} ${
+                          errors.studentInfo?.country ? styles.errorLabel : ""
                         }`}
-                        placeholder={errors.studentInfo?.street || "Street"}
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {studentInfo.street || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div className={styles.rtRwGroup}>
-                    <div className={styles.field}>
-                      <label htmlFor="rt" className={styles.fieldLabel}>
-                        RT
+                      >
+                        Country of origin
                       </label>
                       {isEditing ? (
                         <input
-                          id="rt"
+                          id="country"
                           type="text"
-                          name="rt"
-                          value={studentInfo.rt || ""}
+                          name="country"
+                          value={studentInfo.country || ""}
                           onChange={handleStudentInfoChange}
-                          className={styles.formInput}
-                          placeholder="RT"
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.country ? styles.errorInput : ""
+                          }`}
+                          placeholder={
+                            errors.studentInfo?.country
+                              ? errors.studentInfo.country
+                              : "Country of origin"
+                          }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.rt || "-"}
-                        </b>
-                      )}
-                    </div>
-                    <div className={styles.field}>
-                      <label htmlFor="rw" className={styles.fieldLabel}>
-                        RW
-                      </label>
-                      {isEditing ? (
-                        <input
-                          id="rw"
-                          type="text"
-                          name="rw"
-                          value={studentInfo.rw || ""}
-                          onChange={handleStudentInfoChange}
-                          className={styles.formInput}
-                          placeholder="RW"
-                        />
-                      ) : (
-                        <b className={styles.fieldValue}>
-                          {studentInfo.rw || "-"}
+                          {studentInfo.country || "-"}
                         </b>
                       )}
                     </div>
                   </div>
-                </div>
+                )}
                 <div className={styles.row}>
                   <div
                     className={`${styles.field} ${
-                      errors.studentInfo?.village
-                        ? styles.errorFieldWrapper
-                        : ""
+                      errors.studentInfo?.nisn ? styles.errorFieldWrapper : ""
                     }`}
                   >
                     <label
-                      htmlFor="village"
+                      htmlFor="nisn"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.village ? styles.errorLabel : ""
+                        errors.studentInfo?.nisn ? styles.errorLabel : ""
                       }`}
                     >
-                      Village
+                      NISN
                     </label>
                     {isEditing ? (
-                      <input
-                        id="village"
-                        type="text"
-                        name="village"
-                        value={studentInfo.village || ""}
-                        onChange={handleStudentInfoChange}
-                        className={`${styles.formInput} ${
-                          errors.studentInfo?.village ? styles.errorInput : ""
-                        }`}
-                        placeholder={errors.studentInfo?.village || "Village"}
-                      />
+                      <div className={styles.inputWithError}>
+                        <input
+                          id="nisn"
+                          type="text"
+                          name="nisn"
+                          value={studentInfo.nisn || ""}
+                          onChange={handleStudentInfoChange}
+                          maxLength={10}
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.nisn || validationMessages.nisn
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.studentInfo?.nisn || "NISN (10 digits)"
+                          }
+                        />
+                        {validationMessages.nisn && (
+                          <div className={styles.inlineErrorMessageRight}>
+                            {validationMessages.nisn}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.village || "-"}
+                        {studentInfo.nisn || "-"}
                       </b>
                     )}
                   </div>
                   <div
                     className={`${styles.field} ${
-                      errors.studentInfo?.district
+                      errors.studentInfo?.religion
                         ? styles.errorFieldWrapper
                         : ""
                     }`}
                   >
                     <label
-                      htmlFor="district"
+                      htmlFor="religion"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.district ? styles.errorLabel : ""
+                        errors.studentInfo?.religion ? styles.errorLabel : ""
                       }`}
                     >
-                      District
+                      Religion
                     </label>
                     {isEditing ? (
                       <input
-                        id="district"
+                        id="religion"
                         type="text"
-                        name="district"
-                        value={studentInfo.district || ""}
+                        name="religion"
+                        value={studentInfo.religion || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
-                          errors.studentInfo?.district ? styles.errorInput : ""
+                          errors.studentInfo?.religion ? styles.errorInput : ""
                         }`}
-                        placeholder={errors.studentInfo?.district || "District"}
+                        placeholder={errors.studentInfo?.religion || "Religion"}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.district || "-"}
+                        {studentInfo.religion || "-"}
                       </b>
                     )}
                   </div>
@@ -1996,1589 +1571,2109 @@ const StudentProfile = () => {
                 <div className={styles.row}>
                   <div
                     className={`${styles.field} ${
-                      errors.studentInfo?.city_regency
+                      errors.studentInfo?.place_of_birth
                         ? styles.errorFieldWrapper
                         : ""
                     }`}
                   >
                     <label
-                      htmlFor="city_regency"
+                      htmlFor="place_of_birth"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.city_regency
+                        errors.studentInfo?.place_of_birth
                           ? styles.errorLabel
                           : ""
                       }`}
                     >
-                      City/Regency
+                      Place of birth
                     </label>
                     {isEditing ? (
                       <input
-                        id="city_regency"
+                        id="place_of_birth"
                         type="text"
-                        name="city_regency"
-                        value={studentInfo.city_regency || ""}
+                        name="place_of_birth"
+                        value={studentInfo.place_of_birth || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
-                          errors.studentInfo?.city_regency
+                          errors.studentInfo?.place_of_birth
                             ? styles.errorInput
                             : ""
                         }`}
                         placeholder={
-                          errors.studentInfo?.city_regency || "City/Regency"
+                          errors.studentInfo?.place_of_birth || "Place of birth"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.city_regency || "-"}
+                        {studentInfo.place_of_birth || "-"}
                       </b>
                     )}
                   </div>
                   <div
                     className={`${styles.field} ${
-                      errors.studentInfo?.province
+                      errors.studentInfo?.date_of_birth
                         ? styles.errorFieldWrapper
                         : ""
                     }`}
                   >
                     <label
-                      htmlFor="province"
+                      htmlFor="date_of_birth"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.province ? styles.errorLabel : ""
-                      }`}
-                    >
-                      Province
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="province"
-                        type="text"
-                        name="province"
-                        value={studentInfo.province || ""}
-                        onChange={handleStudentInfoChange}
-                        className={`${styles.formInput} ${
-                          errors.studentInfo?.province ? styles.errorInput : ""
-                        }`}
-                        placeholder={errors.studentInfo?.province || "Province"}
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {studentInfo.province || "-"}
-                      </b>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.otherAddress}>
-                  <span className={styles.fieldLabel}>Other: (</span>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="other"
-                      value={studentInfo.other || ""}
-                      onChange={handleStudentInfoChange}
-                      className={styles.formInput}
-                    />
-                  ) : (
-                    <div
-                      className={`${styles.formInput} ${styles.visualInput}`}
-                    >
-                      {studentInfo.other || "-"}
-                    </div>
-                  )}
-                  <span className={styles.fieldLabel}>)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* PROGRAM */}
-          <div className={styles.infoSection}>
-            <div
-              className={`${styles.sectionHeader} ${
-                isEditing ? styles.sectionHeaderEditing : ""
-              }`}
-            >
-              <b>PROGRAM</b>
-            </div>
-            <div className={styles.sectionContent}>
-              <div className={styles.optionsRow}>
-                <div className={styles.optionLabel}>Section</div>
-                {options?.sections.map((sec) => (
-                  <RadioDisplay
-                    key={sec.section_id}
-                    label={sec.name}
-                    isSelected={
-                      String(formData.section_id) === String(sec.section_id)
-                    }
-                    isEditing={false} // <-- DIUBAH MENJADI STATIS
-                    name="section_id"
-                    value={sec.section_id}
-                    onChange={handleRadioChange}
-                  />
-                ))}
-              </div>
-              <div className={styles.optionsRow}>
-                <div className={styles.field}>
-                  <div className={styles.fieldLabel}>Grade</div>
-                  {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
-                  <b className={styles.fieldValue}>
-                    {getNameById("classes", formData.class_id)}
-                  </b>
-                </div>
-                {/* Logika untuk menampilkan major tetap ada, tapi field-nya statis */}
-                {showMajorField && (
-                  <div className={styles.field}>
-                    <div className={styles.fieldLabel}>Major</div>
-                    {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
-                    <b className={styles.fieldValue}>
-                      {getNameById("majors", formData.major_id)}
-                    </b>
-                  </div>
-                )}
-              </div>
-              <div className={styles.optionsRow}>
-                <div className={styles.optionLabel}>Program</div>
-                {options?.programs.map((prog) => (
-                  <RadioDisplay
-                    key={prog.program_id}
-                    label={prog.name}
-                    isSelected={
-                      String(formData.program_id) === String(prog.program_id)
-                    }
-                    isEditing={false} // <-- DIUBAH MENJADI STATIS
-                    name="program_id"
-                    value={prog.program_id}
-                    onChange={handleRadioChange}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* FACILITIES */}
-          <div id="facilities" className={styles.infoSection}>
-            <div
-              className={`${styles.sectionHeader} ${
-                isEditing ? styles.sectionHeaderEditing : ""
-              }`}
-            >
-              <b>FACILITIES</b>
-            </div>
-            <div className={styles.sectionContent}>
-              {!isDormitorySelected && (
-                <>
-                  <div className={styles.optionsRow}>
-                    {/* Label utama "Transportation" dengan logika error gabungan */}
-                    <div
-                      className={`${styles.optionLabel} ${
-                        (errors.facilities?.pickup_point_id &&
-                          !formData.pickup_point_id &&
-                          !formData.pickup_point_custom) ||
-                        (errors.facilities?.transportation_policy &&
-                          formData.transportation_policy !== "Signed")
+                        errors.studentInfo?.date_of_birth
                           ? styles.errorLabel
                           : ""
                       }`}
                     >
-                      Transportation
-                    </div>
-                    {options?.transportations.map((t) => (
-                      <RadioDisplay
-                        key={t.transport_id}
-                        label={t.type}
-                        isSelected={
-                          String(formData.transportation_id) ===
-                          String(t.transport_id)
+                      Date of birth
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="date_of_birth"
+                        type="date"
+                        name="date_of_birth"
+                        value={formatDateForInput(studentInfo.date_of_birth)}
+                        onChange={handleStudentInfoChange}
+                        className={styles.formInput}
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formatDateForDisplay(studentInfo.date_of_birth)}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.gender ? styles.errorFieldWrapper : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="gender"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.gender ? styles.errorLabel : ""
+                      }`}
+                    >
+                      Gender
+                    </label>
+                    {isEditing ? (
+                      <div className={styles.selectWrapper}>
+                        <Select
+                          id="gender"
+                          name="gender"
+                          options={genderOptions}
+                          value={
+                            studentInfo.gender
+                              ? {
+                                  value: studentInfo.gender,
+                                  label: studentInfo.gender,
+                                }
+                              : null
+                          }
+                          onChange={(opt) =>
+                            handleStudentInfoSelectChange("gender", opt)
+                          }
+                          placeholder={
+                            errors.studentInfo?.gender || "Select gender"
+                          }
+                          isClearable
+                          classNamePrefix={
+                            errors.studentInfo?.gender
+                              ? "react-select-error"
+                              : "react-select"
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.gender || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.family_rank
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="family_rank"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.family_rank ? styles.errorLabel : ""
+                      }`}
+                    >
+                      Rank in the family
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="family_rank"
+                        type="number"
+                        name="family_rank"
+                        value={studentInfo.family_rank || ""}
+                        onChange={handleStudentInfoChange}
+                        className={`${styles.formInput} ${
+                          errors.studentInfo?.family_rank
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={errors.studentInfo?.family_rank || "Rank"}
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.family_rank || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.email ? styles.errorFieldWrapper : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="email"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.email ? styles.errorLabel : ""
+                      }`}
+                    >
+                      Email address
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="email"
+                        type="email"
+                        name="email"
+                        value={studentInfo.email || ""}
+                        onChange={handleStudentInfoChange}
+                        className={`${styles.formInput} ${
+                          errors.studentInfo?.email ? styles.errorInput : ""
+                        }`}
+                        placeholder={
+                          errors.studentInfo?.email || "Email Address"
                         }
-                        isEditing={isEditing}
-                        name="transportation_id"
-                        value={t.transport_id}
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.email || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.previous_school
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="previous_school"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.previous_school
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Previous School
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="previous_school"
+                        type="text"
+                        name="previous_school"
+                        value={studentInfo.previous_school || ""}
+                        onChange={handleStudentInfoChange}
+                        className={`${styles.formInput} ${
+                          errors.studentInfo?.previous_school
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.studentInfo?.previous_school ||
+                          "Previous School"
+                        }
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.previous_school || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.phone_number
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="phone_number"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.phone_number
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Phone number
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="phone_number"
+                        type="tel"
+                        name="phone_number"
+                        value={studentInfo.phone_number || ""}
+                        onChange={handleStudentInfoChange}
+                        className={`${styles.formInput} ${
+                          errors.studentInfo?.phone_number
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.studentInfo?.phone_number || "Phone Number"
+                        }
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.phone_number || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.field} ${
+                      errors.studentInfo?.academic_status
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="academic_status"
+                      className={`${styles.fieldLabel} ${
+                        errors.studentInfo?.academic_status
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Academic status
+                    </label>
+                    {isEditing ? (
+                      <div className={styles.academicStatusWrapper}>
+                        <div className={styles.selectWrapper}>
+                          <Select
+                            id="academic_status"
+                            name="academic_status"
+                            options={academicStatusOptions}
+                            value={
+                              studentInfo.academic_status
+                                ? {
+                                    value: studentInfo.academic_status,
+                                    label: studentInfo.academic_status,
+                                  }
+                                : null
+                            }
+                            onChange={(opt) =>
+                              handleStudentInfoSelectChange(
+                                "academic_status",
+                                opt
+                              )
+                            }
+                            placeholder={
+                              errors.studentInfo?.academic_status ||
+                              "Select status"
+                            }
+                            isClearable
+                            classNamePrefix={
+                              errors.studentInfo?.academic_status
+                                ? "react-select-error"
+                                : "react-select"
+                            }
+                          />
+                        </div>
+                        {studentInfo.academic_status === "OTHER" && (
+                          <input
+                            type="text"
+                            name="academic_status_other"
+                            value={studentInfo.academic_status_other || ""}
+                            onChange={handleStudentInfoChange}
+                            className={`${styles.formInput} ${styles.otherInput}`}
+                            placeholder="Please specify"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {studentInfo.academic_status_other ||
+                          studentInfo.academic_status ||
+                          "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.addressGroup}>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.studentInfo?.street
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="street"
+                        className={`${styles.fieldLabel} ${
+                          errors.studentInfo?.street ? styles.errorLabel : ""
+                        }`}
+                      >
+                        Street
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="street"
+                          type="text"
+                          name="street"
+                          value={studentInfo.street || ""}
+                          onChange={handleStudentInfoChange}
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.street ? styles.errorInput : ""
+                          }`}
+                          placeholder={errors.studentInfo?.street || "Street"}
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {studentInfo.street || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div className={styles.rtRwGroup}>
+                      <div className={styles.field}>
+                        <label htmlFor="rt" className={styles.fieldLabel}>
+                          RT
+                        </label>
+                        {isEditing ? (
+                          <input
+                            id="rt"
+                            type="text"
+                            name="rt"
+                            value={studentInfo.rt || ""}
+                            onChange={handleStudentInfoChange}
+                            className={styles.formInput}
+                            placeholder="RT"
+                          />
+                        ) : (
+                          <b className={styles.fieldValue}>
+                            {studentInfo.rt || "-"}
+                          </b>
+                        )}
+                      </div>
+                      <div className={styles.field}>
+                        <label htmlFor="rw" className={styles.fieldLabel}>
+                          RW
+                        </label>
+                        {isEditing ? (
+                          <input
+                            id="rw"
+                            type="text"
+                            name="rw"
+                            value={studentInfo.rw || ""}
+                            onChange={handleStudentInfoChange}
+                            className={styles.formInput}
+                            placeholder="RW"
+                          />
+                        ) : (
+                          <b className={styles.fieldValue}>
+                            {studentInfo.rw || "-"}
+                          </b>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.studentInfo?.village
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="village"
+                        className={`${styles.fieldLabel} ${
+                          errors.studentInfo?.village ? styles.errorLabel : ""
+                        }`}
+                      >
+                        Village
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="village"
+                          type="text"
+                          name="village"
+                          value={studentInfo.village || ""}
+                          onChange={handleStudentInfoChange}
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.village ? styles.errorInput : ""
+                          }`}
+                          placeholder={errors.studentInfo?.village || "Village"}
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {studentInfo.village || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div
+                      className={`${styles.field} ${
+                        errors.studentInfo?.district
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="district"
+                        className={`${styles.fieldLabel} ${
+                          errors.studentInfo?.district ? styles.errorLabel : ""
+                        }`}
+                      >
+                        District
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="district"
+                          type="text"
+                          name="district"
+                          value={studentInfo.district || ""}
+                          onChange={handleStudentInfoChange}
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.district
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.studentInfo?.district || "District"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {studentInfo.district || "-"}
+                        </b>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.studentInfo?.city_regency
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="city_regency"
+                        className={`${styles.fieldLabel} ${
+                          errors.studentInfo?.city_regency
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        City/Regency
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="city_regency"
+                          type="text"
+                          name="city_regency"
+                          value={studentInfo.city_regency || ""}
+                          onChange={handleStudentInfoChange}
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.city_regency
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.studentInfo?.city_regency || "City/Regency"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {studentInfo.city_regency || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div
+                      className={`${styles.field} ${
+                        errors.studentInfo?.province
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="province"
+                        className={`${styles.fieldLabel} ${
+                          errors.studentInfo?.province ? styles.errorLabel : ""
+                        }`}
+                      >
+                        Province
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="province"
+                          type="text"
+                          name="province"
+                          value={studentInfo.province || ""}
+                          onChange={handleStudentInfoChange}
+                          className={`${styles.formInput} ${
+                            errors.studentInfo?.province
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.studentInfo?.province || "Province"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {studentInfo.province || "-"}
+                        </b>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.otherAddress}>
+                    <span className={styles.fieldLabel}>Other: (</span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="other"
+                        value={studentInfo.other || ""}
+                        onChange={handleStudentInfoChange}
+                        className={styles.formInput}
+                      />
+                    ) : (
+                      <div
+                        className={`${styles.formInput} ${styles.visualInput}`}
+                      >
+                        {studentInfo.other || "-"}
+                      </div>
+                    )}
+                    <span className={styles.fieldLabel}>)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* PROGRAM */}
+            <div className={styles.infoSection}>
+              <div
+                className={`${styles.sectionHeader} ${
+                  isEditing ? styles.sectionHeaderEditing : ""
+                }`}
+              >
+                <b>PROGRAM</b>
+              </div>
+              <div className={styles.sectionContent}>
+                <div className={styles.optionsRow}>
+                  <div className={styles.optionLabel}>Section</div>
+                  {options?.sections.map((sec) => (
+                    <RadioDisplay
+                      key={sec.section_id}
+                      label={sec.name}
+                      isSelected={
+                        String(formData.section_id) === String(sec.section_id)
+                      }
+                      isEditing={false} // <-- DIUBAH MENJADI STATIS
+                      name="section_id"
+                      value={sec.section_id}
+                      onChange={handleRadioChange}
+                    />
+                  ))}
+                </div>
+                <div className={styles.optionsRow}>
+                  <div className={styles.field}>
+                    <div className={styles.fieldLabel}>Grade</div>
+                    {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
+                    <b className={styles.fieldValue}>
+                      {getNameById("classes", formData.class_id)}
+                    </b>
+                  </div>
+                  {/* Logika untuk menampilkan major tetap ada, tapi field-nya statis */}
+                  {showMajorField && (
+                    <div className={styles.field}>
+                      <div className={styles.fieldLabel}>Major</div>
+                      {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
+                      <b className={styles.fieldValue}>
+                        {getNameById("majors", formData.major_id)}
+                      </b>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.optionsRow}>
+                  <div className={styles.optionLabel}>Program</div>
+                  {options?.programs.map((prog) => (
+                    <RadioDisplay
+                      key={prog.program_id}
+                      label={prog.name}
+                      isSelected={
+                        String(formData.program_id) === String(prog.program_id)
+                      }
+                      isEditing={false} // <-- DIUBAH MENJADI STATIS
+                      name="program_id"
+                      value={prog.program_id}
+                      onChange={handleRadioChange}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* FACILITIES */}
+            <div id="facilities" className={styles.infoSection}>
+              <div
+                className={`${styles.sectionHeader} ${
+                  isEditing ? styles.sectionHeaderEditing : ""
+                }`}
+              >
+                <b>FACILITIES</b>
+              </div>
+              <div className={styles.sectionContent}>
+                {!isDormitorySelected && (
+                  <>
+                    <div className={styles.optionsRow}>
+                      {/* Label utama "Transportation" dengan logika error gabungan */}
+                      <div
+                        className={`${styles.optionLabel} ${
+                          (errors.facilities?.pickup_point_id &&
+                            !formData.pickup_point_id &&
+                            !formData.pickup_point_custom) ||
+                          (errors.facilities?.transportation_policy &&
+                            formData.transportation_policy !== "Signed")
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        Transportation
+                      </div>
+                      {options?.transportations.map((t) => (
+                        <RadioDisplay
+                          key={t.transport_id}
+                          label={t.type}
+                          isSelected={
+                            String(formData.transportation_id) ===
+                            String(t.transport_id)
+                          }
+                          isEditing={isEditing}
+                          name="transportation_id"
+                          value={t.transport_id}
+                          onChange={handleRadioChange}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Blok untuk pickup point & custom pickup point */}
+                    {formData.transportation_id &&
+                      selectedTransportType.toLowerCase() !== "own car" && (
+                        <>
+                          {/* Dropdown Pickup Point */}
+                          <div className={styles.optionsRow}>
+                            <div
+                              className={styles.field}
+                              style={{ flexGrow: 2 }}
+                            >
+                              <div className={styles.fieldLabel}>
+                                Pickup point
+                              </div>
+                              {isEditing ? (
+                                <select
+                                  name="pickup_point_id"
+                                  value={formData.pickup_point_id || ""}
+                                  onChange={handleChange}
+                                  className={styles.formInput}
+                                  disabled={!!formData.pickup_point_custom}
+                                >
+                                  <option value="">Select pickup point</option>
+                                  {options?.pickup_points.map((opt) => (
+                                    <option
+                                      key={opt.pickup_point_id}
+                                      value={opt.pickup_point_id}
+                                    >
+                                      {opt.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <b className={styles.fieldValue}>
+                                  {getNameById(
+                                    "pickup_points",
+                                    formData.pickup_point_id
+                                  ) || "-"}
+                                </b>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Custom Pickup Point */}
+                          <div className={styles.optionsRow}>
+                            <div
+                              className={styles.field}
+                              style={{ flexGrow: 2 }}
+                            >
+                              <div className={styles.fieldLabel}>
+                                Custom Pickup point
+                              </div>
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  name="pickup_point_custom"
+                                  value={formData.pickup_point_custom || ""}
+                                  onChange={handleChange}
+                                  className={styles.formInput}
+                                  disabled={!!formData.pickup_point_id}
+                                  placeholder="Enter custom pickup location"
+                                />
+                              ) : (
+                                <b className={styles.fieldValue}>
+                                  {formData.pickup_point_custom || "-"}
+                                </b>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                    {/* Pesan error real-time untuk pickup point (hanya muncul jika error) */}
+                    {errors.facilities?.pickup_point_id &&
+                      !formData.pickup_point_id &&
+                      !formData.pickup_point_custom && (
+                        <div className={styles.inlineErrorMessageFullWidth}>
+                          Pickup point must be selected or specified for School
+                          Bus.
+                        </div>
+                      )}
+
+                    {/* Transportation Policy dengan label dan pesan error real-time */}
+                    <div className={styles.optionsRow}>
+                      <div>
+                        <CheckboxDisplay
+                          label="Transportation Policy"
+                          isSelected={
+                            formData.transportation_policy === "Signed"
+                          }
+                          isEditing={isEditing}
+                          name="transportation_policy"
+                          onChange={handleChange}
+                        />
+                      </div>
+
+                      {errors.facilities?.transportation_policy &&
+                        formData.transportation_policy !== "Signed" && (
+                          <div className={styles.inlineErrorMessage}>
+                            Policy must be signed.
+                          </div>
+                        )}
+                    </div>
+                  </>
+                )}
+
+                {/* Bagian Residence Hall tetap ditampilkan */}
+                <div className={styles.optionsRow}>
+                  <div
+                    className={`${styles.optionLabel} ${
+                      (errors.facilities?.residence_id &&
+                        !formData.residence_id) ||
+                      (errors.facilities?.residence_hall_policy &&
+                        formData.residence_hall_policy !== "Signed")
+                        ? styles.errorLabel
+                        : ""
+                    }`}
+                  >
+                    Residence Hall
+                  </div>
+
+                  {filteredResidenceHalls.map((r) => (
+                    <RadioDisplay
+                      key={r.residence_id}
+                      label={r.type}
+                      isSelected={
+                        String(formData.residence_id) === String(r.residence_id)
+                      }
+                      isEditing={isEditing}
+                      name="residence_id"
+                      value={r.residence_id}
+                      onChange={handleRadioChange}
+                    />
+                  ))}
+                </div>
+                {errors.facilities?.residence_id && (
+                  <div className={styles.inlineErrorMessageFullWidth}>
+                    {errors.facilities.residence_id}
+                  </div>
+                )}
+
+                <div className={styles.optionsRow}>
+                  <CheckboxDisplay
+                    label="Residence Hall Policy"
+                    isSelected={formData.residence_hall_policy === "Signed"}
+                    isEditing={isEditing}
+                    name="residence_hall_policy"
+                    onChange={handleChange}
+                  />
+                  {errors.facilities?.transportation_policy &&
+                    formData.transportation_policy !== "Signed" && (
+                      <div className={styles.inlineErrorMessage}>
+                        Policy must be signed.
+                      </div>
+                    )}
+                </div>
+              </div>
+            </div>
+
+            {/* PARENT / GUARDIAN INFORMATION */}
+            <div id="parentGuardian" className={styles.infoSection}>
+              <div
+                className={`${styles.sectionHeader} ${
+                  isEditing ? styles.sectionHeaderEditing : ""
+                }`}
+              >
+                <b>PARENT / GUARDIAN INFORMATION</b>
+              </div>
+              <div className={styles.sectionContent}>
+                <b>Father's Information</b>
+                <div className={styles.row}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.parentGuardian?.father_name
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="father_name"
+                      className={`${styles.fieldLabel} ${
+                        errors.parentGuardian?.father_name
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Name
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="father_name"
+                        type="text"
+                        name="father_name"
+                        value={formData.father_name || ""}
+                        onChange={handleChange}
+                        className={`${styles.formInput} ${
+                          errors.parentGuardian?.father_name
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.parentGuardian?.father_name
+                            ? errors.parentGuardian.father_name
+                            : "Father's Name"
+                        }
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.father_name || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <label
+                      htmlFor="father_company"
+                      className={styles.fieldLabel}
+                    >
+                      Company Name
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="father_company"
+                        type="text"
+                        name="father_company"
+                        value={formData.father_company || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                        placeholder="Company Name"
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.father_company || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div className={styles.field}>
+                    <label
+                      htmlFor="father_occupation"
+                      className={styles.fieldLabel}
+                    >
+                      Occupation/Position
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="father_occupation"
+                        type="text"
+                        name="father_occupation"
+                        value={formData.father_occupation || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                        placeholder="Occupation/Position"
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.father_occupation || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.parentGuardian?.father_phone
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="father_phone"
+                      className={`${styles.fieldLabel} ${
+                        errors.parentGuardian?.father_phone
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Phone Number
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="father_phone"
+                        type="tel"
+                        name="father_phone"
+                        value={formData.father_phone || ""}
+                        onChange={handleChange}
+                        className={`${styles.formInput} ${
+                          errors.parentGuardian?.father_phone
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.parentGuardian?.father_phone
+                            ? errors.parentGuardian.father_phone
+                            : "Phone Number"
+                        }
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.father_phone || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.field} ${
+                      errors.parentGuardian?.father_email
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="father_email"
+                      className={`${styles.fieldLabel} ${
+                        errors.parentGuardian?.father_email
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Email
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="father_email"
+                        type="email"
+                        name="father_email"
+                        value={formData.father_email || ""}
+                        onChange={handleChange}
+                        className={`${styles.formInput} ${
+                          errors.parentGuardian?.father_email
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.parentGuardian?.father_email
+                            ? errors.parentGuardian.father_email
+                            : "Email"
+                        }
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.father_email || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.addressGroup}>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.father_address_street
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="father_address_street"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.father_address_street
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        Street
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="father_address_street"
+                          type="text"
+                          name="father_address_street"
+                          value={formData.father_address_street || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.father_address_street
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.father_address_street
+                              ? errors.parentGuardian.father_address_street
+                              : "Street"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.father_address_street || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div className={styles.rtRwGroup}>
+                      <div className={styles.field}>
+                        <label
+                          htmlFor="father_address_rt"
+                          className={styles.fieldLabel}
+                        >
+                          RT
+                        </label>
+                        {isEditing ? (
+                          <input
+                            id="father_address_rt"
+                            type="text"
+                            name="father_address_rt"
+                            value={formData.father_address_rt || ""}
+                            onChange={handleChange}
+                            className={styles.formInput}
+                            placeholder="RT"
+                          />
+                        ) : (
+                          <b className={styles.fieldValue}>
+                            {formData.father_address_rt || "-"}
+                          </b>
+                        )}
+                      </div>
+                      <div className={styles.field}>
+                        <label
+                          htmlFor="father_address_rw"
+                          className={styles.fieldLabel}
+                        >
+                          RW
+                        </label>
+                        {isEditing ? (
+                          <input
+                            id="father_address_rw"
+                            type="text"
+                            name="father_address_rw"
+                            value={formData.father_address_rw || ""}
+                            onChange={handleChange}
+                            className={styles.formInput}
+                            placeholder="RW"
+                          />
+                        ) : (
+                          <b className={styles.fieldValue}>
+                            {formData.father_address_rw || "-"}
+                          </b>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.father_address_village
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="father_address_village"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.father_address_village
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        Village
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="father_address_village"
+                          type="text"
+                          name="father_address_village"
+                          value={formData.father_address_village || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.father_address_village
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.father_address_village
+                              ? errors.parentGuardian.father_address_village
+                              : "Village"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.father_address_village || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.father_address_district
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="father_address_district"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.father_address_district
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        District
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="father_address_district"
+                          type="text"
+                          name="father_address_district"
+                          value={formData.father_address_district || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.father_address_district
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.father_address_district
+                              ? errors.parentGuardian.father_address_district
+                              : "District"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.father_address_district || "-"}
+                        </b>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.father_address_city_regency
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="father_address_city_regency"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.father_address_city_regency
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        City/Regency
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="father_address_city_regency"
+                          type="text"
+                          name="father_address_city_regency"
+                          value={formData.father_address_city_regency || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.father_address_city_regency
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.father_address_city_regency
+                              ? errors.parentGuardian
+                                  .father_address_city_regency
+                              : "City/Regency"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.father_address_city_regency || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.father_address_province
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="father_address_province"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.father_address_province
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        Province
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="father_address_province"
+                          type="text"
+                          name="father_address_province"
+                          value={formData.father_address_province || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.father_address_province
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.father_address_province
+                              ? errors.parentGuardian.father_address_province
+                              : "Province"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.father_address_province || "-"}
+                        </b>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.otherAddress}>
+                    <span className={styles.fieldLabel}>Other: (</span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="father_address_other"
+                        value={formData.father_address_other || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                        placeholder="Other address details"
+                      />
+                    ) : (
+                      <div
+                        className={`${styles.formInput} ${styles.visualInput}`}
+                      >
+                        {formData.father_address_other || "-"}
+                      </div>
+                    )}
+                    <span className={styles.fieldLabel}>)</span>
+                  </div>
+                </div>
+                <b>Mother's Information</b>
+                <div className={styles.row}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.parentGuardian?.mother_name
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="mother_name"
+                      className={`${styles.fieldLabel} ${
+                        errors.parentGuardian?.mother_name
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Name
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="mother_name"
+                        type="text"
+                        name="mother_name"
+                        value={formData.mother_name || ""}
+                        onChange={handleChange}
+                        className={`${styles.formInput} ${
+                          errors.parentGuardian?.mother_name
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.parentGuardian?.mother_name
+                            ? errors.parentGuardian.mother_name
+                            : "Mother's Name"
+                        }
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.mother_name || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <label
+                      htmlFor="mother_company"
+                      className={styles.fieldLabel}
+                    >
+                      Company Name
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="mother_company"
+                        type="text"
+                        name="mother_company"
+                        value={formData.mother_company || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                        placeholder="Company Name"
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.mother_company || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div className={styles.field}>
+                    <label
+                      htmlFor="mother_occupation"
+                      className={styles.fieldLabel}
+                    >
+                      Occupation/Position
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="mother_occupation"
+                        type="text"
+                        name="mother_occupation"
+                        value={formData.mother_occupation || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                        placeholder="Occupation/Position"
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.mother_occupation || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div
+                    className={`${styles.field} ${
+                      errors.parentGuardian?.mother_phone
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="mother_phone"
+                      className={`${styles.fieldLabel} ${
+                        errors.parentGuardian?.mother_phone
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Phone Number
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="mother_phone"
+                        type="tel"
+                        name="mother_phone"
+                        value={formData.mother_phone || ""}
+                        onChange={handleChange}
+                        className={`${styles.formInput} ${
+                          errors.parentGuardian?.mother_phone
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.parentGuardian?.mother_phone
+                            ? errors.parentGuardian.mother_phone
+                            : "Phone Number"
+                        }
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.mother_phone || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.field} ${
+                      errors.parentGuardian?.mother_email
+                        ? styles.errorFieldWrapper
+                        : ""
+                    }`}
+                  >
+                    <label
+                      htmlFor="mother_email"
+                      className={`${styles.fieldLabel} ${
+                        errors.parentGuardian?.mother_email
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Email
+                    </label>
+                    {isEditing ? (
+                      <input
+                        id="mother_email"
+                        type="email"
+                        name="mother_email"
+                        value={formData.mother_email || ""}
+                        onChange={handleChange}
+                        className={`${styles.formInput} ${
+                          errors.parentGuardian?.mother_email
+                            ? styles.errorInput
+                            : ""
+                        }`}
+                        placeholder={
+                          errors.parentGuardian?.mother_email
+                            ? errors.parentGuardian.mother_email
+                            : "Email"
+                        }
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.mother_email || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.addressGroup}>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.mother_address_street
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="mother_address_street"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.mother_address_street
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        Street
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="mother_address_street"
+                          type="text"
+                          name="mother_address_street"
+                          value={formData.mother_address_street || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.mother_address_street
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.mother_address_street
+                              ? errors.parentGuardian.mother_address_street
+                              : "Street"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.mother_address_street || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div className={styles.rtRwGroup}>
+                      <div className={styles.field}>
+                        <label
+                          htmlFor="mother_address_rt"
+                          className={styles.fieldLabel}
+                        >
+                          RT
+                        </label>
+                        {isEditing ? (
+                          <input
+                            id="mother_address_rt"
+                            type="text"
+                            name="mother_address_rt"
+                            value={formData.mother_address_rt || ""}
+                            onChange={handleChange}
+                            className={styles.formInput}
+                            placeholder="RT"
+                          />
+                        ) : (
+                          <b className={styles.fieldValue}>
+                            {formData.mother_address_rt || "-"}
+                          </b>
+                        )}
+                      </div>
+                      <div className={styles.field}>
+                        <label
+                          htmlFor="mother_address_rw"
+                          className={styles.fieldLabel}
+                        >
+                          RW
+                        </label>
+                        {isEditing ? (
+                          <input
+                            id="mother_address_rw"
+                            type="text"
+                            name="mother_address_rw"
+                            value={formData.mother_address_rw || ""}
+                            onChange={handleChange}
+                            className={styles.formInput}
+                            placeholder="RW"
+                          />
+                        ) : (
+                          <b className={styles.fieldValue}>
+                            {formData.mother_address_rw || "-"}
+                          </b>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.mother_address_village
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="mother_address_village"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.mother_address_village
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        Village
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="mother_address_village"
+                          type="text"
+                          name="mother_address_village"
+                          value={formData.mother_address_village || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.mother_address_village
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.mother_address_village
+                              ? errors.parentGuardian.mother_address_village
+                              : "Village"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.mother_address_village || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.mother_address_district
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="mother_address_district"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.mother_address_district
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        District
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="mother_address_district"
+                          type="text"
+                          name="mother_address_district"
+                          value={formData.mother_address_district || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.mother_address_district
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.mother_address_district
+                              ? errors.parentGuardian.mother_address_district
+                              : "District"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.mother_address_district || "-"}
+                        </b>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.row}>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.mother_address_city_regency
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="mother_address_city_regency"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.mother_address_city_regency
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        City/Regency
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="mother_address_city_regency"
+                          type="text"
+                          name="mother_address_city_regency"
+                          value={formData.mother_address_city_regency || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.mother_address_city_regency
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.mother_address_city_regency
+                              ? errors.parentGuardian
+                                  .mother_address_city_regency
+                              : "City/Regency"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.mother_address_city_regency || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div
+                      className={`${styles.field} ${
+                        errors.parentGuardian?.mother_address_province
+                          ? styles.errorFieldWrapper
+                          : ""
+                      }`}
+                    >
+                      <label
+                        htmlFor="mother_address_province"
+                        className={`${styles.fieldLabel} ${
+                          errors.parentGuardian?.mother_address_province
+                            ? styles.errorLabel
+                            : ""
+                        }`}
+                      >
+                        Province
+                      </label>
+                      {isEditing ? (
+                        <input
+                          id="mother_address_province"
+                          type="text"
+                          name="mother_address_province"
+                          value={formData.mother_address_province || ""}
+                          onChange={handleChange}
+                          className={`${styles.formInput} ${
+                            errors.parentGuardian?.mother_address_province
+                              ? styles.errorInput
+                              : ""
+                          }`}
+                          placeholder={
+                            errors.parentGuardian?.mother_address_province
+                              ? errors.parentGuardian.mother_address_province
+                              : "Province"
+                          }
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.mother_address_province || "-"}
+                        </b>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.otherAddress}>
+                    <span className={styles.fieldLabel}>Other: (</span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="mother_address_other"
+                        value={formData.mother_address_other || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                      />
+                    ) : (
+                      <div
+                        className={`${styles.formInput} ${styles.visualInput}`}
+                      >
+                        {formData.mother_address_other || "-"}
+                      </div>
+                    )}
+                    <span className={styles.fieldLabel}>)</span>
+                  </div>
+                </div>
+                <b>Authorized Guardian's Information</b>
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <div className={styles.fieldLabel}>Name</div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="guardian_name"
+                        value={formData.guardian_name || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.guardian_name || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div className={styles.field}>
+                    <div className={styles.fieldLabel}>
+                      Relationship to student
+                    </div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="relation_to_student"
+                        value={formData.relation_to_student || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.relation_to_student || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <div className={styles.fieldLabel}>Phone Number</div>
+                    {isEditing ? (
+                      <input
+                        type="tel"
+                        name="guardian_phone"
+                        value={formData.guardian_phone || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.guardian_phone || "-"}
+                      </b>
+                    )}
+                  </div>
+                  <div className={styles.field}>
+                    <div className={styles.fieldLabel}>Email</div>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        name="guardian_email"
+                        value={formData.guardian_email || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                      />
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {formData.guardian_email || "-"}
+                      </b>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.addressGroup}>
+                  <div className={styles.row}>
+                    <div className={styles.field}>
+                      <div className={styles.fieldLabel}>Street</div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="guardian_address_street"
+                          value={formData.guardian_address_street || ""}
+                          onChange={handleChange}
+                          className={styles.formInput}
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.guardian_address_street || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div className={styles.rtRwGroup}>
+                      <div className={styles.field}>
+                        <div className={styles.fieldLabel}>RT</div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="guardian_address_rt"
+                            value={formData.guardian_address_rt || ""}
+                            onChange={handleChange}
+                            className={styles.formInput}
+                          />
+                        ) : (
+                          <b className={styles.fieldValue}>
+                            {formData.guardian_address_rt || "-"}
+                          </b>
+                        )}
+                      </div>
+                      <div className={styles.field}>
+                        <div className={styles.fieldLabel}>RW</div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="guardian_address_rw"
+                            value={formData.guardian_address_rw || ""}
+                            onChange={handleChange}
+                            className={styles.formInput}
+                          />
+                        ) : (
+                          <b className={styles.fieldValue}>
+                            {formData.guardian_address_rw || "-"}
+                          </b>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.row}>
+                    <div className={styles.field}>
+                      <div className={styles.fieldLabel}>Village</div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="guardian_address_village"
+                          value={formData.guardian_address_village || ""}
+                          onChange={handleChange}
+                          className={styles.formInput}
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.guardian_address_village || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div className={styles.field}>
+                      <div className={styles.fieldLabel}>District</div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="guardian_address_district"
+                          value={formData.guardian_address_district || ""}
+                          onChange={handleChange}
+                          className={styles.formInput}
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.guardian_address_district || "-"}
+                        </b>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.row}>
+                    <div className={styles.field}>
+                      <div className={styles.fieldLabel}>City/Regency</div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="guardian_address_city_regency"
+                          value={formData.guardian_address_city_regency || ""}
+                          onChange={handleChange}
+                          className={styles.formInput}
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.guardian_address_city_regency || "-"}
+                        </b>
+                      )}
+                    </div>
+                    <div className={styles.field}>
+                      <div className={styles.fieldLabel}>Province</div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="guardian_address_province"
+                          value={formData.guardian_address_province || ""}
+                          onChange={handleChange}
+                          className={styles.formInput}
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.guardian_address_province || "-"}
+                        </b>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.otherAddress}>
+                    <span className={styles.fieldLabel}>Other: (</span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="guardian_address_other"
+                        value={formData.guardian_address_other || ""}
+                        onChange={handleChange}
+                        className={styles.formInput}
+                      />
+                    ) : (
+                      <div
+                        className={`${styles.formInput} ${styles.visualInput}`}
+                      >
+                        {formData.guardian_address_other || "-"}
+                      </div>
+                    )}
+                    <span className={styles.fieldLabel}>)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* TERM OF PAYMENT */}
+            <div className={styles.infoSection}>
+              <div
+                className={`${styles.sectionHeader} ${
+                  isEditing ? styles.sectionHeaderEditing : ""
+                }`}
+              >
+                <b>TERM OF PAYMENT</b>
+              </div>
+              <div className={styles.paymentContentWrapper}>
+                <div className={styles.paymentSection}>
+                  <div className={styles.paymentTitle}>Tuition Fee</div>
+                  <div className={styles.paymentOptionGroup}>
+                    {options?.tuition_fees?.map((option) => (
+                      <RadioDisplay
+                        key={option}
+                        label={option}
+                        isSelected={formData.tuition_fees === option}
+                        isEditing={false} // <-- DIUBAH MENJADI STATIS
+                        name="tuition_fees"
+                        value={option}
                         onChange={handleRadioChange}
                       />
                     ))}
                   </div>
-
-                  {/* Blok untuk pickup point & custom pickup point */}
-                  {formData.transportation_id &&
-                    selectedTransportType.toLowerCase() !== "own car" && (
-                      <>
-                        {/* Dropdown Pickup Point */}
-                        <div className={styles.optionsRow}>
-                          <div className={styles.field} style={{ flexGrow: 2 }}>
-                            <div className={styles.fieldLabel}>
-                              Pickup point
-                            </div>
-                            {isEditing ? (
-                              <select
-                                name="pickup_point_id"
-                                value={formData.pickup_point_id || ""}
-                                onChange={handleChange}
-                                className={styles.formInput}
-                                disabled={!!formData.pickup_point_custom}
-                              >
-                                <option value="">Select pickup point</option>
-                                {options?.pickup_points.map((opt) => (
-                                  <option
-                                    key={opt.pickup_point_id}
-                                    value={opt.pickup_point_id}
-                                  >
-                                    {opt.name}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <b className={styles.fieldValue}>
-                                {getNameById(
-                                  "pickup_points",
-                                  formData.pickup_point_id
-                                ) || "-"}
-                              </b>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Custom Pickup Point */}
-                        <div className={styles.optionsRow}>
-                          <div className={styles.field} style={{ flexGrow: 2 }}>
-                            <div className={styles.fieldLabel}>
-                              Custom Pickup point
-                            </div>
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                name="pickup_point_custom"
-                                value={formData.pickup_point_custom || ""}
-                                onChange={handleChange}
-                                className={styles.formInput}
-                                disabled={!!formData.pickup_point_id}
-                                placeholder="Enter custom pickup location"
-                              />
-                            ) : (
-                              <b className={styles.fieldValue}>
-                                {formData.pickup_point_custom || "-"}
-                              </b>
-                            )}
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                  {/* Pesan error real-time untuk pickup point (hanya muncul jika error) */}
-                  {errors.facilities?.pickup_point_id &&
-                    !formData.pickup_point_id &&
-                    !formData.pickup_point_custom && (
-                      <div className={styles.inlineErrorMessageFullWidth}>
-                        Pickup point must be selected or specified for School
-                        Bus.
-                      </div>
-                    )}
-
-                  {/* Transportation Policy dengan label dan pesan error real-time */}
-                  <div className={styles.optionsRow}>
-                    <div>
-                      <CheckboxDisplay
-                        label="Transportation Policy"
-                        isSelected={formData.transportation_policy === "Signed"}
-                        isEditing={isEditing}
-                        name="transportation_policy"
-                        onChange={handleChange}
+                </div>
+                <div className={styles.paymentSection}>
+                  <div className={styles.paymentTitle}>Residence Hall</div>
+                  <div className={styles.paymentOptionGroup}>
+                    {options?.residence_payment?.map((option) => (
+                      <RadioDisplay
+                        key={option}
+                        label={option}
+                        isSelected={formData.residence_payment === option}
+                        isEditing={false} // <-- DIUBAH MENJADI STATIS
+                        name="residence_payment"
+                        value={option}
+                        onChange={handleRadioChange}
                       />
-                    </div>
-
-                    {errors.facilities?.transportation_policy &&
-                      formData.transportation_policy !== "Signed" && (
-                        <div className={styles.inlineErrorMessage}>
-                          Policy must be signed.
-                        </div>
-                      )}
+                    ))}
                   </div>
-                </>
-              )}
-
-              {/* Bagian Residence Hall tetap ditampilkan */}
-              <div className={styles.optionsRow}>
-                <div
-                  className={`${styles.optionLabel} ${
-                    (errors.facilities?.residence_id &&
-                      !formData.residence_id) ||
-                    (errors.facilities?.residence_hall_policy &&
-                      formData.residence_hall_policy !== "Signed")
-                      ? styles.errorLabel
-                      : ""
-                  }`}
-                >
-                  Residence Hall
                 </div>
-
-                {filteredResidenceHalls.map((r) => (
-                  <RadioDisplay
-                    key={r.residence_id}
-                    label={r.type}
-                    isSelected={
-                      String(formData.residence_id) === String(r.residence_id)
-                    }
-                    isEditing={isEditing}
-                    name="residence_id"
-                    value={r.residence_id}
-                    onChange={handleRadioChange}
-                  />
-                ))}
-              </div>
-              {errors.facilities?.residence_id && (
-                <div className={styles.inlineErrorMessageFullWidth}>
-                  {errors.facilities.residence_id}
-                </div>
-              )}
-
-              <div className={styles.optionsRow}>
-                <CheckboxDisplay
-                  label="Residence Hall Policy"
-                  isSelected={formData.residence_hall_policy === "Signed"}
-                  isEditing={isEditing}
-                  name="residence_hall_policy"
-                  onChange={handleChange}
-                />
-                {errors.facilities?.transportation_policy &&
-                  formData.transportation_policy !== "Signed" && (
-                    <div className={styles.inlineErrorMessage}>
-                      Policy must be signed.
-                    </div>
-                  )}
-              </div>
-            </div>
-          </div>
-
-          {/* PARENT / GUARDIAN INFORMATION */}
-          <div id="parentGuardian" className={styles.infoSection}>
-            <div
-              className={`${styles.sectionHeader} ${
-                isEditing ? styles.sectionHeaderEditing : ""
-              }`}
-            >
-              <b>PARENT / GUARDIAN INFORMATION</b>
-            </div>
-            <div className={styles.sectionContent}>
-              <b>Father's Information</b>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.parentGuardian?.father_name
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="father_name"
-                    className={`${styles.fieldLabel} ${
-                      errors.parentGuardian?.father_name
-                        ? styles.errorLabel
-                        : ""
-                    }`}
-                  >
-                    Name
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="father_name"
-                      type="text"
-                      name="father_name"
-                      value={formData.father_name || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.parentGuardian?.father_name
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.parentGuardian?.father_name
-                          ? errors.parentGuardian.father_name
-                          : "Father's Name"
+                <div className={styles.paymentSection}>
+                  <div className={styles.paymentTitle}>
+                    Financial Policy & Contract
+                  </div>
+                  <div className={styles.paymentOptionGroup}>
+                    <CheckboxDisplay
+                      label="Agree"
+                      isSelected={
+                        formData.financial_policy_contract === "Signed"
                       }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.father_name || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <label htmlFor="father_company" className={styles.fieldLabel}>
-                    Company Name
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="father_company"
-                      type="text"
-                      name="father_company"
-                      value={formData.father_company || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                      placeholder="Company Name"
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.father_company || "-"}
-                    </b>
-                  )}
-                </div>
-                <div className={styles.field}>
-                  <label
-                    htmlFor="father_occupation"
-                    className={styles.fieldLabel}
-                  >
-                    Occupation/Position
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="father_occupation"
-                      type="text"
-                      name="father_occupation"
-                      value={formData.father_occupation || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                      placeholder="Occupation/Position"
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.father_occupation || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.parentGuardian?.father_phone
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="father_phone"
-                    className={`${styles.fieldLabel} ${
-                      errors.parentGuardian?.father_phone
-                        ? styles.errorLabel
-                        : ""
-                    }`}
-                  >
-                    Phone Number
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="father_phone"
-                      type="tel"
-                      name="father_phone"
-                      value={formData.father_phone || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.parentGuardian?.father_phone
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.parentGuardian?.father_phone
-                          ? errors.parentGuardian.father_phone
-                          : "Phone Number"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.father_phone || "-"}
-                    </b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.parentGuardian?.father_email
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="father_email"
-                    className={`${styles.fieldLabel} ${
-                      errors.parentGuardian?.father_email
-                        ? styles.errorLabel
-                        : ""
-                    }`}
-                  >
-                    Email
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="father_email"
-                      type="email"
-                      name="father_email"
-                      value={formData.father_email || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.parentGuardian?.father_email
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.parentGuardian?.father_email
-                          ? errors.parentGuardian.father_email
-                          : "Email"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.father_email || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.addressGroup}>
-                <div className={styles.row}>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.father_address_street
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="father_address_street"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.father_address_street
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      Street
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="father_address_street"
-                        type="text"
-                        name="father_address_street"
-                        value={formData.father_address_street || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.father_address_street
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.father_address_street
-                            ? errors.parentGuardian.father_address_street
-                            : "Street"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.father_address_street || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div className={styles.rtRwGroup}>
-                    <div className={styles.field}>
-                      <label
-                        htmlFor="father_address_rt"
-                        className={styles.fieldLabel}
-                      >
-                        RT
-                      </label>
-                      {isEditing ? (
-                        <input
-                          id="father_address_rt"
-                          type="text"
-                          name="father_address_rt"
-                          value={formData.father_address_rt || ""}
-                          onChange={handleChange}
-                          className={styles.formInput}
-                          placeholder="RT"
-                        />
-                      ) : (
-                        <b className={styles.fieldValue}>
-                          {formData.father_address_rt || "-"}
-                        </b>
-                      )}
-                    </div>
-                    <div className={styles.field}>
-                      <label
-                        htmlFor="father_address_rw"
-                        className={styles.fieldLabel}
-                      >
-                        RW
-                      </label>
-                      {isEditing ? (
-                        <input
-                          id="father_address_rw"
-                          type="text"
-                          name="father_address_rw"
-                          value={formData.father_address_rw || ""}
-                          onChange={handleChange}
-                          className={styles.formInput}
-                          placeholder="RW"
-                        />
-                      ) : (
-                        <b className={styles.fieldValue}>
-                          {formData.father_address_rw || "-"}
-                        </b>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.row}>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.father_address_village
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="father_address_village"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.father_address_village
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      Village
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="father_address_village"
-                        type="text"
-                        name="father_address_village"
-                        value={formData.father_address_village || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.father_address_village
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.father_address_village
-                            ? errors.parentGuardian.father_address_village
-                            : "Village"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.father_address_village || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.father_address_district
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="father_address_district"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.father_address_district
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      District
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="father_address_district"
-                        type="text"
-                        name="father_address_district"
-                        value={formData.father_address_district || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.father_address_district
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.father_address_district
-                            ? errors.parentGuardian.father_address_district
-                            : "District"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.father_address_district || "-"}
-                      </b>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.row}>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.father_address_city_regency
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="father_address_city_regency"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.father_address_city_regency
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      City/Regency
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="father_address_city_regency"
-                        type="text"
-                        name="father_address_city_regency"
-                        value={formData.father_address_city_regency || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.father_address_city_regency
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.father_address_city_regency
-                            ? errors.parentGuardian.father_address_city_regency
-                            : "City/Regency"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.father_address_city_regency || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.father_address_province
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="father_address_province"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.father_address_province
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      Province
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="father_address_province"
-                        type="text"
-                        name="father_address_province"
-                        value={formData.father_address_province || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.father_address_province
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.father_address_province
-                            ? errors.parentGuardian.father_address_province
-                            : "Province"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.father_address_province || "-"}
-                      </b>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.otherAddress}>
-                  <span className={styles.fieldLabel}>Other: (</span>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="father_address_other"
-                      value={formData.father_address_other || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                      placeholder="Other address details"
-                    />
-                  ) : (
-                    <div
-                      className={`${styles.formInput} ${styles.visualInput}`}
-                    >
-                      {formData.father_address_other || "-"}
-                    </div>
-                  )}
-                  <span className={styles.fieldLabel}>)</span>
-                </div>
-              </div>
-              <b>Mother's Information</b>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.parentGuardian?.mother_name
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="mother_name"
-                    className={`${styles.fieldLabel} ${
-                      errors.parentGuardian?.mother_name
-                        ? styles.errorLabel
-                        : ""
-                    }`}
-                  >
-                    Name
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="mother_name"
-                      type="text"
-                      name="mother_name"
-                      value={formData.mother_name || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.parentGuardian?.mother_name
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.parentGuardian?.mother_name
-                          ? errors.parentGuardian.mother_name
-                          : "Mother's Name"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.mother_name || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <label htmlFor="mother_company" className={styles.fieldLabel}>
-                    Company Name
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="mother_company"
-                      type="text"
-                      name="mother_company"
-                      value={formData.mother_company || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                      placeholder="Company Name"
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.mother_company || "-"}
-                    </b>
-                  )}
-                </div>
-                <div className={styles.field}>
-                  <label
-                    htmlFor="mother_occupation"
-                    className={styles.fieldLabel}
-                  >
-                    Occupation/Position
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="mother_occupation"
-                      type="text"
-                      name="mother_occupation"
-                      value={formData.mother_occupation || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                      placeholder="Occupation/Position"
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.mother_occupation || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div
-                  className={`${styles.field} ${
-                    errors.parentGuardian?.mother_phone
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="mother_phone"
-                    className={`${styles.fieldLabel} ${
-                      errors.parentGuardian?.mother_phone
-                        ? styles.errorLabel
-                        : ""
-                    }`}
-                  >
-                    Phone Number
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="mother_phone"
-                      type="tel"
-                      name="mother_phone"
-                      value={formData.mother_phone || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.parentGuardian?.mother_phone
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.parentGuardian?.mother_phone
-                          ? errors.parentGuardian.mother_phone
-                          : "Phone Number"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.mother_phone || "-"}
-                    </b>
-                  )}
-                </div>
-                <div
-                  className={`${styles.field} ${
-                    errors.parentGuardian?.mother_email
-                      ? styles.errorFieldWrapper
-                      : ""
-                  }`}
-                >
-                  <label
-                    htmlFor="mother_email"
-                    className={`${styles.fieldLabel} ${
-                      errors.parentGuardian?.mother_email
-                        ? styles.errorLabel
-                        : ""
-                    }`}
-                  >
-                    Email
-                  </label>
-                  {isEditing ? (
-                    <input
-                      id="mother_email"
-                      type="email"
-                      name="mother_email"
-                      value={formData.mother_email || ""}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${
-                        errors.parentGuardian?.mother_email
-                          ? styles.errorInput
-                          : ""
-                      }`}
-                      placeholder={
-                        errors.parentGuardian?.mother_email
-                          ? errors.parentGuardian.mother_email
-                          : "Email"
-                      }
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.mother_email || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.addressGroup}>
-                <div className={styles.row}>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.mother_address_street
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="mother_address_street"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.mother_address_street
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      Street
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="mother_address_street"
-                        type="text"
-                        name="mother_address_street"
-                        value={formData.mother_address_street || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.mother_address_street
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.mother_address_street
-                            ? errors.parentGuardian.mother_address_street
-                            : "Street"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.mother_address_street || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div className={styles.rtRwGroup}>
-                    <div className={styles.field}>
-                      <label
-                        htmlFor="mother_address_rt"
-                        className={styles.fieldLabel}
-                      >
-                        RT
-                      </label>
-                      {isEditing ? (
-                        <input
-                          id="mother_address_rt"
-                          type="text"
-                          name="mother_address_rt"
-                          value={formData.mother_address_rt || ""}
-                          onChange={handleChange}
-                          className={styles.formInput}
-                          placeholder="RT"
-                        />
-                      ) : (
-                        <b className={styles.fieldValue}>
-                          {formData.mother_address_rt || "-"}
-                        </b>
-                      )}
-                    </div>
-                    <div className={styles.field}>
-                      <label
-                        htmlFor="mother_address_rw"
-                        className={styles.fieldLabel}
-                      >
-                        RW
-                      </label>
-                      {isEditing ? (
-                        <input
-                          id="mother_address_rw"
-                          type="text"
-                          name="mother_address_rw"
-                          value={formData.mother_address_rw || ""}
-                          onChange={handleChange}
-                          className={styles.formInput}
-                          placeholder="RW"
-                        />
-                      ) : (
-                        <b className={styles.fieldValue}>
-                          {formData.mother_address_rw || "-"}
-                        </b>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.row}>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.mother_address_village
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="mother_address_village"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.mother_address_village
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      Village
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="mother_address_village"
-                        type="text"
-                        name="mother_address_village"
-                        value={formData.mother_address_village || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.mother_address_village
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.mother_address_village
-                            ? errors.parentGuardian.mother_address_village
-                            : "Village"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.mother_address_village || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.mother_address_district
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="mother_address_district"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.mother_address_district
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      District
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="mother_address_district"
-                        type="text"
-                        name="mother_address_district"
-                        value={formData.mother_address_district || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.mother_address_district
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.mother_address_district
-                            ? errors.parentGuardian.mother_address_district
-                            : "District"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.mother_address_district || "-"}
-                      </b>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.row}>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.mother_address_city_regency
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="mother_address_city_regency"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.mother_address_city_regency
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      City/Regency
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="mother_address_city_regency"
-                        type="text"
-                        name="mother_address_city_regency"
-                        value={formData.mother_address_city_regency || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.mother_address_city_regency
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.mother_address_city_regency
-                            ? errors.parentGuardian.mother_address_city_regency
-                            : "City/Regency"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.mother_address_city_regency || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div
-                    className={`${styles.field} ${
-                      errors.parentGuardian?.mother_address_province
-                        ? styles.errorFieldWrapper
-                        : ""
-                    }`}
-                  >
-                    <label
-                      htmlFor="mother_address_province"
-                      className={`${styles.fieldLabel} ${
-                        errors.parentGuardian?.mother_address_province
-                          ? styles.errorLabel
-                          : ""
-                      }`}
-                    >
-                      Province
-                    </label>
-                    {isEditing ? (
-                      <input
-                        id="mother_address_province"
-                        type="text"
-                        name="mother_address_province"
-                        value={formData.mother_address_province || ""}
-                        onChange={handleChange}
-                        className={`${styles.formInput} ${
-                          errors.parentGuardian?.mother_address_province
-                            ? styles.errorInput
-                            : ""
-                        }`}
-                        placeholder={
-                          errors.parentGuardian?.mother_address_province
-                            ? errors.parentGuardian.mother_address_province
-                            : "Province"
-                        }
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.mother_address_province || "-"}
-                      </b>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.otherAddress}>
-                  <span className={styles.fieldLabel}>Other: (</span>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="mother_address_other"
-                      value={formData.mother_address_other || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                    />
-                  ) : (
-                    <div
-                      className={`${styles.formInput} ${styles.visualInput}`}
-                    >
-                      {formData.mother_address_other || "-"}
-                    </div>
-                  )}
-                  <span className={styles.fieldLabel}>)</span>
-                </div>
-              </div>
-              <b>Authorized Guardian's Information</b>
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <div className={styles.fieldLabel}>Name</div>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="guardian_name"
-                      value={formData.guardian_name || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.guardian_name || "-"}
-                    </b>
-                  )}
-                </div>
-                <div className={styles.field}>
-                  <div className={styles.fieldLabel}>
-                    Relationship to student
-                  </div>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="relation_to_student"
-                      value={formData.relation_to_student || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.relation_to_student || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <div className={styles.fieldLabel}>Phone Number</div>
-                  {isEditing ? (
-                    <input
-                      type="tel"
-                      name="guardian_phone"
-                      value={formData.guardian_phone || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.guardian_phone || "-"}
-                    </b>
-                  )}
-                </div>
-                <div className={styles.field}>
-                  <div className={styles.fieldLabel}>Email</div>
-                  {isEditing ? (
-                    <input
-                      type="email"
-                      name="guardian_email"
-                      value={formData.guardian_email || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                    />
-                  ) : (
-                    <b className={styles.fieldValue}>
-                      {formData.guardian_email || "-"}
-                    </b>
-                  )}
-                </div>
-              </div>
-              <div className={styles.addressGroup}>
-                <div className={styles.row}>
-                  <div className={styles.field}>
-                    <div className={styles.fieldLabel}>Street</div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="guardian_address_street"
-                        value={formData.guardian_address_street || ""}
-                        onChange={handleChange}
-                        className={styles.formInput}
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.guardian_address_street || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div className={styles.rtRwGroup}>
-                    <div className={styles.field}>
-                      <div className={styles.fieldLabel}>RT</div>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          name="guardian_address_rt"
-                          value={formData.guardian_address_rt || ""}
-                          onChange={handleChange}
-                          className={styles.formInput}
-                        />
-                      ) : (
-                        <b className={styles.fieldValue}>
-                          {formData.guardian_address_rt || "-"}
-                        </b>
-                      )}
-                    </div>
-                    <div className={styles.field}>
-                      <div className={styles.fieldLabel}>RW</div>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          name="guardian_address_rw"
-                          value={formData.guardian_address_rw || ""}
-                          onChange={handleChange}
-                          className={styles.formInput}
-                        />
-                      ) : (
-                        <b className={styles.fieldValue}>
-                          {formData.guardian_address_rw || "-"}
-                        </b>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.row}>
-                  <div className={styles.field}>
-                    <div className={styles.fieldLabel}>Village</div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="guardian_address_village"
-                        value={formData.guardian_address_village || ""}
-                        onChange={handleChange}
-                        className={styles.formInput}
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.guardian_address_village || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div className={styles.field}>
-                    <div className={styles.fieldLabel}>District</div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="guardian_address_district"
-                        value={formData.guardian_address_district || ""}
-                        onChange={handleChange}
-                        className={styles.formInput}
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.guardian_address_district || "-"}
-                      </b>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.row}>
-                  <div className={styles.field}>
-                    <div className={styles.fieldLabel}>City/Regency</div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="guardian_address_city_regency"
-                        value={formData.guardian_address_city_regency || ""}
-                        onChange={handleChange}
-                        className={styles.formInput}
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.guardian_address_city_regency || "-"}
-                      </b>
-                    )}
-                  </div>
-                  <div className={styles.field}>
-                    <div className={styles.fieldLabel}>Province</div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="guardian_address_province"
-                        value={formData.guardian_address_province || ""}
-                        onChange={handleChange}
-                        className={styles.formInput}
-                      />
-                    ) : (
-                      <b className={styles.fieldValue}>
-                        {formData.guardian_address_province || "-"}
-                      </b>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.otherAddress}>
-                  <span className={styles.fieldLabel}>Other: (</span>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="guardian_address_other"
-                      value={formData.guardian_address_other || ""}
-                      onChange={handleChange}
-                      className={styles.formInput}
-                    />
-                  ) : (
-                    <div
-                      className={`${styles.formInput} ${styles.visualInput}`}
-                    >
-                      {formData.guardian_address_other || "-"}
-                    </div>
-                  )}
-                  <span className={styles.fieldLabel}>)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* TERM OF PAYMENT */}
-          <div className={styles.infoSection}>
-            <div
-              className={`${styles.sectionHeader} ${
-                isEditing ? styles.sectionHeaderEditing : ""
-              }`}
-            >
-              <b>TERM OF PAYMENT</b>
-            </div>
-            <div className={styles.paymentContentWrapper}>
-              <div className={styles.paymentSection}>
-                <div className={styles.paymentTitle}>Tuition Fee</div>
-                <div className={styles.paymentOptionGroup}>
-                  {options?.tuition_fees?.map((option) => (
-                    <RadioDisplay
-                      key={option}
-                      label={option}
-                      isSelected={formData.tuition_fees === option}
                       isEditing={false} // <-- DIUBAH MENJADI STATIS
-                      name="tuition_fees"
-                      value={option}
-                      onChange={handleRadioChange}
+                      name="financial_policy_contract"
+                      onChange={handleChange}
                     />
-                  ))}
+                  </div>
                 </div>
               </div>
-              <div className={styles.paymentSection}>
-                <div className={styles.paymentTitle}>Residence Hall</div>
-                <div className={styles.paymentOptionGroup}>
-                  {options?.residence_payment?.map((option) => (
-                    <RadioDisplay
-                      key={option}
-                      label={option}
-                      isSelected={formData.residence_payment === option}
-                      isEditing={false} // <-- DIUBAH MENJADI STATIS
-                      name="residence_payment"
-                      value={option}
-                      onChange={handleRadioChange}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className={styles.paymentSection}>
-                <div className={styles.paymentTitle}>
-                  Financial Policy & Contract
-                </div>
-                <div className={styles.paymentOptionGroup}>
-                  <CheckboxDisplay
-                    label="Agree"
-                    isSelected={formData.financial_policy_contract === "Signed"}
-                    isEditing={false} // <-- DIUBAH MENJADI STATIS
-                    name="financial_policy_contract"
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className={styles.discountSection}>
-              <div className={styles.paymentTitle}>Discount</div>
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <div className={styles.fieldLabel}>Discount</div>
-                  {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
-                  <b className={styles.fieldValue}>
-                    {formData.discount_name || "-"}
-                  </b>
-                </div>
-
-                {formData.discount_name && (
+              <div className={styles.discountSection}>
+                <div className={styles.paymentTitle}>Discount</div>
+                <div className={styles.row}>
                   <div className={styles.field}>
-                    <div className={styles.fieldLabel}>Notes</div>
+                    <div className={styles.fieldLabel}>Discount</div>
                     {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
                     <b className={styles.fieldValue}>
-                      {formData.discount_notes || "-"}
+                      {formData.discount_name || "-"}
                     </b>
                   </div>
-                )}
+
+                  {formData.discount_name && (
+                    <div className={styles.field}>
+                      <div className={styles.fieldLabel}>Notes</div>
+                      {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
+                      <b className={styles.fieldValue}>
+                        {formData.discount_notes || "-"}
+                      </b>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <ConfirmUpdatePopup
+          isOpen={isPopupOpen}
+          onClose={() => setIsPopupOpen(false)}
+          onConfirm={handleConfirmUpdate}
+          isUpdating={isUpdating}
+        />
+
+        <UpdatedNotification
+          isOpen={showSuccess}
+          onClose={() => setShowSuccess(false)}
+        />
+
+        <PhotoUploadPopup
+          isOpen={isPhotoPopupOpen}
+          onClose={() => setIsPhotoPopupOpen(false)}
+          onFileSelect={handleFileSelect}
+        />
       </div>
-      <ConfirmUpdatePopup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        onConfirm={handleConfirmUpdate}
-        isUpdating={isUpdating}
+      <ConfirmBackPopup
+        isOpen={isBackPopupOpen}
+        onClose={handleClosePopup} // <-- Ganti ke handler baru
+        onConfirm={handleConfirmBack}
       />
-
-      <UpdatedNotification
-        isOpen={showSuccess}
-        onClose={() => setShowSuccess(false)}
-      />
-
-      <PhotoUploadPopup
-        isOpen={isPhotoPopupOpen}
-        onClose={() => setIsPhotoPopupOpen(false)}
-        onFileSelect={handleFileSelect}
-      />
-    </div>
+    </Main>
   );
 };
 
