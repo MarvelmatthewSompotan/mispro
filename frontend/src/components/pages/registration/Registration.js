@@ -13,6 +13,7 @@ import trashIcon from '../../../assets/trash_icon.png';
 import {
   getRegistrations,
   getRegistrationOptions,
+  deleteRegistration,
 } from '../../../services/api';
 
 // --- Komponen Internal BARU untuk Satu Baris Data (Mengikuti Pola StudentList) ---
@@ -302,8 +303,31 @@ const Registration = () => {
     setShowStatusPopup(true);
   };
 
-  const handleDeleteClick = (row) => {
-    console.log(row.registration_id);
+  const handleDeleteClick = async (row) => {
+    const confirmed = window.confirm(
+      `Apakah Anda yakin ingin menghapus pendaftaran dengan ID: ${row.registration_id} (Application ID: ${row.application_id})? Tindakan ini tidak dapat dibatalkan.`
+    );
+
+    if (confirmed) {
+      setLoading(true);
+      try {
+        await deleteRegistration(row.application_id);
+
+        alert(`Pendaftaran ${row.registration_id} berhasil dihapus.`);
+
+        const targetPage =
+          currentPage > 1 && registrationData.length === 1
+            ? currentPage - 1
+            : currentPage;
+        await fetchRegistrations(filters, targetPage, sorts);
+      } catch (error) {
+        console.error('Error deleting registration:', error);
+        alert(
+          `Gagal menghapus pendaftaran: ${error.message || 'Terjadi kesalahan'}`
+        );
+        setLoading(false);
+      }
+    }
   };
 
   const handleCloseStatusPopup = () => {
