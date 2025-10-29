@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PopUpForm from './PopUpRegis/PopUpForm';
+import PopUpForm from '../../molecules/PopUp/PopUpRegis/PopUpForm';
 import Pagination from '../../atoms/Pagination';
-import StatusConfirmationPopup from './PopUpRegis/StatusConfirmationPopup';
+import StatusConfirmationPopup from '../../molecules/PopUp/PopUpRegis/StatusConfirmationPopup';
 import styles from './Registration.module.css';
 import searchIcon from '../../../assets/Search-icon.png';
 import totalRegisIcon from '../../../assets/total_regis_icon.svg';
