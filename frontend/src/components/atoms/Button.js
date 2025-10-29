@@ -25,19 +25,19 @@ const Button = ({
   onClick,
   style,
   className,
-  variant = "outline", // Varian default tetap 'outline'
+  variant = "outline", 
   disabled = false,
   fullWidth = false,
-  showDropdownIcon = false, // Prop baru untuk ikon
+  showDropdownIcon = false, 
   type = "button",
   ...rest
 }) => {
   const composedClassName = [
     "atom-button",
-    `button--${variant}`, // Logika ini akan menangani semua varian secara dinamis
+    `button--${variant}`, 
     disabled ? "is-disabled" : "",
     fullWidth ? "is-full" : "",
-    showDropdownIcon ? "has-dropdown-icon" : "", // Kelas baru untuk styling dropdown
+    showDropdownIcon ? "has-dropdown-icon" : "", 
     className || "",
   ]
     .filter(Boolean)
@@ -54,7 +54,6 @@ const Button = ({
     >
       {children}
       {showDropdownIcon && <DropdownIcon />}{" "}
-      {/* Tampilkan ikon jika prop true */}
     </button>
   );
 };

@@ -370,7 +370,7 @@ const FormButtonSection = ({
         <div className={styles.noteLabel}>Note: </div>
         <div className={styles.noteText}>
           <span className={styles.noteContent}>
-            Please make sure all the data above are accurate before pressing{" "}
+            Please make sure all the data below are accurate before pressing{" "}
           </span>
           <b>Done</b>
         </div>
