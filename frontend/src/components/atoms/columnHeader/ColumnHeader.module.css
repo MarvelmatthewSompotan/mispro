@@ -57,3 +57,7 @@
   cursor: not-allowed;
   filter: grayscale(100%);
 }
+
+.titleDisabled{
+  opacity: 0;
+}

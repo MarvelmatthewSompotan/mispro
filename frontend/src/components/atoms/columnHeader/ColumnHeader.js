@@ -1,12 +1,12 @@
 /*
  * ColumnHeader.js (DIUPDATE DENGAN LOGIKA POPUP)
  */
-import React, { useState } from 'react'; // Import useState
-import styles from './ColumnHeader.module.css';
-import SortButton from '../SortButton';
-import FilterButton from '../FilterButton'; // Ini adalah FilterButton.js Anda
-import FilterPopup from '../FilterPopUp'; // Import popup yang baru dibuat
-import filterPopupStyles from '../FilterPopUp.module.css';
+import React, { useState } from "react"; // Import useState
+import styles from "./ColumnHeader.module.css";
+import SortButton from "../SortButton";
+import FilterButton from "../FilterButton"; // Ini adalah FilterButton.js Anda
+import FilterPopup from "../FilterPopUp"; // Import popup yang baru dibuat
+import filterPopupStyles from "../FilterPopUp.module.css";
 
 const ColumnHeader = ({
   title,
@@ -36,7 +36,7 @@ const ColumnHeader = ({
       return false;
     }
 
-    if (filterType === 'date-range') {
+    if (filterType === "date-range") {
       // Untuk date-range, currentFilterValue adalah array [start_date, end_date]
       return (
         Array.isArray(currentFilterValue) &&
@@ -44,15 +44,15 @@ const ColumnHeader = ({
       );
     }
 
-    if (filterType === 'checkbox') {
+    if (filterType === "checkbox") {
       // Untuk checkbox, currentFilterValue adalah array of values
       return Array.isArray(currentFilterValue) && currentFilterValue.length > 0;
     }
 
-    if (filterType === 'search') {
+    if (filterType === "search") {
       // Untuk search, currentFilterValue adalah string
       return (
-        typeof currentFilterValue === 'string' &&
+        typeof currentFilterValue === "string" &&
         currentFilterValue.trim().length > 0
       );
     }
@@ -89,23 +89,29 @@ const ColumnHeader = ({
     // 'columnController' perlu 'position: relative'
     <div className={styles.columnController}>
       <div className={styles.columnName}>
-        <div className={styles.loremIpsum}>{title}</div>
+        <div
+          className={`${styles.loremIpsum} ${
+            !showActions ? styles.titleDisabled : ""
+          }`}
+        >
+          {title}
+        </div>
       </div>
 
       <div
         className={`${styles.action} ${
-          !showActions ? styles.disabledAction : ''
+          !showActions ? styles.disabledAction : ""
         }`}
       >
         {hasSort && (
           <div
             className={`${styles.control} ${
-              disableSort ? styles.isDisabled : ''
+              disableSort ? styles.isDisabled : ""
             }`}
-            title={disableSort ? 'Sort disabled' : undefined}
+            title={disableSort ? "Sort disabled" : undefined}
           >
             <SortButton
-              direction={sortOrder || 'none'}
+              direction={sortOrder || "none"}
               onClick={handleSortClick}
             />
           </div>
@@ -115,9 +121,9 @@ const ColumnHeader = ({
         {hasFilter && (
           <div
             className={`${styles.control} ${
-              disableFilter ? styles.isDisabled : ''
+              disableFilter ? styles.isDisabled : ""
             }`}
-            title={disableFilter ? 'Filter disabled' : undefined}
+            title={disableFilter ? "Filter disabled" : undefined}
           >
             <FilterButton
               onClick={handleFilterToggle}
@@ -137,7 +143,7 @@ const ColumnHeader = ({
             onClose={() => setIsFilterOpen(false)}
             filterType={filterType}
             filterKey={filterKey}
-            className={filterType === 'date-range' ? styles.popupDateRange : ''}
+            className={filterType === "date-range" ? styles.popupDateRange : ""}
             initialValue={currentFilterValue}
             singleSelect={singleSelect}
           />

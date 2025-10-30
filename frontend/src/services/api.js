@@ -387,8 +387,4 @@ export const postUser = async (userData) => {
   });
 };
 
-export const deleteRegistration = (applicationId) => {
-  return apiFetch(`/registration/${applicationId}`, {
-    method: 'DELETE',
-  });
-};
+
