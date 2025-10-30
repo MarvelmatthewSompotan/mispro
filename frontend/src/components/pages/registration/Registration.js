@@ -7,7 +7,8 @@ import styles from './Registration.module.css';
 import searchIcon from '../../../assets/Search-icon.png';
 import totalRegisIcon from '../../../assets/total_regis_icon.svg';
 import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
-import Button from '../../atoms/Button'; 
+import Button from '../../atoms/Button';
+import ResetFilterButton from '../../atoms/resetFilterButton/ResetFilterButton';
 
 import {
   getRegistrations,
@@ -24,7 +25,6 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
       className={styles.registrationDataRow}
       onClick={() => onRowClick(registration)}
     >
-      {/* 1. Registration Date */}
       <div className={styles.tableCell}>
         {new Date(registration.registration_date).toLocaleDateString('id-ID', {
           day: 'numeric',
@@ -32,23 +32,17 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
           year: 'numeric',
         })}
       </div>
-      {/* 2. Registration ID */}
       <div className={styles.tableCell}>{registration.registration_id}</div>
-      {/* 3. Student Name */}
       <div className={styles.tableCell}>{registration.full_name}</div>
-      {/* 4. Grade */}
       <div className={styles.tableCell}>{registration.grade || 'N/A'}</div>
-      {/* 5. Section */}
       <div className={styles.tableCell}>
         {registration.section_name || 'N/A'}
       </div>
-      {/* 6. Status Badge */}
-      {/* --- PERUBAHAN: Menghapus style inline justifyContent: 'center' --- */}
       <div className={styles.tableCell}>
         <div
           className={statusStyle}
           onClick={(e) => {
-            e.stopPropagation(); 
+            e.stopPropagation();
             onStatusClick(registration);
           }}
         >
@@ -65,7 +59,6 @@ const Registration = () => {
   const navigate = useNavigate();
   const [registrationData, setRegistrationData] = useState([]);
   const [loading, setLoading] = useState(true);
-  // const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -74,7 +67,7 @@ const Registration = () => {
   const REFRESH_INTERVAL = 5000;
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
-  const [search, setSearch] = useState(''); // DIKEMBALIKAN (dari search bar atas)
+  const [search, setSearch] = useState(''); 
   const [filters, setFilters] = useState({});
   const [sorts, setSorts] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
@@ -89,7 +82,6 @@ const Registration = () => {
 
   const fetchRegistrations = useCallback(
     async (filters = {}, page = 1, sorts = [], options = {}) => {
-      // <-- TAMBAHKAN sorts
       const { isBackgroundRefresh = false } = options;
       if (!isBackgroundRefresh) setLoading(true);
 
@@ -167,7 +159,6 @@ const Registration = () => {
   }, [search, filters, sorts, fetchRegistrations]);
 
   useEffect(() => {
-    // Hindari double-fetch saat search bar atas berubah
     if (search) return;
 
     fetchRegistrations(filters, 1, sorts);
@@ -175,7 +166,6 @@ const Registration = () => {
 
   const handleSortChange = (fieldKey) => {
     setSorts((prev) => {
-      // Ambil sort saat ini yang field-nya sama dengan fieldKey
       const current = prev[0]?.field === fieldKey ? prev[0] : null;
       let next;
 
@@ -187,7 +177,6 @@ const Registration = () => {
         next = null;
       }
 
-      
       const newSorts = next ? [next] : [];
       return newSorts;
     });
@@ -196,7 +185,6 @@ const Registration = () => {
   const handleFilterChange = (filterKey, selectedValue) => {
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters };
-      // Cek jika itu Date Range
       if (filterKey === 'date_range' && Array.isArray(selectedValue)) {
         const [startDate, endDate] = selectedValue;
         if (startDate || endDate) {
@@ -206,10 +194,8 @@ const Registration = () => {
           delete newFilters['start_date'];
           delete newFilters['end_date'];
         }
-        // Hapus filterKey "date_range" itu sendiri
         delete newFilters[filterKey];
       } else {
-        // Logika Checkbox (Array) dan Search Input (String)
         const isArray = Array.isArray(selectedValue);
 
         if (isArray && selectedValue.length > 0) {
@@ -227,6 +213,12 @@ const Registration = () => {
 
       return newFilters;
     });
+  };
+
+  const handleResetFilters = () => {
+    setSearch('');
+    setFilters({});
+    setSorts([]);
   };
 
   const getSortOrder = (fieldKey) => {
@@ -315,21 +307,26 @@ const Registration = () => {
       <div className={styles.frameParent}>
         <div>
           <div className={styles.title}>Registration</div>
-          <div className={styles.searchBar}>
-            <input
-              type='text'
-              placeholder='Find name or student id'
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={styles.searchInput}
-            />
-            <img
-              src={searchIcon}
-              alt='Search'
-              className={styles.searchIconImg}
-              style={{ right: '12px' }}
-            />
+
+          <div className={styles.searchAndFilterContainer}>
+            <div className={styles.searchBar}>
+              <input
+                type='text'
+                placeholder='Find name or student id'
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={styles.searchInput}
+              />
+              <img
+                src={searchIcon}
+                alt='Search'
+                className={styles.searchIconImg}
+                style={{ right: '12px' }}
+              />
+            </div>
+            <ResetFilterButton onClick={handleResetFilters} />
           </div>
+          {/* --- PERUBAHAN JSX BERAKHIR DI SINI --- */}
         </div>
         <div>
           <div
@@ -347,7 +344,7 @@ const Registration = () => {
             <img
               src={totalRegisIcon}
               alt='Total Registrations'
-              className={styles.totalRecordsIcon} 
+              className={styles.totalRecordsIcon}
             />
             <div className={styles.div}>{loading ? '...' : totalRecords}</div>
           </div>
@@ -387,8 +384,8 @@ const Registration = () => {
             sortOrder={getSortOrder('full_name')}
             onSort={handleSortChange}
             hasFilter={true}
-            filterType='search' 
-            filterKey='search_name' 
+            filterType='search'
+            filterKey='search_name'
             onFilterChange={handleFilterChange}
             currentFilterValue={filters.search_name}
           />
@@ -429,14 +426,13 @@ const Registration = () => {
             hasFilter={true}
             filterKey='status'
             onFilterChange={handleFilterChange}
-            filterOptions={filterOptions.applicationStatus} 
+            filterOptions={filterOptions.applicationStatus}
             valueKey='id'
             labelKey='name'
             currentFilterValue={filters.status}
           />
         </div>
 
-        {/* Body Grid */}
         <div className={styles.tableBody}>
           {loading ? (
             <div className={styles.messageCell}>Loading...</div>
@@ -455,7 +451,6 @@ const Registration = () => {
         </div>
       </div>
 
-      {/* Pagination & Popup (Tidak Berubah) */}
       {!loading && totalPages > 1 && (
         <div
           style={{

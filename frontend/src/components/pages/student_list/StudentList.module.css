@@ -3,6 +3,9 @@
   margin-top: 16px;
   margin-bottom: 16px;
   background-color: var(--secondary-background);
+  display: flex;
+  flex-direction: column;
+  gap: 32px; 
 }
 
 .pageTitle {
@@ -11,25 +14,29 @@
   font-size: 32px;
 }
 
-/* --- Search Bar --- */
+.searchAndFilterContainer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 20px;
+}
+
 .searchContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
   position: relative;
-  margin-top: 20px;
   width: 426px;
-  border: 2px solid #7a7a7a;
+  border: 2px solid var(--main-grey);
   border-radius: 5px;
-  background-color: #fff;
-  height: 40px; /* pastikan tinggi konsisten */
+  background-color: var(--secondary-background);
+  height: 40px;
 }
 
 .searchInput {
   flex: 1;
   height: 100%;
-  padding: 0 18px; /* hilangkan padding vertikal */
+  padding: 0 18px;
   box-sizing: border-box;
   border: none;
   outline: none;
@@ -37,14 +44,14 @@
   font-size: 14px;
   font-weight: 500;
   display: flex;
-  align-items: center; /* pusatkan konten vertikal */
+  align-items: center;
 }
 
 .searchInput::placeholder {
-  color: #5f84fe;
+  color: var(--main-accent);
   opacity: 0.8;
   font-size: 15px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-primary);
 }
 
 .searchIcon {
@@ -57,9 +64,8 @@
   pointer-events: none;
 }
 
-/* --- Table Structure --- */
 .tableContainer {
-  background: #fff;
+  background: var(--secondary-background);
   border: 1px solid var(--main-grey);
   width: 100%;
 }
@@ -69,20 +75,20 @@
   display: grid;
   grid-template-columns:
     minmax(107.97px, 1fr)
-    minmax(132px, 1fr)
+    minmax(150px, 1fr)
     minmax(200px, 1fr)
     minmax(104.51px, 1fr)
     minmax(120px, 1fr)
     minmax(150px, 1fr)
     minmax(145px, 1fr)
     minmax(178px, 1fr);
-  border-bottom: 4px solid #7a7a7a;
+  border-bottom: 4px solid var(--main-grey);
 }
 
 .studentDataRow {
   box-sizing: border-box;
   border-top: none;
-  border-bottom: 1px solid #7a7a7a;
+  border-bottom: 1px solid var(--main-grey);
   min-height: 100px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -104,9 +110,9 @@
 .messageCell {
   padding: 48px 24px;
   text-align: center;
-  color: #7a7a7a;
+  color: var(--main-grey);
   font-size: 16px;
-  border-top: 1px solid #7a7a7a;
+  border-top: 1px solid var(--main-grey);
 }
 
 .tableCell {
@@ -131,7 +137,7 @@
   width: 60px;
   height: 81px;
   object-fit: contain;
-  background-color: #ffffff;
+  background-color: var(--secondary-background);
   padding: 8px;
   box-sizing: border-box;
 }
@@ -144,24 +150,48 @@
 
 .active {
   border-radius: 6px;
-  background-color: #00f413;
+  background-color: var(--green);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px 12px;
-  color: #fff;
+  color: var(--text-accent);
 }
 
 .status {
   border-radius: 6px;
-  background-color: #7a7a7a;
+  background-color: var(--main-grey);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px 12px;
-  color: #fff;
+  color: var(--text-accent);
 }
 
 .studentDataRow > .tableCell {
   justify-content: flex-start;
+}
+
+.autoGraduateParent {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  text-align: left;
+  font-size: 16px;
+  color: var(--main-accent);
+  font-family: var(--font-primary);
+  margin-bottom: 5px;
+}
+.autoGraduate {
+  position: relative;
+  text-decoration: underline;
+  font-weight: 600;
+}
+.infoIcon {
+  height: 24px;
+  width: 24px;
+  position: relative;
 }

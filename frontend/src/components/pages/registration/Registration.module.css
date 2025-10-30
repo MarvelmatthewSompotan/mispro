@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; 
+  gap: 8px;
   color: var(--main-text);
   cursor: pointer;
 }
@@ -37,34 +37,40 @@
 .div {
   position: relative;
   font-weight: 600;
-  font-size: 24px; 
+  font-size: 24px;
   font-family: var(--font-primary);
 }
 
-
 .totalRecordsIcon {
-  width: 18px; 
-  height: 24px; 
+  width: 18px;
+  height: 24px;
+}
+
+/* --- STYLE BARU DITAMBAHKAN --- */
+.searchAndFilterContainer {
+  display: flex;
+  align-items: center;
+  gap: 24px; 
+  margin-bottom: 32px; 
+  margin-top: 20px; 
 }
 
 .searchBar {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
   position: relative;
-  margin-top: 20px;
   width: 426px;
   border: 2px solid #7a7a7a;
   border-radius: 5px;
   background-color: #fff;
-  height: 40px; 
+  height: 40px;
 }
 
 .searchInput {
   flex: 1;
   height: 100%;
-  padding: 0 18px; 
+  padding: 0 18px;
   box-sizing: border-box;
   border: none;
   outline: none;
@@ -72,13 +78,13 @@
   font-size: 14px;
   font-weight: 500;
   display: flex;
-  align-items: center; 
+  align-items: center;
 }
 
 .searchInput::placeholder {
   opacity: 0.8;
   font-size: 15px;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .searchIconImg {

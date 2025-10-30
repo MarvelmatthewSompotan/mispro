@@ -8,6 +8,7 @@ import utrashAltIcon from '../../../assets/trash_icon.png';
 import PopUpForm from '../registration/PopUpRegis/PopUpForm';
 import { getUsers, deleteUser, postUser } from '../../../services/api';
 import useAuth from '../../../hooks/useAuth';
+import ResetFilterButton from '../../atoms/resetFilterButton/ResetFilterButton';
 
 const REFRESH_INTERVAL = 5000;
 
@@ -25,6 +26,7 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  // eslint-disable-next-line
   const [page, setPage] = useState(1);
   const fetchControllerRef = useRef(null);
   const [deletingUserId, setDeletingUserId] = useState(null);
@@ -83,7 +85,6 @@ const Users = () => {
       .includes(search.toLowerCase())
   );
 
-  // === Fungsi Delete dengan modal ===
   const handleConfirmDelete = async () => {
     if (!confirmDeleteUser) return;
     setDeletingUserId(confirmDeleteUser.user_id);
@@ -140,23 +141,36 @@ const Users = () => {
     }
   };
 
+  const handleResetFilters = () => {
+    setSearch('');
+  };
+
   return (
     <div className={styles.usersContainer}>
-      {/* Header Title */}
       <h2 className={styles.pageTitle}>Users</h2>
       <div className={styles.usersHeaderContent}>
-        {/* Search Bar */}
-        <div className={styles.searchBar}>
-          <input
-            type='text'
-            placeholder='Find username or user ID'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={styles.searchInput}
-          />
-          <img src={searchIcon} alt='Search' className={styles.searchIconImg} />
+        {/* --- PERUBAHAN JSX DIMULAI DI SINI --- */}
+        <div className={styles.searchAndFilterContainer}>
+          {/* Search Bar */}
+          <div className={styles.searchBar}>
+            <input
+              type='text'
+              placeholder='Find username or user ID'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={styles.searchInput}
+            />
+            <img
+              src={searchIcon}
+              alt='Search'
+              className={styles.searchIconImg}
+            />
+          </div>
+          {/* Tombol Reset Filter */}
+          <ResetFilterButton onClick={handleResetFilters} />
         </div>
-        {/* Tombol New User */}
+        {/* --- PERUBAHAN JSX BERAKHIR DI SINI --- */}
+
         <div className={styles.button2Parent}>
           {isAdmin() && (
             <Button variant='solid' onClick={() => setShowUserPopup(true)}>
@@ -173,14 +187,12 @@ const Users = () => {
         </div>
       </div>
 
-      {/* Loading/Error Handling */}
       {loading ? (
         <div className={styles.loadingText}>Loading users...</div>
       ) : error ? (
         <div className={styles.errorText}>{error}</div>
       ) : (
         <div className={styles.tableContainer}>
-          {/* Table Header */}
           <div className={styles.tableHeader}>
             <ColumnHeader title='User ID' hasFilter={false} hasSort={false} />
             <ColumnHeader title='Username' hasFilter={false} hasSort={true} />
@@ -189,7 +201,6 @@ const Users = () => {
             <ColumnHeader title='Actions' hasSort={false} hasFilter={false} />
           </div>
 
-          {/* Table Body */}
           <div className={styles.tableBody}>
             {filteredUsers.length === 0 ? (
               <div className={styles.noData}>No users found</div>
@@ -254,7 +265,6 @@ const Users = () => {
         </div>
       )}
 
-      {/* === Modal Konfirmasi Delete === */}
       {confirmDeleteUser && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -284,7 +294,6 @@ const Users = () => {
         </div>
       )}
 
-      {/* === Popup Notifikasi === */}
       {showPopup && (
         <div
           className={`${styles.popup} ${
