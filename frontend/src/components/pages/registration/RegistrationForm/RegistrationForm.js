@@ -38,7 +38,8 @@ const RegistrationForm = () => {
   const [validationState, setValidationState] = useState({});
   const [errors, setErrors] = useState({});
   const [forceError, setForceError] = useState({});
-  const blocker = useBlocker(true);
+  const [allowNavigation, setAllowNavigation] = useState(false);
+  const blocker = useBlocker(!allowNavigation);
 
   const [isBackPopupOpen, setIsBackPopupOpen] = useState(false);
 
@@ -381,6 +382,7 @@ const RegistrationForm = () => {
           onReset={handleResetForm}
           location={location}
           sharedData={sharedData}
+          onSetAllowNavigation={setAllowNavigation}
         />
 
         <div id="studentStatus">
@@ -431,6 +433,7 @@ const RegistrationForm = () => {
             onDataChange={handleParentGuardianDataChange}
             errors={errors.parentGuardian || {}}
             forceError={forceError.parentGuardian || {}}
+            
           />
         </div>
         <div id="termOfPayment">

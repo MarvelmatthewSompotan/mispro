@@ -38,6 +38,8 @@ class CorsMiddleware
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
 
+        \Log::info('CORS triggered: ' . $request->method() . ' ' . $request->path());
+
         return $response;
     }
 }

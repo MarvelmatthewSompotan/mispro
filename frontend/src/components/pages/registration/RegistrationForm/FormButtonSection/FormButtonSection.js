@@ -13,6 +13,7 @@ const FormButtonSection = ({
   onReset,
   location,
   sharedData,
+  onSetAllowNavigation,
 }) => {
   const navigate = useNavigate();
 
@@ -410,6 +411,7 @@ const FormButtonSection = ({
           locationState={location}
           navigate={navigate}
           onDuplicateFound={handleDuplicateFound}
+          onSetAllowNavigation={onSetAllowNavigation}
         />
       )}
       {showDuplicatePopup && (

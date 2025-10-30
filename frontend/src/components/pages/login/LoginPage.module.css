@@ -1,0 +1,309 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+@import url("../../styles/global-vars.css");
+
+body {
+  margin: 0;
+  font-family: var(--font-primary), "Inter", sans-serif;
+}
+
+.login-page-new {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--secondary-background);
+}
+
+.login-left-new {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--secondary-background);
+  z-index: 2;
+}
+
+.login-card-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 450px;
+}
+
+.login-blob-top,
+.login-blob-bottom,
+.login-blob-top-reset,
+.login-blob-bottom-reset {
+  position: absolute;
+  z-index: 1;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0s;
+}
+
+.login-blob-top,
+.login-blob-bottom {
+  animation: blobLoadIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+  animation-fill-mode: forwards;
+  opacity: 0; 
+  transform: scale(1);
+  transition-delay: 0.15s;
+}
+
+.login-blob-top {
+  width: 210px;
+  height: auto;
+  top: -90px;
+  left: -70px;
+}
+
+.login-blob-bottom {
+  width: 150px;
+  height: auto;
+  bottom: -80px;
+  right: -60px;
+}
+
+
+.login-blob-top-reset,
+.login-blob-bottom-reset {
+  opacity: 0;
+  transform: scale(0.5);
+  transition-delay: 0s; 
+}
+
+.login-blob-top-reset {
+  width: 210px;
+  height: auto;
+  top: -70px;
+  right: -70px;
+}
+
+.login-blob-bottom-reset {
+  width: 150px;
+  height: auto;
+  bottom: -60px;
+  left: -60px;
+}
+
+
+.login-card {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid #fff;
+  border-radius: 12px;
+  padding: 24px 56px;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 31px;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  transform: scale(1);
+  animation: cardLoadIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.4s;
+  animation-fill-mode: forwards; 
+  opacity: 0;
+}
+
+.login-card.is-fading {
+  opacity: 0 !important;
+  transform: scale(0.95) !important;
+}
+
+.login-logo {
+  display: block;
+  height: auto;
+  width: 340px;
+}
+
+.login-form-new {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 31px;
+}
+
+.login-title-new {
+  font-family: var(--font-primary), "Poppins", sans-serif;
+  font-size: 24px; 
+  font-weight: 600;
+  color: var(--main-accent, #007bff);
+  margin: 0 0 0 0;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0 20px !important;
+  height: 60px;
+  font-size: 1rem !important;
+  border: none !important;
+  border-radius: 5px;
+  background-color: var(--main-background, #f7f7f8) !important;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(95, 132, 254, 0.2) !important;
+}
+
+.reset-login-link {
+  font-size: 0.875rem;
+  color: var(--main-accent, #007bff);
+  text-decoration: underline;
+  align-self: flex-start;
+  font-weight: 600;
+}
+
+.reset-login-link:hover {
+  text-decoration: underline;
+}
+
+.login-error-message {
+  color: #d93025;
+  font-size: 14px;
+  text-align: left;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.login-right-new {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden; 
+}
+
+.login-illustration-new {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+  z-index: 0;
+  border-top-left-radius: 124px;
+  border-bottom-left-radius: 248px;
+}
+
+.login-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(160, 154, 154, 0.4);
+  z-index: 1;
+  border-top-left-radius: 124px;
+  border-bottom-left-radius: 248px;
+}
+
+.login-illustration-new,
+.login-image-overlay {
+  transition: border-radius 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: imageLoadIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+  animation-fill-mode: forwards; 
+  opacity: 0; 
+}
+
+.button-container {
+  width: 100%;
+  display: flex;
+}
+
+.button-container .atom-button {
+  width: 145px !important;
+  height: 45px !important;
+}
+
+/* Style untuk Mode Reset 
+ */
+
+.login-page-new.reset-mode {
+  flex-direction: row-reverse;
+}
+
+.login-page-new.reset-mode .login-illustration-new,
+.login-page-new.reset-mode .login-image-overlay {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 124px;
+  border-bottom-right-radius: 248px;
+}
+
+.login-page-new.reset-mode .login-blob-top,
+.login-page-new.reset-mode .login-blob-bottom {
+  opacity: 0 !important;
+  transform: scale(0.5) rotate(-30deg) !important;
+  transition-delay: 0s;
+}
+
+.login-page-new.reset-mode .login-blob-top-reset,
+.login-page-new.reset-mode .login-blob-bottom-reset {
+  opacity: 1 !important;
+  transform: scale(1) rotate(0deg) !important;
+  transition-delay: 0.15s;
+}
+
+/* --- KEYFRAMES (Tidak Berubah) --- */
+@keyframes cardLoadIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes blobLoadIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes imageLoadIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .login-page-new {
+    flex-direction: column;
+  }
+
+  .login-left-new {
+    flex-basis: auto;
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .login-right-new {
+    display: none;
+  }
+
+  .login-card {
+    padding: 2rem 1.5rem;
+    max-width: 100%;
+  }
+}

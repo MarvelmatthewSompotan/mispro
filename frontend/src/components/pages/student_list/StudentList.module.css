@@ -69,10 +69,10 @@
   display: grid;
   grid-template-columns:
     minmax(107.97px, 1fr)
-    minmax(132px, 1fr)
+    minmax(135px, 1fr)
     minmax(200px, 1fr)
     minmax(104.51px, 1fr)
-    minmax(120px, 1fr)
+    minmax(125px, 1fr)
     minmax(150px, 1fr)
     minmax(145px, 1fr)
     minmax(178px, 1fr);
@@ -83,7 +83,7 @@
   box-sizing: border-box;
   border-top: none;
   border-bottom: 1px solid #7a7a7a;
-  min-height: 100px;
+  
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
