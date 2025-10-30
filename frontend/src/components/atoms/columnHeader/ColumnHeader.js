@@ -12,8 +12,7 @@ const ColumnHeader = ({
   title,
   hasSort = false,
   hasFilter = false,
-
-  // --- Props dari StudentList ---
+  disableTitleOnNoActions = false,
   fieldKey,
   filterKey,
   sortOrder,
@@ -91,7 +90,7 @@ const ColumnHeader = ({
       <div className={styles.columnName}>
         <div
           className={`${styles.loremIpsum} ${
-            !showActions ? styles.titleDisabled : ""
+            !showActions && disableTitleOnNoActions ? styles.titleDisabled : ""
           }`}
         >
           {title}
