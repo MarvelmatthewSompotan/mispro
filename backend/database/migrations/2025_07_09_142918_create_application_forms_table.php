@@ -13,6 +13,7 @@ return new class extends Migration
             $table->id('application_id');
             $table->unsignedBigInteger('enrollment_id')->nullable();
             $table->enum('status', ['Confirmed', 'Cancelled']);
+            $table->boolean('is_invalid_data')->default(false);
             $table->dateTime('submitted_at')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->foreign('enrollment_id')->references('enrollment_id')->on('enrollments')->onDelete('set null');
