@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use App\Models\FatherAddress;
 use App\Models\MotherAddress;
 use App\Models\ResidenceHall;
+use App\Models\StudentParent;
 use App\Models\StudentAddress;
 use App\Models\Transportation;
 use App\Models\ApplicationForm;
@@ -32,8 +33,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Events\ApplicationFormCreated;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
+use App\Events\ApplicationFormStatusUpdated;
 use App\Http\Resources\ApplicationPreviewResource;
-use App\Models\StudentParent;
 
 class RegistrationController extends Controller
 {
@@ -186,15 +187,17 @@ class RegistrationController extends Controller
         DB::beginTransaction();
 
         try {
-            $form = ApplicationForm::with(['enrollment.student', 'enrollment.schoolYear', 'enrollment.semester'])
+            $applicationForm = ApplicationForm::with(['enrollment.student', 'enrollment.schoolYear', 'enrollment.semester'])
                 ->findOrFail($application_id);
 
+            $oldStatus = $applicationForm->status;
             // Update status di application_forms
-            $form->status = $request->status;
-            $form->save();
+            $newStatus = $request->status;
+            $applicationForm->status = $newStatus;
+            $applicationForm->save();
 
-            $student = $form->enrollment?->student;
-            $enrollment = $form->enrollment;
+            $student = $applicationForm->enrollment?->student;
+            $enrollment = $applicationForm->enrollment;
 
             if ($student) {
                 if ($request->status === 'Cancelled') {
@@ -212,11 +215,17 @@ class RegistrationController extends Controller
             }
 
             DB::commit();
+            \Log::info('Triggering ApplicationFormStatusUpdated event', [
+                'application_id' => $application_id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+            ]);
+            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
             return response()->json([
                 'success' => true,
                 'message' => 'Status updated successfully',
-                'data' => $form
+                'data' => $applicationForm
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -819,126 +828,6 @@ class RegistrationController extends Controller
             return response()->json([
                 'success' => false, 
                 'error' => 'Registration failed: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function destroy($application_id)
-    {
-        DB::beginTransaction();
-
-        try {
-            $applicationForm = ApplicationForm::with([
-                'versions',
-                'enrollment',
-                'enrollment.student',
-            ])->where('application_id', $application_id)->first();
-
-            if (!$applicationForm) {
-                return response()->json(['success' => false, 'message' => 'Application form not found.'], 404);
-            }
-
-            $enrollment = $applicationForm->enrollment;
-            $student = $enrollment?->student;
-
-            if (!$enrollment || !$student) {
-                return response()->json(['success' => false, 'message' => 'Enrollment or student not found.'], 404);
-            }
-
-            $enrollment_id = $enrollment->enrollment_id;
-
-            if (strtolower($enrollment->student_status ?? '') === 'new') {
-                $hasOtherApplication = ApplicationForm::whereHas('enrollment', function ($query) use ($student, $enrollment_id) {
-                    $query->where('student_id', $student->student_id)
-                            ->where('enrollment_id', '!=', $enrollment_id);
-                })->exists();
-
-                if ($hasOtherApplication) {
-                    \Log::warning('Attempted to delete NEW student registration with linked records', [
-                        'student_id' => $student->student_id,
-                        'application_id' => $application_id,
-                        'enrollment_id' => $enrollment_id,
-                        'student_status' => $enrollment->student_status,
-                    ]);
-                    
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'This registration cannot be deleted because it belongs to a NEW student who has other registration data linked to this student.'
-                    ], 400);
-                }
-            }
-
-            // Hapus versi formulir
-            $applicationForm->versions()->delete();
-
-            // Hapus discount
-            $enrollment->studentDiscount()?->delete();
-
-            // Hapus pembayaran yang terkait dengan pendaftaran ini
-            $student->payments()->where('enrollment_id', $enrollment_id)->delete();
-
-            // Hapus data parent yang terkait enrollment ini
-            $student->studentParent()->where('enrollment_id', $enrollment_id)->delete();
-
-            // Hapus alamat orang tua
-            FatherAddress::where('enrollment_id', $enrollment_id)->delete();
-            MotherAddress::where('enrollment_id', $enrollment_id)->delete();
-
-
-            // === HAPUS STUDENT GUARDIAN DAN ALAMATNYA ===
-            $studentGuardians = $student->studentGuardian()->where('enrollment_id', $enrollment_id)->get();
-
-            foreach ($studentGuardians as $studentGuardian) {
-                $guardian = $studentGuardian->guardian;
-
-                if ($guardian) {
-                    $isGuardianUsedByOthers = StudentGuardian::where('guardian_id', $guardian->guardian_id)
-                        ->where('enrollment_id', '!=', $enrollment_id)
-                        ->exists();
-
-                    if (!$isGuardianUsedByOthers) {
-                        $guardian->guardianAddress()?->delete();
-                        $guardian->delete();
-                    }
-                }
-
-                $studentGuardian->delete();
-            }
-
-            StudentAddress::where('enrollment_id', $enrollment_id)->delete();
-
-            if (strtolower($enrollment->student_status ?? '') === 'new') {
-                $hasOtherEnrollment = Enrollment::where('student_id', $student->student_id)
-                    ->where('enrollment_id', '!=', $enrollment_id)
-                    ->exists();
-
-                if (!$hasOtherEnrollment) {
-                    $student->delete();
-                }
-            }
-
-            $enrollment->delete();
-            $applicationForm->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true, 
-                'message' => 'Registration and related data deleted successfully.'
-            ], 200);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            \Log::error('Failed to delete registration', [
-                'error' => $e->getMessage(),
-                'application_form_id' => $application_id
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete registration data.',
-                'error' => $e->getMessage(),
             ], 500);
         }
     }

@@ -12,6 +12,31 @@ use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
+    private function addCacheKey($key)
+    {
+        $keys = Cache::get('dashboard_keys', []);
+        if (!in_array($key, $keys)) {
+            $keys[] = $key;
+            Cache::put('dashboard_keys', $keys, now()->addDays(30));
+        }
+    }
+
+    public function forgetDashboardCacheByYear($yearStr)
+    {
+        $keys = Cache::get('dashboard_keys', []);
+        $remaining = [];
+
+        foreach ($keys as $key) {
+            if (str_contains($key, $yearStr)) {
+                Cache::forget($key);
+            } else {
+                $remaining[] = $key;
+            }
+        }
+
+        Cache::put('dashboard_keys', $remaining, now()->addDays(30));
+    }
+
     public function index(Request $request)
     {
         try {
@@ -36,19 +61,22 @@ class DashboardController extends Controller
                 ? ($currentYear - 1) . '/' . $currentYear
                 : ($currentYear - 2) . '/' . ($currentYear - 1);
 
-            // Auto invalidate cache meta if new school year detected
             $lastCachedSchoolYear = Cache::get('last_cached_school_year');
-            if ($lastCachedSchoolYear !== $schoolYearStr) {
-                // Hapus semua cache meta per user
-                Cache::flush(); // Bisa diganti selective forget kalau ingin lebih spesifik
+            if ($lastCachedSchoolYear) {
+                if ($lastCachedSchoolYear !== $schoolYearStr) {
+                    $this->forgetDashboardCacheByYear($lastCachedSchoolYear);
+                    Cache::forget('dashboard_meta_' . $user->user_id . '_' . $lastCachedSchoolYear);
+                    Cache::put('last_cached_school_year', $schoolYearStr);
+                    \Log::info('Dashboard meta cache invalidated due to new school year: ' . $schoolYearStr);
+                }
+            } else {
                 Cache::put('last_cached_school_year', $schoolYearStr);
-                \Log::info('Dashboard meta cache invalidated due to new school year: ' . $schoolYearStr);
             }
 
             // CACHE 1: Meta Data
             $metaCacheKey = 'dashboard_meta_' . $user->user_id . '_' . $schoolYearStr;
 
-            $meta = Cache::remember($metaCacheKey, now()->addMinutes(30), function () use ($user, $schoolYearStr, $previousYearStr) {
+            $meta = Cache::remember($metaCacheKey, now()->addHours(24), function () use ($user, $schoolYearStr, $previousYearStr) {
                 $lastLogin = AuditLog::where('action', 'login_success')
                     ->where('user_id', $user->user_id)
                     ->orderByDesc('created_at')
@@ -60,53 +88,70 @@ class DashboardController extends Controller
                     'previous_school_year' => SchoolYear::where('year', $previousYearStr)->first()?->year,
                 ];
             });
+            $this->addCacheKey($metaCacheKey);
 
             // CACHE 2: Statistik Data 
             $statCacheKey = 'dashboard_stats_' . $schoolYearStr . '_' . now()->format('Ymd');
 
-            $stats = Cache::remember($statCacheKey, now()->addMinutes(15), function () use ($schoolYearStr, $previousYearStr, $startOfDay, $endOfDay, $date) {
+            $stats = Cache::remember($statCacheKey, now()->addHours(24), function () use ($schoolYearStr, $previousYearStr, $startOfDay, $endOfDay, $date) {
                 $currentSchoolYear = SchoolYear::where('year', $schoolYearStr)->first();
                 $previousSchoolYear = SchoolYear::where('year', $previousYearStr)->first();
                 $currentSchoolYearId = $currentSchoolYear?->school_year_id;
                 $previousSchoolYearId = $previousSchoolYear?->school_year_id;
 
                 $totalRegistrations = ApplicationForm::count();
+                $totalRegistrationsConfirmed = ApplicationForm::where('status', 'Confirmed')->count();
+                $totalRegistrationsCancelled = ApplicationForm::where('status', 'Cancelled')->count();
 
                 $totalCurrentYear = $currentSchoolYearId
-                    ? ApplicationForm::whereHas('enrollment', fn($q) => $q->where('school_year_id', $currentSchoolYearId))->count()
-                    : 0;
+                    ? ApplicationForm::where('status', 'Confirmed')
+                        ->whereHas('enrollment', fn($q) => 
+                            $q->where('school_year_id', $currentSchoolYearId)
+                            )->count()
+                        : 0;
 
                 $totalPreviousYear = $previousSchoolYearId
-                    ? ApplicationForm::whereHas('enrollment', fn($q) => $q->where('school_year_id', $previousSchoolYearId))->count()
+                    ? ApplicationForm::where('status', 'Confirmed')
+                        ->whereHas('enrollment', fn($q) => 
+                        $q->where('school_year_id', $previousSchoolYearId)
+                        )->count()
                     : 0;
 
                 $registrationGrowth = $totalPreviousYear > 0
                     ? round((($totalCurrentYear - $totalPreviousYear) / $totalPreviousYear) * 100, 2)
                     : 0;
 
-                $todayRegistrations = ApplicationForm::whereBetween('created_at', [$startOfDay, $endOfDay])->count();
+                $todayRegistrations = ApplicationForm::where('status', 'Confirmed')
+                    ->whereBetween('created_at', [$startOfDay, $endOfDay])
+                    ->count();
 
                 $yesterdayStart = Carbon::parse($date)->subDay()->startOfDay();
                 $yesterdayEnd = Carbon::parse($date)->subDay()->endOfDay();
-                $yesterdayRegistrations = ApplicationForm::whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])->count();
+                $yesterdayRegistrations = ApplicationForm::where('status', 'Confirmed')
+                    ->whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])
+                    ->count();
 
                 $todayGrowth = $yesterdayRegistrations > 0
                     ? round((($todayRegistrations - $yesterdayRegistrations) / $yesterdayRegistrations) * 100, 2)
                     : 0;
 
-                $newStudentsToday = ApplicationForm::whereBetween('created_at', [$startOfDay, $endOfDay])
+                $newStudentsToday = ApplicationForm::where('status', 'Confirmed')
+                    ->whereBetween('created_at', [$startOfDay, $endOfDay])
                     ->whereHas('enrollment', fn($q) => $q->where('student_status', 'New'))
                     ->count();
 
-                $returningStudentsToday = ApplicationForm::whereBetween('created_at', [$startOfDay, $endOfDay])
+                $returningStudentsToday = ApplicationForm::where('status', 'Confirmed')
+                    ->whereBetween('created_at', [$startOfDay, $endOfDay])
                     ->whereHas('enrollment', fn($q) => $q->where('student_status', 'Old'))
                     ->count();
 
-                $newStudentsYesterday = ApplicationForm::whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])
+                $newStudentsYesterday = ApplicationForm::where('status', 'Confirmed')
+                    ->whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])
                     ->whereHas('enrollment', fn($q) => $q->where('student_status', 'New'))
                     ->count();
 
-                $returningStudentsYesterday = ApplicationForm::whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])
+                $returningStudentsYesterday = ApplicationForm::where('status', 'Confirmed')
+                    ->whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])
                     ->whereHas('enrollment', fn($q) => $q->where('student_status', 'Old'))
                     ->count();
 
@@ -119,32 +164,36 @@ class DashboardController extends Controller
                     : 0;
 
                 $newStudentsCurrentYear = $currentSchoolYearId
-                    ? ApplicationForm::whereHas('enrollment', fn($q) =>
-                        $q->where('school_year_id', $currentSchoolYearId)
-                            ->where('student_status', 'New')
-                    )->count()
-                    : 0;
+                    ? ApplicationForm::where('status', 'Confirmed')
+                        ->whereHas('enrollment', fn($q) =>
+                            $q->where('school_year_id', $currentSchoolYearId)
+                                ->where('student_status', 'New')
+                        )->count()
+                        : 0;
 
                 $returningStudentsCurrentYear = $currentSchoolYearId
-                    ? ApplicationForm::whereHas('enrollment', fn($q) =>
-                        $q->where('school_year_id', $currentSchoolYearId)
-                            ->where('student_status', 'Old')
-                    )->count()
-                    : 0;
+                    ? ApplicationForm::where('status', 'Confirmed')
+                        ->whereHas('enrollment', fn($q) =>
+                            $q->where('school_year_id', $currentSchoolYearId)
+                                ->where('student_status', 'Old')
+                        )->count()
+                        : 0;
 
                 $newStudentsPrevYear = $previousSchoolYearId
-                    ? ApplicationForm::whereHas('enrollment', fn($q) =>
-                        $q->where('school_year_id', $previousSchoolYearId)
-                            ->where('student_status', 'New')
-                    )->count()
-                    : 0;
+                    ? ApplicationForm::where('status', 'Confirmed')
+                        ->whereHas('enrollment', fn($q) =>
+                            $q->where('school_year_id', $previousSchoolYearId)
+                                ->where('student_status', 'New')
+                        )->count()
+                        : 0;
 
                 $returningStudentsPrevYear = $previousSchoolYearId
-                    ? ApplicationForm::whereHas('enrollment', fn($q) =>
-                        $q->where('school_year_id', $previousSchoolYearId)
-                            ->where('student_status', 'Old')
-                    )->count()
-                    : 0;
+                    ? ApplicationForm::where('status', 'Confirmed')
+                        ->whereHas('enrollment', fn($q) =>
+                            $q->where('school_year_id', $previousSchoolYearId)
+                                ->where('student_status', 'Old')
+                        )->count()
+                        : 0;
 
                 $newStudentYearlyGrowth = $newStudentsPrevYear > 0
                     ? round((($newStudentsCurrentYear - $newStudentsPrevYear) / $newStudentsPrevYear) * 100, 2)
@@ -169,9 +218,11 @@ class DashboardController extends Controller
                     'returning_students_yearly_growth_percent' => $returningStudentYearlyGrowth,
                 ];
             });
+            $this->addCacheKey($statCacheKey);
 
             // Real-time Data
             $latestRegistrations = ApplicationForm::with(['enrollment.student', 'enrollment.schoolClass', 'enrollment.section', 'enrollment.schoolYear'])
+                ->where('status', 'Confirmed')
                 ->orderByDesc('created_at')
                 ->take(3)
                 ->get()

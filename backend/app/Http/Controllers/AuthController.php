@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Events\UserLoggedIn;
 use Illuminate\Http\Request;
+use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Services\AuditTrailService;
 
 class AuthController extends Controller
 {
@@ -60,6 +61,8 @@ class AuthController extends Controller
             'email'   => $user->email,
             'role'    => $user->role,
         ]);
+
+        event(new UserLoggedIn($user));
 
         return response()->json([
             'success' => true,

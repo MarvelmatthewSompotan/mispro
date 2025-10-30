@@ -30,4 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => 'Unauthenticated.'
             ],401);
         });
-    })->create();
+    })
+    ->withProviders([
+        App\Providers\EventServiceProvider::class,
+    ])
+    ->create();
+    
