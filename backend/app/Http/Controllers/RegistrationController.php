@@ -180,9 +180,21 @@ class RegistrationController extends Controller
 
     public function updateStatus(Request $request, $application_id)
     {
-        $request->validate([
+        $validator = \Validator::make($request->all(), [
             'status' => 'required|in:Confirmed,Cancelled',
+            'reason' => 'required_if:status,Cancelled|in:Withdraw,Invalid',
+        ], [
+            'reason.required_if' => 'Field reason harus diisi jika status dibatalkan (Cancelled).',
+            'reason.in' => 'Reason hanya boleh berisi Withdraw atau Invalid.',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         DB::beginTransaction();
 
@@ -191,19 +203,37 @@ class RegistrationController extends Controller
                 ->findOrFail($application_id);
 
             $oldStatus = $applicationForm->status;
-            // Update status di application_forms
             $newStatus = $request->status;
+
             $applicationForm->status = $newStatus;
+
+
+            if ($newStatus === 'Cancelled') {
+                if ($request->reason === 'Invalid') {
+                    $applicationForm->is_invalid_data = true;
+                } else {
+                    $applicationForm->is_invalid_data = false;
+                }
+            } else {
+                $applicationForm->is_invalid_data = false; 
+            }
+
             $applicationForm->save();
 
             $student = $applicationForm->enrollment?->student;
             $enrollment = $applicationForm->enrollment;
 
-            if ($student) {
-                if ($request->status === 'Cancelled') {
-                    $student->status = 'Withdraw';
-                    $student->active = 'NO';
-                    $enrollment->status = 'INACTIVE';
+            if ($student && $enrollment) {
+                if ($newStatus === 'Cancelled') {
+                    if ($applicationForm->is_invalid_data) {
+                        $student->status = 'Not Graduate';
+                        $student->active = 'YES';
+                        $enrollment->status = 'INACTIVE';
+                    } else {
+                        $student->status = 'Withdraw';
+                        $student->active = 'NO';
+                        $enrollment->status = 'INACTIVE';
+                    }
                 } elseif ($request->status === 'Confirmed') {
                     $student->status = 'Not Graduate';
                     $student->active = 'YES';
@@ -219,6 +249,8 @@ class RegistrationController extends Controller
                 'application_id' => $application_id,
                 'old_status' => $oldStatus,
                 'new_status' => $newStatus,
+                'reason' => $request->reason,
+                'is_invalid_data' => $applicationForm->is_invalid_data,
             ]);
             event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
@@ -1166,6 +1198,7 @@ class RegistrationController extends Controller
     {
         return ApplicationForm::create([
             'enrollment_id' => $enrollment->enrollment_id,
+            'is_invalid_data' => false,
             'status' => 'Confirmed',
             'submitted_at' => now(),
         ]);
