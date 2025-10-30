@@ -29,7 +29,6 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const [isFading, setIsFading] = useState(false);
 
   // --- TAMBAHKAN STATE INI ---
   const [isResetMode, setIsResetMode] = useState(false);
@@ -78,16 +77,10 @@ const LoginPage = () => {
   // Fungsi untuk beralih mode
   const toggleMode = (e, mode) => {
     e.preventDefault();
-    setIsFading(true);
-    setTimeout(() => {
-      // Ganti state setelah fade-out
-      setIsResetMode(mode === "reset");
-      setError("");
-      setForm({ email: "", password: "" });
 
-      // Selesai, biarkan fade-in
-      setIsFading(false);
-    }, 300); // 300ms
+    setIsResetMode((prev) => !prev);
+    setError("");
+    setForm({ email: "", password: "" });
   };
   // ----------------
 
@@ -99,7 +92,10 @@ const LoginPage = () => {
       }`}
     >
       {/* Container Kiri (Form) */}
-      <div className={styles["login-left-new"]}>
+      <div
+        className={styles["login-left-new"]}
+        key={isResetMode ? "reset-left" : "login-left"}
+      >
         <div className={styles["login-card-wrapper"]}>
           {/* Elips Mode Login */}
           <img
@@ -127,11 +123,7 @@ const LoginPage = () => {
 
           {/* ------------------------------------------- */}
 
-          <div
-            className={`${styles["login-card"]} ${
-              isFading ? styles["is-fading"] : ""
-            }`}
-          >
+          <div className={styles["login-card"]}>
             <img
               src={logoMis}
               alt="Logo MIS"
