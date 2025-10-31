@@ -4,8 +4,15 @@ import WarningSign from '../../../../assets/Warning_Sign.png';
 import { updateRegistrationStatus } from '../../../../services/api';
 import Button from '../../../atoms/Button';
 
+const reasonOptions = [
+  { label: 'Withdraw', value: 'Withdraw' },
+  { label: 'Invalid Data', value: 'Invalid' },
+];
+
 const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [selectedReason, setSelectedReason] = useState('');
+  const [reasonError, setReasonError] = useState('');
 
   if (!registration) return null;
 
@@ -22,25 +29,58 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
 
   const targetStatusAPI = isConfirmed ? 'Cancelled' : 'Confirmed';
 
+  const showReasonField = targetStatusAPI === 'Cancelled';
+
   const handleUpdate = async () => {
     if (!applicationId) {
       console.error('Application ID is missing. Cannot update status.');
       return;
     }
 
+    let reasonPayload = undefined;
+    if (showReasonField) {
+      if (!selectedReason) {
+        setReasonError('Cancellation reason must be selected.');
+        return;
+      }
+      reasonPayload = selectedReason;
+    }
+
+    setReasonError('');
+
     console.log('Application ID:', applicationId);
     console.log('Target Status (API Payload - Capitalized):', targetStatusAPI);
+    if (showReasonField) {
+      console.log('Reason Payload (API Payload):', reasonPayload);
+    }
 
     setIsUpdating(true);
     try {
-      await updateRegistrationStatus(applicationId, targetStatusAPI);
+      await updateRegistrationStatus(
+        applicationId,
+        targetStatusAPI,
+        reasonPayload
+      );
       onUpdateStatus(registration.registration_id, targetStatusAPI);
       onClose();
     } catch (error) {
+      const backendErrors = error.response?.data?.errors;
       const errorMessage = error.response?.data?.message || 'Connection Error';
+
+      if (backendErrors && Object.keys(backendErrors).length > 0) {
+        console.error('Backend validation details:', backendErrors);
+      }
+
       console.error(`Failed to update status: ${errorMessage}`);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleReasonChange = (e) => {
+    setSelectedReason(e.target.value);
+    if (reasonError) {
+      setReasonError('');
     }
   };
 
@@ -99,8 +139,16 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
           <div className={styles.wrapper}>
             <div className={styles.textInfo}>To</div>
           </div>
-          <div className={styles.registrationInfo}>
-            <div className={styles.infoRow}>
+          <div
+            className={styles.registrationInfo}
+            style={{
+              border:
+                targetStatusAPI === 'Confirmed'
+                  ? '4px solid #00F413'
+                  : '4px solid #EE0808',
+            }}
+          >
+            {/* <div className={styles.infoRow}>
               <span className={styles.infoLabel}>Name</span>
               <span className={styles.separator}>:</span>
               <span className={styles.infoValue}>{registration.full_name}</span>
@@ -116,7 +164,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
               <span className={styles.infoLabel}>Registration ID</span>
               <span className={styles.separator}>:</span>
               <span className={styles.infoValue}>{registrationId}</span>
-            </div>
+            </div> */}
 
             <div className={styles.infoRow}>
               <span className={styles.infoLabel}>Status</span>
@@ -131,6 +179,41 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
                 {targetStatusAPI}
               </span>
             </div>
+            {showReasonField && (
+              <div className={styles.infoRow} style={{ alignItems: 'center' }}>
+                <span className={styles.infoLabel}>Reason</span>
+                <span className={styles.separator}>:</span>
+                <div style={{ flexGrow: 1 }}>
+                  <select
+                    className={styles.reasonSelect}
+                    value={selectedReason}
+                    onChange={handleReasonChange}
+                  >
+                    <option value='' disabled>
+                      Select reason
+                    </option>
+                    {reasonOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {/* Tampilkan error jika ada */}
+                  {reasonError && (
+                    <div className={styles.reasonError}>{reasonError}</div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Jika status target adalah Confirmed, tampilkan Reason sebagai nilai statis/empty */}
+            {!showReasonField && (
+              <div className={styles.infoRow}>
+                <span className={styles.infoLabel}>Reason</span>
+                <span className={styles.separator}>:</span>
+                <span className={styles.infoValue}>-</span>
+              </div>
+            )}
           </div>
         </div>
 
