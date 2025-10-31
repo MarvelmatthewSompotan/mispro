@@ -237,7 +237,21 @@ class RegistrationController extends Controller
                 } elseif ($request->status === 'Confirmed') {
                     $student->status = 'Not Graduate';
                     $student->active = 'YES';
-                    $enrollment->status = 'ACTIVE';
+
+                    $currentMonth = now()->month;
+                    $currentYear = now()->year;
+                    $schoolYearStr = ($currentMonth >= 7) 
+                        ? $currentYear . '/' . ($currentYear + 1)
+                        : ($currentYear - 1) . '/' . $currentYear;
+                    
+                    $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
+                    $currentSchoolYearId = $schoolYear?->school_year_id;
+
+                    if ($currentSchoolYearId && $enrollment->school_year_id === $currentSchoolYearId) {
+                        $enrollment->status = 'ACTIVE';
+                    } else {
+                        $enrollment->status = 'INACTIVE';
+                    }
                 }
 
                 $student->save(); 
@@ -268,8 +282,6 @@ class RegistrationController extends Controller
             ], 500);
         }
     }
-
-
 
     /**
      * Start registration process with initial context
