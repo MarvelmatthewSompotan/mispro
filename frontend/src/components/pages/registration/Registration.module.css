@@ -25,12 +25,12 @@
   font-size: 32px;
 }
 
-.ufileAltParent {
+.totalRecords {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: var(--main-accent);
+  color: var(--main-text);
   cursor: pointer;
 }
 
@@ -46,13 +46,20 @@
   height: 24px;
 }
 
+/* --- STYLE BARU DITAMBAHKAN --- */
+.searchAndFilterContainer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  margin-top: 20px;
+}
+
 .searchBar {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
   position: relative;
-  margin-top: 20px;
   width: 426px;
   border: 2px solid #7a7a7a;
   border-radius: 5px;

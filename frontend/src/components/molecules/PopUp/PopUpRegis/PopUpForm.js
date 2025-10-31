@@ -12,6 +12,7 @@ const useInputStyling = (ref, value) => {
     if (ref.current) {
       ref.current.classList.toggle(styles.hasValue, !!value);
     }
+    // eslint-disable-next-line
   }, [value]);
 };
 

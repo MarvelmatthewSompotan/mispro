@@ -135,12 +135,18 @@ export const submitRegistrationForm = (draftId, formData) => {
   });
 };
 
-export const updateRegistrationStatus = (applicationId, newStatus) => {
+export const updateRegistrationStatus = (applicationId, newStatus, reason) => {
+  const payload = {
+    status: newStatus, // Menggunakan key 'status' (wajib)
+  };
+  if (reason !== undefined && reason !== null) {
+    // Jika reason adalah string kosong '', dia tetap terkirim,
+    // tapi StatusConfirmationPopup.js yang diperbaiki di bawah akan mencegah ini.
+    payload.reason = reason;
+  }
   return apiFetch(`/registration/${applicationId}/status`, {
     method: 'PATCH',
-    body: JSON.stringify({
-      status: newStatus, // 'Confirmed' atau 'Cancelled'
-    }),
+    body: JSON.stringify(payload), // MENGGUNAKAN PAYLOAD YANG SUDAH DIBUAT
   });
 };
 
@@ -386,5 +392,3 @@ export const postUser = async (userData) => {
     body: JSON.stringify(userData),
   });
 };
-
-

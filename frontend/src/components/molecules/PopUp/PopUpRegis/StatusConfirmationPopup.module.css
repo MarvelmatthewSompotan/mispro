@@ -14,26 +14,25 @@
 
 .popUp {
   width: 100%;
-  max-width: 450px;
+  max-width: 510px;
   border-radius: 12px;
   background-color: var(--main-background);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 30px;
+  padding: 30px 60px;
   box-sizing: border-box;
-  gap: 25px;
   text-align: center;
   font-family: var(--font-primary);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  gap: 20px;
 }
 
 .icon {
   width: 80px;
   height: auto;
   color: var(--red);
-  margin-bottom: 10px;
 }
 
 .title {
@@ -45,29 +44,33 @@
 }
 
 .message {
-  font-size: 16px;
+  font-size: 12px;
   font-family: var(--font-primary);
   color: var(--main-grey);
   line-height: 1.5;
   margin: 0;
 }
+.header {
+  gap: 12px;
+}
 
 .registrationInfo {
   background-color: var(--secondary-background);
-  border-radius: 0;
-  padding: 10px;
+  border-radius: 10px;
+  padding: 12px;
   width: 100%;
   text-align: left;
   border: none;
   display: flex;
   flex-direction: column;
   gap: 15px;
+  box-sizing: border-box;
 }
 
 .infoRow {
   display: flex;
   align-items: flex-start;
-  font-size: 16px;
+  font-size: 12px;
   font-family: var(--font-primary);
 }
 
@@ -90,6 +93,22 @@
   color: var(--main-text);
 }
 
+.before {
+  width: 100%;
+}
+
+.after {
+  width: 100%;
+}
+
+/* .after .registrationInfo {
+  border: 4px solid var(--green);
+} */
+
+.button {
+  width: 100%;
+}
+
 .rowBtn {
   width: 100%;
   position: relative;
@@ -98,55 +117,74 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 15px;
 }
 
-.yesBtn {
-  width: 130px;
-  border-radius: 5px;
-  background-color: #5f84fe;
-  border: none;
-  height: 40px;
+.wrapper {
+  align-self: stretch;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, border 0.2s;
-  padding: 10px 15px;
+  font-size: 12px;
+  color: var(--main-grey);
+  font-family: var(--font-primary);
+  text-align: left;
+  margin: 12px;
+}
+
+.textInfo {
+  width: 389px;
+  position: relative;
+  font-weight: 500;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.reasonSelect {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 5px;
+  background-color: #f5f5f5;
+  border: 1.5px solid #f5f5f5;
+  height: 40px;
   box-sizing: border-box;
+  outline: none;
+  margin: 0;
+  font-family: var(--font-primary);
+  font-weight: 400;
+  color: var(--main-text);
+  transition: all 0.2s ease;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23374151'%3e%3cpath d='M7 7l3 3 3-3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+.reasonSelect:focus {
+  border: 1.5px solid #5f84fe;
+  background-color: #f5faff;
+  font-weight: 550;
+  color: var(--main-text);
   outline: none;
 }
 
-.yesBtn:hover {
-  background: #466edc;
+.reasonSelect option {
+  color: var(--main-text);
+  font-weight: 400;
+  background-color: var(--main-background);
 }
 
-.cancelBtn {
-  width: 120px;
-  border-radius: 5px;
-  background: transparent;
-  border: 2px solid #5f84fe;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  color: #5f84fe;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, border 0.2s;
-  padding: 10px 15px;
-  box-sizing: border-box;
-  outline: none;
+.reasonSelect option[value=''] {
+  color: rgba(128, 128, 128, 0.6);
+  font-weight: 400;
 }
 
-.cancelBtn:hover {
-  background: #f5faff;
-  border-color: #466edc;
-  color: #466edc;
+.reasonError {
+  font-size: 10px;
+  color: #ee0808;
+  margin-top: 5px;
+  text-align: left;
 }
