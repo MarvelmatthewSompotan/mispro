@@ -13,7 +13,6 @@ return new class extends Migration
             $table->id('user_id');
             $table->string('username');
             $table->string('email')->unique();
-            $table->string('full_name');
             $table->string('password');
             $table->string('role', 50)->nullable();
             $table->timestamp('created_at')->nullable();
