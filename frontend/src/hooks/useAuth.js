@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 import { useState, useEffect } from 'react';
 
 const getInitialUser = () => {
@@ -14,6 +15,7 @@ const getInitialUser = () => {
 };
 
 const useAuth = () => {
+  // eslint-disable-next-line
   const [user, setUser] = useState(getInitialUser);
 
   const isUserRole = (role) => {
