@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('parents', function (Blueprint $table) {
-            $table->unsignedBigInteger('enrollment_id')->nullable()->after('student_id');
+            $table->unsignedBigInteger('enrollment_id')->nullable()->after('id');
             $table->foreign('enrollment_id')
                   ->references('enrollment_id')
                   ->on('enrollments')
@@ -17,7 +17,7 @@ return new class extends Migration
         });
 
         Schema::table('student_addresses', function (Blueprint $table) {
-            $table->unsignedBigInteger('enrollment_id')->nullable()->after('student_id');
+            $table->unsignedBigInteger('enrollment_id')->nullable()->after('id');
             $table->foreign('enrollment_id')
                   ->references('enrollment_id')
                   ->on('enrollments')
@@ -41,7 +41,7 @@ return new class extends Migration
         });
 
         Schema::table('student_guardians', function (Blueprint $table) {
-            $table->unsignedBigInteger('enrollment_id')->nullable()->after('student_id');
+            $table->unsignedBigInteger('enrollment_id')->nullable()->after('id');
             $table->foreign('enrollment_id')
                   ->references('enrollment_id')
                   ->on('enrollments')
