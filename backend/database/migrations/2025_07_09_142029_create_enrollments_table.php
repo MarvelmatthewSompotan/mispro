@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('enrollments', function (Blueprint $table) {
             $table->id('enrollment_id');
-            $table->string('student_id', 30)->nullable();
+            $table->unsignedBigInteger('id')->nullable();
             $table->string('registration_id', 100)->unique();
             $table->timestamp('registration_date')->useCurrent();
             $table->unsignedBigInteger('class_id')->nullable();
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->enum('residence_hall_policy', ['Signed', 'Not Signed']);
             $table->enum('transportation_policy', ['Signed', 'Not Signed'])->nullable();
             $table->enum('status', ['ACTIVE','INACTIVE']);
-            $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
+            $table->foreign('id')->references('id')->on('students')->onDelete('set null');
             $table->foreign('class_id')->references('class_id')->on('classes')->onDelete('set null');
             $table->foreign('section_id')->references('section_id')->on('sections')->onDelete('set null'); 
             $table->foreign('major_id')->references('major_id')->on('majors')->onDelete('set null');   

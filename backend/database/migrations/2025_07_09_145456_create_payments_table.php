@@ -11,12 +11,12 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id('payment_id');
-            $table->string('student_id', 30)->nullable();
+            $table->unsignedBigInteger('id')->nullable();
             $table->enum('tuition_fees', ['Full Payment', 'Installment']);
             $table->enum('residence_payment', ['Full Payment', 'Installment']);
             $table->enum('financial_policy_contract', ['Signed', 'Not Signed']);
             $table->unsignedBigInteger('enrollment_id');
-            $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
+            $table->foreign('id')->references('id')->on('students')->onDelete('set null');
             $table->foreign('enrollment_id')->references('enrollment_id')->on('enrollments')->onDelete('cascade');
         });
     }

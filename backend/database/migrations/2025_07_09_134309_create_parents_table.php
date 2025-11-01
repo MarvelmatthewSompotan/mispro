@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('parents', function (Blueprint $table) {
             $table->id('parent_id');
-            $table->string('student_id', 30)->nullable(); 
+            $table->unsignedBigInteger('id')->nullable(); 
             $table->string('father_name', 100)->nullable();
             $table->string('father_occupation', 100)->nullable();
             $table->string('father_company', 100)->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('mother_company', 100)->nullable();
             $table->string('mother_phone', 20)->nullable();
             $table->string('mother_email', 100)->nullable();
-            $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
+            $table->foreign('id')->references('id')->on('students')->onDelete('set null');
             
         });
     }
