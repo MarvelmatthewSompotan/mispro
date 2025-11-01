@@ -7,13 +7,67 @@ import {
 } from "../../../../services/api";
 import Button from "../../../atoms/Button";
 
-const useInputStyling = (ref, value) => {
+// --- Komponen Dropdown Kustom ---
+// Dibuat di dalam file yang sama agar mudah
+const CustomSelect = ({ options, value, onChange, placeholder, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectRef = useRef(null);
+
+  // Helper untuk menutup dropdown saat klik di luar
   useEffect(() => {
-    if (ref.current) {
-      ref.current.classList.toggle(styles.hasValue, !!value);
-    }
-  }, [value]);
+    const handleClickOutside = (event) => {
+      if (selectRef.current && !selectRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const getLabelForValue = (val) => {
+    const option = options.find((opt) => opt.value === val);
+    return option ? option.label : placeholder;
+  };
+
+  const handleSelect = (optionValue) => {
+    onChange(optionValue);
+    setIsOpen(false);
+  };
+
+  const selectedLabel = getLabelForValue(value);
+
+  return (
+    <div
+      className={styles.customSelectContainer}
+      ref={selectRef}
+      data-disabled={disabled}
+    >
+      <div
+        className={`${styles.selectInput} ${!value ? styles.placeholder : ""}`}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+      >
+        {selectedLabel}
+      </div>
+
+      {isOpen && (
+        <div className={styles.optionsMenu}>
+          {options.map((opt) => (
+            <div
+              key={opt.value}
+              className={`${styles.optionItem} ${
+                opt.value === "add_new" ? styles.addMoreOption : ""
+              } ${value === opt.value ? styles.selectedOption : ""}`}
+              onClick={() => handleSelect(opt.value)}
+            >
+              {opt.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
+// --- Akhir Komponen Dropdown Kustom ---
 
 const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
   const formRef = useRef();
@@ -24,41 +78,21 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     roles: [],
   });
 
-  // Registration fields
+  // State fields tetap sama
   const [schoolYear, setSchoolYear] = useState("");
   const [semester, setSemester] = useState("");
   const [date, setDate] = useState("");
   const [isAddingYear, setIsAddingYear] = useState(false);
 
-  // User fields
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
-  const schoolYearRef = useRef(null);
-  const semesterRef = useRef(null);
-  const dateRef = useRef(null);
-  const usernameRef = useRef(null);
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
-  const roleRef = useRef(null);
-
-  // Panggil helper styling untuk setiap field
-  useInputStyling(schoolYearRef, schoolYear);
-  useInputStyling(semesterRef, semester);
-  useInputStyling(dateRef, date);
-
-  // Styling untuk fields User
-  useInputStyling(usernameRef, username);
-  useInputStyling(emailRef, email);
-  useInputStyling(passwordRef, password);
-  useInputStyling(roleRef, role);
-
   const resetForm = () => {
     setSchoolYear("");
     setSemester("");
-    setDate(new Date().toISOString().split("T")[0]); // Reset date ke hari ini
+    setDate(new Date().toISOString().split("T")[0]);
     setUsername("");
     setEmail("");
     setPassword("");
@@ -81,8 +115,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
 
   useEffect(() => {
     fetchOptions();
-    const interval = setInterval(fetchOptions, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -95,8 +127,10 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     setIsAddingYear(true);
     try {
       const newYear = await addSchoolYear();
-      fetchOptions();
-      if (newYear?.school_year_id) setSchoolYear(newYear.school_year_id);
+      await fetchOptions();
+      if (newYear?.school_year_id) {
+        setSchoolYear(newYear.school_year_id);
+      }
     } catch (err) {
       alert("Failed to add new school year");
     } finally {
@@ -109,7 +143,10 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     setLoading(true);
     try {
       if (type === "registration") {
-        if (!schoolYear || !semester) return alert("Please fill all fields");
+        if (!schoolYear || !semester) {
+          setLoading(false);
+          return alert("Please fill all fields");
+        }
         const res = await startRegistration(schoolYear, semester);
         if (res.success) {
           onCreate(
@@ -126,7 +163,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
         }
       } else if (type === "user") {
         if (!username || !email || !password || !role) {
-          
+          setLoading(false);
           return alert("Please fill all fields");
         }
         await onCreate({ username, email, password, role }, resetForm);
@@ -138,6 +175,36 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
       setLoading(false);
     }
   };
+
+  // --- Helper untuk mapping options ---
+  const mapOptions = (optionsArray, valueKey, labelKey) => {
+    return optionsArray.map((opt) => ({
+      value: opt[valueKey],
+      label: opt[labelKey],
+    }));
+  };
+
+  const mapRoleOptions = (optionsArray) => {
+    return optionsArray.map((r) => ({
+      value: r,
+      label: r.charAt(0).toUpperCase() + r.slice(1).replace("_", " "),
+    }));
+  };
+
+  // Map options untuk Select
+  const schoolYearOptions = mapOptions(
+    options.schoolYears,
+    "school_year_id",
+    "year"
+  );
+  const semesterOptions = mapOptions(options.semesters, "semester_id", "name");
+  const roleOptions = mapRoleOptions(options.roles);
+
+  // Gabungkan "Add more" ke school year
+  const allSchoolYearOptions = [
+    ...schoolYearOptions,
+    { value: "add_new", label: "+ Add more" },
+  ];
 
   return (
     <div className={styles.overlay}>
@@ -153,55 +220,37 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
 
         {type === "registration" ? (
           <div className={styles.frameParent}>
-            {/* School Year */}
+            {/* School Year (Dropdown Kustom) */}
             <div className={styles.fieldWrapper}>
-              <select
-                ref={schoolYearRef} // <-- REF BARU
-                className={styles.schoolYear} // <-- CLASS DARI CSS LAMA
+              <CustomSelect
+                placeholder="Select Year"
                 value={schoolYear}
-                onChange={(e) =>
-                  e.target.value === "add_new"
-                    ? handleAddNewSchoolYear()
-                    : setSchoolYear(e.target.value)
-                }
+                options={allSchoolYearOptions}
+                onChange={(val) => {
+                  if (val === "add_new") {
+                    handleAddNewSchoolYear();
+                  } else {
+                    setSchoolYear(val);
+                  }
+                }}
                 disabled={isAddingYear}
-                required
-              >
-                <option value="">Select Year</option>
-                {options.schoolYears.map((sy) => (
-                  <option key={sy.school_year_id} value={sy.school_year_id}>
-                    {sy.year}
-                  </option>
-                ))}
-                <option value="add_new" style={{ color: "var(--main-accent)" }}>
-                  + Add more
-                </option>
-              </select>
+              />
             </div>
 
-            {/* Semester */}
+            {/* Semester (Dropdown Kustom) */}
             <div className={styles.fieldWrapper}>
-              <select
-                ref={semesterRef} // <-- REF BARU
-                className={styles.semester} // <-- CLASS DARI CSS LAMA
+              <CustomSelect
+                placeholder="Select Semester"
                 value={semester}
-                onChange={(e) => setSemester(e.target.value)}
-                required
-              >
-                <option value="">Select Semester</option>
-                {options.semesters.map((s) => (
-                  <option key={s.semester_id} value={s.semester_id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+                options={semesterOptions}
+                onChange={(val) => setSemester(val)}
+              />
             </div>
 
-            {/* Date */}
+            {/* Date (Tetap sama) */}
             <div className={styles.fieldWrapper}>
               <input
-                ref={dateRef} // <-- REF BARU
-                className={styles.dateField} // <-- CLASS DARI CSS LAMA
+                className={styles.dateField}
                 type="date"
                 value={date}
                 readOnly
@@ -210,11 +259,10 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
           </div>
         ) : (
           <div className={styles.frameParent}>
-            {/* Username */}
+            {/* Username (Tetap sama) */}
             <div className={styles.fieldWrapper}>
               <input
-                ref={usernameRef} // <-- REF BARU
-                className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input text
+                className={styles.textInput}
                 type="text"
                 placeholder="Username"
                 value={username}
@@ -223,11 +271,10 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 autoComplete="new-password"
               />
             </div>
-            {/* User Email */}
+            {/* User Email (Tetap sama) */}
             <div className={styles.fieldWrapper}>
               <input
-                ref={emailRef} // <-- REF BARU
-                className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input email
+                className={styles.textInput}
                 type="email"
                 placeholder="User Email"
                 value={email}
@@ -236,11 +283,10 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 autoComplete="new-password"
               />
             </div>
-            {/* User Password */}
+            {/* User Password (Tetap sama) */}
             <div className={styles.fieldWrapper}>
               <input
-                ref={passwordRef} // <-- REF BARU
-                className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input password
+                className={styles.textInput}
                 type="password"
                 placeholder="User Password"
                 value={password}
@@ -249,23 +295,15 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 autoComplete="new-password"
               />
             </div>
-            {/* Role (Select) */}
+
+            {/* Role (Dropdown Kustom) */}
             <div className={styles.fieldWrapper}>
-              <select
-                ref={roleRef} // <-- REF BARU
-                className={styles.semester} // <-- Gunakan class .semester untuk select Role
+              <CustomSelect
+                placeholder="Select Role"
                 value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-                autoComplete="off"
-              >
-                <option value="">Select Role</option>
-                {options.roles.map((r) => (
-                  <option key={r} value={r}>
-                    {r.charAt(0).toUpperCase() + r.slice(1).replace("_", " ")}
-                  </option>
-                ))}
-              </select>
+                options={roleOptions}
+                onChange={(val) => setRole(val)}
+              />
             </div>
           </div>
         )}
@@ -277,10 +315,10 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
           <Button
             type="submit"
             variant="solid"
-            disabled={loading}
+            disabled={loading || isAddingYear}
             className={loading ? styles.loadingButton : ""}
           >
-            {loading ? "Processing..." : "Create"}
+            {loading ? "Processing..." : isAddingYear ? "Adding..." : "Create"}
           </Button>
         </div>
       </form>
