@@ -76,8 +76,9 @@ const Users = () => {
     return () => clearInterval(intervalId);
   }, [fetchUsers]);
 
+  // TASK 2: Tambahkan user.name ke dalam filter
   const filteredUsers = users.filter((user) =>
-    [user.username, user.user_id]
+    [user.username, user.user_id, user.full_name]
       .join(' ')
       .toLowerCase()
       .includes(search.toLowerCase())
@@ -106,8 +107,10 @@ const Users = () => {
   };
 
   const handleAddUser = async (userData, resetForm) => {
+    // TASK 3: Tambahkan 'name' ke validasi
     if (
       !userData.username ||
+      !userData.full_name ||
       !userData.email ||
       !userData.password ||
       !userData.role
@@ -147,13 +150,12 @@ const Users = () => {
     <div className={styles.usersContainer}>
       <h2 className={styles.pageTitle}>Users</h2>
       <div className={styles.usersHeaderContent}>
-        {/* --- PERUBAHAN JSX DIMULAI DI SINI --- */}
         <div className={styles.searchAndFilterContainer}>
           {/* Search Bar */}
           <div className={styles.searchBar}>
             <input
               type='text'
-              placeholder='Find username or user ID'
+              placeholder='Find username, name, or user ID' // Diperbarui
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={styles.searchInput}
@@ -164,10 +166,8 @@ const Users = () => {
               className={styles.searchIconImg}
             />
           </div>
-          {/* Tombol Reset Filter */}
           <ResetFilterButton onClick={handleResetFilters} />
         </div>
-        {/* --- PERUBAHAN JSX BERAKHIR DI SINI --- */}
 
         <div className={styles.button2Parent}>
           <Button variant='solid' onClick={() => setShowUserPopup(true)}>
@@ -193,6 +193,9 @@ const Users = () => {
           <div className={styles.tableHeader}>
             <ColumnHeader title='User ID' hasFilter={false} hasSort={false} />
             <ColumnHeader title='Username' hasFilter={false} hasSort={true} />
+            {/* --- TASK 1: KOLOM HEADER "NAME" BARU --- */}
+            <ColumnHeader title='Name' hasFilter={false} hasSort={true} />
+            {/* -------------------------------------- */}
             <ColumnHeader title='User Email' hasFilter={false} hasSort={true} />
             <ColumnHeader title='Role' hasFilter={true} hasSort={true} />
             <ColumnHeader title='Actions' hasSort={false} hasFilter={false} />
@@ -210,6 +213,11 @@ const Users = () => {
                   <div className={styles.tableCell} title={user.username}>
                     {user.username}
                   </div>
+                  {/* --- TASK 2: SEL TABEL "NAME" BARU --- */}
+                  <div className={styles.tableCell} title={user.name}>
+                    {user.full_name || '-'}
+                  </div>
+                  {/* ------------------------------------- */}
                   <div className={styles.tableCell} title={user.email}>
                     {user.email}
                   </div>

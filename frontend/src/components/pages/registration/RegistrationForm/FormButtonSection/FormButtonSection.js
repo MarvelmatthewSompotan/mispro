@@ -16,7 +16,7 @@ const FormButtonSection = ({
   onSetAllowNavigation,
 }) => {
   const navigate = useNavigate();
-
+// eslint-disable-next-line
   const locationState = useLocation();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);

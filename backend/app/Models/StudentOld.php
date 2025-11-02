@@ -8,11 +8,12 @@ class StudentOld extends Model
 {
     protected $table = 'student_old_table';
     
-    protected $primaryKey = 'studentold_id';
-    public $incrementing = false;
-    protected $keyType = 'int';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'string';
     
     protected $fillable = [
+        'id',
         'studentold_id',
         'nisn',
         'first_name',

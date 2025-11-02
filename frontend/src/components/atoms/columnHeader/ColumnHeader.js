@@ -1,12 +1,8 @@
-/*
- * ColumnHeader.js (DIUPDATE DENGAN LOGIKA POPUP)
- */
-import React, { useState } from "react"; // Import useState
+import React, { useState } from "react"; 
 import styles from "./ColumnHeader.module.css";
 import SortButton from "../SortButton";
-import FilterButton from "../FilterButton"; // Ini adalah FilterButton.js Anda
-import FilterPopup from "../FilterPopUp"; // Import popup yang baru dibuat
-import filterPopupStyles from "../FilterPopUp.module.css";
+import FilterButton from "../FilterButton"; 
+import FilterPopup from "../FilterPopUp"; 
 
 const ColumnHeader = ({
   title,
@@ -27,16 +23,14 @@ const ColumnHeader = ({
   disableFilter = false,
   singleSelect = false,
 }) => {
-  // --- STATE BARU untuk mengontrol popup ---
+  
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  // ----------------------------------------
   const isFilterApplied = () => {
     if (!currentFilterValue) {
       return false;
     }
 
     if (filterType === "date-range") {
-      // Untuk date-range, currentFilterValue adalah array [start_date, end_date]
       return (
         Array.isArray(currentFilterValue) &&
         (currentFilterValue[0] || currentFilterValue[1])
@@ -44,48 +38,39 @@ const ColumnHeader = ({
     }
 
     if (filterType === "checkbox") {
-      // Untuk checkbox, currentFilterValue adalah array of values
       return Array.isArray(currentFilterValue) && currentFilterValue.length > 0;
     }
 
     if (filterType === "search") {
-      // Untuk search, currentFilterValue adalah string
       return (
         typeof currentFilterValue === "string" &&
         currentFilterValue.trim().length > 0
       );
     }
 
-    // Default untuk filter tipe lain atau jika nilainya tidak null/undefined
-    // (misalnya, jika filterKey-nya langsung ada di filters)
     return true;
   };
   const showActions = hasSort || hasFilter;
 
-  // Handler untuk SortButton (tetap sama)
   const handleSortClick = () => {
-    if (disableSort) return; // blok jika disabled
+    if (disableSort) return; 
     if (onSort) {
       onSort(fieldKey);
     }
   };
 
-  // Handler untuk FilterButton (sekarang BUKA/TUTUP popup)
   const handleFilterToggle = () => {
-    if (disableFilter) return; // blok jika disabled
+    if (disableFilter) return; 
     setIsFilterOpen((prev) => !prev);
   };
 
-  // Handler saat popup mengirim data (dari tombol "Apply")
   const handleFilterSubmit = (selectedValues) => {
     if (onFilterChange) {
       onFilterChange(filterKey, selectedValues);
     }
-    // Kita tidak tutup popup di sini, popup akan tutup sendiri
   };
 
   return (
-    // 'columnController' perlu 'position: relative'
     <div className={styles.columnController}>
       <div className={styles.columnName}>
         <div
@@ -116,7 +101,6 @@ const ColumnHeader = ({
           </div>
         )}
 
-        {/* FilterButton sekarang membuka popup */}
         {hasFilter && (
           <div
             className={`${styles.control} ${
@@ -131,8 +115,6 @@ const ColumnHeader = ({
             />
           </div>
         )}
-
-        {/* Render Popup secara kondisional */}
         {hasFilter && isFilterOpen && (
           <FilterPopup
             options={filterOptions}

@@ -140,13 +140,13 @@ const StudentProfile = () => {
 
   // --- [BARU] Opsi untuk dropdown Agama ---
   const religionOptions = [
-    'Islam (Muslim)',
-    'Kristen (Christian) ',
-    'Kristen Katolik (Catholic)',
+    'Islam',
+    'Kristen',
+    'Kristen Katolik',
     'Hindu',
     'Buddha',
-    'Konghucu (Confucianism)',
-    'Kristen Advent (Adventist)',
+    'Konghucu',
+    'Kristen Advent',
   ];
   // --- [AKHIR BARU] ---
 
