@@ -91,25 +91,6 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
 
-  const schoolYearRef = useRef(null);
-  const semesterRef = useRef(null);
-  const dateRef = useRef(null);
-  const usernameRef = useRef(null);
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
-  const roleRef = useRef(null);
-
-  // Panggil helper styling untuk setiap field
-  useInputStyling(schoolYearRef, schoolYear);
-  useInputStyling(semesterRef, semester);
-  useInputStyling(dateRef, date);
-
-  // Styling untuk fields User
-  useInputStyling(usernameRef, username);
-  useInputStyling(emailRef, email);
-  useInputStyling(passwordRef, password);
-  useInputStyling(roleRef, role);
-
   const resetForm = () => {
     setSchoolYear('');
     setSemester('');
@@ -184,12 +165,15 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
           alert('Failed to start registration');
         }
       } else if (type === 'user') {
-        if (!username || !email || !password || !role) {
+        if (!username || !name || !email || !password || !role) {
           setLoading(false);
           return alert('Please fill all fields');
         }
         // <-- TASK 3: Tambahkan 'name' ke data yang dikirim
-        await onCreate({ username, name, email, password, role }, resetForm);
+        await onCreate(
+          { username, full_name: name, email, password, role },
+          resetForm
+        );
       }
     } catch (err) {
       console.error(err);
