@@ -152,6 +152,7 @@ const StudentProfile = () => {
 
   const [isBackPopupOpen, setIsBackPopupOpen] = useState(false);
   const historyRef = useRef(null);
+  const studentInfoKeys = useRef(new Set()); // <-- TAMBAHKAN INI
 
   const refreshHistoryDates = useCallback(async () => {
     setIsLoadingHistory(true);
@@ -175,6 +176,8 @@ const StudentProfile = () => {
     if (!location.state?.fromList) {
       navigate("/students", { replace: true });
     }
+
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -222,7 +225,9 @@ const StudentProfile = () => {
           };
           setProfileData(combinedData);
           setFormData(combinedData);
-          setStudentInfo(studentData.studentInfo || {});
+          const studentInfoData = studentData.studentInfo || {};
+          setStudentInfo(studentInfoData);
+          studentInfoKeys.current = new Set(Object.keys(studentInfoData));
         }
       } catch (err) {
         console.error("Error fetching student profile data:", err);
@@ -383,6 +388,7 @@ const StudentProfile = () => {
         };
 
         setStudentInfo(studentInfoSnapshot);
+        studentInfoKeys.current = new Set(Object.keys(studentInfoSnapshot));
         setFormData(combinedData);
         setIsHistoryVisible(false);
       }
@@ -642,7 +648,11 @@ const StudentProfile = () => {
 
   const handleCancel = () => {
     setFormData(profileData);
-    setStudentInfo(profileData);
+    const newStudentInfo = {};
+    for (const key of studentInfoKeys.current) {
+      newStudentInfo[key] = profileData[key];
+    }
+    setStudentInfo(newStudentInfo);
     setIsEditing(false);
     setErrors({});
     setValidationMessages({ nik: "", kitas: "", nisn: "" });
@@ -934,7 +944,11 @@ const StudentProfile = () => {
 
       setProfileData(combinedData);
       setFormData(combinedData);
-      setStudentInfo(combinedData);
+      const newStudentInfo = {};
+      for (const key of studentInfoKeys.current) {
+        newStudentInfo[key] = combinedData[key];
+      }
+      setStudentInfo(newStudentInfo);
       setShowSuccess(true);
       setIsEditing(false);
       setIsPopupOpen(false);
