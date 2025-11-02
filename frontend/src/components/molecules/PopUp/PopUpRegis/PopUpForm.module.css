@@ -34,8 +34,8 @@
   gap: 30px;
   text-align: left;
   font-size: 16px;
-  color: var(--main-text); /* <-- Menggunakan var global */
-  font-family: var(--font-primary); /* <-- Menggunakan var global */
+  color: var(--main-text);
+  font-family: var(--font-primary);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
@@ -43,10 +43,8 @@
   position: relative;
   font-size: 20px;
   line-height: 100%;
-  font-family: var(--font-primary); /* <-- Menggunakan var global */
-  font-weight: var(
-    --font-weight-regular
-  ); /* Menggunakan 400 dari global-vars */
+  font-family: var(--font-primary);
+  font-weight: Regular;
 }
 
 .fieldWrapper {
@@ -196,7 +194,7 @@
 }
 
 .selectInput:focus,
-.customSelectContainer[data-open="true"] .selectInput {
+.customSelectContainer[data-open='true'] .selectInput {
   border-bottom: 1.5px solid var(--main-accent);
   background-image: url('data:image/svg+xml;utf8,<svg fill="%235F84FE" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
 }
@@ -208,7 +206,7 @@
 }
 
 /* Style untuk container[disabled] */
-.customSelectContainer[data-disabled="true"] .selectInput {
+.customSelectContainer[data-disabled='true'] .selectInput {
   opacity: 0.7;
   cursor: not-allowed;
   background-color: var(--main-background);

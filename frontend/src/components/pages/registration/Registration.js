@@ -15,12 +15,32 @@ import {
   getRegistrationOptions,
 } from '../../../services/api';
 
-// --- Komponen Internal BARU untuk Satu Baris Data (Mengikuti Pola StudentList) ---
 const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
-  // Menentukan style untuk badge status
   const status = registration.application_status?.toLowerCase() || 'confirmed';
   const statusStyle =
     status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
+
+  // --- MODIFIKASI DIMULAI: Logika untuk Status Description ---
+  // Mengambil data status_desc. Asumsi field-nya adalah 'status_desc'
+  // Nilainya 'Invalid' or 'Withdraw' sesuai konteks dari Task 4
+  const statusDesc = registration.status_desc;
+  let statusDescContent = null;
+
+  if (statusDesc === 'Invalid') {
+    // Terapkan style dari Task 1
+    statusDescContent = (
+      <div className={styles.statusDescInvalid}>Invalid data</div>
+    );
+  } else if (statusDesc === 'Withdraw') {
+    // Terapkan style dari Task 2
+    statusDescContent = (
+      <div className={styles.statusDescWithdraw}>Withdrawed</div>
+    );
+  } else {
+    // Tampilkan strip jika tidak ada data
+    statusDescContent = <span>-</span>;
+  }
+  // --- MODIFIKASI SELESAI ---
 
   return (
     <div
@@ -53,6 +73,10 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
           </div>
         </div>
       </div>
+      {/* --- MODIFIKASI DIMULAI: Penambahan Sel Kolom ke-7 --- */}
+      {/* Kolom terakhir untuk Status_Desc */}
+      <div className={styles.statusDescCell}>{statusDescContent}</div>
+      {/* --- MODIFIKASI SELESAI --- */}
     </div>
   );
 };
@@ -328,7 +352,6 @@ const Registration = () => {
             </div>
             <ResetFilterButton onClick={handleResetFilters} />
           </div>
-          {/* --- PERUBAHAN JSX BERAKHIR DI SINI --- */}
         </div>
         <div>
           <div

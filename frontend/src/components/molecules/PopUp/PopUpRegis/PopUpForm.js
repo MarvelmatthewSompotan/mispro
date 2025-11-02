@@ -84,16 +84,38 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
   const [date, setDate] = useState('');
   const [isAddingYear, setIsAddingYear] = useState(false);
 
+  // User fields
   const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
 
+  const schoolYearRef = useRef(null);
+  const semesterRef = useRef(null);
+  const dateRef = useRef(null);
+  const usernameRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  const roleRef = useRef(null);
+
+  // Panggil helper styling untuk setiap field
+  useInputStyling(schoolYearRef, schoolYear);
+  useInputStyling(semesterRef, semester);
+  useInputStyling(dateRef, date);
+
+  // Styling untuk fields User
+  useInputStyling(usernameRef, username);
+  useInputStyling(emailRef, email);
+  useInputStyling(passwordRef, password);
+  useInputStyling(roleRef, role);
+
   const resetForm = () => {
     setSchoolYear('');
     setSemester('');
-    setDate(new Date().toISOString().split('T')[0]);
+    setDate(new Date().toISOString().split('T')[0]); // Reset date ke hari ini
     setUsername('');
+    setName('');
     setEmail('');
     setPassword('');
     setRole('');
@@ -166,7 +188,8 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
           setLoading(false);
           return alert('Please fill all fields');
         }
-        await onCreate({ username, email, password, role }, resetForm);
+        // <-- TASK 3: Tambahkan 'name' ke data yang dikirim
+        await onCreate({ username, name, email, password, role }, resetForm);
       }
     } catch (err) {
       console.error(err);
@@ -271,7 +294,22 @@ const PopUpForm = ({ onClose, onCreate, type = 'registration' }) => {
                 autoComplete='new-password'
               />
             </div>
-            {/* User Email (Tetap sama) */}
+
+            {/* --- TASK 3: INPUT FIELD "FULL NAME" BARU --- */}
+            <div className={styles.fieldWrapper}>
+              <input
+                className={styles.textInput}
+                type='text'
+                placeholder='Full Name'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete='name'
+              />
+            </div>
+            {/* ------------------------------------------- */}
+
+            {/* User Email */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.textInput}
