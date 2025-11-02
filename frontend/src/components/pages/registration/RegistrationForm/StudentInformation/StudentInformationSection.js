@@ -6,13 +6,13 @@ import { getRegistrationOptions } from "../../../../../services/api";
 const genderOptions = ["MALE", "FEMALE"];
 const citizenshipOptions = ["Indonesia", "Non Indonesia"];
 const religionOptions = [
-  "Islam (Islam)",
-  "Kristen (Christion) ",
-  "Kristen Katolik (Catholicism)",
-  "Hindu (Hinduism)",
-  "Buddha (Buddhism)",
-  "Konghucu (Confucianism)",
-  "Kristen Advent (Christian Adventism)",
+  "Islam (Muslim)",
+ "Kristen (Christian) ",
+ "Kristen Katolik (Catholic)",
+ "Hindu",
+ "Buddha",
+ "Konghucu (Confucianism)",
+ "Kristen Advent (Adventist)"
 ];
 
 const StudentInformationSection = ({

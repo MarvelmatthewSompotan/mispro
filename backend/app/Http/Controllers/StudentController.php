@@ -562,6 +562,7 @@ class StudentController extends Controller
                 'pickup_point_custom' => 'sometimes|nullable|string',
                 'residence_hall_policy'  => 'sometimes|nullable|string',
                 'transportation_policy'  => 'sometimes|nullable|string',
+                'major_id' => 'sometimes|nullable|exists:majors,major_id',
             ]);
 
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
@@ -662,6 +663,7 @@ class StudentController extends Controller
                         'pickup_point_custom'   => $request->pickup_point_custom ?? $latestEnrollment->pickup_point_custom,
                         'residence_hall_policy' => $request->residence_hall_policy ?? $latestEnrollment->residence_hall_policy,
                         'transportation_policy' => $request->transportation_policy ?? $latestEnrollment->transportation_policy,
+                        'major_id'              => $request->major_id ?? $latestEnrollment->major_id,
                     ]);
                 } else {
                     $student->enrollments()->create([
