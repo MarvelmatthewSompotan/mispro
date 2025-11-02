@@ -131,6 +131,18 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
                 {displayStatusFrom}
               </span>
             </div>
+
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Reason</span>
+              <span className={styles.separator}>:</span>
+              <span
+                className={styles.infoValue}
+                style={{ color: isConfirmed ? '#FF7B00' : '#EE0808' }}
+              >
+              </span>
+
+              
+            </div>
           </div>
         </div>
 

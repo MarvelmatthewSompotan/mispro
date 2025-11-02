@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, getMe } from "../../../services/api"; // Pastikan path ini benar
-import Button from "../../atoms/Button"; // <-- TAMBAHKAN IMPORT BUTTON (Sesuaikan path jika perlu)
-
+import { login, getMe } from "../../../services/api"; 
+import Button from "../../atoms/Button"; 
 // Import assets - sesuaikan path ini dengan struktur folder Anda
-import logoMis from "../../../assets/logo-mis-f.png"; // Asumsi nama file logo dari gambar asset
-import bgLogin from "../../../assets/bg_login.jpg"; // Asumsi nama file gambar kanan dari gambar asset
-
+import logoMis from "../../../assets/logo-mis-f.png"; 
+import bgLogin from "../../../assets/bg_login.jpg"; 
 // Elips untuk mode Login
-import ellipseTop from "../../../assets/elipse1_login.svg"; // <-- GANTI SAYA! (Asumsi nama elipse 1)
-import ellipseBottom from "../../../assets/elipse2_login.svg"; // <-- GANTI SAYA! (Asumsi nama elipse 2)
-
-// --- TAMBAHKAN INI ---
+import ellipseTop from "../../../assets/elipse1_login.svg"; 
+import ellipseBottom from "../../../assets/elipse2_login.svg"; 
 // Elips untuk mode Reset (Asumsi nama file dari Anda)
-import ellipseTopReset from "../../../assets/elipse3_reset.svg"; // <-- GANTI SAYA! (Asumsi nama elipse 3)
-import ellipseBottomReset from "../../../assets/elipse4_reset.svg"; // <-- GANTI SAYA! (Asumsi nama elipse 4)
-// --------------------
+import ellipseTopReset from "../../../assets/elipse3_reset.svg"; 
+import ellipseBottomReset from "../../../assets/elipse4_reset.svg"; 
 
 // Import CSS baru
 import styles from "./LoginPage.module.css"; // <-- UBAH CARA IMPORT

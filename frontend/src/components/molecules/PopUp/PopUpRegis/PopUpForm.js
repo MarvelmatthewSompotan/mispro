@@ -33,6 +33,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
 
   // User fields
   const [username, setUsername] = useState("");
+  const [name, setName] = useState(""); // <-- TASK 3: State baru untuk Name
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
@@ -41,6 +42,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
   const semesterRef = useRef(null);
   const dateRef = useRef(null);
   const usernameRef = useRef(null);
+  const nameRef = useRef(null); // <-- TASK 3: Ref baru untuk Name
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const roleRef = useRef(null);
@@ -52,6 +54,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
 
   // Styling untuk fields User
   useInputStyling(usernameRef, username);
+  useInputStyling(nameRef, name); // <-- TASK 3: Panggil hook styling untuk Name
   useInputStyling(emailRef, email);
   useInputStyling(passwordRef, password);
   useInputStyling(roleRef, role);
@@ -61,6 +64,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     setSemester("");
     setDate(new Date().toISOString().split("T")[0]); // Reset date ke hari ini
     setUsername("");
+    setName(""); // <-- TASK 3: Reset state Name
     setEmail("");
     setPassword("");
     setRole("");
@@ -126,11 +130,12 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
           alert("Failed to start registration");
         }
       } else if (type === "user") {
-        if (!username || !email || !password || !role) {
-          
+        // <-- TASK 3: Tambahkan 'name' ke validasi
+        if (!username || !name || !email || !password || !role) {
           return alert("Please fill all fields");
         }
-        await onCreate({ username, email, password, role }, resetForm);
+        // <-- TASK 3: Tambahkan 'name' ke data yang dikirim
+        await onCreate({ username, name, email, password, role }, resetForm);
       }
     } catch (err) {
       console.error(err);
@@ -149,7 +154,9 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
         autoComplete="off"
       >
         <div className={styles.createNewRegistration}>
-          {type === "registration" ? "Create New Registration" : "Add New User"}
+          {type === "registration"
+            ? "Create New Registration"
+            : "Create new user"}
         </div>
 
         {type === "registration" ? (
@@ -157,8 +164,8 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             {/* School Year */}
             <div className={styles.fieldWrapper}>
               <select
-                ref={schoolYearRef} // <-- REF BARU
-                className={styles.schoolYear} // <-- CLASS DARI CSS LAMA
+                ref={schoolYearRef}
+                className={styles.schoolYear}
                 value={schoolYear}
                 onChange={(e) =>
                   e.target.value === "add_new"
@@ -183,8 +190,8 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             {/* Semester */}
             <div className={styles.fieldWrapper}>
               <select
-                ref={semesterRef} // <-- REF BARU
-                className={styles.semester} // <-- CLASS DARI CSS LAMA
+                ref={semesterRef}
+                className={styles.semester}
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
                 required
@@ -201,8 +208,8 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             {/* Date */}
             <div className={styles.fieldWrapper}>
               <input
-                ref={dateRef} // <-- REF BARU
-                className={styles.dateField} // <-- CLASS DARI CSS LAMA
+                ref={dateRef}
+                className={styles.dateField}
                 type="date"
                 value={date}
                 readOnly
@@ -214,8 +221,8 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             {/* Username */}
             <div className={styles.fieldWrapper}>
               <input
-                ref={usernameRef} // <-- REF BARU
-                className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input text
+                ref={usernameRef}
+                className={styles.schoolYear}
                 type="text"
                 placeholder="Username"
                 value={username}
@@ -224,11 +231,27 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 autoComplete="new-password"
               />
             </div>
+
+            {/* --- TASK 3: INPUT FIELD "FULL NAME" BARU --- */}
+            <div className={styles.fieldWrapper}>
+              <input
+                ref={nameRef}
+                className={styles.schoolYear}
+                type="text"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+              />
+            </div>
+            {/* ------------------------------------------- */}
+
             {/* User Email */}
             <div className={styles.fieldWrapper}>
               <input
-                ref={emailRef} // <-- REF BARU
-                className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input email
+                ref={emailRef}
+                className={styles.schoolYear}
                 type="email"
                 placeholder="User Email"
                 value={email}
@@ -240,8 +263,8 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             {/* User Password */}
             <div className={styles.fieldWrapper}>
               <input
-                ref={passwordRef} // <-- REF BARU
-                className={styles.schoolYear} // <-- Gunakan class .schoolYear untuk input password
+                ref={passwordRef}
+                className={styles.schoolYear}
                 type="password"
                 placeholder="User Password"
                 value={password}
@@ -253,8 +276,8 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             {/* Role (Select) */}
             <div className={styles.fieldWrapper}>
               <select
-                ref={roleRef} // <-- REF BARU
-                className={styles.semester} // <-- Gunakan class .semester untuk select Role
+                ref={roleRef}
+                className={styles.semester}
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 required
