@@ -11,9 +11,9 @@ return new class extends Migration
     {
         Schema::create('student_guardians', function (Blueprint $table) {
             $table->id('student_guardian_id');
-            $table->string('student_id', 30)->nullable();
+            $table->unsignedBigInteger('id')->nullable();
             $table->unsignedBigInteger('guardian_id')->nullable();
-            $table->foreign('student_id')->references('student_id')->on('students')->onDelete('set null');
+            $table->foreign('id')->references('id')->on('students')->onDelete('set null');
             $table->foreign('guardian_id')->references('guardian_id')->on('guardians')->onDelete('set null');
         });
     }

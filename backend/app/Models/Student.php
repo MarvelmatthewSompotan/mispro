@@ -41,7 +41,8 @@ class Student extends Model
     const UPDATED_AT = null;
 
     protected $fillable = [
-        'student_id', 
+        'id',
+        'student_id',
         'nisn', 
         'first_name', 
         'middle_name', 
@@ -65,6 +66,7 @@ class Student extends Model
         'kitas',
         'active',
         'status',
+
     ];
 
     public function enrollments() : HasMany 

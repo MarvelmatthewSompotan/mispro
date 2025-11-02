@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('students', function (Blueprint $table) {
-            $table->string('student_id', 30)->primary();
+            $table->id('id');
+            $table->string('student_id', 30);
             $table->string('nisn')->nullable();
             $table->string('first_name', 50);
             $table->string('middle_name', 50)->nullable();
@@ -31,7 +32,7 @@ return new class extends Migration
             $table->string('email', 100);
             $table->string('photo_path', 255)->nullable();
             $table->string('previous_school', 100)->nullable();
-            $table->string('religion', 30);
+            $table->enum('religion', ['Islam (Islam)','Kristen (Christion)','Kristen Katolik (Catholicism)','Hindu (Hinduism)','Buddha (Buddhism)','Konghucu (Confucianism)','Kristen Advent (Christian Adventism)',]);
             $table->enum('active', ['YES','NO']);
             $table->string('status', 50)->nullable();
             $table->string('academic_status_other', 50)->nullable();
