@@ -5,7 +5,7 @@ const StudentsInformationContent = ({ data }) => {
   if (!data) return null;
 
   const formatValue = (val) =>
-    val === null || val === undefined || val === '' ? '-' : val;
+    val === null || val === undefined || val === '' ? ' ' : val;
 
   return (
     <div className={styles.content}>
@@ -13,15 +13,13 @@ const StudentsInformationContent = ({ data }) => {
         <div className={styles.fullName}>
           <div className={styles.field}>{`Full name `}</div>
           <b className={styles.answer}>
+            {formatValue(data.request_data.last_name)},
+          </b>
+          <b className={styles.answer}>
             {formatValue(data.request_data.first_name)}
           </b>
-          <b className={styles.answer}>-</b>
           <b className={styles.answer}>
             {formatValue(data.request_data.middle_name)}
-          </b>
-          <b className={styles.answer}>-</b>
-          <b className={styles.answer}>
-            {formatValue(data.request_data.last_name)}
           </b>
         </div>
         <div className={styles.fullName}>

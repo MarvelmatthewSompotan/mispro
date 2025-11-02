@@ -108,7 +108,7 @@ const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
 };
 
 const StudentProfile = () => {
-  const { studentId } = useParams();
+  const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
@@ -142,14 +142,14 @@ const StudentProfile = () => {
   const refreshHistoryDates = useCallback(async () => {
     setIsLoadingHistory(true);
     try {
-      const dates = await getStudentHistoryDates(studentId);
+      const dates = await getStudentHistoryDates(id);
       setHistoryDates(dates);
     } catch (err) {
       console.error('Failed to refresh history dates:', err);
     } finally {
       setIsLoadingHistory(false);
     }
-  }, [studentId]);
+  }, [id]);
 
   const [validationMessages, setValidationMessages] = useState({
     nik: '',
@@ -193,7 +193,7 @@ const StudentProfile = () => {
         }
 
         const [studentRes, optionsRes] = await Promise.all([
-          getStudentLatestApplication(studentId, 'new'),
+          getStudentLatestApplication(id, 'new'),
           getRegistrationOptions(),
         ]);
 
@@ -202,7 +202,7 @@ const StudentProfile = () => {
         if (studentRes.success) {
           const studentData = studentRes.data;
           const combinedData = {
-            student_id: studentData.input_name,
+            student_id: studentData.student_id,
             ...studentData.studentInfo,
             ...studentData.program,
             ...studentData.facilities,
@@ -223,7 +223,7 @@ const StudentProfile = () => {
         }
       }
     },
-    [studentId]
+    [id]
   );
 
   useEffect(() => {
@@ -992,11 +992,12 @@ const StudentProfile = () => {
 
     try {
       // 1. Tangkap response dari API update
-      const response = await updateStudent(studentId, dataToSend);
+      const response = await updateStudent(id, dataToSend);
 
       // 2. Buat ulang data profil dari response API, BUKAN dari fetch ulang
       const updatedData = response.data.request_data;
       const combinedData = {
+        id_primary: response.data.id,
         student_id: response.data.student_id,
         ...updatedData,
       };

@@ -154,11 +154,11 @@ export const searchStudent = (searchTerm) => {
   return apiFetch(`/students/search?search=${encodeURIComponent(searchTerm)}`);
 };
 
-export const getStudentLatestApplication = (studentId, source) => {
+export const getStudentLatestApplication = (id, source) => {
   if (!source) {
     return Promise.reject(new Error("Parameter 'source' diperlukan."));
   }
-  return apiFetch(`/students/${studentId}/latest-application?source=${source}`);
+  return apiFetch(`/students/${id}/latest-application?source=${source}`);
 };
 
 export const getRegistrationPreview = (applicationId, versionId) => {
@@ -205,7 +205,7 @@ export const getStudents = (filters = {}) => {
   return apiFetch(`/students?${params.toString()}`);
 };
 
-export const updateStudent = (studentId, studentData) => {
+export const updateStudent = (id, studentData) => {
   const formData = new FormData();
   formData.append('_method', 'PATCH');
   for (const key in studentData) {
@@ -217,7 +217,7 @@ export const updateStudent = (studentId, studentData) => {
     }
   }
 
-  return apiFetch(`/students/${studentId}/update`, {
+  return apiFetch(`/students/${id}/update`, {
     method: 'POST',
     body: formData,
   });
@@ -362,8 +362,8 @@ export const getRegistrations = ({
   return apiFetch(`/registration?${params.toString()}`);
 };
 
-export const getStudentHistoryDates = (studentId) =>
-  apiFetch(`/students/${studentId}/history-dates`);
+export const getStudentHistoryDates = (id) =>
+  apiFetch(`/students/${id}/history-dates`);
 
 export const getHistoryDetail = (versionId) =>
   apiFetch(`/students/history/${versionId}`);

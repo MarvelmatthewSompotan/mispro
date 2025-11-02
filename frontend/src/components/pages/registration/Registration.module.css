@@ -112,8 +112,7 @@
     minmax(200px, 1fr)
     minmax(104px, 1fr)
     minmax(120px, 1fr)
-    minmax(160px, 1fr)
-    minmax(150px, 1fr);
+    minmax(160px, 1fr);
   border-bottom: 4px solid var(--main-grey);
 }
 

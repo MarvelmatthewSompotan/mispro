@@ -350,10 +350,10 @@ const StudentList = () => {
             ) : studentData.length > 0 ? (
               studentData.map((student) => (
                 <StudentRow
-                  key={student.student_id}
+                  key={student.id}
                   student={student}
                   onClick={() =>
-                    navigate(`/students/${student.student_id}`, {
+                    navigate(`/students/${student.id}`, {
                       state: { fromList: true },
                     })
                   }

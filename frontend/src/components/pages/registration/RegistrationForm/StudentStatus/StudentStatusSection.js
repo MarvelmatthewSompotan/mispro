@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   searchStudent,
   getStudentLatestApplication,
   getRegistrationOptions,
-} from "../../../../../services/api";
-import styles from "./StudentStatusSection.module.css";
+} from '../../../../../services/api';
+import styles from './StudentStatusSection.module.css';
 
 const StudentStatusSection = ({
   onSelectOldStudent,
@@ -14,9 +14,9 @@ const StudentStatusSection = ({
   forceError,
   onClearForm,
 }) => {
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState('');
   const [statusOptions, setStatusOptions] = useState([]);
-  const [studentSearch, setStudentSearch] = useState("");
+  const [studentSearch, setStudentSearch] = useState('');
   const [searchResults, setSearchResults] = useState({ new: [], old: [] });
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -27,7 +27,7 @@ const StudentStatusSection = ({
     if (sharedData) {
       const opts = sharedData.student_status || [];
       // Ensure order: New, Transferee, Old
-      const ordered = ["New", "Transferee", "Old"].filter((o) =>
+      const ordered = ['New', 'Transferee', 'Old'].filter((o) =>
         opts.includes(o)
       );
       setStatusOptions(ordered);
@@ -35,32 +35,32 @@ const StudentStatusSection = ({
       getRegistrationOptions()
         .then((data) => {
           const opts = data.student_status || [];
-          const ordered = ["New", "Transferee", "Old"].filter((o) =>
+          const ordered = ['New', 'Transferee', 'Old'].filter((o) =>
             opts.includes(o)
           );
           setStatusOptions(ordered);
         })
         .catch((err) => {
-          console.error("Failed to fetch student status options:", err);
+          console.error('Failed to fetch student status options:', err);
         });
     }
   }, [sharedData]);
 
   const handleStatusChange = (option) => {
     setStatus(option);
-    setStudentSearch("");
+    setStudentSearch('');
     setSearchResults({ new: [], old: [] });
 
     // Jika user memilih "New" atau "Transferee" setelah mengisi data "Old",
     // panggil fungsi reset dari parent.
-    if ((option === "New" || option === "Transferee") && onClearForm) {
+    if ((option === 'New' || option === 'Transferee') && onClearForm) {
       onClearForm();
     }
 
     if (onDataChange) {
       onDataChange({
         student_status: option,
-        input_name: "",
+        input_name: '',
         is_selected: false, // LOGIC: Reset selection state
       });
     }
@@ -72,7 +72,7 @@ const StudentStatusSection = ({
     // LOGIC: Update parent state to indicate user is typing, but no selection is made
     if (onDataChange) {
       onDataChange({
-        student_status: "Old",
+        student_status: 'Old',
         input_name: value, // Pass the typed value for validation feedback
         is_selected: false, // Explicitly set to false as no selection has occurred
       });
@@ -85,7 +85,7 @@ const StudentStatusSection = ({
         setSearchResults(results);
         setShowDropdown(results.new?.length > 0 || results.old?.length > 0);
       } catch (err) {
-        console.error("Error searching student:", err);
+        console.error('Error searching student:', err);
         setSearchResults({ new: [], old: [] });
         setShowDropdown(false);
       } finally {
@@ -106,43 +106,43 @@ const StudentStatusSection = ({
 
     try {
       const latestData = await getStudentLatestApplication(
-        student.student_id,
+        student.id,
         student.source
       );
       if (latestData.success && latestData.data) {
-        console.log("Received application data:", latestData.data); // Debug log
+        console.log('Received application data:', latestData.data); // Debug log
         // Kirim data ke parent untuk prefill semua form fields
         onSelectOldStudent(latestData.data);
 
         // LOGIC: Kirim data ke parent component DENGAN flag is_selected: true
         if (onDataChange) {
           onDataChange({
-            student_status: "Old",
-            input_name: student.student_id, // The actual ID for submission
+            student_status: 'Old',
+            input_name: student.id, // The actual ID for submission
             source: student.source,
             is_selected: true, // Explicitly set to true on selection
           });
         }
       } else {
         console.error(
-          "No application data found for student:",
+          'No application data found for student:',
           student.student_id
         );
         if (onDataChange) {
           onDataChange({
-            student_status: "Old",
-            input_name: student.student_id,
+            student_status: 'Old',
+            input_name: student.id,
             source: student.source,
             is_selected: true, // Also true here, because student IS selected
           });
         }
       }
     } catch (err) {
-      console.error("Error getting latest application:", err);
+      console.error('Error getting latest application:', err);
       if (onDataChange) {
         onDataChange({
-          student_status: "Old",
-          input_name: student.student_id,
+          student_status: 'Old',
+          input_name: student.id,
           source: student.source,
           is_selected: true, // Also true here, because student IS selected
         });
@@ -160,9 +160,9 @@ const StudentStatusSection = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -172,11 +172,11 @@ const StudentStatusSection = ({
       ...(searchResults.new || []),
       ...(searchResults.old || []),
     ];
-    if (allResults.length === 0) return "auto";
+    if (allResults.length === 0) return 'auto';
     const longestText = allResults.reduce((longest, student) => {
       const text = `${student.full_name} (${student.student_id})`;
       return text.length > longest.length ? text : longest;
-    }, "");
+    }, '');
     const estimatedWidth = Math.max(longestText.length * 8, 300);
     return `${estimatedWidth}px`;
   };
@@ -191,33 +191,33 @@ const StudentStatusSection = ({
           className={`${styles.statusOptions} ${
             errors?.student_status || forceError?.student_status
               ? styles.studentStatusErrorWrapper
-              : ""
+              : ''
           }`}
         >
           {statusOptions.map((option) => (
             <div
               key={option}
-              className={option === "Old" ? styles.optionOld : styles.optionNew}
+              className={option === 'Old' ? styles.optionOld : styles.optionNew}
             >
               <label
                 className={styles.radioLabel}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 8,
-                  cursor: "pointer",
-                  position: "relative",
+                  cursor: 'pointer',
+                  position: 'relative',
                 }}
               >
                 <input
-                  type="radio"
-                  name="studentStatus"
+                  type='radio'
+                  name='studentStatus'
                   value={option}
                   checked={status === option}
                   onChange={() => handleStatusChange(option)}
                   style={{
                     opacity: 0,
-                    position: "absolute",
+                    position: 'absolute',
                     width: 0,
                     height: 0,
                   }}
@@ -232,29 +232,29 @@ const StudentStatusSection = ({
                   className={`${styles.statusLabel} ${
                     errors?.student_status || forceError?.student_status
                       ? styles.studentStatusErrorLabel
-                      : ""
+                      : ''
                   }`}
                 >
                   {option}
                 </span>
               </label>
 
-              {option === "Old" && status === "Old" && (
+              {option === 'Old' && status === 'Old' && (
                 <div className={styles.studentIdField} ref={searchRef}>
-                  <label htmlFor="studentSearch" className={styles.statusLabel}>
+                  <label htmlFor='studentSearch' className={styles.statusLabel}>
                     Search Student
                   </label>
                   <div className={styles.searchContainer}>
                     <div className={styles.searchInputRow}>
                       <input
-                        id="studentSearch"
+                        id='studentSearch'
                         className={`${styles.studentIdValue} ${
                           errors?.input_name || forceError?.input_name
                             ? styles.errorInput
-                            : ""
+                            : ''
                         }`}
-                        type="text"
-                        autoComplete="off"
+                        type='text'
+                        autoComplete='off'
                         value={studentSearch}
                         onChange={(e) => handleSearchChange(e.target.value)}
                         onFocus={() =>
@@ -262,7 +262,7 @@ const StudentStatusSection = ({
                             searchResults.old?.length > 0) &&
                           setShowDropdown(true)
                         }
-                        placeholder={"Enter Name or ID"}
+                        placeholder={'Enter Name or ID'}
                         size={Math.max(20, studentSearch.length)}
                       />
                       {isSearching && (
@@ -292,12 +292,12 @@ const StudentStatusSection = ({
                                   key={`new-${student.student_id}`}
                                   className={`${styles.dropdownItem} ${
                                     // Logika: Jika ini item pertama (index 0), beri highlight
-                                    index === 0 ? styles.topItemHighlight : ""
+                                    index === 0 ? styles.topItemHighlight : ''
                                   }`}
                                   onClick={() =>
                                     handleSelectStudent({
                                       ...student,
-                                      source: "new",
+                                      source: 'new',
                                     })
                                   }
                                 >
@@ -326,12 +326,12 @@ const StudentStatusSection = ({
                                     (!searchResults.new ||
                                       searchResults.new.length === 0)
                                       ? styles.topItemHighlight
-                                      : ""
+                                      : ''
                                   }`}
                                   onClick={() =>
                                     handleSelectStudent({
                                       ...student,
-                                      source: "old",
+                                      source: 'old',
                                     })
                                   }
                                 >

@@ -433,12 +433,6 @@ const Registration = () => {
             labelKey='name'
             currentFilterValue={filters.status}
           />
-          <ColumnHeader
-            title='Status_Desc'
-            hasSort={false}
-            hasFilter={false}
-            disableTitleOnNoActions={true}
-          />
         </div>
 
         <div className={styles.tableBody}>
