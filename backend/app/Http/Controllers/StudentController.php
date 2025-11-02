@@ -40,18 +40,19 @@ class StudentController extends Controller
         $isStudentStatusFiltered = $request->filled('student_status');
 
         $latestEnrollments = DB::table('enrollments as e1')
-        ->select('e1.student_id', 'e1.enrollment_id')
+        ->select('e1.id', 'e1.enrollment_id')
         ->when(!$isStudentStatusFiltered, function ($query) use ($targetSchoolYearId) {
             $query->where('e1.school_year_id', $targetSchoolYearId);
         })
         ->whereRaw('e1.registration_date = (
             SELECT MAX(e2.registration_date)
             FROM enrollments AS e2
-            WHERE e2.student_id = e1.student_id
+            WHERE e2.id = e1.id
             ' . (!$isStudentStatusFiltered ? 'AND e2.school_year_id = e1.school_year_id' : '') . '
         )');
 
         $query = Student::select(
+            'students.id',
             'students.student_id',
             DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
             'students.photo_path',
@@ -65,7 +66,7 @@ class StudentController extends Controller
             'enrollments.status as enrollment_status',
         )
         ->joinSub($latestEnrollments, 'latest_enrollments', function ($join) {
-            $join->on('latest_enrollments.student_id', '=', 'students.student_id');
+            $join->on('latest_enrollments.id', '=', 'students.id');
         })
         ->join('enrollments', 'enrollments.enrollment_id', '=', 'latest_enrollments.enrollment_id')
         ->join('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
@@ -151,7 +152,7 @@ class StudentController extends Controller
                 $latestApplicationFormVersion = DB::table('application_forms AS af')
                     ->join('enrollments AS e', 'af.enrollment_id', '=', 'e.enrollment_id')
                     ->join('application_form_versions AS afv', 'af.application_id', '=', 'afv.application_id')
-                    ->where('e.student_id', $student->student_id)
+                    ->where('e.id', $student->id)
                     ->select('afv.data_snapshot')
                     ->orderByDesc('afv.version_id')
                     ->first();

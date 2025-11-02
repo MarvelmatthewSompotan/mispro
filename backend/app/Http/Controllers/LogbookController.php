@@ -218,7 +218,7 @@ class LogbookController extends Controller
                     case 'full_name':
                         if (!$joinMap['enrollments']) {
                             $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.student_id', '=', 'enrollments.student_id')
+                                $join->on('students.id', '=', 'enrollments.id')
                                     ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
                             });
                             $joinMap['enrollments'] = true;
@@ -229,7 +229,7 @@ class LogbookController extends Controller
                     case 'grade':
                         if (!$joinMap['enrollments']) {
                             $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.student_id', '=', 'enrollments.student_id')
+                                $join->on('students.id', '=', 'enrollments.id')
                                     ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
                             });
                             $joinMap['enrollments'] = true;
@@ -244,7 +244,7 @@ class LogbookController extends Controller
                     case 'section':
                         if (!$joinMap['enrollments']) {
                             $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.student_id', '=', 'enrollments.student_id')
+                                $join->on('students.id', '=', 'enrollments.id')
                                     ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
                             });
                             $joinMap['enrollments'] = true;
@@ -259,7 +259,7 @@ class LogbookController extends Controller
                     case 'school_year':
                         if (!$joinMap['enrollments']) {
                             $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.student_id', '=', 'enrollments.student_id')
+                                $join->on('students.id', '=', 'enrollments.id')
                                     ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
                             });
                             $joinMap['enrollments'] = true;
@@ -274,7 +274,7 @@ class LogbookController extends Controller
                     case 'registration_date':
                         if (!$joinMap['enrollments']) {
                             $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.student_id', '=', 'enrollments.student_id')
+                                $join->on('students.id', '=', 'enrollments.id')
                                     ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
                             });
                             $joinMap['enrollments'] = true;
@@ -285,7 +285,7 @@ class LogbookController extends Controller
                     case 'transportation':
                         if (!$joinMap['enrollments']) {
                             $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.student_id', '=', 'enrollments.student_id')
+                                $join->on('students.id', '=', 'enrollments.id')
                                     ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
                             });
                             $joinMap['enrollments'] = true;
@@ -303,13 +303,13 @@ class LogbookController extends Controller
                     case 'mother_occupation':
                         if (!$joinMap['enrollments']) {
                             $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.student_id', '=', 'enrollments.student_id')
+                                $join->on('students.id', '=', 'enrollments.id')
                                     ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
                             });
                             $joinMap['enrollments'] = true;
                         }
                         if (!$joinMap['parents']) {
-                            $studentsQuery->leftJoin('parents', 'students.student_id', '=', 'parents.student_id');
+                            $studentsQuery->leftJoin('parents', 'students.id', '=', 'parents.id');
                             $joinMap['parents'] = true;
                         }
                         $studentsQuery->orderBy("parents.$field", $order);
@@ -318,7 +318,7 @@ class LogbookController extends Controller
                     default:
                         if (!$joinMap['enrollments']) {
                             $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.student_id', '=', 'enrollments.student_id')
+                                $join->on('students.id', '=', 'enrollments.id')
                                     ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
                             });
                             $joinMap['enrollments'] = true;
@@ -328,7 +328,7 @@ class LogbookController extends Controller
                 }
             }
 
-            $studentsQuery->distinct('students.student_id')->select('students.*');
+            $studentsQuery->distinct('students.id')->select('students.*');
             // pagination
             $perPage = $request->input('per_page', 25);
             $students = $studentsQuery->paginate($perPage);
@@ -353,7 +353,7 @@ class LogbookController extends Controller
 
                 $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
                     ->whereHas('applicationForm.enrollment.student', function ($q) use ($student) {
-                        $q->where('student_id', $student->student_id);
+                        $q->where('id', $student->id);
                     })
                     ->orderByDesc('version_id')
                     ->first();

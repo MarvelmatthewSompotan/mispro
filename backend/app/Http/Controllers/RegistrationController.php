@@ -61,7 +61,7 @@ class RegistrationController extends Controller
             )
             ->selectRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name")
             ->addSelect('application_form_versions.version_id')
-            ->join('students', 'students.student_id', '=', 'enrollments.student_id')
+            ->join('students', 'students.id', '=', 'enrollments.id')
             ->leftJoin('school_years', 'enrollments.school_year_id', '=', 'school_years.school_year_id')
             ->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id')
             ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id')           
@@ -85,7 +85,7 @@ class RegistrationController extends Controller
         if ($search = trim($request->input('search', ''))) {
             $query->where(function ($q) use ($search) {
                 $search = strtolower($search);
-                $q->whereRaw('LOWER(students.student_id) LIKE ?', ["%{$search}%"])
+                $q->whereRaw('LOWER(students.id) LIKE ?', ["%{$search}%"])
                 ->orWhereRaw("LOWER(CONCAT_WS(' ', COALESCE(students.first_name,''), COALESCE(students.middle_name,''), COALESCE(students.last_name,''))) LIKE ?", ["%{$search}%"]);
             });
         } elseif ($request->filled('search_name')) {
@@ -352,13 +352,13 @@ class RegistrationController extends Controller
         ], 200);
     }
 
-    private function generateStudentId($schoolYearId, $sectionId, $majorId)
+    private function generateStudentId($schoolYearId, $sectionId)
     {
         $schoolYear = SchoolYear::findOrFail($schoolYearId);
         $startYear = explode('/', $schoolYear->year)[0]; 
         $yearCode = substr($startYear, -2);              
 
-        $prefix = "{$yearCode}{$sectionId}{$majorId}";   
+        $prefix = "{$yearCode}{$sectionId}";   
 
         $latest = Student::where('student_id', 'LIKE', "{$prefix}%")
             ->orderByDesc('student_id')
@@ -384,7 +384,7 @@ class RegistrationController extends Controller
 
         $count = DB::transaction(function () use ($section_id, $month, $year) {
             return DB::table('students')
-                ->join('enrollments', 'students.student_id', '=', 'enrollments.student_id')
+                ->join('enrollments', 'students.id', '=', 'enrollments.id')
                 ->join('classes', 'enrollments.class_id', '=', 'classes.class_id')
                 ->where('enrollments.section_id', $section_id)
                 ->whereMonth('students.registration_date', $month)
@@ -648,7 +648,6 @@ class RegistrationController extends Controller
                 $generatedId = $this->generateStudentId(
                     $draft->school_year_id,  
                     $validated['section_id'], 
-                    $validated['major_id']
                 );
                 
                 // Create new student
@@ -783,11 +782,10 @@ class RegistrationController extends Controller
                     $generatedId = $this->generateStudentId(
                         $draft->school_year_id,  
                         $validated['section_id'], 
-                        $validated['major_id']
                     );
 
                     $student = Student::create([
-                        'student_id' => $generatedId,
+                        'student_id' => $oldStudent->studentold_id ?? null,
                         'first_name' => $validated['first_name'] ?? $oldStudent->first_name,
                         'middle_name' => $validated['middle_name'] ?? $oldStudent->middle_name,
                         'last_name' => $validated['last_name'] ?? $oldStudent->last_name,
@@ -1011,7 +1009,7 @@ class RegistrationController extends Controller
     private function createPayment($student, $validated, $enrollment)
     {
         Payment::create([
-            'student_id' => $student->student_id,
+            'id' => $student->id,
             'enrollment_id'=> $enrollment->enrollment_id,
             'tuition_fees' => $validated['tuition_fees'],
             'residence_payment' => $validated['residence_payment'],
@@ -1061,7 +1059,7 @@ class RegistrationController extends Controller
     {
         $student->studentAddress()->updateOrCreate(
             [
-                'student_id' => $student->student_id,
+                'id' => $student->id,
                 'enrollment_id' => $enrollment->enrollment_id,
             ],
             [
@@ -1078,7 +1076,7 @@ class RegistrationController extends Controller
         
         $student->studentParent()->updateOrCreate(
             [
-                'student_id' => $student->student_id,
+                'id' => $student->id,
                 'enrollment_id' => $enrollment->enrollment_id, 
             ],
             [
@@ -1156,7 +1154,7 @@ class RegistrationController extends Controller
         );
         $studentGuardian = $student->studentGuardian()->updateOrCreate(
             [
-                'student_id' => $student->student_id,
+                'id' => $student->id,
                 'guardian_id' => $guardian->guardian_id,
                 'enrollment_id' => $enrollment->enrollment_id,
             ]
@@ -1181,11 +1179,11 @@ class RegistrationController extends Controller
     {
         Payment::updateOrCreate(
         [
-            'student_id' => $student->student_id,
+            'id' => $student->id,
             'enrollment_id' => $enrollment->enrollment_id,
         ],
         [
-            'student_id' => $student->student_id,
+            'id' => $student->id,
             'enrollment_id'=> $enrollment->enrollment_id,
             'tuition_fees' => $validated['tuition_fees'],
             'residence_payment' => $validated['residence_payment'],
@@ -1219,7 +1217,7 @@ class RegistrationController extends Controller
     private function createApplicationFormVersion($applicationForm, $validated, $student, $enrollment)
     {
         $latestVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment.student', function($q) use ($student) {
-            $q->where('student_id', $student->student_id);
+            $q->where('id', $student->id);
         })
         ->orderByDesc('version_id')
         ->first();
