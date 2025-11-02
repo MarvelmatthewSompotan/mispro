@@ -35,9 +35,9 @@ class Program extends Model
             Student::class,
             Enrollment::class,
             'program_id',
-            'student_id',
+            'id',
             'program_id',
-            'student_id',
+            'id',
         );
     }
 }

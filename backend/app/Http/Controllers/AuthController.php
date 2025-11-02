@@ -59,6 +59,8 @@ class AuthController extends Controller
         $this->auditTrail->log('login_success', [
             'user_id' => $user->user_id,
             'email'   => $user->email,
+            'username'   => $user->username,
+            'full_name'   => $user->full_name,
             'role'    => $user->role,
         ]);
 
@@ -70,6 +72,7 @@ class AuthController extends Controller
             'user'    => [
                 'user_id' => $user->user_id,
                 'username'    => $user->username,
+                'full_name'    => $user->full_name,
                 'email'   => $user->email,
                 'role'    => $user->role
             ]

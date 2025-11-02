@@ -27,9 +27,9 @@ class SchoolYear extends Model
             Student::class,
             Enrollment::class,
             'school_year_id',
-            'student_id',
+            'id',
             'school_year_id',
-            'student_id'
+            'id'
         );
     }
     public function enrollments() : HasMany

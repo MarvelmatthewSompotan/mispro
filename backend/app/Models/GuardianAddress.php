@@ -52,8 +52,8 @@ class GuardianAddress extends Model
     public function getStudentsAttribute()
     {
         return Student::whereIn(
-            'student_id',
-            $this->studentGuardians->pluck('student_id')->unique()
+            'id',
+            $this->studentGuardians->pluck('id')->unique()
         )->get();
     }
 

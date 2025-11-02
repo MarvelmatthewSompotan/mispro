@@ -32,8 +32,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Student extends Model
 {
     protected $table = 'students';
-    protected $primaryKey = 'student_id';
-    public $incrementing = false;
+    protected $primaryKey = 'id';
+    public $incrementing = true;
     protected $keyType = 'string';
     public $timestamps = true;
 
@@ -71,27 +71,27 @@ class Student extends Model
 
     public function enrollments() : HasMany 
     {
-        return $this->hasMany(Enrollment::class, 'student_id', 'student_id');
+        return $this->hasMany(Enrollment::class, 'id', 'id');
     }
 
     public function studentParent() : HasOne 
     {
-        return $this->hasOne(StudentParent::class, 'student_id', 'student_id');
+        return $this->hasOne(StudentParent::class, 'id', 'id');
     }
 
     public function studentAddress() : HasOne 
     {
-        return $this->hasOne(StudentAddress::class, 'student_id', 'student_id');
+        return $this->hasOne(StudentAddress::class, 'id', 'id');
     }
 
     public function studentGuardian() : HasOne 
     {
-        return $this->hasOne(StudentGuardian::class, 'student_id', 'student_id');
+        return $this->hasOne(StudentGuardian::class, 'id', 'id');
     }
 
     public function payments() : HasMany 
     {
-        return $this->hasMany(Payment::class, 'student_id', 'student_id');
+        return $this->hasMany(Payment::class, 'id', 'id');
     }
 
     public function applicationForms() : HasManyThrough
@@ -99,9 +99,9 @@ class Student extends Model
         return $this->hasManyThrough(
             ApplicationForm::class,
             Enrollment::class,
-            'student_id',
+            'id',
             'enrollment_id',
-            'student_id',
+            'id',
             'enrollment_id'
         );
     }
@@ -119,9 +119,9 @@ class Student extends Model
         return $this->hasManyThrough(
             StudentDiscount::class,
             Enrollment::class,
-            'student_id',
+            'id',
             'enrollment_id',
-            'student_id',
+            'id',
             'enrollment_id'
         );
     }
@@ -139,9 +139,9 @@ class Student extends Model
         return $this->belongsToMany(
             Guardian::class,
             'student_guardians',
-            'student_id',
+            'id',
             'guardian_id',
-            'student_id',
+            'id',
             'guardian_id'
         );
     }
@@ -151,9 +151,9 @@ class Student extends Model
         return $this->hasOneThrough(
             GuardianAddress::class,
             StudentGuardian::class,
-            'student_id',
+            'id',
             'guardian_id',
-            'student_id',
+            'id',
             'guardian_id'
         );
     }
@@ -163,9 +163,9 @@ class Student extends Model
         return $this->hasOneThrough(
             FatherAddress::class,
             StudentParent::class,
-            'student_id',
+            'id',
             'parent_id',
-            'student_id',
+            'id',
             'parent_id'
         );
     }
@@ -175,9 +175,9 @@ class Student extends Model
         return $this->hasOneThrough(
             MotherAddress::class,
             StudentParent::class,
-            'student_id',
+            'id',
             'parent_id',
-            'student_id',
+            'id',
             'parent_id'
         );
     }
@@ -187,9 +187,9 @@ class Student extends Model
         return $this->hasManyThrough(
             Transportation::class,
             Enrollment::class,
-            'student_id',
+            'id',
             'transport_id',
-            'student_id',
+            'id',
             'transport_id',
         );
     }
@@ -199,9 +199,9 @@ class Student extends Model
         return $this->hasManyThrough(
             Semester::class,
             Enrollment::class,
-            'student_id',
+            'id',
             'semester_id',
-            'student_id',
+            'id',
             'semester_id',
         );
     }
@@ -211,9 +211,9 @@ class Student extends Model
         return $this->hasManyThrough(
             SchoolClass::class,
             Enrollment::class,
-            'student_id',
+            'id',
             'class_id',
-            'student_id',
+            'id',
             'class_id',
         );
     }
@@ -228,9 +228,9 @@ class Student extends Model
         return $this->hasManyThrough(
             SchoolYear::class,
             Enrollment::class,
-            'student_id',
+            'id',
             'school_year_id',
-            'student_id',
+            'id',
             'school_year_id'
         );
     }
@@ -240,9 +240,9 @@ class Student extends Model
         return $this->hasManyThrough(
             ResidenceHall::class,
             Enrollment::class,
-            'student_id',
+            'id',
             'residence_id',
-            'student_id',
+            'id',
             'residence_id'
         );
     }
@@ -252,9 +252,9 @@ class Student extends Model
         return $this->hasManyThrough(
             Program::class,
             Enrollment::class,
-            'student_id',
+            'id',
             'program_id',
-            'student_id',
+            'id',
             'program_id'
         );
     }

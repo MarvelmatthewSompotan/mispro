@@ -47,9 +47,9 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
   Route::prefix('students')->group(function () {
     Route::get('/', [StudentController::class, 'index']);
     Route::get('/search', [StudentController::class, 'searchStudents']);
-    Route::get('/{student_id}/latest-application', [StudentController::class, 'getLatestApplication']);
-    Route::patch('/{student_id}/update', [StudentController::class, 'updateStudent']);
-    Route::get('/{studentId}/history-dates', [StudentController::class, 'getStudentHistoryDates']);
+    Route::get('/{id}/latest-application', [StudentController::class, 'getLatestApplication']);
+    Route::patch('/{id}/update', [StudentController::class, 'updateStudent']);
+    Route::get('/{id}/history-dates', [StudentController::class, 'getStudentHistoryDates']);
     Route::get('/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
   });
 });

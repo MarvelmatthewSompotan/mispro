@@ -31,9 +31,9 @@ class Guardian extends Model
             Student::class,
             'student_guardians',
             'guardian_id',
-            'student_id',
+            'id',
             'guardian_id',
-            'student_id'
+            'id'
         );
     }
 

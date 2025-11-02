@@ -15,7 +15,7 @@ class StudentAddress extends Model
 
     protected $fillable = [
         'student_address_id',
-        'student_id',
+        'id',
         'street',
         'village',
         'district',
@@ -29,7 +29,7 @@ class StudentAddress extends Model
 
     public function student() : BelongsTo
     {
-        return $this->belongsTo(Student::class, 'student_id', 'student_id');
+        return $this->belongsTo(Student::class, 'id', 'id');
     }
 
     public function enrollment(): BelongsTo

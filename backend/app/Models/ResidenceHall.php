@@ -29,9 +29,9 @@ class ResidenceHall extends Model
             Student::class, 
             Enrollment::class,
             'residence_id',
-            'student_id', 
+            'id', 
             'residence_id',
-            'student_id'
+            'id'
         );
     }
 }

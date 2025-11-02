@@ -38,7 +38,7 @@ class Enrollment extends Model
 
     protected $fillable = [
         'enrollment_id',
-        'student_id',
+        'id',
         'registration_id', 
         'class_id',
         'section_id',
@@ -67,7 +67,7 @@ class Enrollment extends Model
 
     public function student() : BelongsTo
     {
-        return $this->belongsTo(Student::class, 'student_id', 'student_id');
+        return $this->belongsTo(Student::class, 'id', 'id');
     }
 
     public function semester() : BelongsTo

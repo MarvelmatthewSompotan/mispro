@@ -27,9 +27,9 @@ class Semester extends Model
             Student::class,
             Enrollment::class,
             'semester_id',
-            'student_id',
+            'id',
             'semester_id',
-            'student_id',
+            'id',
         );
     }
 

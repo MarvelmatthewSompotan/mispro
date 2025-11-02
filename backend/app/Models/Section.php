@@ -33,8 +33,8 @@ class Section extends Model
     public function getStudentsAttribute() 
     {
         return Student::whereIn(
-            'student_id',
-            $this->enrollments->pluck('student_id')->unique()
+            'id',
+            $this->enrollments->pluck('id')->unique()
         )->get();
     }
 }

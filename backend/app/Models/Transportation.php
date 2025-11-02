@@ -27,9 +27,9 @@ class Transportation extends Model
             Student::class,
             Enrollment::class,
             'transport_id',
-            'student_id',
+            'id',
             'transport_id',
-            'student_id'
+            'id'
         );
     }
 

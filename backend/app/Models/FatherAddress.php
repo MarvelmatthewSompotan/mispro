@@ -45,9 +45,9 @@ class FatherAddress extends Model
             Student::class, 
             StudentParent::class, 
             'parent_id', 
-            'student_id', 
+            'id', 
             'parent_id', 
-            'student_id'
+            'id'
         );
     }
 }

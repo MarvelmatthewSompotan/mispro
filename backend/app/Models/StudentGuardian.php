@@ -18,7 +18,7 @@ class StudentGuardian extends Model
 
     protected $fillable = [
         'student_guardian_id',
-        'student_id',
+        'id',
         'guardian_id',
         'enrollment_id'
     ];
@@ -30,7 +30,7 @@ class StudentGuardian extends Model
 
     public function student() : BelongsTo
     {
-        return $this->belongsTo(Student::class, 'student_id', 'student_id');
+        return $this->belongsTo(Student::class, 'id', 'id');
     }
 
     public function enrollment(): BelongsTo

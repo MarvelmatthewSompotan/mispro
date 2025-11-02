@@ -36,9 +36,9 @@ class SchoolClass extends Model
             Student::class,
             Enrollment::class,
             'class_id',
-            'student_id',
+            'id',
             'class_id',
-            'student_id',
+            'id',
         );
     } 
 

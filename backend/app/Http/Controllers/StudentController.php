@@ -51,7 +51,7 @@ class StudentController extends Controller
             ' . (!$isStudentStatusFiltered ? 'AND e2.school_year_id = e1.school_year_id' : '') . '
         )');
 
-        $query = Student::select(
+        $query = Student::select(            
             'students.id',
             'students.student_id',
             DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
@@ -190,6 +190,7 @@ class StudentController extends Controller
 
         // new database
         $students = Student::select(
+                'id',
                 'student_id',
                 DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"),
                 'nisn',
@@ -215,6 +216,7 @@ class StudentController extends Controller
             
             // old database
             $studentOld = StudentOld::select(
+                    'id',
                     DB::raw('studentold_id as student_id'),
                     DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name) AS full_name"),
                     'nisn',
@@ -237,6 +239,7 @@ class StudentController extends Controller
         $response = [
             'new' => $students->map(function ($item) {
                 return [
+                    'id' => $item->id,
                     'student_id' => $item->student_id,
                     'full_name' => $item->full_name,
                     'nisn' => $item->nisn,
@@ -248,6 +251,7 @@ class StudentController extends Controller
 
             'old' => $studentOld->map(function ($item) {
                 return [
+                    'id' => $item->id,
                     'student_id' => $item->student_id,
                     'full_name' => $item->full_name,
                     'nisn' => $item->nisn,
@@ -261,12 +265,12 @@ class StudentController extends Controller
         return response()->json($response);
     }
 
-    public function getLatestApplication($student_id, Request $request)
+    public function getLatestApplication($id, Request $request)
     {
         $source = $request->input('source', 'new');
         
         if ($source === 'old') {
-            $student = StudentOld::where('studentold_id', $student_id)
+            $student = StudentOld::where('id', $id)
                 ->orderByDesc('section_id')
                 ->first();
 
@@ -319,7 +323,8 @@ class StudentController extends Controller
                     'guardian_address_street' => $student->guardian_address ?? '',
                 ],
                 'student_status' => 'Old',
-                'input_name' => $student->studentold_id
+                'input_name' => $student->studentold_id,
+                'student_id' => $student->studentold_id
             ];
 
             return response()->json([
@@ -329,8 +334,8 @@ class StudentController extends Controller
         }
 
         $latestVersion = ApplicationFormVersion::with(['applicationForm.enrollment.student'])
-            ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
-                $q->where('student_id', $student_id);
+            ->whereHas('applicationForm.enrollment.student', function ($q) use ($id) {
+                $q->where('id', $id);
             })
             ->orderByDesc('version_id')
             ->first();
@@ -344,6 +349,8 @@ class StudentController extends Controller
 
         $dataSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
         
+        $student = $latestVersion->applicationForm->enrollment->student ?? null;
+
         // Extract request_data from snapshot
         $requestData = $dataSnapshot['request_data'] ?? [];
         
@@ -449,7 +456,8 @@ class StudentController extends Controller
             'enrollment_status' => $requestData['enrollment_status'] ?? '',
             'application_form_status' => $requestData['application_form_status'] ?? '',
             'student_status' => 'Old',
-            'input_name' => $student_id
+            'input_name' => $student->id ?? null,
+            'student_id' => $student->student_id ?? null
         ];
 
         return response()->json([
@@ -458,13 +466,13 @@ class StudentController extends Controller
         ]);
     }
 
-    public function updateStudent(Request $request, $student_id)
+    public function updateStudent(Request $request, $id)
     {
         DB::beginTransaction();
         try {
             $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
-                ->whereHas('applicationForm.enrollment.student', function ($q) use ($student_id) {
-                    $q->where('student_id', $student_id);
+                ->whereHas('applicationForm.enrollment.student', function ($q) use ($id) {
+                    $q->where('id', $id);
                 })
                 ->orderByDesc('version_id')
                 ->first();
@@ -477,7 +485,7 @@ class StudentController extends Controller
             }
 
             $student = Student::with(['studentAddress', 'studentParent', 'studentGuardian', 'enrollments'])
-                ->findOrFail($student_id);
+                ->findOrFail($id);
 
             $validated = $request->validate([
                 // Student
@@ -615,14 +623,14 @@ class StudentController extends Controller
 
             if ($request->hasAny(['street', 'city_regency', 'province'])) {
                 $student->studentAddress()->updateOrCreate(
-                    ['student_id' => $student->student_id],
+                    ['id' => $student->id],
                     $request->only(['street', 'city_regency', 'province'])
                 );
             }
 
             if ($request->hasAny(['father_name', 'mother_name'])) {
                 $student->studentParent()->updateOrCreate(
-                    ['student_id' => $student->student_id],
+                    ['id' => $student->id],
                     $request->only([
                         'father_name', 'father_company', 'father_occupation', 'father_phone', 'father_email',
                         'father_address_street', 'father_address_rt', 'father_address_rw', 'father_address_village',
@@ -638,7 +646,7 @@ class StudentController extends Controller
 
             if ($request->hasAny(['guardian_name'])) {
                 $student->studentGuardian()->updateOrCreate(
-                    ['student_id' => $student->student_id],
+                    ['id' => $student->id],
                     $request->only([
                         'guardian_name', 'relation_to_student', 'guardian_phone', 'guardian_email',
                         'guardian_address_street', 'guardian_address_rt', 'guardian_address_rw', 'guardian_address_village',
@@ -699,6 +707,7 @@ class StudentController extends Controller
 
 
             $newSnapshot = [
+                'id'             => $student->id,
                 'student_id'     => $student->student_id,
                 'registration_id' => $latestEnrollment?->registration_id,
                 'enrollment_id'  => $latestEnrollment?->enrollment_id,
@@ -759,10 +768,10 @@ class StudentController extends Controller
         }
     }
 
-    public function getStudentHistoryDates($studentId)
+    public function getStudentHistoryDates($id)
     {
-        $histories = ApplicationFormVersion::whereHas('applicationForm.enrollment', function ($q) use ($studentId) {
-                $q->where('student_id', $studentId);
+        $histories = ApplicationFormVersion::whereHas('applicationForm.enrollment', function ($q) use ($id) {
+                $q->where('id', $id);
             })
             ->with(['applicationForm.enrollment.schoolYear'])
             ->orderBy('updated_at', 'desc')
@@ -794,10 +803,12 @@ class StudentController extends Controller
             $version = ApplicationFormVersion::with('applicationForm.enrollment.student')
                 ->findOrFail($versionId);
 
+            $student = $version->applicationForm->enrollment->student ?? null;
             return response()->json([
                 'success'            => true,
                 'version_id'         => $version->version_id,
-                'student_id'         => $version->applicationForm->enrollment->student_id ?? null,
+                'id'                 => $version->applicationForm->enrollment->id ?? null,
+                'student_id'         => $student->student_id,
                 'application_form_id'=> $version->application_id,
                 'updated_at'         => $version->updated_at,
                 'data_snapshot'      => json_decode($version->data_snapshot, true),

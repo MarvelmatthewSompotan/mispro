@@ -13,7 +13,7 @@ class UserManagementController extends Controller
     public function index(Request $request)
     {
         try {
-            $users = User::select('user_id', 'username', 'email', 'role')
+            $users = User::select('user_id', 'username', 'full_name', 'email', 'role')
                 ->orderBy('created_at', 'desc')
                 ->paginate(25);
             
@@ -41,12 +41,14 @@ class UserManagementController extends Controller
                     'unique:users,email',
                     'regex:/^[A-Za-z0-9._%+-]+@mis-mdo\.sch\.id$/'
                 ],
+                'full_name' => 'required|string|max:255',
                 'password' => 'required|min:8',
                 'role' => ['required', Rule::in(['admin', 'head_registrar', 'registrar', 'teacher'])],
             ]);
 
             $user = User::create([
                 'username' => $validated['username'],
+                'full_name' => $validated['full_name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => $validated['role'],
@@ -79,6 +81,7 @@ class UserManagementController extends Controller
                     Rule::unique('users')->ignore($user->user_id),
                     'regex:/^[A-Za-z0-9._%+-]+@mis-mdo\.sch\.id$/'
                 ],
+                'full_name' => 'sometimes|string|max:255',
                 'password' => 'nullable|min:8',
                 'role' => ['sometimes', Rule::in(['admin', 'head_registrar', 'registrar', 'teacher'])],
             ]);

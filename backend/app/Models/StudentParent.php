@@ -18,7 +18,7 @@ class StudentParent extends Model
 
     protected $fillable = [
         'parent_id',
-        'student_id',
+        'id',
         'father_name',
         'father_occupation',
         'father_company',
@@ -35,7 +35,7 @@ class StudentParent extends Model
 
     public function student() : BelongsTo
     {
-        return $this->belongsTo(Student::class, 'student_id', 'student_id');
+        return $this->belongsTo(Student::class, 'id', 'id');
     }
 
     public function fatherAddress() : HasOne
