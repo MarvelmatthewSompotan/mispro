@@ -2,8 +2,18 @@ import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentInformationSection.module.css";
 import Select from "react-select";
 import { getRegistrationOptions } from "../../../../../services/api";
+
 const genderOptions = ["MALE", "FEMALE"];
 const citizenshipOptions = ["Indonesia", "Non Indonesia"];
+const religionOptions = [
+  "Islam (Muslim)",
+ "Kristen (Christian) ",
+ "Kristen Katolik (Catholic)",
+ "Hindu",
+ "Buddha",
+ "Konghucu (Confucianism)",
+ "Kristen Advent (Adventist)"
+];
 
 const StudentInformationSection = ({
   prefill,
@@ -325,7 +335,8 @@ const StudentInformationSection = ({
     onDataChange(updatedData);
   };
 
-  const handleReligion = (value) => {
+  const handleReligion = (opt) => {
+    const value = opt ? opt.value : "";
     setReligion(value);
     if (religionError && value.trim()) setReligionError(false);
     onDataChange({ religion: value });
@@ -593,25 +604,22 @@ const StudentInformationSection = ({
               >
                 Religion
               </label>
-              <input
+              <Select
                 id="religion"
-                className={`${styles.valueHighlight} ${
-                  religion ? "hasValue" : ""
-                } ${religionError ? styles.errorInput : ""}`}
-                type="text"
-                value={religion}
-                onChange={(e) => {
-                  handleReligion(e.target.value);
-                  if (religionError && e.target.value.trim()) {
-                    setReligionError(false);
-                  }
-                }}
+                value={religion ? { value: religion, label: religion } : null}
+                onChange={handleReligion}
+                options={religionOptions.map((opt) => ({
+                  value: opt,
+                  label: opt,
+                }))}
+                styles={customSelectStyles}
+                placeholder="Select religion"
+                isClearable
                 onFocus={() => {
                   if (religionError) {
                     setReligionError(false);
                   }
                 }}
-                placeholder="Religion"
               />
             </div>
             <div

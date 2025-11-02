@@ -1,5 +1,3 @@
-// File: src/components/pages/StudentProfile.js (Versi Final & Lengkap)
-
 import React, {
   useState,
   useEffect,
@@ -30,6 +28,7 @@ import gsap from 'gsap';
 import StudentProfileHeader from './StudentProfileHeader/StudentProfileHeader.js';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import ConfirmBackPopup from '../../../molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm.js';
+
 gsap.registerPlugin(ScrollToPlugin);
 
 const RadioDisplay = ({
@@ -89,6 +88,7 @@ const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
       </span>{' '}
     </>
   );
+
   if (isEditing) {
     return (
       <label className={styles.clickableLabel}>
@@ -99,11 +99,11 @@ const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
           onChange={onChange}
           className={styles.hiddenInput}
         />
-        {/* Tampilan visual kustom */}
         {content}
       </label>
     );
   }
+
   return <div className={styles.optionItem}>{content}</div>;
 };
 
@@ -137,8 +137,23 @@ const StudentProfile = () => {
     { value: 'Indonesia', label: 'Indonesia' },
     { value: 'Non Indonesia', label: 'Non Indonesia' },
   ];
+
+  // --- [BARU] Opsi untuk dropdown Agama ---
+  const religionOptions = [
+    'Islam (Muslim)',
+    'Kristen (Christian) ',
+    'Kristen Katolik (Catholic)',
+    'Hindu',
+    'Buddha',
+    'Konghucu (Confucianism)',
+    'Kristen Advent (Adventist)',
+  ];
+  // --- [AKHIR BARU] ---
+
   const [isBackPopupOpen, setIsBackPopupOpen] = useState(false);
   const historyRef = useRef(null);
+  const studentInfoKeys = useRef(new Set()); // <-- TAMBAHKAN INI
+
   const refreshHistoryDates = useCallback(async () => {
     setIsLoadingHistory(true);
     try {
@@ -161,6 +176,7 @@ const StudentProfile = () => {
     if (!location.state?.fromList) {
       navigate('/students', { replace: true });
     }
+
     // eslint-disable-next-line
   }, []);
 
@@ -181,7 +197,7 @@ const StudentProfile = () => {
   const handleFileSelect = (file) => {
     setSelectedPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
-    setIsPhotoPopupOpen(false); // Menutup popup setelah file dipilih
+    setIsPhotoPopupOpen(false);
   };
 
   const fetchData = useCallback(
@@ -191,13 +207,10 @@ const StudentProfile = () => {
         if (!isBackgroundRefresh) {
           setLoading(true);
         }
-
         const [studentRes, optionsRes] = await Promise.all([
           getStudentLatestApplication(id, 'new'),
           getRegistrationOptions(),
         ]);
-
-        console.log('LANGKAH 1: Data mentah dari API:', studentRes);
         setOptions(optionsRes);
         if (studentRes.success) {
           const studentData = studentRes.data;
@@ -212,12 +225,13 @@ const StudentProfile = () => {
           };
           setProfileData(combinedData);
           setFormData(combinedData);
-          setStudentInfo(studentData.studentInfo || {});
+          const studentInfoData = studentData.studentInfo || {};
+          setStudentInfo(studentInfoData);
+          studentInfoKeys.current = new Set(Object.keys(studentInfoData));
         }
       } catch (err) {
         console.error('Error fetching student profile data:', err);
       } finally {
-        // Hanya hentikan loading jika BUKAN background refresh
         if (!isBackgroundRefresh) {
           setLoading(false);
         }
@@ -231,16 +245,14 @@ const StudentProfile = () => {
   }, [fetchData]);
 
   useEffect(() => {
-    // Jika blocker aktif dan mendeteksi navigasi ('blocked')
     if (blocker.state === 'blocked') {
-      setIsBackPopupOpen(true); // Tampilkan popup
+      setIsBackPopupOpen(true);
     }
-  }, [blocker.state]); // Dijalankan setiap kali state blocker berubah
+  }, [blocker.state]);
 
   const handleStatusChange = (newStatus) => {
     const inactiveStatuses = ['Graduate', 'Expelled', 'Withdraw'];
     const newActiveStatus = inactiveStatuses.includes(newStatus) ? 'NO' : 'YES';
-
     setStudentInfo((prev) => ({
       ...prev,
       status: newStatus,
@@ -248,28 +260,23 @@ const StudentProfile = () => {
     }));
   };
 
-  // --- [BARU] Handler untuk mengambil dan menampilkan history ---
   const handleViewHistoryClick = async () => {
-    // Jika sedang dalam mode view history, tombol ini akan kembali ke data terbaru
     if (selectedVersionId) {
       setSelectedVersionId(null);
       setIsHistoryVisible(false);
-      setFormData(profileData); // Reset ke data terbaru yang sudah disimpan
+      setFormData(profileData);
       setStudentInfo(profileData);
       return;
     }
 
-    // Toggle tampilan dropdown
     const willOpen = !isHistoryVisible;
     setIsHistoryVisible(willOpen);
 
-    // Selalu refresh saat mau dibuka
     if (willOpen) {
       await refreshHistoryDates();
     }
   };
 
-  // --- [BARU] Handler saat memilih tanggal dari dropdown history ---
   const handleHistoryDateChange = async (versionId) => {
     if (!versionId) {
       setSelectedVersionId(null);
@@ -280,13 +287,12 @@ const StudentProfile = () => {
     }
 
     setSelectedVersionId(versionId);
-    setLoading(true); // Tampilkan loading global
+    setLoading(true);
+
     try {
       const historyDetail = await getHistoryDetail(versionId);
       if (historyDetail.success) {
         const snapshotData = historyDetail.data_snapshot.request_data;
-
-        // Re-construct studentInfo dari snapshot
         const studentInfoSnapshot = {
           first_name: snapshotData.first_name,
           middle_name: snapshotData.middle_name,
@@ -320,25 +326,24 @@ const StudentProfile = () => {
           status: snapshotData.status ?? studentInfo.status ?? 'Not Graduated',
         };
 
-        // Re-construct formData dari snapshot
         const combinedData = {
           student_id: historyDetail.student_id,
-          ...studentInfoSnapshot, // studentInfo fields
+          ...studentInfoSnapshot,
           section_id: snapshotData.section_id,
-          program_id: snapshotData.program_id, // program fields
+          program_id: snapshotData.program_id,
           class_id: snapshotData.class_id,
           major_id: snapshotData.major_id,
           program_other: snapshotData.program_other,
           school_year_id: snapshotData.school_year_id,
           school_year: snapshotData.school_year,
           transportation_id: snapshotData.transportation_id,
-          pickup_point_id: snapshotData.pickup_point_id, // facilities fields
+          pickup_point_id: snapshotData.pickup_point_id,
           pickup_point_custom: snapshotData.pickup_point_custom,
           transportation_policy: snapshotData.transportation_policy,
           residence_id: snapshotData.residence_id,
           residence_hall_policy: snapshotData.residence_hall_policy,
           father_name: snapshotData.father_name,
-          mother_name: snapshotData.mother_name, // parent/guardian fields
+          mother_name: snapshotData.mother_name,
           father_company: snapshotData.father_company,
           father_occupation: snapshotData.father_occupation,
           father_phone: snapshotData.father_phone,
@@ -375,7 +380,7 @@ const StudentProfile = () => {
           guardian_address_province: snapshotData.guardian_address_province,
           guardian_address_other: snapshotData.guardian_address_other,
           tuition_fees: snapshotData.tuition_fees,
-          residence_payment: snapshotData.residence_payment, // payment fields
+          residence_payment: snapshotData.residence_payment,
           financial_policy_contract: snapshotData.financial_policy_contract,
           discount_name: snapshotData.discount_name,
           discount_notes: snapshotData.discount_notes,
@@ -383,6 +388,7 @@ const StudentProfile = () => {
         };
 
         setStudentInfo(studentInfoSnapshot);
+        studentInfoKeys.current = new Set(Object.keys(studentInfoSnapshot));
         setFormData(combinedData);
         setIsHistoryVisible(false);
       }
@@ -395,12 +401,8 @@ const StudentProfile = () => {
 
   const clearError = (section, fieldName) => {
     if (errors[section] && errors[section][fieldName]) {
-      // Buat salinan dari error section yang relevan
       const newSectionErrors = { ...errors[section] };
-      // Hapus key error dari salinan tersebut
       delete newSectionErrors[fieldName];
-
-      // Perbarui state errors utama
       setErrors((prevErrors) => ({
         ...prevErrors,
         [section]: newSectionErrors,
@@ -408,12 +410,10 @@ const StudentProfile = () => {
     }
   };
 
-  // Handler untuk input biasa di student info
   const handleStudentInfoChange = (e) => {
     const { name, value } = e.target;
     clearError('studentInfo', name);
 
-    // Real-time validation for specific fields
     if (name === 'nik' && value && value.length !== 16) {
       setValidationMessages((prev) => ({
         ...prev,
@@ -440,32 +440,34 @@ const StudentProfile = () => {
     } else if (name === 'nisn') {
       setValidationMessages((prev) => ({ ...prev, nisn: '' }));
     }
+
     setStudentInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handler khusus untuk react-select
   const handleStudentInfoSelectChange = (name, selectedOption) => {
     const value = selectedOption ? selectedOption.value : '';
     clearError('studentInfo', name);
+
     setStudentInfo((prev) => {
       const newData = { ...prev, [name]: value };
+
       if (name === 'citizenship') {
         if (value === 'Indonesia') {
           newData.kitas = '';
           newData.country = '';
         } else if (value === 'Non Indonesia') newData.nik = '';
       }
+
       if (name === 'academic_status' && value !== 'OTHER') {
         newData.academic_status_other = '';
       }
+
       return newData;
     });
   };
 
   const handleChange = (e) => {
-    // eslint-disable-next-line
     const { name, value, type, checked } = e.target;
-
     const studentInfoFields = [
       'first_name',
       'nickname',
@@ -488,6 +490,7 @@ const StudentProfile = () => {
       'city_regency',
       'province',
     ];
+
     const parentFields = [
       'father_name',
       'father_phone',
@@ -516,9 +519,7 @@ const StudentProfile = () => {
     }
 
     setFormData((prevData) => {
-      // Salin state sebelumnya untuk dimodifikasi
       const newFormData = { ...prevData };
-
       const radioNames = [
         'section_id',
         'program_id',
@@ -527,8 +528,6 @@ const StudentProfile = () => {
         'tuition_fees',
         'residence_payment',
       ];
-
-      // Aturan untuk Checkbox Policy
       const isPolicyCheckbox = [
         'transportation_policy',
         'residence_hall_policy',
@@ -542,54 +541,40 @@ const StudentProfile = () => {
         : value;
 
       if (radioNames.includes(name)) {
-        // INI UNTUK RADIO BUTTON
-        // Jika nilai yang diklik sama dengan nilai saat ini, kosongkan. Jika beda, isi dengan nilai baru.
         newFormData[name] =
           String(prevData[name]) === String(value) ? '' : value;
       } else if (isPolicyCheckbox) {
-        // INI UNTUK CHECKBOX
         newFormData[name] = checked ? 'Signed' : 'Not Signed';
       } else {
-        // INI UNTUK SEMUA INPUT LAINNYA (text, select, date)
         newFormData[name] = value;
       }
 
-      // === ATURAN 1: Logika untuk Bagian PROGRAM ===
       if (name === 'section_id') {
-        // Jika section diubah, reset grade dan major
         newFormData.class_id = '';
         newFormData.major_id = '';
       }
 
       if (name === 'class_id') {
-        // Jika grade diubah, cek apakah major perlu direset
         const selectedClass = options.classes.find(
           (c) => String(c.class_id) === String(value)
         );
         const gradeNum = selectedClass ? parseInt(selectedClass.grade, 10) : 0;
-        // Jika grade di bawah 9, major tidak berlaku (direset)
         if (gradeNum < 9) {
           newFormData.major_id = '';
         }
       }
 
-      // === ATURAN 2: Logika untuk Bagian FACILITIES ===
       if (name === 'transportation_id') {
-        // Jika transportasi diubah, cek apakah residence hall perlu direset
         const selectedTransport = options.transportations.find(
           (t) => String(t.transport_id) === String(value)
         );
         const transportType = selectedTransport
           ? selectedTransport.type.toLowerCase()
           : '';
-
-        // Jika transportasi adalah 'own car' atau 'school bus'
         if (transportType === 'own car' || transportType === 'school bus') {
-          // Cek residence hall yang sedang dipilih
           const currentResidence = options.residence_halls.find(
             (r) => String(r.residence_id) === String(prevData.residence_id)
           );
-          // Jika yang dipilih adalah asrama (Dormitory), maka reset
           if (
             currentResidence &&
             currentResidence.type.toLowerCase().includes('dormitory')
@@ -607,6 +592,14 @@ const StudentProfile = () => {
     });
   };
 
+  const handleFormSelectChange = (name, selectedOption) => {
+    const value = selectedOption ? selectedOption.value : '';
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
   const handleRadioChange = (name, value) => {
     clearError('facilities', name);
     setFormData((prevData) => {
@@ -614,17 +607,14 @@ const StudentProfile = () => {
       const newVal = currentVal === value ? '' : value;
       const newFormData = { ...prevData, [name]: newVal };
 
-      // [MODIFIKASI] Logika baru ditambahkan di sini
       if (name === 'residence_id') {
         const selectedResidence = options.residence_halls.find(
           (r) => String(r.residence_id) === String(newVal)
         );
-        // Jika yang dipilih adalah asrama (Dormitory)
         if (
           selectedResidence &&
           selectedResidence.type.toLowerCase().includes('dormitory')
         ) {
-          // Reset semua data transportasi
           newFormData.transportation_id = '';
           newFormData.pickup_point_id = '';
           newFormData.pickup_point_custom = '';
@@ -633,7 +623,6 @@ const StudentProfile = () => {
       }
 
       if (name === 'transportation_id') {
-        // Logika yang sudah ada sebelumnya tetap dipertahankan
         const selectedTransport = options.transportations.find(
           (t) => String(t.transport_id) === String(newVal)
         );
@@ -652,13 +641,18 @@ const StudentProfile = () => {
           }
         }
       }
+
       return newFormData;
     });
   };
 
   const handleCancel = () => {
     setFormData(profileData);
-    setStudentInfo(profileData); // Reset student info as well
+    const newStudentInfo = {};
+    for (const key of studentInfoKeys.current) {
+      newStudentInfo[key] = profileData[key];
+    }
+    setStudentInfo(newStudentInfo);
     setIsEditing(false);
     setErrors({});
     setValidationMessages({ nik: '', kitas: '', nisn: '' });
@@ -671,30 +665,21 @@ const StudentProfile = () => {
   };
 
   const handleConfirmBack = () => {
-    // 1. Jalankan logika 'cancel' Anda untuk reset form
     handleCancel();
-
-    // 2. Tutup popup
     setIsBackPopupOpen(false);
-
-    // 3. [BARU] Lanjutkan navigasi yang tadi diblokir
     if (blocker.state === 'blocked') {
       blocker.proceed();
     }
   };
 
   const handleClosePopup = () => {
-    // 1. Tutup popup
     setIsBackPopupOpen(false);
-
-    // 2. Beri tahu blocker untuk 'reset' (membatalkan navigasi)
     if (blocker.state === 'blocked') {
       blocker.reset();
     }
   };
 
   const validateForm = () => {
-    // ——— Helpers ringkas & aman ———
     const isFilled = (v) =>
       v !== null && v !== undefined && String(v).trim() !== '';
     const normStr = (v) => String(v ?? '').trim();
@@ -707,13 +692,8 @@ const StudentProfile = () => {
 
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Menggabungkan data dari kedua state untuk validasi yang komprehensif
     const fullFormData = { ...formData, ...studentInfo };
 
-    // ——————————————————————————————————————————————————————————————
-    // 1) Validasi Student Information
-    // ——————————————————————————————————————————————————————————————
     const studentInfoErrors = {};
     const requiredStudentFields = {
       first_name: 'First name is required',
@@ -740,7 +720,6 @@ const StudentProfile = () => {
       }
     }
 
-    // Cari selected section/class sekali saja (tanpa ubah logika)
     let selectedSection, selectedClass;
     if (options && fullFormData.section_id && fullFormData.class_id) {
       selectedSection = options.sections?.find(
@@ -751,29 +730,22 @@ const StudentProfile = () => {
       );
     }
 
-    // ——— Previous School required? (default: required) ———
     let isPreviousSchoolRequired = true;
     if (selectedSection && selectedClass) {
       const secName = lower(selectedSection.name);
       const gradeStr = upper(selectedClass.grade);
-
-      // ECP + Grade N => tidak required
       if (secName === 'ecp' && gradeStr === 'N') {
         isPreviousSchoolRequired = false;
       }
     }
-
     if (isPreviousSchoolRequired && !isFilled(fullFormData.previous_school)) {
       studentInfoErrors.previous_school = 'Previous school is required.';
     }
 
-    // ——— NISN required? (default: required) ———
     let isNisnRequired = true;
     if (selectedSection && selectedClass) {
       const secName = lower(selectedSection.name);
       const gradeNum = toInt(selectedClass.grade);
-
-      // NISN tidak required untuk: ECP, atau Elementary School grade 1–2
       if (
         secName === 'ecp' ||
         (secName === 'elementary school' && (gradeNum === 1 || gradeNum === 2))
@@ -782,12 +754,10 @@ const StudentProfile = () => {
       }
     }
 
-    // Konversi NISN, NIK, KITAS ke string untuk validasi yang aman
     const nisnAsString = normStr(fullFormData.nisn);
     const nikAsString = normStr(fullFormData.nik);
     const kitasAsString = normStr(fullFormData.kitas);
 
-    // ——— NISN: required vs format dipisah ———
     if (isFilled(nisnAsString)) {
       if (nisnAsString.length !== 10) {
         studentInfoErrors.nisn = 'NISN must be 10 digits.';
@@ -798,14 +768,11 @@ const StudentProfile = () => {
       studentInfoErrors.nisn = 'NISN is required.';
     }
 
-    // ——— Email format (required sudah di atas) ———
     if (isFilled(fullFormData.email) && !emailRegex.test(fullFormData.email)) {
       studentInfoErrors.email = 'Invalid email format.';
     }
 
-    // ——— NIK (untuk WNI) ———
     if (fullFormData.citizenship === 'Indonesia') {
-      // [UPDATE] Menggunakan regex dari FormButtonSection.js
       const nikRegex = /^[1-9][0-9]{15}$/;
       if (!isFilled(nikAsString)) {
         studentInfoErrors.nik = 'NIK is required.';
@@ -815,21 +782,17 @@ const StudentProfile = () => {
       }
     }
 
-    // ——— KITAS (untuk WNA) ———
     if (fullFormData.citizenship === 'Non Indonesia') {
       if (!isFilled(kitasAsString)) {
         studentInfoErrors.kitas = 'KITAS is required.';
       } else if (kitasAsString.length < 11 || kitasAsString.length > 16) {
         studentInfoErrors.kitas = 'KITAS must be 11-16 characters.';
       }
-
-      // [UPDATE] Menambahkan validasi 'country' dari FormButtonSection.js
       if (!isFilled(fullFormData.country)) {
         studentInfoErrors.country = 'Country of origin is required.';
       }
     }
 
-    // ——— Academic Status OTHER ———
     if (
       fullFormData.academic_status === 'OTHER' &&
       !isFilled(fullFormData.academic_status_other)
@@ -841,11 +804,7 @@ const StudentProfile = () => {
       newErrors.studentInfo = studentInfoErrors;
     }
 
-    // ——————————————————————————————————————————————————————————————
-    // 2) Validasi Facilities
-    // ——————————————————————————————————————————————————————————————
     const facilitiesErrors = {};
-
     if (!fullFormData.residence_id) {
       facilitiesErrors.residence_id = 'Residence Hall is required.';
     }
@@ -854,7 +813,6 @@ const StudentProfile = () => {
       const selectedTransport = options.transportations.find(
         (t) => String(t.transport_id) === String(fullFormData.transportation_id)
       );
-
       if (
         selectedTransport &&
         lower(selectedTransport.type).includes('school bus')
@@ -863,7 +821,6 @@ const StudentProfile = () => {
         const isCustomPickupPointFilled = isFilled(
           fullFormData.pickup_point_custom
         );
-
         if (!isPickupPointSelected && !isCustomPickupPointFilled) {
           facilitiesErrors.pickup_point_id =
             'Pickup point must be selected or specified.';
@@ -886,12 +843,7 @@ const StudentProfile = () => {
       newErrors.facilities = facilitiesErrors;
     }
 
-    // ——————————————————————————————————————————————————————————————
-    // 3) Validasi Parent/Guardian Information (Versi Lengkap)
-    // ——————————————————————————————————————————————————————————————
     const parentErrors = {};
-
-    // Ayah
     if (!isFilled(fullFormData.father_name))
       parentErrors.father_name = "Father's name is required.";
     if (!isFilled(fullFormData.father_phone))
@@ -914,7 +866,6 @@ const StudentProfile = () => {
     if (!isFilled(fullFormData.father_address_province))
       parentErrors.father_address_province = "Father's province is required.";
 
-    // Ibu
     if (!isFilled(fullFormData.mother_name))
       parentErrors.mother_name = "Mother's name is required.";
     if (!isFilled(fullFormData.mother_phone))
@@ -941,12 +892,9 @@ const StudentProfile = () => {
       newErrors.parentGuardian = parentErrors;
     }
 
-    // ——— Finalize ———
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-  // ... (sisa kode di dalam komponen)
 
   useEffect(() => {
     if (Object.keys(errors).length > 0 && scrollTrigger > 0) {
@@ -966,23 +914,19 @@ const StudentProfile = () => {
         }
       }
     }
-    // eslint-disable-next-line
   }, [scrollTrigger]);
 
   const handleSaveClick = () => {
     const isValid = validateForm();
     if (isValid) {
       setErrors({});
-      // Before opening popup, combine studentInfo back into the main formData
       setFormData((prev) => ({ ...prev, ...studentInfo }));
       setIsPopupOpen(true);
     } else {
-      // === TAMBAHKAN BARIS INI UNTUK MENGAKTIFKAN SCROLL ===
       setScrollTrigger((prev) => prev + 1);
     }
   };
 
-  // Fungsi ini akan dijalankan saat tombol "Yes, I'm sure" di popup diklik
   const handleConfirmUpdate = async () => {
     setIsUpdating(true);
     const dataToSend = { ...formData, ...studentInfo };
@@ -1002,35 +946,33 @@ const StudentProfile = () => {
         ...updatedData,
       };
 
-      // 3. Update state secara manual
       setProfileData(combinedData);
       setFormData(combinedData);
-      setStudentInfo(combinedData); // Asumsi studentInfo fields ada di request_data
+      const newStudentInfo = {};
+      for (const key of studentInfoKeys.current) {
+        newStudentInfo[key] = combinedData[key];
+      }
+      setStudentInfo(newStudentInfo);
       setShowSuccess(true);
       setIsEditing(false);
       setIsPopupOpen(false);
       setSelectedPhoto(null);
       setPhotoPreview(null);
       await refreshHistoryDates();
-
-      // fetchData(); // <-- Anda tidak perlu baris ini lagi!
     } catch (error) {
       if (error.response && error.response.data) {
-        // Cek apakah error ini adalah error validasi dari backend kita
         if (error.response.data.type === 'validation') {
           console.error('Validation Errors:', error.response.data.errors);
           alert(
             'Update failed due to validation errors. Please check the console (F12) for more details.'
           );
         } else {
-          // Error server lainnya (misal: 500 Internal Server Error)
           console.error('Server Error:', error.response.data);
           alert(
             `Update failed: ${error.response.data.message || error.message}`
           );
         }
       } else {
-        // Error jaringan atau error lainnya
         console.error('Failed to update student:', error);
         alert(`Update failed: ${error.message}`);
       }
@@ -1038,21 +980,22 @@ const StudentProfile = () => {
       setIsUpdating(false);
     }
   };
+
   const getNameById = (type, id) => {
     if (!options || !id || !options[type] || !options[type].length) return id;
     const keyName = Object.keys(options[type][0])[0];
     const item = options[type]?.find((i) => String(i[keyName]) === String(id));
     return item?.name || item?.grade || item?.type || id;
   };
-  // eslint-disable-next-line
+
   const filteredGrades = useMemo(() => {
     if (!isEditing || !options?.classes || !formData?.section_id) return [];
     const selectedSection = options.sections?.find(
       (sec) => String(sec.section_id) === String(formData.section_id)
     );
     if (!selectedSection) return [];
-
     const sectionName = selectedSection.name;
+
     if (sectionName === 'ECP') {
       return options.classes.filter((cls) =>
         ['N', 'K1', 'K2'].includes(cls.grade)
@@ -1080,7 +1023,6 @@ const StudentProfile = () => {
   }, [isEditing, options, formData?.section_id]);
 
   const showMajorField = useMemo(() => {
-    // Kondisi isEditing dihapus agar pengecekan hanya berdasarkan data
     if (!options?.classes || !formData?.class_id) return false;
     const selectedClass = options.classes.find(
       (c) => String(c.class_id) === String(formData.class_id)
@@ -1102,14 +1044,31 @@ const StudentProfile = () => {
       transportType === 'own car' || transportType === 'school bus';
 
     if (isTransportRestricted) {
-      // Sembunyikan semua opsi yang mengandung kata 'Dormitory'
       return options.residence_halls.filter(
         (r) => !r.type.toLowerCase().includes('dormitory')
       );
     }
-    // Jika tidak ada batasan, tampilkan semua
     return options.residence_halls;
   }, [options, formData?.transportation_id]);
+
+  const majorSelectOptions = useMemo(() => {
+    if (!options?.majors) return [];
+    return options.majors
+      .filter((mjr) => mjr.name !== 'No Major')
+      .map((mjr) => ({
+        value: mjr.major_id,
+        label: mjr.name,
+      }));
+  }, [options?.majors]);
+
+  // --- [BARU] Opsi untuk Select Agama ---
+  const religionSelectOptions = useMemo(() => {
+    return religionOptions.map((opt) => ({
+      value: opt,
+      label: opt,
+    }));
+  }, []); // Array dependensi kosong karena religionOptions tidak berubah
+  // --- [AKHIR BARU] ---
 
   const isDormitorySelected = useMemo(() => {
     if (!options?.residence_halls || !formData?.residence_id) return false;
@@ -1128,11 +1087,13 @@ const StudentProfile = () => {
         <div>Loading student profile...</div>
       </div>
     );
+
   if (!formData)
     return <div style={{ padding: '20px' }}>Student not found.</div>;
 
   const formatDateForInput = (dateString) =>
     !dateString ? '' : new Date(dateString).toISOString().split('T')[0];
+
   const formatDateForDisplay = (dateString) =>
     !dateString
       ? '-'
@@ -1141,15 +1102,11 @@ const StudentProfile = () => {
           month: 'long',
           year: 'numeric',
         });
+
   const selectedTransportType =
     options?.transportations?.find(
       (t) => String(t.transport_id) === String(formData.transportation_id)
     )?.type || '';
-
-  console.log(
-    'LANGKAH 2: State formData yang akan dikirim ke Header:',
-    formData
-  );
 
   return (
     <Main showBackButton onBackClick={handleBackClick}>
@@ -1177,7 +1134,6 @@ const StudentProfile = () => {
 
         <div className={styles.profileContent}>
           <div className={styles.infoContainer}>
-            {/* STUDENT'S INFORMATION */}
             <div id='studentInfo' className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
@@ -1339,7 +1295,6 @@ const StudentProfile = () => {
                             'Select citizenship'
                           }
                           isClearable
-                          // Gunakan prefix 'react-select' dan biarkan CSS global yang menghandle error
                           classNamePrefix={
                             errors.studentInfo?.citizenship
                               ? 'react-select-error'
@@ -1435,7 +1390,6 @@ const StudentProfile = () => {
                             }
                           />
                           {validationMessages.kitas && (
-                            /* ===== UBAH CLASSNAME DI SINI ===== */
                             <div className={styles.inlineErrorMessageRight}>
                               {validationMessages.kitas}
                             </div>
@@ -1550,23 +1504,41 @@ const StudentProfile = () => {
                     >
                       Religion
                     </label>
+                    {/* --- [UBAH] Ganti Input menjadi Select --- */}
                     {isEditing ? (
-                      <input
-                        id='religion'
-                        type='text'
-                        name='religion'
-                        value={studentInfo.religion || ''}
-                        onChange={handleStudentInfoChange}
-                        className={`${styles.formInput} ${
-                          errors.studentInfo?.religion ? styles.errorInput : ''
-                        }`}
-                        placeholder={errors.studentInfo?.religion || 'Religion'}
-                      />
+                      <div className={styles.selectWrapper}>
+                        <Select
+                          id='religion'
+                          name='religion'
+                          options={religionSelectOptions}
+                          value={
+                            studentInfo.religion
+                              ? {
+                                  value: studentInfo.religion,
+                                  label: studentInfo.religion,
+                                }
+                              : null
+                          }
+                          onChange={(opt) =>
+                            handleStudentInfoSelectChange('religion', opt)
+                          }
+                          placeholder={
+                            errors.studentInfo?.religion || 'Select religion'
+                          }
+                          isClearable
+                          classNamePrefix={
+                            errors.studentInfo?.religion
+                              ? 'react-select-error'
+                              : 'react-select'
+                          }
+                        />
+                      </div>
                     ) : (
                       <b className={styles.fieldValue}>
                         {studentInfo.religion || '-'}
                       </b>
                     )}
+                    {/* --- [AKHIR UBAH] --- */}
                   </div>
                 </div>
                 <div className={styles.row}>
@@ -2162,7 +2134,6 @@ const StudentProfile = () => {
               </div>
             </div>
 
-            {/* PROGRAM */}
             <div className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
@@ -2181,7 +2152,7 @@ const StudentProfile = () => {
                       isSelected={
                         String(formData.section_id) === String(sec.section_id)
                       }
-                      isEditing={false} // <-- DIUBAH MENJADI STATIS
+                      isEditing={false}
                       name='section_id'
                       value={sec.section_id}
                       onChange={handleRadioChange}
@@ -2191,22 +2162,43 @@ const StudentProfile = () => {
                 <div className={styles.optionsRow}>
                   <div className={styles.field}>
                     <div className={styles.fieldLabel}>Grade</div>
-                    {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
                     <b className={styles.fieldValue}>
                       {getNameById('classes', formData.class_id)}
                     </b>
                   </div>
-                  {/* Logika untuk menampilkan major tetap ada, tapi field-nya statis */}
                   {showMajorField && (
                     <div className={styles.field}>
                       <div className={styles.fieldLabel}>Major</div>
-                      {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
-                      <b className={styles.fieldValue}>
-                        {getNameById('majors', formData.major_id)}
-                      </b>
+                      {isEditing ? (
+                        <div className={styles.selectWrapper}>
+                          <Select
+                            id='major_id'
+                            name='major_id'
+                            options={majorSelectOptions}
+                            value={
+                              formData.major_id
+                                ? majorSelectOptions.find(
+                                    (opt) => opt.value === formData.major_id
+                                  )
+                                : null
+                            }
+                            onChange={(opt) =>
+                              handleFormSelectChange('major_id', opt)
+                            }
+                            placeholder='Select major'
+                            isClearable
+                            classNamePrefix='react-select'
+                          />
+                        </div>
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {getNameById('majors', formData.major_id)}
+                        </b>
+                      )}
                     </div>
                   )}
                 </div>
+
                 <div className={styles.optionsRow}>
                   <div className={styles.optionLabel}>Program</div>
                   {options?.programs.map((prog) => (
@@ -2216,7 +2208,7 @@ const StudentProfile = () => {
                       isSelected={
                         String(formData.program_id) === String(prog.program_id)
                       }
-                      isEditing={false} // <-- DIUBAH MENJADI STATIS
+                      isEditing={false}
                       name='program_id'
                       value={prog.program_id}
                       onChange={handleRadioChange}
@@ -2226,7 +2218,6 @@ const StudentProfile = () => {
               </div>
             </div>
 
-            {/* FACILITIES */}
             <div id='facilities' className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
@@ -2239,7 +2230,6 @@ const StudentProfile = () => {
                 {!isDormitorySelected && (
                   <>
                     <div className={styles.optionsRow}>
-                      {/* Label utama "Transportation" dengan logika error gabungan */}
                       <div
                         className={`${styles.optionLabel} ${
                           (errors.facilities?.pickup_point_id &&
@@ -2269,11 +2259,9 @@ const StudentProfile = () => {
                       ))}
                     </div>
 
-                    {/* Blok untuk pickup point & custom pickup point */}
                     {formData.transportation_id &&
                       selectedTransportType.toLowerCase() !== 'own car' && (
                         <>
-                          {/* Dropdown Pickup Point */}
                           <div className={styles.optionsRow}>
                             <div
                               className={styles.field}
@@ -2311,7 +2299,6 @@ const StudentProfile = () => {
                             </div>
                           </div>
 
-                          {/* Custom Pickup Point */}
                           <div className={styles.optionsRow}>
                             <div
                               className={styles.field}
@@ -2340,7 +2327,6 @@ const StudentProfile = () => {
                         </>
                       )}
 
-                    {/* Pesan error real-time untuk pickup point (hanya muncul jika error) */}
                     {errors.facilities?.pickup_point_id &&
                       !formData.pickup_point_id &&
                       !formData.pickup_point_custom && (
@@ -2350,7 +2336,6 @@ const StudentProfile = () => {
                         </div>
                       )}
 
-                    {/* Transportation Policy dengan label dan pesan error real-time */}
                     <div className={styles.optionsRow}>
                       <div>
                         <CheckboxDisplay
@@ -2374,7 +2359,6 @@ const StudentProfile = () => {
                   </>
                 )}
 
-                {/* Bagian Residence Hall tetap ditampilkan */}
                 <div className={styles.optionsRow}>
                   <div
                     className={`${styles.optionLabel} ${
@@ -2427,7 +2411,6 @@ const StudentProfile = () => {
               </div>
             </div>
 
-            {/* PARENT / GUARDIAN INFORMATION */}
             <div id='parentGuardian' className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
@@ -3567,7 +3550,6 @@ const StudentProfile = () => {
               </div>
             </div>
 
-            {/* TERM OF PAYMENT */}
             <div className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
@@ -3585,7 +3567,7 @@ const StudentProfile = () => {
                         key={option}
                         label={option}
                         isSelected={formData.tuition_fees === option}
-                        isEditing={false} // <-- DIUBAH MENJADI STATIS
+                        isEditing={false}
                         name='tuition_fees'
                         value={option}
                         onChange={handleRadioChange}
@@ -3601,7 +3583,7 @@ const StudentProfile = () => {
                         key={option}
                         label={option}
                         isSelected={formData.residence_payment === option}
-                        isEditing={false} // <-- DIUBAH MENJADI STATIS
+                        isEditing={false}
                         name='residence_payment'
                         value={option}
                         onChange={handleRadioChange}
@@ -3619,7 +3601,7 @@ const StudentProfile = () => {
                       isSelected={
                         formData.financial_policy_contract === 'Signed'
                       }
-                      isEditing={false} // <-- DIUBAH MENJADI STATIS
+                      isEditing={false}
                       name='financial_policy_contract'
                       onChange={handleChange}
                     />
@@ -3631,7 +3613,6 @@ const StudentProfile = () => {
                 <div className={styles.row}>
                   <div className={styles.field}>
                     <div className={styles.fieldLabel}>Discount</div>
-                    {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
                     <b className={styles.fieldValue}>
                       {formData.discount_name || '-'}
                     </b>
@@ -3640,7 +3621,6 @@ const StudentProfile = () => {
                   {formData.discount_name && (
                     <div className={styles.field}>
                       <div className={styles.fieldLabel}>Notes</div>
-                      {/* HANYA MENAMPILKAN MODE VISUAL, TIDAK ADA MODE EDIT */}
                       <b className={styles.fieldValue}>
                         {formData.discount_notes || '-'}
                       </b>
@@ -3671,7 +3651,7 @@ const StudentProfile = () => {
       </div>
       <ConfirmBackPopup
         isOpen={isBackPopupOpen}
-        onClose={handleClosePopup} // <-- Ganti ke handler baru
+        onClose={handleClosePopup}
         onConfirm={handleConfirmBack}
       />
     </Main>
