@@ -546,7 +546,7 @@ class RegistrationController extends Controller
                 'guardian_address_other' => 'nullable|string',
                 
                 'tuition_fees' => 'required|in:Full Payment,Installment',
-                'residence_payment' => 'required|in:Full Payment,Installment',
+                'residence_payment' => 'nullable|required_unless:residence_id,3|in:Full Payment,Installment',
                 'financial_policy_contract' => 'required|in:Signed,Not Signed',
 
                 'discount_name' => 'nullable|string',

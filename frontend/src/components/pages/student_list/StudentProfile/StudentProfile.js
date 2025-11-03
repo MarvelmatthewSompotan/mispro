@@ -140,13 +140,13 @@ const StudentProfile = () => {
 
   // --- [BARU] Opsi untuk dropdown Agama ---
   const religionOptions = [
-    "Islam (Muslim)",
-    "Kristen (Christian) ",
-    "Katolik (Catholic)",
+    "Islam",
+    "Kristen",
+    "Katolik",
     "Hindu",
     "Buddha",
-    "Konghucu (Confucianism)",
-    "Kristen Advent (Adventist)",
+    "Konghucu",
+    "Kristen Advent",
   ];
 
   const [isBackPopupOpen, setIsBackPopupOpen] = useState(false);
