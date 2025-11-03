@@ -9,7 +9,7 @@
     41,
     59,
     0.4
-  ); /* Tetap, karena ini style overlay spesifik */
+  ); 
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -24,7 +24,7 @@
   border-radius: 10px;
   background-color: var(
     --secondary-background
-  ); /* <-- Menggunakan var global */
+  ); 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -49,8 +49,6 @@
 
 .fieldWrapper {
   width: 100%;
-  /* === BARU === */
-  /* Diperlukan sebagai 'anchor' untuk menu dropdown */
   position: relative;
 }
 
@@ -61,27 +59,27 @@
   border-radius: 0;
   background-color: transparent;
   border: none;
-  border-bottom: 1.5px solid var(--main-grey); /* <-- Menggunakan var global */
+  border-bottom: 1.5px solid var(--main-grey); 
   height: 40px;
   padding: 0;
   font-size: 16px;
   box-sizing: border-box;
   outline: none;
   margin: 0;
-  font-family: var(--font-primary); /* <-- Menggunakan var global */
-  font-weight: var(--font-weight-regular); /* <-- Menggunakan var global */
-  color: var(--main-text); /* <-- Menggunakan var global */
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-regular); 
+  color: var(--main-text); 
   transition: border-color 0.2s ease;
 }
 
 .textInput:focus {
-  border-bottom: 1.5px solid var(--main-accent); /* <-- Menggunakan var global */
+  border-bottom: 1.5px solid var(--main-accent); 
   font-weight: var(--font-weight-bold);
 }
 
 .textInput::placeholder {
-  color: var(--main-grey); /* <-- Menggunakan var global */
-  font-weight: var(--font-weight-regular); /* <-- Menggunakan var global */
+  color: var(--main-grey); 
+  font-weight: var(--font-weight-regular); 
   opacity: 1;
 }
 
@@ -95,19 +93,19 @@
   line-height: 100%;
   border-radius: 5px;
   background-color: var(--main-background);
-  border: 1.5px solid var(--main-grey); /* <-- Menggunakan var global (border non-aktif) */
-  opacity: 0.7; /* <-- Tampilan non-aktif */
+  border: 1.5px solid var(--main-grey); 
+  opacity: 0.7; 
   height: 40px;
   padding: 0 12px;
   font-size: 16px;
   box-sizing: border-box;
   outline: none;
   margin: 0;
-  font-family: var(--font-primary); /* <-- Menggunakan var global */
-  font-weight: var(--font-weight-regular); /* <-- Menggunakan var global */
-  color: var(--main-grey); /* <-- Menggunakan var global */
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-regular); 
+  color: var(--main-grey); 
   transition: all 0.2s ease;
-  -webkit-appearance: none; /* Untuk iOS */
+  -webkit-appearance: none; 
 }
 
 .frameParent {
@@ -117,7 +115,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   gap: 20px;
-  color: var(--main-grey); /* <-- Menggunakan var global (dari #6e6e6e) */
+  color: var(--main-grey); 
   width: 100%;
 }
 
@@ -128,19 +126,19 @@
   align-items: flex-start;
   justify-content: flex-end;
   gap: 10px;
-  color: var(--main-accent); /* <-- Menggunakan var global */
+  color: var(--main-accent); 
 }
 
 .bAddSubjectParent button[disabled] {
   opacity: 0.8;
-  cursor: wait; /* Mengganti kursor */
+  cursor: wait; 
 }
 
 .loadingButton {
   background-color: var(
     --main-accent-hoverstate
-  ) !important; /* <-- Menggunakan var global */
-  color: var(--text-accent) !important; /* <-- Menggunakan var global */
+  ) !important; 
+  color: var(--text-accent) !important; 
   cursor: wait !important;
   opacity: 0.9;
   pointer-events: none;
@@ -149,19 +147,14 @@
 .loadingButton:hover {
   background-color: var(
     --main-accent-hoverstate
-  ) !important; /* <-- Menggunakan var global */
+  ) !important; 
   cursor: wait !important;
 }
-
-/* ================================================= */
-/* === STYLE UNTUK DROPDOWN KUSTOM BARU === */
-/* ================================================= */
 
 .customSelectContainer {
   position: relative;
 }
 
-/* Ini adalah kotak display yang terlihat seperti input */
 .selectInput {
   position: relative;
   width: 100%;
@@ -181,14 +174,12 @@
   transition: border-color 0.2s ease;
   cursor: pointer;
 
-  /* Menjaga panah tetap ada */
   background-image: url('data:image/svg+xml;utf8,<svg fill="%237A7A7A" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
   background-repeat: no-repeat;
   background-position: right 4px center;
   background-size: 24px 24px;
   padding-right: 32px;
 
-  /* Vertically center text */
   display: flex;
   align-items: center;
 }
@@ -199,46 +190,40 @@
   background-image: url('data:image/svg+xml;utf8,<svg fill="%235F84FE" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
 }
 
-/* Style saat placeholder (nilai kosong) */
 .selectInput.placeholder {
   color: var(--main-grey);
   font-weight: var(--font-weight-regular);
 }
 
-/* Style untuk container[disabled] */
 .customSelectContainer[data-disabled='true'] .selectInput {
   opacity: 0.7;
   cursor: not-allowed;
   background-color: var(--main-background);
 }
 
-/* === INI YANG ANDA MINTA === */
-/* === Menu Dropdown (Scroll + Max Height) === */
 .optionsMenu {
   position: absolute;
-  top: 100%; /* Muncul tepat di bawah input */
+  top: 100%; 
   left: 0;
   right: 0;
   background-color: var(--secondary-background);
   border: 1px solid var(--main-grey);
-  border-radius: 8px; /* Style dari react-select asli */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Style dari react-select asli */
+  border-radius: 8px; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
   z-index: 10;
-  margin-top: 8px; /* Style dari react-select asli */
-  padding: 4px; /* Style dari react-select asli */
+  margin-top: 8px; 
+  padding: 4px; 
   box-sizing: border-box;
 
-  /* === INI DIA === */
-  max-height: 200px; /* Atur max height */
-  overflow-y: auto; /* Tambahkan scroll jika melebihi max height */
+  max-height: 200px; 
+  overflow-y: auto; 
 }
 
-/* Style untuk setiap item di dropdown */
 .optionItem {
   padding: 10px 12px;
   font-weight: var(--font-weight-regular);
   color: var(--main-text);
-  border-radius: 4px; /* Style dari react-select asli */
+  border-radius: 4px; 
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
@@ -247,7 +232,6 @@
   background-color: var(--secondary-accent);
 }
 
-/* Style untuk item yang sedang dipilih */
 .optionItem.selectedOption {
   background-color: var(--main-accent);
   color: var(--text-accent);
@@ -257,7 +241,6 @@
   background-color: var(--main-accent-hoverstate);
 }
 
-/* Style khusus untuk opsi "Add more" */
 .addMoreOption {
   color: var(--main-accent) !important;
   font-weight: var(--font-weight-bold) !important;
@@ -267,7 +250,6 @@
   background-color: var(--secondary-accent) !important;
 }
 .addMoreOption.selectedOption {
-  /* Seharusnya tidak pernah terjadi, tapi untuk jaga-jaga */
   background-color: var(--main-accent-hoverstate) !important;
   color: var(--text-accent) !important;
 }

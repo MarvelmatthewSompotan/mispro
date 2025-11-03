@@ -84,10 +84,10 @@
 .tableRow {
   display: grid;
   grid-template-columns:
-    minmax(150px, 1fr) 
-    minmax(300px, 1fr) 
-    minmax(300px, 1fr) 
-    minmax(300px, 1fr) 
+    minmax(142px, 1fr) 
+    minmax(201px, 1fr) 
+    minmax(250px, 1fr) 
+    minmax(201px, 1fr) 
     minmax(150px, 1fr) 
     minmax(150px, 1fr); 
   border-bottom: 4px solid var(--main-grey);
