@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import styles from './TermOfPaymentSection.module.css';
-import checkBoxIcon from '../../../../../assets/CheckBox.png';
-import { getRegistrationOptions } from '../../../../../services/api';
-import Select from 'react-select';
+import React, { useState, useEffect } from "react";
+import styles from "./TermOfPaymentSection.module.css";
+import checkBoxIcon from "../../../../../assets/CheckBox.png";
+import { getRegistrationOptions } from "../../../../../services/api";
+import Select from "react-select";
 
 const TermOfPaymentSection = ({
   onDataChange,
@@ -11,11 +11,11 @@ const TermOfPaymentSection = ({
   errors,
   forceError,
 }) => {
-  const [tuitionFees, setTuitionFees] = useState('');
-  const [residencePayment, setResidencePayment] = useState('');
+  const [tuitionFees, setTuitionFees] = useState("");
+  const [residencePayment, setResidencePayment] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
-  const [discountName, setDiscountName] = useState('');
-  const [discountNotes, setDiscountNotes] = useState('');
+  const [discountName, setDiscountName] = useState("");
+  const [discountNotes, setDiscountNotes] = useState("");
 
   const [tuitionFeesOption, setTuitionFeesOption] = useState([]);
   const [residencePaymentOption, setResidencePaymentOption] = useState([]);
@@ -34,18 +34,18 @@ const TermOfPaymentSection = ({
           setDiscountTypeOptions(data.discount_types || []);
         })
         .catch((err) => {
-          console.error('Failed to fetch payment options:', err);
+          console.error("Failed to fetch payment options:", err);
         });
     }
   }, [sharedData]);
 
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-      setTuitionFees(prefill.tuition_fees || '');
-      setResidencePayment(prefill.residence_payment || '');
-      setFinancialPolicy(prefill.financial_policy_contract === 'Signed');
-      setDiscountName(prefill.discount_name || '');
-      setDiscountNotes(prefill.discount_notes || '');
+      setTuitionFees(prefill.tuition_fees || "");
+      setResidencePayment(prefill.residence_payment || "");
+      setFinancialPolicy(prefill.financial_policy_contract === "Signed");
+      setDiscountName(prefill.discount_name || "");
+      setDiscountNotes(prefill.discount_notes || "");
     }
   }, [prefill]);
 
@@ -53,7 +53,7 @@ const TermOfPaymentSection = ({
     onDataChange({
       tuition_fees: tuitionFees,
       residence_payment: residencePayment,
-      financial_policy_contract: financialPolicy ? 'Signed' : 'Not Signed',
+      financial_policy_contract: financialPolicy ? "Signed" : "Not Signed",
       discount_name: discountName,
       discount_notes: discountNotes,
     });
@@ -68,12 +68,12 @@ const TermOfPaymentSection = ({
 
   const handleTuitionFeesChange = (e, value) => {
     e.preventDefault(); // Mencegah event ganda
-    setTuitionFees((current) => (current === value ? '' : value));
+    setTuitionFees((current) => (current === value ? "" : value));
   };
 
   const handleResidencePaymentChange = (e, value) => {
     e.preventDefault(); // Mencegah event ganda
-    setResidencePayment((current) => (current === value ? '' : value));
+    setResidencePayment((current) => (current === value ? "" : value));
   };
 
   const handleFinancialPolicyChange = (e) => {
@@ -81,10 +81,10 @@ const TermOfPaymentSection = ({
   };
 
   const handleDiscountChange = (selectedOption) => {
-    const value = selectedOption ? selectedOption.value : '';
+    const value = selectedOption ? selectedOption.value : "";
     setDiscountName(value);
     if (!value) {
-      setDiscountNotes('');
+      setDiscountNotes("");
     }
   };
 
@@ -99,19 +99,12 @@ const TermOfPaymentSection = ({
       </div>
       <div className={styles.contentWrapper}>
         <div className={styles.paymentSection}>
-          <div
-            className={`${styles.sectionTitle} ${
-              (errors?.tuition_fees || forceError?.tuition_fees) && !tuitionFees
-                ? styles.termOfPaymentErrorWrapper
-                : ''
-            }`}
-          >
+          <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                (errors?.tuition_fees || forceError?.tuition_fees) &&
-                !tuitionFees
+                errors?.tuition_fees && !tuitionFees
                   ? styles.termOfPaymentErrorLabel
-                  : ''
+                  : ""
               }`}
             >
               Tuition Fees
@@ -125,8 +118,8 @@ const TermOfPaymentSection = ({
                   onClick={(e) => handleTuitionFeesChange(e, option)}
                 >
                   <input
-                    type='radio'
-                    name='tuitionFees'
+                    type="radio"
+                    name="tuitionFees"
                     value={option}
                     checked={tuitionFees === option}
                     readOnly
@@ -146,20 +139,12 @@ const TermOfPaymentSection = ({
         </div>
 
         <div className={styles.paymentSection}>
-          <div
-            className={`${styles.sectionTitle} ${
-              (errors?.residence_payment || forceError?.residence_payment) &&
-              !residencePayment
-                ? styles.termOfPaymentErrorWrapper
-                : ''
-            }`}
-          >
+          <div className={styles.sectionTitle}>
             <div
               className={`${styles.sectionTitleText} ${
-                (errors?.residence_payment || forceError?.residence_payment) &&
-                !residencePayment
+                errors?.residence_payment && !residencePayment
                   ? styles.termOfPaymentErrorLabel
-                  : ''
+                  : ""
               }`}
             >
               Residence Hall
@@ -173,8 +158,8 @@ const TermOfPaymentSection = ({
                   onClick={(e) => handleResidencePaymentChange(e, option)}
                 >
                   <input
-                    type='radio'
-                    name='residencePayment'
+                    type="radio"
+                    name="residencePayment"
                     value={option}
                     checked={residencePayment === option}
                     readOnly
@@ -203,7 +188,7 @@ const TermOfPaymentSection = ({
             <div className={styles.optionItem}>
               <label className={styles.checkboxLabel}>
                 <input
-                  type='checkbox'
+                  type="checkbox"
                   checked={financialPolicy}
                   onChange={handleFinancialPolicyChange}
                   className={styles.hiddenCheckbox}
@@ -213,7 +198,7 @@ const TermOfPaymentSection = ({
                   {financialPolicy && (
                     <img
                       className={styles.checkBoxIcon}
-                      alt=''
+                      alt=""
                       src={checkBoxIcon}
                     />
                   )}
@@ -231,7 +216,7 @@ const TermOfPaymentSection = ({
         <div className={styles.discountInputWrapper}>
           <div className={styles.discountSelectWrapper}>
             <Select
-              placeholder='Select discount type'
+              placeholder="Select discount type"
               isClearable
               options={discountTypeOptions.map((d) => ({
                 value: d.name,
@@ -243,7 +228,7 @@ const TermOfPaymentSection = ({
                   : null
               }
               onChange={handleDiscountChange}
-              classNamePrefix='react-select'
+              classNamePrefix="react-select"
             />
           </div>
           {discountName && (
@@ -251,10 +236,10 @@ const TermOfPaymentSection = ({
               <span className={styles.notesLabel}>Notes:</span>
               <input
                 className={styles.notesInput}
-                type='text'
+                type="text"
                 value={discountNotes}
                 onChange={handleDiscountNotesChange}
-                placeholder='Enter discount notes'
+                placeholder="Enter discount notes"
               />
             </div>
           )}

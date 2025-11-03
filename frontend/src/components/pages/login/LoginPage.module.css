@@ -118,9 +118,13 @@ body {
   margin: 0 0 0 0;
 }
 
+.input-group {
+  position: relative; 
+}
+
 .input-group input {
   width: 100%;
-  padding: 0 20px !important;
+  padding: 0 60px 0 20px !important; /* Beri ruang di kanan untuk ikon */
   height: 60px;
   font-size: 1rem !important;
   border: none !important;
@@ -132,6 +136,22 @@ body {
 .input-group input:focus {
   outline: none !important;
   box-shadow: 0 0 0 2px rgba(95, 132, 254, 0.2) !important;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  top: 50%;
+  right: 20px; 
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.password-toggle-icon:hover {
+  opacity: 1;
 }
 
 .reset-login-link {

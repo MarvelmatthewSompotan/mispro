@@ -4,30 +4,30 @@ import React, {
   useCallback,
   useMemo,
   useRef,
-} from 'react';
+} from "react";
 import {
   useParams,
   useLocation,
   useNavigate,
   useBlocker,
-} from 'react-router-dom';
+} from "react-router-dom";
 import {
   getStudentLatestApplication,
   getRegistrationOptions,
   updateStudent,
   getStudentHistoryDates,
   getHistoryDetail,
-} from '../../../../services/api';
-import Select from 'react-select';
-import styles from './StudentProfile.module.css';
-import ConfirmUpdatePopup from '../PopUpUpdate/PopUpConfirmUpdate.js';
-import UpdatedNotification from '../UpdateNotification/UpdateNotification.js';
-import PhotoUploadPopup from '../PhotoUploadPopup/PhotoUploadPopup.js';
-import Main from '../../../layout/Main.js';
-import gsap from 'gsap';
-import StudentProfileHeader from './StudentProfileHeader/StudentProfileHeader.js';
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-import ConfirmBackPopup from '../../../molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm.js';
+} from "../../../../services/api";
+import Select from "react-select";
+import styles from "./StudentProfile.module.css";
+import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate.js";
+import UpdatedNotification from "../UpdateNotification/UpdateNotification.js";
+import PhotoUploadPopup from "../PhotoUploadPopup/PhotoUploadPopup.js";
+import Main from "../../../layout/Main.js";
+import gsap from "gsap";
+import StudentProfileHeader from "./StudentProfileHeader/StudentProfileHeader.js";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import ConfirmBackPopup from "../../../molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm.js";
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -44,12 +44,12 @@ const RadioDisplay = ({
       <div className={styles.visualRadio}>
         <div
           className={`${styles.radioOuter} ${
-            isSelected ? styles.radioOuterSelected : ''
+            isSelected ? styles.radioOuterSelected : ""
           }`}
         />
         {isSelected && <div className={styles.radioInner} />}
       </div>
-      <span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>
+      <span style={{ fontWeight: isSelected ? "bold" : "normal" }}>
         {label}
       </span>
     </>
@@ -60,7 +60,7 @@ const RadioDisplay = ({
       <div
         className={styles.clickableLabel}
         onClick={() => onChange(name, value)}
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: "pointer" }}
       >
         {content}
       </div>
@@ -73,19 +73,19 @@ const RadioDisplay = ({
 const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
   const content = (
     <>
-      {' '}
+      {" "}
       <div className={styles.visualCheckbox}>
-        {' '}
+        {" "}
         <div
           className={`${styles.checkboxOuter} ${
-            isSelected ? styles.checkboxOuterSelected : ''
+            isSelected ? styles.checkboxOuterSelected : ""
           }`}
-        />{' '}
-        {isSelected && <div className={styles.checkboxCheckmark}>✓</div>}{' '}
-      </div>{' '}
-      <span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>
+        />{" "}
+        {isSelected && <div className={styles.checkboxCheckmark}>✓</div>}{" "}
+      </div>{" "}
+      <span style={{ fontWeight: isSelected ? "bold" : "normal" }}>
         {label}
-      </span>{' '}
+      </span>{" "}
     </>
   );
 
@@ -93,7 +93,7 @@ const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
     return (
       <label className={styles.clickableLabel}>
         <input
-          type='checkbox'
+          type="checkbox"
           name={name}
           checked={isSelected}
           onChange={onChange}
@@ -108,7 +108,7 @@ const CheckboxDisplay = ({ label, isSelected, isEditing, name, onChange }) => {
 };
 
 const StudentProfile = () => {
-  const { id } = useParams();
+  const { studentId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
@@ -134,21 +134,20 @@ const StudentProfile = () => {
   const blocker = useBlocker(isEditing);
   const [isPhotoPopupOpen, setIsPhotoPopupOpen] = useState(false);
   const citizenshipOptions = [
-    { value: 'Indonesia', label: 'Indonesia' },
-    { value: 'Non Indonesia', label: 'Non Indonesia' },
+    { value: "Indonesia", label: "Indonesia" },
+    { value: "Non Indonesia", label: "Non Indonesia" },
   ];
 
   // --- [BARU] Opsi untuk dropdown Agama ---
   const religionOptions = [
-    'Islam',
-    'Kristen',
-    'Kristen Katolik',
-    'Hindu',
-    'Buddha',
-    'Konghucu',
-    'Kristen Advent',
+    "Islam (Muslim)",
+    "Kristen (Christian) ",
+    "Katolik (Catholic)",
+    "Hindu",
+    "Buddha",
+    "Konghucu (Confucianism)",
+    "Kristen Advent (Adventist)",
   ];
-  // --- [AKHIR BARU] ---
 
   const [isBackPopupOpen, setIsBackPopupOpen] = useState(false);
   const historyRef = useRef(null);
@@ -157,24 +156,24 @@ const StudentProfile = () => {
   const refreshHistoryDates = useCallback(async () => {
     setIsLoadingHistory(true);
     try {
-      const dates = await getStudentHistoryDates(id);
+      const dates = await getStudentHistoryDates(studentId);
       setHistoryDates(dates);
     } catch (err) {
-      console.error('Failed to refresh history dates:', err);
+      console.error("Failed to refresh history dates:", err);
     } finally {
       setIsLoadingHistory(false);
     }
-  }, [id]);
+  }, [studentId]);
 
   const [validationMessages, setValidationMessages] = useState({
-    nik: '',
-    kitas: '',
-    nisn: '',
+    nik: "",
+    kitas: "",
+    nisn: "",
   });
 
   useEffect(() => {
     if (!location.state?.fromList) {
-      navigate('/students', { replace: true });
+      navigate("/students", { replace: true });
     }
 
     // eslint-disable-next-line
@@ -191,7 +190,7 @@ const StudentProfile = () => {
         );
         setStatusOptions(data.active_status || []);
       })
-      .catch((err) => console.error('Failed to fetch options:', err));
+      .catch((err) => console.error("Failed to fetch options:", err));
   }, []);
 
   const handleFileSelect = (file) => {
@@ -208,14 +207,14 @@ const StudentProfile = () => {
           setLoading(true);
         }
         const [studentRes, optionsRes] = await Promise.all([
-          getStudentLatestApplication(id, 'new'),
+          getStudentLatestApplication(studentId, "new"),
           getRegistrationOptions(),
         ]);
         setOptions(optionsRes);
         if (studentRes.success) {
           const studentData = studentRes.data;
           const combinedData = {
-            student_id: studentData.student_id,
+            student_id: studentData.input_name,
             ...studentData.studentInfo,
             ...studentData.program,
             ...studentData.facilities,
@@ -230,14 +229,14 @@ const StudentProfile = () => {
           studentInfoKeys.current = new Set(Object.keys(studentInfoData));
         }
       } catch (err) {
-        console.error('Error fetching student profile data:', err);
+        console.error("Error fetching student profile data:", err);
       } finally {
         if (!isBackgroundRefresh) {
           setLoading(false);
         }
       }
     },
-    [id]
+    [studentId]
   );
 
   useEffect(() => {
@@ -245,14 +244,14 @@ const StudentProfile = () => {
   }, [fetchData]);
 
   useEffect(() => {
-    if (blocker.state === 'blocked') {
+    if (blocker.state === "blocked") {
       setIsBackPopupOpen(true);
     }
   }, [blocker.state]);
 
   const handleStatusChange = (newStatus) => {
-    const inactiveStatuses = ['Graduate', 'Expelled', 'Withdraw'];
-    const newActiveStatus = inactiveStatuses.includes(newStatus) ? 'NO' : 'YES';
+    const inactiveStatuses = ["Graduate", "Expelled", "Withdraw"];
+    const newActiveStatus = inactiveStatuses.includes(newStatus) ? "NO" : "YES";
     setStudentInfo((prev) => ({
       ...prev,
       status: newStatus,
@@ -322,8 +321,8 @@ const StudentProfile = () => {
           province: snapshotData.province,
           other: snapshotData.other,
           student_active:
-            snapshotData.student_active ?? studentInfo.student_active ?? 'YES',
-          status: snapshotData.status ?? studentInfo.status ?? 'Not Graduated',
+            snapshotData.student_active ?? studentInfo.student_active ?? "YES",
+          status: snapshotData.status ?? studentInfo.status ?? "Not Graduated",
         };
 
         const combinedData = {
@@ -393,7 +392,7 @@ const StudentProfile = () => {
         setIsHistoryVisible(false);
       }
     } catch (error) {
-      console.error('Failed to fetch history detail:', error);
+      console.error("Failed to fetch history detail:", error);
     } finally {
       setLoading(false);
     }
@@ -412,54 +411,54 @@ const StudentProfile = () => {
 
   const handleStudentInfoChange = (e) => {
     const { name, value } = e.target;
-    clearError('studentInfo', name);
+    clearError("studentInfo", name);
 
-    if (name === 'nik' && value && value.length !== 16) {
+    if (name === "nik" && value && value.length !== 16) {
       setValidationMessages((prev) => ({
         ...prev,
-        nik: 'NIK must be 16 digits',
+        nik: "NIK must be 16 digits",
       }));
-    } else if (name === 'nik') {
-      setValidationMessages((prev) => ({ ...prev, nik: '' }));
+    } else if (name === "nik") {
+      setValidationMessages((prev) => ({ ...prev, nik: "" }));
     }
 
-    if (name === 'kitas' && value && (value.length < 11 || value.length > 16)) {
+    if (name === "kitas" && value && (value.length < 11 || value.length > 16)) {
       setValidationMessages((prev) => ({
         ...prev,
-        kitas: 'KITAS must be 11-16 characters',
+        kitas: "KITAS must be 11-16 characters",
       }));
-    } else if (name === 'kitas') {
-      setValidationMessages((prev) => ({ ...prev, kitas: '' }));
+    } else if (name === "kitas") {
+      setValidationMessages((prev) => ({ ...prev, kitas: "" }));
     }
 
-    if (name === 'nisn' && value && value.length !== 10) {
+    if (name === "nisn" && value && value.length !== 10) {
       setValidationMessages((prev) => ({
         ...prev,
-        nisn: 'NISN must be 10 digits',
+        nisn: "NISN must be 10 digits",
       }));
-    } else if (name === 'nisn') {
-      setValidationMessages((prev) => ({ ...prev, nisn: '' }));
+    } else if (name === "nisn") {
+      setValidationMessages((prev) => ({ ...prev, nisn: "" }));
     }
 
     setStudentInfo((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleStudentInfoSelectChange = (name, selectedOption) => {
-    const value = selectedOption ? selectedOption.value : '';
-    clearError('studentInfo', name);
+    const value = selectedOption ? selectedOption.value : "";
+    clearError("studentInfo", name);
 
     setStudentInfo((prev) => {
       const newData = { ...prev, [name]: value };
 
-      if (name === 'citizenship') {
-        if (value === 'Indonesia') {
-          newData.kitas = '';
-          newData.country = '';
-        } else if (value === 'Non Indonesia') newData.nik = '';
+      if (name === "citizenship") {
+        if (value === "Indonesia") {
+          newData.kitas = "";
+          newData.country = "";
+        } else if (value === "Non Indonesia") newData.nik = "";
       }
 
-      if (name === 'academic_status' && value !== 'OTHER') {
-        newData.academic_status_other = '';
+      if (name === "academic_status" && value !== "OTHER") {
+        newData.academic_status_other = "";
       }
 
       return newData;
@@ -469,123 +468,123 @@ const StudentProfile = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const studentInfoFields = [
-      'first_name',
-      'nickname',
-      'nisn',
-      'nik',
-      'kitas',
-      'gender',
-      'family_rank',
-      'citizenship',
-      'religion',
-      'place_of_birth',
-      'date_of_birth',
-      'email',
-      'previous_school',
-      'phone_number',
-      'academic_status',
-      'street',
-      'village',
-      'district',
-      'city_regency',
-      'province',
+      "first_name",
+      "nickname",
+      "nisn",
+      "nik",
+      "kitas",
+      "gender",
+      "family_rank",
+      "citizenship",
+      "religion",
+      "place_of_birth",
+      "date_of_birth",
+      "email",
+      "previous_school",
+      "phone_number",
+      "academic_status",
+      "street",
+      "village",
+      "district",
+      "city_regency",
+      "province",
     ];
 
     const parentFields = [
-      'father_name',
-      'father_phone',
-      'father_email',
-      'father_address_street',
-      'father_address_village',
-      'father_address_district',
-      'father_address_city_regency',
-      'father_address_province',
-      'mother_name',
-      'mother_phone',
-      'mother_email',
-      'mother_address_street',
-      'mother_address_village',
-      'mother_address_district',
-      'mother_address_city_regency',
-      'mother_address_province',
+      "father_name",
+      "father_phone",
+      "father_email",
+      "father_address_street",
+      "father_address_village",
+      "father_address_district",
+      "father_address_city_regency",
+      "father_address_province",
+      "mother_name",
+      "mother_phone",
+      "mother_email",
+      "mother_address_street",
+      "mother_address_village",
+      "mother_address_district",
+      "mother_address_city_regency",
+      "mother_address_province",
     ];
 
     if (studentInfoFields.includes(name)) {
-      clearError('studentInfo', name);
+      clearError("studentInfo", name);
     } else if (parentFields.includes(name)) {
-      clearError('parentGuardian', name);
+      clearError("parentGuardian", name);
     } else {
-      clearError('facilities', name);
+      clearError("facilities", name);
     }
 
     setFormData((prevData) => {
       const newFormData = { ...prevData };
       const radioNames = [
-        'section_id',
-        'program_id',
-        'transportation_id',
-        'residence_id',
-        'tuition_fees',
-        'residence_payment',
+        "section_id",
+        "program_id",
+        "transportation_id",
+        "residence_id",
+        "tuition_fees",
+        "residence_payment",
       ];
       const isPolicyCheckbox = [
-        'transportation_policy',
-        'residence_hall_policy',
-        'financial_policy_contract',
+        "transportation_policy",
+        "residence_hall_policy",
+        "financial_policy_contract",
       ].includes(name);
 
       newFormData[name] = isPolicyCheckbox
         ? checked
-          ? 'Signed'
-          : 'Not Signed'
+          ? "Signed"
+          : "Not Signed"
         : value;
 
       if (radioNames.includes(name)) {
         newFormData[name] =
-          String(prevData[name]) === String(value) ? '' : value;
+          String(prevData[name]) === String(value) ? "" : value;
       } else if (isPolicyCheckbox) {
-        newFormData[name] = checked ? 'Signed' : 'Not Signed';
+        newFormData[name] = checked ? "Signed" : "Not Signed";
       } else {
         newFormData[name] = value;
       }
 
-      if (name === 'section_id') {
-        newFormData.class_id = '';
-        newFormData.major_id = '';
+      if (name === "section_id") {
+        newFormData.class_id = "";
+        newFormData.major_id = "";
       }
 
-      if (name === 'class_id') {
+      if (name === "class_id") {
         const selectedClass = options.classes.find(
           (c) => String(c.class_id) === String(value)
         );
         const gradeNum = selectedClass ? parseInt(selectedClass.grade, 10) : 0;
         if (gradeNum < 9) {
-          newFormData.major_id = '';
+          newFormData.major_id = "";
         }
       }
 
-      if (name === 'transportation_id') {
+      if (name === "transportation_id") {
         const selectedTransport = options.transportations.find(
           (t) => String(t.transport_id) === String(value)
         );
         const transportType = selectedTransport
           ? selectedTransport.type.toLowerCase()
-          : '';
-        if (transportType === 'own car' || transportType === 'school bus') {
+          : "";
+        if (transportType === "own car" || transportType === "school bus") {
           const currentResidence = options.residence_halls.find(
             (r) => String(r.residence_id) === String(prevData.residence_id)
           );
           if (
             currentResidence &&
-            currentResidence.type.toLowerCase().includes('dormitory')
+            currentResidence.type.toLowerCase().includes("dormitory")
           ) {
-            newFormData.residence_id = '';
+            newFormData.residence_id = "";
           }
         }
       }
 
-      if (name === 'discount_name' && !value) {
-        newFormData.discount_notes = '';
+      if (name === "discount_name" && !value) {
+        newFormData.discount_notes = "";
       }
 
       return newFormData;
@@ -593,7 +592,7 @@ const StudentProfile = () => {
   };
 
   const handleFormSelectChange = (name, selectedOption) => {
-    const value = selectedOption ? selectedOption.value : '';
+    const value = selectedOption ? selectedOption.value : "";
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -601,43 +600,43 @@ const StudentProfile = () => {
   };
 
   const handleRadioChange = (name, value) => {
-    clearError('facilities', name);
+    clearError("facilities", name);
     setFormData((prevData) => {
       const currentVal = prevData[name];
-      const newVal = currentVal === value ? '' : value;
+      const newVal = currentVal === value ? "" : value;
       const newFormData = { ...prevData, [name]: newVal };
 
-      if (name === 'residence_id') {
+      if (name === "residence_id") {
         const selectedResidence = options.residence_halls.find(
           (r) => String(r.residence_id) === String(newVal)
         );
         if (
           selectedResidence &&
-          selectedResidence.type.toLowerCase().includes('dormitory')
+          selectedResidence.type.toLowerCase().includes("dormitory")
         ) {
-          newFormData.transportation_id = '';
-          newFormData.pickup_point_id = '';
-          newFormData.pickup_point_custom = '';
-          newFormData.transportation_policy = 'Not Signed';
+          newFormData.transportation_id = "";
+          newFormData.pickup_point_id = "";
+          newFormData.pickup_point_custom = "";
+          newFormData.transportation_policy = "Not Signed";
         }
       }
 
-      if (name === 'transportation_id') {
+      if (name === "transportation_id") {
         const selectedTransport = options.transportations.find(
           (t) => String(t.transport_id) === String(newVal)
         );
         const transportType = selectedTransport
           ? selectedTransport.type.toLowerCase()
-          : '';
-        if (transportType === 'own car' || transportType === 'school bus') {
+          : "";
+        if (transportType === "own car" || transportType === "school bus") {
           const currentResidence = options.residence_halls.find(
             (r) => String(r.residence_id) === String(prevData.residence_id)
           );
           if (
             currentResidence &&
-            currentResidence.type.toLowerCase().includes('dormitory')
+            currentResidence.type.toLowerCase().includes("dormitory")
           ) {
-            newFormData.residence_id = '';
+            newFormData.residence_id = "";
           }
         }
       }
@@ -655,7 +654,7 @@ const StudentProfile = () => {
     setStudentInfo(newStudentInfo);
     setIsEditing(false);
     setErrors({});
-    setValidationMessages({ nik: '', kitas: '', nisn: '' });
+    setValidationMessages({ nik: "", kitas: "", nisn: "" });
     setSelectedPhoto(null);
     setPhotoPreview(null);
   };
@@ -667,22 +666,22 @@ const StudentProfile = () => {
   const handleConfirmBack = () => {
     handleCancel();
     setIsBackPopupOpen(false);
-    if (blocker.state === 'blocked') {
+    if (blocker.state === "blocked") {
       blocker.proceed();
     }
   };
 
   const handleClosePopup = () => {
     setIsBackPopupOpen(false);
-    if (blocker.state === 'blocked') {
+    if (blocker.state === "blocked") {
       blocker.reset();
     }
   };
 
   const validateForm = () => {
     const isFilled = (v) =>
-      v !== null && v !== undefined && String(v).trim() !== '';
-    const normStr = (v) => String(v ?? '').trim();
+      v !== null && v !== undefined && String(v).trim() !== "";
+    const normStr = (v) => String(v ?? "").trim();
     const lower = (v) => normStr(v).toLowerCase();
     const upper = (v) => normStr(v).toUpperCase();
     const toInt = (v) => {
@@ -696,22 +695,22 @@ const StudentProfile = () => {
 
     const studentInfoErrors = {};
     const requiredStudentFields = {
-      first_name: 'First name is required',
-      nickname: 'Nickname is required',
-      gender: 'Gender is required',
-      family_rank: 'Rank is required',
-      citizenship: 'Citizenship is required',
-      religion: 'Religion is required',
-      place_of_birth: 'Place of birth is required',
-      date_of_birth: 'Date of birth is required',
-      email: 'A valid email is required',
-      phone_number: 'Phone number is required',
-      academic_status: 'Academic status is required',
-      street: 'Street is required',
-      village: 'Village is required',
-      district: 'District is required',
-      city_regency: 'City/Regency is required',
-      province: 'Province is required',
+      first_name: "First name is required",
+      nickname: "Nickname is required",
+      gender: "Gender is required",
+      family_rank: "Rank is required",
+      citizenship: "Citizenship is required",
+      religion: "Religion is required",
+      place_of_birth: "Place of birth is required",
+      date_of_birth: "Date of birth is required",
+      email: "A valid email is required",
+      phone_number: "Phone number is required",
+      academic_status: "Academic status is required",
+      street: "Street is required",
+      village: "Village is required",
+      district: "District is required",
+      city_regency: "City/Regency is required",
+      province: "Province is required",
     };
 
     for (const field in requiredStudentFields) {
@@ -734,12 +733,12 @@ const StudentProfile = () => {
     if (selectedSection && selectedClass) {
       const secName = lower(selectedSection.name);
       const gradeStr = upper(selectedClass.grade);
-      if (secName === 'ecp' && gradeStr === 'N') {
+      if (secName === "ecp" && gradeStr === "N") {
         isPreviousSchoolRequired = false;
       }
     }
     if (isPreviousSchoolRequired && !isFilled(fullFormData.previous_school)) {
-      studentInfoErrors.previous_school = 'Previous school is required.';
+      studentInfoErrors.previous_school = "Previous school is required.";
     }
 
     let isNisnRequired = true;
@@ -747,8 +746,8 @@ const StudentProfile = () => {
       const secName = lower(selectedSection.name);
       const gradeNum = toInt(selectedClass.grade);
       if (
-        secName === 'ecp' ||
-        (secName === 'elementary school' && (gradeNum === 1 || gradeNum === 2))
+        secName === "ecp" ||
+        (secName === "elementary school" && (gradeNum === 1 || gradeNum === 2))
       ) {
         isNisnRequired = false;
       }
@@ -760,44 +759,44 @@ const StudentProfile = () => {
 
     if (isFilled(nisnAsString)) {
       if (nisnAsString.length !== 10) {
-        studentInfoErrors.nisn = 'NISN must be 10 digits.';
+        studentInfoErrors.nisn = "NISN must be 10 digits.";
       } else if (!/^\d+$/.test(nisnAsString)) {
-        studentInfoErrors.nisn = 'NISN must only contain numbers.';
+        studentInfoErrors.nisn = "NISN must only contain numbers.";
       }
     } else if (isNisnRequired) {
-      studentInfoErrors.nisn = 'NISN is required.';
+      studentInfoErrors.nisn = "NISN is required.";
     }
 
     if (isFilled(fullFormData.email) && !emailRegex.test(fullFormData.email)) {
-      studentInfoErrors.email = 'Invalid email format.';
+      studentInfoErrors.email = "Invalid email format.";
     }
 
-    if (fullFormData.citizenship === 'Indonesia') {
+    if (fullFormData.citizenship === "Indonesia") {
       const nikRegex = /^[1-9][0-9]{15}$/;
       if (!isFilled(nikAsString)) {
-        studentInfoErrors.nik = 'NIK is required.';
+        studentInfoErrors.nik = "NIK is required.";
       } else if (!nikRegex.test(nikAsString)) {
         studentInfoErrors.nik =
-          'NIK must be 16 valid digits (not start with 0).';
+          "NIK must be 16 valid digits (not start with 0).";
       }
     }
 
-    if (fullFormData.citizenship === 'Non Indonesia') {
+    if (fullFormData.citizenship === "Non Indonesia") {
       if (!isFilled(kitasAsString)) {
-        studentInfoErrors.kitas = 'KITAS is required.';
+        studentInfoErrors.kitas = "KITAS is required.";
       } else if (kitasAsString.length < 11 || kitasAsString.length > 16) {
-        studentInfoErrors.kitas = 'KITAS must be 11-16 characters.';
+        studentInfoErrors.kitas = "KITAS must be 11-16 characters.";
       }
       if (!isFilled(fullFormData.country)) {
-        studentInfoErrors.country = 'Country of origin is required.';
+        studentInfoErrors.country = "Country of origin is required.";
       }
     }
 
     if (
-      fullFormData.academic_status === 'OTHER' &&
+      fullFormData.academic_status === "OTHER" &&
       !isFilled(fullFormData.academic_status_other)
     ) {
-      studentInfoErrors.academic_status = 'Please specify the academic status.';
+      studentInfoErrors.academic_status = "Please specify the academic status.";
     }
 
     if (Object.keys(studentInfoErrors).length > 0) {
@@ -806,7 +805,7 @@ const StudentProfile = () => {
 
     const facilitiesErrors = {};
     if (!fullFormData.residence_id) {
-      facilitiesErrors.residence_id = 'Residence Hall is required.';
+      facilitiesErrors.residence_id = "Residence Hall is required.";
     }
 
     if (fullFormData.transportation_id && options?.transportations) {
@@ -815,7 +814,7 @@ const StudentProfile = () => {
       );
       if (
         selectedTransport &&
-        lower(selectedTransport.type).includes('school bus')
+        lower(selectedTransport.type).includes("school bus")
       ) {
         const isPickupPointSelected = !!fullFormData.pickup_point_id;
         const isCustomPickupPointFilled = isFilled(
@@ -823,20 +822,20 @@ const StudentProfile = () => {
         );
         if (!isPickupPointSelected && !isCustomPickupPointFilled) {
           facilitiesErrors.pickup_point_id =
-            'Pickup point must be selected or specified.';
+            "Pickup point must be selected or specified.";
         }
       }
     }
 
     if (
       fullFormData.transportation_id &&
-      fullFormData.transportation_policy !== 'Signed'
+      fullFormData.transportation_policy !== "Signed"
     ) {
-      facilitiesErrors.transportation_policy = 'Policy must be signed.';
+      facilitiesErrors.transportation_policy = "Policy must be signed.";
     }
 
-    if (fullFormData.residence_hall_policy !== 'Signed') {
-      facilitiesErrors.residence_hall_policy = 'Policy must be signed.';
+    if (fullFormData.residence_hall_policy !== "Signed") {
+      facilitiesErrors.residence_hall_policy = "Policy must be signed.";
     }
 
     if (Object.keys(facilitiesErrors).length > 0) {
@@ -852,7 +851,7 @@ const StudentProfile = () => {
       !isFilled(fullFormData.father_email) ||
       !emailRegex.test(normStr(fullFormData.father_email))
     )
-      parentErrors.father_email = 'A valid email for the father is required.';
+      parentErrors.father_email = "A valid email for the father is required.";
     if (!isFilled(fullFormData.father_address_street))
       parentErrors.father_address_street =
         "Father's street address is required.";
@@ -874,7 +873,7 @@ const StudentProfile = () => {
       !isFilled(fullFormData.mother_email) ||
       !emailRegex.test(normStr(fullFormData.mother_email))
     )
-      parentErrors.mother_email = 'A valid email for the mother is required.';
+      parentErrors.mother_email = "A valid email for the mother is required.";
     if (!isFilled(fullFormData.mother_address_street))
       parentErrors.mother_address_street =
         "Mother's street address is required.";
@@ -898,7 +897,7 @@ const StudentProfile = () => {
 
   useEffect(() => {
     if (Object.keys(errors).length > 0 && scrollTrigger > 0) {
-      const sectionOrder = ['studentInfo', 'facilities', 'parentGuardian'];
+      const sectionOrder = ["studentInfo", "facilities", "parentGuardian"];
       const firstErrorSectionKey = sectionOrder.find(
         (key) => errors[key] && Object.keys(errors[key]).length > 0
       );
@@ -909,7 +908,7 @@ const StudentProfile = () => {
           gsap.to(window, {
             duration: 0.8,
             scrollTo: { y: targetElement, offsetY: 100 },
-            ease: 'power2.inOut',
+            ease: "power2.inOut",
           });
         }
       }
@@ -935,13 +934,9 @@ const StudentProfile = () => {
     }
 
     try {
-      // 1. Tangkap response dari API update
-      const response = await updateStudent(id, dataToSend);
-
-      // 2. Buat ulang data profil dari response API, BUKAN dari fetch ulang
+      const response = await updateStudent(studentId, dataToSend);
       const updatedData = response.data.request_data;
       const combinedData = {
-        id_primary: response.data.id,
         student_id: response.data.student_id,
         ...updatedData,
       };
@@ -961,19 +956,19 @@ const StudentProfile = () => {
       await refreshHistoryDates();
     } catch (error) {
       if (error.response && error.response.data) {
-        if (error.response.data.type === 'validation') {
-          console.error('Validation Errors:', error.response.data.errors);
+        if (error.response.data.type === "validation") {
+          console.error("Validation Errors:", error.response.data.errors);
           alert(
-            'Update failed due to validation errors. Please check the console (F12) for more details.'
+            "Update failed due to validation errors. Please check the console (F12) for more details."
           );
         } else {
-          console.error('Server Error:', error.response.data);
+          console.error("Server Error:", error.response.data);
           alert(
             `Update failed: ${error.response.data.message || error.message}`
           );
         }
       } else {
-        console.error('Failed to update student:', error);
+        console.error("Failed to update student:", error);
         alert(`Update failed: ${error.message}`);
       }
     } finally {
@@ -996,24 +991,24 @@ const StudentProfile = () => {
     if (!selectedSection) return [];
     const sectionName = selectedSection.name;
 
-    if (sectionName === 'ECP') {
+    if (sectionName === "ECP") {
       return options.classes.filter((cls) =>
-        ['N', 'K1', 'K2'].includes(cls.grade)
+        ["N", "K1", "K2"].includes(cls.grade)
       );
     }
-    if (sectionName === 'Elementary School') {
+    if (sectionName === "Elementary School") {
       return options.classes.filter((cls) => {
         const grade = parseInt(cls.grade, 10);
         return grade >= 1 && grade <= 6;
       });
     }
-    if (sectionName === 'Middle School') {
+    if (sectionName === "Middle School") {
       return options.classes.filter((cls) => {
         const grade = parseInt(cls.grade, 10);
         return grade >= 7 && grade <= 9;
       });
     }
-    if (sectionName === 'High School') {
+    if (sectionName === "High School") {
       return options.classes.filter((cls) => {
         const grade = parseInt(cls.grade, 10);
         return grade >= 10 && grade <= 12;
@@ -1039,13 +1034,13 @@ const StudentProfile = () => {
     );
     const transportType = selectedTransport
       ? selectedTransport.type.toLowerCase()
-      : '';
+      : "";
     const isTransportRestricted =
-      transportType === 'own car' || transportType === 'school bus';
+      transportType === "own car" || transportType === "school bus";
 
     if (isTransportRestricted) {
       return options.residence_halls.filter(
-        (r) => !r.type.toLowerCase().includes('dormitory')
+        (r) => !r.type.toLowerCase().includes("dormitory")
       );
     }
     return options.residence_halls;
@@ -1054,7 +1049,7 @@ const StudentProfile = () => {
   const majorSelectOptions = useMemo(() => {
     if (!options?.majors) return [];
     return options.majors
-      .filter((mjr) => mjr.name !== 'No Major')
+      .filter((mjr) => mjr.name !== "No Major")
       .map((mjr) => ({
         value: mjr.major_id,
         label: mjr.name,
@@ -1076,7 +1071,7 @@ const StudentProfile = () => {
       (r) => String(r.residence_id) === String(formData.residence_id)
     );
     return selectedResidence
-      ? selectedResidence.type.toLowerCase().includes('dormitory')
+      ? selectedResidence.type.toLowerCase().includes("dormitory")
       : false;
   }, [options, formData?.residence_id]);
 
@@ -1089,24 +1084,24 @@ const StudentProfile = () => {
     );
 
   if (!formData)
-    return <div style={{ padding: '20px' }}>Student not found.</div>;
+    return <div style={{ padding: "20px" }}>Student not found.</div>;
 
   const formatDateForInput = (dateString) =>
-    !dateString ? '' : new Date(dateString).toISOString().split('T')[0];
+    !dateString ? "" : new Date(dateString).toISOString().split("T")[0];
 
   const formatDateForDisplay = (dateString) =>
     !dateString
-      ? '-'
-      : new Date(dateString).toLocaleDateString('en-GB', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
+      ? "-"
+      : new Date(dateString).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
         });
 
   const selectedTransportType =
     options?.transportations?.find(
       (t) => String(t.transport_id) === String(formData.transportation_id)
-    )?.type || '';
+    )?.type || "";
 
   return (
     <Main showBackButton onBackClick={handleBackClick}>
@@ -1134,10 +1129,10 @@ const StudentProfile = () => {
 
         <div className={styles.profileContent}>
           <div className={styles.infoContainer}>
-            <div id='studentInfo' className={styles.infoSection}>
+            <div id="studentInfo" className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
-                  isEditing ? styles.sectionHeaderEditing : ''
+                  isEditing ? styles.sectionHeaderEditing : ""
                 }`}
               >
                 <b>STUDENT’S INFORMATION</b>
@@ -1148,78 +1143,78 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.first_name
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='first_name'
+                      htmlFor="first_name"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.first_name ? styles.errorLabel : ''
+                        errors.studentInfo?.first_name ? styles.errorLabel : ""
                       }`}
                     >
                       First name
                     </label>
                     {isEditing ? (
                       <input
-                        id='first_name'
-                        type='text'
-                        name='first_name'
-                        value={studentInfo.first_name || ''}
+                        id="first_name"
+                        type="text"
+                        name="first_name"
+                        value={studentInfo.first_name || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.first_name
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
-                          errors.studentInfo?.first_name || 'First name'
+                          errors.studentInfo?.first_name || "First name"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.first_name || '-'}
+                        {studentInfo.first_name || "-"}
                       </b>
                     )}
                   </div>
                   <div className={styles.field}>
-                    <label htmlFor='middle_name' className={styles.fieldLabel}>
+                    <label htmlFor="middle_name" className={styles.fieldLabel}>
                       Middle name
                     </label>
                     {isEditing ? (
                       <input
-                        id='middle_name'
-                        type='text'
-                        name='middle_name'
-                        value={studentInfo.middle_name || ''}
+                        id="middle_name"
+                        type="text"
+                        name="middle_name"
+                        value={studentInfo.middle_name || ""}
                         onChange={handleStudentInfoChange}
                         className={styles.formInput}
-                        placeholder='Middle name'
+                        placeholder="Middle name"
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.middle_name || '-'}
+                        {studentInfo.middle_name || "-"}
                       </b>
                     )}
                   </div>
                 </div>
                 <div className={styles.row}>
                   <div className={styles.field}>
-                    <label htmlFor='last_name' className={styles.fieldLabel}>
+                    <label htmlFor="last_name" className={styles.fieldLabel}>
                       Last name
                     </label>
                     {isEditing ? (
                       <input
-                        id='last_name'
-                        type='text'
-                        name='last_name'
-                        value={studentInfo.last_name || ''}
+                        id="last_name"
+                        type="text"
+                        name="last_name"
+                        value={studentInfo.last_name || ""}
                         onChange={handleStudentInfoChange}
                         className={styles.formInput}
-                        placeholder='Last name'
+                        placeholder="Last name"
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.last_name || '-'}
+                        {studentInfo.last_name || "-"}
                       </b>
                     )}
                   </div>
@@ -1227,32 +1222,32 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.nickname
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='nickname'
+                      htmlFor="nickname"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.nickname ? styles.errorLabel : ''
+                        errors.studentInfo?.nickname ? styles.errorLabel : ""
                       }`}
                     >
                       Nickname
                     </label>
                     {isEditing ? (
                       <input
-                        id='nickname'
-                        type='text'
-                        name='nickname'
-                        value={studentInfo.nickname || ''}
+                        id="nickname"
+                        type="text"
+                        name="nickname"
+                        value={studentInfo.nickname || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
-                          errors.studentInfo?.nickname ? styles.errorInput : ''
+                          errors.studentInfo?.nickname ? styles.errorInput : ""
                         }`}
-                        placeholder={errors.studentInfo?.nickname || 'Nickname'}
+                        placeholder={errors.studentInfo?.nickname || "Nickname"}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.nickname || '-'}
+                        {studentInfo.nickname || "-"}
                       </b>
                     )}
                   </div>
@@ -1262,13 +1257,13 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.citizenship
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='citizenship'
+                      htmlFor="citizenship"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.citizenship ? styles.errorLabel : ''
+                        errors.studentInfo?.citizenship ? styles.errorLabel : ""
                       }`}
                     >
                       Citizenship
@@ -1276,8 +1271,8 @@ const StudentProfile = () => {
                     {isEditing ? (
                       <div className={styles.selectWrapper}>
                         <Select
-                          id='citizenship'
-                          name='citizenship'
+                          id="citizenship"
+                          name="citizenship"
                           options={citizenshipOptions}
                           value={
                             studentInfo.citizenship
@@ -1288,36 +1283,36 @@ const StudentProfile = () => {
                               : null
                           }
                           onChange={(opt) =>
-                            handleStudentInfoSelectChange('citizenship', opt)
+                            handleStudentInfoSelectChange("citizenship", opt)
                           }
                           placeholder={
                             errors.studentInfo?.citizenship ||
-                            'Select citizenship'
+                            "Select citizenship"
                           }
                           isClearable
                           classNamePrefix={
                             errors.studentInfo?.citizenship
-                              ? 'react-select-error'
-                              : 'react-select'
+                              ? "react-select-error"
+                              : "react-select"
                           }
                         />
                       </div>
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.citizenship || '-'}
+                        {studentInfo.citizenship || "-"}
                       </b>
                     )}
                   </div>
-                  {studentInfo.citizenship === 'Indonesia' && (
+                  {studentInfo.citizenship === "Indonesia" && (
                     <div
                       className={`${styles.field} ${
-                        errors.studentInfo?.nik ? styles.errorFieldWrapper : ''
+                        errors.studentInfo?.nik ? styles.errorFieldWrapper : ""
                       }`}
                     >
                       <label
-                        htmlFor='nik'
+                        htmlFor="nik"
                         className={`${styles.fieldLabel} ${
-                          errors.studentInfo?.nik ? styles.errorLabel : ''
+                          errors.studentInfo?.nik ? styles.errorLabel : ""
                         }`}
                       >
                         NIK
@@ -1325,19 +1320,19 @@ const StudentProfile = () => {
                       {isEditing ? (
                         <div className={styles.inputWithError}>
                           <input
-                            id='nik'
-                            type='text'
-                            name='nik'
-                            value={studentInfo.nik || ''}
+                            id="nik"
+                            type="text"
+                            name="nik"
+                            value={studentInfo.nik || ""}
                             onChange={handleStudentInfoChange}
                             maxLength={16}
                             className={`${styles.formInput} ${
                               errors.studentInfo?.nik || validationMessages.nik
                                 ? styles.errorInput
-                                : ''
+                                : ""
                             }`}
                             placeholder={
-                              errors.studentInfo?.nik || 'NIK (16 digits)'
+                              errors.studentInfo?.nik || "NIK (16 digits)"
                             }
                           />
                           {validationMessages.nik && (
@@ -1348,23 +1343,23 @@ const StudentProfile = () => {
                         </div>
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.nik || '-'}
+                          {studentInfo.nik || "-"}
                         </b>
                       )}
                     </div>
                   )}
-                  {studentInfo.citizenship === 'Non Indonesia' && (
+                  {studentInfo.citizenship === "Non Indonesia" && (
                     <div
                       className={`${styles.field} ${
                         errors.studentInfo?.kitas
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='kitas'
+                        htmlFor="kitas"
                         className={`${styles.fieldLabel} ${
-                          errors.studentInfo?.kitas ? styles.errorLabel : ''
+                          errors.studentInfo?.kitas ? styles.errorLabel : ""
                         }`}
                       >
                         KITAS
@@ -1372,21 +1367,21 @@ const StudentProfile = () => {
                       {isEditing ? (
                         <div className={styles.inputWithError}>
                           <input
-                            id='kitas'
-                            type='text'
-                            name='kitas'
-                            value={studentInfo.kitas || ''}
+                            id="kitas"
+                            type="text"
+                            name="kitas"
+                            value={studentInfo.kitas || ""}
                             onChange={handleStudentInfoChange}
                             maxLength={16}
                             className={`${styles.formInput} ${
                               errors.studentInfo?.kitas ||
                               validationMessages.kitas
                                 ? styles.errorInput
-                                : ''
+                                : ""
                             }`}
                             placeholder={
                               errors.studentInfo?.kitas ||
-                              'KITAS (11-16 characters)'
+                              "KITAS (11-16 characters)"
                             }
                           />
                           {validationMessages.kitas && (
@@ -1397,49 +1392,49 @@ const StudentProfile = () => {
                         </div>
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.kitas || '-'}
+                          {studentInfo.kitas || "-"}
                         </b>
                       )}
                     </div>
                   )}
                 </div>
 
-                {studentInfo.citizenship === 'Non Indonesia' && (
+                {studentInfo.citizenship === "Non Indonesia" && (
                   <div className={styles.row}>
                     <div
                       className={`${styles.field} ${
                         errors.studentInfo?.country
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='country'
+                        htmlFor="country"
                         className={`${styles.fieldLabel} ${
-                          errors.studentInfo?.country ? styles.errorLabel : ''
+                          errors.studentInfo?.country ? styles.errorLabel : ""
                         }`}
                       >
                         Country of origin
                       </label>
                       {isEditing ? (
                         <input
-                          id='country'
-                          type='text'
-                          name='country'
-                          value={studentInfo.country || ''}
+                          id="country"
+                          type="text"
+                          name="country"
+                          value={studentInfo.country || ""}
                           onChange={handleStudentInfoChange}
                           className={`${styles.formInput} ${
-                            errors.studentInfo?.country ? styles.errorInput : ''
+                            errors.studentInfo?.country ? styles.errorInput : ""
                           }`}
                           placeholder={
                             errors.studentInfo?.country
                               ? errors.studentInfo.country
-                              : 'Country of origin'
+                              : "Country of origin"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.country || '-'}
+                          {studentInfo.country || "-"}
                         </b>
                       )}
                     </div>
@@ -1448,13 +1443,13 @@ const StudentProfile = () => {
                 <div className={styles.row}>
                   <div
                     className={`${styles.field} ${
-                      errors.studentInfo?.nisn ? styles.errorFieldWrapper : ''
+                      errors.studentInfo?.nisn ? styles.errorFieldWrapper : ""
                     }`}
                   >
                     <label
-                      htmlFor='nisn'
+                      htmlFor="nisn"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.nisn ? styles.errorLabel : ''
+                        errors.studentInfo?.nisn ? styles.errorLabel : ""
                       }`}
                     >
                       NISN
@@ -1462,19 +1457,19 @@ const StudentProfile = () => {
                     {isEditing ? (
                       <div className={styles.inputWithError}>
                         <input
-                          id='nisn'
-                          type='text'
-                          name='nisn'
-                          value={studentInfo.nisn || ''}
+                          id="nisn"
+                          type="text"
+                          name="nisn"
+                          value={studentInfo.nisn || ""}
                           onChange={handleStudentInfoChange}
                           maxLength={10}
                           className={`${styles.formInput} ${
                             errors.studentInfo?.nisn || validationMessages.nisn
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
-                            errors.studentInfo?.nisn || 'NISN (10 digits)'
+                            errors.studentInfo?.nisn || "NISN (10 digits)"
                           }
                         />
                         {validationMessages.nisn && (
@@ -1485,7 +1480,7 @@ const StudentProfile = () => {
                       </div>
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.nisn || '-'}
+                        {studentInfo.nisn || "-"}
                       </b>
                     )}
                   </div>
@@ -1493,13 +1488,13 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.religion
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='religion'
+                      htmlFor="religion"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.religion ? styles.errorLabel : ''
+                        errors.studentInfo?.religion ? styles.errorLabel : ""
                       }`}
                     >
                       Religion
@@ -1508,8 +1503,8 @@ const StudentProfile = () => {
                     {isEditing ? (
                       <div className={styles.selectWrapper}>
                         <Select
-                          id='religion'
-                          name='religion'
+                          id="religion"
+                          name="religion"
                           options={religionSelectOptions}
                           value={
                             studentInfo.religion
@@ -1520,22 +1515,22 @@ const StudentProfile = () => {
                               : null
                           }
                           onChange={(opt) =>
-                            handleStudentInfoSelectChange('religion', opt)
+                            handleStudentInfoSelectChange("religion", opt)
                           }
                           placeholder={
-                            errors.studentInfo?.religion || 'Select religion'
+                            errors.studentInfo?.religion || "Select religion"
                           }
                           isClearable
                           classNamePrefix={
                             errors.studentInfo?.religion
-                              ? 'react-select-error'
-                              : 'react-select'
+                              ? "react-select-error"
+                              : "react-select"
                           }
                         />
                       </div>
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.religion || '-'}
+                        {studentInfo.religion || "-"}
                       </b>
                     )}
                     {/* --- [AKHIR UBAH] --- */}
@@ -1546,38 +1541,38 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.place_of_birth
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='place_of_birth'
+                      htmlFor="place_of_birth"
                       className={`${styles.fieldLabel} ${
                         errors.studentInfo?.place_of_birth
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Place of birth
                     </label>
                     {isEditing ? (
                       <input
-                        id='place_of_birth'
-                        type='text'
-                        name='place_of_birth'
-                        value={studentInfo.place_of_birth || ''}
+                        id="place_of_birth"
+                        type="text"
+                        name="place_of_birth"
+                        value={studentInfo.place_of_birth || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.place_of_birth
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
-                          errors.studentInfo?.place_of_birth || 'Place of birth'
+                          errors.studentInfo?.place_of_birth || "Place of birth"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.place_of_birth || '-'}
+                        {studentInfo.place_of_birth || "-"}
                       </b>
                     )}
                   </div>
@@ -1585,24 +1580,24 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.date_of_birth
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='date_of_birth'
+                      htmlFor="date_of_birth"
                       className={`${styles.fieldLabel} ${
                         errors.studentInfo?.date_of_birth
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Date of birth
                     </label>
                     {isEditing ? (
                       <input
-                        id='date_of_birth'
-                        type='date'
-                        name='date_of_birth'
+                        id="date_of_birth"
+                        type="date"
+                        name="date_of_birth"
                         value={formatDateForInput(studentInfo.date_of_birth)}
                         onChange={handleStudentInfoChange}
                         className={styles.formInput}
@@ -1617,13 +1612,13 @@ const StudentProfile = () => {
                 <div className={styles.row}>
                   <div
                     className={`${styles.field} ${
-                      errors.studentInfo?.gender ? styles.errorFieldWrapper : ''
+                      errors.studentInfo?.gender ? styles.errorFieldWrapper : ""
                     }`}
                   >
                     <label
-                      htmlFor='gender'
+                      htmlFor="gender"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.gender ? styles.errorLabel : ''
+                        errors.studentInfo?.gender ? styles.errorLabel : ""
                       }`}
                     >
                       Gender
@@ -1631,8 +1626,8 @@ const StudentProfile = () => {
                     {isEditing ? (
                       <div className={styles.selectWrapper}>
                         <Select
-                          id='gender'
-                          name='gender'
+                          id="gender"
+                          name="gender"
                           options={genderOptions}
                           value={
                             studentInfo.gender
@@ -1643,22 +1638,22 @@ const StudentProfile = () => {
                               : null
                           }
                           onChange={(opt) =>
-                            handleStudentInfoSelectChange('gender', opt)
+                            handleStudentInfoSelectChange("gender", opt)
                           }
                           placeholder={
-                            errors.studentInfo?.gender || 'Select gender'
+                            errors.studentInfo?.gender || "Select gender"
                           }
                           isClearable
                           classNamePrefix={
                             errors.studentInfo?.gender
-                              ? 'react-select-error'
-                              : 'react-select'
+                              ? "react-select-error"
+                              : "react-select"
                           }
                         />
                       </div>
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.gender || '-'}
+                        {studentInfo.gender || "-"}
                       </b>
                     )}
                   </div>
@@ -1666,34 +1661,34 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.family_rank
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='family_rank'
+                      htmlFor="family_rank"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.family_rank ? styles.errorLabel : ''
+                        errors.studentInfo?.family_rank ? styles.errorLabel : ""
                       }`}
                     >
                       Rank in the family
                     </label>
                     {isEditing ? (
                       <input
-                        id='family_rank'
-                        type='number'
-                        name='family_rank'
-                        value={studentInfo.family_rank || ''}
+                        id="family_rank"
+                        type="number"
+                        name="family_rank"
+                        value={studentInfo.family_rank || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.family_rank
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
-                        placeholder={errors.studentInfo?.family_rank || 'Rank'}
+                        placeholder={errors.studentInfo?.family_rank || "Rank"}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.family_rank || '-'}
+                        {studentInfo.family_rank || "-"}
                       </b>
                     )}
                   </div>
@@ -1701,34 +1696,34 @@ const StudentProfile = () => {
                 <div className={styles.row}>
                   <div
                     className={`${styles.field} ${
-                      errors.studentInfo?.email ? styles.errorFieldWrapper : ''
+                      errors.studentInfo?.email ? styles.errorFieldWrapper : ""
                     }`}
                   >
                     <label
-                      htmlFor='email'
+                      htmlFor="email"
                       className={`${styles.fieldLabel} ${
-                        errors.studentInfo?.email ? styles.errorLabel : ''
+                        errors.studentInfo?.email ? styles.errorLabel : ""
                       }`}
                     >
                       Email address
                     </label>
                     {isEditing ? (
                       <input
-                        id='email'
-                        type='email'
-                        name='email'
-                        value={studentInfo.email || ''}
+                        id="email"
+                        type="email"
+                        name="email"
+                        value={studentInfo.email || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
-                          errors.studentInfo?.email ? styles.errorInput : ''
+                          errors.studentInfo?.email ? styles.errorInput : ""
                         }`}
                         placeholder={
-                          errors.studentInfo?.email || 'Email Address'
+                          errors.studentInfo?.email || "Email Address"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.email || '-'}
+                        {studentInfo.email || "-"}
                       </b>
                     )}
                   </div>
@@ -1736,39 +1731,39 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.previous_school
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='previous_school'
+                      htmlFor="previous_school"
                       className={`${styles.fieldLabel} ${
                         errors.studentInfo?.previous_school
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Previous School
                     </label>
                     {isEditing ? (
                       <input
-                        id='previous_school'
-                        type='text'
-                        name='previous_school'
-                        value={studentInfo.previous_school || ''}
+                        id="previous_school"
+                        type="text"
+                        name="previous_school"
+                        value={studentInfo.previous_school || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.previous_school
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
                           errors.studentInfo?.previous_school ||
-                          'Previous School'
+                          "Previous School"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.previous_school || '-'}
+                        {studentInfo.previous_school || "-"}
                       </b>
                     )}
                   </div>
@@ -1778,38 +1773,38 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.phone_number
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='phone_number'
+                      htmlFor="phone_number"
                       className={`${styles.fieldLabel} ${
                         errors.studentInfo?.phone_number
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Phone number
                     </label>
                     {isEditing ? (
                       <input
-                        id='phone_number'
-                        type='tel'
-                        name='phone_number'
-                        value={studentInfo.phone_number || ''}
+                        id="phone_number"
+                        type="tel"
+                        name="phone_number"
+                        value={studentInfo.phone_number || ""}
                         onChange={handleStudentInfoChange}
                         className={`${styles.formInput} ${
                           errors.studentInfo?.phone_number
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
-                          errors.studentInfo?.phone_number || 'Phone Number'
+                          errors.studentInfo?.phone_number || "Phone Number"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {studentInfo.phone_number || '-'}
+                        {studentInfo.phone_number || "-"}
                       </b>
                     )}
                   </div>
@@ -1817,15 +1812,15 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.studentInfo?.academic_status
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='academic_status'
+                      htmlFor="academic_status"
                       className={`${styles.fieldLabel} ${
                         errors.studentInfo?.academic_status
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Academic status
@@ -1834,8 +1829,8 @@ const StudentProfile = () => {
                       <div className={styles.academicStatusWrapper}>
                         <div className={styles.selectWrapper}>
                           <Select
-                            id='academic_status'
-                            name='academic_status'
+                            id="academic_status"
+                            name="academic_status"
                             options={academicStatusOptions}
                             value={
                               studentInfo.academic_status
@@ -1847,30 +1842,30 @@ const StudentProfile = () => {
                             }
                             onChange={(opt) =>
                               handleStudentInfoSelectChange(
-                                'academic_status',
+                                "academic_status",
                                 opt
                               )
                             }
                             placeholder={
                               errors.studentInfo?.academic_status ||
-                              'Select status'
+                              "Select status"
                             }
                             isClearable
                             classNamePrefix={
                               errors.studentInfo?.academic_status
-                                ? 'react-select-error'
-                                : 'react-select'
+                                ? "react-select-error"
+                                : "react-select"
                             }
                           />
                         </div>
-                        {studentInfo.academic_status === 'OTHER' && (
+                        {studentInfo.academic_status === "OTHER" && (
                           <input
-                            type='text'
-                            name='academic_status_other'
-                            value={studentInfo.academic_status_other || ''}
+                            type="text"
+                            name="academic_status_other"
+                            value={studentInfo.academic_status_other || ""}
                             onChange={handleStudentInfoChange}
                             className={`${styles.formInput} ${styles.otherInput}`}
-                            placeholder='Please specify'
+                            placeholder="Please specify"
                           />
                         )}
                       </div>
@@ -1878,7 +1873,7 @@ const StudentProfile = () => {
                       <b className={styles.fieldValue}>
                         {studentInfo.academic_status_other ||
                           studentInfo.academic_status ||
-                          '-'}
+                          "-"}
                       </b>
                     )}
                   </div>
@@ -1889,73 +1884,73 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.studentInfo?.street
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='street'
+                        htmlFor="street"
                         className={`${styles.fieldLabel} ${
-                          errors.studentInfo?.street ? styles.errorLabel : ''
+                          errors.studentInfo?.street ? styles.errorLabel : ""
                         }`}
                       >
                         Street
                       </label>
                       {isEditing ? (
                         <input
-                          id='street'
-                          type='text'
-                          name='street'
-                          value={studentInfo.street || ''}
+                          id="street"
+                          type="text"
+                          name="street"
+                          value={studentInfo.street || ""}
                           onChange={handleStudentInfoChange}
                           className={`${styles.formInput} ${
-                            errors.studentInfo?.street ? styles.errorInput : ''
+                            errors.studentInfo?.street ? styles.errorInput : ""
                           }`}
-                          placeholder={errors.studentInfo?.street || 'Street'}
+                          placeholder={errors.studentInfo?.street || "Street"}
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.street || '-'}
+                          {studentInfo.street || "-"}
                         </b>
                       )}
                     </div>
                     <div className={styles.rtRwGroup}>
                       <div className={styles.field}>
-                        <label htmlFor='rt' className={styles.fieldLabel}>
+                        <label htmlFor="rt" className={styles.fieldLabel}>
                           RT
                         </label>
                         {isEditing ? (
                           <input
-                            id='rt'
-                            type='text'
-                            name='rt'
-                            value={studentInfo.rt || ''}
+                            id="rt"
+                            type="text"
+                            name="rt"
+                            value={studentInfo.rt || ""}
                             onChange={handleStudentInfoChange}
                             className={styles.formInput}
-                            placeholder='RT'
+                            placeholder="RT"
                           />
                         ) : (
                           <b className={styles.fieldValue}>
-                            {studentInfo.rt || '-'}
+                            {studentInfo.rt || "-"}
                           </b>
                         )}
                       </div>
                       <div className={styles.field}>
-                        <label htmlFor='rw' className={styles.fieldLabel}>
+                        <label htmlFor="rw" className={styles.fieldLabel}>
                           RW
                         </label>
                         {isEditing ? (
                           <input
-                            id='rw'
-                            type='text'
-                            name='rw'
-                            value={studentInfo.rw || ''}
+                            id="rw"
+                            type="text"
+                            name="rw"
+                            value={studentInfo.rw || ""}
                             onChange={handleStudentInfoChange}
                             className={styles.formInput}
-                            placeholder='RW'
+                            placeholder="RW"
                           />
                         ) : (
                           <b className={styles.fieldValue}>
-                            {studentInfo.rw || '-'}
+                            {studentInfo.rw || "-"}
                           </b>
                         )}
                       </div>
@@ -1966,32 +1961,32 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.studentInfo?.village
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='village'
+                        htmlFor="village"
                         className={`${styles.fieldLabel} ${
-                          errors.studentInfo?.village ? styles.errorLabel : ''
+                          errors.studentInfo?.village ? styles.errorLabel : ""
                         }`}
                       >
                         Village
                       </label>
                       {isEditing ? (
                         <input
-                          id='village'
-                          type='text'
-                          name='village'
-                          value={studentInfo.village || ''}
+                          id="village"
+                          type="text"
+                          name="village"
+                          value={studentInfo.village || ""}
                           onChange={handleStudentInfoChange}
                           className={`${styles.formInput} ${
-                            errors.studentInfo?.village ? styles.errorInput : ''
+                            errors.studentInfo?.village ? styles.errorInput : ""
                           }`}
-                          placeholder={errors.studentInfo?.village || 'Village'}
+                          placeholder={errors.studentInfo?.village || "Village"}
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.village || '-'}
+                          {studentInfo.village || "-"}
                         </b>
                       )}
                     </div>
@@ -1999,36 +1994,36 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.studentInfo?.district
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='district'
+                        htmlFor="district"
                         className={`${styles.fieldLabel} ${
-                          errors.studentInfo?.district ? styles.errorLabel : ''
+                          errors.studentInfo?.district ? styles.errorLabel : ""
                         }`}
                       >
                         District
                       </label>
                       {isEditing ? (
                         <input
-                          id='district'
-                          type='text'
-                          name='district'
-                          value={studentInfo.district || ''}
+                          id="district"
+                          type="text"
+                          name="district"
+                          value={studentInfo.district || ""}
                           onChange={handleStudentInfoChange}
                           className={`${styles.formInput} ${
                             errors.studentInfo?.district
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
-                            errors.studentInfo?.district || 'District'
+                            errors.studentInfo?.district || "District"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.district || '-'}
+                          {studentInfo.district || "-"}
                         </b>
                       )}
                     </div>
@@ -2038,38 +2033,38 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.studentInfo?.city_regency
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='city_regency'
+                        htmlFor="city_regency"
                         className={`${styles.fieldLabel} ${
                           errors.studentInfo?.city_regency
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         City/Regency
                       </label>
                       {isEditing ? (
                         <input
-                          id='city_regency'
-                          type='text'
-                          name='city_regency'
-                          value={studentInfo.city_regency || ''}
+                          id="city_regency"
+                          type="text"
+                          name="city_regency"
+                          value={studentInfo.city_regency || ""}
                           onChange={handleStudentInfoChange}
                           className={`${styles.formInput} ${
                             errors.studentInfo?.city_regency
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
-                            errors.studentInfo?.city_regency || 'City/Regency'
+                            errors.studentInfo?.city_regency || "City/Regency"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.city_regency || '-'}
+                          {studentInfo.city_regency || "-"}
                         </b>
                       )}
                     </div>
@@ -2077,36 +2072,36 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.studentInfo?.province
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='province'
+                        htmlFor="province"
                         className={`${styles.fieldLabel} ${
-                          errors.studentInfo?.province ? styles.errorLabel : ''
+                          errors.studentInfo?.province ? styles.errorLabel : ""
                         }`}
                       >
                         Province
                       </label>
                       {isEditing ? (
                         <input
-                          id='province'
-                          type='text'
-                          name='province'
-                          value={studentInfo.province || ''}
+                          id="province"
+                          type="text"
+                          name="province"
+                          value={studentInfo.province || ""}
                           onChange={handleStudentInfoChange}
                           className={`${styles.formInput} ${
                             errors.studentInfo?.province
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
-                            errors.studentInfo?.province || 'Province'
+                            errors.studentInfo?.province || "Province"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {studentInfo.province || '-'}
+                          {studentInfo.province || "-"}
                         </b>
                       )}
                     </div>
@@ -2115,9 +2110,9 @@ const StudentProfile = () => {
                     <span className={styles.fieldLabel}>Other: (</span>
                     {isEditing ? (
                       <input
-                        type='text'
-                        name='other'
-                        value={studentInfo.other || ''}
+                        type="text"
+                        name="other"
+                        value={studentInfo.other || ""}
                         onChange={handleStudentInfoChange}
                         className={styles.formInput}
                       />
@@ -2125,7 +2120,7 @@ const StudentProfile = () => {
                       <div
                         className={`${styles.formInput} ${styles.visualInput}`}
                       >
-                        {studentInfo.other || '-'}
+                        {studentInfo.other || "-"}
                       </div>
                     )}
                     <span className={styles.fieldLabel}>)</span>
@@ -2137,7 +2132,7 @@ const StudentProfile = () => {
             <div className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
-                  isEditing ? styles.sectionHeaderEditing : ''
+                  isEditing ? styles.sectionHeaderEditing : ""
                 }`}
               >
                 <b>PROGRAM</b>
@@ -2153,7 +2148,7 @@ const StudentProfile = () => {
                         String(formData.section_id) === String(sec.section_id)
                       }
                       isEditing={false}
-                      name='section_id'
+                      name="section_id"
                       value={sec.section_id}
                       onChange={handleRadioChange}
                     />
@@ -2163,7 +2158,7 @@ const StudentProfile = () => {
                   <div className={styles.field}>
                     <div className={styles.fieldLabel}>Grade</div>
                     <b className={styles.fieldValue}>
-                      {getNameById('classes', formData.class_id)}
+                      {getNameById("classes", formData.class_id)}
                     </b>
                   </div>
                   {showMajorField && (
@@ -2172,8 +2167,8 @@ const StudentProfile = () => {
                       {isEditing ? (
                         <div className={styles.selectWrapper}>
                           <Select
-                            id='major_id'
-                            name='major_id'
+                            id="major_id"
+                            name="major_id"
                             options={majorSelectOptions}
                             value={
                               formData.major_id
@@ -2183,16 +2178,16 @@ const StudentProfile = () => {
                                 : null
                             }
                             onChange={(opt) =>
-                              handleFormSelectChange('major_id', opt)
+                              handleFormSelectChange("major_id", opt)
                             }
-                            placeholder='Select major'
+                            placeholder="Select major"
                             isClearable
-                            classNamePrefix='react-select'
+                            classNamePrefix="react-select"
                           />
                         </div>
                       ) : (
                         <b className={styles.fieldValue}>
-                          {getNameById('majors', formData.major_id)}
+                          {getNameById("majors", formData.major_id)}
                         </b>
                       )}
                     </div>
@@ -2209,7 +2204,7 @@ const StudentProfile = () => {
                         String(formData.program_id) === String(prog.program_id)
                       }
                       isEditing={false}
-                      name='program_id'
+                      name="program_id"
                       value={prog.program_id}
                       onChange={handleRadioChange}
                     />
@@ -2218,10 +2213,10 @@ const StudentProfile = () => {
               </div>
             </div>
 
-            <div id='facilities' className={styles.infoSection}>
+            <div id="facilities" className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
-                  isEditing ? styles.sectionHeaderEditing : ''
+                  isEditing ? styles.sectionHeaderEditing : ""
                 }`}
               >
                 <b>FACILITIES</b>
@@ -2236,9 +2231,9 @@ const StudentProfile = () => {
                             !formData.pickup_point_id &&
                             !formData.pickup_point_custom) ||
                           (errors.facilities?.transportation_policy &&
-                            formData.transportation_policy !== 'Signed')
+                            formData.transportation_policy !== "Signed")
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         Transportation
@@ -2252,7 +2247,7 @@ const StudentProfile = () => {
                             String(t.transport_id)
                           }
                           isEditing={isEditing}
-                          name='transportation_id'
+                          name="transportation_id"
                           value={t.transport_id}
                           onChange={handleRadioChange}
                         />
@@ -2260,7 +2255,7 @@ const StudentProfile = () => {
                     </div>
 
                     {formData.transportation_id &&
-                      selectedTransportType.toLowerCase() !== 'own car' && (
+                      selectedTransportType.toLowerCase() !== "own car" && (
                         <>
                           <div className={styles.optionsRow}>
                             <div
@@ -2272,13 +2267,13 @@ const StudentProfile = () => {
                               </div>
                               {isEditing ? (
                                 <select
-                                  name='pickup_point_id'
-                                  value={formData.pickup_point_id || ''}
+                                  name="pickup_point_id"
+                                  value={formData.pickup_point_id || ""}
                                   onChange={handleChange}
                                   className={styles.formInput}
                                   disabled={!!formData.pickup_point_custom}
                                 >
-                                  <option value=''>Select pickup point</option>
+                                  <option value="">Select pickup point</option>
                                   {options?.pickup_points.map((opt) => (
                                     <option
                                       key={opt.pickup_point_id}
@@ -2291,9 +2286,9 @@ const StudentProfile = () => {
                               ) : (
                                 <b className={styles.fieldValue}>
                                   {getNameById(
-                                    'pickup_points',
+                                    "pickup_points",
                                     formData.pickup_point_id
-                                  ) || '-'}
+                                  ) || "-"}
                                 </b>
                               )}
                             </div>
@@ -2309,17 +2304,17 @@ const StudentProfile = () => {
                               </div>
                               {isEditing ? (
                                 <input
-                                  type='text'
-                                  name='pickup_point_custom'
-                                  value={formData.pickup_point_custom || ''}
+                                  type="text"
+                                  name="pickup_point_custom"
+                                  value={formData.pickup_point_custom || ""}
                                   onChange={handleChange}
                                   className={styles.formInput}
                                   disabled={!!formData.pickup_point_id}
-                                  placeholder='Enter custom pickup location'
+                                  placeholder="Enter custom pickup location"
                                 />
                               ) : (
                                 <b className={styles.fieldValue}>
-                                  {formData.pickup_point_custom || '-'}
+                                  {formData.pickup_point_custom || "-"}
                                 </b>
                               )}
                             </div>
@@ -2339,18 +2334,18 @@ const StudentProfile = () => {
                     <div className={styles.optionsRow}>
                       <div>
                         <CheckboxDisplay
-                          label='Transportation Policy'
+                          label="Transportation Policy"
                           isSelected={
-                            formData.transportation_policy === 'Signed'
+                            formData.transportation_policy === "Signed"
                           }
                           isEditing={isEditing}
-                          name='transportation_policy'
+                          name="transportation_policy"
                           onChange={handleChange}
                         />
                       </div>
 
                       {errors.facilities?.transportation_policy &&
-                        formData.transportation_policy !== 'Signed' && (
+                        formData.transportation_policy !== "Signed" && (
                           <div className={styles.inlineErrorMessage}>
                             Policy must be signed.
                           </div>
@@ -2365,9 +2360,9 @@ const StudentProfile = () => {
                       (errors.facilities?.residence_id &&
                         !formData.residence_id) ||
                       (errors.facilities?.residence_hall_policy &&
-                        formData.residence_hall_policy !== 'Signed')
+                        formData.residence_hall_policy !== "Signed")
                         ? styles.errorLabel
-                        : ''
+                        : ""
                     }`}
                   >
                     Residence Hall
@@ -2381,7 +2376,7 @@ const StudentProfile = () => {
                         String(formData.residence_id) === String(r.residence_id)
                       }
                       isEditing={isEditing}
-                      name='residence_id'
+                      name="residence_id"
                       value={r.residence_id}
                       onChange={handleRadioChange}
                     />
@@ -2395,14 +2390,14 @@ const StudentProfile = () => {
 
                 <div className={styles.optionsRow}>
                   <CheckboxDisplay
-                    label='Residence Hall Policy'
-                    isSelected={formData.residence_hall_policy === 'Signed'}
+                    label="Residence Hall Policy"
+                    isSelected={formData.residence_hall_policy === "Signed"}
                     isEditing={isEditing}
-                    name='residence_hall_policy'
+                    name="residence_hall_policy"
                     onChange={handleChange}
                   />
                   {errors.facilities?.transportation_policy &&
-                    formData.transportation_policy !== 'Signed' && (
+                    formData.transportation_policy !== "Signed" && (
                       <div className={styles.inlineErrorMessage}>
                         Policy must be signed.
                       </div>
@@ -2411,10 +2406,10 @@ const StudentProfile = () => {
               </div>
             </div>
 
-            <div id='parentGuardian' className={styles.infoSection}>
+            <div id="parentGuardian" className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
-                  isEditing ? styles.sectionHeaderEditing : ''
+                  isEditing ? styles.sectionHeaderEditing : ""
                 }`}
               >
                 <b>PARENT / GUARDIAN INFORMATION</b>
@@ -2426,30 +2421,30 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.parentGuardian?.father_name
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='father_name'
+                      htmlFor="father_name"
                       className={`${styles.fieldLabel} ${
                         errors.parentGuardian?.father_name
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Name
                     </label>
                     {isEditing ? (
                       <input
-                        id='father_name'
-                        type='text'
-                        name='father_name'
-                        value={formData.father_name || ''}
+                        id="father_name"
+                        type="text"
+                        name="father_name"
+                        value={formData.father_name || ""}
                         onChange={handleChange}
                         className={`${styles.formInput} ${
                           errors.parentGuardian?.father_name
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
                           errors.parentGuardian?.father_name
@@ -2459,7 +2454,7 @@ const StudentProfile = () => {
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.father_name || '-'}
+                        {formData.father_name || "-"}
                       </b>
                     )}
                   </div>
@@ -2467,47 +2462,47 @@ const StudentProfile = () => {
                 <div className={styles.row}>
                   <div className={styles.field}>
                     <label
-                      htmlFor='father_company'
+                      htmlFor="father_company"
                       className={styles.fieldLabel}
                     >
                       Company Name
                     </label>
                     {isEditing ? (
                       <input
-                        id='father_company'
-                        type='text'
-                        name='father_company'
-                        value={formData.father_company || ''}
+                        id="father_company"
+                        type="text"
+                        name="father_company"
+                        value={formData.father_company || ""}
                         onChange={handleChange}
                         className={styles.formInput}
-                        placeholder='Company Name'
+                        placeholder="Company Name"
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.father_company || '-'}
+                        {formData.father_company || "-"}
                       </b>
                     )}
                   </div>
                   <div className={styles.field}>
                     <label
-                      htmlFor='father_occupation'
+                      htmlFor="father_occupation"
                       className={styles.fieldLabel}
                     >
                       Occupation/Position
                     </label>
                     {isEditing ? (
                       <input
-                        id='father_occupation'
-                        type='text'
-                        name='father_occupation'
-                        value={formData.father_occupation || ''}
+                        id="father_occupation"
+                        type="text"
+                        name="father_occupation"
+                        value={formData.father_occupation || ""}
                         onChange={handleChange}
                         className={styles.formInput}
-                        placeholder='Occupation/Position'
+                        placeholder="Occupation/Position"
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.father_occupation || '-'}
+                        {formData.father_occupation || "-"}
                       </b>
                     )}
                   </div>
@@ -2517,40 +2512,40 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.parentGuardian?.father_phone
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='father_phone'
+                      htmlFor="father_phone"
                       className={`${styles.fieldLabel} ${
                         errors.parentGuardian?.father_phone
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Phone Number
                     </label>
                     {isEditing ? (
                       <input
-                        id='father_phone'
-                        type='tel'
-                        name='father_phone'
-                        value={formData.father_phone || ''}
+                        id="father_phone"
+                        type="tel"
+                        name="father_phone"
+                        value={formData.father_phone || ""}
                         onChange={handleChange}
                         className={`${styles.formInput} ${
                           errors.parentGuardian?.father_phone
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
                           errors.parentGuardian?.father_phone
                             ? errors.parentGuardian.father_phone
-                            : 'Phone Number'
+                            : "Phone Number"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.father_phone || '-'}
+                        {formData.father_phone || "-"}
                       </b>
                     )}
                   </div>
@@ -2558,40 +2553,40 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.parentGuardian?.father_email
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='father_email'
+                      htmlFor="father_email"
                       className={`${styles.fieldLabel} ${
                         errors.parentGuardian?.father_email
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Email
                     </label>
                     {isEditing ? (
                       <input
-                        id='father_email'
-                        type='email'
-                        name='father_email'
-                        value={formData.father_email || ''}
+                        id="father_email"
+                        type="email"
+                        name="father_email"
+                        value={formData.father_email || ""}
                         onChange={handleChange}
                         className={`${styles.formInput} ${
                           errors.parentGuardian?.father_email
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
                           errors.parentGuardian?.father_email
                             ? errors.parentGuardian.father_email
-                            : 'Email'
+                            : "Email"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.father_email || '-'}
+                        {formData.father_email || "-"}
                       </b>
                     )}
                   </div>
@@ -2602,87 +2597,87 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.father_address_street
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='father_address_street'
+                        htmlFor="father_address_street"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.father_address_street
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         Street
                       </label>
                       {isEditing ? (
                         <input
-                          id='father_address_street'
-                          type='text'
-                          name='father_address_street'
-                          value={formData.father_address_street || ''}
+                          id="father_address_street"
+                          type="text"
+                          name="father_address_street"
+                          value={formData.father_address_street || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.father_address_street
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.father_address_street
                               ? errors.parentGuardian.father_address_street
-                              : 'Street'
+                              : "Street"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.father_address_street || '-'}
+                          {formData.father_address_street || "-"}
                         </b>
                       )}
                     </div>
                     <div className={styles.rtRwGroup}>
                       <div className={styles.field}>
                         <label
-                          htmlFor='father_address_rt'
+                          htmlFor="father_address_rt"
                           className={styles.fieldLabel}
                         >
                           RT
                         </label>
                         {isEditing ? (
                           <input
-                            id='father_address_rt'
-                            type='text'
-                            name='father_address_rt'
-                            value={formData.father_address_rt || ''}
+                            id="father_address_rt"
+                            type="text"
+                            name="father_address_rt"
+                            value={formData.father_address_rt || ""}
                             onChange={handleChange}
                             className={styles.formInput}
-                            placeholder='RT'
+                            placeholder="RT"
                           />
                         ) : (
                           <b className={styles.fieldValue}>
-                            {formData.father_address_rt || '-'}
+                            {formData.father_address_rt || "-"}
                           </b>
                         )}
                       </div>
                       <div className={styles.field}>
                         <label
-                          htmlFor='father_address_rw'
+                          htmlFor="father_address_rw"
                           className={styles.fieldLabel}
                         >
                           RW
                         </label>
                         {isEditing ? (
                           <input
-                            id='father_address_rw'
-                            type='text'
-                            name='father_address_rw'
-                            value={formData.father_address_rw || ''}
+                            id="father_address_rw"
+                            type="text"
+                            name="father_address_rw"
+                            value={formData.father_address_rw || ""}
                             onChange={handleChange}
                             className={styles.formInput}
-                            placeholder='RW'
+                            placeholder="RW"
                           />
                         ) : (
                           <b className={styles.fieldValue}>
-                            {formData.father_address_rw || '-'}
+                            {formData.father_address_rw || "-"}
                           </b>
                         )}
                       </div>
@@ -2693,40 +2688,40 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.father_address_village
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='father_address_village'
+                        htmlFor="father_address_village"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.father_address_village
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         Village
                       </label>
                       {isEditing ? (
                         <input
-                          id='father_address_village'
-                          type='text'
-                          name='father_address_village'
-                          value={formData.father_address_village || ''}
+                          id="father_address_village"
+                          type="text"
+                          name="father_address_village"
+                          value={formData.father_address_village || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.father_address_village
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.father_address_village
                               ? errors.parentGuardian.father_address_village
-                              : 'Village'
+                              : "Village"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.father_address_village || '-'}
+                          {formData.father_address_village || "-"}
                         </b>
                       )}
                     </div>
@@ -2734,40 +2729,40 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.father_address_district
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='father_address_district'
+                        htmlFor="father_address_district"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.father_address_district
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         District
                       </label>
                       {isEditing ? (
                         <input
-                          id='father_address_district'
-                          type='text'
-                          name='father_address_district'
-                          value={formData.father_address_district || ''}
+                          id="father_address_district"
+                          type="text"
+                          name="father_address_district"
+                          value={formData.father_address_district || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.father_address_district
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.father_address_district
                               ? errors.parentGuardian.father_address_district
-                              : 'District'
+                              : "District"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.father_address_district || '-'}
+                          {formData.father_address_district || "-"}
                         </b>
                       )}
                     </div>
@@ -2777,41 +2772,41 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.father_address_city_regency
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='father_address_city_regency'
+                        htmlFor="father_address_city_regency"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.father_address_city_regency
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         City/Regency
                       </label>
                       {isEditing ? (
                         <input
-                          id='father_address_city_regency'
-                          type='text'
-                          name='father_address_city_regency'
-                          value={formData.father_address_city_regency || ''}
+                          id="father_address_city_regency"
+                          type="text"
+                          name="father_address_city_regency"
+                          value={formData.father_address_city_regency || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.father_address_city_regency
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.father_address_city_regency
                               ? errors.parentGuardian
                                   .father_address_city_regency
-                              : 'City/Regency'
+                              : "City/Regency"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.father_address_city_regency || '-'}
+                          {formData.father_address_city_regency || "-"}
                         </b>
                       )}
                     </div>
@@ -2819,40 +2814,40 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.father_address_province
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='father_address_province'
+                        htmlFor="father_address_province"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.father_address_province
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         Province
                       </label>
                       {isEditing ? (
                         <input
-                          id='father_address_province'
-                          type='text'
-                          name='father_address_province'
-                          value={formData.father_address_province || ''}
+                          id="father_address_province"
+                          type="text"
+                          name="father_address_province"
+                          value={formData.father_address_province || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.father_address_province
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.father_address_province
                               ? errors.parentGuardian.father_address_province
-                              : 'Province'
+                              : "Province"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.father_address_province || '-'}
+                          {formData.father_address_province || "-"}
                         </b>
                       )}
                     </div>
@@ -2861,18 +2856,18 @@ const StudentProfile = () => {
                     <span className={styles.fieldLabel}>Other: (</span>
                     {isEditing ? (
                       <input
-                        type='text'
-                        name='father_address_other'
-                        value={formData.father_address_other || ''}
+                        type="text"
+                        name="father_address_other"
+                        value={formData.father_address_other || ""}
                         onChange={handleChange}
                         className={styles.formInput}
-                        placeholder='Other address details'
+                        placeholder="Other address details"
                       />
                     ) : (
                       <div
                         className={`${styles.formInput} ${styles.visualInput}`}
                       >
-                        {formData.father_address_other || '-'}
+                        {formData.father_address_other || "-"}
                       </div>
                     )}
                     <span className={styles.fieldLabel}>)</span>
@@ -2884,30 +2879,30 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.parentGuardian?.mother_name
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='mother_name'
+                      htmlFor="mother_name"
                       className={`${styles.fieldLabel} ${
                         errors.parentGuardian?.mother_name
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Name
                     </label>
                     {isEditing ? (
                       <input
-                        id='mother_name'
-                        type='text'
-                        name='mother_name'
-                        value={formData.mother_name || ''}
+                        id="mother_name"
+                        type="text"
+                        name="mother_name"
+                        value={formData.mother_name || ""}
                         onChange={handleChange}
                         className={`${styles.formInput} ${
                           errors.parentGuardian?.mother_name
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
                           errors.parentGuardian?.mother_name
@@ -2917,7 +2912,7 @@ const StudentProfile = () => {
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.mother_name || '-'}
+                        {formData.mother_name || "-"}
                       </b>
                     )}
                   </div>
@@ -2925,47 +2920,47 @@ const StudentProfile = () => {
                 <div className={styles.row}>
                   <div className={styles.field}>
                     <label
-                      htmlFor='mother_company'
+                      htmlFor="mother_company"
                       className={styles.fieldLabel}
                     >
                       Company Name
                     </label>
                     {isEditing ? (
                       <input
-                        id='mother_company'
-                        type='text'
-                        name='mother_company'
-                        value={formData.mother_company || ''}
+                        id="mother_company"
+                        type="text"
+                        name="mother_company"
+                        value={formData.mother_company || ""}
                         onChange={handleChange}
                         className={styles.formInput}
-                        placeholder='Company Name'
+                        placeholder="Company Name"
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.mother_company || '-'}
+                        {formData.mother_company || "-"}
                       </b>
                     )}
                   </div>
                   <div className={styles.field}>
                     <label
-                      htmlFor='mother_occupation'
+                      htmlFor="mother_occupation"
                       className={styles.fieldLabel}
                     >
                       Occupation/Position
                     </label>
                     {isEditing ? (
                       <input
-                        id='mother_occupation'
-                        type='text'
-                        name='mother_occupation'
-                        value={formData.mother_occupation || ''}
+                        id="mother_occupation"
+                        type="text"
+                        name="mother_occupation"
+                        value={formData.mother_occupation || ""}
                         onChange={handleChange}
                         className={styles.formInput}
-                        placeholder='Occupation/Position'
+                        placeholder="Occupation/Position"
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.mother_occupation || '-'}
+                        {formData.mother_occupation || "-"}
                       </b>
                     )}
                   </div>
@@ -2975,40 +2970,40 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.parentGuardian?.mother_phone
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='mother_phone'
+                      htmlFor="mother_phone"
                       className={`${styles.fieldLabel} ${
                         errors.parentGuardian?.mother_phone
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Phone Number
                     </label>
                     {isEditing ? (
                       <input
-                        id='mother_phone'
-                        type='tel'
-                        name='mother_phone'
-                        value={formData.mother_phone || ''}
+                        id="mother_phone"
+                        type="tel"
+                        name="mother_phone"
+                        value={formData.mother_phone || ""}
                         onChange={handleChange}
                         className={`${styles.formInput} ${
                           errors.parentGuardian?.mother_phone
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
                           errors.parentGuardian?.mother_phone
                             ? errors.parentGuardian.mother_phone
-                            : 'Phone Number'
+                            : "Phone Number"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.mother_phone || '-'}
+                        {formData.mother_phone || "-"}
                       </b>
                     )}
                   </div>
@@ -3016,40 +3011,40 @@ const StudentProfile = () => {
                     className={`${styles.field} ${
                       errors.parentGuardian?.mother_email
                         ? styles.errorFieldWrapper
-                        : ''
+                        : ""
                     }`}
                   >
                     <label
-                      htmlFor='mother_email'
+                      htmlFor="mother_email"
                       className={`${styles.fieldLabel} ${
                         errors.parentGuardian?.mother_email
                           ? styles.errorLabel
-                          : ''
+                          : ""
                       }`}
                     >
                       Email
                     </label>
                     {isEditing ? (
                       <input
-                        id='mother_email'
-                        type='email'
-                        name='mother_email'
-                        value={formData.mother_email || ''}
+                        id="mother_email"
+                        type="email"
+                        name="mother_email"
+                        value={formData.mother_email || ""}
                         onChange={handleChange}
                         className={`${styles.formInput} ${
                           errors.parentGuardian?.mother_email
                             ? styles.errorInput
-                            : ''
+                            : ""
                         }`}
                         placeholder={
                           errors.parentGuardian?.mother_email
                             ? errors.parentGuardian.mother_email
-                            : 'Email'
+                            : "Email"
                         }
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.mother_email || '-'}
+                        {formData.mother_email || "-"}
                       </b>
                     )}
                   </div>
@@ -3060,87 +3055,87 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.mother_address_street
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='mother_address_street'
+                        htmlFor="mother_address_street"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.mother_address_street
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         Street
                       </label>
                       {isEditing ? (
                         <input
-                          id='mother_address_street'
-                          type='text'
-                          name='mother_address_street'
-                          value={formData.mother_address_street || ''}
+                          id="mother_address_street"
+                          type="text"
+                          name="mother_address_street"
+                          value={formData.mother_address_street || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.mother_address_street
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.mother_address_street
                               ? errors.parentGuardian.mother_address_street
-                              : 'Street'
+                              : "Street"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.mother_address_street || '-'}
+                          {formData.mother_address_street || "-"}
                         </b>
                       )}
                     </div>
                     <div className={styles.rtRwGroup}>
                       <div className={styles.field}>
                         <label
-                          htmlFor='mother_address_rt'
+                          htmlFor="mother_address_rt"
                           className={styles.fieldLabel}
                         >
                           RT
                         </label>
                         {isEditing ? (
                           <input
-                            id='mother_address_rt'
-                            type='text'
-                            name='mother_address_rt'
-                            value={formData.mother_address_rt || ''}
+                            id="mother_address_rt"
+                            type="text"
+                            name="mother_address_rt"
+                            value={formData.mother_address_rt || ""}
                             onChange={handleChange}
                             className={styles.formInput}
-                            placeholder='RT'
+                            placeholder="RT"
                           />
                         ) : (
                           <b className={styles.fieldValue}>
-                            {formData.mother_address_rt || '-'}
+                            {formData.mother_address_rt || "-"}
                           </b>
                         )}
                       </div>
                       <div className={styles.field}>
                         <label
-                          htmlFor='mother_address_rw'
+                          htmlFor="mother_address_rw"
                           className={styles.fieldLabel}
                         >
                           RW
                         </label>
                         {isEditing ? (
                           <input
-                            id='mother_address_rw'
-                            type='text'
-                            name='mother_address_rw'
-                            value={formData.mother_address_rw || ''}
+                            id="mother_address_rw"
+                            type="text"
+                            name="mother_address_rw"
+                            value={formData.mother_address_rw || ""}
                             onChange={handleChange}
                             className={styles.formInput}
-                            placeholder='RW'
+                            placeholder="RW"
                           />
                         ) : (
                           <b className={styles.fieldValue}>
-                            {formData.mother_address_rw || '-'}
+                            {formData.mother_address_rw || "-"}
                           </b>
                         )}
                       </div>
@@ -3151,40 +3146,40 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.mother_address_village
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='mother_address_village'
+                        htmlFor="mother_address_village"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.mother_address_village
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         Village
                       </label>
                       {isEditing ? (
                         <input
-                          id='mother_address_village'
-                          type='text'
-                          name='mother_address_village'
-                          value={formData.mother_address_village || ''}
+                          id="mother_address_village"
+                          type="text"
+                          name="mother_address_village"
+                          value={formData.mother_address_village || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.mother_address_village
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.mother_address_village
                               ? errors.parentGuardian.mother_address_village
-                              : 'Village'
+                              : "Village"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.mother_address_village || '-'}
+                          {formData.mother_address_village || "-"}
                         </b>
                       )}
                     </div>
@@ -3192,40 +3187,40 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.mother_address_district
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='mother_address_district'
+                        htmlFor="mother_address_district"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.mother_address_district
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         District
                       </label>
                       {isEditing ? (
                         <input
-                          id='mother_address_district'
-                          type='text'
-                          name='mother_address_district'
-                          value={formData.mother_address_district || ''}
+                          id="mother_address_district"
+                          type="text"
+                          name="mother_address_district"
+                          value={formData.mother_address_district || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.mother_address_district
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.mother_address_district
                               ? errors.parentGuardian.mother_address_district
-                              : 'District'
+                              : "District"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.mother_address_district || '-'}
+                          {formData.mother_address_district || "-"}
                         </b>
                       )}
                     </div>
@@ -3235,41 +3230,41 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.mother_address_city_regency
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='mother_address_city_regency'
+                        htmlFor="mother_address_city_regency"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.mother_address_city_regency
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         City/Regency
                       </label>
                       {isEditing ? (
                         <input
-                          id='mother_address_city_regency'
-                          type='text'
-                          name='mother_address_city_regency'
-                          value={formData.mother_address_city_regency || ''}
+                          id="mother_address_city_regency"
+                          type="text"
+                          name="mother_address_city_regency"
+                          value={formData.mother_address_city_regency || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.mother_address_city_regency
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.mother_address_city_regency
                               ? errors.parentGuardian
                                   .mother_address_city_regency
-                              : 'City/Regency'
+                              : "City/Regency"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.mother_address_city_regency || '-'}
+                          {formData.mother_address_city_regency || "-"}
                         </b>
                       )}
                     </div>
@@ -3277,40 +3272,40 @@ const StudentProfile = () => {
                       className={`${styles.field} ${
                         errors.parentGuardian?.mother_address_province
                           ? styles.errorFieldWrapper
-                          : ''
+                          : ""
                       }`}
                     >
                       <label
-                        htmlFor='mother_address_province'
+                        htmlFor="mother_address_province"
                         className={`${styles.fieldLabel} ${
                           errors.parentGuardian?.mother_address_province
                             ? styles.errorLabel
-                            : ''
+                            : ""
                         }`}
                       >
                         Province
                       </label>
                       {isEditing ? (
                         <input
-                          id='mother_address_province'
-                          type='text'
-                          name='mother_address_province'
-                          value={formData.mother_address_province || ''}
+                          id="mother_address_province"
+                          type="text"
+                          name="mother_address_province"
+                          value={formData.mother_address_province || ""}
                           onChange={handleChange}
                           className={`${styles.formInput} ${
                             errors.parentGuardian?.mother_address_province
                               ? styles.errorInput
-                              : ''
+                              : ""
                           }`}
                           placeholder={
                             errors.parentGuardian?.mother_address_province
                               ? errors.parentGuardian.mother_address_province
-                              : 'Province'
+                              : "Province"
                           }
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.mother_address_province || '-'}
+                          {formData.mother_address_province || "-"}
                         </b>
                       )}
                     </div>
@@ -3319,9 +3314,9 @@ const StudentProfile = () => {
                     <span className={styles.fieldLabel}>Other: (</span>
                     {isEditing ? (
                       <input
-                        type='text'
-                        name='mother_address_other'
-                        value={formData.mother_address_other || ''}
+                        type="text"
+                        name="mother_address_other"
+                        value={formData.mother_address_other || ""}
                         onChange={handleChange}
                         className={styles.formInput}
                       />
@@ -3329,7 +3324,7 @@ const StudentProfile = () => {
                       <div
                         className={`${styles.formInput} ${styles.visualInput}`}
                       >
-                        {formData.mother_address_other || '-'}
+                        {formData.mother_address_other || "-"}
                       </div>
                     )}
                     <span className={styles.fieldLabel}>)</span>
@@ -3341,15 +3336,15 @@ const StudentProfile = () => {
                     <div className={styles.fieldLabel}>Name</div>
                     {isEditing ? (
                       <input
-                        type='text'
-                        name='guardian_name'
-                        value={formData.guardian_name || ''}
+                        type="text"
+                        name="guardian_name"
+                        value={formData.guardian_name || ""}
                         onChange={handleChange}
                         className={styles.formInput}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.guardian_name || '-'}
+                        {formData.guardian_name || "-"}
                       </b>
                     )}
                   </div>
@@ -3359,15 +3354,15 @@ const StudentProfile = () => {
                     </div>
                     {isEditing ? (
                       <input
-                        type='text'
-                        name='relation_to_student'
-                        value={formData.relation_to_student || ''}
+                        type="text"
+                        name="relation_to_student"
+                        value={formData.relation_to_student || ""}
                         onChange={handleChange}
                         className={styles.formInput}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.relation_to_student || '-'}
+                        {formData.relation_to_student || "-"}
                       </b>
                     )}
                   </div>
@@ -3377,15 +3372,15 @@ const StudentProfile = () => {
                     <div className={styles.fieldLabel}>Phone Number</div>
                     {isEditing ? (
                       <input
-                        type='tel'
-                        name='guardian_phone'
-                        value={formData.guardian_phone || ''}
+                        type="tel"
+                        name="guardian_phone"
+                        value={formData.guardian_phone || ""}
                         onChange={handleChange}
                         className={styles.formInput}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.guardian_phone || '-'}
+                        {formData.guardian_phone || "-"}
                       </b>
                     )}
                   </div>
@@ -3393,15 +3388,15 @@ const StudentProfile = () => {
                     <div className={styles.fieldLabel}>Email</div>
                     {isEditing ? (
                       <input
-                        type='email'
-                        name='guardian_email'
-                        value={formData.guardian_email || ''}
+                        type="email"
+                        name="guardian_email"
+                        value={formData.guardian_email || ""}
                         onChange={handleChange}
                         className={styles.formInput}
                       />
                     ) : (
                       <b className={styles.fieldValue}>
-                        {formData.guardian_email || '-'}
+                        {formData.guardian_email || "-"}
                       </b>
                     )}
                   </div>
@@ -3412,15 +3407,15 @@ const StudentProfile = () => {
                       <div className={styles.fieldLabel}>Street</div>
                       {isEditing ? (
                         <input
-                          type='text'
-                          name='guardian_address_street'
-                          value={formData.guardian_address_street || ''}
+                          type="text"
+                          name="guardian_address_street"
+                          value={formData.guardian_address_street || ""}
                           onChange={handleChange}
                           className={styles.formInput}
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.guardian_address_street || '-'}
+                          {formData.guardian_address_street || "-"}
                         </b>
                       )}
                     </div>
@@ -3429,15 +3424,15 @@ const StudentProfile = () => {
                         <div className={styles.fieldLabel}>RT</div>
                         {isEditing ? (
                           <input
-                            type='text'
-                            name='guardian_address_rt'
-                            value={formData.guardian_address_rt || ''}
+                            type="text"
+                            name="guardian_address_rt"
+                            value={formData.guardian_address_rt || ""}
                             onChange={handleChange}
                             className={styles.formInput}
                           />
                         ) : (
                           <b className={styles.fieldValue}>
-                            {formData.guardian_address_rt || '-'}
+                            {formData.guardian_address_rt || "-"}
                           </b>
                         )}
                       </div>
@@ -3445,15 +3440,15 @@ const StudentProfile = () => {
                         <div className={styles.fieldLabel}>RW</div>
                         {isEditing ? (
                           <input
-                            type='text'
-                            name='guardian_address_rw'
-                            value={formData.guardian_address_rw || ''}
+                            type="text"
+                            name="guardian_address_rw"
+                            value={formData.guardian_address_rw || ""}
                             onChange={handleChange}
                             className={styles.formInput}
                           />
                         ) : (
                           <b className={styles.fieldValue}>
-                            {formData.guardian_address_rw || '-'}
+                            {formData.guardian_address_rw || "-"}
                           </b>
                         )}
                       </div>
@@ -3464,15 +3459,15 @@ const StudentProfile = () => {
                       <div className={styles.fieldLabel}>Village</div>
                       {isEditing ? (
                         <input
-                          type='text'
-                          name='guardian_address_village'
-                          value={formData.guardian_address_village || ''}
+                          type="text"
+                          name="guardian_address_village"
+                          value={formData.guardian_address_village || ""}
                           onChange={handleChange}
                           className={styles.formInput}
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.guardian_address_village || '-'}
+                          {formData.guardian_address_village || "-"}
                         </b>
                       )}
                     </div>
@@ -3480,15 +3475,15 @@ const StudentProfile = () => {
                       <div className={styles.fieldLabel}>District</div>
                       {isEditing ? (
                         <input
-                          type='text'
-                          name='guardian_address_district'
-                          value={formData.guardian_address_district || ''}
+                          type="text"
+                          name="guardian_address_district"
+                          value={formData.guardian_address_district || ""}
                           onChange={handleChange}
                           className={styles.formInput}
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.guardian_address_district || '-'}
+                          {formData.guardian_address_district || "-"}
                         </b>
                       )}
                     </div>
@@ -3498,15 +3493,15 @@ const StudentProfile = () => {
                       <div className={styles.fieldLabel}>City/Regency</div>
                       {isEditing ? (
                         <input
-                          type='text'
-                          name='guardian_address_city_regency'
-                          value={formData.guardian_address_city_regency || ''}
+                          type="text"
+                          name="guardian_address_city_regency"
+                          value={formData.guardian_address_city_regency || ""}
                           onChange={handleChange}
                           className={styles.formInput}
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.guardian_address_city_regency || '-'}
+                          {formData.guardian_address_city_regency || "-"}
                         </b>
                       )}
                     </div>
@@ -3514,15 +3509,15 @@ const StudentProfile = () => {
                       <div className={styles.fieldLabel}>Province</div>
                       {isEditing ? (
                         <input
-                          type='text'
-                          name='guardian_address_province'
-                          value={formData.guardian_address_province || ''}
+                          type="text"
+                          name="guardian_address_province"
+                          value={formData.guardian_address_province || ""}
                           onChange={handleChange}
                           className={styles.formInput}
                         />
                       ) : (
                         <b className={styles.fieldValue}>
-                          {formData.guardian_address_province || '-'}
+                          {formData.guardian_address_province || "-"}
                         </b>
                       )}
                     </div>
@@ -3531,9 +3526,9 @@ const StudentProfile = () => {
                     <span className={styles.fieldLabel}>Other: (</span>
                     {isEditing ? (
                       <input
-                        type='text'
-                        name='guardian_address_other'
-                        value={formData.guardian_address_other || ''}
+                        type="text"
+                        name="guardian_address_other"
+                        value={formData.guardian_address_other || ""}
                         onChange={handleChange}
                         className={styles.formInput}
                       />
@@ -3541,7 +3536,7 @@ const StudentProfile = () => {
                       <div
                         className={`${styles.formInput} ${styles.visualInput}`}
                       >
-                        {formData.guardian_address_other || '-'}
+                        {formData.guardian_address_other || "-"}
                       </div>
                     )}
                     <span className={styles.fieldLabel}>)</span>
@@ -3553,7 +3548,7 @@ const StudentProfile = () => {
             <div className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
-                  isEditing ? styles.sectionHeaderEditing : ''
+                  isEditing ? styles.sectionHeaderEditing : ""
                 }`}
               >
                 <b>TERM OF PAYMENT</b>
@@ -3568,7 +3563,7 @@ const StudentProfile = () => {
                         label={option}
                         isSelected={formData.tuition_fees === option}
                         isEditing={false}
-                        name='tuition_fees'
+                        name="tuition_fees"
                         value={option}
                         onChange={handleRadioChange}
                       />
@@ -3584,7 +3579,7 @@ const StudentProfile = () => {
                         label={option}
                         isSelected={formData.residence_payment === option}
                         isEditing={false}
-                        name='residence_payment'
+                        name="residence_payment"
                         value={option}
                         onChange={handleRadioChange}
                       />
@@ -3597,12 +3592,12 @@ const StudentProfile = () => {
                   </div>
                   <div className={styles.paymentOptionGroup}>
                     <CheckboxDisplay
-                      label='Agree'
+                      label="Agree"
                       isSelected={
-                        formData.financial_policy_contract === 'Signed'
+                        formData.financial_policy_contract === "Signed"
                       }
                       isEditing={false}
-                      name='financial_policy_contract'
+                      name="financial_policy_contract"
                       onChange={handleChange}
                     />
                   </div>
@@ -3614,7 +3609,7 @@ const StudentProfile = () => {
                   <div className={styles.field}>
                     <div className={styles.fieldLabel}>Discount</div>
                     <b className={styles.fieldValue}>
-                      {formData.discount_name || '-'}
+                      {formData.discount_name || "-"}
                     </b>
                   </div>
 
@@ -3622,7 +3617,7 @@ const StudentProfile = () => {
                     <div className={styles.field}>
                       <div className={styles.fieldLabel}>Notes</div>
                       <b className={styles.fieldValue}>
-                        {formData.discount_notes || '-'}
+                        {formData.discount_notes || "-"}
                       </b>
                     </div>
                   )}
