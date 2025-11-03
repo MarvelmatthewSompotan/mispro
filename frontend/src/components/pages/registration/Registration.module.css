@@ -150,7 +150,6 @@
   align-items: center;
   justify-content: flex-start;
   overflow: visible;
-
   word-break: break-word;
   white-space: nornmal;
   font-size: 14px;
@@ -220,35 +219,4 @@
 
 .statusCancelled {
   background-color: var(--red);
-}
-
-/* --- MODIFIKASI DIMULAI: STYLE BARU DITAMBAHKAN UNTUK KOLOM TERAKHIR --- */
-/* (Berdasarkan Task 1, 2, dan 3) */
-
-.statusDescCell {
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-primary); 
-  font-size: 12px;
-  overflow: visible;
-  word-break: break-word;
-  white-space: normal;
-}
-
-.statusDescInvalid {
-  position: relative;
-  text-decoration: underline;
-  line-height: 100%;
-  font-weight: 600;
-  color: var(--red); 
-}
-
-.statusDescWithdraw {
-  position: relative;
-  text-decoration: underline;
-  line-height: 100%;
-  font-weight: 600;
-  color: var(--orange); 
 }
