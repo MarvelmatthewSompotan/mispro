@@ -39,7 +39,7 @@ class Enrollment extends Model
     protected $fillable = [
         'enrollment_id',
         'id',
-        'registration_id', 
+        'registration_id',
         'class_id',
         'section_id',
         'major_id',

@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, getMe } from "../../../services/api"; 
-import Button from "../../atoms/Button"; 
-// Import assets - sesuaikan path ini dengan struktur folder Anda
-import logoMis from "../../../assets/logo-mis-f.png"; 
-import bgLogin from "../../../assets/bg_login.jpg"; 
+import { login, getMe } from "../../../services/api";
+import Button from "../../atoms/Button";
+// Import assets
+import logoMis from "../../../assets/logo-mis-f.png";
+import bgLogin from "../../../assets/bg_login.jpg";
 // Elips untuk mode Login
-import ellipseTop from "../../../assets/elipse1_login.svg"; 
-import ellipseBottom from "../../../assets/elipse2_login.svg"; 
-// Elips untuk mode Reset (Asumsi nama file dari Anda)
-import ellipseTopReset from "../../../assets/elipse3_reset.svg"; 
-import ellipseBottomReset from "../../../assets/elipse4_reset.svg"; 
+import ellipseTop from "../../../assets/elipse1_login.svg";
+import ellipseBottom from "../../../assets/elipse2_login.svg";
+// Elips untuk mode Reset
+import ellipseTopReset from "../../../assets/elipse3_reset.svg";
+import ellipseBottomReset from "../../../assets/elipse4_reset.svg";
+
+// --- TAMBAHKAN IMPORT IKON MATA DI SINI ---
+// (Ganti nama file ini sesuai dengan file aset Anda)
+import eyeOpenIcon from "../../../assets/open.svg";
+import eyeClosedIcon from "../../../assets/hide.svg";
+// ------------------------------------------
 
 // Import CSS baru
-import styles from "./LoginPage.module.css"; // <-- UBAH CARA IMPORT
+import styles from "./LoginPage.module.css";
 
 const LoginPage = () => {
   // --- Logika dari LoginForm.js lama ---
@@ -25,8 +31,10 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // --- TAMBAHKAN STATE INI ---
   const [isResetMode, setIsResetMode] = useState(false);
+
+  // --- TAMBAHKAN STATE INI ---
+  const [showPassword, setShowPassword] = useState(false);
   // -------------------------
 
   const handleChange = (e) => {
@@ -68,19 +76,21 @@ const LoginPage = () => {
     console.log("LoginPage mounted - URL:", window.location.pathname);
   }, []);
 
-  // --- UBAH INI ---
-  // Fungsi untuk beralih mode
   const toggleMode = (e, mode) => {
     e.preventDefault();
-
     setIsResetMode((prev) => !prev);
     setError("");
     setForm({ email: "", password: "" });
+    setShowPassword(false); // <-- TAMBAHKAN INI: Reset ikon mata
   };
-  // ----------------
+
+  // --- TAMBAHKAN FUNGSI INI ---
+  const toggleShowPassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+  // ---------------------------
 
   return (
-    // --- UBAH CLASSNAME INI ---
     <div
       className={`${styles["login-page-new"]} ${
         isResetMode ? styles["reset-mode"] : ""
@@ -92,7 +102,7 @@ const LoginPage = () => {
         key={isResetMode ? "reset-left" : "login-left"}
       >
         <div className={styles["login-card-wrapper"]}>
-          {/* Elips Mode Login */}
+          {/* ... (kode elips tidak berubah) ... */}
           <img
             src={ellipseTop}
             alt="Decorative ellipse 1"
@@ -103,8 +113,6 @@ const LoginPage = () => {
             alt="Decorative ellipse 2"
             className={styles["login-blob-bottom"]}
           />
-
-          {/* Elips Mode Reset */}
           <img
             src={ellipseTopReset}
             alt="Decorative ellipse 3"
@@ -115,7 +123,6 @@ const LoginPage = () => {
             alt="Decorative ellipse 4"
             className={styles["login-blob-bottom-reset"]}
           />
-
           {/* ------------------------------------------- */}
 
           <div className={styles["login-card"]}>
@@ -125,16 +132,13 @@ const LoginPage = () => {
               className={styles["login-logo"]}
             />
 
-            {/* --- UBAH ONSUBMIT --- */}
             <form
               onSubmit={isResetMode ? handleResetSubmit : handleSubmit}
               className={styles["login-form-new"]}
             >
-              {/* --- UBAH JUDUL --- */}
               <h2 className={styles["login-title-new"]}>
                 {isResetMode ? "Reset your login" : "Login to your account"}
               </h2>
-              {/* -------------------- */}
 
               {error && (
                 <p className={styles["login-error-message"]}>{error}</p>
@@ -146,7 +150,7 @@ const LoginPage = () => {
                   type="email"
                   id="email"
                   name="email"
-                  placeholder="Username or Email" /* <-- UBAH PLACEHOLDER */
+                  placeholder="Username or Email"
                   value={form.email}
                   onChange={handleChange}
                   disabled={isLoading}
@@ -154,19 +158,28 @@ const LoginPage = () => {
                 />
               </div>
 
-              {/* Field Password */}
+              {/* --- MODIFIKASI FIELD PASSWORD --- */}
               <div className={styles["input-group"]}>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // <-- UBAH INI
                   id="password"
                   name="password"
-                  placeholder="Password" /* <-- UBAH PLACEHOLDER */
+                  placeholder="Password"
                   value={form.password}
                   onChange={handleChange}
                   disabled={isLoading}
                   required
                 />
+                {/* --- TAMBAHKAN IKON INI --- */}
+                <img
+                  src={showPassword ? eyeClosedIcon : eyeOpenIcon}
+                  alt="Toggle password visibility"
+                  className={styles["password-toggle-icon"]}
+                  onClick={toggleShowPassword}
+                />
+                {/* ------------------------- */}
               </div>
+              {/* --------------------------------- */}
 
               <a
                 href="#"
@@ -197,8 +210,7 @@ const LoginPage = () => {
           alt="Students"
           className={styles["login-illustration-new"]}
         />
-        <div className={styles["login-image-overlay"]}></div>{" "}
-        {/* Div overlay dipindahkan ke sini */}
+        <div className={styles["login-image-overlay"]}></div>
       </div>
     </div>
   );
