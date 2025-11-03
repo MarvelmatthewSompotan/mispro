@@ -51,6 +51,18 @@ class StudentController extends Controller
             ' . (!$isStudentStatusFiltered ? 'AND e2.school_year_id = e1.school_year_id' : '') . '
         )');
 
+        $latestApplicationVersionSub = DB::table('application_form_versions AS afv')
+        ->select(
+            'afv.application_id',
+            'afv.data_snapshot'
+        )
+        ->join('application_forms AS af', 'af.application_id', '=', 'afv.application_id')
+        ->whereRaw('afv.version_id = (
+            SELECT MAX(afv2.version_id) 
+            FROM application_form_versions AS afv2
+            WHERE afv2.application_id = afv.application_id
+        )');
+
         $query = Student::select(            
             'students.id',
             'students.student_id',
@@ -64,12 +76,16 @@ class StudentController extends Controller
             'sections.name as section_name',
             'students.status as student_status',
             'enrollments.status as enrollment_status',
+            'latest_app_version.data_snapshot as latest_data_snapshot'
         )
         ->joinSub($latestEnrollments, 'latest_enrollments', function ($join) {
             $join->on('latest_enrollments.id', '=', 'students.id');
         })
         ->join('enrollments', 'enrollments.enrollment_id', '=', 'latest_enrollments.enrollment_id')
         ->join('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+        ->leftJoinSub($latestApplicationVersionSub, 'latest_app_version', function ($join) {
+            $join->on('latest_app_version.application_id', '=', 'application_forms.application_id');
+        })
         ->join('school_years', 'enrollments.school_year_id', '=', 'school_years.school_year_id')
         ->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id')
         ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id');
@@ -146,21 +162,16 @@ class StudentController extends Controller
 
         // Transform data (photo_url)
         $students->getCollection()->transform(function ($student) {
-
             $photoUrl = null;
             try {
-                $latestApplicationFormVersion = DB::table('application_forms AS af')
-                    ->join('enrollments AS e', 'af.enrollment_id', '=', 'e.enrollment_id')
-                    ->join('application_form_versions AS afv', 'af.application_id', '=', 'afv.application_id')
-                    ->where('e.id', $student->id)
-                    ->select('afv.data_snapshot')
-                    ->orderByDesc('afv.version_id')
-                    ->first();
-
-                if ($latestApplicationFormVersion && $latestApplicationFormVersion->data_snapshot) {
-                    $decode = json_decode($latestApplicationFormVersion->data_snapshot);
+                if ($student->latest_data_snapshot) {
+                    $decode = json_decode($student->latest_data_snapshot);
                     $photoUrl = $decode->request_data->photo_url ?? null;
                 } 
+                unset($student->latest_data_snapshot); 
+                $student->photo_url = $photoUrl;
+                return $student;
+
             } catch (\Exception $e) {
             }
 
@@ -578,9 +589,7 @@ class StudentController extends Controller
             $student->update(array_filter($studentData, fn($v) => !is_null($v)));
             if (isset($validated['status'])) {
                 $inactiveStatuses = ['graduate', 'expelled', 'withdraw'];
-                $latestEnrollment = $student->enrollments()
-                    ->orderByDesc('registration_date')
-                    ->first();
+                $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
 
                 $currentMonth = now()->month;
                 $currentYear = now()->year;
@@ -660,9 +669,8 @@ class StudentController extends Controller
                 'residence_id', 'transportation_id', 'pickup_point_id',
                 'pickup_point_custom', 'residence_hall_policy', 'transportation_policy'
             ])) {
-                $latestEnrollment = $student->enrollments()
-                    ->orderByDesc('registration_date')
-                    ->first();
+
+                $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
 
                 if ($latestEnrollment) {
                     $latestEnrollment->update([
@@ -701,12 +709,11 @@ class StudentController extends Controller
                 $newRequestData['photo_url']  = asset('storage/' . $student->photo_path);
             }
 
-            $latestEnrollment = $student->enrollments()
-                ->orderByDesc('registration_date')
-                ->first();
+            $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
             $latestEnrollment->refresh();
             $newRequestData['enrollment_status'] = $latestEnrollment->status;
 
+            $latestEnrollment->load('semester', 'schoolYear'); 
 
             $newSnapshot = [
                 'id'             => $student->id,
@@ -775,7 +782,7 @@ class StudentController extends Controller
         $histories = ApplicationFormVersion::whereHas('applicationForm.enrollment', function ($q) use ($id) {
                 $q->where('id', $id);
             })
-            ->with(['applicationForm.enrollment.schoolYear'])
+            ->with(['applicationForm.enrollment.schoolYear', 'applicationForm.enrollment'])
             ->orderBy('updated_at', 'desc')
             ->get(['version_id', 'application_id', 'updated_at']);
 

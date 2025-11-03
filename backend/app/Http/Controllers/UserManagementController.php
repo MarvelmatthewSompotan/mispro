@@ -111,7 +111,21 @@ class UserManagementController extends Controller
     public function destroy(Request $request, $user_id)
     {
         try {
+            if (auth()->user()->role !== 'admin') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authorization failed. Only administrators can delete users.',
+                ], 403);
+            }
+
             $user = User::findOrFail($user_id);
+
+            if (auth()->id() === $user->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete your own account.',
+                ], 403);
+            }
 
             if ($user->role === 'admin') {
                 return response()->json([
