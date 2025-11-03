@@ -323,17 +323,36 @@ const FormButtonSection = ({
     }
 
     // Validasi Term of Payment Section
+    let isDormitoryStudent = false;
+    if (
+      sharedData &&
+      sharedData.residence_halls &&
+      facilities.residence_id
+    ) {
+      const selectedResidence = sharedData.residence_halls.find(
+        (r) => r.residence_id === facilities.residence_id
+      );
+      if (
+        selectedResidence &&
+        selectedResidence.type.toLowerCase().includes("dormitory")
+      ) {
+        isDormitoryStudent = true;
+      }
+    }
+
+    // Validasi Term of Payment Section
     const termOfPayment = allFormData.termOfPayment || {};
     if (!termOfPayment.tuition_fees) {
       errors.termOfPayment = { ...errors.termOfPayment, tuition_fees: true };
     }
-    if (!termOfPayment.residence_payment) {
+
+    // Hanya wajibkan residence_payment jika siswa di asrama
+    if (isDormitoryStudent && !termOfPayment.residence_payment) {
       errors.termOfPayment = {
         ...errors.termOfPayment,
         residence_payment: true,
       };
     }
-
     console.log("Validation Errors:", errors);
 
     const hasErrors = Object.values(errors).some(
