@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('email', 100);
             $table->string('photo_path', 255)->nullable();
             $table->string('previous_school', 100)->nullable();
-            $table->enum('religion', ['Islam','Kristen','Katolik','Hindu','Buddha','Konghucu','Kristen Advent',]);
+            $table->enum('religion', ['Islam','Kristen','Kristen Katolik','Hindu','Buddha','Konghucu','Kristen Advent',]);
             $table->enum('active', ['YES','NO']);
             $table->string('status', 50)->nullable();
             $table->string('academic_status_other', 50)->nullable();

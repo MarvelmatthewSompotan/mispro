@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id('payment_id');
             $table->unsignedBigInteger('id')->nullable();
             $table->enum('tuition_fees', ['Full Payment', 'Installment']);
-            $table->enum('residence_payment', ['Full Payment', 'Installment'])->nullable();
+            $table->enum('residence_payment', ['Full Payment', 'Installment']);
             $table->enum('financial_policy_contract', ['Signed', 'Not Signed']);
             $table->unsignedBigInteger('enrollment_id');
             $table->foreign('id')->references('id')->on('students')->onDelete('set null');
