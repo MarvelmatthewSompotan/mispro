@@ -14,8 +14,8 @@ import ellipseBottomReset from "../../../assets/elipse4_reset.svg";
 
 // --- TAMBAHKAN IMPORT IKON MATA DI SINI ---
 // (Ganti nama file ini sesuai dengan file aset Anda)
-import eyeOpenIcon from "../../../assets/open.svg";
 import eyeClosedIcon from "../../../assets/hide.svg";
+import eyeOpenIcon from "../../../assets/open.svg";
 // ------------------------------------------
 
 // Import CSS baru
@@ -172,7 +172,7 @@ const LoginPage = () => {
                 />
                 {/* --- TAMBAHKAN IKON INI --- */}
                 <img
-                  src={showPassword ? eyeClosedIcon : eyeOpenIcon}
+                  src={showPassword ? eyeOpenIcon : eyeClosedIcon}
                   alt="Toggle password visibility"
                   className={styles["password-toggle-icon"]}
                   onClick={toggleShowPassword}

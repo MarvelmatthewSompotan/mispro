@@ -265,9 +265,11 @@
   font-weight: var(--font-weight-bold) !important;
   font-style: italic;
 }
+
 .addMoreOption:hover {
   background-color: var(--secondary-accent) !important;
 }
+
 .addMoreOption.selectedOption {
   background-color: var(--main-accent-hoverstate) !important;
   color: var(--text-accent) !important;

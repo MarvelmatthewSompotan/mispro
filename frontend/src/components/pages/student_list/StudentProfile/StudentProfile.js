@@ -17,6 +17,7 @@ import {
   updateStudent,
   getStudentHistoryDates,
   getHistoryDetail,
+  getRegistrationPreview,
 } from '../../../../services/api';
 import Select from 'react-select';
 import styles from './StudentProfile.module.css';
@@ -131,12 +132,14 @@ const StudentProfile = () => {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [studentData, setStudentData] = useState(null);
   const blocker = useBlocker(isEditing);
   const [isPhotoPopupOpen, setIsPhotoPopupOpen] = useState(false);
   const citizenshipOptions = [
     { value: 'Indonesia', label: 'Indonesia' },
     { value: 'Non Indonesia', label: 'Non Indonesia' },
   ];
+  const currentApplicationId = studentData?.application_id;
 
   // --- [BARU] Opsi untuk dropdown Agama ---
   const religionOptions = [
@@ -193,6 +196,27 @@ const StudentProfile = () => {
       .catch((err) => console.error('Failed to fetch options:', err));
   }, []);
 
+  const handleDownloadPdfClick = async () => {
+    // Pastikan kita punya ID yang dibutuhkan
+    const applicationId = currentApplicationId;
+    // Gunakan versionId terbaru (null jika tidak ada riwayat yang dipilih)
+    const defaultVersionId = studentData?.version_id;
+    const versionIdToPrint = selectedVersionId || defaultVersionId;
+
+    if (!applicationId) {
+      alert('Application ID tidak ditemukan.');
+      return;
+    }
+
+    navigate('/print', {
+      state: {
+        applicationId: applicationId,
+        version: versionIdToPrint,
+        fromStudentProfile: true,
+      },
+    });
+  };
+
   const handleFileSelect = (file) => {
     setSelectedPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
@@ -222,6 +246,7 @@ const StudentProfile = () => {
             ...studentData.termOfPayment,
             photo_url: studentData.studentInfo?.photo_url,
           };
+          setStudentData(studentData);
           setProfileData(combinedData);
           setFormData(combinedData);
           const studentInfoData = studentData.studentInfo || {};
@@ -939,9 +964,17 @@ const StudentProfile = () => {
       const combinedData = {
         id_primary: response.data.id,
         student_id: response.data.student_id,
+        application_id:
+          response.data.application_id || studentData.application_id,
+        version_id: response.version_id,
         ...updatedData,
       };
-
+      setStudentData(response.data);
+      setStudentData((prev) => ({
+        ...prev,
+        application_id: response.data.application_id,
+        version_id: response.version_id,
+      }));
       setProfileData(combinedData);
       setFormData(combinedData);
       const newStudentInfo = {};
@@ -1126,6 +1159,7 @@ const StudentProfile = () => {
           onAddPhotoClick={() => setIsPhotoPopupOpen(true)}
           statusOptions={statusOptions}
           onStatusChange={handleStatusChange}
+          onDownloadPdfClick={handleDownloadPdfClick}
         />
 
         <div className={styles.profileContent}>

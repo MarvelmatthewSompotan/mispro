@@ -18,7 +18,11 @@ function ProgramContent({
 
   const getMajorName = () => {
     if (data?.major_id) {
-      const found = majorOptions?.find((m) => m.major_id === data.major_id);
+      // const targetId = String(data.major_id);
+      // const found = majorOptions?.find((m) => m.major_id === targetId);
+      const found = majorOptions?.find(
+        (m) => m.major_id === parseInt(data.major_id, 10)
+      );
       return found ? found.name : '';
     }
     return '';

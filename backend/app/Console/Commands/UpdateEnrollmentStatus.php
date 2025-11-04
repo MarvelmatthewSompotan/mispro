@@ -27,6 +27,7 @@ class UpdateEnrollmentStatus extends Command
      */
     public function handle()
     {
+        \Log::info('Running UpdateEnrollmentStatus command at ' . now());
         $currentMonth = now()->month;
         $currentYear = now()->year;
 

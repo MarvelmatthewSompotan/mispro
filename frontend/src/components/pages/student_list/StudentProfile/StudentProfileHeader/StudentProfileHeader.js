@@ -1,18 +1,18 @@
 // File: src/components/pages/StudentProfileHeader/StudentProfileHeader.js
 
-import React, { useState } from "react";
-import styles from "./StudentProfileHeader.module.css";
-import Button from "../../../../atoms/Button";
-import placeholder from "../../../../../assets/user.svg";
+import React, { useState } from 'react';
+import styles from './StudentProfileHeader.module.css';
+import Button from '../../../../atoms/Button';
+import placeholder from '../../../../../assets/user.svg';
 
 const getStatusVariant = (status) => {
-  if (!status) return "not-graduated";
+  if (!status) return 'not-graduated';
   const lowerStatus = status.toLowerCase();
-  if (lowerStatus.includes("not graduate")) return "not-graduated";
-  if (lowerStatus.includes("graduate")) return "graduated";
-  if (lowerStatus.includes("expelled")) return "expelled";
-  if (lowerStatus.includes("withdraw")) return "withdraw";
-  return "not-graduated"; // Default variant
+  if (lowerStatus.includes('not graduate')) return 'not-graduated';
+  if (lowerStatus.includes('graduate')) return 'graduated';
+  if (lowerStatus.includes('expelled')) return 'expelled';
+  if (lowerStatus.includes('withdraw')) return 'withdraw';
+  return 'not-graduated'; // Default variant
 };
 
 const StudentProfileHeader = ({
@@ -35,6 +35,7 @@ const StudentProfileHeader = ({
   onAddPhotoClick,
   editableStatus, // <-- Prop added
   onStatusChange, // <-- Prop added
+  onDownloadPdfClick,
 }) => {
   const [isStatusDropdownOpen, setStatusDropdownOpen] = useState(false);
 
@@ -54,7 +55,7 @@ const StudentProfileHeader = ({
         <img
           className={imageClass} // Gunakan variabel kelas
           src={imageUrl} // Gunakan variabel URL
-          alt=""
+          alt=''
         />
       </div>
 
@@ -69,7 +70,7 @@ const StudentProfileHeader = ({
 
         <div className={styles.schoolYearContainer}>
           <span className={styles.yearLabel}>School year</span>
-          <b className={styles.yearValue}>{formData.school_year || "-"}</b>
+          <b className={styles.yearValue}>{formData.school_year || '-'}</b>
         </div>
 
         {isEditing ? (
@@ -79,22 +80,22 @@ const StudentProfileHeader = ({
               {/* This button now reflects the state but is not clickable */}
               <Button
                 variant={
-                  studentInfo.student_active === "YES" ? "active" : "not-active"
+                  studentInfo.student_active === 'YES' ? 'active' : 'not-active'
                 }
               >
-                {studentInfo.student_active === "YES" ? "Active" : "Not Active"}
+                {studentInfo.student_active === 'YES' ? 'Active' : 'Not Active'}
               </Button>
 
               {/* New Status Dropdown Button */}
               <div className={styles.historyContainer}>
-                {" "}
+                {' '}
                 {/* Re-using history container for positioning */}
                 <Button
                   variant={getStatusVariant(studentInfo.status)}
                   showDropdownIcon={true}
                   onClick={() => setStatusDropdownOpen(!isStatusDropdownOpen)}
                 >
-                  {studentInfo.status || "Select Status"}
+                  {studentInfo.status || 'Select Status'}
                 </Button>
                 {isStatusDropdownOpen && (
                   <ul className={styles.historyDropdown}>
@@ -121,7 +122,7 @@ const StudentProfileHeader = ({
             <Button
               className={styles.editPhotoButton}
               onClick={onAddPhotoClick}
-              variant="solid"
+              variant='solid'
             >
               Edit photo
             </Button>
@@ -129,17 +130,33 @@ const StudentProfileHeader = ({
         ) : (
           // --- VIEW MODE ---
           !selectedVersionId && (
-            <div className={styles.statusTagContainer}>
+            // --- [UBAH] Tambahkan div untuk menampung button status dan PDF
+            <div className={styles.statusAndActionGroup}>
+              <div className={styles.statusTagContainer}>
+                <Button
+                  variant={
+                    studentInfo.student_active === 'YES'
+                      ? 'active'
+                      : 'not-active'
+                  }
+                >
+                  {studentInfo.student_active === 'YES'
+                    ? 'Active'
+                    : 'Not Active'}
+                </Button>
+                <Button variant={getStatusVariant(studentInfo.status)}>
+                  {studentInfo.status || 'Not Graduated'}
+                </Button>
+              </div>
+              {/* --- [BARU] Tombol Download PDF (desain sama dengan button edit) */}
               <Button
-                variant={
-                  studentInfo.student_active === "YES" ? "active" : "not-active"
-                }
+                className={`${styles.actionButton} ${styles.actionButtonPrimary}`} // Menggunakan style yang sama dengan Edit
+                onClick={onDownloadPdfClick}
+                variant='solid'
               >
-                {studentInfo.student_active === "YES" ? "Active" : "Not Active"}
+                Download PDF
               </Button>
-              <Button variant={getStatusVariant(studentInfo.status)}>
-                {studentInfo.status || "Not Graduated"}
-              </Button>
+              {/* --- [AKHIR BARU] */}
             </div>
           )
         )}
@@ -149,10 +166,10 @@ const StudentProfileHeader = ({
       <div className={styles.headerActionSection}>
         {!isEditing && (
           <div className={styles.historyContainer} ref={historyRef}>
-            <Button variant="outline" onClick={onViewHistoryClick}>
+            <Button variant='outline' onClick={onViewHistoryClick}>
               {selectedVersionId
-                ? "Back to Latest Version"
-                : "View version history"}
+                ? 'Back to Latest Version'
+                : 'View version history'}
             </Button>
             {isHistoryVisible && (
               <ul className={styles.historyDropdown}>
@@ -192,7 +209,7 @@ const StudentProfileHeader = ({
               className={styles.actionButton}
               onClick={onCancelClick}
               disabled={isUpdating}
-              variant="outline"
+              variant='outline'
             >
               Cancel
             </Button>
@@ -200,9 +217,9 @@ const StudentProfileHeader = ({
               className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
               onClick={onSaveClick}
               disabled={isUpdating}
-              variant="solid"
+              variant='solid'
             >
-              {isUpdating ? "Saving..." : "Save changes"}
+              {isUpdating ? 'Saving...' : 'Save changes'}
             </Button>
           </>
         ) : (
@@ -210,7 +227,7 @@ const StudentProfileHeader = ({
             <Button
               className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
               onClick={onEditClick}
-              variant="solid"
+              variant='solid'
             >
               Edit
             </Button>

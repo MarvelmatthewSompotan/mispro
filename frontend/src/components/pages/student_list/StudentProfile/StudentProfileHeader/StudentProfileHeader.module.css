@@ -182,3 +182,18 @@
   border-top: 1px solid #e9ecef;
   border-bottom: 1px solid #e9ecef;
 }
+
+.statusTagContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* --- [BARU] Container untuk Status Tag dan Tombol Aksi di View Mode --- */
+.statusAndActionGroup {
+    display: flex;
+    flex-direction: column; /* Ubah dari row ke column */
+    align-items: flex-start;
+    gap: 16px; /* Jarak antara baris Status dan tombol Download PDF */
+}
