@@ -81,7 +81,7 @@
 }
 .studentInfoTable {
   width: 100%;
-  background: #fff;
+  background: var(--secondary-background);
   border-radius: 6px;
   border: 1px solid #d1d5db;
   margin-bottom: 24px;
@@ -102,14 +102,14 @@
 }
 .studentInfoLabel {
   font-weight: 700;
-  color: #222;
+  color: var(--main-text);
   min-width: 220px;
   margin-right: 12px;
   white-space: nowrap;
 }
 .studentInfoValue {
   font-weight: 500;
-  color: #111;
+  color: var(--main-text);
   flex: 1;
   white-space: pre-line;
   word-break: break-word;
@@ -127,7 +127,7 @@
 }
 .programTable {
   width: 100%;
-  background: #fff;
+  background: var(--secondary-background);
   border-radius: 0 0 6px 6px;
   border: 1px solid #d1d5db;
   border-top: none;
@@ -150,13 +150,13 @@
 }
 .programLabel {
   font-weight: 600;
-  color: #222;
+  color: var(--main-text);
   padding: 4px 8px 4px 0;
   white-space: nowrap;
 }
 .programValue {
   font-weight: 500;
-  color: #111;
+  color: var(--main-text);
   padding: 4px 8px;
   display: flex;
   align-items: center;
@@ -169,25 +169,25 @@
   border: 2px solid #b6c6fa;
   border-radius: 4px;
   margin-right: 6px;
-  background: #fff;
+  background: var(--secondary-background);
   vertical-align: middle;
   position: relative;
 }
 .checked {
-  background: #5a6bff;
-  border-color: #5a6bff;
+  background: var(--main-accent);
+  border-color: var(--main-accent); /* Diubah dari #5a6bff */
 }
 .checked::after {
   content: '';
   display: block;
   width: 8px;
   height: 8px;
-  background: #fff;
+  background: var(--secondary-background);
   border-radius: 2px;
   position: absolute;
   top: 2px;
   left: 2px;
-} 
+}
 
 .misLogo1024x9801Icon {
   width: 148px;
@@ -254,7 +254,7 @@
   position: relative;
   line-height: 100%;
   margin-left: 5px;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-primary);
   font-weight: bold;
 }
 .title {
@@ -304,7 +304,7 @@
 }
 .header {
   align-self: stretch;
-  height: 295px; 
+  height: 295px;
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
@@ -314,11 +314,11 @@
   padding: 72px 0px 12px;
   box-sizing: border-box;
   gap: 15px;
-  padding-top: 50px; 
+  padding-top: 50px;
 }
 .header1 {
   align-self: stretch;
-  background-color: #e4eefa;
+  background-color: #e4eefa; 
   border-left: 7px solid #8dc1ff;
   box-sizing: border-box;
   height: 40px;
@@ -330,7 +330,7 @@
 .fullName {
   align-self: stretch;
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -353,7 +353,7 @@
 }
 .nickname {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -365,7 +365,7 @@
 }
 .gender {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -386,7 +386,7 @@
 }
 .age {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -397,7 +397,7 @@
   max-width: 108px;
 }
 .rankInFamily {
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -426,7 +426,7 @@
 }
 .citizenship {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -436,7 +436,7 @@
 }
 .dob {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -455,7 +455,7 @@
 }
 .sec2 {
   align-self: stretch;
-  border: 1px solid #000;
+  border: 1px solid var(--main-text);
   box-sizing: border-box;
   height: 92px;
   display: flex;
@@ -482,7 +482,7 @@
 }
 .address {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   height: 80px;
   display: flex;
@@ -495,7 +495,7 @@
 }
 .sec3 {
   align-self: stretch;
-  border: 1px solid #000;
+  border: 1px solid var(--main-text); 
   box-sizing: border-box;
   height: 92px;
   display: flex;
@@ -538,7 +538,7 @@
   bottom: -5.36%;
   left: -5.36%;
   border-radius: 50%;
-  border: 3px solid #5f84fe;
+  border: 3px solid var(--main-accent); 
   box-sizing: border-box;
 }
 .radioBtn {
@@ -563,10 +563,10 @@
   bottom: 21.43%;
   left: 21.43%;
   border-radius: 50%;
-  background-color: #5f84fe;
+  background-color: var(--main-accent); 
 }
 .grade {
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -576,7 +576,7 @@
 }
 .major {
   width: 250px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -603,7 +603,7 @@
   bottom: -6.25%;
   left: -6.25%;
   border-radius: 4px;
-  border: 3px solid #5f84fe;
+  border: 3px solid var(--main-accent); 
   box-sizing: border-box;
 }
 .checkBox {
@@ -620,7 +620,7 @@
 }
 .other1 {
   width: 458px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -659,8 +659,8 @@
   bottom: -4.17%;
   left: -4.17%;
   border-radius: 4px;
-  background-color: #5f84fe;
-  border: 2px solid #5f84fe;
+  background-color: var(--main-accent); 
+  border: 2px solid var(--main-accent); 
   box-sizing: border-box;
 }
 .ucheckIcon {
@@ -699,7 +699,7 @@
 .name {
   align-self: stretch;
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -746,7 +746,7 @@
 }
 .address2 {
   width: 830px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -765,7 +765,7 @@
 }
 .fatherInfo {
   align-self: stretch;
-  border: 1px solid #000;
+  border: 1px solid var(--main-text); 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -790,7 +790,7 @@
 }
 .left1 {
   flex: 1;
-  border: 1px solid #000;
+  border: 1px solid var(--main-text); 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -799,7 +799,7 @@
 }
 .address6 {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   box-sizing: border-box;
   height: 74px;
   display: flex;
@@ -814,7 +814,7 @@
 .right1 {
   align-self: stretch;
   flex: 0.9718;
-  border: 1px solid #000;
+  border: 1px solid var(--main-text); 
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -856,7 +856,7 @@
   padding: 0px 12px;
 }
 .weParent {
-  font-family: Poppins;
+  font-family: var(--font-primary); 
 }
 .weParentJohnJaneDoeA {
   margin: 0;
@@ -892,7 +892,7 @@
 }
 .txtStudentNameAndSignature {
   align-self: stretch;
-  border-top: 0.9px solid #000;
+  border-top: 0.9px solid var(--main-text); 
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -939,7 +939,7 @@
   bottom: -4.94%;
   left: -5.06%;
   border-radius: 50%;
-  border: 2.8px solid #5f84fe;
+  border: 2.8px solid var(--main-accent); 
   box-sizing: border-box;
 }
 .complete1 {
@@ -1013,7 +1013,7 @@
 }
 .principal {
   align-self: stretch;
-  border-bottom: 0.9px solid #000;
+  border-bottom: 0.9px solid var(--main-text); 
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -1048,7 +1048,7 @@
   justify-content: flex-start;
   gap: 6px;
   font-size: 20px;
-  font-family: Poppins;
+  font-family: var(--font-primary); 
 }
 
 .printPageA4 {
@@ -1065,8 +1065,8 @@
   text-align: left;
   font-size: 16px;
   color: var(--main-text);
-  font-family: Inter;
-} 
+  font-family: var(--font-secondary); 
+}
 
 .printPageF4 {
   width: 1816px;
@@ -1082,52 +1082,52 @@
   text-align: left;
   font-size: 16px;
   color: var(--main-text);
-  font-family: Inter;
+  font-family: var(--font-secondary); 
 }
 
 .footerA4 {
   width: 100%;
-  height: 223px; 
-  position: relative; 
-  display: flex; 
-  align-items: center; 
-  gap: 20px; 
-  margin-top: 24px; 
+  height: 223px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 24px;
 }
 
 .footerF4 {
   width: 100%;
-  height: 553px; 
-  position: relative; 
-  display: flex; 
-  align-items: center; 
-  gap: 20px; 
-  margin-top: 24px; 
+  height: 553px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 24px;
 }
 
 .footerRow {
   display: flex;
-  justify-content: center; 
+  justify-content: center;
   align-items: center;
   width: 100%;
   height: 100%;
 }
 
 .footerImgA4 {
-  width: auto; 
-  max-width: 100%; 
+  width: auto;
+  max-width: 100%;
   height: auto;
   object-fit: contain;
-  max-height: 300px; 
+  max-height: 300px;
   padding-bottom: 50px;
 }
 
 .footerImgF4 {
-  width: auto; 
-  max-width: 100%; 
+  width: auto;
+  max-width: 100%;
   height: auto;
   object-fit: contain;
-  max-height: 600px; 
+  max-height: 600px;
 }
 
 .program {
@@ -1137,7 +1137,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   gap: 12px;
-} 
+}
 
 .facilities {
   align-self: stretch;
@@ -1146,7 +1146,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   gap: 12px;
-} 
+}
 
 .parentsguardianInformation {
   align-self: stretch;
@@ -1155,7 +1155,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   gap: 12px;
-} 
+}
 
 .termOfPayment {
   align-self: stretch;
@@ -1188,7 +1188,7 @@
 
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid var(--accent-color);
+  border-top: 4px solid var(--main-accent); 
   border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -1198,19 +1198,21 @@
 .printActionsBar {
   position: fixed;
   top: 0;
-  left: -40px;
+  left: 890px;
   right: 0;
-  width: 100%;
+  width: 36.5%;
   display: flex;
   justify-content: flex-end;
-  align-items: center; 
+  align-items: center;
   gap: 10px;
-  padding: 20px 20px;
+  padding: 10px 26px;
   z-index: 9999;
+  background-color: var(--secondary-background);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .switchIcon {
-  width: 32px;  
+  width: 32px;
   height: 32px;
   cursor: pointer;
   opacity: 0.7;
