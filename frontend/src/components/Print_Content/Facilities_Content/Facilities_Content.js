@@ -3,11 +3,11 @@ import styles from '../../styles/Facilities_Content.module.css';
 
 function FacilitiesContent({ data, pickupPointOptions }) {
   if (!data) return null;
-  const transportations = [
+  const localTransportations = [
     { id: 1, name: 'Own car' },
     { id: 2, name: 'School bus' },
   ];
-  const residences = [
+  const localResidences = [
     { id: 1, name: 'Boys dormitory' },
     { id: 2, name: 'Girls dormitory' },
     { id: 3, name: 'Non-Residence hall' },
@@ -16,11 +16,31 @@ function FacilitiesContent({ data, pickupPointOptions }) {
   const getPickupPointName = () => {
     if (data?.pickup_point_id) {
       const option = pickupPointOptions.find(
-        (p) => p.pickup_point_id === data.pickup_point_id
+        (p) => p.pickup_point_id === parseInt(data.pickup_point_id, 10)
       );
       return option ? option.name : '-';
     }
     return data?.pickup_point_custom ?? '-';
+  };
+
+  const getTransportationName = () => {
+    if (data?.transportation_id) {
+      // Kita harus mengasumsikan data.transportation_id dari Print.js adalah Integer (Number)
+      const idToMatch = parseInt(data.transportation_id, 10);
+      const found = localTransportations.find((t) => t.id === idToMatch);
+      return found ? found.name : '-';
+    }
+    return '-';
+  };
+
+  const getResidenceName = () => {
+    if (data?.residence_id) {
+      // Kita harus mengasumsikan data.residence_id dari Print.js adalah Integer (Number)
+      const idToMatch = parseInt(data.residence_id, 10);
+      const found = localResidences.find((r) => r.id === idToMatch);
+      return found ? found.name : '-';
+    }
+    return '-';
   };
 
   // helper checkbox biar tidak duplikat
@@ -54,11 +74,11 @@ function FacilitiesContent({ data, pickupPointOptions }) {
           <div className={styles.transportation}>Transportation</div>
         </div>
 
-        {transportations.map((transport) => (
+        {localTransportations.map((transport) => (
           <div key={transport.id} className={styles.ownCar}>
             <div className={styles.radioBtn}>
               <div className={styles.radioBtnChild} />
-              {data?.transportation_id === transport.id && (
+              {String(data?.transportation_id) === String(transport.id) && (
                 <div className={styles.radioBtnInner} />
               )}
             </div>
@@ -87,11 +107,11 @@ function FacilitiesContent({ data, pickupPointOptions }) {
           <div className={styles.residenceHall}>Residence Hall</div>
         </div>
 
-        {residences.map((residence) => (
+        {localResidences.map((residence) => (
           <div key={residence.id} className={styles.ownCar}>
             <div className={styles.radioBtn}>
               <div className={styles.radioBtnChild} />
-              {data?.residence_id === residence.id && (
+              {String(data?.residence_id) === String(residence.id) && (
                 <div className={styles.radioBtnInner} />
               )}
             </div>
