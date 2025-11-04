@@ -4,29 +4,27 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CheckTokenLifetime
 {
     public function handle(Request $request, Closure $next)
     {
-        $user = $request->user();
+        $token = $request->user()?->currentAccessToken();
 
-        if ($user) {
-            $token = $user->currentAccessToken();
+        if ($token) {
+            $lifetimeMinutes = 720; 
 
-            if ($token) {
-                $lifetimeMinutes = 720; 
+            $createdAt = $token->created_at;
 
-                $createdAt = $token->created_at;
+            if ($createdAt && now()->diffInMinutes($createdAt) >= $lifetimeMinutes) {
+                $token->delete();
+                Auth::guard('sanctum')->forget($request->user()); 
 
-                if ($createdAt && now()->diffInMinutes($createdAt) >= $lifetimeMinutes) {
-                    $token->delete();
-
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Token expired. Please login again.'
-                    ], 401);
-                }
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token expired. Please login again.'
+                ], 401);
             }
         }
 

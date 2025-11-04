@@ -19,9 +19,12 @@ class CorsMiddleware
 
         $origin = $request->headers->get('Origin');
 
-        // Tentukan origin mana yang boleh
-        $allowOrigin = in_array($origin, $allowedOrigins) ? $origin : $allowedOrigins[1];
+        $allowOrigin = in_array($origin, $allowedOrigins) ? $origin : false;
 
+        if (!$allowOrigin) {
+            $allowOrigin = $allowedOrigins[1]; 
+        }
+        
         if ($request->isMethod('OPTIONS')) {
             return response('', 200)
                 ->header('Access-Control-Allow-Origin', $allowOrigin)

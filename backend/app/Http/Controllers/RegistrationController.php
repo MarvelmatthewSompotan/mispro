@@ -29,12 +29,12 @@ use App\Models\GuardianAddress;
 use App\Models\StudentGuardian;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Events\ApplicationFormCreated;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
 use App\Events\ApplicationFormStatusUpdated;
-use App\Http\Resources\ApplicationPreviewResource;
 
 class RegistrationController extends Controller
 {
@@ -244,9 +244,8 @@ class RegistrationController extends Controller
                         ? $currentYear . '/' . ($currentYear + 1)
                         : ($currentYear - 1) . '/' . $currentYear;
                     
-                    $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
-                    $currentSchoolYearId = $schoolYear?->school_year_id;
-
+                    $currentSchoolYearId = SchoolYear::where('year', $schoolYearStr)->value('school_year_id'); 
+    
                     if ($currentSchoolYearId && $enrollment->school_year_id === $currentSchoolYearId) {
                         $enrollment->status = 'ACTIVE';
                     } else {
@@ -360,10 +359,10 @@ class RegistrationController extends Controller
 
         $prefix = "{$yearCode}{$sectionId}";   
 
-        $latest = Student::where('student_id', 'LIKE', "{$prefix}%")
-            ->orderByDesc('student_id')
+        $latest = Student::where('studentall_id', 'LIKE', "{$prefix}%")
+            ->orderByDesc('studentall_id')
             ->lockForUpdate()
-            ->value('student_id');
+            ->value('studentall_id');
 
         if ($latest) {
             $lastNumber = (int)substr($latest, -4);
@@ -547,7 +546,7 @@ class RegistrationController extends Controller
                 'guardian_address_other' => 'nullable|string',
                 
                 'tuition_fees' => 'required|in:Full Payment,Installment',
-                'residence_payment' => 'required|in:Full Payment,Installment',
+                'residence_payment' => 'nullable|required_unless:residence_id,3|in:Full Payment,Installment',
                 'financial_policy_contract' => 'required|in:Signed,Not Signed',
 
                 'discount_name' => 'nullable|string',
@@ -629,14 +628,13 @@ class RegistrationController extends Controller
                         $query->where('kitas', $validated['kitas']);
                     }
                 })
+                ->with(['enrollments' => function ($query) use ($validated) {
+                    $query->where('section_id', $validated['section_id']);
+                }])
                 ->get();
                 
                 foreach ($possibleStudents as $stud) {
-                    $alreadyInSection = $stud->enrollments()
-                        ->where('section_id', $validated['section_id'])
-                        ->exists();
-    
-                    if ($alreadyInSection) {
+                    if ($stud->enrollments->isNotEmpty()) {
                         return response()->json([
                             'success' => false,
                             'error' => 'Student already exists in this section (any semester), please select Old status'
@@ -653,6 +651,7 @@ class RegistrationController extends Controller
                 // Create new student
                 $student = Student::create([
                     'student_id' => $generatedId,
+                    'studentall_id' => $generatedId,
                     'first_name' => $validated['first_name'],
                     'middle_name' => $validated['middle_name'],
                     'last_name' => $validated['last_name'],
@@ -694,10 +693,11 @@ class RegistrationController extends Controller
                     'transportation_policy' => $validated['transportation_policy'],
                     'status' => $enrollmentStatus,
                     'student_status' => $validated['student_status'],
-                ]);
+                ])->refresh()->load('semester', 'schoolYear');
                 
                 // Create application form
                 $applicationForm = $this->createApplicationForm($enrollment);
+                $applicationForm->load('enrollment.schoolYear'); 
                 event(new ApplicationFormCreated($applicationForm));
 
                 // Create application form version
@@ -753,9 +753,11 @@ class RegistrationController extends Controller
                         'transportation_policy' => $validated['transportation_policy'],
                         'status' => $enrollmentStatus,
                         'student_status' => 'Old',
-                    ]);
+                    ])->refresh()->load('semester', 'schoolYear');
+
                     // Create application form
                     $applicationForm = $this->createApplicationForm($enrollment);
+                    $applicationForm->load('enrollment.schoolYear'); 
                     event(new ApplicationFormCreated($applicationForm));
 
                     // Create application form version
@@ -766,6 +768,8 @@ class RegistrationController extends Controller
                         $student->status = 'Not Graduate';
                         $student->save();
                     }
+
+                    $student->load('studentParent');
 
                     $this->updateStudentData($student, $validated, $registrationId, $draft);
                     
@@ -786,6 +790,7 @@ class RegistrationController extends Controller
 
                     $student = Student::create([
                         'student_id' => $oldStudent->studentold_id ?? null,
+                        'studentall_id' => $generatedId,
                         'first_name' => $validated['first_name'] ?? $oldStudent->first_name,
                         'middle_name' => $validated['middle_name'] ?? $oldStudent->middle_name,
                         'last_name' => $validated['last_name'] ?? $oldStudent->last_name,
@@ -826,9 +831,10 @@ class RegistrationController extends Controller
                         'transportation_policy' => $validated['transportation_policy'],
                         'status' => $enrollmentStatus,
                         'student_status' => 'Old',
-                    ]);
+                    ])->refresh()->load('semester', 'schoolYear');
 
                     $applicationForm = $this->createApplicationForm($enrollment);
+                    $applicationForm->load('enrollment.schoolYear'); 
                     event(new ApplicationFormCreated($applicationForm));
 
                     $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
@@ -1216,6 +1222,9 @@ class RegistrationController extends Controller
 
     private function createApplicationFormVersion($applicationForm, $validated, $student, $enrollment)
     {
+        \Log::info($enrollment->registration_date); 
+        \Log::info(gettype($enrollment->registration_date));
+
         $latestVersion = ApplicationFormVersion::whereHas('applicationForm.enrollment.student', function($q) use ($student) {
             $q->where('id', $student->id);
         })
@@ -1243,6 +1252,7 @@ class RegistrationController extends Controller
 
         $dataSnapshot = [
             'student_id'     => $student->student_id,
+            'studentall_id' => $student->studentall_id,
             'registration_id'=> $enrollment->registration_id,
             'enrollment_id'  => $enrollment->enrollment_id,
             'registration_number' => $enrollment->enrollment_id,

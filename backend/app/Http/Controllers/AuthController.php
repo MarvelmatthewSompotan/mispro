@@ -84,6 +84,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         $token = $request->user()->currentAccessToken();
+        $tokenId = $token->id ?? null;
 
         if ($token) {
             $token->delete();
@@ -92,7 +93,7 @@ class AuthController extends Controller
         $this->auditTrail->log('logout_success', [
             'user_id'  => $user->user_id,
             'email'    => $user->email,
-            'token_id' => $token->id ?? null,
+            'token_id' => $tokenId,
         ]);
 
         return response()->json([

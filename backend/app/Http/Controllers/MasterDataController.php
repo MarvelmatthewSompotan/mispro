@@ -13,30 +13,41 @@ use App\Models\DiscountType;
 use Illuminate\Http\Request;
 use App\Models\ResidenceHall;
 use App\Models\Transportation;
+use Illuminate\Support\Facades\DB;
 
 class MasterDataController extends Controller
 {
     public function addSchoolYear()
     {
-        $lastSchoolYear = SchoolYear::orderByDesc('school_year_id')->first();
+        DB::beginTransaction();
+        try {
+            $lastSchoolYear = SchoolYear::orderByDesc('school_year_id')->lockForUpdate()->first(); 
 
-        if (!$lastSchoolYear) {
-            $newYear = date('Y') . '/' .(date('Y') + 1);
-        } else {
-            [$startYear,  $endYear] = explode('/', $lastSchoolYear->year);
-            $nextStart = (int)$startYear + 1;
-            $nextEnd = (int)$endYear + 1;
-            $newYear = $nextStart . '/' . $nextEnd;
+            if (!$lastSchoolYear) {
+                $newYear = date('Y') . '/' .(date('Y') + 1);
+            } else {
+                [$startYear,  $endYear] = explode('/', $lastSchoolYear->year);
+                $nextStart = (int)$startYear + 1;
+                $nextEnd = (int)$endYear + 1;
+                $newYear = $nextStart . '/' . $nextEnd;
+            }
+    
+            $schoolYear = SchoolYear::create([
+                'year' => $newYear,
+            ]);
+            
+            DB::commit();
+            
+            return response()->json([
+                'message' => 'New school year added successfully.',
+                'school_year' => $schoolYear,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to add school year due to a server error or conflict.',
+            ], 500);
         }
-
-        $schoolYear = SchoolYear::create([
-            'year' => $newYear,
-        ]);
-
-        return response()->json([
-            'message' => 'New school year added successfully.',
-            'school_year' => $schoolYear,
-        ]);
     }
 
     public function getRegistrationOption()
