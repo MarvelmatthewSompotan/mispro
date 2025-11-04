@@ -359,10 +359,10 @@ class RegistrationController extends Controller
 
         $prefix = "{$yearCode}{$sectionId}";   
 
-        $latest = Student::where('student_id', 'LIKE', "{$prefix}%")
-            ->orderByDesc('student_id')
+        $latest = Student::where('studentall_id', 'LIKE', "{$prefix}%")
+            ->orderByDesc('studentall_id')
             ->lockForUpdate()
-            ->value('student_id');
+            ->value('studentall_id');
 
         if ($latest) {
             $lastNumber = (int)substr($latest, -4);
@@ -651,6 +651,7 @@ class RegistrationController extends Controller
                 // Create new student
                 $student = Student::create([
                     'student_id' => $generatedId,
+                    'studentall_id' => $generatedId,
                     'first_name' => $validated['first_name'],
                     'middle_name' => $validated['middle_name'],
                     'last_name' => $validated['last_name'],
@@ -789,6 +790,7 @@ class RegistrationController extends Controller
 
                     $student = Student::create([
                         'student_id' => $oldStudent->studentold_id ?? null,
+                        'studentall_id' => $generatedId,
                         'first_name' => $validated['first_name'] ?? $oldStudent->first_name,
                         'middle_name' => $validated['middle_name'] ?? $oldStudent->middle_name,
                         'last_name' => $validated['last_name'] ?? $oldStudent->last_name,
@@ -1250,6 +1252,7 @@ class RegistrationController extends Controller
 
         $dataSnapshot = [
             'student_id'     => $student->student_id,
+            'studentall_id' => $student->studentall_id,
             'registration_id'=> $enrollment->registration_id,
             'enrollment_id'  => $enrollment->enrollment_id,
             'registration_number' => $enrollment->enrollment_id,
