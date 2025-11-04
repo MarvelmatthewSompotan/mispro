@@ -468,7 +468,9 @@ class StudentController extends Controller
             'application_form_status' => $requestData['application_form_status'] ?? '',
             'student_status' => 'Old',
             'input_name' => $student->id ?? null,
-            'student_id' => $student->student_id ?? null
+            'student_id' => $student->student_id ?? null,
+            'application_id' => $latestVersion->application_id,
+            'version_id' => $latestVersion->version_id,
         ];
 
         return response()->json([
