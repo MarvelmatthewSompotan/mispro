@@ -1,25 +1,25 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import styles from './Print.module.css';
-import kop from '../../assets/LogoMIS_Print.png';
-import footer from '../../assets/Footer_A4.svg';
-import footerF4Logos from '../../assets/Footer_F4.svg';
-import switchIcon from '../../assets/switch_icon.svg';
-import StudentsInformationContent from './StudentsInformation_Content/StudentsInformation_Content';
-import ProgramContent from './Program_Content/Program_Content';
-import FacilitiesContent from './Facilities_Content/Facilities_Content';
-import ParentsGuardianInformationContent from './ParentsGuardianInformation_Content/ParentsGuardianInformation_Content';
-import TermofPaymentContent from './TermofPayment_Content/TermofPayment_Content';
-import PledgeContent from './Pledge_Content/Pledge_Content';
-import SignatureContent from './Signature_Content/Signature_Content';
-import OtherDetailContent from './OtherDetail_Content/OtherDetail_Content';
+import React, { useRef, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import styles from "./Print.module.css";
+import kop from "../../assets/LogoMIS_Print.png";
+import footer from "../../assets/Footer_A4.svg";
+import footerF4Logos from "../../assets/Footer_F4.svg";
+import switchIcon from "../../assets/switch_icon.svg";
+import StudentsInformationContent from "./StudentsInformation_Content/StudentsInformation_Content";
+import ProgramContent from "./Program_Content/Program_Content";
+import FacilitiesContent from "./Facilities_Content/Facilities_Content";
+import ParentsGuardianInformationContent from "./ParentsGuardianInformation_Content/ParentsGuardianInformation_Content";
+import TermofPaymentContent from "./TermofPayment_Content/TermofPayment_Content";
+import PledgeContent from "./Pledge_Content/Pledge_Content";
+import SignatureContent from "./Signature_Content/Signature_Content";
+import OtherDetailContent from "./OtherDetail_Content/OtherDetail_Content";
 import {
   getRegistrationPreview,
   getRegistrationOptions,
-} from '../../services/api';
-import Button from '../../components/atoms/Button';
+} from "../../services/api";
+import Button from "../../components/atoms/Button";
 
 function Print() {
   const location = useLocation();
@@ -35,27 +35,29 @@ function Print() {
   const [majorOptions, setMajorOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [pageSize, setPageSize] = useState('A4');
+  const [pageSize, setPageSize] = useState("A4");
+
+  const [residenceHallOptions, setResidenceHallOptions] = useState([]);
 
   useEffect(() => {
     if (!applicationId) {
-      navigate('/registration', { replace: true });
+      navigate("/registration", { replace: true });
     }
   }, [applicationId, navigate]);
 
   const handleBackButtonClick = () => {
     if (fromStudentProfile) {
-      navigate('/students');
+      navigate("/students");
     } else if (fromSubmission) {
-      navigate('/registration', { replace: true });
+      navigate("/registration", { replace: true });
     } else {
       navigate(-1);
     }
   };
 
   const backButtonText = fromStudentProfile
-    ? 'Back to Student List'
-    : 'Back to Registration';
+    ? "Back to Student List"
+    : "Back to Registration";
 
   const downloadPDF = async () => {
     if (!printRef.current || !previewData?.student_id) return;
@@ -67,16 +69,16 @@ function Print() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        ignoreElements: (el) => el.classList.contains('no-print'),
+        ignoreElements: (el) => el.classList.contains("no-print"),
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      const imgData = canvas.toDataURL("image/jpeg", 0.85);
 
-      const isA4 = pageSize === 'A4';
+      const isA4 = pageSize === "A4";
       const pdfWidth = 210;
       const pdfHeight = isA4 ? 297 : 330;
 
-      const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
+      const pdf = new jsPDF("p", "mm", [pdfWidth, pdfHeight]);
 
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
@@ -98,24 +100,24 @@ function Print() {
 
       pdf.addImage(
         imgData,
-        'JPEG',
+        "JPEG",
         x,
         y,
         imgWidthOnPdf,
         imgHeightOnPdf,
         undefined,
-        'FAST'
+        "FAST"
       );
 
       const studentName =
         `${previewData.request_data.first_name} ${previewData.request_data.last_name}`.replace(
           /[\\?%*:|"<>]/g,
-          '-'
+          "-"
         );
 
       pdf.save(`${studentName}_Application_Form (${pageSize}).pdf`);
     } catch (error) {
-      console.error('Failed to generate PDF:', error);
+      console.error("Failed to generate PDF:", error);
     } finally {
       setIsPrinting(false);
     }
@@ -135,8 +137,9 @@ function Print() {
         setPickupPointOptions(optionsResp.pickup_points || []);
         setClassOptions(optionsResp.classes || []);
         setMajorOptions(optionsResp.majors || []);
+        setResidenceHallOptions(optionsResp.residence_halls || []);
       } catch (error) {
-        console.error('Failed to fetch data:', error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
@@ -145,7 +148,7 @@ function Print() {
     if (applicationId) {
       fetchAllData();
     } else {
-      console.error('No applicationId provided in navigation state');
+      console.error("No applicationId provided in navigation state");
       setLoading(false);
     }
   }, [applicationId, version]);
@@ -162,12 +165,12 @@ function Print() {
     return (
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          fontSize: '18px',
-          fontWeight: 'bold',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          fontSize: "18px",
+          fontWeight: "bold",
         }}
       >
         No application ID found
@@ -178,12 +181,12 @@ function Print() {
     return (
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          fontSize: '18px',
-          fontWeight: 'bold',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          fontSize: "18px",
+          fontWeight: "bold",
         }}
       >
         No preview data found
@@ -191,20 +194,34 @@ function Print() {
     );
   // eslint-disable-next-line
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return new Intl.DateTimeFormat('en-GB', options).format(date);
+    const options = { day: "numeric", month: "long", year: "numeric" };
+    return new Intl.DateTimeFormat("en-GB", options).format(date);
   };
 
   const getSemesterNumber = (semester) => {
-    if (!semester) return '';
-    return semester.includes('1') ? '1 (One)' : '2 (Two)';
+    if (!semester) return "";
+    return semester.includes("1") ? "1 (One)" : "2 (Two)";
   };
 
   const handlePageSizeToggle = () => {
-    setPageSize((prevSize) => (prevSize === 'A4' ? 'F4' : 'A4'));
+    setPageSize((prevSize) => (prevSize === "A4" ? "F4" : "A4"));
   };
+
+  const isDormitorySelected = (() => {
+        const resId = previewData?.request_data?.residence_id;
+        if (!resId || !residenceHallOptions?.length) return false;
+        const item = residenceHallOptions.find((r) => r.residence_id === resId);
+        const label = (item?.type || item?.name || "").toLowerCase().trim();
+        // anggap dormitory kalau TIDAK mengandung "non" dan mengandung kata kunci dormitory/boys/girls
+        const hasNon = /\bnon\b/.test(label) || label.includes("non-res");
+        const isDorm =
+          /\bdormitory\b/.test(label) ||
+          /\bboys?\b/.test(label) ||
+          /\bgirls?\b/.test(label);
+        return !hasNon && isDorm;
+      })();
 
   return (
     <div className={styles.printWrapper}>
@@ -212,27 +229,27 @@ function Print() {
         <h3>Page Format {pageSize}</h3>
         <img
           src={switchIcon}
-          alt='Switch View'
+          alt="Switch View"
           className={styles.switchIcon}
-          title='Switch View'
+          title="Switch View"
           onClick={handlePageSizeToggle}
         />
-        <Button onClick={handleBackButtonClick} variant='outline'>
+        <Button onClick={handleBackButtonClick} variant="outline">
           {backButtonText}
         </Button>
-        <Button onClick={downloadPDF} disabled={isPrinting} variant='solid'>
-          {isPrinting ? 'Generating PDF...' : 'Export as PDF'}
+        <Button onClick={downloadPDF} disabled={isPrinting} variant="solid">
+          {isPrinting ? "Generating PDF..." : "Export as PDF"}
         </Button>
       </div>
 
       {/* Konten PDF */}
       <div
         ref={printRef}
-        className={pageSize === 'A4' ? styles.printPageA4 : styles.printPageF4}
+        className={pageSize === "A4" ? styles.printPageA4 : styles.printPageF4}
       >
         <div className={styles.header}>
           <div className={styles.headerRow}>
-            <img src={kop} alt='Header KOP' className={styles.headerKop} />
+            <img src={kop} alt="Header KOP" className={styles.headerKop} />
             <div className={styles.schoolInfo}>
               <div className={styles.schoolName}>
                 <b>MANADO INDEPENDENT SCHOOL</b>
@@ -257,25 +274,25 @@ function Print() {
             <div className={styles.semesterParent}>
               <b className={styles.applicationForm}>Semester:</b>
               <b className={styles.applicationForm}>
-                {getSemesterNumber(previewData.semester ?? '')}
+                {getSemesterNumber(previewData.semester ?? "")}
               </b>
             </div>
             <div className={styles.semesterChild}>
               <b className={styles.applicationForm}>School Year:</b>
               <b className={styles.applicationForm}>
-                {previewData.school_year ?? ''}
+                {previewData.school_year ?? ""}
               </b>
             </div>
             <div className={styles.semesterChild}>
               <b className={styles.applicationForm}>Registration Number:</b>
               <b className={styles.applicationForm}>
-                {previewData.registration_number ?? ''}
+                {previewData.registration_number ?? ""}
               </b>
             </div>
             <div className={styles.registrationIdParent}>
               <b className={styles.applicationForm}>Registration ID: </b>
               <b className={styles.applicationForm}>
-                {previewData.registration_id ?? ''}
+                {previewData.registration_id ?? ""}
               </b>
             </div>
           </div>
@@ -322,7 +339,10 @@ function Print() {
             <div className={styles.header1}>
               <b className={styles.applicationForm}>TERM OF PAYMENT</b>
             </div>
-            <TermofPaymentContent data={previewData.request_data} />
+            <TermofPaymentContent
+              data={previewData.request_data}
+              isDormitory={isDormitorySelected}
+            />
           </div>
           <div className={styles.pledge}>
             <div className={styles.header1}>
@@ -338,13 +358,13 @@ function Print() {
           </div>
         </div>
 
-        <div className={pageSize === 'A4' ? styles.footerA4 : styles.footerF4}>
+        <div className={pageSize === "A4" ? styles.footerA4 : styles.footerF4}>
           <div className={styles.footerRow}>
             <img
-              src={pageSize === 'A4' ? footer : footerF4Logos}
-              alt='Footer'
+              src={pageSize === "A4" ? footer : footerF4Logos}
+              alt="Footer"
               className={
-                pageSize === 'A4' ? styles.footerImgA4 : styles.footerImgF4
+                pageSize === "A4" ? styles.footerImgA4 : styles.footerImgF4
               }
             />
           </div>

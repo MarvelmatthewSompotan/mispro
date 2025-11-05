@@ -92,6 +92,10 @@
   line-height: normal; /* Samakan line-height dengan .formInput */
   display: block; /* Pastikan elemen mengambil ruang vertikal dengan benar */
   min-height: 20px; /* Beri tinggi minimum agar sejajar bahkan saat kosong */
+  white-space: normal !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.3;
 }
 
 /* --- Style Khusus Alamat --- */
