@@ -8,7 +8,7 @@ const citizenshipOptions = ['Indonesia', 'Non Indonesia'];
 const religionOptions = [
   'Islam',
   'Kristen',
-  'Kristen Katolik',
+  'Katolik',
   'Hindu',
   'Buddha',
   'Konghucu',

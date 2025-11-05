@@ -27,6 +27,7 @@ class UpdateEnrollmentStatus extends Command
      */
     public function handle()
     {
+        \Log::info('Running UpdateEnrollmentStatus command at ' . now());
         $currentMonth = now()->month;
         $currentYear = now()->year;
 
@@ -43,21 +44,29 @@ class UpdateEnrollmentStatus extends Command
 
         $currentId = $currentSchoolYear->school_year_id;
 
+        $updatableStudentStatuses = ['Not Graduate']; 
+
         // Update ACTIVE
-        Enrollment::where('school_year_id', $currentId)
-            ->update(['status' => 'ACTIVE']);
+        $activeUpdated = Enrollment::query()
+            ->where('enrollments.school_year_id', $currentId)
+            ->join('students', 'enrollments.id', '=', 'students.id')
+            ->whereIn('students.status', $updatableStudentStatuses)
+            ->update(['enrollments.status' => 'ACTIVE']); 
 
         // Update INACTIVE
-        Enrollment::where('school_year_id', '!=', $currentId)
-            ->update(['status' => 'INACTIVE']);
+        $inactiveUpdated = \App\Models\Enrollment::query()
+            ->where('enrollments.school_year_id', '!=', $currentId)
+            ->join('students', 'enrollments.id', '=', 'students.id')
+            ->whereIn('students.status', $updatableStudentStatuses)
+            ->update(['enrollments.status' => 'INACTIVE']);
 
         $activeCount = Enrollment::where('status', 'ACTIVE')->count();
         $inactiveCount = Enrollment::where('status', 'INACTIVE')->count();
 
         $this->info("Enrollment status updated successfully.");
+        $this->info("Total records updated: " . ($activeUpdated + $inactiveUpdated));
         $this->info("Current school year: {$schoolYearStr} (ID: {$currentId})");
         $this->info("ACTIVE: {$activeCount} | INACTIVE: {$inactiveCount}");
-
 
         return 0;
     }

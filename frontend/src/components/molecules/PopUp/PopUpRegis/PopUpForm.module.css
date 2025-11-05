@@ -4,12 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(
-    30,
-    41,
-    59,
-    0.4
-  ); 
+  background: rgba(30, 41, 59, 0.4);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -22,9 +17,7 @@
   max-width: 400px;
   position: relative;
   border-radius: 10px;
-  background-color: var(
-    --secondary-background
-  ); 
+  background-color: var(--secondary-background);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -59,27 +52,27 @@
   border-radius: 0;
   background-color: transparent;
   border: none;
-  border-bottom: 1.5px solid var(--main-grey); 
+  border-bottom: 1.5px solid var(--main-grey);
   height: 40px;
   padding: 0;
   font-size: 16px;
   box-sizing: border-box;
   outline: none;
   margin: 0;
-  font-family: var(--font-primary); 
-  font-weight: var(--font-weight-regular); 
-  color: var(--main-text); 
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
+  color: var(--main-text);
   transition: border-color 0.2s ease;
 }
 
 .textInput:focus {
-  border-bottom: 1.5px solid var(--main-accent); 
+  border-bottom: 1.5px solid var(--main-accent);
   font-weight: var(--font-weight-bold);
 }
 
 .textInput::placeholder {
-  color: var(--main-grey); 
-  font-weight: var(--font-weight-regular); 
+  color: var(--main-grey);
+  font-weight: var(--font-weight-regular);
   opacity: 1;
 }
 
@@ -93,17 +86,17 @@
   line-height: 100%;
   border-radius: 5px;
   background-color: var(--main-background);
-  border: 1.5px solid var(--main-grey); 
-  opacity: 0.7; 
+  border: 1.5px solid var(--main-grey);
+  opacity: 0.7;
   height: 40px;
   padding: 0 12px;
   font-size: 16px;
   box-sizing: border-box;
   outline: none;
   margin: 0;
-  font-family: var(--font-primary); 
-  font-weight: var(--font-weight-regular); 
-  color: var(--main-grey); 
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
+  color: var(--main-grey);
   transition: all 0.2s ease;
   -webkit-appearance: none; 
 }
@@ -115,7 +108,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   gap: 20px;
-  color: var(--main-grey); 
+  color: var(--main-grey);
   width: 100%;
 }
 
@@ -126,30 +119,30 @@
   align-items: flex-start;
   justify-content: flex-end;
   gap: 10px;
-  color: var(--main-accent); 
+  color: var(--main-accent);
 }
 
 .bAddSubjectParent button[disabled] {
   opacity: 0.8;
-  cursor: wait; 
+  cursor: wait;
 }
 
 .loadingButton {
-  background-color: var(
-    --main-accent-hoverstate
-  ) !important; 
-  color: var(--text-accent) !important; 
+  background-color: var(--main-accent-hoverstate) !important;
+  color: var(--text-accent) !important;
   cursor: wait !important;
   opacity: 0.9;
   pointer-events: none;
 }
 
 .loadingButton:hover {
-  background-color: var(
-    --main-accent-hoverstate
-  ) !important; 
+  background-color: var(--main-accent-hoverstate) !important;
   cursor: wait !important;
 }
+
+/* ================================================= */
+/* === STYLE UNTUK DROPDOWN KUSTOM (SEARCHABLE) === */
+/* ================================================= */
 
 .customSelectContainer {
   position: relative;
@@ -174,56 +167,79 @@
   transition: border-color 0.2s ease;
   cursor: pointer;
 
+  /* Panah (default / abu-abu) */
   background-image: url('data:image/svg+xml;utf8,<svg fill="%237A7A7A" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
   background-repeat: no-repeat;
   background-position: right 4px center;
   background-size: 24px 24px;
-  padding-right: 32px;
 
+  padding-right: 32px; /* Jarak agar teks tidak menimpa panah */
   display: flex;
   align-items: center;
 }
 
-.selectInput:focus,
-.customSelectContainer[data-open='true'] .selectInput {
-  border-bottom: 1.5px solid var(--main-accent);
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%235F84FE" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+/* Style untuk placeholder bawaan <input> (Select Year) */
+.selectInput::placeholder {
+  color: var(--main-grey);
+  font-weight: var(--font-weight-regular);
+  opacity: 1;
 }
 
+/* === INI YANG HILANG === */
+/* Style untuk placeholder kustom di <div> (Select Semester) */
 .selectInput.placeholder {
   color: var(--main-grey);
   font-weight: var(--font-weight-regular);
 }
 
-.customSelectContainer[data-disabled='true'] .selectInput {
+/* Style saat input fokus atau menu terbuka */
+.selectInput:focus,
+.customSelectContainer[data-open="true"] .selectInput {
+  border-bottom: 1.5px solid var(--main-accent);
+
+  /* Panah (aktif / biru) */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%235F84FE" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 24px 24px;
+}
+
+/* Style untuk container[disabled] */
+.customSelectContainer[data-disabled="true"] .selectInput {
   opacity: 0.7;
   cursor: not-allowed;
   background-color: var(--main-background);
 }
 
+/* Wrapper untuk menu dropdown */
 .optionsMenu {
   position: absolute;
-  top: 100%; 
+  top: 100%;
   left: 0;
   right: 0;
   background-color: var(--secondary-background);
   border: 1px solid var(--main-grey);
-  border-radius: 8px; 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 10;
-  margin-top: 8px; 
-  padding: 4px; 
+  margin-top: 8px;
+  padding: 4px;
   box-sizing: border-box;
+}
 
-  max-height: 200px; 
-  overflow-y: auto; 
+/* Wrapper untuk list agar bisa di-scroll */
+.optionsList {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .optionItem {
   padding: 10px 12px;
   font-weight: var(--font-weight-regular);
   color: var(--main-text);
-  border-radius: 4px; 
+  border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
@@ -246,9 +262,11 @@
   font-weight: var(--font-weight-bold) !important;
   font-style: italic;
 }
+
 .addMoreOption:hover {
   background-color: var(--secondary-accent) !important;
 }
+
 .addMoreOption.selectedOption {
   background-color: var(--main-accent-hoverstate) !important;
   color: var(--text-accent) !important;

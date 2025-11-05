@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ApplicationFormVersion;
 use Log;
 use Exception;
 use App\Models\Student;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\ApplicationFormVersion;
 
 class LogbookController extends Controller
 {
@@ -38,7 +39,19 @@ class LogbookController extends Controller
             } else {
                 $targetSchoolYearIds[] = $defaultSchoolYearId;
             }
+            
+            $latestApplicationVersionSub = DB::table('application_form_versions AS afv')
+            ->select('afv.application_id', 'afv.data_snapshot')
+            ->join('application_forms AS af', 'af.application_id', '=', 'afv.application_id')
+            ->whereRaw('afv.version_id = (
+                SELECT MAX(afv2.version_id) 
+                FROM application_form_versions AS afv2
+                WHERE afv2.application_id = afv.application_id
+            )');
+            
             $studentsQuery = Student::where('active', 'YES')
+                ->select('students.*') 
+                ->addSelect('latest_app_version.data_snapshot as latest_data_snapshot') 
                 ->with([
                     'enrollments' => function ($q) use ($targetSchoolYearIds) {
                         $q->whereIn('school_year_id', $targetSchoolYearIds);
@@ -47,11 +60,19 @@ class LogbookController extends Controller
                     },
                     'studentParent',
                     'studentAddress',
-                ]);
-            
-            $studentsQuery->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                $q->whereIn('school_year_id', $targetSchoolYearIds);
-            });
+                ])
+                ->join('enrollments AS e_join', function ($join) use ($targetSchoolYearIds) {
+                    $join->on('students.id', '=', 'e_join.id')
+                        ->whereIn('e_join.school_year_id', $targetSchoolYearIds);
+                })
+                ->join('application_forms AS af_join', 'af_join.enrollment_id', '=', 'e_join.enrollment_id')
+                ->leftJoinSub($latestApplicationVersionSub, 'latest_app_version', function ($join) {
+                    $join->on('latest_app_version.application_id', '=', 'af_join.application_id');
+                });
+                
+                $studentsQuery->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
+                    $q->whereIn('school_year_id', $targetSchoolYearIds);
+                });
 
             // Filter (search)
             if ($name = $request->input('search_name')) {
@@ -328,7 +349,7 @@ class LogbookController extends Controller
                 }
             }
 
-            $studentsQuery->distinct('students.id')->select('students.*');
+            $studentsQuery->distinct('students.id');
             // pagination
             $perPage = $request->input('per_page', 25);
             $students = $studentsQuery->paginate($perPage);
@@ -350,18 +371,14 @@ class LogbookController extends Controller
                     : null;
                 
                 $photoPath = $student->photo_path;
-
-                $latestVersion = ApplicationFormVersion::with('applicationForm.enrollment.student')
-                    ->whereHas('applicationForm.enrollment.student', function ($q) use ($student) {
-                        $q->where('id', $student->id);
-                    })
-                    ->orderByDesc('version_id')
-                    ->first();
+                $photoUrl = null;
                 
-                $decoded = json_decode($latestVersion->data_snapshot);
-                $photoUrl = $decoded->request_data->photo_url ?? null;
-
+                if (isset($student->latest_data_snapshot)) {
+                    $decoded = json_decode($student->latest_data_snapshot);
+                    $photoUrl = $decoded->request_data->photo_url ?? null;
+                }
                 
+                unset($student->latest_data_snapshot); 
                 
                 return [
                     'photo' => $photoPath,
