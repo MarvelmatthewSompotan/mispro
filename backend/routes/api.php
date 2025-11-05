@@ -61,7 +61,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/context/{draft_id}', [RegistrationController::class, 'getRegistrationContext']);
     Route::post('/store/{draft_id}', [RegistrationController::class, 'store']);
     Route::get('/preview/{applicationId}/version/{versionId}', [RegistrationController::class, 'showPreview']);
-    Route::patch('/{application_id}/status', [RegistrationController::class, 'updateStatus']);
+    Route::post('/{application_id}/cancel/{reason_type}', [RegistrationController::class, 'handleCancelRegistration']);
   });
 });
 
