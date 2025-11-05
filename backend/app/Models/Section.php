@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Student;
+use App\Models\CancelledRegistration;
 use App\Models\Enrollment;
 use App\Models\SchoolClass;
+use App\Models\Student;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -28,6 +29,15 @@ class Section extends Model
     public function enrollments() : HasMany
     {
         return $this->hasMany(Enrollment::class, 'section_id', 'section_id');
+    }
+
+    public function cancelledRegistrations() : HasMany
+    {
+        return $this->hasMany(
+            CancelledRegistration::class,
+            'section_id',
+            'section_id'
+        );
     }
 
     public function getStudentsAttribute() 
