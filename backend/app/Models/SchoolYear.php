@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\CancelledRegistration;
 use App\Models\Draft;
-use App\Models\Student;
 use App\Models\Enrollment;
+use App\Models\Student;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -41,6 +42,15 @@ class SchoolYear extends Model
     {
         return $this->hasMany(
             Draft::class,
+            'school_year_id',
+            'school_year_id'
+        );
+    }
+
+    public function cancelledRegistrations() : HasMany
+    {
+        return $this->hasMany(
+            CancelledRegistration::class,
             'school_year_id',
             'school_year_id'
         );
