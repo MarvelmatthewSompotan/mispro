@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../../styles/Program_Content.module.css';
+import RadioButton from '../../../components/atoms/radiobutton/RadioButton';
 
 function ProgramContent({
   data,
@@ -18,8 +19,6 @@ function ProgramContent({
 
   const getMajorName = () => {
     if (data?.major_id) {
-      // const targetId = String(data.major_id);
-      // const found = majorOptions?.find((m) => m.major_id === targetId);
       const found = majorOptions?.find(
         (m) => m.major_id === parseInt(data.major_id, 10)
       );
@@ -37,12 +36,13 @@ function ProgramContent({
 
         {sectionOptions.map((section) => (
           <div key={section.section_id} className={styles.answer}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-              {data?.section_id === section.section_id && (
-                <div className={styles.radioBtnChild1} />
-              )}
-            </div>
+            <RadioButton
+              name="section"
+              value={section.section_id}
+              checked={data?.section_id === section.section_id}
+              onChange={() => {}}
+              readOnly={true}
+            />
             <div className={styles.field}>{section.name}</div>
           </div>
         ))}
@@ -64,22 +64,26 @@ function ProgramContent({
 
         {programOptions.map((program) => (
           <div key={program.program_id} className={styles.answer}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-              {data?.program_id === program.program_id && (
-                <div className={styles.radioBtnChild1} />
-              )}
-            </div>
+            <RadioButton
+              name="program"
+              value={program.program_id}
+              checked={data?.program_id === program.program_id}
+              onChange={() => {}}
+              readOnly={true}
+            />
             <div className={styles.option}>{program.name}</div>
           </div>
         ))}
 
         {data?.program_other && (
           <div className={styles.answer}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-              {!data?.program_id && <div className={styles.radioBtnChild1} />}
-            </div>
+            <RadioButton
+              name="program"
+              value="other"
+              checked={!data?.program_id}
+              onChange={() => {}}
+              readOnly={true}
+            />
             <div className={styles.option}>{data.program_other}</div>
           </div>
         )}

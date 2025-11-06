@@ -14,23 +14,6 @@
   align-items: center;
   justify-content: center;
 }
-.radioBtnChild {
-  position: absolute;
-  height: 110.71%;
-  width: 110.71%;
-  top: -5.36%;
-  right: -5.36%;
-  bottom: -5.36%;
-  left: -5.36%;
-  border-radius: 50%;
-  border: 3px solid #5f84fe;
-  box-sizing: border-box;
-}
-.radioBtn {
-  width: 28px;
-  position: relative;
-  height: 28px;
-}
 .answer {
   display: flex;
   flex-direction: row;
@@ -52,17 +35,6 @@
   line-height: 100%;
   font-family: 'Poppins', sans-serif;
 	font-weight: Regular;
-}
-.radioBtnChild1 {
-  position: absolute;
-  height: 57.14%;
-  width: 57.14%;
-  top: 21.43%;
-  right: 21.43%;
-  bottom: 21.43%;
-  left: 21.43%;
-  border-radius: 50%;
-  background-color: #5f84fe;
 }
 .grade {
   border-bottom: 1px solid #000;
@@ -102,23 +74,6 @@
   padding: 0px 12px;
   gap: 32px;
 }
-.checkBoxChild {
-  position: absolute;
-  height: 112.5%;
-  width: 112.5%;
-  top: -6.25%;
-  right: -6.25%;
-  bottom: -6.25%;
-  left: -6.25%;
-  border-radius: 4px;
-  border: 3px solid #5f84fe;
-  box-sizing: border-box;
-}
-.checkBox {
-  width: 24px;
-  position: relative;
-  height: 24px;
-}
 .other {
   width: 458px;
   border-bottom: 1px solid #000;
@@ -138,7 +93,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   text-align: left;
-  font-size: 20px;
+  font-size: 24px;
   color: #000;
   font-family: Poppins;
-} 
+}

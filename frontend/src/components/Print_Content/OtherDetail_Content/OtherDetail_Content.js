@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../../styles/OtherDetail_Content.module.css';
+import RadioButton from '../../../components/atoms/radiobutton/RadioButton';
 
 function OtherDetail_Content() {
   return (
@@ -16,16 +17,23 @@ function OtherDetail_Content() {
           </div>
           <div className={styles.status}>
             <div className={styles.choice}>
-              <div className={styles.radioBtn}>
-                <div className={styles.radioBtnChild} />
-                <div className={styles.radioBtnItem} />
-              </div>
+              <RadioButton
+                name="status"
+                value="complete"
+                checked={true}
+                onChange={() => {}}
+                readOnly={true}
+              />
               <div className={styles.complete1}>Complete</div>
             </div>
             <div className={styles.choice}>
-              <div className={styles.radioBtn}>
-                <div className={styles.radioBtnChild} />
-              </div>
+              <RadioButton
+                name="status"
+                value="incomplete"
+                checked={false}
+                onChange={() => {}}
+                readOnly={true}
+              />
               <div className={styles.complete1}>Incomplete</div>
             </div>
           </div>
