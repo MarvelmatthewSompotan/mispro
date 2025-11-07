@@ -328,7 +328,7 @@
   line-height: 1;
 }
 
-/* === RadioButton Overrides for Print Page === */
+
 .printPageA4 :global(.atom-radio-button),
 .printPageF4 :global(.atom-radio-button) {
   cursor: default;
@@ -336,7 +336,7 @@
 
 .printPageA4 :global(.atom-radio-button .custom-radio),
 .printPageF4 :global(.atom-radio-button .custom-radio) {
-  background-image: none !important; /* Memaksa SVG biru hilang */
+  background-image: none !important;
   width: 22px;
   height: 22px;
   border: 2px solid var(--main-grey);
@@ -372,38 +372,6 @@
   border-radius: 50%;
   background-color: var(--secondary-background);
 }
-
-/* GANTIKAN SAYA: .semesterParent, .semesterChild, .registrationIdParent, .studentsInformation, .signature, .otherDetail, .form, .header, .header1, .titleHeader, .applicationForm */
-/* PENGINGAT: Pastikan semua kelas ini memiliki definisi di atas, jika tidak, tambahkan dari blok 102-501 yang relevan. */
-
-/*
-CATATAN: 
-Saya mengidentifikasi bahwa kelas-kelas berikut digunakan di Print.js, 
-namun definisinya ada di dalam blok besar (102-501) yang saya hapus.
-Saya telah memastikan definisi yang relevan dari blok 1-100 (yang tampak benar) 
-telah disimpan.
-
-Kelas yang digunakan di .js:
-- semesterParent
-- semesterChild
-- registrationIdParent
-- studentsInformation
-- signature
-- otherDetail
-- form
-- header
-- header1
-- titleHeader
-- applicationForm
-
-Definisi untuk ini (kecuali 'signature' dan 'otherDetail' 
-yang tampaknya tidak ada di blok 1-100) sudah ada di bagian atas file 
-(misalnya .form, .header, .header1, .titleHeader, .applicationForm).
-
-Kelas-kelas ini (.program, .facilities, .parentsguardianInformation, .termOfPayment, .pledge) 
-digunakan di .js dan definisinya telah saya simpan.
-*/
-
 .semesterParent {
   flex: 1;
   display: flex;

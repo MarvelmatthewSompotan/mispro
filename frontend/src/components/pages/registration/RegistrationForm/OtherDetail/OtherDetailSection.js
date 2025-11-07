@@ -1,20 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./OtherDetailSection.module.css";
 
-const OtherDetailSection = () => {
-  
-  const [studentRequirementStatus, setStudentRequirementStatus] =
-    useState("complete");
-  const [incompleteDocuments, setIncompleteDocuments] = useState("");
+const OtherDetailSection = ({ onDataChange, prefill = {} }) => {
+  // 1. Inisialisasi state LOKAL dari prefill
+  const [studentRequirementStatus, setStudentRequirementStatus] = useState(
+    prefill.student_requirement_status || "complete"
+  );
+  const [incompleteDocuments, setIncompleteDocuments] = useState(
+    prefill.incomplete_documents || ""
+  );
 
+  // 2. [PERBAIKAN BAGIAN 1]
+  // Kirim state default ke parent HANYA SEKALI saat komponen di-mount.
+  useEffect(() => {
+    if (onDataChange) {
+      // Kirim nilai state lokal saat ini (yaitu, "complete" pada awalnya)
+      onDataChange({
+        student_requirement_status: studentRequirementStatus,
+        incomplete_documents: incompleteDocuments,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // <-- Array kosong [] berarti ini HANYA berjalan sekali saat mount
+
+  // 3. [PERBAIKAN BAGIAN 2]
+  // Jaga agar state LOKAL tetap sinkron dengan 'prefill' (misalnya saat form di-reset).
+  // JANGAN panggil onDataChange di sini, untuk menghindari loop.
+  useEffect(() => {
+    setStudentRequirementStatus(prefill.student_requirement_status || "complete");
+    setIncompleteDocuments(prefill.incomplete_documents || "");
+  }, [prefill]);
 
   const handleStatusChange = (e) => {
     const newStatus = e.target.value;
-    setStudentRequirementStatus(newStatus);
+    setStudentRequirementStatus(newStatus); // Update state LOKAL
 
- 
+    let currentDocs = incompleteDocuments;
+
     if (newStatus === "complete") {
-      setIncompleteDocuments("");
+      setIncompleteDocuments(""); // Update state LOKAL
+      currentDocs = "";
+    }
+
+    if (onDataChange) {
+      onDataChange({
+        student_requirement_status: newStatus,
+        incomplete_documents: currentDocs,
+      });
+    }
+  };
+
+  const handleDocsChange = (e) => {
+    const newDocs = e.target.value;
+    setIncompleteDocuments(newDocs); // Update state LOKAL
+
+    if (onDataChange) {
+      onDataChange({
+        student_requirement_status: studentRequirementStatus,
+        incomplete_documents: newDocs,
+      });
     }
   };
 
@@ -71,7 +115,6 @@ const OtherDetailSection = () => {
             </div>
           </div>
 
-        
           {studentRequirementStatus === "incomplete" && (
             <div className={styles.documentsSection}>
               <div className={styles.documentsLabel}>Incomplete documents:</div>
@@ -80,7 +123,7 @@ const OtherDetailSection = () => {
                   className={styles.textareaField}
                   placeholder="Enter incomplete documents"
                   value={incompleteDocuments}
-                  onChange={(e) => setIncompleteDocuments(e.target.value)}
+                  onChange={handleDocsChange}
                   rows={3}
                 />
               </div>

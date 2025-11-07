@@ -1,8 +1,8 @@
 .heading {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   color: var(--text-accent);
 }
 .header {
@@ -18,8 +18,8 @@
 .studentRequirementStatus {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 24px;
 }
 .txtSrs {
@@ -44,8 +44,8 @@
   justify-content: flex-start;
   padding: 11.3px;
   gap: 9.4px;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-regular);
 }
 .status {
   align-self: stretch;
@@ -75,7 +75,6 @@
 }
 .content {
   align-self: stretch;
-  /* height: 142px; */ /* <-- Ini juga sebaiknya dihapus agar fleksibel */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -87,8 +86,6 @@
 }
 .officeUseNote {
   flex: 1;
-  /* height: 207px; */ /* <-- DIHAPUS */
-  /* overflow: hidden; */ /* <-- DIHAPUS */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -98,8 +95,8 @@
 .approvedBy1 {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
 }
 .txtApprovedBy {
   align-self: stretch;
@@ -111,7 +108,7 @@
 }
 .principal {
   align-self: stretch;
-  border-bottom: 0.9px solid #000;
+  border-bottom: 0.9px solid var(--main-text);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -139,10 +136,10 @@
   gap: 12px;
   text-align: left;
   font-size: 24px;
-  color: #000;
-  font-family: Poppins;
+  color: var(--main-text);
+  font-family: var(--font-primary);
 }
 .incompleteDocuments {
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
 }

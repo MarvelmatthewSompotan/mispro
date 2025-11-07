@@ -1,8 +1,8 @@
 .transportation {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
 }
 .txtTransportation {
   width: 200px;
@@ -23,12 +23,12 @@
   flex: 1;
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-bold); 
 }
 .pickupPoint {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -46,8 +46,8 @@
 .checkBoxPolicy {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-regular); 
 }
 .top {
   align-self: stretch;
@@ -65,8 +65,8 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold); 
 }
 .txtRh {
   display: flex;
@@ -83,10 +83,10 @@
   justify-content: flex-start;
   text-align: left;
   font-size: 24px;
-  color: #000;
-  font-family: Poppins;
+  color: var(--main-text); 
+  font-family: var(--font-primary); 
 }
 .field {
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-regular); 
 }

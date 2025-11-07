@@ -1,10 +1,10 @@
 .contentParagraph {
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
 }
 .answer {
-  font-family: 'Poppins', sans-serif;
-	font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
 }
 .paragraph {
   margin: 0;
@@ -23,6 +23,6 @@
   justify-content: flex-start;
   text-align: left;
   font-size: 24px;
-  color: #000;
-  font-family: Poppins;
+  color: var(--main-text);
+  font-family: var(--font-primary);
 }

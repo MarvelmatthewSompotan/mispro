@@ -1,8 +1,13 @@
 import React from 'react';
 import styles from '../../styles/OtherDetail_Content.module.css';
-import RadioButton from '../../../components/atoms/radiobutton/RadioButton';
+import RadioButton from '../../atoms/radiobutton/RadioButton';
 
-function OtherDetail_Content() {
+
+function OtherDetail_Content({ data }) {
+
+
+  const status = data?.student_requirement_status || "";
+
   return (
     <div className={styles.otherDetail}>
       <div className={styles.officeUseNote}>
@@ -15,23 +20,24 @@ function OtherDetail_Content() {
               Student Requirement Status:
             </div>
           </div>
+          {/* [MODIFIED] Mengganti div statis dengan komponen RadioButton */}
           <div className={styles.status}>
             <div className={styles.choice}>
               <RadioButton
-                name="status"
+                name="requirement_status_print"
                 value="complete"
-                checked={true}
-                onChange={() => {}}
+                checked={status === 'complete'}
+                onChange={() => {}} // Handler kosong karena read-only
                 readOnly={true}
               />
               <div className={styles.complete1}>Complete</div>
             </div>
             <div className={styles.choice}>
               <RadioButton
-                name="status"
+                name="requirement_status_print"
                 value="incomplete"
-                checked={false}
-                onChange={() => {}}
+                checked={status === 'incomplete'}
+                onChange={() => {}} // Handler kosong karena read-only
                 readOnly={true}
               />
               <div className={styles.complete1}>Incomplete</div>

@@ -24,8 +24,12 @@ import Button from "../../components/atoms/Button";
 function Print() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { applicationId, version, fromSubmission, fromStudentProfile } =
+
+  // [KEMBALIKAN 1/3]
+  // Ambil kembali 'otherDetail' dari location.state
+  const { applicationId, version, fromSubmission, fromStudentProfile, otherDetail } =
     location.state || {};
+
   const printRef = useRef();
   const [previewData, setPreviewData] = useState(null);
   const [sectionOptions, setSectionOptions] = useState([]);
@@ -131,7 +135,19 @@ function Print() {
           getRegistrationOptions(),
         ]);
 
-        setPreviewData(previewResp.data);
+        const apiData = previewResp.data;
+
+        // [KEMBALIKAN 2/3]
+        // Gabungkan data API dengan data 'otherDetail' yang dititipkan
+        if (otherDetail && apiData && apiData.request_data) {
+          apiData.request_data = {
+            ...apiData.request_data, // Data lama dari API
+            ...otherDetail, // Timpa/tambah dengan data dari form
+          };
+        }
+
+        setPreviewData(apiData); // Set data yang sudah digabungkan
+
         setSectionOptions(optionsResp.sections || []);
         setProgramOptions(optionsResp.programs || []);
         setPickupPointOptions(optionsResp.pickup_points || []);
@@ -151,7 +167,9 @@ function Print() {
       console.error("No applicationId provided in navigation state");
       setLoading(false);
     }
-  }, [applicationId, version]);
+    // [KEMBALIKAN 3/3]
+    // Tambahkan 'otherDetail' kembali ke dependency array
+  }, [applicationId, version, otherDetail]);
 
   if (loading)
     return (
@@ -210,17 +228,18 @@ function Print() {
   };
 
   const isDormitorySelected = (() => {
-        const resId = previewData?.request_data?.residence_id;
-        if (!resId || !residenceHallOptions?.length) return false;
-        const item = residenceHallOptions.find((r) => r.residence_id === resId);
-        const label = (item?.type || item?.name || "").toLowerCase().trim();
-        const hasNon = /\bnon\b/.test(label) || label.includes("non-res");
-        const isDorm =
-          /\bdormitory\b/.test(label) ||
-          /\bboys?\b/.test(label) ||
-          /\bgirls?\b/.test(label);
-        return !hasNon && isDorm;
-      })();
+    const resId = previewData?.request_data?.residence_id;
+    if (!resId || !residenceHallOptions?.length) return false;
+    const item = residenceHallOptions.find((r) => r.residence_id === resId);
+    const label = (item?.type || item?.name || "").toLowerCase().trim();
+    const hasNon = /\bnon\b/.test(label) || label.includes("non-res");
+    const isDorm =
+      /\bdormitory\b/.test(label) ||
+      /\bboys?\b/.test(label) ||
+      /\bgirls?\b/.test(label);
+
+    return !hasNon && isDorm;
+  })();
 
   return (
     <div className={styles.printWrapper}>
@@ -353,7 +372,7 @@ function Print() {
             <SignatureContent data={previewData} />
           </div>
           <div className={styles.otherDetail}>
-            <OtherDetailContent />
+            <OtherDetailContent data={previewData.request_data} />
           </div>
         </div>
 
