@@ -140,7 +140,7 @@ class StudentController extends Controller
         ];
         
         if (empty($sorts)) {
-            $query->orderBy('students.student_id', 'asc');
+            $query->orderBy('students.first_name', 'asc');
         } else {
             foreach ($sorts as $sort) {
                 $field = $sort['field'] ?? null;

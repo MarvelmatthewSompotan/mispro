@@ -223,7 +223,7 @@ class RegistrationController extends Controller
 
                 if ($studentStatus === 'new' || $studentStatus === 'transferee') {
 
-                    $hasOtherApplication = ApplicationForm::whereHas('enrollment', function ($query) use ($student, $enrollment_id) {
+                    $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
                         $query->where('studentall_id', $student->studentall_id)
                                 ->where('enrollment_id', '!=', $enrollment_id);
                     })->exists();
@@ -240,7 +240,7 @@ class RegistrationController extends Controller
                         DB::rollBack();
                         return response()->json([
                             'success' => false,
-                            'message' => 'This registration cannot be invalidated because it belongs to a NEW student who has other registration data linked to this student.'
+                            'message' => 'This registration cannot be invalidated because it belongs to a NEW/TRANSFEREE student who has other registration data linked to this student.'
                         ], 400);
                     }
 
@@ -251,7 +251,7 @@ class RegistrationController extends Controller
                     $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id);
 
                     DB::commit();
-                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                    // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
                     return response()->json([
                         'success' => true, 
@@ -266,7 +266,7 @@ class RegistrationController extends Controller
                         
                         if ((int)$application_id === 1) {
 
-                            $hasOtherApplication = ApplicationForm::whereHas('enrollment', function ($query) use ($student, $enrollment_id) {
+                            $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
                                 $query->where('studentall_id', $student->studentall_id)
                                         ->where('enrollment_id', '!=', $enrollment_id);
                             })->exists();
@@ -294,7 +294,7 @@ class RegistrationController extends Controller
                             $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id);
 
                             DB::commit();
-                            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                            // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
                             return response()->json([
                                 'success' => true, 
@@ -321,7 +321,7 @@ class RegistrationController extends Controller
                     $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id);
 
                     DB::commit();
-                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                    // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
                     return response()->json([
                         'success' => true, 
@@ -341,7 +341,7 @@ class RegistrationController extends Controller
                             $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id);
 
                             DB::commit();
-                            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                            // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
                             return response()->json([
                                 'success' => true, 
@@ -358,7 +358,7 @@ class RegistrationController extends Controller
                         $enrollment->save();
 
                         DB::commit();
-                        event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                        // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
                         return response()->json([
                             'success' => true, 
@@ -375,7 +375,7 @@ class RegistrationController extends Controller
                     $enrollment->save();
 
                     DB::commit();
-                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                    // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
                     return response()->json([
                         'success' => true, 
@@ -410,7 +410,7 @@ class RegistrationController extends Controller
     private function saveToCancelledRegistration($student, $enrollment)
     {
         DB::table('cancelled_registrations')->insert([
-            'studentall_id' => $student->studentall_id,
+            'student_id' => $student->studentall_id,
             'full_name' => trim("{$student->first_name} {$student->middle_name} {$student->last_name}"),
             'registration_id' => $enrollment->registration_id,
             'school_year_id' => $enrollment->school_year_id,
@@ -418,6 +418,7 @@ class RegistrationController extends Controller
             'registration_date' => $enrollment->registration_date,
             'cancelled_by' => auth()->user()->username ?? 'anonymous', 
             'cancelled_at' => now(),
+            'created_at' => now(),
             'is_use_student_id' => false,
         ]);
     }
