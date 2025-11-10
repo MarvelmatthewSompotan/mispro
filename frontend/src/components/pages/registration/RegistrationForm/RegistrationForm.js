@@ -1,5 +1,11 @@
 // eslint-disable-next-line
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { useLocation, useNavigate, useBlocker } from "react-router-dom";
 import Main from "../../../layout/Main";
 import StudentStatusSection from "./StudentStatus/StudentStatusSection";
@@ -34,6 +40,16 @@ const RegistrationForm = () => {
   const [resetKey, setResetKey] = useState(0);
   const [setPrefillTrigger] = useState(0);
   const [sharedData, setSharedData] = useState(null);
+  const isDormitoryStudent = useMemo(() => {
+        const resId = formSections?.facilities?.residence_id;
+        if (!resId || !sharedData?.residence_halls) return false;
+        const selectedResidence = sharedData.residence_halls.find(
+          (r) => r.residence_id === resId
+        );
+        return selectedResidence
+          ? selectedResidence.type.toLowerCase().includes("dormitory")
+          : false;
+      }, [formSections?.facilities?.residence_id, sharedData]);
   const [isLoading, setIsLoading] = useState(true);
   const [validationState, setValidationState] = useState({});
   const [errors, setErrors] = useState({});
@@ -433,7 +449,6 @@ const RegistrationForm = () => {
             onDataChange={handleParentGuardianDataChange}
             errors={errors.parentGuardian || {}}
             forceError={forceError.parentGuardian || {}}
-            
           />
         </div>
         <div id="termOfPayment">
@@ -444,6 +459,7 @@ const RegistrationForm = () => {
             sharedData={sharedData}
             errors={errors.termOfPayment || {}}
             forceError={forceError.termOfPayment || {}}
+            isDormitory={isDormitoryStudent}
           />
         </div>
         <OtherDetailSection />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./TermOfPaymentSection.module.css";
 import checkBoxIcon from "../../../../../assets/CheckBox.png";
 import { getRegistrationOptions } from "../../../../../services/api";
@@ -10,7 +10,9 @@ const TermOfPaymentSection = ({
   prefill,
   errors,
   forceError,
+  isDormitory = false,
 }) => {
+  const hydratedRef = useRef(false);
   const [tuitionFees, setTuitionFees] = useState("");
   const [residencePayment, setResidencePayment] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
@@ -40,12 +42,17 @@ const TermOfPaymentSection = ({
   }, [sharedData]);
 
   useEffect(() => {
+    // Hydrate sekali saja dari prefill agar input tidak di-reset saat user mengetik
+    if (hydratedRef.current) return;
     if (prefill && Object.keys(prefill).length > 0) {
-      setTuitionFees(prefill.tuition_fees || "");
-      setResidencePayment(prefill.residence_payment || "");
-      setFinancialPolicy(prefill.financial_policy_contract === "Signed");
-      setDiscountName(prefill.discount_name || "");
-      setDiscountNotes(prefill.discount_notes || "");
+      setTuitionFees((v) => v || prefill.tuition_fees || "");
+      setResidencePayment((v) => v || prefill.residence_payment || "");
+      setFinancialPolicy((v) =>
+        v ? v : prefill.financial_policy_contract === "Signed"
+      );
+      setDiscountName((v) => (v !== "" ? v : prefill.discount_name || ""));
+      setDiscountNotes((v) => (v !== "" ? v : prefill.discount_notes || ""));
+      hydratedRef.current = true;
     }
   }, [prefill]);
 
@@ -65,6 +72,12 @@ const TermOfPaymentSection = ({
     discountNotes,
     onDataChange,
   ]);
+
+  useEffect(() => {
+    if (!isDormitory && residencePayment) {
+      setResidencePayment("");
+    }
+  }, [isDormitory]);
 
   const handleTuitionFeesChange = (e, value) => {
     e.preventDefault(); // Mencegah event ganda
@@ -138,45 +151,47 @@ const TermOfPaymentSection = ({
           </div>
         </div>
 
-        <div className={styles.paymentSection}>
-          <div className={styles.sectionTitle}>
-            <div
-              className={`${styles.sectionTitleText} ${
-                errors?.residence_payment && !residencePayment
-                  ? styles.termOfPaymentErrorLabel
-                  : ""
-              }`}
-            >
-              Residence Hall
+        {isDormitory && (
+          <div className={styles.paymentSection}>
+            <div className={styles.sectionTitle}>
+              <div
+                className={`${styles.sectionTitleText} ${
+                  isDormitory && errors?.residence_payment && !residencePayment
+                    ? styles.termOfPaymentErrorLabel
+                    : ""
+                }`}
+              >
+                Residence Hall
+              </div>
+            </div>
+            <div className={styles.optionGroup}>
+              {residencePaymentOption.map((option) => (
+                <div key={option} className={styles.optionItem}>
+                  <label
+                    className={styles.radioLabel}
+                    onClick={(e) => handleResidencePaymentChange(e, option)}
+                  >
+                    <input
+                      type="radio"
+                      name="residencePayment"
+                      value={option}
+                      checked={residencePayment === option}
+                      readOnly
+                      className={styles.hiddenRadio}
+                    />
+                    <div className={styles.radioButton}>
+                      <div className={styles.radioButtonCircle} />
+                      {residencePayment === option && (
+                        <div className={styles.radioButtonSelected} />
+                      )}
+                    </div>
+                    <div className={styles.label}>{option}</div>
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
-          <div className={styles.optionGroup}>
-            {residencePaymentOption.map((option) => (
-              <div key={option} className={styles.optionItem}>
-                <label
-                  className={styles.radioLabel}
-                  onClick={(e) => handleResidencePaymentChange(e, option)}
-                >
-                  <input
-                    type="radio"
-                    name="residencePayment"
-                    value={option}
-                    checked={residencePayment === option}
-                    readOnly
-                    className={styles.hiddenRadio}
-                  />
-                  <div className={styles.radioButton}>
-                    <div className={styles.radioButtonCircle} />
-                    {residencePayment === option && (
-                      <div className={styles.radioButtonSelected} />
-                    )}
-                  </div>
-                  <div className={styles.label}>{option}</div>
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         <div className={styles.paymentSection}>
           <div className={styles.sectionTitle}>
@@ -208,41 +223,45 @@ const TermOfPaymentSection = ({
             </div>
           </div>
         </div>
-      </div>
-      <div className={styles.discountSection}>
-        <div className={styles.sectionTitle}>
-          <div className={styles.sectionTitleText}>Discount</div>
-        </div>
-        <div className={styles.discountInputWrapper}>
-          <div className={styles.discountSelectWrapper}>
-            <Select
-              placeholder="Select discount type"
-              isClearable
-              options={discountTypeOptions.map((d) => ({
-                value: d.name,
-                label: d.name,
-              }))}
-              value={
-                discountName
-                  ? { value: discountName, label: discountName }
-                  : null
-              }
-              onChange={handleDiscountChange}
-              classNamePrefix="react-select"
-            />
+        <div
+          className={`${styles.discountSection} ${
+            !isDormitory ? styles.discountInline : ""
+          }`}
+        >
+          <div className={styles.sectionTitle}>
+            <div className={styles.sectionTitleText}>Discount</div>
           </div>
-          {discountName && (
-            <div className={styles.notesWrapper}>
-              <span className={styles.notesLabel}>Notes:</span>
-              <input
-                className={styles.notesInput}
-                type="text"
-                value={discountNotes}
-                onChange={handleDiscountNotesChange}
-                placeholder="Enter discount notes"
+          <div className={styles.discountInputWrapper}>
+            <div className={styles.discountSelectWrapper}>
+              <Select
+                placeholder="Select discount type"
+                isClearable
+                options={discountTypeOptions.map((d) => ({
+                  value: d.name,
+                  label: d.name,
+                }))}
+                value={
+                  discountName
+                    ? { value: discountName, label: discountName }
+                    : null
+                }
+                onChange={handleDiscountChange}
+                classNamePrefix="react-select"
               />
             </div>
-          )}
+            {discountName && (
+              <div className={styles.notesWrapper}>
+                <span className={styles.notesLabel}>Notes:</span>
+                <input
+                  className={styles.notesInput}
+                  type="text"
+                  value={discountNotes}
+                  onChange={handleDiscountNotesChange}
+                  placeholder="Enter discount notes"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
