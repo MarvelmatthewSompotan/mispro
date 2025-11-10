@@ -229,7 +229,9 @@ class RegistrationController extends Controller
             $current_version = (int)$enrollment->version;
             $student_id_enrollment = (int)$enrollment->id;
             $isLatest = $this->isLatestVersion($student_id_enrollment, $current_version);
-            
+            $invalid = 'Invalid Section';
+            $cancellation = 'Cancellation of Enrollment';
+
             if ($reason_type === 'invalidSection') {
 
                 if ($studentStatus === 'new' || $studentStatus === 'transferee') {
@@ -256,7 +258,7 @@ class RegistrationController extends Controller
                     }
 
                     // Save in cancelled registration table
-                    $this->saveToCancelledRegistration($student, $enrollment);
+                    $this->saveToCancelledRegistration($student, $enrollment, $invalid);
                     
                     // Delete student and related data
                     $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
@@ -276,7 +278,7 @@ class RegistrationController extends Controller
                 
                         if ($current_version === 1 && $isLatest) {
                             // Save in cancelled registration table
-                            $this->saveToCancelledRegistration($student, $enrollment);
+                            $this->saveToCancelledRegistration($student, $enrollment, $invalid);
                             
                             // Delete student and related data
                             $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
@@ -353,7 +355,7 @@ class RegistrationController extends Controller
                     }
 
                     // Save in cancelled registration table
-                    $this->saveToCancelledRegistration($student, $enrollment);
+                    $this->saveToCancelledRegistration($student, $enrollment, $cancellation);
                     
                     // Delete student and related data
                     $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
@@ -418,7 +420,7 @@ class RegistrationController extends Controller
         }
     }
 
-    private function saveToCancelledRegistration($student, $enrollment)
+    private function saveToCancelledRegistration($student, $enrollment, $reason)
     {
         DB::table('cancelled_registrations')->insert([
             'student_id' => $student->studentall_id,
@@ -431,6 +433,7 @@ class RegistrationController extends Controller
             'cancelled_at' => now(),
             'created_at' => now(),
             'is_use_student_id' => false,
+            'reason' => $reason,
         ]);
     }
 
