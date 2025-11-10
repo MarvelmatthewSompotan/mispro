@@ -21,6 +21,7 @@ class CancelledRegistration extends Model
         'section_id',
         'student_id',
         'full_name',
+        'reason',
         'registration_id',
         'registration_date',
         'cancelled_at',
@@ -38,4 +39,3 @@ class CancelledRegistration extends Model
         return $this->belongsTo(Section::class, 'section_id', 'section_id');
     }
 }
-
