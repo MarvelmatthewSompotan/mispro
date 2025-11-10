@@ -2,12 +2,11 @@
   align-self: stretch;
   position: relative;
   line-height: 100%;
-  font-weight: 500;
+  font-weight: var(--font-weight-regular);
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
 }
 .contentDate {
   align-self: stretch;
@@ -17,8 +16,8 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
 }
 .txtDate {
   align-self: stretch;
@@ -31,13 +30,13 @@
 .studentName {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   padding-bottom: 1px;
 }
 .txtStudentNameAndSignature {
   align-self: stretch;
-  border-top: 0.9px solid #000;
+  border-top: 0.9px solid var(--main-text);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -86,6 +85,6 @@
   box-sizing: border-box;
   gap: 12px;
   text-align: left;
-  color: #000;
-  font-family: Poppins;
+  color: var(--main-text);
+  font-family: var(--font-primary);
 }
