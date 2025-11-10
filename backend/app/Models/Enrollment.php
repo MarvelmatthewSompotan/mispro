@@ -117,7 +117,7 @@ class Enrollment extends Model
         StudentDiscount::class, 'enrollment_id', 'enrollment_id');
     }
 
-    public function payments() : HasOne
+    public function payment() : HasOne
     {
         return $this->hasOne(Payment::class, 'enrollment_id', 'enrollment_id');
     }
