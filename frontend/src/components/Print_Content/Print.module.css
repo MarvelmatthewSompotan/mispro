@@ -54,7 +54,7 @@
   margin-left: 5px;
   font-family: var(--font-primary);
   font-weight: bold;
-  font-size: 23.2px;
+  font-size: 20px;
 }
 .titleHeader {
   position: relative;
@@ -250,14 +250,12 @@
 .printActionsBar {
   position: fixed;
   top: 0;
-  left: 890px;
-  right: 0;
-  width: 36.5%;
+  right: 10px; 
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-end; 
   align-items: center;
   gap: 10px;
-  padding: 10px 26px;
+  padding: 2px 24px;
   z-index: 9999;
   background-color: var(--secondary-background);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
