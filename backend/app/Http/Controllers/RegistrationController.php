@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\CancelledRegistration;
 use App\Events\ApplicationFormCreated;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
@@ -422,7 +423,7 @@ class RegistrationController extends Controller
 
     private function saveToCancelledRegistration($student, $enrollment, $reason)
     {
-        DB::table('cancelled_registrations')->insert([
+        CancelledRegistration::create([
             'student_id' => $student->studentall_id,
             'full_name' => trim("{$student->first_name} {$student->middle_name} {$student->last_name}"),
             'registration_id' => $enrollment->registration_id,
@@ -431,7 +432,6 @@ class RegistrationController extends Controller
             'registration_date' => $enrollment->registration_date,
             'cancelled_by' => auth()->user()->username ?? 'anonymous', 
             'cancelled_at' => now(),
-            'created_at' => now(),
             'is_use_student_id' => false,
             'reason' => $reason,
         ]);
@@ -552,6 +552,25 @@ class RegistrationController extends Controller
 
     private function generateStudentId($schoolYearId, $sectionId)
     {
+        $cancelledRegistration = CancelledRegistration::where('school_year_id', $schoolYearId)
+            ->where('section_id', $sectionId)
+            ->where('is_use_student_id', false)
+            ->orderBy('student_id') 
+            ->lockForUpdate() 
+            ->first();
+
+        if ($cancelledRegistration) {
+            $studentIdToUse = $cancelledRegistration->student_id;
+
+            $cancelledRegistration->is_use_student_id = true;
+            $cancelledRegistration->updated_at = now(); 
+            $cancelledRegistration->save();
+
+            \Log::info("Reusing cancelled/invalid student ID: {$studentIdToUse} for school_year_id: {$schoolYearId} and section_id: {$sectionId}");
+            
+            return $studentIdToUse;
+        }
+
         $schoolYear = SchoolYear::findOrFail($schoolYearId);
         $startYear = explode('/', $schoolYear->year)[0]; 
         $yearCode = substr($startYear, -2);              
