@@ -530,7 +530,7 @@ class StudentController extends Controller
                 'phone_number' => 'sometimes|required|string|max:20',
                 'previous_school' => 'sometimes|nullable|string',
                 'nisn' => 'sometimes|required|string',
-                'nik' => 'sometimes|required|integer',
+                'nik' => 'sometimes|nullable|required_if:citizenship,Indonesia|integer',
                 'kitas' => 'sometimes|nullable|required_if:citizenship,Non Indonesia|string',                'photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg|max:5048',
                 'status' => 'sometimes|required|in:Not Graduate,Graduate,Expelled,Withdraw',
 
