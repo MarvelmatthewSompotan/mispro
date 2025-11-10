@@ -3,7 +3,6 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  useRef,
   useMemo,
 } from "react";
 import { useLocation, useNavigate, useBlocker } from "react-router-dom";
@@ -36,6 +35,7 @@ const RegistrationForm = () => {
     facilities: {},
     parentGuardian: {},
     termOfPayment: {},
+    otherDetail: {}, // [MODIFIED 1/5] Menambahkan state untuk OtherDetail
   });
   const [resetKey, setResetKey] = useState(0);
   const [setPrefillTrigger] = useState(0);
@@ -108,6 +108,7 @@ const RegistrationForm = () => {
       "facilities",
       "parentGuardian",
       "termOfPayment",
+      "otherDetail", // [MODIFIED 2/5] Menambahkan otherDetail ke urutan error
     ];
 
     const firstErrorSection = sectionOrder.find(
@@ -203,6 +204,14 @@ const RegistrationForm = () => {
     [handleSectionDataChange]
   );
 
+  // [MODIFIED 3/5] Menambahkan handler untuk data dari OtherDetailSection
+  const handleOtherDetailDataChange = useCallback(
+    (data) => {
+      handleSectionDataChange("otherDetail", data);
+    },
+    [handleSectionDataChange]
+  );
+
   const handleSelectOldStudent = (latestData) => {
     console.log("Received latest data for prefill:", latestData); // Debug log
 
@@ -249,6 +258,8 @@ const RegistrationForm = () => {
         console.log("Prefilling termOfPayment:", latestData.termOfPayment);
         handleSectionDataChange("termOfPayment", latestData.termOfPayment);
       }
+
+      // (Kita tidak prefill otherDetail dari data siswa lama, diasumsikan ini selalu baru)
     }
 
     // Signal children to apply prefill just once
@@ -264,6 +275,7 @@ const RegistrationForm = () => {
       facilities: {},
       parentGuardian: {},
       termOfPayment: {},
+      otherDetail: {}, // [MODIFIED 4/5] Reset otherDetail juga
     }));
 
     // Hapus juga prefilled data dan error yang mungkin ada
@@ -298,6 +310,7 @@ const RegistrationForm = () => {
       facilities: {},
       parentGuardian: {},
       termOfPayment: {},
+      otherDetail: {}, // [MODIFIED 5/5] Reset otherDetail juga
     });
 
     setPrefilledData({});
@@ -462,7 +475,17 @@ const RegistrationForm = () => {
             isDormitory={isDormitoryStudent}
           />
         </div>
-        <OtherDetailSection />
+        
+        {/* [MODIFIED 5/5] Memberikan props onDataChange dan error ke OtherDetailSection */}
+        <div id="otherDetail">
+          <OtherDetailSection
+            key={resetKey} // Tambahkan key agar ikut ter-reset
+            prefill={formSections.otherDetail || {}} // Berikan prefill jika ada
+            onDataChange={handleOtherDetailDataChange}
+            errors={errors.otherDetail || {}}
+            forceError={forceError.otherDetail || {}}
+          />
+        </div>
       </div>
       <ConfirmBackPopup
         isOpen={isBackPopupOpen}

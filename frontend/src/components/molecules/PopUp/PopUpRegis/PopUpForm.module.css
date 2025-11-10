@@ -98,7 +98,7 @@
   font-weight: var(--font-weight-regular);
   color: var(--main-grey);
   transition: all 0.2s ease;
-  -webkit-appearance: none; /* Untuk iOS */
+  -webkit-appearance: none; 
 }
 
 .frameParent {
@@ -235,7 +235,6 @@
   padding-right: 2px;
 }
 
-/* Style untuk setiap item di dropdown */
 .optionItem {
   padding: 10px 12px;
   font-weight: var(--font-weight-regular);
@@ -249,7 +248,6 @@
   background-color: var(--secondary-accent);
 }
 
-/* Style untuk item yang sedang dipilih */
 .optionItem.selectedOption {
   background-color: var(--main-accent);
   color: var(--text-accent);
@@ -259,7 +257,6 @@
   background-color: var(--main-accent-hoverstate);
 }
 
-/* Style khusus untuk opsi "Add more" */
 .addMoreOption {
   color: var(--main-accent) !important;
   font-weight: var(--font-weight-bold) !important;

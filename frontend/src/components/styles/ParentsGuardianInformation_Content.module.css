@@ -1,8 +1,8 @@
 .heading {
 	position: relative;
 	line-height: 100%;
-	font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+	font-family: var(--font-primary);
+	font-weight: var(--font-weight-bold);
 }
 .txtFather {
 	align-self: stretch;
@@ -14,7 +14,8 @@
 .field {
 	position: relative;
 	line-height: 100%;
-	font-family: 'Poppins', sans-serif;
+	font-family: var(--font-primary);
+	font-weight: var(--font-weight-regular);
 }
 .name {
 	align-self: stretch;
@@ -30,7 +31,8 @@
 	line-height: 100%;
 	display: inline-block;
 	max-width: 357.5px;
-	font-family: 'Poppins', sans-serif;
+	font-family: var(--font-primary);
+	font-weight: var(--font-weight-regular);
 }
 .left {
 	align-self: stretch;
@@ -44,7 +46,8 @@
 	align-self: stretch;
 	position: relative;
 	line-height: 100%;
-	font-family: 'Poppins', sans-serif;
+	font-family: var(--font-primary);
+	font-weight: var(--font-weight-regular);
 }
 .compName {
 	align-self: stretch;
@@ -62,7 +65,8 @@
 	line-height: 100%;
 	display: inline-block;
 	max-width: 228.5px;
-	font-family: 'Poppins', sans-serif;
+	font-family: var(--font-primary);
+	font-weight: var(--font-weight-regular);
 }
 .b3 {
 	align-self: stretch;
@@ -119,7 +123,8 @@
 	flex: 1;
 	position: relative;
 	line-height: 100%;
-	font-family: 'Poppins', sans-serif;	
+	font-family: var(--font-primary);
+	font-weight: var(--font-weight-regular);
 }
 .relation {
 	align-self: stretch;
@@ -185,7 +190,7 @@
 	align-items: flex-start;
 	justify-content: flex-start;
 	text-align: left;
-	font-size: 20px;
-	color: #000;
-	font-family: Poppins;
-} 
+	font-size: 24px;
+	color: var(--main-text);
+	font-family: var(--font-primary);
+}

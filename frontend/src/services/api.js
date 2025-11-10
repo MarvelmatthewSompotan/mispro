@@ -392,3 +392,16 @@ export const postUser = async (userData) => {
     body: JSON.stringify(userData),
   });
 };
+
+// --- PERUBAHAN DI SINI ---
+export const updateUser = (userId, userData) => {
+  // Kita KEMBALIKAN ke pola 'PATCH' + 'JSON'
+  // Ini mengikuti pola dari `updateRegistrationStatus`
+  // Kita HAPUS '/update' dari URL
+  // Kita HAPUS 'FormData' dan '_method'
+  return apiFetch(`/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(userData), // Mengirim data sebagai JSON
+  });
+};
+// --- AKHIR PERUBAHAN ---

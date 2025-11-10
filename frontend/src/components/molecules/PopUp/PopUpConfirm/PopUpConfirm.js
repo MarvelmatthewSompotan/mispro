@@ -21,49 +21,47 @@ const PopUpConfirm = React.memo(
       onSetAllowNavigation(true);
       try {
         setIsSubmitting(true);
+        // [KEMBALIKAN] Data yang dikirim ke DB adalah data TANPA otherDetail
         const transformedData = transformFormData(allFormData);
         const response = await submitRegistrationForm(draftId, transformedData);
 
         if (response.success) {
+          // [KEMBALIKAN]
+          // Kita "titipkan" data otherDetail di state navigasi
           navigate("/print", {
             state: {
               applicationId: response.data.application_id,
               version: response.data.version,
               fromSubmission: true,
+              otherDetail: allFormData.otherDetail, // <-- BARIS INI DITAMBAHKAN KEMBALI
             },
             replace: true,
-            
           });
           onConfirm();
         } else {
-          alert("Registration failed: " + (response.error || "Unknown error"));
-         
+          alert("Registration failed: " (response.error || "Unknown error"));
         }
       } catch (error) {
         const errorMessage = error.response?.data?.error || "";
         const errorDetails = error.response?.data?.errors;
         const generalMessage = error.response?.data?.message;
 
-        // Cek #1: Untuk error duplikat siswa
         if (errorMessage.includes("Student already exists")) {
           onDuplicateFound();
-          // Di sini kita panggil onCancel karena DuplicateStudentPopup di-handle oleh parent
+
           onCancel();
           return;
         }
 
-        // Cek #2: Untuk error salah section
         if (
           errorMessage.includes(
             "For different section, please register as New Student."
           )
         ) {
           setShowWrongSectionPopup(true);
-          // onCancel(); // <-- BARIS INI DIHAPUS/DI-COMMENT
           return;
         }
 
-        // Penanganan Error Umum (Generic)
         if (errorDetails) {
           const errorMessages = Object.values(errorDetails).flat().join(", ");
           alert("Validation errors: " + errorMessages);
@@ -216,6 +214,12 @@ const PopUpConfirm = React.memo(
           formData.termOfPayment?.financial_policy_contract || "Not Signed",
         discount_name: formData.termOfPayment?.discount_name || null,
         discount_notes: formData.termOfPayment?.discount_notes || null,
+
+        // [KEMBALIKAN] HAPUS DUA BARIS INI DARI PAYLOAD API
+        // student_requirement_status:
+        //   formData.otherDetail?.student_requirement_status || "complete",
+        // incomplete_documents:
+        //   formData.otherDetail?.incomplete_documents || null,
       };
       return transformed;
     };
@@ -227,7 +231,6 @@ const PopUpConfirm = React.memo(
         )}
         <div
           className={styles.overlay}
-          // Sembunyikan popup konfirmasi jika popup error muncul
           style={{ visibility: showWrongSectionPopup ? "hidden" : "visible" }}
         >
           <div className={styles.popUpConfirm}>

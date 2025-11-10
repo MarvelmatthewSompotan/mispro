@@ -203,6 +203,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     }
   };
 
+  // --- PERUBAHAN DI SINI: Logika `handleSubmit` untuk membedakan Create vs Edit ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -244,7 +245,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     }
   };
 
-  // --- Helper untuk mapping options ---
   const mapOptions = (optionsArray, valueKey, labelKey) => {
     return optionsArray.map((opt) => ({
       value: opt[valueKey],
@@ -259,7 +259,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     }));
   };
 
-  // Map options untuk Select
   const schoolYearOptions = mapOptions(
     options.schoolYears,
     "school_year_id",
@@ -268,7 +267,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
   const semesterOptions = mapOptions(options.semesters, "semester_id", "name");
   const roleOptions = mapRoleOptions(options.roles);
 
-  // Gabungkan "Add more" ke school year
   const allSchoolYearOptions = [
     ...schoolYearOptions,
     { value: "add_new", label: "+ Add more" },
@@ -282,13 +280,14 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
         ref={formRef}
         autoComplete="off"
       >
+        {/* --- PERUBAHAN DI SINI: Judul dinamis --- */}
         <div className={styles.createNewRegistration}>
           {type === "registration" ? "Create New Registration" : "Add New User"}
         </div>
 
         {type === "registration" ? (
           <div className={styles.frameParent}>
-            {/* School Year (Dropdown Kustom) */}
+            {/* ... (Form registrasi tidak diubah) ... */}
             <div className={styles.fieldWrapper}>
               <CustomSelect
                 placeholder="Select Year"
@@ -306,7 +305,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
               />
             </div>
 
-            {/* Semester (Dropdown Kustom) */}
             <div className={styles.fieldWrapper}>
               <CustomSelect
                 placeholder="Select Semester"
@@ -317,7 +315,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
               />
             </div>
 
-            {/* Date (Tetap sama) */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.dateField}
@@ -329,7 +326,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
           </div>
         ) : (
           <div className={styles.frameParent}>
-            {/* Username (Tetap sama) */}
+            {/* ... (Field Username, Full Name, Email tidak diubah) ... */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.textInput}
@@ -355,7 +352,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
               />
             </div>
 
-            {/* User Email */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.textInput}
@@ -367,8 +363,8 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 autoComplete="new-password"
               />
             </div>
-            {/* User Password (Tetap sama) */}
             <div className={styles.fieldWrapper}>
+              {/* --- PERUBAHAN DI SINI: Placeholder & required dinamis --- */}
               <input
                 className={styles.textInput}
                 type="password"
@@ -380,7 +376,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
               />
             </div>
 
-            {/* Role (Dropdown Kustom) */}
             <div className={styles.fieldWrapper}>
               <CustomSelect
                 placeholder="Select Role"
@@ -397,6 +392,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
           <Button onClick={onClose} variant="outline">
             Cancel
           </Button>
+          {/* --- PERUBAHAN DI SINI: Teks tombol dinamis --- */}
           <Button
             type="submit"
             variant="solid"

@@ -24,8 +24,12 @@ import Button from "../../components/atoms/Button";
 function Print() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { applicationId, version, fromSubmission, fromStudentProfile } =
+
+  // [KEMBALIKAN 1/3]
+  // Ambil kembali 'otherDetail' dari location.state
+  const { applicationId, version, fromSubmission, fromStudentProfile, otherDetail } =
     location.state || {};
+
   const printRef = useRef();
   const [previewData, setPreviewData] = useState(null);
   const [sectionOptions, setSectionOptions] = useState([]);
@@ -131,7 +135,19 @@ function Print() {
           getRegistrationOptions(),
         ]);
 
-        setPreviewData(previewResp.data);
+        const apiData = previewResp.data;
+
+        // [KEMBALIKAN 2/3]
+        // Gabungkan data API dengan data 'otherDetail' yang dititipkan
+        if (otherDetail && apiData && apiData.request_data) {
+          apiData.request_data = {
+            ...apiData.request_data, // Data lama dari API
+            ...otherDetail, // Timpa/tambah dengan data dari form
+          };
+        }
+
+        setPreviewData(apiData); // Set data yang sudah digabungkan
+
         setSectionOptions(optionsResp.sections || []);
         setProgramOptions(optionsResp.programs || []);
         setPickupPointOptions(optionsResp.pickup_points || []);
@@ -151,7 +167,9 @@ function Print() {
       console.error("No applicationId provided in navigation state");
       setLoading(false);
     }
-  }, [applicationId, version]);
+    // [KEMBALIKAN 3/3]
+    // Tambahkan 'otherDetail' kembali ke dependency array
+  }, [applicationId, version, otherDetail]);
 
   if (loading)
     return (
@@ -210,18 +228,18 @@ function Print() {
   };
 
   const isDormitorySelected = (() => {
-        const resId = previewData?.request_data?.residence_id;
-        if (!resId || !residenceHallOptions?.length) return false;
-        const item = residenceHallOptions.find((r) => r.residence_id === resId);
-        const label = (item?.type || item?.name || "").toLowerCase().trim();
-        // anggap dormitory kalau TIDAK mengandung "non" dan mengandung kata kunci dormitory/boys/girls
-        const hasNon = /\bnon\b/.test(label) || label.includes("non-res");
-        const isDorm =
-          /\bdormitory\b/.test(label) ||
-          /\bboys?\b/.test(label) ||
-          /\bgirls?\b/.test(label);
-        return !hasNon && isDorm;
-      })();
+    const resId = previewData?.request_data?.residence_id;
+    if (!resId || !residenceHallOptions?.length) return false;
+    const item = residenceHallOptions.find((r) => r.residence_id === resId);
+    const label = (item?.type || item?.name || "").toLowerCase().trim();
+    const hasNon = /\bnon\b/.test(label) || label.includes("non-res");
+    const isDorm =
+      /\bdormitory\b/.test(label) ||
+      /\bboys?\b/.test(label) ||
+      /\bgirls?\b/.test(label);
+
+    return !hasNon && isDorm;
+  })();
 
   return (
     <div className={styles.printWrapper}>
@@ -272,26 +290,26 @@ function Print() {
           </div>
           <div className={styles.formInfo}>
             <div className={styles.semesterParent}>
-              <b className={styles.applicationForm}>Semester:</b>
-              <b className={styles.applicationForm}>
+              <b className={styles.infoTitle}>Semester:</b>
+              <b className={styles.infoTitle}>
                 {getSemesterNumber(previewData.semester ?? "")}
               </b>
             </div>
             <div className={styles.semesterChild}>
-              <b className={styles.applicationForm}>School Year:</b>
-              <b className={styles.applicationForm}>
+              <b className={styles.infoTitle}>School Year:</b>
+              <b className={styles.infoTitle}>
                 {previewData.school_year ?? ""}
               </b>
             </div>
             <div className={styles.semesterChild}>
-              <b className={styles.applicationForm}>Registration Number:</b>
-              <b className={styles.applicationForm}>
+              <b className={styles.infoTitle}>Registration Number:</b>
+              <b className={styles.infoTitle}>
                 {previewData.registration_number ?? ""}
               </b>
             </div>
             <div className={styles.registrationIdParent}>
-              <b className={styles.applicationForm}>Registration ID: </b>
-              <b className={styles.applicationForm}>
+              <b className={styles.infoTitle}>Registration ID: </b>
+              <b className={styles.infoTitle}>
                 {previewData.registration_id ?? ""}
               </b>
             </div>
@@ -300,13 +318,13 @@ function Print() {
         <div className={styles.form}>
           <div className={styles.studentsInformation}>
             <div className={styles.header1}>
-              <b className={styles.applicationForm}>STUDENT'S INFORMATION</b>
+              <b className={styles.titleHeader}>STUDENT'S INFORMATION</b>
             </div>
             <StudentsInformationContent data={previewData} />
           </div>
           <div className={styles.program}>
             <div className={styles.header1}>
-              <b className={styles.applicationForm}>PROGRAM</b>
+              <b className={styles.titleHeader}>PROGRAM</b>
             </div>
             <ProgramContent
               data={previewData.request_data}
@@ -318,7 +336,7 @@ function Print() {
           </div>
           <div className={styles.facilities}>
             <div className={styles.header1}>
-              <b className={styles.applicationForm}>FACILITIES</b>
+              <b className={styles.titleHeader}>FACILITIES</b>
             </div>
             <FacilitiesContent
               data={previewData.request_data}
@@ -327,7 +345,7 @@ function Print() {
           </div>
           <div className={styles.parentsguardianInformation}>
             <div className={styles.header1}>
-              <b className={styles.applicationForm}>
+              <b className={styles.titleHeader}>
                 PARENT / GUARDIAN INFORMATION
               </b>
             </div>
@@ -337,7 +355,7 @@ function Print() {
           </div>
           <div className={styles.termOfPayment}>
             <div className={styles.header1}>
-              <b className={styles.applicationForm}>TERM OF PAYMENT</b>
+              <b className={styles.titleHeader}>TERM OF PAYMENT</b>
             </div>
             <TermofPaymentContent
               data={previewData.request_data}
@@ -346,7 +364,7 @@ function Print() {
           </div>
           <div className={styles.pledge}>
             <div className={styles.header1}>
-              <b className={styles.applicationForm}>PLEDGE</b>
+              <b className={styles.titleHeader}>PLEDGE</b>
             </div>
             <PledgeContent data={previewData.request_data} />
           </div>
@@ -354,7 +372,7 @@ function Print() {
             <SignatureContent data={previewData} />
           </div>
           <div className={styles.otherDetail}>
-            <OtherDetailContent />
+            <OtherDetailContent data={previewData.request_data} />
           </div>
         </div>
 

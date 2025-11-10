@@ -1,8 +1,8 @@
 .transportation {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
 }
 .txtTransportation {
   width: 200px;
@@ -10,23 +10,6 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-}
-.radioBtnChild {
-  position: absolute;
-  height: 110.71%;
-  width: 110.71%;
-  top: -5.36%;
-  right: -5.36%;
-  bottom: -5.36%;
-  left: -5.36%;
-  border-radius: 50%;
-  border: 3px solid #5f84fe;
-  box-sizing: border-box;
-}
-.radioBtn {
-  width: 28px;
-  position: relative;
-  height: 28px;
 }
 .ownCar {
   display: flex;
@@ -36,27 +19,16 @@
   padding: 12px;
   gap: 10px;
 }
-.radioBtnInner {
-  position: absolute;
-  height: 57.14%;
-  width: 57.14%;
-  top: 21.43%;
-  right: 21.43%;
-  bottom: 21.43%;
-  left: 21.43%;
-  border-radius: 50%;
-  background-color: #5f84fe;
-}
 .pickupPointAnswer {
   flex: 1;
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-bold); 
 }
 .pickupPoint {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text); 
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -71,51 +43,11 @@
   align-items: center;
   justify-content: flex-start;
 }
-.checkBoxChild {
-  position: absolute;
-  height: 108.33%;
-  width: 108.33%;
-  top: -4.17%;
-  right: -4.17%;
-  bottom: -4.17%;
-  left: -4.17%;
-  border-radius: 4px;
-  background-color: #5f84fe;
-  border: 2px solid #5f84fe;
-  box-sizing: border-box;
-}
-.checkBoxChild::after {
-  content: '✓';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-}
-.ucheckIcon {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0%;
-  right: 0%;
-  bottom: 0%;
-  left: 0%;
-  max-width: 100%;
-  overflow: hidden;
-  max-height: 100%;
-}
-.checkBox {
-  width: 24px;
-  position: relative;
-  height: 24px;
-}
 .checkBoxPolicy {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-regular); 
 }
 .top {
   align-self: stretch;
@@ -133,8 +65,8 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold); 
 }
 .txtRh {
   display: flex;
@@ -150,11 +82,11 @@
   align-items: flex-start;
   justify-content: flex-start;
   text-align: left;
-  font-size: 20px;
-  color: #000;
-  font-family: Poppins;
+  font-size: 24px;
+  color: var(--main-text); 
+  font-family: var(--font-primary); 
 }
 .field {
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary); 
+  font-weight: var(--font-weight-regular); 
 }

@@ -17,6 +17,7 @@ import {
   updateStudent,
   getStudentHistoryDates,
   getHistoryDetail,
+  // eslint-disable-next-line
   getRegistrationPreview,
 } from "../../../../services/api";
 import Select from "react-select";
@@ -491,6 +492,7 @@ const StudentProfile = () => {
   };
 
   const handleChange = (e) => {
+    // eslint-disable-next-line
     const { name, value, type, checked } = e.target;
     const studentInfoFields = [
       "first_name",
@@ -938,6 +940,7 @@ const StudentProfile = () => {
         }
       }
     }
+    // eslint-disable-next-line
   }, [scrollTrigger]);
 
   const handleSaveClick = () => {
@@ -1016,7 +1019,7 @@ const StudentProfile = () => {
     const item = options[type]?.find((i) => String(i[keyName]) === String(id));
     return item?.name || item?.grade || item?.type || id;
   };
-
+// eslint-disable-next-line
   const filteredGrades = useMemo(() => {
     if (!isEditing || !options?.classes || !formData?.section_id) return [];
     const selectedSection = options.sections?.find(
@@ -1090,14 +1093,14 @@ const StudentProfile = () => {
       }));
   }, [options?.majors]);
 
-  // --- [BARU] Opsi untuk Select Agama ---
   const religionSelectOptions = useMemo(() => {
     return religionOptions.map((opt) => ({
       value: opt,
       label: opt,
     }));
-  }, []); // Array dependensi kosong karena religionOptions tidak berubah
-  // --- [AKHIR BARU] ---
+    // eslint-disable-next-line
+  }, []); 
+  
 
   const isDormitorySelected = useMemo(() => {
     if (!options?.residence_halls || !formData?.residence_id) return false;

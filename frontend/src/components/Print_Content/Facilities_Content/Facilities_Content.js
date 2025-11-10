@@ -1,5 +1,7 @@
 import React from 'react';
 import styles from '../../styles/Facilities_Content.module.css';
+import RadioButton from '../../../components/atoms/radiobutton/RadioButton';
+import Checkbox from '../../../components/atoms/checkbox/Checkbox';
 
 function FacilitiesContent({ data, pickupPointOptions }) {
   if (!data) return null;
@@ -22,20 +24,18 @@ function FacilitiesContent({ data, pickupPointOptions }) {
     }
     return data?.pickup_point_custom ?? '-';
   };
-
+// eslint-disable-next-line
   const getTransportationName = () => {
     if (data?.transportation_id) {
-      // Kita harus mengasumsikan data.transportation_id dari Print.js adalah Integer (Number)
       const idToMatch = parseInt(data.transportation_id, 10);
       const found = localTransportations.find((t) => t.id === idToMatch);
       return found ? found.name : '-';
     }
     return '-';
   };
-
+// eslint-disable-next-line
   const getResidenceName = () => {
     if (data?.residence_id) {
-      // Kita harus mengasumsikan data.residence_id dari Print.js adalah Integer (Number)
       const idToMatch = parseInt(data.residence_id, 10);
       const found = localResidences.find((r) => r.id === idToMatch);
       return found ? found.name : '-';
@@ -43,32 +43,8 @@ function FacilitiesContent({ data, pickupPointOptions }) {
     return '-';
   };
 
-  // helper checkbox biar tidak duplikat
-  const renderCheckbox = (isSigned) => {
-    return isSigned ? (
-      <div className={styles.checkBoxChild} />
-    ) : (
-      <div
-        style={{
-          position: 'absolute',
-          height: '108.33%',
-          width: '108.33%',
-          top: '-4.17%',
-          right: '-4.17%',
-          bottom: '-4.17%',
-          left: '-4.17%',
-          borderRadius: '4px',
-          border: '3px solid #5f84fe',
-          boxSizing: 'border-box',
-          backgroundColor: 'white',
-        }}
-      />
-    );
-  };
-
   return (
     <div className={styles.content}>
-      {/* Transportation */}
       <div className={styles.top}>
         <div className={styles.txtTransportation}>
           <div className={styles.transportation}>Transportation</div>
@@ -76,12 +52,13 @@ function FacilitiesContent({ data, pickupPointOptions }) {
 
         {localTransportations.map((transport) => (
           <div key={transport.id} className={styles.ownCar}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-              {String(data?.transportation_id) === String(transport.id) && (
-                <div className={styles.radioBtnInner} />
-              )}
-            </div>
+            <RadioButton
+              name="transportation"
+              value={transport.id}
+              checked={String(data?.transportation_id) === String(transport.id)}
+              onChange={() => {}}
+              readOnly={true}
+            />
             <div className={styles.field}>{transport.name}</div>
           </div>
         ))}
@@ -94,14 +71,16 @@ function FacilitiesContent({ data, pickupPointOptions }) {
         </div>
 
         <div className={styles.ownCar}>
-          <div className={styles.checkBox}>
-            {renderCheckbox(data?.transportation_policy === 'Signed')}
-          </div>
+          <Checkbox
+            checked={data?.transportation_policy === 'Signed'}
+            onChange={() => {}}
+            name="transportation_policy"
+            readOnly={true}
+          />
           <div className={styles.checkBoxPolicy}>Transportation policy</div>
         </div>
       </div>
 
-      {/* Residence Hall */}
       <div className={styles.top}>
         <div className={styles.txtRh}>
           <div className={styles.residenceHall}>Residence Hall</div>
@@ -109,20 +88,24 @@ function FacilitiesContent({ data, pickupPointOptions }) {
 
         {localResidences.map((residence) => (
           <div key={residence.id} className={styles.ownCar}>
-            <div className={styles.radioBtn}>
-              <div className={styles.radioBtnChild} />
-              {String(data?.residence_id) === String(residence.id) && (
-                <div className={styles.radioBtnInner} />
-              )}
-            </div>
+            <RadioButton
+              name="residence"
+              value={residence.id}
+              checked={String(data?.residence_id) === String(residence.id)}
+              onChange={() => {}}
+              readOnly={true}
+            />
             <div className={styles.field}>{residence.name}</div>
           </div>
         ))}
 
         <div className={styles.ownCar}>
-          <div className={styles.checkBox}>
-            {renderCheckbox(data?.residence_hall_policy === 'Signed')}
-          </div>
+          <Checkbox
+            checked={data?.residence_hall_policy === 'Signed'}
+            onChange={() => {}}
+            name="residence_hall_policy"
+            readOnly={true}
+          />
           <div className={styles.checkBoxPolicy}>Residence Hall policy</div>
         </div>
       </div>

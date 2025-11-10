@@ -5,31 +5,14 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
 }
 .txtSection {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-}
-.radioBtnChild {
-  position: absolute;
-  height: 110.71%;
-  width: 110.71%;
-  top: -5.36%;
-  right: -5.36%;
-  bottom: -5.36%;
-  left: -5.36%;
-  border-radius: 50%;
-  border: 3px solid #5f84fe;
-  box-sizing: border-box;
-}
-.radioBtn {
-  width: 28px;
-  position: relative;
-  height: 28px;
 }
 .answer {
   display: flex;
@@ -38,34 +21,23 @@
   justify-content: flex-start;
   padding: 12px;
   gap: 10px;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
 }
 .option {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
 }
 .field {
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
-}
-.radioBtnChild1 {
-  position: absolute;
-  height: 57.14%;
-  width: 57.14%;
-  top: 21.43%;
-  right: 21.43%;
-  bottom: 21.43%;
-  left: 21.43%;
-  border-radius: 50%;
-  background-color: #5f84fe;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
 }
 .grade {
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -77,12 +49,12 @@
   flex: 1;
   position: relative;
   line-height: 100%;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
 }
 .major {
   width: 250px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -90,8 +62,8 @@
   justify-content: flex-start;
   padding: 12px;
   gap: 10px;
-  font-family: 'Poppins', sans-serif;
-	font-weight: Regular;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
 }
 .top {
   align-self: stretch;
@@ -102,26 +74,9 @@
   padding: 0px 12px;
   gap: 32px;
 }
-.checkBoxChild {
-  position: absolute;
-  height: 112.5%;
-  width: 112.5%;
-  top: -6.25%;
-  right: -6.25%;
-  bottom: -6.25%;
-  left: -6.25%;
-  border-radius: 4px;
-  border: 3px solid #5f84fe;
-  box-sizing: border-box;
-}
-.checkBox {
-  width: 24px;
-  position: relative;
-  height: 24px;
-}
 .other {
   width: 458px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -138,7 +93,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   text-align: left;
-  font-size: 20px;
-  color: #000;
-  font-family: Poppins;
-} 
+  font-size: 24px;
+  color: var(--main-text);
+  font-family: var(--font-primary);
+}

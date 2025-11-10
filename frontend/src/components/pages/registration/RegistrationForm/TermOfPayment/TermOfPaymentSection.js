@@ -77,15 +77,16 @@ const TermOfPaymentSection = ({
     if (!isDormitory && residencePayment) {
       setResidencePayment("");
     }
+    // eslint-disable-next-line
   }, [isDormitory]);
 
   const handleTuitionFeesChange = (e, value) => {
-    e.preventDefault(); // Mencegah event ganda
+    e.preventDefault(); 
     setTuitionFees((current) => (current === value ? "" : value));
   };
 
   const handleResidencePaymentChange = (e, value) => {
-    e.preventDefault(); // Mencegah event ganda
+    e.preventDefault(); 
     setResidencePayment((current) => (current === value ? "" : value));
   };
 
