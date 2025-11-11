@@ -620,14 +620,37 @@ const StudentProfile = () => {
 
   const handleFormSelectChange = (name, selectedOption) => {
     const value = selectedOption ? selectedOption.value : "";
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => {
+      const newFormData = { ...prevData, [name]: value };
+
+      // [BARU] Tambahkan logika side-effect untuk class_id
+      if (name === "class_id") {
+        if (options?.classes) {
+          const selectedClass = options.classes.find(
+            (c) => String(c.class_id) === String(value)
+          );
+          // Logika `showMajorField` (baris 1301) adalah grade >= 9
+          const gradeNum = selectedClass
+            ? parseInt(selectedClass.grade, 10)
+            : 0;
+
+          // Jika grade di bawah 9, kosongkan major_id
+          if (gradeNum < 9) {
+            newFormData.major_id = "";
+          }
+        }
+      }
+      // [AKHIR BARU]
+
+      return newFormData;
+    });
   };
 
   const handleRadioChange = (name, value) => {
+    // --- [UBAH] Tambahkan "termOfPayment" untuk di-clear errornya ---
     clearError("facilities", name);
+    clearError("termOfPayment", name);
+
     setFormData((prevData) => {
       const currentVal = prevData[name];
       const newVal = currentVal === value ? "" : value;
@@ -637,14 +660,19 @@ const StudentProfile = () => {
         const selectedResidence = options.residence_halls.find(
           (r) => String(r.residence_id) === String(newVal)
         );
-        if (
+        const isDormitory =
           selectedResidence &&
-          selectedResidence.type.toLowerCase().includes("dormitory")
-        ) {
+          selectedResidence.type.toLowerCase().includes("dormitory");
+
+        if (isDormitory) {
+          // Jika memilih dormitory, kosongkan transportasi
           newFormData.transportation_id = "";
           newFormData.pickup_point_id = "";
           newFormData.pickup_point_custom = "";
           newFormData.transportation_policy = "Not Signed";
+        } else {
+          // --- [BARU] Jika TIDAK memilih dormitory (atau dikosongkan), kosongkan residence_payment ---
+          newFormData.residence_payment = "";
         }
       }
 
@@ -664,6 +692,8 @@ const StudentProfile = () => {
             currentResidence.type.toLowerCase().includes("dormitory")
           ) {
             newFormData.residence_id = "";
+            // --- [BARU] Karena residence_id dikosongkan, kosongkan juga residence_payment ---
+            newFormData.residence_payment = "";
           }
         }
       }
@@ -768,16 +798,13 @@ const StudentProfile = () => {
       studentInfoErrors.previous_school = "Previous school is required.";
     }
 
+    // [AWAL BLOK PENGGANTI] - Ganti baris 911-935
     let isNisnRequired = true;
-    if (selectedSection && selectedClass) {
-      const secName = lower(selectedSection.name);
-      const gradeNum = toInt(selectedClass.grade);
-      if (
-        secName === "ecp" ||
-        (secName === "elementary school" && (gradeNum === 1 || gradeNum === 2))
-      ) {
-        isNisnRequired = false;
-      }
+    const classIdNum = toInt(fullFormData.class_id);
+
+    // ECP (class_id 1,2,3) dan Elem 1-2 (class_id 4,5) tidak wajib NISN
+    if ([1, 2, 3, 4, 5].includes(classIdNum)) {
+      isNisnRequired = false;
     }
 
     const nisnAsString = normStr(fullFormData.nisn);
@@ -791,7 +818,7 @@ const StudentProfile = () => {
         studentInfoErrors.nisn = "NISN must only contain numbers.";
       }
     } else if (isNisnRequired) {
-      studentInfoErrors.nisn = "NISN is required.";
+      studentInfoErrors.nisn = "NISN is required for this grade.";
     }
 
     if (isFilled(fullFormData.email) && !emailRegex.test(fullFormData.email)) {
@@ -828,6 +855,27 @@ const StudentProfile = () => {
 
     if (Object.keys(studentInfoErrors).length > 0) {
       newErrors.studentInfo = studentInfoErrors;
+    }
+
+    const programErrors = {};
+    const classIdNum_val = toInt(fullFormData.class_id);
+    
+    // Logika ini didasarkan pada 'showMajorField' (grade >= 9)
+    // dan 'classIdRanges' (Middle 10-12, High 13-15).
+    // Grade 9 = class_id 12.
+    const needsMajor_val = [12, 13, 14, 15].includes(classIdNum_val);
+
+    if (!isFilled(fullFormData.class_id)) {
+      // Seharusnya ini tidak akan pernah terjadi karena dropdown, tapi untuk keamanan
+      programErrors.class_id = "Grade is required.";
+    }
+    
+    if (needsMajor_val && !isFilled(fullFormData.major_id)) {
+      programErrors.major_id = "Major is required for this grade.";
+    }
+
+    if (Object.keys(programErrors).length > 0) {
+      newErrors.program = programErrors;
     }
 
     const facilitiesErrors = {};
@@ -918,19 +966,49 @@ const StudentProfile = () => {
       newErrors.parentGuardian = parentErrors;
     }
 
+    // --- [LOGIKA BARU DITAMBAHKAN] ---
+    const termOfPaymentErrors = {};
+    if (!isFilled(fullFormData.tuition_fees)) {
+      termOfPaymentErrors.tuition_fees = "Tuition fees are required.";
+    }
+
+    // Gunakan memo 'isDormitorySelected' yang sudah ada
+    if (isDormitorySelected && !isFilled(fullFormData.residence_payment)) {
+      termOfPaymentErrors.residence_payment =
+        "Residence payment is required for dormitory.";
+    }
+
+    if (Object.keys(termOfPaymentErrors).length > 0) {
+      newErrors.termOfPayment = termOfPaymentErrors;
+    }
+    // --- [AKHIR LOGIKA BARU] ---
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   useEffect(() => {
     if (Object.keys(errors).length > 0 && scrollTrigger > 0) {
-      const sectionOrder = ["studentInfo", "facilities", "parentGuardian"];
+      // --- [UBAH] Tambahkan "termOfPayment" ---
+      const sectionOrder = [
+        "studentInfo",
+        "program",
+        "facilities",
+        "parentGuardian",
+        "termOfPayment",
+      ];
       const firstErrorSectionKey = sectionOrder.find(
         (key) => errors[key] && Object.keys(errors[key]).length > 0
       );
 
       if (firstErrorSectionKey) {
-        const targetElement = document.getElementById(firstErrorSectionKey);
+        // --- [BARU] Ganti ID target untuk termOfPayment ---
+        const targetId =
+          firstErrorSectionKey === "termOfPayment"
+            ? "termOfPaymentSection"
+            : firstErrorSectionKey;
+        const targetElement = document.getElementById(targetId);
+
         if (targetElement) {
           gsap.to(window, {
             duration: 0.8,
@@ -959,6 +1037,13 @@ const StudentProfile = () => {
     const dataToSend = { ...formData, ...studentInfo };
     if (selectedPhoto) {
       dataToSend.photo = selectedPhoto;
+    }
+
+    const classIdNum = parseInt(dataToSend.class_id, 10);
+    const needsMajor = [12, 13, 14, 15].includes(classIdNum);
+
+    if (!needsMajor) {
+      delete dataToSend.major_id;
     }
 
     try {
@@ -1019,7 +1104,7 @@ const StudentProfile = () => {
     const item = options[type]?.find((i) => String(i[keyName]) === String(id));
     return item?.name || item?.grade || item?.type || id;
   };
-// eslint-disable-next-line
+  // eslint-disable-next-line
   const filteredGrades = useMemo(() => {
     if (!isEditing || !options?.classes || !formData?.section_id) return [];
     const selectedSection = options.sections?.find(
@@ -1099,8 +1184,42 @@ const StudentProfile = () => {
       label: opt,
     }));
     // eslint-disable-next-line
-  }, []); 
-  
+  }, []);
+
+  // [BARU] Tambahkan mapping rentang class_id
+  const classIdRanges = useMemo(
+    () => ({
+      1: [1, 3], // ECP
+      2: [4, 9], // Elementary
+      3: [10, 12], // Middle
+      4: [13, 15], // High
+    }),
+    []
+  );
+
+  // [BARU] Buat opsi dropdown untuk Grade/Class yang difilter
+  const filteredClassOptions = useMemo(() => {
+    if (!options?.classes || !formData?.section_id) return [];
+
+    const range = classIdRanges[String(formData.section_id)];
+
+    if (!range) {
+      // Jika section_id tidak ada di map, kembalikan array kosong
+      return [];
+    }
+
+    const [min, max] = range;
+
+    return options.classes
+      .filter((cls) => {
+        const classIdNum = parseInt(cls.class_id, 10);
+        return classIdNum >= min && classIdNum <= max;
+      })
+      .map((cls) => ({
+        value: cls.class_id,
+        label: cls.grade, // Menggunakan 'grade' sebagai label (e.g., "1", "10", "K1")
+      }));
+  }, [options?.classes, formData?.section_id, classIdRanges]);
 
   const isDormitorySelected = useMemo(() => {
     if (!options?.residence_halls || !formData?.residence_id) return false;
@@ -2195,9 +2314,36 @@ const StudentProfile = () => {
                 <div className={styles.optionsRow}>
                   <div className={styles.field}>
                     <div className={styles.fieldLabel}>Grade</div>
-                    <b className={styles.fieldValue}>
-                      {getNameById("classes", formData.class_id)}
-                    </b>
+                    {/* --- [UBAH] Ganti <b> dengan conditional logic --- */}
+                    {isEditing ? (
+                      <div className={styles.selectWrapper}>
+                        <Select
+                          id="class_id"
+                          name="class_id"
+                          options={filteredClassOptions}
+                          value={
+                            formData.class_id
+                              ? filteredClassOptions.find(
+                                  (opt) =>
+                                    String(opt.value) ===
+                                    String(formData.class_id)
+                                )
+                              : null
+                          }
+                          onChange={(opt) =>
+                            handleFormSelectChange("class_id", opt)
+                          }
+                          placeholder="Select grade"
+                          isClearable
+                          classNamePrefix="react-select"
+                        />
+                      </div>
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {getNameById("classes", formData.class_id)}
+                      </b>
+                    )}
+                    {/* --- [AKHIR PERUBAHAN] --- */}
                   </div>
                   {showMajorField && (
                     <div className={styles.field}>
@@ -3585,24 +3731,40 @@ const StudentProfile = () => {
               </div>
             </div>
 
-            <div className={styles.infoSection}>
+            <div id="termOfPaymentSection" className={styles.infoSection}>
               <div
                 className={`${styles.sectionHeader} ${
                   isEditing ? styles.sectionHeaderEditing : ""
+                } ${
+                  // --- [BARU] Tambahkan class error di header ---
+                  errors.termOfPayment &&
+                  (errors.termOfPayment.tuition_fees ||
+                    errors.termOfPayment.residence_payment)
+                    ? styles.sectionHeaderError
+                    : ""
                 }`}
               >
                 <b>TERM OF PAYMENT</b>
               </div>
               <div className={styles.paymentContentWrapper}>
                 <div className={styles.paymentSection}>
-                  <div className={styles.paymentTitle}>Tuition Fee</div>
+                  <div
+                    className={`${styles.paymentTitle} ${
+                      // --- [BARU] Tambahkan class error di title ---
+                      errors.termOfPayment?.tuition_fees
+                        ? styles.errorLabel
+                        : ""
+                    }`}
+                  >
+                    Tuition Fee
+                  </div>
                   <div className={styles.paymentOptionGroup}>
                     {options?.tuition_fees?.map((option) => (
                       <RadioDisplay
                         key={option}
                         label={option}
                         isSelected={formData.tuition_fees === option}
-                        isEditing={false}
+                        isEditing={isEditing}
                         name="tuition_fees"
                         value={option}
                         onChange={handleRadioChange}
@@ -3610,22 +3772,37 @@ const StudentProfile = () => {
                     ))}
                   </div>
                 </div>
-                <div className={styles.paymentSection}>
-                  <div className={styles.paymentTitle}>Residence Hall</div>
-                  <div className={styles.paymentOptionGroup}>
-                    {options?.residence_payment?.map((option) => (
-                      <RadioDisplay
-                        key={option}
-                        label={option}
-                        isSelected={formData.residence_payment === option}
-                        isEditing={false}
-                        name="residence_payment"
-                        value={option}
-                        onChange={handleRadioChange}
-                      />
-                    ))}
+
+                {/* --- [BARU] Dibungkus dengan isDormitorySelected --- */}
+                {isDormitorySelected && (
+                  <div className={styles.paymentSection}>
+                    <div
+                      className={`${styles.paymentTitle} ${
+                        // --- [BARU] Tambahkan class error di title ---
+                        errors.termOfPayment?.residence_payment
+                          ? styles.errorLabel
+                          : ""
+                      }`}
+                    >
+                      Residence Hall
+                    </div>
+                    <div className={styles.paymentOptionGroup}>
+                      {options?.residence_payment?.map((option) => (
+                        <RadioDisplay
+                          key={option}
+                          label={option}
+                          isSelected={formData.residence_payment === option}
+                          isEditing={isEditing}
+                          name="residence_payment"
+                          value={option}
+                          onChange={handleRadioChange}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+                {/* --- [AKHIR BUNGKUS] --- */}
+
                 <div className={styles.paymentSection}>
                   <div className={styles.paymentTitle}>
                     Financial Policy & Contract
@@ -3636,7 +3813,7 @@ const StudentProfile = () => {
                       isSelected={
                         formData.financial_policy_contract === "Signed"
                       }
-                      isEditing={false}
+                      isEditing={isEditing}
                       name="financial_policy_contract"
                       onChange={handleChange}
                     />
