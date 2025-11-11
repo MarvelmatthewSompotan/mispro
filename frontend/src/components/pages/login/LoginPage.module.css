@@ -3,7 +3,7 @@
 
 body {
   margin: 0;
-  font-family: var(--font-primary), "Inter", sans-serif;
+  font-family: var(--font-primary), var(--font-secondary), sans-serif;
 }
 
 .login-page-new {
@@ -76,7 +76,7 @@ body {
 .login-card {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 1) ;
+  border: 2px solid var(--secondary-background);
   border-radius: 12px;
   padding: 24px 56px;
   width: 100%;
@@ -94,7 +94,7 @@ body {
   animation: cardLoadIn 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.5s;
   animation-fill-mode: forwards;
   opacity: 0;
-  color: #5f84fe;
+  color: var(--main-accent);
 }
 
 .login-logo {
@@ -111,10 +111,10 @@ body {
 }
 
 .login-title-new {
-  font-family: var(--font-primary), "Poppins", sans-serif;
+  font-family: var(--font-primary);
   font-size: 24px;
-  font-weight: 600;
-  color: var(--main-accent, #007bff);
+  font-weight: var(--font-weight-semibold);
+  color: var(--main-accent);
   margin: 0 0 0 0;
 }
 
@@ -124,12 +124,12 @@ body {
 
 .input-group input {
   width: 100%;
-  padding: 0 60px 0 20px !important; /* Beri ruang di kanan untuk ikon */
+  padding: 0 60px 0 20px !important;
   height: 60px;
   font-size: 1rem !important;
   border: none !important;
   border-radius: 5px;
-  background-color: var(--main-background, #f7f7f8) !important;
+  background-color: var(--main-background) !important;
   box-sizing: border-box;
 }
 
@@ -156,10 +156,10 @@ body {
 
 .reset-login-link {
   font-size: 0.875rem;
-  color: var(--main-accent, #007bff);
+  color: var(--main-accent);
   text-decoration: underline;
   align-self: flex-start;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .reset-login-link:hover {
@@ -167,7 +167,7 @@ body {
 }
 
 .login-error-message {
-  color: #d93025;
+  color: var(--dark-red);
   font-size: 14px;
   text-align: left;
   margin-bottom: 1rem;

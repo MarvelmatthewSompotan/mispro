@@ -1,17 +1,15 @@
-/* CSS khusus untuk StudentStatusSection */
-
 .statusLabel {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
-  color: #333;
+  color: var(--main-text);
   line-height: 100%;
 }
 .headerTitle {
-  font-family: Poppins, sans-serif;
-  font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 20px;
-  color: #000;
+  color: var(--main-text);
 }
 .sectionHeader {
   align-self: stretch;
@@ -23,8 +21,8 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 20px;
 }
 
@@ -61,7 +59,7 @@
   bottom: -5.36%;
   left: -5.36%;
   border-radius: 50%;
-  border: 3px solid #5f84fe;
+  border: 3px solid var(--main-accent);
   box-sizing: border-box;
   transition: all 0.2s ease;
 }
@@ -75,7 +73,7 @@
   bottom: 21.43%;
   left: 21.43%;
   border-radius: 50%;
-  background-color: #5f84fe;
+  background-color: var(--main-accent);
   transform: scale(1);
   opacity: 1;
   animation: grow-in 0.25s forwards;
@@ -115,8 +113,8 @@
 .studentIdValue {
   flex: 1;
   line-height: 100%;
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
   transition: all 0.2s ease;
@@ -133,13 +131,13 @@
 
 .studentIdValue:focus,
 .studentIdValue.hasValue {
-  font-weight: bold;
-  color: #000;
+  font-weight: var(--font-weight-bold);
+  color: var(--main-text);
 }
 
 .studentIdValue::placeholder {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
 }
@@ -156,9 +154,9 @@
 }
 
 .inlineErrorText {
-  font-family: Poppins, Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--font-weight-regular);
   color: var(--red);
   margin-left: 16px;
   white-space: nowrap;
@@ -186,7 +184,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  background: #fff;
+  background: var(--secondary-background);
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -197,17 +195,17 @@
 }
 
 .searchInputError {
-  font-family: Poppins, Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 12px;
-  color: #ff4444;
+  color: var(--red);
   margin-top: 4px;
   padding-left: 2px;
 }
 
 /* Styling untuk border input saat error */
 .studentIdValue.errorInput {
-  border-bottom: 2px solid var(--red) !important; /* Tambahkan border bawah merah */
-  padding-bottom: 1px; /* Sedikit padding agar border tidak menempel */
+  border-bottom: 2px solid var(--red) !important;
+  padding-bottom: 1px;
 }
 
 .dropdownItem {
@@ -227,7 +225,7 @@
 }
 
 .dropdownItem:hover {
-  background-color: #f8f9fa;
+  background-color: var(--main-background);
 }
 
 .dropdownItem:active {
@@ -235,29 +233,29 @@
 }
 
 .studentName {
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  font-weight: var(--font-weight-regular);
+  color: var(--main-text);
   flex: 1;
   text-align: left;
 }
 
 .studentId {
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 12px;
-  font-weight: 400;
-  color: #666;
+  font-weight: var(--font-weight-regular);
+  color: var(--main-grey);
   margin-left: 8px;
   white-space: nowrap;
 }
 
 /* Searching indicator */
 .searching {
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 12px;
-  font-weight: 400;
-  color: #666;
+  font-weight: var(--font-weight-regular);
+  color: var(--main-grey);
   font-style: italic;
   white-space: nowrap;
   flex-shrink: 0;
@@ -268,10 +266,10 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 6px 8px;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
-  font-weight: 400;
-  background: #fff;
+  font-weight: var(--font-weight-regular);
+  background: var(--secondary-background);
   width: auto;
   max-width: 100%;
 }
@@ -293,17 +291,17 @@
   gap: 32px;
 }
 .noteText {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
-  color: #ff4d4d;
+  color: var(--red);
   line-height: 100%;
 }
 .noteTextBold {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 16px;
-  color: #ff4d4d;
+  color: var(--red);
   line-height: 100%;
 }
 .noteWrapper {
@@ -325,7 +323,7 @@
   justify-content: flex-start;
   padding: 0px 12px;
   font-size: 14px;
-  color: #ff4d4d;
+  color: var(--red);
 }
 .contentWrapper {
   align-self: stretch;
@@ -336,11 +334,11 @@
   gap: 12px;
   min-width: 422px;
   font-size: 16px;
-  background-color: #fffaec;
+  background-color: var(--cream);
 }
 .container {
   position: relative;
-  background-color: #fff;
+  background-color: var(--secondary-background);
   overflow: visible !important;
   display: flex;
   flex-direction: column;
@@ -350,60 +348,60 @@
   padding: 0 16px 0 16px;
   text-align: left;
   font-size: 20px;
-  color: #000;
-  font-family: Poppins;
+  color: var(--main-text);
+  font-family: var(--font-primary);
   margin-bottom: 24px;
 }
 .noteLabel {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 14px;
-  color: #ff4d4d;
+  color: var(--red);
   line-height: 100%;
 }
 .noteWarning {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 14px;
-  color: #ff4d4d;
+  color: var(--red);
   line-height: 100%;
 }
 .noteWarningBold {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 14px;
-  color: #ff4d4d;
+  color: var(--red);
   line-height: 100%;
 }
 
 /* Error state styling untuk StudentStatusSection */
 
 .studentStatusErrorLabel {
-  color: #ff4444 !important;
-  font-weight: 600;
+  color: var(--red) !important;
+  font-weight: var(--font-weight-semibold);
 }
 
 .dropdownHeader {
   padding: 8px 12px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--text-accent);
   background-color: var(--main-grey);
   border-bottom: 1px solid var(--main-background);
   text-transform: capitalize;
-  font-family: Poppins, Arial, sans-serif;
+  font-family: var(--font-primary);
 }
 
 /* --- Aturan Final Highlight Item Teratas --- */
 
 /* Ini adalah kelas yang memberi warna biru pada item */
 .topItemHighlight {
-  background-color: #a7cdff; /* Warna highlight biru muda */
-  border-top: 1px solid #cce0ff;
-  border-bottom: 1px solid #cce0ff;
+  background-color: var(--secondary-accent);
+  border-top: 1px solid var(--secondary-accent);
+  border-bottom: 1px solid var(--secondary-accent);
 }
 
 /* (Opsional) Efek hover untuk item yang sedang di-highlight */
 .topItemHighlight:hover {
-  background-color: #7fb6ff; /* Warna biru sedikit lebih gelap saat hover */
+  background-color: var(--main-accent);
 }

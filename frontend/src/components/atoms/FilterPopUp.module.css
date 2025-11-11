@@ -1,16 +1,15 @@
-/* FilterPopup.module.css */
 .popupContainer {
   position: absolute;
   top: 100%;
   right: 0;
   width: 280px;
-  background: #ffffff;
+  background: var(--secondary-background);
   border: 1px solid #dfe0eb;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  margin-bottom: 8px; /* Jarak dari tombol filter */
-  font-family: 'Poppins', Arial, sans-serif;
+  margin-bottom: 8px;
+  font-family: var(--font-primary);
 }
 
 .popupDateRange {
@@ -30,9 +29,9 @@
 }
 
 .popupHeader span {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: 16px;
-  color: #333;
+  color: var(--main-text);
 }
 
 .closeBtn {
@@ -64,7 +63,7 @@
   padding: 10px 0;
   cursor: pointer;
   font-size: 14px;
-  color: #444;
+  color: var(--main-text);
 }
 
 .checkboxLabel:hover {
@@ -86,7 +85,7 @@
   margin-right: 12px;
   display: inline-block;
   position: relative;
-  background: #fff;
+  background: var(--secondary-background);
 }
 
 .checkboxInput:checked + .customCheckbox::after {
@@ -97,14 +96,14 @@
   top: 1px;
   width: 5px;
   height: 10px;
-  border: solid #ffffff;
+  border: solid var(--text-accent);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
 .checkboxInput:checked + .customCheckbox {
-  background: #007bff;
-  border-color: #007bff;
+  background: var(--main-accent);
+  border-color: var(--main-accent);
 }
 
 .popupFooter {
@@ -117,7 +116,7 @@
 
 .popupFooter {
   display: flex;
-  justify-content: space-between; /* <-- PERUBAHAN: Ganti flex-end agar ada ruang untuk Reset */
+  justify-content: space-between;
   gap: 8px;
   padding: 12px 16px;
   border-top: 1px solid #dfe0eb;
@@ -125,7 +124,6 @@
 
 /* KELOMPOK TOMBOL KANAN (Cancel dan Apply) */
 .actionBtnGroup {
-  /* <-- BARU: Tambahkan wrapper untuk Cancel/Apply agar tetap bersebelahan */
   display: flex;
   gap: 8px;
 }
@@ -134,11 +132,11 @@
   border: 1px solid #ccc;
   padding: 8px 16px;
   border-radius: 6px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: 14px;
   cursor: pointer;
-  background: #fff;
-  color: #555;
+  background: var(--secondary-background);
+  color: var(--main-text);
 }
 
 .actionBtn,
@@ -146,56 +144,53 @@
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: 14px;
   cursor: pointer;
 }
 
 .actionBtn {
   background: #f0f0f0;
-  color: #555;
+  color: var(--main-text);
 }
 
 .applyBtn {
-  background: #007bff; /* Ganti dengan warna primer Anda */
-  color: #ffffff;
+  background: var(--main-accent);
+  color: var(--text-accent);
 }
 
 .searchPopupBody {
-  padding: 16px; /* Beri padding agar input tidak menempel */
+  padding: 16px;
 }
 
 .searchInputPopup {
   width: 100%;
   padding: 10px 12px;
   font-size: 14px;
-  font-family: 'Poppins', Arial, sans-serif;
+  font-family: var(--font-primary);
 }
 
 .searchInputPopup:focus {
   outline: none;
-  border: 2px solid #1f1f20;
+  border: 2px solid var(--main-text);
   border-radius: 5px;
 }
 
 .dateRangePopupBody {
-  /* Memastikan konten di dalam body pop-up berorientasi kolom */
   display: flex;
   flex-direction: column;
-  padding: 10px 15px; /* Sesuaikan dengan padding .popupBody yang lain */
-  max-height: 200px; /* Batas tinggi agar tetap ringkas */
+  padding: 10px 15px;
+  max-height: 200px;
 }
 
-/* --- Label Tanggal (Start Date/End Date) --- */
 .dateLabel {
   font-size: 13px;
   font-weight: 500;
-  color: #333; /* Warna teks gelap */
+  color: var(--main-text);
   margin-bottom: 5px;
   margin-top: 10px;
 }
 
-/* Hilangkan margin-top untuk label pertama */
 .dateLabel:first-child {
   margin-top: 0;
 }
@@ -204,17 +199,17 @@
 .dateInput {
   width: 100%;
   padding: 8px 10px;
-  margin-bottom: 5px; /* Jarak antar input */
+  margin-bottom: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-sizing: border-box; /* Penting untuk menjaga padding di dalam width 100% */
+  box-sizing: border-box;
   font-size: 14px;
-  color: #555;
+  color: var(--main-text);
   outline: none;
   transition: border-color 0.2s;
 }
 
 .dateInput:focus {
-  border-color: #007bff; /* Contoh warna fokus biru */
+  border-color: var(--main-accent);
   box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.25);
 }
