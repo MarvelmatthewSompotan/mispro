@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 class LogbookController extends Controller
 {
@@ -364,7 +365,7 @@ class LogbookController extends Controller
                     $student->province, 
                     $student->other, 
                 ])));
-                
+
                 $address = $address ?: null;
 
                 $photoPath = $student->photo_path;
@@ -373,6 +374,10 @@ class LogbookController extends Controller
                 if (isset($student->latest_data_snapshot)) {
                     $decoded = json_decode($student->latest_data_snapshot);
                     $photoUrl = $decoded->request_data->photo_url ?? null;
+
+                    if ($photoPath) {
+                        $photoUrl = URL::to("api/storage-file/{$photoPath}"); 
+                    }
                 }
                 
                 unset($student->latest_data_snapshot); 
