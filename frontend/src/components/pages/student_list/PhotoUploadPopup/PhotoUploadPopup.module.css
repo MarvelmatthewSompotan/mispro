@@ -1,4 +1,3 @@
-/* src/components/PhotoUploadPopup/PhotoUploadPopup.module.css */
 .overlay {
   position: fixed;
   top: 0;
@@ -13,7 +12,7 @@
 }
 .popupContainer {
   position: relative;
-  background-color: #fff;
+  background-color: var(--secondary-background);
   border-radius: 10px;
   width: 90%;
   max-width: 600px;
@@ -26,8 +25,8 @@
   background: none;
   border: none;
   font-size: 28px;
-  font-weight: bold;
-  color: #888;
+  font-weight: var(--font-weight-bold);
+  color: var(--main-grey);
   cursor: pointer;
   z-index: 10;
 }
@@ -42,13 +41,13 @@
   padding: 16px;
   box-sizing: border-box;
   text-align: center;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-primary);
 }
 .dragAndDropYourFileHereParent {
   align-self: stretch;
   flex: 1;
   border-radius: 12px;
-  border: 4px dashed #5f84fe;
+  border: 4px dashed var(--main-accent);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -60,45 +59,43 @@
 .dragAndDropTitle {
   font-size: 20px;
   line-height: 1.2;
-  font-weight: 600;
-  color: #5f84fe;
+  font-weight: var(--font-weight-semibold);
+  color: var(--main-accent);
 }
 .or {
-  font-weight: 600;
-  color: #000;
+  font-weight: var(--font-weight-semibold);
+  color: var(--main-text);
   font-size: 14px;
 }
 .dropYourFileWrapper {
   align-self: stretch;
   flex: 1;
   border-radius: 12px;
-  background-color: #5f84fe;
-  border: 4px dashed #fff;
+  background-color: var(--main-accent);
+  border: 4px dashed var(--text-accent);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .dropYourFile {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: 20px;
-  color: #fff;
+  color: var(--text-accent);
 }
 .browseButton {
   display: flex;
   padding: 10px 20px;
 }
 .browseText {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: 16px;
 }
-
-/* TAMBAHAN BARU untuk Cropper di PhotoUploadPopup.module.css */
 
 .cropperContainer {
   position: relative;
   width: 100%;
-  height: 360px; /* Sesuaikan tinggi sesuai kebutuhan */
-  background: #333;
+  height: 360px;
+  background: var(--main-text);
 }
 
 .controls {
@@ -107,15 +104,15 @@
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
-  background-color: #f8f9fa;
+  background-color: var(--main-background);
   border-top: 1px solid #dee2e6;
   border-bottom: 1px solid #dee2e6;
 }
 
 .controls label {
   text-align: center;
-  font-weight: 600;
-  color: #495057;
+  font-weight: var(--font-weight-semibold);
+  color: var(--main-text);
 }
 
 .zoomRange {
@@ -139,7 +136,7 @@
   appearance: none;
   width: 20px;
   height: 20px;
-  background: #5f84fe;
+  background: var(--main-accent);
   cursor: pointer;
   border-radius: 50%;
 }
@@ -147,7 +144,7 @@
 .zoomRange::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: #5f84fe;
+  background: var(--main-accent);
   cursor: pointer;
   border-radius: 50%;
 }
@@ -163,7 +160,5 @@
 .saveButton {
   padding: 12px 22px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
-
-/* Color/border are handled by Button atom */

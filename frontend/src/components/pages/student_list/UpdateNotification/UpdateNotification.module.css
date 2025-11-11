@@ -8,27 +8,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2001; /* Pastikan z-index lebih tinggi dari popup konfirmasi */
+  z-index: 2001;
 }
 
 .notificationContent {
   width: 450px;
   padding: 50px 20px;
   border-radius: 10px;
-  background-color: #fff;
+  background-color: var(--secondary-background);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 25px;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-primary);
   text-align: center;
 }
 
 .message {
   font-size: 20px;
-  font-weight: 600;
-  color: #10ee22;
+  font-weight: var(--font-weight-semibold);
+  color: var(--green);
 }
 
 /* --- Animasi Ikon Centang --- */
@@ -38,9 +38,9 @@
   border-radius: 50%;
   display: block;
   stroke-width: 3;
-  stroke: #10ee22;
+  stroke: var(--green);
   stroke-miterlimit: 10;
-  box-shadow: inset 0px 0px 0px #10ee22;
+  box-shadow: inset 0px 0px 0px var(--green);
   animation: fill 0.4s ease-in-out 0.4s forwards,
     scale 0.3s ease-in-out 0.9s both;
 }
@@ -50,7 +50,7 @@
   stroke-dashoffset: 166;
   stroke-width: 3;
   stroke-miterlimit: 10;
-  stroke: #10ee22;
+  stroke: var(--green);
   fill: none;
   animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
 }
@@ -80,7 +80,6 @@
 
 @keyframes fill {
   100% {
-    box-shadow: inset 0px 0px 0px 60px #fff;
+    box-shadow: inset 0px 0px 0px 60px var(--secondary-background);
   }
 }
-
