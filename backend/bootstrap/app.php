@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\Authenticate::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'lifetime' => \App\Http\Middleware\CheckTokenLifetime::class,
+            'cors' => \App\Http\Middleware\CorsMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -11,8 +11,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\StorageController;
 
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/storage-file/{path}', [StorageController::class, 'serveFile'])
+    ->where('path', '.*') 
+    ->middleware('cors');
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index']);

@@ -8,7 +8,7 @@ use App\Models\Student;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\ApplicationFormVersion;
+use Illuminate\Support\Facades\URL;
 
 class LogbookController extends Controller
 {
@@ -39,7 +39,21 @@ class LogbookController extends Controller
             } else {
                 $targetSchoolYearIds[] = $defaultSchoolYearId;
             }
-            
+
+            $latestEnrollmentSub = DB::table('enrollments AS e_latest')
+                ->select('e_latest.id AS student_id', 'e_latest.school_year_id', DB::raw('MAX(e_latest.semester_id) AS max_semester_id'))
+                ->whereIn('e_latest.school_year_id', $targetSchoolYearIds)
+                ->groupBy('e_latest.id', 'e_latest.school_year_id');
+
+            $latestEnrollmentIdSub = DB::table('enrollments AS e_id')
+                ->select('e_id.enrollment_id', 'e_id.id AS student_id', 'e_id.school_year_id')
+                ->joinSub($latestEnrollmentSub, 'latest_e_sub', function ($join) {
+                    $join->on('e_id.id', '=', 'latest_e_sub.student_id')
+                            ->on('e_id.school_year_id', '=', 'latest_e_sub.school_year_id')
+                            ->on('e_id.semester_id', '=', 'latest_e_sub.max_semester_id');
+                })
+                ->groupBy('e_id.enrollment_id', 'e_id.id', 'e_id.school_year_id');
+
             $latestApplicationVersionSub = DB::table('application_form_versions AS afv')
             ->select('afv.application_id', 'afv.data_snapshot')
             ->join('application_forms AS af', 'af.application_id', '=', 'afv.application_id')
@@ -52,150 +66,134 @@ class LogbookController extends Controller
             $studentsQuery = Student::where('active', 'YES')
                 ->select('students.*') 
                 ->addSelect('latest_app_version.data_snapshot as latest_data_snapshot') 
+                ->addSelect(
+                    'p_join.father_name',
+                    'p_join.father_occupation',
+                    'p_join.father_phone',
+                    'p_join.mother_name',
+                    'p_join.mother_occupation',
+                    'p_join.mother_phone'
+                )
+                ->addSelect(
+                    'sa_join.street',
+                    'sa_join.rt',
+                    'sa_join.rw',
+                    'sa_join.village',
+                    'sa_join.district',
+                    'sa_join.city_regency',
+                    'sa_join.province',
+                    'sa_join.other'
+                )
                 ->with([
-                    'enrollments' => function ($q) use ($targetSchoolYearIds) {
+                    'enrollments' => function ($q) use ($targetSchoolYearIds, $latestEnrollmentIdSub) {
+                        $latestIds = $latestEnrollmentIdSub->pluck('enrollment_id');
+                        $q->whereIn('enrollment_id', $latestIds);
                         $q->whereIn('school_year_id', $targetSchoolYearIds);
                         $q->orderBy('semester_id', 'desc'); 
                         $q->with(['schoolClass', 'section', 'schoolYear', 'transportation']);
                     },
-                    'studentParent',
-                    'studentAddress',
                 ])
-                ->join('enrollments AS e_join', function ($join) use ($targetSchoolYearIds) {
-                    $join->on('students.id', '=', 'e_join.id')
-                        ->whereIn('e_join.school_year_id', $targetSchoolYearIds);
+                ->joinSub($latestEnrollmentIdSub, 'e_latest_join', function ($join) {
+                    $join->on('students.id', '=', 'e_latest_join.student_id');
                 })
-                ->join('application_forms AS af_join', 'af_join.enrollment_id', '=', 'e_join.enrollment_id')
+                ->leftJoin('parents AS p_join', function ($join) {
+                    $join->on('p_join.enrollment_id', '=', 'e_latest_join.enrollment_id');
+                    $join->on('p_join.id', '=', 'students.id'); 
+                })
+                ->leftJoin('student_addresses AS sa_join', function ($join) {
+                    $join->on('sa_join.enrollment_id', '=', 'e_latest_join.enrollment_id');
+                    $join->on('sa_join.id', '=', 'students.id'); 
+                })
+                ->join('enrollments AS e_join', 'e_join.enrollment_id', '=', 'e_latest_join.enrollment_id') 
+                ->join('application_forms AS af_join', 'af_join.enrollment_id', '=', 'e_latest_join.enrollment_id')
                 ->leftJoinSub($latestApplicationVersionSub, 'latest_app_version', function ($join) {
                     $join->on('latest_app_version.application_id', '=', 'af_join.application_id');
                 });
-                
-                $studentsQuery->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                    $q->whereIn('school_year_id', $targetSchoolYearIds);
-                });
+
+            $filterSchoolYearIds = $targetSchoolYearIds; 
 
             // Filter (search)
             if ($name = $request->input('search_name')) {
                 $studentsQuery->where(function ($q) use ($name) {
                     $q->whereRaw("CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) LIKE ?", ["%{$name}%"]);
-                })
-                ->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                    $q->whereIn('school_year_id', $targetSchoolYearIds);
                 });
             }
 
             if ($family = $request->input('search_family_rank')) {
-                $studentsQuery->where('family_rank', 'like', "%$family%")
-                    ->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                        $q->whereIn('school_year_id', $targetSchoolYearIds);
-                });     
+                $studentsQuery->where('family_rank', 'like', "%$family%");
             }
 
             if ($religion = $request->input('search_religion')) {
-                $studentsQuery->where('religion', 'like', "%$religion%")
-                    ->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                        $q->whereIn('school_year_id', $targetSchoolYearIds);
-                });     
+                $studentsQuery->where('religion', 'like', "%$religion%");
             }
             
             if ($country = $request->input('search_country')) {
-                $studentsQuery->where('country', 'like', "%$country%")
-                    ->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                        $q->whereIn('school_year_id', $targetSchoolYearIds);
-                });     
+                $studentsQuery->where('country', 'like', "%$country%");
             }
 
             if ($father = $request->input('search_father')) {
-                $studentsQuery->whereHas('studentParent', function ($q) use ($father) {
-                    $q->where('father_name', 'like', "%$father%");
-                })
-                ->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                    $q->whereIn('school_year_id', $targetSchoolYearIds);
-                });     
+                $studentsQuery->where('p_join.father_name', 'like', "%$father%");
             }
 
             if ($mother = $request->input('search_mother')) {
-                $studentsQuery->whereHas('studentParent', function ($q) use ($mother) {
-                    $q->where('mother_name', 'like', "%$mother%");
-                })
-                ->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                    $q->whereIn('school_year_id', $targetSchoolYearIds);
-                });     
+                $studentsQuery->where('p_join.mother_name', 'like', "%$mother%");
             }
 
-            $filterSchoolYearIds = [];
-            $schoolYearsRequest = $request->input('school_years');
-            if ($schoolYearsRequest) {
-                $filterSchoolYearIds = SchoolYear::whereIn('year', (array)$schoolYearsRequest)
-                                                ->pluck('school_year_id')
-                                                ->toArray();
-            } else {
-                $filterSchoolYearIds[] = $defaultSchoolYearId;
-            }
+            $joinMap = [
+                'enrollments' => true,
+                'classes' => false,
+                'sections' => false,
+                'school_years' => false,
+                'transportations' => false,
+                'parents' => true,
+            ];
 
             // Fiter (checkbox)
             if ($grades = $request->input('grades')) {
-                $studentsQuery->whereHas('enrollments', function ($q) use ($grades, $filterSchoolYearIds) {
-                    $q->whereHas('schoolClass', function ($c) use ($grades) {
-                        $c->whereIn('grade', (array)$grades);
-                    });
-                    
-                    $q->whereIn('school_year_id', $filterSchoolYearIds);
-                });
+                if (!$joinMap['classes']) {
+                    $studentsQuery->leftJoin('classes', 'e_join.class_id', '=', 'classes.class_id');
+                    $joinMap['classes'] = true;
+                }
+                $studentsQuery->whereIn('classes.grade', (array)$grades);
             }
 
             if ($sections = $request->input('sections')) {
-                $studentsQuery->whereHas('enrollments', function ($q) use ($sections, $filterSchoolYearIds) {
-                    $q->whereHas('section', function ($c) use ($sections) {
-                        $c->whereIn('name', (array)$sections);
-                    });
-
-                    $q->whereIn('school_year_id', $filterSchoolYearIds);
-                });
+                if (!$joinMap['sections']) {
+                    $studentsQuery->leftJoin('sections', 'e_join.section_id', '=', 'sections.section_id');
+                    $joinMap['sections'] = true;
+                }
+                $studentsQuery->whereIn('sections.name', (array)$sections);
             }
 
             if ($schoolYears = $request->input('school_years')) {
-                $studentsQuery->whereHas('enrollments.schoolYear', function ($q) use ($schoolYears) {
-                    $q->whereIn('year', (array)$schoolYears);
-                });
+                $studentsQuery->whereIn('e_latest_join.school_year_id', $targetSchoolYearIds);
             }
 
             if ($genders = $request->input('genders')) {
-                $studentsQuery->whereIn('gender', (array)$genders) 
-                    ->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                        $q->whereIn('school_year_id', $targetSchoolYearIds);
-                    });
+                $studentsQuery->whereIn('gender', (array)$genders);
             }
-            
+
             if ($transportations = $request->input('transportations')) {
-                $studentsQuery->whereHas('enrollments', function ($q) use ($transportations, $filterSchoolYearIds) {
-                    $q->whereHas('transportation', function ($t) use ($transportations) {
-                        $t->whereIn('type', (array)$transportations);
-                    });
-                    
-                    $q->whereIn('school_year_id', $filterSchoolYearIds);
-                });
+                if (!$joinMap['transportations']) {
+                    $studentsQuery->leftJoin('transportations', 'e_join.transport_id', '=', 'transportations.transport_id');
+                    $joinMap['transportations'] = true;
+                }
+                $studentsQuery->whereIn('transportations.type', (array)$transportations);
             }
 
             // Filter (range)
             if ($request->filled('start_date') && $request->filled('end_date')) {
-                $studentsQuery->whereHas('enrollments', function ($q) use ($request, $targetSchoolYearIds) {
-                    $q->whereBetween('registration_date', [
-                        $request->input('start_date'), 
-                        $request->input('end_date')
-                    ]);
-                    $q->whereIn('school_year_id', $targetSchoolYearIds);
-                });
+                $studentsQuery->whereBetween('e_join.registration_date', [
+                    $request->input('start_date'), 
+                    $request->input('end_date')
+                ]);
             }
 
             if ($request->filled('min_age') && $request->filled('max_age')) {
                 $studentsQuery->whereBetween('age', [
                     $request->input('min_age'), 
                     $request->input('max_age')
-                ])
-                ->whereHas('enrollments', function ($q) use ($targetSchoolYearIds) {
-                    $q->whereIn('school_year_id', $targetSchoolYearIds);
-                });
+                ]);
             }
 
             // Sort
@@ -220,99 +218,52 @@ class LogbookController extends Controller
 
             $sorts = $request->input('sort', []);
 
-            $joinMap = [
-                'enrollments' => false,
-                'classes' => false,
-                'sections' => false,
-                'school_years' => false,
-                'transportations' => false,
-                'parents' => false,
-            ];
-
             foreach ($sorts as $sort) {
                 $field = $sort['field'] ?? null;
                 $order = $sort['order'] ?? 'asc';
 
                 if (!$field || !in_array($field, $sortable)) continue;
 
+                if (!collect($studentsQuery->getQuery()->columns)->contains('e_join.enrollment_id')) {
+                    $studentsQuery->addSelect('e_join.enrollment_id');
+                }
+
                 switch ($field) {
                     case 'full_name':
-                        if (!$joinMap['enrollments']) {
-                            $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.id', '=', 'enrollments.id')
-                                    ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
-                            });
-                            $joinMap['enrollments'] = true;
-                        }
                         $studentsQuery->orderByRaw("CONCAT(students.first_name, ' ', COALESCE(students.middle_name, ''), ' ', students.last_name) $order");
                         break;
 
                     case 'grade':
-                        if (!$joinMap['enrollments']) {
-                            $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.id', '=', 'enrollments.id')
-                                    ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
-                            });
-                            $joinMap['enrollments'] = true;
-                        }
                         if (!$joinMap['classes']) {
-                            $studentsQuery->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id');
+                            $studentsQuery->leftJoin('classes', 'e_join.class_id', '=', 'classes.class_id');
                             $joinMap['classes'] = true;
                         }
                         $studentsQuery->orderBy('classes.grade', $order);
                         break;
 
                     case 'section':
-                        if (!$joinMap['enrollments']) {
-                            $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.id', '=', 'enrollments.id')
-                                    ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
-                            });
-                            $joinMap['enrollments'] = true;
-                        }
                         if (!$joinMap['sections']) {
-                            $studentsQuery->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id');
+                            $studentsQuery->leftJoin('sections', 'e_join.section_id', '=', 'sections.section_id');
                             $joinMap['sections'] = true;
                         }
                         $studentsQuery->orderBy('sections.name', $order);
                         break;
 
                     case 'school_year':
-                        if (!$joinMap['enrollments']) {
-                            $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.id', '=', 'enrollments.id')
-                                    ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
-                            });
-                            $joinMap['enrollments'] = true;
-                        }
                         if (!$joinMap['school_years']) {
-                            $studentsQuery->leftJoin('school_years', 'enrollments.school_year_id', '=', 'school_years.school_year_id');
+                            $studentsQuery->leftJoin('school_years', 'e_join.school_year_id', '=', 'school_years.school_year_id');
                             $joinMap['school_years'] = true;
                         }
                         $studentsQuery->orderBy('school_years.year', $order);
                         break;
 
                     case 'registration_date':
-                        if (!$joinMap['enrollments']) {
-                            $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.id', '=', 'enrollments.id')
-                                    ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
-                            });
-                            $joinMap['enrollments'] = true;
-                        }
-                        $studentsQuery->orderBy('enrollments.registration_date', $order);
+                        $studentsQuery->orderBy('e_join.registration_date', $order);
                         break;
 
                     case 'transportation':
-                        if (!$joinMap['enrollments']) {
-                            $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.id', '=', 'enrollments.id')
-                                    ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
-                            });
-                            $joinMap['enrollments'] = true;
-                        }
                         if (!$joinMap['transportations']) {
-                            $studentsQuery->leftJoin('transportations', 'enrollments.transport_id', '=', 'transportations.transport_id');
+                            $studentsQuery->leftJoin('transportations', 'e_join.transport_id', '=', 'transportations.transport_id');
                             $joinMap['transportations'] = true;
                         }
                         $studentsQuery->orderBy('transportations.type', $order);
@@ -322,34 +273,81 @@ class LogbookController extends Controller
                     case 'father_occupation':
                     case 'mother_name':
                     case 'mother_occupation':
-                        if (!$joinMap['enrollments']) {
-                            $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.id', '=', 'enrollments.id')
-                                    ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
-                            });
-                            $joinMap['enrollments'] = true;
-                        }
-                        if (!$joinMap['parents']) {
-                            $studentsQuery->leftJoin('parents', 'students.id', '=', 'parents.id');
-                            $joinMap['parents'] = true;
-                        }
-                        $studentsQuery->orderBy("parents.$field", $order);
+                        $studentsQuery->orderBy("p_join.$field", $order);
                         break;
 
                     default:
-                        if (!$joinMap['enrollments']) {
-                            $studentsQuery->leftJoin('enrollments', function($join) use ($targetSchoolYearIds) {
-                                $join->on('students.id', '=', 'enrollments.id')
-                                    ->whereIn('enrollments.school_year_id', $targetSchoolYearIds);
-                            });
-                            $joinMap['enrollments'] = true;
-                        }
                         $studentsQuery->orderBy("students.$field", $order);
                         break;
                 }
             }
 
-            $studentsQuery->distinct('students.id');
+            $studentsQuery->groupBy(
+                'students.id',
+                'students.student_id',
+                'students.studentall_id',
+                'students.first_name',
+                'students.middle_name',
+                'students.last_name',
+                'students.nickname',
+                'students.citizenship',
+                'students.gender',
+                'students.age',
+                'students.nisn',
+                'students.family_rank',
+                'students.place_of_birth',
+                'students.date_of_birth',
+                'students.email',
+                'students.previous_school',
+                'students.religion',
+                'students.country',
+                'students.active',
+                'students.status',
+                'students.photo_path',
+                'students.phone_number',
+                'students.nik',
+                'students.kitas',
+                'students.academic_status',
+                'students.academic_status_other',
+                'students.registration_date',
+                'students.va_mandiri',
+                'students.va_bca',
+                'students.va_bni',
+                'students.va_bri',
+                'e_latest_join.enrollment_id', 
+                'e_join.enrollment_id', 
+                'latest_app_version.data_snapshot',
+
+                'p_join.father_name',
+                'p_join.father_occupation',
+                'p_join.father_phone',
+                'p_join.mother_name',
+                'p_join.mother_occupation',
+                'p_join.mother_phone',
+
+                'sa_join.street',
+                'sa_join.rt',
+                'sa_join.rw',
+                'sa_join.village',
+                'sa_join.district',
+                'sa_join.city_regency',
+                'sa_join.province',
+                'sa_join.other'
+            );
+
+            if ($joinMap['classes']) {
+                $studentsQuery->groupBy('classes.class_id', 'classes.grade');
+            }
+            if ($joinMap['sections']) {
+                $studentsQuery->groupBy('sections.section_id', 'sections.name');
+            }
+            if ($joinMap['school_years']) {
+                $studentsQuery->groupBy('school_years.school_year_id', 'school_years.year');
+            }
+            if ($joinMap['transportations']) {
+                $studentsQuery->groupBy('transportations.transport_id', 'transportations.type');
+            }
+
             // pagination
             $perPage = $request->input('per_page', 25);
             $students = $studentsQuery->paginate($perPage);
@@ -358,24 +356,28 @@ class LogbookController extends Controller
             $data = $students->getCollection()->map(function ($student) {
                 $enrollment = $student->enrollments->first();
 
-                $address = $student->studentAddress
-                    ? trim(implode(', ', array_filter([
-                        $student->studentAddress->street,
-                        "{$student->studentAddress->rt}/{$student->studentAddress->rw}",
-                        $student->studentAddress->village,
-                        $student->studentAddress->district,
-                        $student->studentAddress->city_regency,
-                        $student->studentAddress->province,
-                        $student->studentAddress->other,
-                    ])))
-                    : null;
-                
+                $address = trim(implode(', ', array_filter([
+                    $student->street, 
+                    ($student->rt && $student->rw) ? "{$student->rt}/{$student->rw}" : "-", 
+                    $student->village, 
+                    $student->district, 
+                    $student->city_regency, 
+                    $student->province, 
+                    $student->other, 
+                ])));
+
+                $address = $address ?: null;
+
                 $photoPath = $student->photo_path;
                 $photoUrl = null;
                 
                 if (isset($student->latest_data_snapshot)) {
                     $decoded = json_decode($student->latest_data_snapshot);
                     $photoUrl = $decoded->request_data->photo_url ?? null;
+
+                    if ($photoPath) {
+                        $photoUrl = URL::to("api/storage-file/{$photoPath}"); 
+                    }
                 }
                 
                 unset($student->latest_data_snapshot); 
@@ -399,12 +401,12 @@ class LogbookController extends Controller
                     'country' => $student->country,
                     'address' => $address,
                     'phone' => $student->phone_number,
-                    'father_name' => $student->studentParent?->father_name,
-                    'father_occupation' => $student->studentParent?->father_occupation,
-                    'father_phone' => $student->studentParent?->father_phone,
-                    'mother_name' => $student->studentParent?->mother_name,
-                    'mother_occupation' => $student->studentParent?->mother_occupation,
-                    'mother_phone' => $student->studentParent?->mother_phone,
+                    'father_name' => $student->father_name,
+                    'father_occupation' => $student->father_occupation,
+                    'father_phone' => $student->father_phone,
+                    'mother_name' => $student->mother_name,
+                    'mother_occupation' => $student->mother_occupation,
+                    'mother_phone' => $student->mother_phone,
                     'nik' => $student->nik,
                     'kitas' => $student->kitas,
                 ];
