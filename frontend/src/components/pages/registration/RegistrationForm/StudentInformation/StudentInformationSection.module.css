@@ -1,4 +1,3 @@
-/* CSS khusus untuk StudentInformationSection */
 input,
 select,
 textarea {
@@ -10,8 +9,8 @@ textarea {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
   padding: 12px 0 8px 0;
@@ -21,10 +20,9 @@ textarea {
 
 /* Error label styling - Label merah yang rapi */
 .errorLabel {
-  color: #ff4444 !important;
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: 500 !important;
-  font-size: 16px;
+  color: var(--red) !important;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular) !important;
   margin: 0;
   line-height: 1.2;
   text-align: left;
@@ -35,18 +33,18 @@ textarea {
 /* Error input styling - Hanya ubah warna text, JANGAN tambah border baru */
 .errorInput {
   border: none !important;
-  border-bottom: none !important; /* HAPUS border baru */
+  border-bottom: none !important;
   border-radius: 0 !important;
   background-color: transparent !important;
   box-shadow: none !important;
-  color: #ff4444 !important; /* Text input jadi merah */
-  transition: color 0.2s ease; /* Hanya transition untuk color */
+  color: var(--red) !important;
+  transition: color 0.2s ease;
 }
 
 .errorInput:focus {
-  border-bottom: none !important; /* Focus state tidak ada border baru */
+  border-bottom: none !important;
   box-shadow: none !important;
-  color: #ff6666 !important; /* Focus text lebih terang */
+  color: var(--red) !important;
 }
 
 /* Error state styling untuk SEMUA input field - Override border bottom yang sudah ada */
@@ -63,13 +61,13 @@ textarea {
 
 /* Error state untuk date input - Override border bottom yang sudah ada */
 .errorFieldWrapper .dateInput {
-  color: #ff4444 !important;
+  color: var(--red) !important;
 }
 
 /* Error state untuk academic status other input - Override border bottom yang sudah ada */
 .errorFieldWrapper .otherInput {
-  border-bottom: 2px solid #ff4444 !important; /* Override line yang sudah ada */
-  color: #ff4444 !important;
+  border-bottom: 2px solid var(--red) !important;
+  color: var(--red) !important;
 }
 
 /* Hapus semua error container dan message yang tidak diperlukan */
@@ -87,21 +85,21 @@ textarea {
 }
 
 .inlineErrorMessage {
-  color: #ff4444;
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: 500;
+  color: var(--red);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 12px;
   white-space: nowrap;
   flex-shrink: 0;
   padding: 4px 8px;
   background-color: rgba(255, 68, 68, 0.1);
   border-radius: 4px;
-  border-left: 3px solid #ff4444;
+  border-left: 3px solid var(--red);
 }
 
 /* Error select styling */
 .errorSelect {
-  border: 2px solid #ff4444 !important;
+  border: 2px solid var(--red) !important;
   border-radius: 4px !important;
 }
 
@@ -116,15 +114,15 @@ textarea:focus {
   outline: none;
   border: none;
   background: transparent;
-  color: #000;
-  font-weight: bold;
+  color: var(--main-text);
+  font-weight: var(--font-weight-bold);
 }
 
 input::placeholder,
 select::placeholder,
 textarea::placeholder {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
 }
@@ -132,29 +130,29 @@ textarea::placeholder {
 /* Memastikan input dengan nilai tetap terlihat jelas */
 input:not(:placeholder-shown),
 textarea:not(:placeholder-shown) {
-  color: #000 !important;
-  font-weight: bold !important;
+  color: var(--main-text) !important;
+  font-weight: var(--font-weight-bold) !important;
 }
 
 /* Styling untuk input fields dengan nilai */
 input.hasValue,
 textarea.hasValue {
-  color: #000 !important;
-  font-weight: bold !important;
+  color: var(--main-text) !important;
+  font-weight: var(--font-weight-bold) !important;
 }
 
 /* Memastikan input tidak kembali ke placeholder style */
 input[value]:not([value=""]),
 textarea[value]:not([value=""]) {
-  color: #000 !important;
-  font-weight: bold !important;
+  color: var(--main-text) !important;
+  font-weight: var(--font-weight-bold) !important;
 }
 
 .headerTitle {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 20px;
-  color: #000;
+  color: var(--main-text);
 }
 
 .sectionHeader {
@@ -170,10 +168,10 @@ textarea[value]:not([value=""]) {
 }
 
 .label {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
-  color: #333;
+  color: var(--main-text);
   line-height: 100%;
   margin: 0;
   padding: 0;
@@ -186,23 +184,22 @@ textarea[value]:not([value=""]) {
 .citizenshipField,
 .districtField,
 .academicStatusField,
-.phoneField, /* Tambah phoneField */
-.previousSchoolField, /* Tambah previousSchoolField */
+.phoneField,
+.previousSchoolField,
 .otherField {
-  /* Tambah otherField */
   flex: 1;
-  border-bottom: 1px solid #000; /* Hanya satu line di bawah field */
+  border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
-  height: 80px; /* Standard height untuk semua field */
+  height: 80px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 12px; /* Standard padding untuk semua field */
+  padding: 12px;
   margin: 0;
-  gap: 8px; /* Standard gap antara label dan input */
+  gap: 8px;
   min-width: 0;
-  width: 100%; /* Pastikan semua field punya width yang sama */
+  width: 100%;
 }
 
 .emailField {
@@ -210,15 +207,15 @@ textarea[value]:not([value=""]) {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  padding: 12px; /* Standard padding untuk semua field */
+  padding: 12px;
   margin: 0;
   min-width: 0;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
 }
 /* Khusus untuk field age dan email address - tambah gap yang lebih besar */
 .ageField,
 .emailField {
-  gap: 20px; /* Tambah gap dari 8px ke 16px untuk field age dan email */
+  gap: 20px;
 }
 
 /* Row layout - Standardized spacing */
@@ -228,36 +225,36 @@ textarea[value]:not([value=""]) {
   align-self: stretch;
   display: flex;
   flex-direction: row;
-  align-items: flex-end; /* Semua field sejajar di bagian bawah */
+  align-items: flex-end;
   justify-content: flex-start;
-  gap: 16px; /* Standard gap antar field */
+  gap: 16px;
   margin: 0;
   padding: 0;
 }
 
 /* Khusus untuk row 3 (Citizenship, NISN, Rank, Age) - tambah margin top lebih besar */
 .row:nth-child(3) {
-  margin-top: 20px; /* Tambah gap lebih besar antara row 2 dan 3 */
+  margin-top: 20px;
 }
 
 /* Khusus untuk row 4 (Gender, Email, Previous School) - tambah margin top */
 .row:nth-child(4) {
-  margin-top: 15px; /* Gap yang cukup antara row 3 dan 4 */
+  margin-top: 15px;
 }
 
 /* Khusus untuk row 5 (Phone, Academic Status, Other) - tambah margin top */
 .row:nth-child(5) {
-  margin-top: 20px; /* Gap yang cukup antara row 4 dan 5 */
+  margin-top: 20px;
 }
 
 /* Khusus untuk row 7 (Phone, Academic Status) - tambah margin top */
 .topRow:nth-of-type(2) {
-  margin-top: 15px; /* Tambah gap yang lebih besar antara Email/Previous School dengan Phone/Academic Status */
+  margin-top: 15px;
 }
 
 /* Jarak vertikal spesifik di atas baris Gender */
 .genderRow {
-  margin-top: 20px; /* <-- UBAH NILAI INI SESUAI KEINGINAN ANDA */
+  margin-top: 20px;
 }
 
 /* Address section styling - KURANGI gap yang terlalu besar */
@@ -268,37 +265,37 @@ textarea[value]:not([value=""]) {
   align-items: flex-start;
   justify-content: center;
   padding: 6px 0px;
-  margin-top: 24px; /* Kurangi dari 60px ke 24px untuk gap yang lebih seimbang */
+  margin-top: 24px;
 }
 
 .valueHighlight {
   align-self: stretch;
   position: relative;
   line-height: 100%;
-  border: none !important; /* hilangkan border input */
-  outline: none !important; /* hilangkan outline fokus */
-  box-shadow: none !important; /* hilangkan shadow bawaan */
-  background: transparent !important; /* biar nyatu dengan bg */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 /* Khusus untuk field yang tidak memerlukan border bottom - HAPUS noBorder */
 .noBorder {
-  border-bottom: 1px solid #000 !important; /* Override noBorder, pastikan semua field punya line */
+  border-bottom: 1px solid var(--main-text) !important;
 }
 
 /* Field khusus untuk RT/RW */
 .rtField {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
-  height: 80px; /* Sama dengan field lain */
+  height: 80px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 12px; /* Sama dengan field lain */
+  padding: 12px;
   margin: 0;
-  gap: 8px; /* Sama dengan field lain */
+  gap: 8px;
   min-width: 0;
 }
 
@@ -317,13 +314,13 @@ textarea[value]:not([value=""]) {
 
 .academicStatusField {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
   height: 80px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-end; /* Ini akan mendorong label & input ke bawah */
+  justify-content: flex-end;
   padding: 12px;
   gap: 8px;
 }
@@ -339,12 +336,12 @@ textarea[value]:not([value=""]) {
 }
 
 .selectWrapper {
-  flex: 1; /* Biarkan Select mengisi ruang yang tersedia */
+  flex: 1;
 }
 
 /* Wrapper untuk komponen Select agar bisa mengatur lebarnya */
 .academicStatusWrapper .selectWrapper {
-  flex: 1; /* Membuat Select mengambil ruang yang tersedia */
+  flex: 1;
 }
 
 /* Academic status styling - HAPUS line yang double */
@@ -353,9 +350,9 @@ textarea[value]:not([value=""]) {
   flex-direction: row;
   gap: 16px;
   width: 100%;
-  padding-bottom: 2px; /* Tambah padding bottom */
-  min-height: 40px; /* Pastikan height cukup */
-  align-items: flex-end; /* Sejajarkan dengan field lain */
+  padding-bottom: 2px;
+  min-height: 40px;
+  align-items: flex-end;
 }
 
 .academicStatusOption {
@@ -370,7 +367,7 @@ textarea[value]:not([value=""]) {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
 }
@@ -380,16 +377,16 @@ textarea[value]:not([value=""]) {
 }
 
 .otherText {
-  font-weight: 200;
-  color: #000;
+  font-weight: var(--font-weight-regular);
+  color: var(--main-text);
 }
 
 /* Style untuk input 'Other' saat muncul */
 .otherInput {
-  color: #000;
+  color: var(--main-text);
   padding: 6px 2px;
-  width: 70%; /* Atur lebar agar tidak memenuhi layar */
-  border-bottom: 1px solid #ccc; /* Beri garis bawah terpisah */
+  width: 70%;
+  border-bottom: 1px solid var(--main-grey);
   position: absolute;
   right: 12px;
   bottom: 12px;
@@ -397,13 +394,13 @@ textarea[value]:not([value=""]) {
 
 .otherInput:focus {
   outline: none;
-  color: #000;
-  font-weight: bold;
+  color: var(--main-text);
+  font-weight: var(--font-weight-bold);
 }
 
 .otherInput:not(:placeholder-shown) {
-  color: #a9a9a9;
-  font-weight: normal !important;
+  color: var(--main-grey);
+  font-weight: var(--font-weight-regular) !important;
 }
 
 /* Date input styling */
@@ -419,8 +416,8 @@ textarea[value]:not([value=""]) {
   border: none;
   outline: none;
   background: transparent;
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
   padding: 12px 0 8px 0;
@@ -435,7 +432,7 @@ textarea[value]:not([value=""]) {
   height: 24px;
   overflow: hidden;
   flex-shrink: 0;
-  color: #000;
+  color: var(--main-text); /* Diubah dari #000 */
   pointer-events: none;
 }
 
@@ -475,18 +472,18 @@ textarea[value]:not([value=""]) {
   outline: none;
   border: none;
   background: transparent;
-  color: #000;
-  font-weight: bold;
+  color: var(--main-text);
+  font-weight: var(--font-weight-bold);
 }
 
 .dateInput.hasValue {
-  color: #000 !important;
-  font-weight: bold !important;
+  color: var(--main-text) !important;
+  font-weight: var(--font-weight-bold) !important;
 }
 
 .dateInput::placeholder {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
 }
@@ -547,12 +544,12 @@ textarea[value]:not([value=""]) {
 /* Section styling */
 .infoSection {
   align-self: stretch;
-  background-color: #fffaec;
+  background-color: var(--cream);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 12px; /* Standard padding untuk semua section */
+  padding: 12px;
 }
 
 /* Content wrapper - kurangi gap yang terlalu besar */
@@ -560,7 +557,7 @@ textarea[value]:not([value=""]) {
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  gap: 24px; /* Kurangi gap dari 40px ke 24px untuk spacing yang lebih seimbang */
+  gap: 24px;
   min-width: 422px;
   font-size: 16px;
   box-sizing: border-box;
@@ -575,12 +572,12 @@ textarea[value]:not([value=""]) {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 24px; /* Standard gap antar container */
+  gap: 24px;
   text-align: left;
   font-size: 20px;
   padding: 0 16px 0 16px;
-  color: #000;
-  font-family: Poppins;
+  color: var(--main-text);
+  font-family: var(--font-primary);
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -588,7 +585,7 @@ textarea[value]:not([value=""]) {
 /* React Select styling */
 .react-select__control {
   border: none !important;
-  border-bottom: none !important; /* HAPUS border bottom untuk dropdown */
+  border-bottom: none !important;
   box-shadow: none !important;
   min-height: 40px !important;
   height: 40px !important;
@@ -614,7 +611,7 @@ textarea[value]:not([value=""]) {
 /* DatePicker styling */
 .react-datepicker__input-container > div {
   border: none;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   min-height: 40px;
   height: 40px;
   background: transparent;
@@ -632,10 +629,10 @@ textarea[value]:not([value=""]) {
 
 .react-datepicker__input-container input {
   border: none !important;
-  border-bottom: 1px solid #000 !important;
+  border-bottom: 1px solid var(--main-text) !important;
   background: transparent !important;
-  font-family: "Poppins", Arial, sans-serif !important;
-  font-weight: 400 !important;
+  font-family: var(--font-primary) !important;
+  font-weight: var(--font-weight-regular) !important;
   font-size: 16px !important;
   color: rgba(128, 128, 128, 0.6) !important;
   padding: 12px 0 8px 0 !important;
@@ -655,12 +652,12 @@ textarea[value]:not([value=""]) {
   outline: none !important;
   border: none !important;
   background: transparent !important;
-  border-bottom: 1px solid #000 !important;
+  border-bottom: 1px solid var(--main-text) !important;
 }
 
 .react-datepicker__input-container input.hasValue {
-  font-weight: bold !important;
-  color: #000 !important;
+  font-weight: var(--font-weight-bold) !important;
+  color: var(--main-text) !important;
 }
 
 .react-datepicker-wrapper,
@@ -678,21 +675,21 @@ textarea[value]:not([value=""]) {
 }
 
 .react-datepicker {
-  font-family: "Poppins", Arial, sans-serif !important;
-  border: 1px solid #ccc !important;
+  font-family: var(--font-primary) !important;
+  border: 1px solid var(--main-grey) !important;
   border-radius: 4px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Select styling */
 select {
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: rgba(128, 128, 128, 0.6);
 }
 
 select.hasValue {
-  font-weight: bold;
-  color: #000;
+  font-weight: var(--font-weight-bold);
+  color: var(--main-text);
 }
 
 /* Standard padding untuk semua input */
@@ -714,7 +711,7 @@ textarea,
   .addressRow,
   .topRow {
     flex-direction: column;
-    gap: 20px; /* Kurangi gap untuk mobile */
+    gap: 20px;
   }
 
   .nameField,
@@ -731,13 +728,13 @@ textarea,
   .otherField {
     min-width: 0;
     width: 100%;
-    height: 80px; /* Pastikan height konsisten */
+    height: 80px;
   }
 
   /* Khusus untuk field age dan email di mobile */
   .ageField,
   .emailField {
-    gap: 16px; /* Tetap gap yang lebih besar di mobile */
+    gap: 16px;
   }
 
   .addressRow .genderField {
@@ -774,7 +771,7 @@ textarea,
   .row,
   .addressRow,
   .topRow {
-    gap: 16px; /* Standard gap */
+    gap: 16px;
   }
 
   .contentWrapper {
@@ -782,13 +779,13 @@ textarea,
   }
 
   .infoSection {
-    padding: 8px 12px; /* Standard padding */
+    padding: 8px 12px;
   }
 }
 
 /* Placeholder text merah untuk field yang error */
 .errorFieldWrapper input::placeholder,
 .errorFieldWrapper .react-select__placeholder {
-  color: #ff4444 !important; /* Placeholder merah saat error */
-  opacity: 0.8; /* Sedikit transparan agar tidak terlalu mencolok */
+  color: var(--red) !important;
+  opacity: 0.8;
 }

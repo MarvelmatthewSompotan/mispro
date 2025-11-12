@@ -70,7 +70,6 @@
 	padding: 6px 12px;
 	box-sizing: border-box;
 	gap: 10px;
-	max-width: 240px;
 }
 .address {
 	flex: 1;

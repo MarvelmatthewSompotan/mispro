@@ -1,5 +1,3 @@
-/* CSS khusus untuk TermOfPaymentSection */
-
 .container {
   position: relative;
   display: flex;
@@ -9,8 +7,8 @@
   gap: 0;
   text-align: left;
   font-size: 16px;
-  color: #000;
-  font-family: Poppins;
+  color: var(--main-text);
+  font-family: var(--font-primary);
   padding: 0 16px 0 16px;
   margin-top: 24px;
 }
@@ -30,10 +28,10 @@
 }
 
 .headerText {
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 20px;
-  color: #000;
+  color: var(--main-text);
 }
 
 .contentWrapper {
@@ -44,7 +42,7 @@
   align-items: flex-start;
   justify-content: flex-start;
   gap: 55px;
-  background-color: #fffaec;
+  background-color: var(--cream);
 
   padding-bottom: 8px;
   margin: 0 10px;
@@ -64,7 +62,7 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  background-color: #fffaec;
+  background-color: var(--cream);
 }
 
 .sectionTitle {
@@ -78,8 +76,8 @@
 .sectionTitleText {
   position: relative;
   line-height: 100%;
-  font-weight: 600;
-  font-family: Poppins, Arial, sans-serif;
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-primary);
   font-size: 16px;
 }
 
@@ -134,7 +132,7 @@
   bottom: -5.36%;
   left: -5.36%;
   border-radius: 50%;
-  border: 3px solid #5f84fe;
+  border: 3px solid var(--main-accent);
   box-sizing: border-box;
   transition: all 0.2s ease;
 }
@@ -148,7 +146,7 @@
   bottom: 21.43%;
   left: 21.43%;
   border-radius: 50%;
-  background-color: #5f84fe;
+  background-color: var(--main-accent);
   transform: scale(1);
   opacity: 1;
   animation: grow-in 0.25s forwards;
@@ -194,8 +192,8 @@
   bottom: -4.17%;
   left: -4.17%;
   border-radius: 4px;
-  background-color: #ffffff;
-  border: 3px solid #5f84fe;
+  background-color: var(--secondary-background);
+  border: 3px solid var(--main-accent);
   box-sizing: border-box;
 }
 
@@ -214,8 +212,8 @@
 
 .label {
   line-height: 100%;
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
 }
 
@@ -256,8 +254,8 @@ input[type="text"],
 input[type="number"],
 select,
 textarea {
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
   transition: all 0.2s ease;
@@ -277,8 +275,8 @@ select:focus,
 select.hasValue,
 textarea:focus,
 textarea.hasValue {
-  font-weight: bold;
-  color: #000;
+  font-weight: var(--font-weight-bold);
+  color: var(--main-text);
 }
 
 .inputField::placeholder,
@@ -288,7 +286,7 @@ input[type="text"]::placeholder,
 input[type="number"]::placeholder,
 select::placeholder,
 textarea::placeholder {
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: rgba(128, 128, 128, 0.6);
 }
 
@@ -296,7 +294,7 @@ textarea::placeholder {
   border: none;
   outline: none;
   background: transparent;
-  font-family: "Poppins", Arial, sans-serif;
+  font-family: var(--font-primary);
 
   font-size: 16px;
   color: rgba(128, 128, 128, 0.6);
@@ -306,18 +304,18 @@ textarea::placeholder {
 }
 .dropdownSelect:focus,
 .dropdownSelect.hasValue {
-  font-weight: bold;
-  color: #000;
+  font-weight: var(--font-weight-bold);
+  color: var(--main-text);
 }
 .dropdownSelect option {
-  background: white;
-  color: #000;
+  background: var(--secondary-background);
+  color: var(--main-text);
 }
 
 /* Error label untuk sub label Term of Payment */
 .termOfPaymentErrorLabel {
-  color: #ff4444 !important;
-  font-weight: 600;
+  color: var(--red) !important;
+  font-weight: var(--font-weight-semibold);
 }
 
 .discountSection {
@@ -337,8 +335,6 @@ textarea::placeholder {
 }
 
 .discountInline {
- 
-
   align-self: auto;
 }
 
@@ -355,14 +351,13 @@ textarea::placeholder {
   width: 100%;
   flex-shrink: 0;
   margin-top: -3px;
-
 }
 
 .notesLabel {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: 16px;
   white-space: nowrap;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-primary);
 }
 
 .notesInput {
@@ -372,10 +367,8 @@ textarea::placeholder {
   padding: 8px 4px;
   margin-bottom: 6px;
   font-size: 16px;
-  font-family: Poppins, Arial, sans-serif;
+  font-family: var(--font-primary);
 }
-
-/* --- [BARU] Global Styles untuk React-Select --- */
 
 :global(.react-select__control),
 :global(.react-select__control--is-focused) {
@@ -385,5 +378,5 @@ textarea::placeholder {
 }
 
 :global(.react-select__placeholder) {
-  font-family: Poppins, Arial, sans-serif !important;
+  font-family: var(--font-primary) !important;
 }

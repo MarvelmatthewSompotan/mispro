@@ -1,5 +1,3 @@
-
-
 .container {
   width: 100%;
   position: relative;
@@ -10,8 +8,8 @@
   gap: 24px;
   text-align: left;
   font-size: 20px;
-  color: #000;
-  font-family: Poppins;
+  color: var(--main-text);
+  font-family: var(--font-primary);
   padding: 0 16px 0 16px;
   margin-top: 24px;
 }
@@ -29,8 +27,8 @@
 }
 
 .headerText {
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 20px;
   line-height: 100%;
 }
@@ -38,8 +36,8 @@
 .label {
   position: relative;
   line-height: 100%;
-  font-weight: 400;
-  font-family: Poppins, Arial, sans-serif;
+  font-weight: var(--font-weight-regular);
+  font-family: var(--font-primary);
   font-size: 16px;
 }
 
@@ -51,7 +49,7 @@
   justify-content: flex-start;
   gap: 24px;
   font-size: 16px;
-  background-color: #fffaec;
+  background-color: var(--cream);
 }
 
 .transportationSection {
@@ -80,11 +78,11 @@
   width: 200px;
   position: relative;
   line-height: 100%;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  font-family: Poppins, Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
 }
 
@@ -137,7 +135,7 @@
   bottom: -5.36%;
   left: -5.36%;
   border-radius: 50%;
-  border: 3px solid #5f84fe;
+  border: 3px solid var(--main-accent);
   box-sizing: border-box;
   transition: all 0.2s ease;
 }
@@ -151,7 +149,7 @@
   bottom: 21.43%;
   left: 21.43%;
   border-radius: 50%;
-  background-color: #5f84fe;
+  background-color: var(--main-accent);
   transform: scale(1);
   opacity: 1;
   animation: grow-in 0.25s forwards;
@@ -197,8 +195,8 @@
   bottom: -4.17%;
   left: -4.17%;
   border-radius: 4px;
-  background-color: #ffffff;
-  border: 3px solid #5f84fe;
+  background-color: var(--secondary-background);
+  border: 3px solid var(--main-accent);
   box-sizing: border-box;
   transition: all 0.2s ease;
 }
@@ -229,7 +227,7 @@
 
 .pickupPointField {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -242,9 +240,9 @@
   border: none;
   outline: none;
   background: transparent;
-  font-family: Poppins, Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: rgba(128, 128, 128, 0.6);
   line-height: 100%;
   padding: 4px 0;
@@ -253,15 +251,15 @@
 
 .pickupPointInput:focus,
 .pickupPointInput.hasValue {
-  font-weight: bold;
-  color: #000;
+  font-weight: var(--font-weight-bold);
+  color: var(--main-text);
 }
 
 .pickupPointInput::placeholder {
   color: rgba(128, 128, 128, 0.6);
   font-style: normal;
-  font-family: Poppins, Arial, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
   font-size: 16px;
 }
 
@@ -296,10 +294,10 @@ input[type="text"],
 input[type="number"],
 select,
 textarea {
-  font-family: "Poppins", Arial, sans-serif;
-  font-weight: bold;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-size: 16px;
-  color: #000;
+  color: var(--main-text);
 }
 
 .inputField::placeholder,
@@ -309,7 +307,7 @@ input[type="text"]::placeholder,
 input[type="number"]::placeholder,
 select::placeholder,
 textarea::placeholder {
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: rgba(128, 128, 128, 0.6);
 }
 
@@ -346,6 +344,6 @@ textarea::placeholder {
 
 
 .facilitiesSectionErrorLabel {
-  color: #ff4444 !important;
-  font-weight: 600;
+  color: var(--red) !important;
+  font-weight: var(--font-weight-semibold);
 }

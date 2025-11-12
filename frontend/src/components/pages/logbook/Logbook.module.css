@@ -74,8 +74,8 @@
 
 .logbookTable {
   width: 100%;
-  border-collapse: collapse; /* agar garis tabel menyatu */
-  border-spacing: 0; /* hilangkan jarak antar cell */
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 .logbookTable td {
@@ -85,14 +85,14 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--main-text);
-  white-space: normal; /* agar teks turun baris */
+  white-space: normal;
   word-break: break-word;
-  line-height: 1; /* jarak antar baris nol */
+  line-height: 1;
   vertical-align: middle;
 }
 
 .logbookTable td:last-child {
-  border-right: none; /* hilangkan garis kanan di kolom terakhir */
+  border-right: none;
 }
 
 .logbookTable tbody tr:last-child td {
@@ -101,7 +101,7 @@
 
 /* Foto menyesuaikan tinggi baris */
 .studentPhoto {
-  height: 81px; /* tinggi tetap proporsional */
+  height: 81px;
   width: 59.97px;
   max-height: 100%;
   object-fit: cover;
