@@ -702,6 +702,11 @@ class RegistrationController extends Controller
                 'nisn' => 'nullable|string',
                 'nik' => 'nullable|integer',
                 'kitas' => 'nullable|string',
+                'va_mandiri' => 'nullable|string',
+                'va_bca' => 'nullable|string',
+                'va_bni' => 'nullable|string',
+                'va_bri' => 'nullable|string',
+                
 
                 'street' => 'required|string',
                 'rt' => 'nullable|string',
@@ -777,6 +782,7 @@ class RegistrationController extends Controller
 
                 'discount_name' => 'nullable|string',
                 'discount_notes' => 'nullable|string',
+
             ]);
 
             if (empty($validated['program_id']) && !empty($validated['program_other'])) {
@@ -906,6 +912,10 @@ class RegistrationController extends Controller
                     'nik' => $validated['nik'],
                     'kitas' => $validated['kitas'],
                     'nisn' => $validated['nisn'],
+                    'va_mandiri' => $validated['va_mandiri'],
+                    'va_bca' => $validated['va_bca'],
+                    'va_bni' => $validated['va_bni'],
+                    'va_bri' => $validated['va_bri'],
                 ]);
 
                 $enrollment = $student->enrollments()->create([
@@ -1052,6 +1062,10 @@ class RegistrationController extends Controller
                         'status' => 'Not Graduate',
                         'nik' => $validated['nik'] ?? $oldStudent->nik,
                         'nisn' => $validated['nisn'] ?? $oldStudent->nisn,
+                        'va_mandiri' => $validated['va_mandiri'],
+                        'va_bca' => $validated['va_bca'],
+                        'va_bni' => $validated['va_bni'],
+                        'va_bri' => $validated['va_bri'],
                     ]);
 
                     $nextVersion = 1; 
