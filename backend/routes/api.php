@@ -72,6 +72,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
 
 Route::middleware(['auth:sanctum', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
     Route::get('/logbook', [LogbookController::class, 'index']);
+    Route::get('/logbook/export', [LogbookController::class, 'export']);
 });
 
 ?>
