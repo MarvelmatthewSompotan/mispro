@@ -1506,6 +1506,7 @@ class RegistrationController extends Controller
         }
 
         $dataSnapshot = [
+            'id' => $student->id,
             'student_id'     => $student->student_id,
             'studentall_id' => $student->studentall_id,
             'registration_id'=> $enrollment->registration_id,

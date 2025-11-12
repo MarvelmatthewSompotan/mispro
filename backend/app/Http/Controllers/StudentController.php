@@ -3,15 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Payment;
 use App\Models\Student;
 use App\Models\SchoolYear;
+use App\Models\StudentOld;
 use Illuminate\Http\Request;
+use App\Models\StudentDiscount;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
 use App\Models\ApplicationFormVersion;
-use App\Models\Payment;
-use App\Models\StudentOld;
 
 class StudentController extends Controller
 {
@@ -594,6 +595,7 @@ class StudentController extends Controller
                 'pickup_point_custom' => 'sometimes|nullable|string',
                 'residence_hall_policy'  => 'sometimes|required|string',
                 'transportation_policy'  => 'sometimes|required|string',
+                'program_id' => 'sometimes|nullable|exists:programs,program_id',
                 'major_id' => 'sometimes|required|exists:majors,major_id',
                 'class_id' => [
                     'sometimes', 
@@ -620,6 +622,8 @@ class StudentController extends Controller
                 'tuition_fees' => 'sometimes|required_with:tuition_fees|in:Full Payment,Installment',
                 'residence_payment' => 'sometimes|nullable|required_unless:residence_id,3|in:Full Payment,Installment',
                 'financial_policy_contract' => 'sometimes|required_with:financial_policy_contract|in:Signed,Not Signed',
+                'discount_name' => 'sometimes|nullable|exists:discount_types,discount_type_id',
+                'discount_notes' => 'sometimes|nullable|string',
             ]);
 
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
@@ -704,7 +708,8 @@ class StudentController extends Controller
 
             if ($request->hasAny([
                 'residence_id', 'transportation_id', 'pickup_point_id',
-                'pickup_point_custom', 'residence_hall_policy', 'transportation_policy', 'major_id', 'class_id'
+                'pickup_point_custom', 'residence_hall_policy', 'transportation_policy', 
+                'major_id', 'class_id', 'program_id'
             ])) {
 
                 $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
@@ -719,6 +724,7 @@ class StudentController extends Controller
                         'transportation_policy' => $request->transportation_policy ?? $latestEnrollment->transportation_policy,
                         'major_id'              => $request->major_id ?? $latestEnrollment->major_id,
                         'class_id'              => $request->class_id ?? $latestEnrollment->class_id,
+                        'program_id'              => $request->program_id ?? $latestEnrollment->program_id,
                     ]);
                 } else {
                     $student->enrollments()->create([
@@ -730,6 +736,7 @@ class StudentController extends Controller
                         'transportation_policy' => $request->transportation_policy,
                         'major_id'              => $request->major_id,
                         'class_id'              => $request->class_id,
+                        'program_id'          => $request->program_id, 
                     ]);
                 }
             }
@@ -761,6 +768,25 @@ class StudentController extends Controller
                 }
             }
 
+            if ($request->hasAny(['discount_name', 'discount_notes'])) {
+                $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
+                
+                if ($latestEnrollment) {
+                    $studentDiscount = StudentDiscount::firstOrNew(
+                        ['enrollment_id' => $latestEnrollment->enrollment_id]
+                    );
+                    
+                    if ($request->has('discount_name')) {
+                        $studentDiscount->discount_type_id = $validated['discount_name'];
+                    }
+                    if ($request->has('discount_notes')) {
+                        $studentDiscount->notes = $validated['discount_notes'];
+                    }
+                    
+                    $studentDiscount->save();
+                }
+            }
+
             $oldSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
             $oldRequestData = $oldSnapshot['request_data'] ?? [];
 
@@ -779,14 +805,21 @@ class StudentController extends Controller
             $latestEnrollment->refresh();
             $newRequestData['enrollment_status'] = $latestEnrollment->status;
 
-            $latestEnrollment->load('semester', 'schoolYear', 'payment'); 
+            $latestEnrollment->load('semester', 'schoolYear', 'payment', 'studentDiscount' ); 
             if ($latestEnrollment->payment) {
                 $newRequestData['tuition_fees'] = $latestEnrollment->payment->tuition_fees;
                 $newRequestData['residence_payment'] = $latestEnrollment->payment->residence_payment;
                 $newRequestData['financial_policy_contract'] = $latestEnrollment->payment->financial_policy_contract;
             }
+
+            if ($latestEnrollment->studentDiscount) {
+                $newRequestData['discount_name'] = $latestEnrollment->studentDiscount->discount_type_id;
+                $newRequestData['discount_notes'] = $latestEnrollment->studentDiscount->notes;
+            }
+
             $newRequestData['class_id'] = $latestEnrollment->class_id;
             $newRequestData['major_id'] = $latestEnrollment->major_id;
+            $newRequestData['program_id'] = $latestEnrollment->program_id;
 
             $newSnapshot = [
                 'id'             => $student->id,
