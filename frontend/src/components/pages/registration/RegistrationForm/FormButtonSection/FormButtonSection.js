@@ -16,7 +16,7 @@ const FormButtonSection = ({
   onSetAllowNavigation,
 }) => {
   const navigate = useNavigate();
-// eslint-disable-next-line
+  // eslint-disable-next-line
   const locationState = useLocation();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
@@ -29,7 +29,8 @@ const FormButtonSection = ({
     console.log("Data saat Submit:", JSON.stringify(allFormData, null, 2));
 
     const errors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex =
+      /^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
     const studentStatus = allFormData.studentStatus || {};
     if (!studentStatus.student_status) {
       errors.studentStatus = { ...errors.studentStatus, student_status: true };
@@ -324,11 +325,7 @@ const FormButtonSection = ({
 
     // Validasi Term of Payment Section
     let isDormitoryStudent = false;
-    if (
-      sharedData &&
-      sharedData.residence_halls &&
-      facilities.residence_id
-    ) {
+    if (sharedData && sharedData.residence_halls && facilities.residence_id) {
       const selectedResidence = sharedData.residence_halls.find(
         (r) => r.residence_id === facilities.residence_id
       );

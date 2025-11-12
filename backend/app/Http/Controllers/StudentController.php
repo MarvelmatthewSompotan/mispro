@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
 use App\Models\ApplicationFormVersion;
+use App\Models\Payment;
 use App\Models\StudentOld;
 
 class StudentController extends Controller
@@ -140,7 +141,7 @@ class StudentController extends Controller
         ];
         
         if (empty($sorts)) {
-            $query->orderBy('students.student_id', 'asc');
+            $query->orderBy('students.first_name', 'asc');
         } else {
             foreach ($sorts as $sort) {
                 $field = $sort['field'] ?? null;
@@ -500,68 +501,77 @@ class StudentController extends Controller
             $student = Student::with(['studentAddress', 'studentParent', 'studentGuardian', 'enrollments'])
                 ->findOrFail($id);
 
+            $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
+            
+            $currentSectionId = $latestEnrollment->section_id ?? null;
+
+            // Map: [section_id => [min_class_id, max_class_id]]
+            $classIdRanges = [
+                1 => [1, 3],   
+                2 => [4, 9],   
+                3 => [10, 12], 
+                4 => [13, 15],
+            ];
+
             $validated = $request->validate([
                 // Student
-                'first_name'   => 'sometimes|string',
+                'first_name'   => 'sometimes|required|string',
                 'middle_name'  => 'sometimes|nullable|string',
                 'last_name'    => 'sometimes|nullable|string',
-                'nickname'     => 'sometimes|nullable|string',
-                'citizenship' => 'sometimes|nullable',
+                'nickname'     => 'sometimes|required|string',
+                'citizenship' => 'sometimes|required|in:Indonesia,Non Indonesia',
                 'country' => 'sometimes|nullable',
-                'religion'     => 'sometimes|nullable|string',
-                'place_of_birth' => 'sometimes|nullable|string',
-                'date_of_birth' => 'sometimes|nullable|date',
-                'gender' => 'sometimes|nullable|string',
-                'family_rank' => 'sometimes|nullable|string',
-                'email'        => 'sometimes|nullable|email',
-                'phone_number' => 'sometimes|nullable|string|max:20',
+                'religion'     => 'sometimes|required|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Kristen Advent',
+                'place_of_birth' => 'sometimes|required|string',
+                'date_of_birth' => 'sometimes|required|date',
+                'gender' => 'sometimes|required|string',
+                'family_rank' => 'sometimes|required|string',
+                'email'        => 'sometimes|required|email',
+                'phone_number' => 'sometimes|required|string|max:20',
                 'previous_school' => 'sometimes|nullable|string',
-                'nisn' => 'sometimes|nullable|string',
-                'nik' => 'sometimes|nullable|integer',
-                'kitas' => 'sometimes|nullable|string',
-                'photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg|max:5048',
+                'nisn' => 'sometimes|required|string',
+                'nik' => 'sometimes|nullable|required_if:citizenship,Indonesia|integer',
+                'kitas' => 'sometimes|nullable|required_if:citizenship,Non Indonesia|string',                'photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg|max:5048',
                 'status' => 'sometimes|required|in:Not Graduate,Graduate,Expelled,Withdraw',
 
                 // Address
-                'street'       => 'sometimes|nullable|string',
+                'street'       => 'sometimes|required|string',
                 'rt' => 'sometimes|nullable|string',
                 'rw' => 'sometimes|nullable|string',
-                'village' => 'sometimes|nullable|string',
-                'district' => 'sometimes|nullable|string',
-                'city_regency' => 'sometimes|nullable|string',
-                'province'     => 'sometimes|nullable|string',
+                'village' => 'sometimes|required|string',
+                'district' => 'sometimes|required|string',
+                'city_regency' => 'sometimes|required|string',
+                'province'     => 'sometimes|required|string',
                 'other'     => 'sometimes|nullable|string',
 
                 // Parent
-                'father_name' => 'sometimes|nullable|string',
+                'father_name' => 'sometimes|required|string',
                 'father_company' => 'sometimes|nullable|string',
                 'father_occupation' => 'sometimes|nullable|string',
-                'father_phone' => 'sometimes|nullable|string',
-                'father_email' => 'sometimes|nullable|email',
-                'father_address_street' => 'sometimes|nullable|string',
+                'father_phone' => 'sometimes|required|string',
+                'father_email' => 'sometimes|required|email',
+                'father_address_street' => 'sometimes|required|string',
                 'father_address_rt' => 'sometimes|nullable|string',
                 'father_address_rw' => 'sometimes|nullable|string',
-                'father_address_village' => 'sometimes|nullable|string',
-                'father_address_district' => 'sometimes|nullable|string',
-                'father_address_city_regency' => 'sometimes|nullable|string',
-                'father_address_province' => 'sometimes|nullable|string',
+                'father_address_village' => 'sometimes|required|string',
+                'father_address_district' => 'sometimes|required|string',
+                'father_address_city_regency' => 'sometimes|required|string',
+                'father_address_province' => 'sometimes|required|string',
                 'father_address_other' => 'sometimes|nullable|string',
-                'father_company_addresses' => 'sometimes|nullable|string',
 
-                'mother_name' => 'sometimes|nullable|string',
+                'mother_name' => 'sometimes|required|string',
                 'mother_company' => 'sometimes|nullable|string',
                 'mother_occupation' => 'sometimes|nullable|string',
-                'mother_phone' => 'sometimes|nullable|string',
-                'mother_email' => 'sometimes|nullable|email', 
-                'mother_address_street' => 'sometimes|nullable|string',
+                'mother_phone' => 'sometimes|required|string',
+                'mother_email' => 'sometimes|required|email', 
+                'mother_address_street' => 'sometimes|required|string',
                 'mother_address_rt' => 'sometimes|nullable|string',
                 'mother_address_rw' => 'sometimes|nullable|string',
-                'mother_address_village' => 'sometimes|nullable|string',
-                'mother_address_district' => 'sometimes|nullable|string',
-                'mother_address_city_regency' => 'sometimes|nullable|string',
-                'mother_address_province' => 'sometimes|nullable|string',
+                'mother_address_village' => 'sometimes|required|string',
+                'mother_address_district' => 'sometimes|required|string',
+                'mother_address_city_regency' => 'sometimes|required|string',
+                'mother_address_province' => 'sometimes|required|string',
                 'mother_address_other' => 'sometimes|nullable|string',
-                'mother_company_addresses' => 'sometimes|nullable|string',
 
                 // Guardian
                 'guardian_name' => 'sometimes|nullable|string',
@@ -578,17 +588,42 @@ class StudentController extends Controller
                 'guardian_address_other' => 'sometimes|nullable|string',
 
                 // Enrollment
-                'residence_id' => 'sometimes|nullable|exists:residence_halls,residence_id',
+                'residence_id' => 'sometimes|required|exists:residence_halls,residence_id',
                 'transportation_id' => 'sometimes|nullable|exists:transportations,transport_id',
                 'pickup_point_id' => 'sometimes|nullable|exists:pickup_points,pickup_point_id',
                 'pickup_point_custom' => 'sometimes|nullable|string',
-                'residence_hall_policy'  => 'sometimes|nullable|string',
-                'transportation_policy'  => 'sometimes|nullable|string',
-                'major_id' => 'sometimes|nullable|exists:majors,major_id',
+                'residence_hall_policy'  => 'sometimes|required|string',
+                'transportation_policy'  => 'sometimes|required|string',
+                'major_id' => 'sometimes|required|exists:majors,major_id',
+                'class_id' => [
+                    'sometimes', 
+                    'required', 
+                    'exists:classes,class_id',
+                    function ($attribute, $value, $fail) use ($currentSectionId, $classIdRanges) {
+                        if (!$currentSectionId) {
+                            return $fail('Student does not have an active enrollment section to validate the class.');
+                        }
+
+                        if (!isset($classIdRanges[$currentSectionId])) {
+                            return $fail("Invalid section ID ($currentSectionId) configured for class validation.");
+                        }
+
+                        [$min, $max] = $classIdRanges[$currentSectionId];
+
+                        if ($value < $min || $value > $max) {
+                            $fail("The selected class is not valid for the current student's section (Section ID: {$currentSectionId}). Valid range is class ID {$min} to {$max}.");
+                        }
+                    }
+                ],
+
+                // Payment
+                'tuition_fees' => 'sometimes|required_with:tuition_fees|in:Full Payment,Installment',
+                'residence_payment' => 'sometimes|nullable|required_unless:residence_id,3|in:Full Payment,Installment',
+                'financial_policy_contract' => 'sometimes|required_with:financial_policy_contract|in:Signed,Not Signed',
             ]);
 
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
-            $student->update(array_filter($studentData, fn($v) => !is_null($v)));
+            $student->update($studentData);
             if (isset($validated['status'])) {
                 $inactiveStatuses = ['graduate', 'expelled', 'withdraw'];
                 $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
@@ -669,7 +704,7 @@ class StudentController extends Controller
 
             if ($request->hasAny([
                 'residence_id', 'transportation_id', 'pickup_point_id',
-                'pickup_point_custom', 'residence_hall_policy', 'transportation_policy'
+                'pickup_point_custom', 'residence_hall_policy', 'transportation_policy', 'major_id', 'class_id'
             ])) {
 
                 $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
@@ -683,6 +718,7 @@ class StudentController extends Controller
                         'residence_hall_policy' => $request->residence_hall_policy ?? $latestEnrollment->residence_hall_policy,
                         'transportation_policy' => $request->transportation_policy ?? $latestEnrollment->transportation_policy,
                         'major_id'              => $request->major_id ?? $latestEnrollment->major_id,
+                        'class_id'              => $request->class_id ?? $latestEnrollment->class_id,
                     ]);
                 } else {
                     $student->enrollments()->create([
@@ -692,10 +728,38 @@ class StudentController extends Controller
                         'pickup_point_custom'   => $request->pickup_point_custom,
                         'residence_hall_policy' => $request->residence_hall_policy,
                         'transportation_policy' => $request->transportation_policy,
+                        'major_id'              => $request->major_id,
+                        'class_id'              => $request->class_id,
                     ]);
                 }
             }
 
+            if ($request->hasAny(['tuition_fees', 'residence_payment', 'financial_policy_contract'])) {
+                $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
+                if ($latestEnrollment) {
+                    $payment = Payment::where('enrollment_id', $latestEnrollment->enrollment_id)->first();
+                    
+                    if ($payment) {
+                        $updateData = [];
+
+                        if ($request->has('tuition_fees')) {
+                            $updateData['tuition_fees'] = $request->tuition_fees;
+                        }
+
+                        if ($request->has('residence_payment')) {
+                            $updateData['residence_payment'] = $request->residence_payment;
+                        }
+
+                        if ($request->has('financial_policy_contract')) {
+                            $updateData['financial_policy_contract'] = $request->financial_policy_contract;
+                        }
+
+                        if (!empty($updateData)) {
+                            $payment->update($updateData);
+                        }
+                    }
+                }
+            }
 
             $oldSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
             $oldRequestData = $oldSnapshot['request_data'] ?? [];
@@ -715,7 +779,14 @@ class StudentController extends Controller
             $latestEnrollment->refresh();
             $newRequestData['enrollment_status'] = $latestEnrollment->status;
 
-            $latestEnrollment->load('semester', 'schoolYear'); 
+            $latestEnrollment->load('semester', 'schoolYear', 'payment'); 
+            if ($latestEnrollment->payment) {
+                $newRequestData['tuition_fees'] = $latestEnrollment->payment->tuition_fees;
+                $newRequestData['residence_payment'] = $latestEnrollment->payment->residence_payment;
+                $newRequestData['financial_policy_contract'] = $latestEnrollment->payment->financial_policy_contract;
+            }
+            $newRequestData['class_id'] = $latestEnrollment->class_id;
+            $newRequestData['major_id'] = $latestEnrollment->major_id;
 
             $newSnapshot = [
                 'id'             => $student->id,

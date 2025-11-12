@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\CancelledRegistration;
 use App\Events\ApplicationFormCreated;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
@@ -178,107 +179,305 @@ class RegistrationController extends Controller
         ], 200);
     }
 
-    public function updateStatus(Request $request, $application_id)
+    protected function isLatestVersion(int $id, int $current_version): bool
     {
-        $validator = \Validator::make($request->all(), [
-            'status' => 'required|in:Confirmed,Cancelled',
-            'reason' => 'required_if:status,Cancelled|in:Withdraw,Invalid',
-        ], [
-            'reason.required_if' => 'Field reason harus diisi jika status dibatalkan (Cancelled).',
-            'reason.in' => 'Reason hanya boleh berisi Withdraw atau Invalid.',
-        ]);
+        $latestVersion = Enrollment::where('id', $id)
+            ->max('version');
 
-        if ($validator->fails()) {
+        return $current_version === (int)$latestVersion;
+    }
+
+    public function handleCancelRegistration(Request $request, $application_id, string $reason_type) {
+        
+        if (empty($application_id) || !in_array($reason_type, ['invalidSection', 'cancellationOfEnrollment'])) {
             return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors(),
-            ], 422);
+                'success' => false, 
+                'message' => 'Invalid application ID or reason type.'
+            ], 400);
         }
 
         DB::beginTransaction();
 
         try {
-            $applicationForm = ApplicationForm::with(['enrollment.student', 'enrollment.schoolYear', 'enrollment.semester'])
-                ->findOrFail($application_id);
+            $applicationForm = ApplicationForm::with([
+                'versions',
+                'enrollment',
+                'enrollment.student',
+                'enrollment.student.studentParent', 
+                'enrollment.student.studentGuardian.guardian.guardianAddress', 
+                'enrollment.studentDiscount',
+            ])->where('application_id', $application_id)->first();
 
-            $oldStatus = $applicationForm->status;
-            $newStatus = $request->status;
-
-            $applicationForm->status = $newStatus;
-
-
-            if ($newStatus === 'Cancelled') {
-                if ($request->reason === 'Invalid') {
-                    $applicationForm->is_invalid_data = true;
-                } else {
-                    $applicationForm->is_invalid_data = false;
-                }
-            } else {
-                $applicationForm->is_invalid_data = false; 
+            if (!$applicationForm) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Application form not found.'
+                ], 404);
             }
 
-            $applicationForm->save();
-
-            $student = $applicationForm->enrollment?->student;
             $enrollment = $applicationForm->enrollment;
+            $student = $enrollment?->student;
 
-            if ($student && $enrollment) {
-                if ($newStatus === 'Cancelled') {
-                    if ($applicationForm->is_invalid_data) {
-                        $student->status = 'Not Graduate';
-                        $student->active = 'YES';
-                        $enrollment->status = 'INACTIVE';
-                    } else {
+            if (!$enrollment || !$student) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Enrollment or student not found.'
+                ], 404);
+            }
+
+            $studentStatus = strtolower($enrollment->student_status ?? '');
+            $enrollment_id = $enrollment->enrollment_id;
+            $current_version = (int)$enrollment->version;
+            $student_id_enrollment = (int)$enrollment->id;
+            $isLatest = $this->isLatestVersion($student_id_enrollment, $current_version);
+            $invalid = 'Invalid Section';
+            $cancellation = 'Cancellation of Enrollment';
+
+            if ($reason_type === 'invalidSection') {
+
+                if ($studentStatus === 'new' || $studentStatus === 'transferee') {
+
+                    $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
+                        $query->where('studentall_id', $student->studentall_id)
+                                ->where('enrollment_id', '!=', $enrollment_id);
+                    })->exists();
+
+                    if ($hasOtherApplication) {
+                        \Log::warning('Attempted to invalidaated NEW student registration with linked records', [
+                            'student_id' => $student->student_id,
+                            'studentall_id' => $student->studentall_id,
+                            'application_id' => $application_id,
+                            'enrollment_id' => $enrollment_id,
+                            'student_status' => $enrollment->student_status,
+                        ]);
+                        
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'This registration cannot be invalidated because it belongs to a NEW/TRANSFEREE student who has other registration data linked to this student.'
+                        ], 400);
+                    }
+
+                    // Save in cancelled registration table
+                    $this->saveToCancelledRegistration($student, $enrollment, $invalid);
+                    
+                    // Delete student and related data
+                    $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
+
+                    DB::commit();
+                    // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                    return response()->json([
+                        'success' => true, 
+                        'message' => 'Registration and related data deleted successfully (Invalid Section - NEW/TRANSFEREE).'
+                    ], 200);
+
+                } else if ($studentStatus === 'old') {
+
+                    $inOldDatabase = StudentOld::where('studentold_id', $student->student_id)->exists();
+                    if ($inOldDatabase) {
+                
+                        if ($current_version === 1 && $isLatest) {
+                            // Save in cancelled registration table
+                            $this->saveToCancelledRegistration($student, $enrollment, $invalid);
+                            
+                            // Delete student and related data
+                            $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
+
+                            DB::commit();
+                            // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                            return response()->json([
+                                'success' => true, 
+                                'message' => 'Registration and related data deleted successfully (Invalid Section - OLD, enrollment version = 1).'
+                            ], 200);
+                        } else if ($current_version > 1 && $isLatest) {                            
+                            // Delete student and related data
+                            $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
+
+                            DB::commit();
+                            // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                            return response()->json([
+                                'success' => true, 
+                                'message' => 'Registration and related data deleted successfully, except student data (Invalid Section - OLD, latest enrollment version).'
+                            ], 200);
+                        }
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false, 
+                            'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'
+                        ], 400);
+                    }
+
+                    if ($isLatest) {
+                        // Delete student and related data
+                        $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
+
+                        DB::commit();
+                        // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                        return response()->json([
+                            'success' => true, 
+                            'message' => 'Registration and related data deleted successfully, except student data (Invalid Section - OLD, latest enrollment version).'
+                        ], 200);
+                    }
+
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'
+                    ], 400);
+                }
+
+            } else if ($reason_type === 'cancellationOfEnrollment') {
+
+                if ($studentStatus === 'new' || $studentStatus === 'transferee') {
+                    
+                    $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
+                        $query->where('studentall_id', $student->studentall_id)
+                                ->where('enrollment_id', '!=', $enrollment_id);
+                    })->exists();
+
+                    if ($hasOtherApplication) {
+                        \Log::warning('Attempted to invalidaated NEW student registration with linked records', [
+                            'student_id' => $student->student_id,
+                            'studentall_id' => $student->studentall_id,
+                            'application_id' => $application_id,
+                            'enrollment_id' => $enrollment_id,
+                            'student_status' => $enrollment->student_status,
+                        ]);
+                        
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'This registration cannot be cancelled because it belongs to a NEW/TRANSFEREE student who has other registration data linked to this student.'
+                        ], 400);
+                    }
+
+                    // Save in cancelled registration table
+                    $this->saveToCancelledRegistration($student, $enrollment, $cancellation);
+                    
+                    // Delete student and related data
+                    $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
+
+                    DB::commit();
+                    // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                    return response()->json([
+                        'success' => true, 
+                        'message' => 'Registration and related data deleted successfully (Cancellation of Enrollment - NEW/TRANSFEREE).'
+                    ], 200);
+                } else if ($studentStatus === 'old') {
+                    
+                    if ($isLatest) {                            
                         $student->status = 'Withdraw';
                         $student->active = 'NO';
+                        $applicationForm->status = 'Cancelled';
                         $enrollment->status = 'INACTIVE';
-                    }
-                } elseif ($request->status === 'Confirmed') {
-                    $student->status = 'Not Graduate';
-                    $student->active = 'YES';
+                        $student->save();
+                        $applicationForm->save();
+                        $enrollment->save();
+                        
+                        DB::commit();
+                        // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
 
-                    $currentMonth = now()->month;
-                    $currentYear = now()->year;
-                    $schoolYearStr = ($currentMonth >= 7) 
-                        ? $currentYear . '/' . ($currentYear + 1)
-                        : ($currentYear - 1) . '/' . $currentYear;
-                    
-                    $currentSchoolYearId = SchoolYear::where('year', $schoolYearStr)->value('school_year_id'); 
+                        return response()->json([
+                            'success' => true, 
+                            'message' => 'Registration status updated successfully (Cancellation of Enrollment - Old, latest enrollment version).'
+                        ], 200);
+                    }
+
+                    DB::rollBack();
+                    // event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
     
-                    if ($currentSchoolYearId && $enrollment->school_year_id === $currentSchoolYearId) {
-                        $enrollment->status = 'ACTIVE';
-                    } else {
-                        $enrollment->status = 'INACTIVE';
-                    }
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'OLD student registration could not be cancelled  (Old, not latest enrollment version).'
+                    ], 200);
                 }
-
-                $student->save(); 
-                $enrollment->save();
+                
+                DB::rollBack();
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Invalid student status for cancellation.'
+                ], 400);
             }
 
-            DB::commit();
-            \Log::info('Triggering ApplicationFormStatusUpdated event', [
-                'application_id' => $application_id,
-                'old_status' => $oldStatus,
-                'new_status' => $newStatus,
-                'reason' => $request->reason,
-                'is_invalid_data' => $applicationForm->is_invalid_data,
-            ]);
-            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Status updated successfully',
-                'data' => $applicationForm
-            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
 
+            \Log::error('Failed to cancel registration', [
+                'error' => $e->getMessage(),
+                'application_form_id' => $application_id,
+                'reason_type' => $reason_type
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update status: ' . $e->getMessage()
+                'message' => 'Failed to cancel registration data.',
+                'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    private function saveToCancelledRegistration($student, $enrollment, $reason)
+    {
+        CancelledRegistration::create([
+            'student_id' => $student->studentall_id,
+            'full_name' => trim("{$student->first_name} {$student->middle_name} {$student->last_name}"),
+            'registration_id' => $enrollment->registration_id,
+            'school_year_id' => $enrollment->school_year_id,
+            'section_id' => $enrollment->section_id,
+            'registration_date' => $enrollment->registration_date,
+            'cancelled_by' => auth()->user()->username ?? 'anonymous', 
+            'cancelled_at' => now(),
+            'is_use_student_id' => false,
+            'reason' => $reason,
+        ]);
+    }
+
+    private function deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, bool $isAllData)
+    {
+        // Hapus versi formulir
+        $applicationForm->versions()->delete();
+        
+        // Hapus discount
+        $enrollment->studentDiscount()?->delete();
+        
+        // Hapus pembayaran yang terkait dengan pendaftaran ini
+        $student->payments()->where('enrollment_id', $enrollment_id)->delete();
+        
+        // Hapus data parent yang terkait enrollment ini
+        $student->studentParent()->where('enrollment_id', $enrollment_id)->delete();
+        
+        // Hapus alamat orang tua
+        FatherAddress::where('enrollment_id', $enrollment_id)->delete();
+        MotherAddress::where('enrollment_id', $enrollment_id)->delete();
+        
+        // === HAPUS STUDENT GUARDIAN DAN ALAMATNYA ===
+        $studentGuardians = $student->studentGuardian()->where('enrollment_id', $enrollment_id)->get();
+        foreach ($studentGuardians as $studentGuardian) {
+            $guardian = $studentGuardian->guardian;
+            if ($guardian) {
+                $isGuardianUsedByOthers = StudentGuardian::where('guardian_id', $guardian->guardian_id)
+                    ->where('enrollment_id', '!=', $enrollment_id)
+                    ->exists();
+                if (!$isGuardianUsedByOthers) {
+                    $guardian->guardianAddress()?->delete();
+                    $guardian->delete();
+                }
+            }
+            $studentGuardian->delete();
+        }
+        StudentAddress::where('enrollment_id', $enrollment_id)->delete();
+        
+        // Hapus data utama
+        $enrollment->delete();
+        $applicationForm->delete();
+
+        if ($isAllData) {
+            $student->delete();
         }
     }
 
@@ -353,6 +552,25 @@ class RegistrationController extends Controller
 
     private function generateStudentId($schoolYearId, $sectionId)
     {
+        $cancelledRegistration = CancelledRegistration::where('school_year_id', $schoolYearId)
+            ->where('section_id', $sectionId)
+            ->where('is_use_student_id', false)
+            ->orderBy('student_id') 
+            ->lockForUpdate() 
+            ->first();
+
+        if ($cancelledRegistration) {
+            $studentIdToUse = $cancelledRegistration->student_id;
+
+            $cancelledRegistration->is_use_student_id = true;
+            $cancelledRegistration->updated_at = now(); 
+            $cancelledRegistration->save();
+
+            \Log::info("Reusing cancelled/invalid student ID: {$studentIdToUse} for school_year_id: {$schoolYearId} and section_id: {$sectionId}");
+            
+            return $studentIdToUse;
+        }
+
         $schoolYear = SchoolYear::findOrFail($schoolYearId);
         $startYear = explode('/', $schoolYear->year)[0]; 
         $yearCode = substr($startYear, -2);              
@@ -381,20 +599,28 @@ class RegistrationController extends Controller
         $month = $date->month;
         $year = $date->year;
 
-        $count = DB::transaction(function () use ($section_id, $month, $year) {
-            return DB::table('students')
-                ->join('enrollments', 'students.id', '=', 'enrollments.id')
-                ->join('classes', 'enrollments.class_id', '=', 'classes.class_id')
-                ->where('enrollments.section_id', $section_id)
-                ->whereMonth('students.registration_date', $month)
-                ->whereYear('students.registration_date', $year)
-                ->lockForUpdate()
-                ->count();
+        $nextNumber  = DB::transaction(function () use ($section_id, $month, $year) {
+            $lastRegistration = DB::table('enrollments')
+                ->where('section_id', $section_id)
+                ->whereMonth('registration_date', $month)
+                ->whereYear('registration_date', $year)
+                ->lockForUpdate() 
+                ->orderBy('registration_id', 'desc')
+                ->first(['registration_id']);
+
+            $highestNumber = 0;
+
+            if ($lastRegistration) {
+                $parts = explode('/', $lastRegistration->registration_id);
+                $currentNumber = (int) $parts[0]; 
+
+                $highestNumber = $currentNumber;
+            }
+
+            return $highestNumber + 1;
         });
 
-        $number = ($count % 999) + 1;
-
-        return str_pad($number, 3, '0', STR_PAD_LEFT);
+        return str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
     private function formatRegistrationId($number, $section_id, $registration_date)
@@ -592,6 +818,8 @@ class RegistrationController extends Controller
             $status = $validated['student_status'];
             $student = null;
             
+            $nextVersion = 1;
+
             // check current school year
             $currentMonth = now()->month;
             $currentYear = now()->year;
@@ -612,35 +840,38 @@ class RegistrationController extends Controller
 
             if ($status === 'New' || $status === 'Transferee') {
                 // Check existing student
-                $possibleStudents = Student::where(function($query) use ($validated) {
-                    $query->where('first_name', $validated['first_name'])
+                $studentExists  = Student::where(function($query) use ($validated) {
+                    $query->where(function($q) use ($validated) {
+                        // 1. Kriteria Nama/TTL
+                        $q->where('first_name', $validated['first_name'])
                         ->where('last_name', $validated['last_name'])
                         ->where('date_of_birth', $validated['date_of_birth'])
                         ->where('place_of_birth', $validated['place_of_birth']);
+                    })
+                    ->orWhere(function($q) use ($validated) {
+                            // 2. Kriteria NIK
+                            if (!empty($validated['nik'])) {
+                                $q->where('nik', $validated['nik']);
+                            }
+                    })
+                    ->orWhere(function($q) use ($validated) {
+                        // 3. Kriteria KITAS
+                        if (!empty($validated['kitas'])) {
+                            $q->where('kitas', $validated['kitas']);
+                        }
+                    });
                 })
-                ->orWhere(function($query) use ($validated) {
-                    if (!empty($validated['nik'])) {
-                        $query->where('nik', $validated['nik']);
-                    }
-                })
-                ->orWhere(function($query) use ($validated) {
-                    if (!empty($validated['kitas'])) {
-                        $query->where('kitas', $validated['kitas']);
-                    }
-                })
-                ->with(['enrollments' => function ($query) use ($validated) {
+                ->whereHas('enrollments', function ($query) use ($validated) {
                     $query->where('section_id', $validated['section_id']);
-                }])
-                ->get();
+                })
+                ->exists(); 
                 
-                foreach ($possibleStudents as $stud) {
-                    if ($stud->enrollments->isNotEmpty()) {
-                        return response()->json([
-                            'success' => false,
-                            'error' => 'Student already exists in this section (any semester), please select Old status'
-                        ], 422);
-                    }
-                }    
+                if ($studentExists) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Student already exists in this section (any semester), please select Old status'
+                    ], 422);
+                }
                 
                 // Generate new student ID
                 $generatedId = $this->generateStudentId(
@@ -680,6 +911,7 @@ class RegistrationController extends Controller
                 $enrollment = $student->enrollments()->create([
                     'registration_date' => $draft->registration_date_draft,
                     'registration_id' => $registrationId,
+                    'version' => $nextVersion,
                     'class_id' => $schoolClass->class_id,
                     'section_id' => $section->section_id,
                     'major_id' => $major->major_id,
@@ -737,9 +969,16 @@ class RegistrationController extends Controller
                         ], 422);
                     }
 
+                    $latestEnrollment = $student->enrollments()
+                        ->orderBy('version', 'desc')
+                        ->first();
+
+                    $nextVersion = ($latestEnrollment ? $latestEnrollment->version : 0) + 1;
+
                     $enrollment = $student->enrollments()->create([
                         'registration_date' => $draft->registration_date_draft,
                         'registration_id' => $registrationId,
+                        'version' => $nextVersion,
                         'class_id' => $schoolClass->class_id,
                         'section_id' => $section->section_id,
                         'major_id' => $major->major_id,
@@ -815,9 +1054,12 @@ class RegistrationController extends Controller
                         'nisn' => $validated['nisn'] ?? $oldStudent->nisn,
                     ]);
 
+                    $nextVersion = 1; 
+
                     $enrollment = $student->enrollments()->create([
                         'registration_date' => $draft->registration_date_draft,
                         'registration_id' => $registrationId,
+                        'version' => $nextVersion,
                         'class_id' => $schoolClass->class_id,
                         'section_id' => $section->section_id,
                         'major_id' => $major->major_id,
@@ -862,7 +1104,6 @@ class RegistrationController extends Controller
                     'registration_id' => $registrationId,
                     'application_id' => $applicationForm->application_id,
                     'version' => $applicationFormVersion->version_id,
-                    'registration_number' =>$enrollment->enrollment_id
                 ],
             ], 200);
             
@@ -1234,6 +1475,20 @@ class RegistrationController extends Controller
         $oldSnapshot = $latestVersion ? json_decode($latestVersion->data_snapshot, true) : [];
         $oldRequestData = $oldSnapshot['request_data'] ?? [];
 
+        $maxRegistrationSnapshot = ApplicationFormVersion::select('data_snapshot')
+            ->orderByDesc('application_id') 
+            ->lockForUpdate() 
+            ->first();
+
+        $highestRegistrationNumber = 0;
+
+        if ($maxRegistrationSnapshot) {
+            $snapshot = json_decode($maxRegistrationSnapshot->data_snapshot, true);
+            $highestRegistrationNumber = (int) ($snapshot['registration_number'] ?? 0);
+        }
+    
+        $registrationNumber = $highestRegistrationNumber + 1;
+
         $newRequestData = array_merge($oldRequestData, $validated, [
             'student_active' => $student->active,          
             'status' => $student->status,
@@ -1255,7 +1510,7 @@ class RegistrationController extends Controller
             'studentall_id' => $student->studentall_id,
             'registration_id'=> $enrollment->registration_id,
             'enrollment_id'  => $enrollment->enrollment_id,
-            'registration_number' => $enrollment->enrollment_id,
+            'registration_number' => $registrationNumber,
             'registration_date'   => $enrollment->registration_date,
             'application_id' => $applicationForm->application_id,
             'semester'       => $enrollment->semester->number, 

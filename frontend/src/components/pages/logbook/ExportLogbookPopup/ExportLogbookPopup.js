@@ -212,9 +212,9 @@ const ExportLogbookPopup = ({
 
             const imgData = data.cell.raw;
 
-            if (imgData) {
-              data.cell.text = [];
+            data.cell.text = [];
 
+            if (imgData) {
               const aspectRatio = 59.97 / 81;
               let imgHeight = cellHeight - 1;
               let imgWidth = imgHeight * aspectRatio;

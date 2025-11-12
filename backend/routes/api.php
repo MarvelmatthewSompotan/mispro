@@ -11,8 +11,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\StorageController;
 
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/storage-file/{path}', [StorageController::class, 'serveFile'])
+    ->where('path', '.*') 
+    ->middleware('cors');
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
@@ -61,7 +66,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/context/{draft_id}', [RegistrationController::class, 'getRegistrationContext']);
     Route::post('/store/{draft_id}', [RegistrationController::class, 'store']);
     Route::get('/preview/{applicationId}/version/{versionId}', [RegistrationController::class, 'showPreview']);
-    Route::patch('/{application_id}/status', [RegistrationController::class, 'updateStatus']);
+    Route::post('/{application_id}/cancel/{reason_type}', [RegistrationController::class, 'handleCancelRegistration']);
   });
 });
 
