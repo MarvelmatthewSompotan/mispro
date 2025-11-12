@@ -166,6 +166,8 @@ const ExportLogbookPopup = ({
         .padStart(2, '0')}`;
       doc.text(createdDate, margin, 22);
 
+      const drawnCells = new Set();
+
       // 6. Panggil autoTable
       autoTable(doc, {
         head: [tableHeaders],
@@ -173,7 +175,7 @@ const ExportLogbookPopup = ({
         startY: 28,
         margin: { left: margin, right: margin },
         theme: 'grid',
-        rowPageBreak: 'avoid',
+        rowPageBreak: 'auto',
         styles: {
           font: 'helvetica',
           fontSize: 4,
@@ -201,6 +203,16 @@ const ExportLogbookPopup = ({
           },
         },
 
+        willDrawCell: (data) => {
+          if (
+            photoColIndex !== -1 &&
+            data.column.index === photoColIndex &&
+            data.cell.section === 'body'
+          ) {
+            data.cell.text = []; // kosongkan sebelum digambar
+          }
+        },
+
         didDrawCell: (data) => {
           if (
             photoColIndex !== -1 &&
@@ -212,9 +224,11 @@ const ExportLogbookPopup = ({
 
             const imgData = data.cell.raw;
 
-            data.cell.text = [];
-
             if (imgData) {
+              const cellId = `${data.row.index}-${data.column.index}`;
+              if (drawnCells.has(cellId)) return;
+              drawnCells.add(cellId);
+
               const aspectRatio = 59.97 / 81;
               let imgHeight = cellHeight - 1;
               let imgWidth = imgHeight * aspectRatio;
@@ -239,7 +253,6 @@ const ExportLogbookPopup = ({
                 );
               }
             } else {
-              data.cell.text = [];
               // --- FIX: Variabel sekarang terdefinisi ---
               doc.text(
                 '-',
@@ -252,7 +265,10 @@ const ExportLogbookPopup = ({
 
           // Logika nomor halaman
           const pageCount = doc.internal.getNumberOfPages();
-          if (pageCount > 1) {
+          if (
+            data.row.index === data.table.body.length - 1 &&
+            data.pageNumber
+          ) {
             doc.setFontSize(8);
             doc.text(
               `Page ${data.pageNumber} of ${pageCount}`,
