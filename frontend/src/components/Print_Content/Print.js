@@ -230,7 +230,7 @@ function Print() {
   const isDormitorySelected = (() => {
     const resId = previewData?.request_data?.residence_id;
     if (!resId || !residenceHallOptions?.length) return false;
-    const item = residenceHallOptions.find((r) => r.residence_id === resId);
+    const item = residenceHallOptions.find((r) => String(r.residence_id) === String(resId));
     const label = (item?.type || item?.name || "").toLowerCase().trim();
     const hasNon = /\bnon\b/.test(label) || label.includes("non-res");
     const isDorm =

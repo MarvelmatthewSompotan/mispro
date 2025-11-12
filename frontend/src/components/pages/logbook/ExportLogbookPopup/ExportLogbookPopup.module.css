@@ -161,7 +161,7 @@
 }
 
 .downloadButton:hover {
-  background-color: var(--main-accent-hover);
+  background-color: var(--main-accent-hoverstate);
 }
 
 /* Responsive design */
@@ -194,4 +194,3 @@
     padding: 14px 22px;
   }
 }
-
