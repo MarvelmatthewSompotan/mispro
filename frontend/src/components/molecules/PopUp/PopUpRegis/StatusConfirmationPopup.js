@@ -5,14 +5,15 @@ import { updateRegistrationStatus } from '../../../../services/api';
 import Button from '../../../atoms/Button';
 
 const reasonOptions = [
-  { label: 'Withdraw', value: 'Withdraw' },
-  { label: 'Invalid Data', value: 'Invalid' },
+  { label: 'Cancellation of Enrollment (Withdraw)', value: 'Withdraw' },
+  { label: 'Invalid Section/Data', value: 'Invalid' },
 ];
 
 const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectedReason, setSelectedReason] = useState('');
   const [reasonError, setReasonError] = useState('');
+  const [apiError, setApiError] = useState('');
 
   if (!registration) return null;
 
@@ -22,18 +23,34 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   const applicationId = registration.application_id;
 
   const isConfirmed = currentStatus.toLowerCase() === 'confirmed';
+  const isCancelled = currentStatus.toLowerCase() === 'cancelled';
 
   const displayStatusFrom =
     currentStatus.charAt(0).toUpperCase() +
     currentStatus.slice(1).toLowerCase();
 
-  const targetStatusAPI = isConfirmed ? 'Cancelled' : 'Confirmed';
+  let targetStatusAPI;
+  if (isCancelled) {
+    targetStatusAPI = 'Cancelled';
+  } else if (isConfirmed) {
+    targetStatusAPI = 'Cancelled';
+  } else {
+    targetStatusAPI = 'Confirmed';
+  }
+
+  const isActionDisabled = isCancelled;
 
   const showReasonField = targetStatusAPI === 'Cancelled';
 
   const handleUpdate = async () => {
     if (!applicationId) {
       console.error('Application ID is missing. Cannot update status.');
+      setApiError('Application ID is missing. Cannot update status.');
+      return;
+    }
+
+    if (isActionDisabled) {
+      console.warn('Action disabled: Cannot change status from Cancelled.');
       return;
     }
 
@@ -46,7 +63,12 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
       reasonPayload = selectedReason;
     }
 
+    if (targetStatusAPI === 'Confirmed') {
+      reasonPayload = undefined;
+    }
+
     setReasonError('');
+    setApiError('');
 
     console.log('Application ID:', applicationId);
     console.log('Target Status (API Payload - Capitalized):', targetStatusAPI);
@@ -72,6 +94,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
       }
 
       console.error(`Failed to update status: ${errorMessage}`);
+      setApiError(errorMessage);
     } finally {
       setIsUpdating(false);
     }
@@ -82,7 +105,14 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
     if (reasonError) {
       setReasonError('');
     }
+
+    if (apiError) {
+      setApiError('');
+    }
   };
+
+  const isButtonDisabled =
+    isUpdating || isActionDisabled || (showReasonField && !selectedReason);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -92,9 +122,16 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
           <img src={WarningSign} alt='Warning' className={styles.icon} />
           <h2 className={styles.title}>Confirm Update Registration Status</h2>
           <p className={styles.message}>
-            Please double-check to make sure that all the information you've
-            entered is correct. Once submitted, changes may not be possible.
+            {isCancelled
+              ? 'This registration is currently CANCELLED and cannot be reverted.'
+              : "Please double-check to make sure that all the information you've entered is correct. Once submitted, changes may not be possible."}
           </p>
+
+          {apiError && (
+            <div className={styles.apiErrorContainer}>
+              <p className={styles.apiErrorText}>{apiError}</p>
+            </div>
+          )}
         </div>
 
         {/* Task 2: Container "before" */}
@@ -138,10 +175,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
               <span
                 className={styles.infoValue}
                 style={{ color: isConfirmed ? '#FF7B00' : '#EE0808' }}
-              >
-              </span>
-
-              
+              ></span>
             </div>
           </div>
         </div>
@@ -246,7 +280,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
             <Button
               className={styles.bAddSubject}
               onClick={handleUpdate}
-              disabled={isUpdating}
+              disabled={isButtonDisabled}
               variant='outline'
             >
               {isUpdating

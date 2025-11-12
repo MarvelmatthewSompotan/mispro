@@ -135,19 +135,27 @@ export const submitRegistrationForm = (draftId, formData) => {
   });
 };
 
-export const updateRegistrationStatus = (applicationId, newStatus, reason) => {
-  const payload = {
-    status: newStatus, // Menggunakan key 'status' (wajib)
-  };
-  if (reason !== undefined && reason !== null) {
-    // Jika reason adalah string kosong '', dia tetap terkirim,
-    // tapi StatusConfirmationPopup.js yang diperbaiki di bawah akan mencegah ini.
-    payload.reason = reason;
+export const updateRegistrationStatus = (
+  applicationId,
+  targetStatus,
+  reason
+) => {
+  if (targetStatus === 'Cancelled' && reason) {
+    let reasonType;
+    if (reason === 'Withdraw') {
+      reasonType = 'cancellationOfEnrollment';
+    } else if (reason === 'Invalid') {
+      reasonType = 'invalidSection';
+    } else {
+      throw new Error('Invalid cancellation reason selected.');
+    }
+    return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
+      method: 'POST',
+    });
   }
-  return apiFetch(`/registration/${applicationId}/status`, {
-    method: 'PATCH',
-    body: JSON.stringify(payload), // MENGGUNAKAN PAYLOAD YANG SUDAH DIBUAT
-  });
+
+  // Handle case lain (misalnya reason tidak terkirim saat cancel)
+  throw new Error('Cannot determine API endpoint or missing required data.');
 };
 
 export const searchStudent = (searchTerm) => {
