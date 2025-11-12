@@ -639,8 +639,6 @@ const Logbook = () => {
           </div>
         )}
       </div>{" "}
-      {/* .logbookContainer */}
-      {/* Export Logbook Popup (Tetap Sama) */}
       <ExportLogbookPopup
         isOpen={isExportPopupOpen}
         onClose={handleCloseExportPopup}

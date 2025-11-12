@@ -42,7 +42,7 @@
   outline: none;
   background: transparent;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: var(--font-weight-regular);
   display: flex;
   align-items: center;
 }
@@ -123,8 +123,8 @@
   white-space: normal;
   word-break: break-word;
   font-size: 14px;
-  color: #333;
-  font-weight: 500;
+  color: var(--main-text);
+  font-weight: var(--font-weight-regular);
 }
 
 .photo {
@@ -145,7 +145,7 @@
 .statusText {
   position: relative;
   line-height: 100%;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .active {
@@ -188,7 +188,7 @@
 .autoGraduate {
   position: relative;
   text-decoration: underline;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 .infoIcon {
   height: 24px;

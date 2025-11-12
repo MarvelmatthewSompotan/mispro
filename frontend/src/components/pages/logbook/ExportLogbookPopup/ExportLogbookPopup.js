@@ -108,19 +108,19 @@ const ExportLogbookPopup = ({
       const tableHeaders = ["No.", ...columnsForPDFTable];
       const photoColIndex = tableHeaders.indexOf("Photo");
 
-      // 3. Load semua gambar
+      // 3. Load semua gambar (Ini tetap sama)
       const loadedImages = await Promise.all(
         logbookData.map((student) =>
           loadImage(student[HEADER_KEY_MAP["Photo"]])
         )
       );
 
-      // 4. Siapkan Data Tabel
+      // 4. Siapkan Data Tabel (Ini tetap sama, 'null' untuk foto)
       const tableData = logbookData.map((student, index) => {
         const row = [index + 1];
         columnsForPDFTable.forEach((column) => {
           if (column === "Photo") {
-            row.push(loadedImages[index]);
+            row.push(null);
           } else {
             const dataKey = HEADER_KEY_MAP[column];
             const cellData =
@@ -166,6 +166,20 @@ const ExportLogbookPopup = ({
         .padStart(2, "0")}`;
       doc.text(createdDate, margin, 22);
 
+      // --- PERBAIKAN: Tentukan Semua Ukuran di Sini ---
+
+      // 1. UBAH ANGKA INI UNTUK MENGUBAH UKURAN GAMBAR
+      const fixedImgHeight = 12; // (Sebelumnya 5, sekarang 15mm)
+
+      // 2. Definisikan aspect ratio & padding
+      const aspectRatio = 59.97 / 81;
+      const globalCellPadding = 2.5; // Sesuai 'styles.cellPadding'
+
+      // 3. Hitung ukuran sel foto secara otomatis
+      const fixedImgWidth = fixedImgHeight * aspectRatio; // Lebar gambar
+      const photoCellWidth = fixedImgWidth + globalCellPadding * 2; // Lebar sel = lebar gambar + padding kiri/kanan
+      const photoCellHeight = fixedImgHeight + globalCellPadding * 2; // Tinggi sel = tinggi gambar + padding atas/bawah
+
       // 6. Panggil autoTable
       autoTable(doc, {
         head: [tableHeaders],
@@ -173,11 +187,11 @@ const ExportLogbookPopup = ({
         startY: 28,
         margin: { left: margin, right: margin },
         theme: "grid",
-        rowPageBreak: "avoid",
+        rowPageBreak: "auto",
         styles: {
           font: "helvetica",
           fontSize: 4,
-          cellPadding: 2.0,
+          cellPadding: globalCellPadding, // Gunakan variabel
           textColor: globalColors.mainText,
           lineColor: globalColors.mainGrey,
           lineWidth: 0.2,
@@ -196,9 +210,21 @@ const ExportLogbookPopup = ({
         },
         columnStyles: {
           [photoColIndex]: {
-            cellWidth: 10,
+            // Gunakan nilai yang sudah dihitung otomatis
+            cellWidth: photoCellWidth,
+            minCellHeight: photoCellHeight,
             halign: "center",
           },
+        },
+
+        willDrawCell: (data) => {
+          if (
+            photoColIndex !== -1 &&
+            data.column.index === photoColIndex &&
+            data.cell.section === "body"
+          ) {
+            data.cell.text = []; // Tetap kosongkan teks
+          }
         },
 
         didDrawCell: (data) => {
@@ -207,25 +233,17 @@ const ExportLogbookPopup = ({
             data.column.index === photoColIndex &&
             data.cell.section === "body"
           ) {
-
-            data.cell.text = [''];
             const cellHeight = data.cell.height;
             const cellWidth = data.cell.width;
-
-            const imgData = data.cell.raw;
-
-            
+            const imgData = loadedImages[data.row.index];
 
             if (imgData) {
-              const aspectRatio = 59.97 / 81;
-              let imgHeight = cellHeight - 1;
-              let imgWidth = imgHeight * aspectRatio;
+              // Gunakan 'fixedImgHeight' dan 'fixedImgWidth'
+              // yang kita definisikan di atas
+              const imgHeight = fixedImgHeight;
+              const imgWidth = fixedImgWidth;
 
-              if (imgWidth > cellWidth - 1) {
-                imgWidth = cellWidth - 1;
-                imgHeight = imgWidth / aspectRatio;
-              }
-
+              // Center gambar di dalam sel
               const x = data.cell.x + (cellWidth - imgWidth) / 2;
               const y = data.cell.y + (cellHeight - imgHeight) / 2;
 
@@ -241,8 +259,7 @@ const ExportLogbookPopup = ({
                 );
               }
             } else {
-              data.cell.text = [];
-              // --- FIX: Variabel sekarang terdefinisi ---
+              // Gambar placeholder jika tidak ada imgData
               doc.text(
                 "-",
                 data.cell.x + cellWidth / 2,
@@ -251,20 +268,23 @@ const ExportLogbookPopup = ({
               );
             }
           }
-
-          // Logika nomor halaman
-          const pageCount = doc.internal.getNumberOfPages();
-          if (pageCount > 1) {
-            doc.setFontSize(8);
-            doc.text(
-              `Page ${data.pageNumber} of ${pageCount}`,
-              doc.internal.pageSize.width - margin,
-              doc.internal.pageSize.height - 5,
-              { align: "right" }
-            );
-          }
         },
       });
+
+      // --- Logika Nomor Halaman (Tetap sama, sudah benar) ---
+      const pageCount = doc.internal.getNumberOfPages();
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.text(
+          `Page ${i} of ${pageCount}`,
+          doc.internal.pageSize.width - margin,
+          doc.internal.pageSize.height - 5,
+          { align: "right" }
+        );
+      }
+      // -----------------------------------------------------
 
       // 7. Simpan PDF
       const fileName = `Student_Logbook_${
@@ -285,7 +305,6 @@ const ExportLogbookPopup = ({
   ]); // Dependensi hook
 
   if (!isOpen) return null;
-  // ----------------------------------------
 
   return (
     <div className={styles.overlay}>

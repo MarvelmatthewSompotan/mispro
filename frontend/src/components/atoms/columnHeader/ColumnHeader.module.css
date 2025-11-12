@@ -14,10 +14,9 @@
   font-family: var(--font-primary);
 }
 
-/* Tambahkan ini ke ColumnHeader.module.css */
 .popupDateRange {
   right: auto;
-  left: 0; /* Mulai dari tepi kiri kolom (ColumnHeader) */
+  left: 0;
 }
 
 .columnName {

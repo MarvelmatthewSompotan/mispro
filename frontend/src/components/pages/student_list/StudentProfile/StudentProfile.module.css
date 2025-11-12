@@ -1,5 +1,3 @@
-
-/* --- Kontainer Informasi Kanan --- */
 .infoContainer {
   flex: 1;
   overflow: hidden;
@@ -29,16 +27,16 @@
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  font-family: "Poppins", sans-serif;
-  font-weight: reguler;
-  color: #000;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-regular);
+  color: var(--main-text);
 }
 
 /* --- Style Baru untuk Header Editing --- */
 .sectionHeaderEditing {
-  background-color: #e4eefa !important; /* Warna biru */
-  border-left-color: #8dc1ff !important; /* Warna border kiri yang lebih gelap */
-  color: #000000 !important; /* Warna teks putih */
+  background-color: #e4eefa !important;
+  border-left-color: #8dc1ff !important;
+  color: var(--main-text) !important;
 }
 
 .sectionContent {
@@ -50,7 +48,7 @@
   gap: 12px;
   font-size: 16px;
   padding: 6px 12px;
-  background-color: #fff;
+  background-color: var(--secondary-background);
 }
 /* --- Style Field Informasi (Label & Value) --- */
 .row {
@@ -63,13 +61,13 @@
 }
 .field {
   flex: 1;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
   height: 80px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: space-between; /* <--- UBAH MENJADI INI */
+  justify-content: space-between;
   padding: 12px;
   gap: 10px;
   position: relative;
@@ -81,17 +79,17 @@
 }
 
 .fieldLabel {
-  color: #000;
+  color: var(--main-text);
   line-height: 100%;
 }
 .fieldValue {
   align-self: stretch;
   position: relative;
-  color: #000;
-  font-weight: bold;
-  line-height: normal; /* Samakan line-height dengan .formInput */
-  display: block; /* Pastikan elemen mengambil ruang vertikal dengan benar */
-  min-height: 20px; /* Beri tinggi minimum agar sejajar bahkan saat kosong */
+  color: var(--main-text);
+  font-weight: var(--font-weight-bold);
+  line-height: normal;
+  display: block;
+  min-height: 20px;
   white-space: normal !important;
   word-break: break-word;
   overflow-wrap: break-word;
@@ -127,7 +125,7 @@
   gap: 3px;
   width: 100%;
   padding: 12px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--main-text);
   min-height: 66px;
   box-sizing: border-box;
 }
@@ -147,7 +145,7 @@
 /* --- Style Pilihan (Program, Fasilitas, dll) --- */
 .optionsRow {
   align-self: stretch;
-  background-color: #fff;
+  background-color: var(--secondary-background);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -158,7 +156,7 @@
 }
 .optionLabel {
   min-width: 150px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   display: flex;
   align-items: center;
 }
@@ -187,7 +185,7 @@
   transition: border-color 0.2s ease;
 }
 .radioOuterSelected {
-  border-color: #5f84fe;
+  border-color: var(--main-accent);
 }
 .radioInner {
   position: absolute;
@@ -196,7 +194,7 @@
   top: 21.5%;
   left: 21.5%;
   border-radius: 50%;
-  background-color: #5f84fe;
+  background-color: var(--main-accent);
   transform: scale(0);
   opacity: 0;
   animation: grow-in 0.25s forwards;
@@ -217,15 +215,15 @@
   transition: all 0.2s ease;
 }
 .checkboxOuterSelected {
-  border-color: #5f84fe;
-  background-color: #5f84fe;
+  border-color: var(--main-accent);
+  background-color: var(--main-accent);
 }
 .checkboxCheckmark {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
+  color: var(--text-accent);
   font-size: 20px;
   line-height: 1;
   opacity: 0;
@@ -270,7 +268,7 @@
   gap: 8px;
 }
 .paymentTitle {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   padding-bottom: 8px;
   font-size: 16px;
 }
@@ -291,18 +289,18 @@
 /* === PERBAIKAN FINAL UNTUK MODE EDIT === */
 .formInput {
   width: 100%;
-  border: none !important; /* HAPUS SEMUA BORDER DARI INPUT */
+  border: none !important;
   background-color: transparent;
-  font-family: Poppins, Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
-  font-weight: bold;
-  color: #000;
+  font-weight: var(--font-weight-bold);
+  color: var(--main-text);
   padding: 1px 0;
   margin: 0;
   line-height: normal;
 }
 .formInput:focus {
-  outline: none; /* Hapus outline biru saat di-klik */
+  outline: none;
   background-color: #f0f6ff;
 }
 .hiddenInput {
@@ -324,10 +322,10 @@
 .visualInput {
   display: flex;
   align-items: center;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
   min-height: 38px;
   box-sizing: border-box;
-  background-color: #f8f9fa;
+  background-color: var(--main-background);
 }
 
 /* ================================== */
@@ -336,19 +334,19 @@
 
 /* Memberi border bawah warna merah pada seluruh field yang error */
 .errorFieldWrapper {
-  border-bottom-color: #d32f2f !important;
+  border-bottom-color: var(--red) !important;
 }
 
 /* Mengubah warna label field menjadi merah dan tebal */
 .errorLabel {
-  color: #d32f2f !important;
-  font-weight: 600 !important;
+  color: var(--red) !important;
+  font-weight: var(--font-weight-semibold) !important;
 }
 
 /* Mengubah warna teks di dalam input yang error menjadi merah */
 .errorInput,
 .errorInput:focus {
-  color: #d32f2f !important;
+  color: var(--red) !important;
 }
 
 /* Mengubah warna placeholder menjadi merah muda saat error */
@@ -359,19 +357,19 @@
 
 /* Style untuk teks pesan error yang muncul di bawah input */
 .inlineErrorMessage {
-  position: absolute; /* Mengeluarkan pesan dari alur layout normal */
-  bottom: 4px; /* Posisikan di bagian bawah container */
-  left: 12px; /* Sesuaikan dengan padding kiri field */
-  right: 12px; /* Sesuaikan dengan padding kanan field */
-  color: #d32f2f;
+  position: absolute;
+  bottom: 4px;
+  left: 12px;
+  right: 12px;
+  color: var(--red);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--font-weight-regular);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .inputWithError .formInput {
-  flex-grow: 1; /* Input akan membesar mengisi sisa ruang */
+  flex-grow: 1;
 }
 
 .inputWithError {
@@ -383,21 +381,21 @@
 
 /* Style untuk pesan error yang butuh lebar penuh (untuk grup radio/checkbox) */
 .inlineErrorMessageFullWidth {
-  color: #d32f2f;
+  color: var(--red);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--font-weight-regular);
   margin-top: 4px;
-  padding-left: 12px; /* Menyesuaikan dengan padding section */
+  padding-left: 12px;
   width: 100%;
 }
 
 /* Style baru untuk pesan error yang muncul di KANAN input */
 .inlineErrorMessageRight {
-  color: #d32f2f;
+  color: var(--red);
   font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap; /* Mencegah pesan error terpotong ke baris baru */
-  flex-shrink: 0; /* Mencegah pesan error mengecil jika tidak ada ruang */
+  font-weight: var(--font-weight-regular);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .academicStatusWrapper {
@@ -409,7 +407,6 @@
 }
 
 .academicStatusWrapper > div:first-child {
-  /* The Select component */
   flex: 1;
 }
 
@@ -418,12 +415,12 @@
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
-  border-bottom: 1px solid #ccc !important;
+  border-bottom: 1px solid var(--main-grey) !important;
   margin-left: 10px;
 }
 
 :global(.react-select-error__control) {
-  border-bottom-color: #d32f2f !important;
+  border-bottom-color: var(--red) !important;
 }
 :global(.react-select-error__placeholder) {
   color: #e57373 !important;
@@ -438,7 +435,7 @@
 :global(.react-select__control) {
   background-color: transparent !important;
   border: none !important;
-  box-shadow: none !important; /* Menghilangkan shadow saat focus */
+  box-shadow: none !important;
   min-height: auto !important;
   padding: 0;
   margin: 0;
@@ -452,19 +449,19 @@
 
 /* Menyamakan style teks terpilih dengan input field lain */
 :global(.react-select__single-value) {
-  font-weight: bold !important;
-  font-family: Poppins, Arial, sans-serif !important;
+  font-weight: var(--font-weight-bold) !important;
+  font-family: var(--font-primary) !important;
   font-size: 16px !important;
-  color: #000 !important;
+  color: var(--main-text) !important;
   margin: 0;
 }
 
 /* Menyamakan style placeholder */
 :global(.react-select__placeholder) {
-  font-weight: bold !important;
-  font-family: Poppins, Arial, sans-serif !important;
+  font-weight: var(--font-weight-bold) !important;
+  font-family: var(--font-primary) !important;
   font-size: 16px !important;
-  color: #a9a9a9 !important; /* Warna placeholder standar input */
+  color: #a9a9a9 !important;
   margin: 0;
 }
 
@@ -480,32 +477,30 @@
 
 /* Override khusus untuk state error */
 :global(.react-select-error__control) {
-  background-color: transparent !important; /* Tetap transparan saat error */
+  background-color: transparent !important;
 }
 
 :global(.react-select-error__single-value) {
-  color: #d32f2f !important; /* Warna teks merah saat error */
+  color: var(--red) !important;
 }
 
 :global(.react-select-error__placeholder) {
-  color: #e57373 !important; /* Warna placeholder merah saat error */
+  color: #e57373 !important;
 }
 
-/* --- [BARU] Style untuk Fitur History --- */
-
 .historyContainer {
-  position: relative; /* Wajib untuk positioning dropdown */
+  position: relative;
   display: flex;
   align-items: center;
 }
 
 .historyDropdown {
   position: absolute;
-  top: calc(100% + 4px); /* Muncul 4px di bawah tombol */
+  top: calc(100% + 4px);
   left: 0;
-  width: 100%; /* Lebar dropdown */
-  background-color: #fff;
-  border: 1px solid #ccc;
+  width: 100%;
+  background-color: var(--secondary-background);
+  border: 1px solid var(--main-grey);
   border-radius: 5px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -530,7 +525,7 @@
 .historyInfoItem {
   padding: 10px 16px;
   font-style: italic;
-  color: #888;
+  color: var(--main-grey);
 }
 
 /* === Loading style (samakan dengan Home) === */
@@ -547,7 +542,7 @@
 
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid var(--accent-color, #4e73df);
+  border-top: 4px solid var(--main-accent);
   border-radius: 50%;
   width: 36px;
   height: 36px;
