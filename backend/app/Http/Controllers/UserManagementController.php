@@ -14,14 +14,60 @@ class UserManagementController extends Controller
     public function index(Request $request)
     {
         try {
-            $users = User::select('user_id', 'username', 'full_name', 'email', 'role')
-                ->orderBy('created_at', 'desc')
-                ->paginate(25);
-            
+            $query = User::select('user_id', 'username', 'full_name', 'email', 'role');
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+                    if (is_numeric($search)) {
+                        $q->orWhere('user_id', $search);
+                    }
+
+                    $q->orWhere('username', 'LIKE', "%{$search}%")
+                    ->orWhere('full_name', 'LIKE', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('user_id')) {
+                $query->where('user_id', $request->user_id);
+            }
+
+            if ($request->filled('username')) {
+                $query->where('username', 'LIKE', '%' . $request->username . '%');
+            }
+
+            if ($request->filled('full_name')) {
+                $query->where('full_name', 'LIKE', '%' . $request->full_name . '%');
+            }
+
+            if ($request->filled('email')) {
+                $query->where('email', 'LIKE', '%' . $request->email . '%');
+            }
+
+            if ($request->filled('role') && is_array($request->role)) {
+                $query->whereIn('role', $request->role);
+            }
+
+            $sortable = ['user_id', 'username', 'full_name', 'role'];
+
+            $sortBy = $request->get('sort_by');
+            $sortDir = $request->get('sort_dir', 'asc');
+
+            if (in_array($sortBy, $sortable)) {
+                $sortDir = strtolower($sortDir) === 'desc' ? 'desc' : 'asc';
+                $query->orderBy($sortBy, $sortDir);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+            $users = $query->paginate(25);
+
             return response()->json([
                 'success' => true,
                 'data' => $users,
             ]);
+
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -30,6 +76,7 @@ class UserManagementController extends Controller
             ], 500);
         }
     }
+
 
     public function store(Request $request)
     {
