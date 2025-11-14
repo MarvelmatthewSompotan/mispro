@@ -145,7 +145,7 @@ export const updateRegistrationStatus = (
     if (reason === 'Withdraw') {
       reasonType = 'cancellationOfEnrollment';
     } else if (reason === 'Invalid') {
-      reasonType = 'invalidSection';
+      reasonType = 'invalidData';
     } else {
       throw new Error('Invalid cancellation reason selected.');
     }
@@ -154,7 +154,6 @@ export const updateRegistrationStatus = (
     });
   }
 
-  // Handle case lain (misalnya reason tidak terkirim saat cancel)
   throw new Error('Cannot determine API endpoint or missing required data.');
 };
 

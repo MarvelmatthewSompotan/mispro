@@ -6,7 +6,7 @@ import Button from '../../../atoms/Button';
 
 const reasonOptions = [
   { label: 'Cancellation of Enrollment (Withdraw)', value: 'Withdraw' },
-  { label: 'Invalid Section/Data', value: 'Invalid' },
+  { label: 'Invalid Data', value: 'Invalid' },
 ];
 
 const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
