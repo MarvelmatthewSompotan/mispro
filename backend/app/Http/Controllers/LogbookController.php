@@ -110,6 +110,8 @@ class LogbookController extends Controller
                     $join->on('latest_app_version.application_id', '=', 'af_join.application_id');
                 });
 
+            $studentsQuery->where('af_join.status', 'Confirmed');
+
             $filterSchoolYearIds = $targetSchoolYearIds; 
 
             // Filter (search)
@@ -530,6 +532,8 @@ class LogbookController extends Controller
                 ->leftJoinSub($latestApplicationVersionSub, 'latest_app_version', function ($join) {
                     $join->on('latest_app_version.application_id', '=', 'af_join.application_id');
                 });
+
+            $studentsQuery->where('af_join.status', 'Confirmed');
 
             $filterSchoolYearIds = $targetSchoolYearIds; 
 

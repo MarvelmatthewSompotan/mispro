@@ -14,6 +14,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\StorageController;
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/reset-login', [AuthController::class, 'resetLogin']);
 
 Route::get('/storage-file/{path}', [StorageController::class, 'serveFile'])
     ->where('path', '.*') 

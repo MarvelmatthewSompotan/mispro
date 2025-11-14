@@ -68,13 +68,13 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
   return await res.json();
 };
 
-export const login = async (email, password) => {
+export const login = async (identifier, password) => {
   // `requiresAuth` diset `false` karena login belum punya token
   const data = await apiFetch(
     '/login',
     {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier, password }),
     },
     false
   );

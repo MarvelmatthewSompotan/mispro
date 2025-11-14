@@ -21,29 +21,48 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => [
-                'required',
-                'email',
-                'regex:/^[A-Za-z0-9._%+-]+@mis-mdo\.sch\.id$/',
-            ],
+            'identifier' => 'required|string', 
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $identifier = $request->identifier;
+
+        $loginField = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $user = null;
+
+        if ($loginField === 'email') {
+            $regex = '/^[A-Za-z0-9._%+-]+@mis-mdo\.sch\.id$/';
+
+            if (!preg_match($regex, $identifier)) {
+                $this->auditTrail->log('login_failed', [
+                    'identifier' => $identifier,
+                    'reason' => 'Email domain check failed'
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email/Username or Password is incorrect' 
+                ], 401);
+            }
+
+            $user = User::where('email', $identifier)->first();
+
+        } else {
+            $user = User::where('username', $identifier)->first();
+        }
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            // catat attempt gagal login
             $this->auditTrail->log('login_failed', [
-                'email' => $request->email,
+                'Email/Username' => $identifier,
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Email or Password is incorrect'
+                'message' => 'Email/Username or Password is incorrect'
             ], 401);
         }
 
-        // Set session user
         Auth::login($user);
 
         $user->tokens()->delete();
@@ -105,5 +124,54 @@ class AuthController extends Controller
     public function me(Request $request) 
     {
         return response()->json($request->user());
+    }
+
+    public function resetLogin(Request $request)
+    {
+        $request->validate([
+            'identifier' => 'required|string',
+            'password' => 'required',
+        ]);
+
+        $identifier = $request->identifier;
+
+        $loginField = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $user = null;
+
+        if ($loginField === 'email') {
+            $regex = '/^[A-Za-z0-9._%+-]+@mis-mdo\.sch\.id$/';
+
+            if (!preg_match($regex, $identifier)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email or Username is incorrect'
+                ], 401);
+            }
+
+            $user = User::where('email', $identifier)->first();
+        } else {
+            $user = User::where('username', $identifier)->first();
+        }
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email/Username or Password is incorrect'
+            ], 401);
+        }
+
+        $user->tokens()->delete();
+
+        $this->auditTrail->log('reset_login', [
+            'user_id' => $user->user_id,
+            'email'   => $user->email,
+            'username' => $user->username,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login reset successful. Please login again.'
+        ]);
     }
 }
