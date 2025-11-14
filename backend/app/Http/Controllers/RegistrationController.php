@@ -188,8 +188,8 @@ class RegistrationController extends Controller
         return $current_version === (int)$latestVersion;
     }
 
-    public function handleCancelRegistration(Request $request, $application_id, string $reason_type) {
-        
+    public function handleCancelRegistration(Request $request, $application_id, string $reason_type)
+    {
         if (empty($application_id) || !in_array($reason_type, ['invalidData', 'cancellationOfEnrollment'])) {
             return response()->json([
                 'success' => false, 
@@ -211,10 +211,7 @@ class RegistrationController extends Controller
 
             if (!$applicationForm) {
                 DB::rollBack();
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'Application form not found.'
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Application form not found.'], 404);
             }
 
             $enrollment = $applicationForm->enrollment;
@@ -222,232 +219,44 @@ class RegistrationController extends Controller
 
             if (!$enrollment || !$student) {
                 DB::rollBack();
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'Enrollment or student not found.'
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Enrollment or student not found.'], 404);
             }
 
-            $oldStatus = $applicationForm->status;
-            $newStatus = '';
-
-            $studentStatus = strtolower($enrollment->student_status ?? '');
-            $enrollment_id = $enrollment->enrollment_id;
-            $current_version = (int)$enrollment->version;
-            $student_id_enrollment = (int)$enrollment->id;
-            $isLatest = $this->isLatestVersion($student_id_enrollment, $current_version);
-            $invalid = 'Invalid Data';
-            $cancellation = 'Cancellation of Enrollment';
+            $data = [
+                'applicationForm' => $applicationForm,
+                'enrollment' => $enrollment,
+                'student' => $student,
+                'oldStatus' => $applicationForm->status,
+                'studentStatus' => strtolower($enrollment->student_status ?? ''),
+                'enrollment_id' => $enrollment->enrollment_id,
+                'current_version' => (int)$enrollment->version,
+                'student_id_enrollment' => (int)$enrollment->id,
+                'invalidReason' => 'Invalid Data',
+                'cancellationReason' => 'Cancellation of Enrollment',
+            ];
+            
+            $data['isLatest'] = $this->isLatestVersion($data['student_id_enrollment'], $data['current_version']);
+            
             $latestApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student) {
-                                            $query->where('studentall_id', $student->studentall_id);
-                                        })
-                                        ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
-                                        ->orderBy('enrollments.version', 'desc')
-                                        ->select('application_forms.*') 
-                                        ->first();
-            $isCancelled = $latestApplication->status === 'Cancelled';
-
+                                                $query->where('studentall_id', $student->studentall_id);
+                                            })
+                                            ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+                                            ->orderBy('enrollments.version', 'desc')
+                                            ->select('application_forms.*') 
+                                            ->first();
+            $data['isCancelled'] = $latestApplication->status === 'Cancelled';
+            
             if ($reason_type === 'invalidData') {
-
-                if ($studentStatus === 'new' || $studentStatus === 'transferee') {
-
-                    $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
-                        $query->where('studentall_id', $student->studentall_id)
-                                ->where('enrollment_id', '!=', $enrollment_id);
-                    })->exists();
-
-                    if ($hasOtherApplication) {
-                        \Log::warning('Attempted to invalidaated NEW student registration with linked records', [
-                            'student_id' => $student->student_id,
-                            'studentall_id' => $student->studentall_id,
-                            'application_id' => $application_id,
-                            'enrollment_id' => $enrollment_id,
-                            'student_status' => $enrollment->student_status,
-                        ]);
-                        
-                        DB::rollBack();
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'This registration cannot be invalidated because it belongs to a NEW/TRANSFEREE student who has other registration data linked to this student.'
-                        ], 400);
-                    }
-
-                    // Save in cancelled registration table
-                    $this->saveToCancelledRegistration($student, $enrollment, $invalid);
-                    
-                    // Delete student and related data
-                    $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
-
-                    $newStatus = 'Deleted New/Transferee (Invalid Data)';
-                    DB::commit();
-                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
-
-                    return response()->json([
-                        'success' => true, 
-                        'message' => 'Registration and related data deleted successfully (Invalid Data - NEW/TRANSFEREE).'
-                    ], 200);
-
-                } else if ($studentStatus === 'old') {
-
-                    $inOldDatabase = StudentOld::where('studentold_id', $student->student_id)->exists();
-                    if ($inOldDatabase) {
-                
-                        if ($current_version === 1 && $isLatest) {
-                            // Save in cancelled registration table
-                            $this->saveToCancelledRegistration($student, $enrollment, $invalid);
-                            
-                            // Delete student and related data
-                            $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
-
-                            $newStatus = 'Deleted Old (Invalid Data)';
-                            DB::commit();
-
-                            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
-
-                            return response()->json([
-                                'success' => true, 
-                                'message' => 'Registration and related data deleted successfully (Invalid Data - OLD, enrollment version = 1).'
-                            ], 200);
-                        } else if ($current_version > 1 && $isLatest) {                            
-                            // Delete student and related data
-                            $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
-
-                            $newStatus = 'Deleted Old (Invalid Data)';
-                            DB::commit();
-                            
-                            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
-
-                            return response()->json([
-                                'success' => true, 
-                                'message' => 'Registration and related data deleted successfully, except student data (Invalid Data - OLD, latest enrollment version).'
-                            ], 200);
-                        } else if (!$isLatest && $isCancelled) {
-                            DB::rollBack();
-                            return response()->json([
-                                'success' => false,
-                                'message' => 'This registration cannot be invalidated. The latest enrollment for this student is already cancelled.'
-                            ], 400);
-                        }
-                        DB::rollBack();
-                        return response()->json([
-                            'success' => false, 
-                            'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'
-                        ], 400);
-                    } else if ($isLatest) {
-                        // Delete student and related data
-                        $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
-
-                        $newStatus = 'Deleted Old (Invalid Data)';
-                        DB::commit();
-
-                        event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
-
-                        return response()->json([
-                            'success' => true, 
-                            'message' => 'Registration and related data deleted successfully, except student data (Invalid Data - OLD, latest enrollment version).'
-                        ], 200);
-                    } else if (!$isLatest && $isCancelled) {
-                        DB::rollBack();
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'This registration cannot be invalidated. The latest enrollment for this student is already cancelled.'
-                        ], 400);
-                    }
-
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'
-                    ], 400);
-                }
-
+                return $this->InvalidDataCancellation($data);
             } else if ($reason_type === 'cancellationOfEnrollment') {
-
-                if ($studentStatus === 'new' || $studentStatus === 'transferee') {
-                    
-                    $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
-                        $query->where('studentall_id', $student->studentall_id)
-                                ->where('enrollment_id', '!=', $enrollment_id);
-                    })->exists();
-
-                    if ($hasOtherApplication) {
-                        \Log::warning('Attempted to invalidaated NEW student registration with linked records', [
-                            'student_id' => $student->student_id,
-                            'studentall_id' => $student->studentall_id,
-                            'application_id' => $application_id,
-                            'enrollment_id' => $enrollment_id,
-                            'student_status' => $enrollment->student_status,
-                        ]);
-                        
-                        DB::rollBack();
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'This registration cannot be cancelled because it belongs to a NEW/TRANSFEREE student who has other registration data linked to this student.'
-                        ], 400);
-                    }
-
-                    // Save in cancelled registration table
-                    $this->saveToCancelledRegistration($student, $enrollment, $cancellation);
-                    
-                    // Delete student and related data
-                    $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
-
-                    $newStatus = 'Deleted New/Transferee (Cancelled)';
-                    DB::commit();
-
-                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
-
-                    return response()->json([
-                        'success' => true, 
-                        'message' => 'Registration and related data deleted successfully (Cancellation of Enrollment - NEW/TRANSFEREE).'
-                    ], 200);
-                } else if ($studentStatus === 'old') {
-                    
-                    if ($isLatest) {                            
-                        $student->status = 'Withdraw';
-                        $student->active = 'NO';
-                        $applicationForm->status = 'Cancelled';
-                        $enrollment->status = 'INACTIVE';
-                        $student->save();
-                        $applicationForm->save();
-                        $enrollment->save();
-                        
-                        $newStatus = 'Deleted Old (Cancelled)';
-                        DB::commit();
-                        
-                        event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
-
-                        return response()->json([
-                            'success' => true, 
-                            'message' => 'Registration status updated successfully (Cancellation of Enrollment - Old, latest enrollment version).'
-                        ], 200);
-                    } else if (!$isLatest && $isCancelled) {
-                        DB::rollBack();
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'This registration cannot be cancelled. The latest enrollment for this student is already cancelled.'
-                        ], 400); 
-                    }
-
-                    DB::rollBack();
-    
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'OLD student registration could not be cancelled  (Old, not latest enrollment version).'
-                    ], 400);
-                }
-                
-                DB::rollBack();
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'Invalid student status for cancellation.'
-                ], 400);
+                return $this->EnrollmentCancellation($data);
             }
+            
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Invalid reason type supplied.'], 400);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-
-            \Log::error('Failed to cancel registration', [
+            Log::error('Failed to cancel registration', [
                 'error' => $e->getMessage(),
                 'application_form_id' => $application_id,
                 'reason_type' => $reason_type
@@ -459,6 +268,170 @@ class RegistrationController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    protected function InvalidDataCancellation(array $data)
+    {
+        extract($data); 
+
+        if ($studentStatus === 'new' || $studentStatus === 'transferee') {
+            
+            $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
+                $query->where('studentall_id', $student->studentall_id)
+                        ->where('enrollment_id', '!=', $enrollment_id);
+            })->exists();
+
+            if ($hasOtherApplication) {
+                \Log::warning('Attempted to invalidaated NEW student registration with linked records', [
+                    'student_id' => $student->student_id, 'studentall_id' => $student->studentall_id,
+                    'application_id' => $applicationForm->application_id, 'enrollment_id' => $enrollment_id,
+                    'student_status' => $enrollment->student_status,
+                ]);
+                
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This registration cannot be invalidated because it belongs to a NEW/TRANSFEREE student who has other registration data linked to this student.'
+                ], 400);
+            }
+
+            $this->saveToCancelledRegistration($student, $enrollment, $invalidReason);
+            $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
+
+            $newStatus = 'Deleted New/Transferee (Invalid Data)';
+            DB::commit();
+            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Registration and related data deleted successfully (Invalid Data - NEW/TRANSFEREE).'
+            ], 200);
+
+        } else if ($studentStatus === 'old') {
+
+            $inOldDatabase = StudentOld::where('studentold_id', $student->student_id)->exists();
+            
+            if ($inOldDatabase) {
+                if ($current_version === 1 && $isLatest) {
+                    $this->saveToCancelledRegistration($student, $enrollment, $invalidReason);
+                    $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
+
+                    $newStatus = 'Deleted Old (Invalid Data)';
+                    DB::commit();
+                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                    return response()->json([
+                        'success' => true, 
+                        'message' => 'Registration and related data deleted successfully (Invalid Data - OLD, enrollment version = 1).'
+                    ], 200);
+                } else if ($current_version > 1 && $isLatest) { 
+                    $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
+
+                    $newStatus = 'Deleted Old (Invalid Data)';
+                    DB::commit();
+                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                    return response()->json([
+                        'success' => true, 
+                        'message' => 'Registration and related data deleted successfully, except student data (Invalid Data - OLD, latest enrollment version).'
+                    ], 200);
+                } else if (!$isLatest && $isCancelled) {
+                    DB::rollBack();
+                    return response()->json(['success' => false, 'message' => 'This registration cannot be invalidated. The latest enrollment for this student is already cancelled.'], 400);
+                }
+                
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'], 400);
+            } else if ($isLatest) {
+                $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
+
+                $newStatus = 'Deleted Old (Invalid Data)';
+                DB::commit();
+                event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Registration and related data deleted successfully, except student data (Invalid Data - OLD, latest enrollment version).'
+                ], 200);
+            } else if (!$isLatest && $isCancelled) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'This registration cannot be invalidated. The latest enrollment for this student is already cancelled.'], 400);
+            }
+
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'], 400);
+        }
+        DB::rollBack();
+        return response()->json(['success' => false, 'message' => 'Invalid student status for cancellation.'], 400);
+    }
+
+    protected function EnrollmentCancellation(array $data)
+    {
+        extract($data); 
+        if ($studentStatus === 'new' || $studentStatus === 'transferee') {
+            
+            $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
+                $query->where('studentall_id', $student->studentall_id)
+                        ->where('enrollment_id', '!=', $enrollment_id);
+            })->exists();
+
+            if ($hasOtherApplication) {
+                \Log::warning('Attempted to invalidaated NEW student registration with linked records', [
+                    'student_id' => $student->student_id, 'studentall_id' => $student->studentall_id,
+                    'application_id' => $applicationForm->application_id, 'enrollment_id' => $enrollment_id,
+                    'student_status' => $enrollment->student_status,
+                ]);
+                
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This registration cannot be cancelled because it belongs to a NEW/TRANSFEREE student who has other registration data linked to this student.'
+                ], 400);
+            }
+
+            $this->saveToCancelledRegistration($student, $enrollment, $cancellationReason);
+            $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
+
+            $newStatus = 'Deleted New/Transferee (Cancelled)';
+            DB::commit();
+            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Registration and related data deleted successfully (Cancellation of Enrollment - NEW/TRANSFEREE).'
+            ], 200);
+
+        } else if ($studentStatus === 'old') {
+            
+            if ($isLatest) { 
+                $student->status = 'Withdraw';
+                $student->active = 'NO';
+                $applicationForm->status = 'Cancelled';
+                $enrollment->status = 'INACTIVE';
+                
+                $student->save();
+                $applicationForm->save();
+                $enrollment->save();
+                
+                $newStatus = 'Deleted Old (Cancelled)';
+                DB::commit();
+                event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Registration status updated successfully (Cancellation of Enrollment - Old, latest enrollment version).'
+                ], 200);
+            } else if (!$isLatest && $isCancelled) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'This registration cannot be cancelled. The latest enrollment for this student is already cancelled.'], 400); 
+            }
+
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'OLD student registration could not be cancelled (Old, not latest enrollment version).'], 400);
+        }
+        
+        DB::rollBack();
+        return response()->json(['success' => false, 'message' => 'Invalid student status for cancellation.'], 400);
     }
 
     private function saveToCancelledRegistration($student, $enrollment, $reason)
