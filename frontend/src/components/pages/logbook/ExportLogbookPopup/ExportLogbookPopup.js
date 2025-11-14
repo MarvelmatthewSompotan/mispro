@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import styles from "./ExportLogbookPopup.module.css";
@@ -76,20 +76,61 @@ const ExportLogbookPopup = ({
   onClose,
   columns,
   selectedColumns,
-  logbookData,
+  // BARU: Terima fungsi fetch dan status loading dari parent
+  fetchFullData,
+  isExportLoading,
+  currentFilters,
 }) => {
   // --- STATE (HOOK) ---
   const [isDownloading, setIsDownloading] = useState(false);
+  const [previewData, setPreviewData] = useState([]); // Data lengkap untuk export
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-  // --- Kalkulasi (sebelum hook) ---
+  // --- LOGIKA UTAMA: Muat data export saat popup dibuka ---
+  useEffect(() => {
+    // Hanya memuat jika popup terbuka, data belum dimuat, dan tidak sedang loading dari parent
+    if (isOpen && !dataLoaded && !isExportLoading) {
+      fetchFullData()
+        .then((data) => {
+          setPreviewData(data);
+          setDataLoaded(true);
+        })
+        .catch((err) => {
+          // Tampilkan pesan error jika fetch gagal
+          console.error("Gagal memuat data export di popup:", err);
+          setPreviewData([]);
+          setDataLoaded(true);
+        });
+    }
+
+    if (!isOpen) {
+      // Reset state saat popup ditutup
+      setPreviewData([]);
+      setDataLoaded(false);
+    }
+  }, [isOpen, dataLoaded, isExportLoading, fetchFullData]);
+
+  // --- Kalkulasi ---
   const selectedColumnsForPreview = columns.filter((column) =>
     selectedColumns.has(column)
   );
   const hasSelectedColumns = selectedColumnsForPreview.length > 0;
 
+  // Gunakan previewData sebagai sumber data utama untuk PDF
+  const logbookData = previewData;
+
+  // Tentukan status loading (Deklarasi ini harus hanya satu kali)
+  const currentLoading = isExportLoading || (isOpen && !dataLoaded);
+
   // --- FUNGSI DOWNLOAD (HOOK) ---
   const handleDownloadPDF = useCallback(async () => {
-    if (!hasSelectedColumns || isDownloading) return;
+    if (
+      !hasSelectedColumns ||
+      isDownloading ||
+      !dataLoaded ||
+      logbookData.length === 0
+    )
+      return;
 
     setIsDownloading(true);
 
@@ -108,14 +149,14 @@ const ExportLogbookPopup = ({
       const tableHeaders = ["No.", ...columnsForPDFTable];
       const photoColIndex = tableHeaders.indexOf("Photo");
 
-      // 3. Load semua gambar (Ini tetap sama)
+      // 3. Load semua gambar (Ini tetap sama, menggunakan data LENGKAP)
       const loadedImages = await Promise.all(
         logbookData.map((student) =>
           loadImage(student[HEADER_KEY_MAP["Photo"]])
         )
       );
 
-      // 4. Siapkan Data Tabel (Ini tetap sama, 'null' untuk foto)
+      // 4. Siapkan Data Tabel (Ini tetap sama)
       const tableData = logbookData.map((student, index) => {
         const row = [index + 1];
         columnsForPDFTable.forEach((column) => {
@@ -166,7 +207,7 @@ const ExportLogbookPopup = ({
         .padStart(2, "0")}`;
       doc.text(createdDate, margin, 22);
 
-      // --- PERBAIKAN: Tentukan Semua Ukuran di Sini ---
+      // --- PERBAIKAN: Tentukan Semua Ukuran di Sini (TETAP SAMA) ---
 
       // 1. UBAH ANGKA INI UNTUK MENGUBAH UKURAN GAMBAR
       const fixedImgHeight = 12; // (Sebelumnya 5, sekarang 15mm)
@@ -271,7 +312,7 @@ const ExportLogbookPopup = ({
         },
       });
 
-      // --- Logika Nomor Halaman (Tetap sama, sudah benar) ---
+      // --- Logika Nomor Halaman (TETAP SAMA) ---
       const pageCount = doc.internal.getNumberOfPages();
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
@@ -302,6 +343,7 @@ const ExportLogbookPopup = ({
     logbookData,
     hasSelectedColumns,
     isDownloading,
+    dataLoaded,
   ]); // Dependensi hook
 
   if (!isOpen) return null;
@@ -314,7 +356,24 @@ const ExportLogbookPopup = ({
         </div>
 
         <div className={styles.content}>
-          {hasSelectedColumns ? (
+          {currentLoading ? (
+            <div
+              style={{
+                padding: "48px 24px",
+                textAlign: "center",
+                fontStyle: "italic",
+                color: "#7a7a7a",
+                minHeight: "200px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#f9f9f9",
+                borderRadius: "8px",
+              }}
+            >
+              Memuat **semua** data logbook sesuai filter. Mohon tunggu...
+            </div>
+          ) : hasSelectedColumns ? (
             <div className={styles.tableContainer}>
               <table className={styles.table}>
                 <thead>
@@ -328,7 +387,8 @@ const ExportLogbookPopup = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {logbookData.map((student, index) => (
+                  {/* Tampilkan maksimal 10 baris di preview untuk menghindari crash */}
+                  {logbookData.slice(0, 10).map((student, index) => (
                     <tr key={student.student_id}>
                       <td className={styles.dataCell}>{index + 1}</td>
                       {selectedColumnsForPreview.map((column) => {
@@ -352,6 +412,21 @@ const ExportLogbookPopup = ({
                       })}
                     </tr>
                   ))}
+                  {logbookData.length > 10 && (
+                    <tr>
+                      <td
+                        colSpan={selectedColumnsForPreview.length + 1}
+                        className={styles.messageCell}
+                        style={{
+                          textAlign: "center",
+                          fontStyle: "italic",
+                          backgroundColor: "#f0f0f0",
+                        }}
+                      >
+                        ... dan {logbookData.length - 10} data lainnya
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -373,6 +448,7 @@ const ExportLogbookPopup = ({
               Please select at least one column first to see the preview.
             </div>
           )}
+          
         </div>
 
         <div className={styles.footer}>
@@ -380,7 +456,7 @@ const ExportLogbookPopup = ({
             <button
               className={styles.cancelButton}
               onClick={onClose}
-              disabled={isDownloading}
+              disabled={isDownloading || currentLoading}
             >
               Cancel
             </button>
@@ -388,9 +464,18 @@ const ExportLogbookPopup = ({
             <button
               className={styles.downloadButton}
               onClick={handleDownloadPDF}
-              disabled={!hasSelectedColumns || isDownloading}
+              disabled={
+                !hasSelectedColumns ||
+                isDownloading ||
+                currentLoading ||
+                logbookData.length === 0
+              }
             >
-              {isDownloading ? "Downloading..." : "Download PDF"}
+              {isDownloading
+                ? "Generating PDF..."
+                : currentLoading
+                ? "Loading Data..."
+                : "Download PDF"}
             </button>
           </div>
         </div>

@@ -308,6 +308,86 @@ export const getLogbook = ({
   return apiFetch(`/logbook?${params.toString()}`);
 };
 
+/**
+ * @function getLogbookForExport
+ * Memanggil API logbook/export untuk mendapatkan SEMUA data yang terfilter (tanpa pagination).
+ * Menggunakan parameter yang sama dengan getLogbook, namun mengabaikan 'page' dan 'per_page'.
+ */
+export const getLogbookForExport = ({
+  // Search
+  search_name = '',
+  search_family_rank = '',
+  search_religion = '',
+  search_country = '',
+  search_father = '',
+  search_mother = '',
+
+  // Checkbox
+  grades = [],
+  sections = [],
+  school_years = [],
+  genders = [],
+  transportations = [],
+
+  // Range
+  start_date = '',
+  end_date = '',
+  min_age = '',
+  max_age = '',
+
+  // Sort
+  sort = [],
+
+  // Parameter pagination diabaikan di sini
+} = {}) => {
+  const params = new URLSearchParams();
+
+  // --- HANYA LOGIKA FILTER DAN SORT YANG DIKIRIM ---
+
+  // Search
+  if (search_name) params.append('search_name', search_name);
+  if (search_family_rank)
+    params.append('search_family_rank', search_family_rank);
+  if (search_religion) params.append('search_religion', search_religion);
+  if (search_country) params.append('search_country', search_country);
+  if (search_father) params.append('search_father', search_father);
+  if (search_mother) params.append('search_mother', search_mother);
+
+  // Checkbox arrays
+  (Array.isArray(grades) ? grades : []).forEach((v) =>
+    params.append('grades[]', v)
+  );
+  (Array.isArray(sections) ? sections : []).forEach((v) =>
+    params.append('sections[]', v)
+  );
+  (Array.isArray(school_years) ? school_years : []).forEach((v) =>
+    params.append('school_years[]', v)
+  );
+  (Array.isArray(genders) ? genders : []).forEach((v) =>
+    params.append('genders[]', v)
+  );
+  (Array.isArray(transportations) ? transportations : []).forEach((v) =>
+    params.append('transportations[]', v)
+  );
+
+  // Date range
+  if (start_date) params.append('start_date', start_date);
+  if (end_date) params.append('end_date', end_date);
+
+  // Age range
+  if (min_age !== '' && min_age !== null) params.append('min_age', min_age);
+  if (max_age !== '' && max_age !== null) params.append('max_age', max_age);
+
+  // Sort (multi-field) - Bekerja sebagai single sort karena state sorts hanya berisi 1 elemen
+  sort?.forEach((s, i) => {
+    params.append(`sort[${i}][field]`, s.field);
+    params.append(`sort[${i}][order]`, s.order); // 'asc' | 'desc'
+  });
+
+  // Panggil endpoint BARU /logbook/export
+  return apiFetch(`/logbook/export?${params.toString()}`);
+};
+
 export const getRegistrations = ({
   search = '',
   search_name = '',
@@ -400,15 +480,9 @@ export const postUser = async (userData) => {
   });
 };
 
-// --- PERUBAHAN DI SINI ---
 export const updateUser = (userId, userData) => {
-  // Kita KEMBALIKAN ke pola 'PATCH' + 'JSON'
-  // Ini mengikuti pola dari `updateRegistrationStatus`
-  // Kita HAPUS '/update' dari URL
-  // Kita HAPUS 'FormData' dan '_method'
   return apiFetch(`/users/${userId}`, {
     method: 'PATCH',
-    body: JSON.stringify(userData), // Mengirim data sebagai JSON
+    body: JSON.stringify(userData),
   });
 };
-// --- AKHIR PERUBAHAN ---

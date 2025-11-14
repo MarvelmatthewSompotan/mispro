@@ -108,3 +108,9 @@
   border-radius: 4px;
   display: inline-block;
 }
+
+.paginationContainer {
+  display: flex;
+  justify-content: flex-start; /* Mendorong pagination ke kiri */
+  width: 100%;
+}

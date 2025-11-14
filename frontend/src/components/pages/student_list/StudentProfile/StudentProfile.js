@@ -153,6 +153,11 @@ const StudentProfile = () => {
     "Kristen Advent",
   ];
 
+  const hardcodedGenderOptions = [
+    { value: "Male", label: "Male" },
+    { value: "Female", label: "Female" },
+  ];
+
   const [isBackPopupOpen, setIsBackPopupOpen] = useState(false);
   const historyRef = useRef(null);
   const studentInfoKeys = useRef(new Set());
@@ -189,9 +194,7 @@ const StudentProfile = () => {
         setAcademicStatusOptions(
           data.academic_status?.map((opt) => ({ value: opt, label: opt })) || []
         );
-        setGenderOptions(
-          data.genders?.map((opt) => ({ value: opt, label: opt })) || []
-        );
+        setGenderOptions(hardcodedGenderOptions);
         setStatusOptions(data.active_status || []);
       })
       .catch((err) => console.error("Failed to fetch options:", err));
