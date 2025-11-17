@@ -11,13 +11,11 @@ return new class extends Migration
         Schema::table('students', function (Blueprint $table) {
             $table->timestamp('updated_at')
                 ->nullable()
-                ->after('registration_date')
-                ->useCurrent();
+                ->after('registration_date');
 
             $table->timestamp('graduated_at')
                 ->nullable()
-                ->after('updated_at')
-                ->useCurrent();
+                ->after('updated_at');
         });
     }
 
