@@ -72,6 +72,8 @@ class Student extends Model
         'kitas',
         'active',
         'status',
+        'update_at',
+        'graduate_at'
 
     ];
 
