@@ -12,7 +12,6 @@ const TermOfPaymentSection = ({
   forceError,
   isDormitory = false,
 }) => {
-  const hydratedRef = useRef(false);
   const [tuitionFees, setTuitionFees] = useState("");
   const [residencePayment, setResidencePayment] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
@@ -46,21 +45,18 @@ const TermOfPaymentSection = ({
   }, [sharedData]);
 
   useEffect(() => {
-    // Hydrate sekali saja dari prefill agar input tidak di-reset saat user mengetik
-    if (hydratedRef.current) return;
     if (prefill && Object.keys(prefill).length > 0) {
       setTuitionFees((v) => v || prefill.tuition_fees || "");
       setResidencePayment((v) => v || prefill.residence_payment || "");
       setFinancialPolicy((v) =>
         v ? v : prefill.financial_policy_contract === "Signed"
       );
-      setDiscountName((v) => (v !== "" ? v : prefill.discount_name || ""));
-      setDiscountNotes((v) => (v !== "" ? v : prefill.discount_notes || ""));
+      setDiscountName((v) => v || prefill.discount_name || "");
+      setDiscountNotes((v) => v || prefill.discount_notes || "");
       setVaMandiri((v) => (v !== "" ? v : prefill.va_mandiri || ""));
       setVaBni((v) => (v !== "" ? v : prefill.va_bni || ""));
       setVaBca((v) => (v !== "" ? v : prefill.va_bca || ""));
       setVaBri((v) => (v !== "" ? v : prefill.va_bri || ""));
-      hydratedRef.current = true;
     }
   }, [prefill]);
 
@@ -97,12 +93,12 @@ const TermOfPaymentSection = ({
   }, [isDormitory]);
 
   const handleTuitionFeesChange = (e, value) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setTuitionFees((current) => (current === value ? "" : value));
   };
 
   const handleResidencePaymentChange = (e, value) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setResidencePayment((current) => (current === value ? "" : value));
   };
 
@@ -269,7 +265,6 @@ const TermOfPaymentSection = ({
                 }
                 onChange={handleDiscountChange}
                 classNamePrefix="react-select"
-                
               />
             </div>
             {discountName && (
