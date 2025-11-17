@@ -64,13 +64,16 @@ class DashboardController extends Controller
                 ? ($currentYear - 1) . '/' . $currentYear
                 : ($currentYear - 2) . '/' . ($currentYear - 1);
             
-            // OPTIMASI Awal: Ambil ID tahun ajaran yang dibutuhkan hanya sekali
-            $schoolYears = SchoolYear::whereIn('year', [$schoolYearStr, $previousYearStr])
+            $yearParts = explode('/', $schoolYearStr);
+            $nextSchoolYearStr = ((int)$yearParts[1]) . '/' . (((int)$yearParts[1]) + 1);
+
+            $schoolYears = SchoolYear::whereIn('year', [$schoolYearStr, $previousYearStr, $nextSchoolYearStr])
                 ->pluck('school_year_id', 'year');
 
             $currentSchoolYearId = $schoolYears[$schoolYearStr] ?? null;
             $previousSchoolYearId = $schoolYears[$previousYearStr] ?? null;
-
+            $nextSchoolYearId = $schoolYears[$nextSchoolYearStr] ?? null; 
+            
             $lastCachedSchoolYear = Cache::get('last_cached_school_year');
             if ($lastCachedSchoolYear) {
                 if ($lastCachedSchoolYear !== $schoolYearStr) {
@@ -103,9 +106,9 @@ class DashboardController extends Controller
             // CACHE 2: Statistik Data 
             $statCacheKey = 'dashboard_stats_' . $schoolYearStr . '_' . now()->format('Ymd');
 
-            $stats = Cache::remember($statCacheKey, now()->addHours(24), function () use ($currentSchoolYearId, $previousSchoolYearId, $startOfDay, $endOfDay, $yesterdayStart, $yesterdayEnd) {
+            $stats = Cache::remember($statCacheKey, now()->addHours(24), function () use ($currentSchoolYearId, $previousSchoolYearId, $nextSchoolYearId, $startOfDay, $endOfDay, $yesterdayStart, $yesterdayEnd) {
 
-                // --- 1. Statistik Global (Satu Query) ---
+                // Global Statistics
                 $registrationStats = ApplicationForm::selectRaw('
                     COUNT(*) as total_registrations,
                     COUNT(CASE WHEN application_forms.status = "Confirmed" THEN 1 ELSE NULL END) as total_confirmed,
@@ -114,7 +117,7 @@ class DashboardController extends Controller
 
                 $totalRegistrations = $registrationStats->total_registrations;
 
-                // --- 2. Statistik Harian (Satu Query) ---
+                // Daily Statistics
                 $dailyStats = ApplicationForm::selectRaw('
                     -- Today Stats
                     SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) AS today_total,
@@ -132,7 +135,7 @@ class DashboardController extends Controller
                 ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
                 ->first();
                 
-                // --- 3. Statistik Tahunan (Satu Query) ---
+                // Yearly Statistics
                 $yearlyStats = ApplicationForm::where('application_forms.status', 'Confirmed')
                     ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
                     ->selectRaw('
@@ -152,19 +155,61 @@ class DashboardController extends Controller
                     ->whereIn('enrollments.school_year_id', array_filter([$currentSchoolYearId, $previousSchoolYearId]))
                     ->first();
                 
-                // --- Perhitungan Pertumbuhan ---
-                
-                // Pertumbuhan Tahunan Total
+                // Total Pre-Registers for Next School Year
+                $totalPreRegisters = 0;
+                if ($nextSchoolYearId) {
+                    $totalPreRegisters = ApplicationForm::where('application_forms.status', 'Confirmed')
+                        ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+                        ->where('enrollments.school_year_id', $nextSchoolYearId)
+                        ->count();
+                }
+
+                // Total Active Students by Section
+                $sectionKeys = ['ecp' => 'ECP', 'elementary' => 'Elementary School', 'middle' => 'Middle School', 'high' => 'High School'];
+                $activeStudentsBySection = array_fill_keys(array_keys($sectionKeys), 0);
+
+                if ($currentSchoolYearId) {
+                    $activeStudentsData = DB::table('students')
+                        ->select(
+                            'sections.name as section_name', 
+                            DB::raw('COUNT(DISTINCT students.id) as total_active')
+                        )
+                        ->join('enrollments', 'enrollments.id', '=', 'students.id')
+                        ->join('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+                        ->join('sections', 'enrollments.section_id', '=', 'sections.section_id')
+                        ->where('students.status', 'Not Graduate')
+                        ->where('students.active', 'YES')
+                        ->where('application_forms.status', 'Confirmed')
+                        ->where('enrollments.school_year_id', $currentSchoolYearId)
+                        ->groupBy('sections.name')
+                        ->get();
+
+                    foreach ($activeStudentsData as $data) {
+                        $normalizedName = strtolower($data->section_name);
+                        
+                        if (str_contains($normalizedName, 'ecp')) {
+                            $activeStudentsBySection['ecp'] = $data->total_active;
+                        } elseif (str_contains($normalizedName, 'elementary')) {
+                            $activeStudentsBySection['elementary'] = $data->total_active;
+                        } elseif (str_contains($normalizedName, 'middle')) {
+                            $activeStudentsBySection['middle'] = $data->total_active;
+                        } elseif (str_contains($normalizedName, 'high')) {
+                            $activeStudentsBySection['high'] = $data->total_active;
+                        }
+                    }
+                }
+
+                // Total Yearly Registrations & Growth
                 $totalCurrentYear = $yearlyStats->total_current;
                 $totalPreviousYear = $yearlyStats->total_previous;
                 $registrationGrowth = $totalPreviousYear > 0 ? round((($totalCurrentYear - $totalPreviousYear) / $totalPreviousYear) * 100, 2) : 0;
                 
-                // Pertumbuhan Harian Total
+                // Total Daily Registrations & Growth
                 $todayRegistrations = $dailyStats->today_total;
                 $yesterdayRegistrations = $dailyStats->yesterday_total;
                 $todayGrowth = $yesterdayRegistrations > 0 ? round((($todayRegistrations - $yesterdayRegistrations) / $yesterdayRegistrations) * 100, 2) : 0;
                 
-                // Pertumbuhan Harian (New/Returning)
+                // Daily Growth (New/Returning)
                 $newStudentsToday = $dailyStats->today_new;
                 $returningStudentsToday = $dailyStats->today_returning;
                 $newStudentsYesterday = $dailyStats->yesterday_new;
@@ -172,7 +217,7 @@ class DashboardController extends Controller
                 $newStudentGrowth = $newStudentsYesterday > 0 ? round((($newStudentsToday - $newStudentsYesterday) / $newStudentsYesterday) * 100, 2) : 0;
                 $returningStudentGrowth = $returningStudentsYesterday > 0 ? round((($returningStudentsToday - $returningStudentsYesterday) / $returningStudentsYesterday) * 100, 2) : 0;
                 
-                // Pertumbuhan Tahunan (New/Returning)
+                // Yearly Growth (New/Returning)
                 $newStudentsCurrentYear = $yearlyStats->new_current;
                 $returningStudentsCurrentYear = $yearlyStats->returning_current;
                 $newStudentsPrevYear = $yearlyStats->new_previous;
@@ -194,6 +239,8 @@ class DashboardController extends Controller
                     'returning_students_current_year' => $returningStudentsCurrentYear,
                     'new_students_yearly_growth_percent' => $newStudentYearlyGrowth,
                     'returning_students_yearly_growth_percent' => $returningStudentYearlyGrowth,
+                    'total_pre_registers_next_year' => $totalPreRegisters,
+                    'active_students_by_section' => $activeStudentsBySection,
                 ];
             });
             $this->addCacheKey($statCacheKey);
