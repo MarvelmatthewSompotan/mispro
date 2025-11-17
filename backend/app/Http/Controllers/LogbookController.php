@@ -316,6 +316,8 @@ class LogbookController extends Controller
                 'students.va_bca',
                 'students.va_bni',
                 'students.va_bri',
+                'students.updated_at',
+                'students.graduated_at',
                 'e_latest_join.enrollment_id', 
                 'e_join.enrollment_id', 
                 'latest_app_version.data_snapshot',
