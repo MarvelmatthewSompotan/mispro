@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('application_forms', function (Blueprint $table) {
-            $table->timestamp('update_at')
+            $table->timestamp('updated_at')
                 ->nullable()
                 ->after('is_invalid_data'); 
         });
@@ -18,7 +18,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('application_forms', function (Blueprint $table) {
-            $table->dropColumn('update_at');
+            $table->dropColumn('updated_at');
         });
     }
 };
