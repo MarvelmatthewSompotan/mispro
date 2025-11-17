@@ -214,12 +214,10 @@ const PopUpConfirm = React.memo(
           formData.termOfPayment?.financial_policy_contract || "Not Signed",
         discount_name: formData.termOfPayment?.discount_name || null,
         discount_notes: formData.termOfPayment?.discount_notes || null,
-
-        // [KEMBALIKAN] HAPUS DUA BARIS INI DARI PAYLOAD API
-        // student_requirement_status:
-        //   formData.otherDetail?.student_requirement_status || "complete",
-        // incomplete_documents:
-        //   formData.otherDetail?.incomplete_documents || null,
+        va_mandiri: formData.termOfPayment?.va_mandiri || null,
+        va_bni: formData.termOfPayment?.va_bni || null,
+        va_bca: formData.termOfPayment?.va_bca || null,
+        va_bri: formData.termOfPayment?.va_bri || null,
       };
       return transformed;
     };

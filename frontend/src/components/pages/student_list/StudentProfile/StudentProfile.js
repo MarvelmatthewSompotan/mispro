@@ -625,7 +625,9 @@ const StudentProfile = () => {
     const value = selectedOption ? selectedOption.value : "";
     setFormData((prevData) => {
       const newFormData = { ...prevData, [name]: value };
-
+      if (name === "discount_name" && !value) {
+        newFormData.discount_notes = "";
+      }
       // [BARU] Tambahkan logika side-effect untuk class_id
       if (name === "class_id") {
         if (options?.classes) {
@@ -862,7 +864,7 @@ const StudentProfile = () => {
 
     const programErrors = {};
     const classIdNum_val = toInt(fullFormData.class_id);
-    
+
     // Logika ini didasarkan pada 'showMajorField' (grade >= 9)
     // dan 'classIdRanges' (Middle 10-12, High 13-15).
     // Grade 9 = class_id 12.
@@ -872,7 +874,7 @@ const StudentProfile = () => {
       // Seharusnya ini tidak akan pernah terjadi karena dropdown, tapi untuk keamanan
       programErrors.class_id = "Grade is required.";
     }
-    
+
     if (needsMajor_val && !isFilled(fullFormData.major_id)) {
       programErrors.major_id = "Major is required for this grade.";
     }
@@ -1189,6 +1191,18 @@ const StudentProfile = () => {
     // eslint-disable-next-line
   }, []);
 
+  // [TAMBAH] Buat opsi dropdown untuk Discount (sekitar baris 1350)
+
+  const discountSelectOptions = useMemo(() => {
+    // Gunakan 'discount_types' agar sama dengan TermOfPaymentSection.js
+    if (!options?.discount_types) return [];
+
+    return options.discount_types.map((d) => ({
+      value: d.discount_type_id,
+      label: d.name,
+    }));
+  }, [options?.discount_types]);
+
   // [BARU] Tambahkan mapping rentang class_id
   const classIdRanges = useMemo(
     () => ({
@@ -1261,6 +1275,10 @@ const StudentProfile = () => {
     options?.transportations?.find(
       (t) => String(t.transport_id) === String(formData.transportation_id)
     )?.type || "";
+
+  const selectedDiscountOption = discountSelectOptions.find(
+    (opt) => String(opt.value) === String(formData.discount_name)
+  );
 
   return (
     <Main showBackButton onBackClick={handleBackClick}>
@@ -2392,7 +2410,7 @@ const StudentProfile = () => {
                       isSelected={
                         String(formData.program_id) === String(prog.program_id)
                       }
-                      isEditing={false}
+                      isEditing={isEditing && prog.name !== "Other"}
                       name="program_id"
                       value={prog.program_id}
                       onChange={handleRadioChange}
@@ -3828,18 +3846,136 @@ const StudentProfile = () => {
                 <div className={styles.row}>
                   <div className={styles.field}>
                     <div className={styles.fieldLabel}>Discount</div>
-                    <b className={styles.fieldValue}>
-                      {formData.discount_name || "-"}
-                    </b>
+                    {isEditing ? (
+                      <div className={styles.selectWrapper}>
+                        <Select
+                          id="discount_name"
+                          name="discount_name"
+                          options={discountSelectOptions}
+                          value={selectedDiscountOption || null}
+                          onChange={(opt) =>
+                            handleFormSelectChange("discount_name", opt)
+                          }
+                          placeholder="Select discount (if any)"
+                          isClearable
+                          classNamePrefix="react-select"
+                          menuPortalTarget={document.body}
+                        />
+                      </div>
+                    ) : (
+                      <b className={styles.fieldValue}>
+                        {selectedDiscountOption
+                          ? selectedDiscountOption.label
+                          : "-"}
+                      </b>
+                    )}
                   </div>
 
-                  {formData.discount_name && (
+                  {/* Tampilkan notes jika sedang edit ATAU jika ada isinya saat view */}
+                  {(isEditing || formData.discount_name) && (
                     <div className={styles.field}>
                       <div className={styles.fieldLabel}>Notes</div>
-                      <b className={styles.fieldValue}>
-                        {formData.discount_notes || "-"}
-                      </b>
+                      {isEditing ? (
+                        <input
+                          id="discount_notes"
+                          type="text"
+                          name="discount_notes"
+                          value={formData.discount_notes || ""}
+                          onChange={handleChange}
+                          className={styles.formInput}
+                          placeholder="Discount notes"
+                          disabled={!formData.discount_name} // <-- Note input nonaktif jika tidak ada diskon
+                        />
+                      ) : (
+                        <b className={styles.fieldValue}>
+                          {formData.discount_notes || "-"}
+                        </b>
+                      )}
                     </div>
+                  )}
+                </div>
+              </div>
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label htmlFor="va_mandiri" className={styles.fieldLabel}>
+                    Virtual Account Mandiri
+                  </label>
+                  {isEditing ? (
+                    <input
+                      id="va_mandiri"
+                      type="text"
+                      name="va_mandiri"
+                      value={studentInfo.va_mandiri || ""}
+                      onChange={handleStudentInfoChange}
+                      className={styles.formInput}
+                      placeholder="Enter VA number"
+                    />
+                  ) : (
+                    <b className={styles.fieldValue}>
+                      {studentInfo.va_mandiri || "-"}
+                    </b>
+                  )}
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="va_bni" className={styles.fieldLabel}>
+                    Virtual Account BNI
+                  </label>
+                  {isEditing ? (
+                    <input
+                      id="va_bni"
+                      type="text"
+                      name="va_bni"
+                      value={studentInfo.va_bni || ""}
+                      onChange={handleStudentInfoChange}
+                      className={styles.formInput}
+                      placeholder="Enter VA number"
+                    />
+                  ) : (
+                    <b className={styles.fieldValue}>
+                      {studentInfo.va_bni || "-"}
+                    </b>
+                  )}
+                </div>
+              </div>
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label htmlFor="va_bca" className={styles.fieldLabel}>
+                    Virtual Account BCA
+                  </label>
+                  {isEditing ? (
+                    <input
+                      id="va_bca"
+                      type="text"
+                      name="va_bca"
+                      value={studentInfo.va_bca || ""}
+                      onChange={handleStudentInfoChange}
+                      className={styles.formInput}
+                      placeholder="Enter VA number"
+                    />
+                  ) : (
+                    <b className={styles.fieldValue}>
+                      {studentInfo.va_bca || "-"}
+                    </b>
+                  )}
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="va_bri" className={styles.fieldLabel}>
+                    Virtual Account BRI
+                  </label>
+                  {isEditing ? (
+                    <input
+                      id="va_bri"
+                      type="text"
+                      name="va_bri"
+                      value={studentInfo.va_bri || ""}
+                      onChange={handleStudentInfoChange}
+                      className={styles.formInput}
+                      placeholder="Enter VA number"
+                    />
+                  ) : (
+                    <b className={styles.fieldValue}>
+                      {studentInfo.va_bri || "-"}
+                    </b>
                   )}
                 </div>
               </div>

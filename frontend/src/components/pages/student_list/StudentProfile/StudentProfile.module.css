@@ -1,6 +1,6 @@
 .infoContainer {
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   padding: 20px 0px 0px 0px;
