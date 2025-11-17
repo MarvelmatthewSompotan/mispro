@@ -22,6 +22,7 @@ class CancelledRegistration extends Model
         'student_id',
         'full_name',
         'reason',
+        'notes',
         'registration_id',
         'registration_date',
         'cancelled_at',

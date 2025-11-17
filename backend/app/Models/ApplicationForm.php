@@ -15,12 +15,13 @@ class ApplicationForm extends Model
     public $timestamps = true;
 
     const CREATED_AT = 'created_at';
-    const UPDATED_AT = null;
+    const UPDATED_AT = 'update_at';
 
     protected $fillable = [
         'application_id',
         'enrollment_id', 
-        'status', 
+        'status',
+        'notes',
         'submitted_at',
         'is_invalid_data'
     ];
