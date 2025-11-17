@@ -27,7 +27,7 @@
   --font-size-base: 16px;      /* Ukuran font dasar */
   --font-weight-regular: 400;  /* Berat font standar */
   --font-weight-semibold: 600; /* Berat font semi-tebal <-- BARU */
-  --font-weight-bold: 700;     /* Berat font tebal */
+  --font-weight-bold: 650;     /* Berat font tebal */
   --font-weight-black: 900;    /* Berat font ekstra (Black) */
   --line-height-base: 1.5;     /* Tinggi baris standar */
 }
