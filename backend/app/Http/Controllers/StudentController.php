@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\Enrollment;
 use App\Models\SchoolYear;
 use App\Models\StudentOld;
 use Illuminate\Http\Request;
@@ -191,6 +192,102 @@ class StudentController extends Controller
                 'per_page' => $students->perPage(),
                 'total' => $students->total(),
             ]
+        ]);
+    }
+
+    public function autoGraduatePreview(Request $request)
+    {
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        $schoolYearStr = ($currentMonth >= 7)
+            ? $currentYear . '/' . ($currentYear + 1)
+            : ($currentYear - 1) . '/' . $currentYear;
+
+        $currentSchoolYear = SchoolYear::where('year', $schoolYearStr)->first();
+
+        if (!$currentSchoolYear) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current school year is not defined.'
+            ], 400);
+        }
+
+        $currentSchoolYearId = $currentSchoolYear->school_year_id;
+
+        $graduatingGrades = ['K2', '6', '9', '12'];
+
+        $latestEnrollments = DB::table('enrollments as e1')
+            ->select('e1.id', 'e1.enrollment_id')
+            ->where('e1.school_year_id', $currentSchoolYearId)
+            ->whereRaw('e1.registration_date = (
+                SELECT MAX(e2.registration_date)
+                FROM enrollments AS e2
+                WHERE e2.id = e1.id
+                AND e2.school_year_id = e1.school_year_id
+            )');
+
+        $students = Student::select(
+            'students.id',
+            'students.student_id',
+            DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
+            'classes.grade',
+            'sections.name AS section_name',
+            'sections.section_id',
+            'school_years.year AS school_year',
+            'students.status',
+            'students.active',
+            'enrollments.status AS enrollment_status'
+        )
+            ->joinSub($latestEnrollments, 'latest_enrollments', function ($join) {
+                $join->on('latest_enrollments.id', '=', 'students.id');
+            })
+            ->join('enrollments', 'enrollments.enrollment_id', '=', 'latest_enrollments.enrollment_id')
+            ->join('school_years', 'school_years.school_year_id', '=', 'enrollments.school_year_id')
+            ->leftJoin('classes', 'classes.class_id', '=', 'enrollments.class_id')
+            ->leftJoin('sections', 'sections.section_id', '=', 'enrollments.section_id')
+            ->whereIn('classes.grade', $graduatingGrades)
+            ->where('students.active', 'YES')
+            ->where('school_years.school_year_id', $currentSchoolYearId)
+            ->orderBy('sections.section_id', 'asc') 
+            ->orderBy('classes.grade', 'asc')
+            ->orderBy('students.first_name', 'asc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'current_school_year' => $currentSchoolYear->year,
+            'total_students' => $students->count(),
+            'students' => $students
+        ]);
+    }
+
+    public function autoGraduateConfirm(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:students,id'
+        ]);
+
+        DB::transaction(function () use ($request) {
+
+            Student::whereIn('id', $request->ids)
+                ->update([
+                    'status' => 'Graduate',
+                    'active' => 'NO',
+                    // 'graduated_at' => now(),
+            ]);
+            
+            Enrollment::whereIn('id', $request->ids) 
+                ->where('status', 'ACTIVE')
+                ->update([
+                    'status' => 'INACTIVE'
+            ]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Selected students have been successfully graduated.'
         ]);
     }
 

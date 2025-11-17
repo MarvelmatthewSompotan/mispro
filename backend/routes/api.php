@@ -57,6 +57,8 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::patch('/{id}/update', [StudentController::class, 'updateStudent']);
     Route::get('/{id}/history-dates', [StudentController::class, 'getStudentHistoryDates']);
     Route::get('/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
+    Route::post('/auto-graduate/preview', [StudentController::class, 'autoGraduatePreview']);
+    Route::post('/auto-graduate/confirm', [StudentController::class, 'autoGraduateConfirm']);
   });
 });
 
