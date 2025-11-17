@@ -39,7 +39,7 @@ class Student extends Model
     public $timestamps = true;
 
     const CREATED_AT = 'registration_date';
-    const UPDATED_AT = null;
+    const UPDATED_AT = 'updated_at';
 
     protected $fillable = [
         'id',
@@ -72,8 +72,7 @@ class Student extends Model
         'kitas',
         'active',
         'status',
-        'update_at',
-        'graduate_at'
+        'graduated_at'
 
     ];
 

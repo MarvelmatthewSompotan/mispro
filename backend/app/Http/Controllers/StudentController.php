@@ -275,7 +275,8 @@ class StudentController extends Controller
                 ->update([
                     'status' => 'Graduate',
                     'active' => 'NO',
-                    // 'graduated_at' => now(),
+                    'graduated_at' => now(),
+                    'updated_at' => now(),
             ]);
             
             Enrollment::whereIn('id', $request->ids) 

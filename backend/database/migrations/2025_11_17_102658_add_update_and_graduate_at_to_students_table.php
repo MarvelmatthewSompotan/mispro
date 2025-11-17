@@ -9,14 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->timestamp('update_at')
+            $table->timestamp('updated_at')
                 ->nullable()
                 ->after('registration_date')
                 ->useCurrent();
 
-            $table->timestamp('graduate_at')
+            $table->timestamp('graduated_at')
                 ->nullable()
-                ->after('update_at')
+                ->after('updated_at')
                 ->useCurrent();
         });
     }
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->dropColumn(['update_at', 'graduate_at']);
+            $table->dropColumn(['updated_at', 'graduated_at']);
         });
     }
 };
