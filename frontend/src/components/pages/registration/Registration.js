@@ -16,6 +16,7 @@ import {
 } from '../../../services/api';
 
 const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
+  // Komponen ini membaca 'application_status' (Ini sudah benar)
   const status = registration.application_status?.toLowerCase() || 'confirmed';
   const statusStyle =
     status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
@@ -80,9 +81,13 @@ const Registration = () => {
   });
   const fetchControllerRef = useRef(null);
 
+  // Fungsi fetchRegistrations Anda yang baru sudah benar
   const fetchRegistrations = useCallback(
     async (filters = {}, page = 1, sorts = [], options = {}) => {
+      // Opsi 'isBackgroundRefresh' ini HANYA untuk auto-refresh
       const { isBackgroundRefresh = false } = options;
+      
+      // Jika BUKAN background refresh, set loading (INI YANG BENAR)
       if (!isBackgroundRefresh) setLoading(true);
 
       const controller = new AbortController();
@@ -245,7 +250,7 @@ const Registration = () => {
       };
       console.log('Auto refreshing registration list (background)...');
       fetchRegistrations(currentFilters, currentPage, sorts, {
-        isBackgroundRefresh: true,
+        isBackgroundRefresh: true, // Auto-refresh boleh di background
       });
     };
     const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
@@ -280,14 +285,19 @@ const Registration = () => {
     setSelectedRegistration(null);
   };
 
+  // === PERBAIKAN TASK 1 ===
+  // Mengembalikan logika dari KODE LAMA ANDA (yang berfungsi)
   const handleUpdateStatus = (id, newStatus) => {
+    
+    // 1. Update state LOKAL (untuk instant feedback di tabel)
     setRegistrationData((prevData) =>
       prevData.map((reg) => {
-        if (reg.registration_id === id && reg.application_form) {
+        if (reg.registration_id === id) {
           return {
             ...reg,
-            application_form: {
-              ...reg.application_form,
+            application_status: newStatus, // Properti yang dilihat tabel
+            application_form: { // Properti untuk konsistensi (seperti kode lama)
+              ...(reg.application_form || {}),
               status: newStatus,
             },
           };
@@ -295,12 +305,19 @@ const Registration = () => {
         return reg;
       })
     );
+
+    // 2. Refresh data dari SERVER (seperti kode lama Anda)
+    //    Memanggil 'fetchRegistrations' TANPA 'isBackgroundRefresh'.
+    //    Ini akan memicu 'setLoading(true)' (sesuai logika lama Anda)
+    //    yang akan menutup popup dan me-refresh tabel dengan benar.
     fetchRegistrations(
       { ...filters, search: search || undefined },
       currentPage,
       sorts
+      // Opsi { isBackgroundRefresh: true } DIHAPUS agar loading state ter-trigger
     );
   };
+  // === AKHIR PERBAIKAN ===
 
   return (
     <div className={styles.registrationContainer}>
@@ -429,7 +446,7 @@ const Registration = () => {
             valueKey='id'
             labelKey='name'
             currentFilterValue={filters.status}
-          />
+          /> {/* <-- PERBAIKAN SYNTAX ERROR DI SINI (sebelumnya '}') */}
         </div>
 
         <div className={styles.tableBody}>

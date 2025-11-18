@@ -486,3 +486,10 @@ export const updateUser = (userId, userData) => {
     body: JSON.stringify(userData),
   });
 };
+// --- AKHIR PERUBAHAN ---
+
+export const cancelRegistration = (applicationId, reasonType) => {
+  return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
+    method: 'POST',
+  });
+};
