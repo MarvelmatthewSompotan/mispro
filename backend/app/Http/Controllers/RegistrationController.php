@@ -68,8 +68,7 @@ class RegistrationController extends Controller
             ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id')           
             ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
             ->leftJoin('application_form_versions', 'application_form_versions.version_id', '=', DB::raw('(SELECT MAX(version_id) FROM application_form_versions WHERE application_id = application_forms.application_id AND action = "registration")'))
-            ->addSelect('application_form_versions.version_id as registration_version_id')
-            ->where('application_forms.status', 'Confirmed');
+            ->addSelect('application_form_versions.version_id as registration_version_id');
 
         // Filter Range
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -281,7 +280,13 @@ class RegistrationController extends Controller
                         ->where('enrollment_id', '!=', $enrollment_id);
             })->exists();
 
-            if ($hasOtherApplication) {
+            if (!$isLatest && $isCancelled) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'This registration cannot be invalidated. This student has already withdrawn.'
+                ], 400);
+            } else if ($hasOtherApplication) {
                 \Log::warning('Attempted to invalidaated NEW student registration with linked records', [
                     'student_id' => $student->student_id, 'studentall_id' => $student->studentall_id,
                     'application_id' => $applicationForm->application_id, 'enrollment_id' => $enrollment_id,
@@ -293,7 +298,7 @@ class RegistrationController extends Controller
                     'success' => false,
                     'message' => 'This registration cannot be invalidated because it belongs to a NEW/TRANSFEREE student who has other registration data linked to this student.'
                 ], 400);
-            }
+            } 
 
             $this->saveToCancelledRegistration($student, $enrollment, $invalidReason);
             $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
@@ -375,7 +380,13 @@ class RegistrationController extends Controller
                         ->where('enrollment_id', '!=', $enrollment_id);
             })->exists();
 
-            if ($hasOtherApplication) {
+            if (!$isLatest && $isCancelled) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'This registration cannot be cancelled. This student has already withdrawn.'
+                ], 400);
+            } else if ($hasOtherApplication) {
                 \Log::warning('Attempted to invalidaated NEW student registration with linked records', [
                     'student_id' => $student->student_id, 'studentall_id' => $student->studentall_id,
                     'application_id' => $applicationForm->application_id, 'enrollment_id' => $enrollment_id,

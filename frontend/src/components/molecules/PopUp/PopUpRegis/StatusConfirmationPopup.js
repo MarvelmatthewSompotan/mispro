@@ -11,7 +11,7 @@ import Button from '../../../atoms/Button';
 
 const reasonOptions = [
   { label: 'Withdraw', value: 'cancellationOfEnrollment' },
-  { label: 'Invalid Data', value: 'invalidSection' },
+  { label: 'Invalid Data', value: 'invalidData' },
 ];
 
 const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
@@ -139,9 +139,6 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
     // =================================================
   };
 
-  const isButtonDisabled =
-    isUpdating || isActionDisabled || (showReasonField && !selectedReason);
-
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.popUp} onClick={(e) => e.stopPropagation()}>
@@ -152,12 +149,6 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
             Please double-check your changes. Once submitted, some changes may
             not be reversible.
           </p>
-
-          {apiError && (
-            <div className={styles.apiErrorContainer}>
-              <p className={styles.apiErrorText}>{apiError}</p>
-            </div>
-          )}
         </div>
 
         {isLoading ? (
@@ -260,21 +251,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
           </div>
         )}
 
-        {/* === TASK 1: TAMPILKAN ERROR BACKEND DI SINI === */}
-        {/*
-          Kita letakkan di luar 'isLoading' block tapi sebelum 'button' block.
-          Kita gunakan 'styles.reasonError' agar gayanya konsisten.
-        */}
-        {apiError && (
-          <div
-            className={styles.reasonError}
-            // Tambahkan sedikit style agar posisinya rapi
-            style={{ padding: '0 20px 15px 20px', textAlign: 'center' }}
-          >
-            {apiError}
-          </div>
-        )}
-        {/* ============================================== */}
+        {apiError && <div className={styles.reasonError}>{apiError}</div>}
 
         <div className={styles.button}>
           <div className={styles.rowBtn}>

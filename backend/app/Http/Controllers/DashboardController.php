@@ -252,7 +252,6 @@ class DashboardController extends Controller
                 'enrollment.section', 
                 'enrollment.schoolYear'
             ])
-                ->where('status', 'Confirmed')
                 ->orderByDesc('created_at')
                 ->take(3)
                 ->get()
@@ -263,6 +262,7 @@ class DashboardController extends Controller
                     $schoolYear = $form->enrollment->schoolYear;
 
                     return [
+                        'application_id' => $form->application_id ?? null,
                         'student_id' => $student->student_id ?? null,
                         'full_name' => trim(
                             collect([$student->first_name, $student->middle_name, $student->last_name])

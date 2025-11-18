@@ -147,7 +147,7 @@ const Home = () => {
                 total_registration_growth_percent,
                 'last year'
               )}
-              style={{ flex: 'none' }} 
+              style={{ flex: 'none' }}
             />
             <div className={styles.dotsPlaceholder} />
           </div>
@@ -161,7 +161,7 @@ const Home = () => {
                 today_registration_growth_percent,
                 'yesterday'
               )}
-              style={{ flex: 'none' }} 
+              style={{ flex: 'none' }}
             />
             <div className={styles.dotsPlaceholder} />
           </div>
@@ -173,7 +173,7 @@ const Home = () => {
               variant='blue'
               footerText={newStudentData[newStudentSlide].footerText}
               onClick={handleNewStudentClick}
-              style={{ flex: 'none' }} 
+              style={{ flex: 'none' }}
             />
             <div className={styles.paginationDots}>
               <span
@@ -196,7 +196,7 @@ const Home = () => {
               variant='blue'
               footerText={returnStudentData[returnStudentSlide].footerText}
               onClick={handleReturnStudentClick}
-              style={{ flex: 'none' }} 
+              style={{ flex: 'none' }}
             />
             <div className={styles.paginationDots}>
               <span
@@ -229,7 +229,7 @@ const Home = () => {
           <div className={styles.tableBody}>
             {latest_registrations?.length > 0 ? (
               latest_registrations.map((student) => (
-                <div key={student.student_id} className={styles.tableRow}>
+                <div key={student.application_id} className={styles.tableRow}>
                   <div className={styles.tableCell}>{student.student_id}</div>
                   <div className={styles.tableCell}>{student.full_name}</div>
                   <div className={styles.tableCell}>{student.grade}</div>
@@ -237,15 +237,15 @@ const Home = () => {
                   <div className={styles.tableCell}>{student.school_year}</div>
                   <div className={styles.tableCell}>
                     <div
-                    className={` ${
-                      student.status?.toLowerCase() === 'confirmed'
-                        ? styles.statusConfirmed
-                        : student.status?.toLowerCase() === 'cancelled'
-                        ? styles.statusCancelled
-                        : ''
-                    }`}
-                  >
-                    {student.status}
+                      className={` ${
+                        student.status?.toLowerCase() === 'confirmed'
+                          ? styles.statusConfirmed
+                          : student.status?.toLowerCase() === 'cancelled'
+                          ? styles.statusCancelled
+                          : ''
+                      }`}
+                    >
+                      {student.status}
                     </div>
                   </div>
                 </div>

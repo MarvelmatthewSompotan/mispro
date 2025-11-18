@@ -269,8 +269,8 @@
 .inputField,
 .dropdownSelect,
 .textareaField,
-input[type="text"],
-input[type="number"],
+input[type='text'],
+input[type='number'],
 select,
 textarea {
   font-family: var(--font-primary);
@@ -286,10 +286,10 @@ textarea {
 .dropdownSelect.hasValue,
 .textareaField:focus,
 .textareaField.hasValue,
-input[type="text"]:focus,
-input[type="text"].hasValue,
-input[type="number"]:focus,
-input[type="number"].hasValue,
+input[type='text']:focus,
+input[type='text'].hasValue,
+input[type='number']:focus,
+input[type='number'].hasValue,
 select:focus,
 select.hasValue,
 textarea:focus,
@@ -301,8 +301,8 @@ textarea.hasValue {
 .inputField::placeholder,
 .dropdownSelect::placeholder,
 .textareaField::placeholder,
-input[type="text"]::placeholder,
-input[type="number"]::placeholder,
+input[type='text']::placeholder,
+input[type='number']::placeholder,
 select::placeholder,
 textarea::placeholder {
   font-weight: var(--font-weight-regular);
@@ -408,7 +408,7 @@ textarea::placeholder {
 
 .virtualAccountLabel {
   font-family: var(--font-primary);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-semibold);
   font-size: 16px;
   color: var(--main-text);
 }
@@ -422,8 +422,8 @@ textarea::placeholder {
   background-color: transparent;
   border: none;
   border-bottom: 1px solid var(--main-text);
-  box-sizing: border-box; 
-  width: 90%; 
+  box-sizing: border-box;
+  width: 90%;
 }
 
 .container {
@@ -697,8 +697,8 @@ textarea::placeholder {
 .inputField,
 .dropdownSelect,
 .textareaField,
-input[type="text"],
-input[type="number"],
+input[type='text'],
+input[type='number'],
 select,
 textarea {
   font-family: var(--font-primary);
@@ -714,10 +714,10 @@ textarea {
 .dropdownSelect.hasValue,
 .textareaField:focus,
 .textareaField.hasValue,
-input[type="text"]:focus,
-input[type="text"].hasValue,
-input[type="number"]:focus,
-input[type="number"].hasValue,
+input[type='text']:focus,
+input[type='text'].hasValue,
+input[type='number']:focus,
+input[type='number'].hasValue,
 select:focus,
 select.hasValue,
 textarea:focus,
@@ -729,8 +729,8 @@ textarea.hasValue {
 .inputField::placeholder,
 .dropdownSelect::placeholder,
 .textareaField::placeholder,
-input[type="text"]::placeholder,
-input[type="number"]::placeholder,
+input[type='text']::placeholder,
+input[type='number']::placeholder,
 select::placeholder,
 textarea::placeholder {
   font-weight: var(--font-weight-regular);
@@ -850,8 +850,8 @@ textarea::placeholder {
   background-color: transparent;
   border: none;
   border-bottom: 1px solid var(--main-text);
-  box-sizing: border-box; 
-  width: 90%; 
+  box-sizing: border-box;
+  width: 90%;
 }
 
 /* --- TAMBAHAN: Style placeholder dan focus untuk input VA --- */
@@ -862,11 +862,9 @@ textarea::placeholder {
 
 .virtualAccountNumber:focus {
   border-bottom-style: solid;
-  border-bottom-color: var(
-    --main-text
-  ); 
-  border-bottom-width: 1px ; 
-  padding-bottom: 3px; 
+  border-bottom-color: var(--main-text);
+  border-bottom-width: 1px;
+  padding-bottom: 3px;
 }
 
 :global(.react-select__control),
@@ -879,7 +877,6 @@ textarea::placeholder {
 :global(.react-select__placeholder) {
   font-family: var(--font-primary) !important;
 }
-
 
 :global(.react-select__control),
 :global(.react-select__control--is-focused) {

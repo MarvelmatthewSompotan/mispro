@@ -135,28 +135,6 @@ export const submitRegistrationForm = (draftId, formData) => {
   });
 };
 
-export const updateRegistrationStatus = (
-  applicationId,
-  targetStatus,
-  reason
-) => {
-  if (targetStatus === 'Cancelled' && reason) {
-    let reasonType;
-    if (reason === 'Withdraw') {
-      reasonType = 'cancellationOfEnrollment';
-    } else if (reason === 'Invalid') {
-      reasonType = 'invalidData';
-    } else {
-      throw new Error('Invalid cancellation reason selected.');
-    }
-    return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
-      method: 'POST',
-    });
-  }
-
-  throw new Error('Cannot determine API endpoint or missing required data.');
-};
-
 export const searchStudent = (searchTerm) => {
   return apiFetch(`/students/search?search=${encodeURIComponent(searchTerm)}`);
 };

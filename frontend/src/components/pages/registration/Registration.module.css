@@ -15,8 +15,8 @@
   gap: 20px;
   text-align: left;
   font-size: 32px;
-  color: var(--main-text); 
-  font-family: var(--font-primary); 
+  color: var(--main-text);
+  font-family: var(--font-primary);
 }
 
 .title {
@@ -60,9 +60,9 @@
   justify-content: center;
   position: relative;
   width: 426px;
-  border: 2px solid var(--main-grey); 
+  border: 2px solid var(--main-grey);
   border-radius: 5px;
-  background-color: var(--secondary-background); 
+  background-color: var(--secondary-background);
   height: 40px;
 }
 
@@ -83,7 +83,7 @@
 .searchInput::placeholder {
   opacity: 0.8;
   font-size: 15px;
-  font-family: var(--font-primary); 
+  font-family: var(--font-primary);
 }
 
 .searchIconImg {
@@ -125,7 +125,7 @@
 }
 
 .registrationDataRow:hover {
-  background-color: #f7f7f7; 
+  background-color: #f7f7f7;
 }
 
 .registrationDataRow:last-child {
@@ -140,7 +140,7 @@
 .messageCell {
   padding: 48px 24px;
   text-align: center;
-  color: var(--main-grey); 
+  color: var(--main-grey);
   font-size: 16px;
 }
 
@@ -153,7 +153,7 @@
   word-break: break-word;
   white-space: nornmal;
   font-size: 14px;
-  color: var(--main-text); 
+  color: var(--main-text);
   font-weight: 500;
 }
 
@@ -195,7 +195,7 @@
   position: relative;
   line-height: 100%;
   font-weight: 600;
-  color: var(--text-accent); 
+  color: var(--text-accent);
 }
 
 .statusConfirmed,
@@ -209,7 +209,7 @@
   cursor: pointer;
   text-align: center;
   font-size: 14px;
-  font-family: var(--font-primary); 
+  font-family: var(--font-primary);
   border: none;
 }
 
@@ -219,4 +219,7 @@
 
 .statusCancelled {
   background-color: var(--red);
+  pointer-events: none;
+  cursor: default !important;
+  opacity: 0.5;
 }
