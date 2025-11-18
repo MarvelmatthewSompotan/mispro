@@ -85,6 +85,18 @@ export const login = async (identifier, password) => {
   return data;
 };
 
+export const resetLogin = async (identifier, password) => {
+  // requiresAuth = false karena user belum login / sedang bermasalah loginnya
+  return apiFetch(
+    '/reset-login',
+    {
+      method: 'POST',
+      body: JSON.stringify({ identifier, password }),
+    },
+    false
+  );
+};
+
 export const logout = async () => {
   try {
     // Endpoint logout tetap butuh token untuk tahu sesi mana yang harus dihapus di backend
