@@ -750,12 +750,17 @@ class StudentController extends Controller
 
                 if (in_array(strtolower($validated['status']), $inactiveStatuses)) {
                     $student->active = 'NO';
+                    $student->updated_at = now();
+                    if ($validated['status'] === 'Graduate') {
+                        $student->graduated_at = now();
+                    }
                     if ($latestEnrollment) {
                         $latestEnrollment->status = 'INACTIVE';
                         $latestEnrollment->save();
                     }
                 } else {
                     $student->active = 'YES';
+                    $student->updated_at = now();
                     if ($latestEnrollment) {
                         $latestEnrollment->status =
                             ($currentSchoolYearId && $latestEnrollment->school_year_id === $currentSchoolYearId)

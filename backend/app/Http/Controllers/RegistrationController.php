@@ -588,9 +588,6 @@ class RegistrationController extends Controller
         
     }
 
-    /**
-     * Get current registration context
-     */
     public function getRegistrationContext($draft_id)
     {
         $draft = Draft::where('draft_id', $draft_id)
@@ -802,7 +799,7 @@ class RegistrationController extends Controller
                 'father_company' => 'nullable|string',
                 'father_occupation' => 'nullable|string',
                 'father_phone' => 'nullable|string',
-                'father_email' => 'nullable|email', // Perbaiki email validation
+                'father_email' => 'nullable|email', 
                 'father_address_street' => 'nullable|string',
                 'father_address_rt' => 'nullable|string',
                 'father_address_rw' => 'nullable|string',
@@ -817,7 +814,7 @@ class RegistrationController extends Controller
                 'mother_company' => 'nullable|string',
                 'mother_occupation' => 'nullable|string',
                 'mother_phone' => 'nullable|string',
-                'mother_email' => 'nullable|email', // Perbaiki email validation
+                'mother_email' => 'nullable|email', 
                 'mother_address_street' => 'nullable|string',
                 'mother_address_rt' => 'nullable|string',
                 'mother_address_rw' => 'nullable|string',
@@ -830,7 +827,7 @@ class RegistrationController extends Controller
                 'guardian_name' => 'nullable|string',
                 'relation_to_student' => 'nullable|string',
                 'guardian_phone' => 'nullable|string',
-                'guardian_email' => 'nullable|email', // Perbaiki email validation
+                'guardian_email' => 'nullable|email', 
                 'guardian_address_street' => 'nullable|string',
                 'guardian_address_rt' => 'nullable|string',
                 'guardian_address_rw' => 'nullable|string',
@@ -912,20 +909,20 @@ class RegistrationController extends Controller
                 // Check existing student
                 $studentExists  = Student::where(function($query) use ($validated) {
                     $query->where(function($q) use ($validated) {
-                        // 1. Kriteria Nama/TTL
+                        // 1. Nama/TTL
                         $q->where('first_name', $validated['first_name'])
                         ->where('last_name', $validated['last_name'])
                         ->where('date_of_birth', $validated['date_of_birth'])
                         ->where('place_of_birth', $validated['place_of_birth']);
                     })
                     ->orWhere(function($q) use ($validated) {
-                            // 2. Kriteria NIK
+                            // 2. NIK
                             if (!empty($validated['nik'])) {
                                 $q->where('nik', $validated['nik']);
                             }
                     })
                     ->orWhere(function($q) use ($validated) {
-                        // 3. Kriteria KITAS
+                        // 3. KITAS
                         if (!empty($validated['kitas'])) {
                             $q->where('kitas', $validated['kitas']);
                         }
@@ -1354,7 +1351,6 @@ class RegistrationController extends Controller
     private function updateStudentData($student, $validated, $registrationId, $draft)
     {
         $student->update([
-            'registration_id' => $registrationId,
             'first_name' => $validated['first_name'],
             'middle_name' => $validated['middle_name'],
             'last_name' => $validated['last_name'],
@@ -1377,6 +1373,11 @@ class RegistrationController extends Controller
             'nik' => $validated['nik'],
             'kitas' => $validated['kitas'],
             'nisn' => $validated['nisn'],
+            'updated_at' => now(),
+            'va_mandiri' => $validated['va_mandiri'],
+            'va_bca' => $validated['va_bca'],
+            'va_bni' => $validated['va_bni'],
+            'va_bri' => $validated['va_bri'],
         ]);
     }
 

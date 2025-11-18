@@ -10,14 +10,12 @@ class StorageController extends Controller
 {
     public function serveFile($path)
     {
-        // Pastikan path hanya berisi nama folder dan file
         $path = str_replace('storage/', '', $path);
         
         if (!Storage::disk('public')->exists($path)) {
             return response()->json(['error' => 'File not found.'], 404);
         }
 
-        // Gunakan Storage::response. Middleware 'cors' harus menambahkan header CORS.
         return Storage::disk('public')->response($path);
     }
 }
