@@ -196,6 +196,14 @@ class RegistrationController extends Controller
             ], 400);
         }
 
+        $notes = null;
+        if ($reason_type === 'cancellationOfEnrollment') {
+            $request->validate([
+                'notes' => 'required|string|max:1000',
+            ]);
+            $notes = $request->input('notes');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -232,6 +240,7 @@ class RegistrationController extends Controller
                 'student_id_enrollment' => (int)$enrollment->id,
                 'invalidReason' => 'Invalid Data',
                 'cancellationReason' => 'Cancellation of Enrollment',
+                'notes' => $notes,
             ];
             
             $data['isLatest'] = $this->isLatestVersion($data['student_id_enrollment'], $data['current_version']);
@@ -255,6 +264,7 @@ class RegistrationController extends Controller
             return response()->json(['success' => false, 'message' => 'Invalid reason type supplied.'], 400);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Failed to cancel registration', [
                 'error' => $e->getMessage(),
                 'application_form_id' => $application_id,
@@ -272,6 +282,7 @@ class RegistrationController extends Controller
     protected function InvalidDataCancellation(array $data)
     {
         extract($data); 
+        $notes = $data['notes'] ?? null; 
 
         if ($studentStatus === 'new' || $studentStatus === 'transferee') {
             
@@ -300,7 +311,7 @@ class RegistrationController extends Controller
                 ], 400);
             } 
 
-            $this->saveToCancelledRegistration($student, $enrollment, $invalidReason);
+            $this->saveToCancelledRegistration($student, $enrollment, $invalidReason, $notes);
             $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
 
             $newStatus = 'Deleted New/Transferee (Invalid Data)';
@@ -318,7 +329,7 @@ class RegistrationController extends Controller
             
             if ($inOldDatabase) {
                 if ($current_version === 1 && $isLatest) {
-                    $this->saveToCancelledRegistration($student, $enrollment, $invalidReason);
+                    $this->saveToCancelledRegistration($student, $enrollment, $invalidReason, $notes);
                     $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
 
                     $newStatus = 'Deleted Old (Invalid Data)';
@@ -342,11 +353,17 @@ class RegistrationController extends Controller
                     ], 200);
                 } else if (!$isLatest && $isCancelled) {
                     DB::rollBack();
-                    return response()->json(['success' => false, 'message' => 'This registration cannot be invalidated. The latest enrollment for this student is already cancelled.'], 400);
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'This registration cannot be invalidated. The latest enrollment for this student is already cancelled.'
+                    ], 400);
                 }
                 
                 DB::rollBack();
-                return response()->json(['success' => false, 'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'], 400);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'
+                ], 400);
             } else if ($isLatest) {
                 $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
 
@@ -360,19 +377,30 @@ class RegistrationController extends Controller
                 ], 200);
             } else if (!$isLatest && $isCancelled) {
                 DB::rollBack();
-                return response()->json(['success' => false, 'message' => 'This registration cannot be invalidated. The latest enrollment for this student is already cancelled.'], 400);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'This registration cannot be invalidated. The latest enrollment for this student is already cancelled.'
+                ], 400);
             }
 
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'], 400);
+            return response()->json([
+                'success' => false, 
+                'message' => 'OLD student registration could not be invalidated (not latest enrollment version).'
+            ], 400);
         }
         DB::rollBack();
-        return response()->json(['success' => false, 'message' => 'Invalid student status for cancellation.'], 400);
+        return response()->json([
+            'success' => false, 
+            'message' => 'Invalid student status for cancellation.'
+        ], 400);
     }
 
     protected function EnrollmentCancellation(array $data)
     {
         extract($data); 
+        $notes = $data['notes'];
+        
         if ($studentStatus === 'new' || $studentStatus === 'transferee') {
             
             $hasOtherApplication = ApplicationForm::whereHas('enrollment.student', function ($query) use ($student, $enrollment_id) {
@@ -400,7 +428,7 @@ class RegistrationController extends Controller
                 ], 400);
             }
 
-            $this->saveToCancelledRegistration($student, $enrollment, $cancellationReason);
+            $this->saveToCancelledRegistration($student, $enrollment, $cancellationReason, $notes);
             $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
 
             $newStatus = 'Deleted New/Transferee (Cancelled)';
@@ -415,6 +443,7 @@ class RegistrationController extends Controller
         } else if ($studentStatus === 'old') {
             
             if ($isLatest) { 
+                $applicationForm->notes = $notes;
                 $student->status = 'Withdraw';
                 $student->active = 'NO';
                 $applicationForm->status = 'Cancelled';
@@ -434,18 +463,27 @@ class RegistrationController extends Controller
                 ], 200);
             } else if (!$isLatest && $isCancelled) {
                 DB::rollBack();
-                return response()->json(['success' => false, 'message' => 'This registration cannot be cancelled. The latest enrollment for this student is already cancelled.'], 400); 
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'This registration cannot be cancelled. The latest enrollment for this student is already cancelled.'
+                ], 400); 
             }
 
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'OLD student registration could not be cancelled (Old, not latest enrollment version).'], 400);
+            return response()->json([
+                'success' => false, 
+                'message' => 'OLD student registration could not be cancelled (Old, not latest enrollment version).'
+            ], 400);
         }
         
         DB::rollBack();
-        return response()->json(['success' => false, 'message' => 'Invalid student status for cancellation.'], 400);
+        return response()->json([
+            'success' => false, 
+            'message' => 'Invalid student status for cancellation.'
+        ], 400);
     }
 
-    private function saveToCancelledRegistration($student, $enrollment, $reason)
+    private function saveToCancelledRegistration($student, $enrollment, $reason, $notes)
     {
         CancelledRegistration::create([
             'student_id' => $student->studentall_id,
@@ -456,8 +494,10 @@ class RegistrationController extends Controller
             'registration_date' => $enrollment->registration_date,
             'cancelled_by' => auth()->user()->username ?? 'anonymous', 
             'cancelled_at' => now(),
+            'created_at' => now(),
             'is_use_student_id' => false,
             'reason' => $reason,
+            'notes' => $notes,
         ]);
     }
 
@@ -1493,7 +1533,6 @@ class RegistrationController extends Controller
     {
         return ApplicationForm::create([
             'enrollment_id' => $enrollment->enrollment_id,
-            'is_invalid_data' => false,
             'status' => 'Confirmed',
             'submitted_at' => now(),
         ]);

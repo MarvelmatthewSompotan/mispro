@@ -464,10 +464,21 @@ export const updateUser = (userId, userData) => {
     body: JSON.stringify(userData),
   });
 };
-// --- AKHIR PERUBAHAN ---
 
-export const cancelRegistration = (applicationId, reasonType) => {
+export const cancelRegistration = (applicationId, reasonType, payload = {}) => {
+  const method = 'POST';
+
+  if (reasonType === 'cancellationOfEnrollment' && payload.notes) {
+    return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+  }
+
   return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
-    method: 'POST',
+    method: method,
   });
 };

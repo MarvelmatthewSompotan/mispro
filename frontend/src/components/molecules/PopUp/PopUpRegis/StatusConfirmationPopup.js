@@ -19,11 +19,9 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   const [selectedReason, setSelectedReason] = useState('');
   const [reasonError, setReasonError] = useState('');
   const [targetStatus, setTargetStatus] = useState(null);
-
-  // === TASK 1: TAMBAHAN STATE UNTUK ERROR BACKEND ===
+  const [notes, setNotes] = useState('');
+  const [notesError, setNotesError] = useState('');
   const [apiError, setApiError] = useState('');
-  // ================================================
-
   const [isLoading, setIsLoading] = useState(true);
   const [fullData, setFullData] = useState(null);
 
@@ -67,9 +65,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   }, [registration]);
 
   const handleToggleStatus = () => {
-    // === TASK 1: BERSIHKAN ERROR JIKA STATUS DIGANTI ===
     setApiError('');
-    // ================================================
 
     setTargetStatus((prev) => {
       const next = prev === 'Confirmed' ? 'Cancelled' : 'Confirmed';
@@ -77,6 +73,8 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
       if (next !== 'Cancelled') {
         setSelectedReason('');
         setReasonError('');
+        setNotes('');
+        setNotesError('');
       }
 
       return next;
@@ -84,6 +82,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
   };
 
   const showReasonField = targetStatus === 'Cancelled';
+  const showNotesField = selectedReason === 'cancellationOfEnrollment';
 
   const handleUpdate = async () => {
     const applicationId = registration.application_id;
@@ -94,49 +93,62 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
     }
 
     setIsUpdating(true);
-    // === TASK 1: BERSIHKAN ERROR SEBELUM API CALL ===
     setApiError('');
-    // ===============================================
+    setReasonError('');
+    setNotesError('');
 
     try {
       if (targetStatus === 'Cancelled') {
         if (!selectedReason) {
           setReasonError('Cancellation reason must be selected.');
-          // Pastikan stop loading jika validasi gagal
           setIsUpdating(false);
           return;
         }
 
-        await cancelRegistration(applicationId, selectedReason);
+        if (selectedReason === 'cancellationOfEnrollment' && !notes.trim()) {
+          setNotesError('Notes are required for Withdrawal.');
+          setIsUpdating(false);
+          return;
+        }
+
+        let payload = {};
+        if (selectedReason === 'cancellationOfEnrollment') {
+          payload = { notes };
+        }
+
+        await cancelRegistration(applicationId, selectedReason, payload);
       }
 
-      // Ini hanya berjalan jika API call (await) di atas SUKSES
       onUpdateStatus(registration.registration_id, targetStatus);
       onClose();
     } catch (err) {
-      // === TASK 1: TANGKAP DAN TAMPILKAN ERROR BACKEND ===
       console.error('Failed updating:', err);
-      // Ambil pesan error dari response backend (jika ada),
-      // atau gunakan pesan error default
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
         'An unexpected error occurred. Please try again.';
 
       setApiError(errorMessage);
-      // ==================================================
     } finally {
       setIsUpdating(false);
     }
   };
 
   const handleReasonChange = (e) => {
+    const newReason = e.target.value;
     setSelectedReason(e.target.value);
     if (reasonError) setReasonError('');
-
-    // === TASK 1: BERSIHKAN ERROR JIKA REASON DIGANTI ===
     if (apiError) setApiError('');
-    // =================================================
+    if (newReason !== 'cancellationOfEnrollment') {
+      setNotes('');
+      setNotesError('');
+    }
+  };
+
+  const handleNotesChange = (e) => {
+    setNotes(e.target.value);
+    if (notesError) setNotesError('');
+    if (apiError) setApiError('');
   };
 
   return (
@@ -228,16 +240,41 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
                       </option>
                     ))}
                   </select>
-
                   {reasonError && (
                     <div className={styles.reasonError}>{reasonError}</div>
                   )}
-
-                  {/* NOTE: Kita tidak meletakkan apiError di sini
-                    karena ini HANYA MUNCUL jika 'showReasonField' true.
-                    Error backend bisa terjadi kapan saja.
-                  */}
                 </div>
+              )}
+
+              {showNotesField && (
+                <>
+                  <div
+                    className={styles.infoRow}
+                    style={{ alignItems: 'flex-start' }}
+                  >
+                    <span className={styles.infoLabel}>Notes</span>
+                    <span className={styles.separator}>:</span>
+                    <textarea
+                      className={styles.notesTextarea}
+                      value={notes}
+                      onChange={handleNotesChange}
+                      placeholder='Please explain the reason for withdrawal...'
+                      rows={2}
+                    />
+                  </div>
+                  {notesError && (
+                    <div
+                      className={styles.notesError}
+                      style={{
+                        padding: '0 0 5px 0',
+                        textAlign: 'left',
+                        marginLeft: '165px',
+                      }}
+                    >
+                      {notesError}
+                    </div>
+                  )}
+                </>
               )}
 
               {!showReasonField && (
