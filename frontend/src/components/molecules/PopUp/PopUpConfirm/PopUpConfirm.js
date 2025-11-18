@@ -39,7 +39,7 @@ const PopUpConfirm = React.memo(
           });
           onConfirm();
         } else {
-          alert("Registration failed: " (response.error || "Unknown error"));
+          alert("Registration failed: "(response.error || "Unknown error"));
         }
       } catch (error) {
         const errorMessage = error.response?.data?.error || "";
@@ -212,7 +212,7 @@ const PopUpConfirm = React.memo(
         residence_payment: formData.termOfPayment?.residence_payment || "",
         financial_policy_contract:
           formData.termOfPayment?.financial_policy_contract || "Not Signed",
-        discount_name: formData.termOfPayment?.discount_name || null,
+        discount_name: formData.termOfPayment?.discount_name || "",
         discount_notes: formData.termOfPayment?.discount_notes || null,
         va_mandiri: formData.termOfPayment?.va_mandiri || null,
         va_bni: formData.termOfPayment?.va_bni || null,
