@@ -1,10 +1,5 @@
 // eslint-disable-next-line
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, useNavigate, useBlocker } from "react-router-dom";
 import Main from "../../../layout/Main";
 import StudentStatusSection from "./StudentStatus/StudentStatusSection";
@@ -41,15 +36,15 @@ const RegistrationForm = () => {
   const [setPrefillTrigger] = useState(0);
   const [sharedData, setSharedData] = useState(null);
   const isDormitoryStudent = useMemo(() => {
-        const resId = formSections?.facilities?.residence_id;
-        if (!resId || !sharedData?.residence_halls) return false;
-        const selectedResidence = sharedData.residence_halls.find(
-          (r) => r.residence_id === resId
-        );
-        return selectedResidence
-          ? selectedResidence.type.toLowerCase().includes("dormitory")
-          : false;
-      }, [formSections?.facilities?.residence_id, sharedData]);
+    const resId = formSections?.facilities?.residence_id;
+    if (!resId || !sharedData?.residence_halls) return false;
+    const selectedResidence = sharedData.residence_halls.find(
+      (r) => r.residence_id === resId
+    );
+    return selectedResidence
+      ? selectedResidence.type.toLowerCase().includes("dormitory")
+      : false;
+  }, [formSections?.facilities?.residence_id, sharedData]);
   const [isLoading, setIsLoading] = useState(true);
   const [validationState, setValidationState] = useState({});
   const [errors, setErrors] = useState({});
@@ -251,12 +246,20 @@ const RegistrationForm = () => {
       }
 
       // Prefill Term of Payment
-      if (
-        latestData.termOfPayment &&
-        Object.keys(latestData.termOfPayment).length > 0
-      ) {
-        console.log("Prefilling termOfPayment:", latestData.termOfPayment);
-        handleSectionDataChange("termOfPayment", latestData.termOfPayment);
+      const termOfPaymentData = { ...(latestData.termOfPayment || {}) };
+
+      // 2. Ambil data VA dari studentInfo (jika ada) dan gabungkan
+      if (latestData.studentInfo) {
+        termOfPaymentData.va_mandiri = latestData.studentInfo.va_mandiri;
+        termOfPaymentData.va_bca = latestData.studentInfo.va_bca;
+        termOfPaymentData.va_bni = latestData.studentInfo.va_bni;
+        termOfPaymentData.va_bri = latestData.studentInfo.va_bri;
+      }
+
+      // 3. Kirim data gabungan jika tidak kosong
+      if (Object.keys(termOfPaymentData).length > 0) {
+        console.log("Prefilling termOfPayment (merged):", termOfPaymentData);
+        handleSectionDataChange("termOfPayment", termOfPaymentData);
       }
 
       // (Kita tidak prefill otherDetail dari data siswa lama, diasumsikan ini selalu baru)
@@ -475,7 +478,7 @@ const RegistrationForm = () => {
             isDormitory={isDormitoryStudent}
           />
         </div>
-        
+
         {/* [MODIFIED 5/5] Memberikan props onDataChange dan error ke OtherDetailSection */}
         <div id="otherDetail">
           <OtherDetailSection

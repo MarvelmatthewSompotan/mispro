@@ -27,8 +27,13 @@ function Print() {
 
   // [KEMBALIKAN 1/3]
   // Ambil kembali 'otherDetail' dari location.state
-  const { applicationId, version, fromSubmission, fromStudentProfile, otherDetail } =
-    location.state || {};
+  const {
+    applicationId,
+    version,
+    fromSubmission,
+    fromStudentProfile,
+    otherDetail,
+  } = location.state || {};
 
   const printRef = useRef();
   const [previewData, setPreviewData] = useState(null);
@@ -145,8 +150,32 @@ function Print() {
             ...otherDetail, // Timpa/tambah dengan data dari form
           };
         }
+        const discountList = optionsResp.discount_types || [];
+
+        // Cek jika data dan daftar diskon ada
+        if (apiData && apiData.request_data && discountList.length > 0) {
+          // Ambil ID diskon dari data
+          const discountId = apiData.request_data.discount_name;
+
+          if (discountId) {
+            // Cari nama diskon yang sesuai berdasarkan ID
+            const foundDiscount = discountList.find(
+              (d) => String(d.discount_type_id) === String(discountId)
+            );
+
+            // Jika ketemu, ganti ID dengan NAMA di data yang akan di-set
+            if (foundDiscount) {
+              apiData.request_data.discount_name = foundDiscount.name;
+            }
+          }
+        }
+        // --- [AKHIR PERUBAHAN] ---
 
         setPreviewData(apiData); // Set data yang sudah digabungkan
+        console.log(
+          "Data yang diterima dari getRegistrationPreview:",
+          apiData.request_data
+        );
 
         setSectionOptions(optionsResp.sections || []);
         setProgramOptions(optionsResp.programs || []);
@@ -230,7 +259,9 @@ function Print() {
   const isDormitorySelected = (() => {
     const resId = previewData?.request_data?.residence_id;
     if (!resId || !residenceHallOptions?.length) return false;
-    const item = residenceHallOptions.find((r) => String(r.residence_id) === String(resId));
+    const item = residenceHallOptions.find(
+      (r) => String(r.residence_id) === String(resId)
+    );
     const label = (item?.type || item?.name || "").toLowerCase().trim();
     const hasNon = /\bnon\b/.test(label) || label.includes("non-res");
     const isDorm =

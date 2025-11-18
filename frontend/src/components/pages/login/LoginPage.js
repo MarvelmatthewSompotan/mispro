@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, getMe } from '../../../services/api';
+import { login, getMe, resetLogin } from '../../../services/api';
 import Button from '../../atoms/Button';
-// Import assets
 import logoMis from '../../../assets/logo-mis-f.png';
 import bgLogin from '../../../assets/bg_login.jpg';
-// Elips untuk mode Login
 import ellipseTop from '../../../assets/elipse1_login.svg';
 import ellipseBottom from '../../../assets/elipse2_login.svg';
-// Elips untuk mode Reset
 import ellipseTopReset from '../../../assets/elipse3_reset.svg';
 import ellipseBottomReset from '../../../assets/elipse4_reset.svg';
-
-// --- TAMBAHKAN IMPORT IKON MATA DI SINI ---
-// (Ganti nama file ini sesuai dengan file aset Anda)
 import eyeClosedIcon from '../../../assets/hide.svg';
 import eyeOpenIcon from '../../../assets/open.svg';
-// ------------------------------------------
-
-// Import CSS baru
 import styles from './LoginPage.module.css';
 
 const LoginPage = () => {

@@ -12,12 +12,15 @@ const TermOfPaymentSection = ({
   forceError,
   isDormitory = false,
 }) => {
-  const hydratedRef = useRef(false);
   const [tuitionFees, setTuitionFees] = useState("");
   const [residencePayment, setResidencePayment] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
   const [discountName, setDiscountName] = useState("");
   const [discountNotes, setDiscountNotes] = useState("");
+  const [vaMandiri, setVaMandiri] = useState("");
+  const [vaBni, setVaBni] = useState("");
+  const [vaBca, setVaBca] = useState("");
+  const [vaBri, setVaBri] = useState("");
 
   const [tuitionFeesOption, setTuitionFeesOption] = useState([]);
   const [residencePaymentOption, setResidencePaymentOption] = useState([]);
@@ -42,17 +45,18 @@ const TermOfPaymentSection = ({
   }, [sharedData]);
 
   useEffect(() => {
-    // Hydrate sekali saja dari prefill agar input tidak di-reset saat user mengetik
-    if (hydratedRef.current) return;
     if (prefill && Object.keys(prefill).length > 0) {
       setTuitionFees((v) => v || prefill.tuition_fees || "");
       setResidencePayment((v) => v || prefill.residence_payment || "");
       setFinancialPolicy((v) =>
         v ? v : prefill.financial_policy_contract === "Signed"
       );
-      setDiscountName((v) => (v !== "" ? v : prefill.discount_name || ""));
-      setDiscountNotes((v) => (v !== "" ? v : prefill.discount_notes || ""));
-      hydratedRef.current = true;
+      setDiscountName((v) => v || prefill.discount_name || "");
+      setDiscountNotes((v) => v || prefill.discount_notes || "");
+      setVaMandiri((v) => (v !== "" ? v : prefill.va_mandiri || ""));
+      setVaBni((v) => (v !== "" ? v : prefill.va_bni || ""));
+      setVaBca((v) => (v !== "" ? v : prefill.va_bca || ""));
+      setVaBri((v) => (v !== "" ? v : prefill.va_bri || ""));
     }
   }, [prefill]);
 
@@ -63,6 +67,10 @@ const TermOfPaymentSection = ({
       financial_policy_contract: financialPolicy ? "Signed" : "Not Signed",
       discount_name: discountName,
       discount_notes: discountNotes,
+      va_mandiri: vaMandiri,
+      va_bni: vaBni,
+      va_bca: vaBca,
+      va_bri: vaBri,
     });
   }, [
     tuitionFees,
@@ -71,6 +79,10 @@ const TermOfPaymentSection = ({
     discountName,
     discountNotes,
     onDataChange,
+    vaMandiri,
+    vaBni,
+    vaBca,
+    vaBri,
   ]);
 
   useEffect(() => {
@@ -81,12 +93,12 @@ const TermOfPaymentSection = ({
   }, [isDormitory]);
 
   const handleTuitionFeesChange = (e, value) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setTuitionFees((current) => (current === value ? "" : value));
   };
 
   const handleResidencePaymentChange = (e, value) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setResidencePayment((current) => (current === value ? "" : value));
   };
 
@@ -105,6 +117,11 @@ const TermOfPaymentSection = ({
   const handleDiscountNotesChange = (e) => {
     setDiscountNotes(e.target.value);
   };
+
+  const handleVaMandiriChange = (e) => setVaMandiri(e.target.value);
+  const handleVaBniChange = (e) => setVaBni(e.target.value);
+  const handleVaBcaChange = (e) => setVaBca(e.target.value);
+  const handleVaBriChange = (e) => setVaBri(e.target.value);
 
   return (
     <div className={styles.container}>
@@ -262,6 +279,56 @@ const TermOfPaymentSection = ({
                 />
               </div>
             )}
+          </div>
+        </div>
+        <div className={styles.virtualAccountContainer}>
+          <div className={styles.virtualAccountItem}>
+            <span className={styles.virtualAccountLabel}>
+              Virtual Account Mandiri
+            </span>
+            <input
+              type="text"
+              className={styles.virtualAccountNumber}
+              value={vaMandiri}
+              onChange={handleVaMandiriChange}
+              placeholder="Enter VA number"
+            />
+          </div>
+          <div className={styles.virtualAccountItem}>
+            <span className={styles.virtualAccountLabel}>
+              Virtual Account BNI
+            </span>
+            <input
+              type="text"
+              className={styles.virtualAccountNumber}
+              value={vaBni}
+              onChange={handleVaBniChange}
+              placeholder="Enter VA number"
+            />
+          </div>
+          <div className={styles.virtualAccountItem}>
+            <span className={styles.virtualAccountLabel}>
+              Virtual Account BCA
+            </span>
+            <input
+              type="text"
+              className={styles.virtualAccountNumber}
+              value={vaBca}
+              onChange={handleVaBcaChange}
+              placeholder="Enter VA number"
+            />
+          </div>
+          <div className={styles.virtualAccountItem}>
+            <span className={styles.virtualAccountLabel}>
+              Virtual Account BRI
+            </span>
+            <input
+              type="text"
+              className={styles.virtualAccountNumber}
+              value={vaBri}
+              onChange={handleVaBriChange}
+              placeholder="Enter VA number"
+            />
           </div>
         </div>
       </div>
