@@ -498,3 +498,18 @@ export const updateUser = (userId, userData) => {
     body: JSON.stringify(userData),
   });
 };
+
+
+
+export const getAutoGraduatePreview = () => {
+  return apiFetch('/students/auto-graduate/preview', {
+    method: 'POST',
+  });
+};
+
+export const confirmAutoGraduate = (ids) => {
+  return apiFetch('/students/auto-graduate/confirm', {
+    method: 'POST',
+    body: JSON.stringify({ ids }),
+  });
+};
