@@ -23,7 +23,6 @@ class ApplicationForm extends Model
         'status',
         'notes',
         'submitted_at',
-        'is_invalid_data'
     ];
     
     public function enrollment() : BelongsTo
