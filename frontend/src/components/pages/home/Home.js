@@ -84,31 +84,31 @@ const Home = () => {
     total_registration_growth_percent,
     today_registration,
     today_registration_growth_percent,
-    new_students_today,
-    new_students_today_growth_percent,
-    returning_students_today,
-    returning_students_today_growth_percent,
-    new_students_current_year,
-    returning_students_current_year,
-    new_students_yearly_growth_percent,
-    returning_students_yearly_growth_percent,
+    new_students_today_total,
+    new_students_today_total_growth_percent,
+    returning_students_today_total,
+    returning_students_today_total_growth_percent,
+    sy_new_students_total,
+    sy_returning_students_total,
+    sy_new_students_total_growth_percent,
+    sy_returning_students_total_growth_percent,
     latest_registrations,
   } = dashboardData;
 
   const newStudentData = [
     {
-      value: new_students_today,
+      value: new_students_today_total,
       label: 'New students (Today)',
       footerText: formatGrowthText(
-        new_students_today_growth_percent,
+        new_students_today_total_growth_percent,
         'yesterday'
       ),
     },
     {
-      value: new_students_current_year,
+      value: sy_new_students_total,
       label: 'New students (This Year)',
       footerText: formatGrowthText(
-        new_students_yearly_growth_percent,
+        sy_new_students_total_growth_percent,
         'last year'
       ),
     },
@@ -116,18 +116,18 @@ const Home = () => {
 
   const returnStudentData = [
     {
-      value: returning_students_today,
+      value: returning_students_today_total,
       label: 'Returning students (Today)',
       footerText: formatGrowthText(
-        returning_students_today_growth_percent,
+        returning_students_today_total_growth_percent,
         'yesterday'
       ),
     },
     {
-      value: returning_students_current_year,
+      value: sy_returning_students_total,
       label: 'Returning students (This Year)',
       footerText: formatGrowthText(
-        returning_students_yearly_growth_percent,
+        sy_returning_students_total_growth_percent,
         'last year'
       ),
     },
