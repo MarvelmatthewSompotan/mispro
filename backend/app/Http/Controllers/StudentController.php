@@ -938,7 +938,7 @@ class StudentController extends Controller
                 'student_id'     => $student->student_id,
                 'registration_id' => $latestEnrollment?->registration_id,
                 'enrollment_id'  => $latestEnrollment?->enrollment_id,
-                'registration_number' =>$latestEnrollment?->enrollment_id,
+                'registration_number' => $oldSnapshot['registration_number'] ?? null, 
                 'registration_date' =>$latestEnrollment?->registration_date,
                 'application_id' => $latestVersion->application_id,
                 'semester'     => $latestEnrollment?->semester->number,        
