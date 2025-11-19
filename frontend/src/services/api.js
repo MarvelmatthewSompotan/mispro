@@ -85,6 +85,18 @@ export const login = async (identifier, password) => {
   return data;
 };
 
+export const resetLogin = async (identifier, password) => {
+  // requiresAuth = false karena user belum login / sedang bermasalah loginnya
+  return apiFetch(
+    '/reset-login',
+    {
+      method: 'POST',
+      body: JSON.stringify({ identifier, password }),
+    },
+    false
+  );
+};
+
 export const logout = async () => {
   try {
     // Endpoint logout tetap butuh token untuk tahu sesi mana yang harus dihapus di backend
@@ -480,5 +492,18 @@ export const cancelRegistration = (applicationId, reasonType, payload = {}) => {
 
   return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
     method: method,
+  });
+};
+
+export const getAutoGraduatePreview = () => {
+  return apiFetch('/students/auto-graduate/preview', {
+    method: 'POST',
+  });
+};
+
+export const confirmAutoGraduate = (ids) => {
+  return apiFetch('/students/auto-graduate/confirm', {
+    method: 'POST',
+    body: JSON.stringify({ ids }),
   });
 };

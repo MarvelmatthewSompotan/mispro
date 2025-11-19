@@ -33,18 +33,8 @@ const RegistrationForm = () => {
     otherDetail: {}, // [MODIFIED 1/5] Menambahkan state untuk OtherDetail
   });
   const [resetKey, setResetKey] = useState(0);
-  const [setPrefillTrigger] = useState(0);
+  const [prefillTrigger, setPrefillTrigger] = useState(0);
   const [sharedData, setSharedData] = useState(null);
-  const isDormitoryStudent = useMemo(() => {
-    const resId = formSections?.facilities?.residence_id;
-    if (!resId || !sharedData?.residence_halls) return false;
-    const selectedResidence = sharedData.residence_halls.find(
-      (r) => r.residence_id === resId
-    );
-    return selectedResidence
-      ? selectedResidence.type.toLowerCase().includes("dormitory")
-      : false;
-  }, [formSections?.facilities?.residence_id, sharedData]);
   const [isLoading, setIsLoading] = useState(true);
   const [validationState, setValidationState] = useState({});
   const [errors, setErrors] = useState({});
@@ -248,7 +238,6 @@ const RegistrationForm = () => {
       // Prefill Term of Payment
       const termOfPaymentData = { ...(latestData.termOfPayment || {}) };
 
-      // 2. Ambil data VA dari studentInfo (jika ada) dan gabungkan
       if (latestData.studentInfo) {
         termOfPaymentData.va_mandiri = latestData.studentInfo.va_mandiri;
         termOfPaymentData.va_bca = latestData.studentInfo.va_bca;
@@ -256,17 +245,13 @@ const RegistrationForm = () => {
         termOfPaymentData.va_bri = latestData.studentInfo.va_bri;
       }
 
-      // 3. Kirim data gabungan jika tidak kosong
       if (Object.keys(termOfPaymentData).length > 0) {
-        console.log("Prefilling termOfPayment (merged):", termOfPaymentData);
         handleSectionDataChange("termOfPayment", termOfPaymentData);
       }
-
-      // (Kita tidak prefill otherDetail dari data siswa lama, diasumsikan ini selalu baru)
     }
 
-    // Signal children to apply prefill just once
-    setPrefillTrigger((prev) => prev + 1);
+    // Signal children to apply prefill
+    setPrefillTrigger((prev) => prev + 1); // [INI SEKARANG AKAN BERHASIL]
   };
 
   const handleClearFormOnStatusChange = useCallback(() => {
@@ -372,6 +357,18 @@ const RegistrationForm = () => {
       blocker.reset(); // Batalkan navigasi
     }
   };
+
+  const resId = formSections?.facilities?.residence_id;
+  let isDormitoryStudent = false; // Default false
+  if (resId && sharedData?.residence_halls) {
+    const selectedResidence = sharedData.residence_halls.find(
+      // [UBAH] Selalu bandingkan sebagai string untuk keamanan tipe data
+      (r) => String(r.residence_id) === String(resId)
+    );
+    isDormitoryStudent = selectedResidence
+      ? selectedResidence.type.toLowerCase().includes("dormitory")
+      : false;
+  }
 
   // Show loading state while data is being fetched
   if (isLoading) {

@@ -153,6 +153,8 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
+  const [passwordError, setPasswordError] = useState("");
+
   const resetForm = () => {
     setSchoolYear("");
     setSemester("");
@@ -162,6 +164,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     setEmail("");
     setPassword("");
     setRole("");
+    setPasswordError("");
     formRef.current?.reset();
   };
 
@@ -207,6 +210,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setPasswordError("");
     try {
       if (type === "registration") {
         if (!schoolYear || !semester) {
@@ -228,6 +232,11 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
           alert("Failed to start registration");
         }
       } else if (type === "user") {
+        if (password.length <= 8) {
+          setPasswordError("Password must be more than 8 characters");
+          setLoading(false);
+          return; // Stop proses, jangan lanjut ke onCreate
+        }
         if (!username || !name || !email || !password || !role) {
           setLoading(false);
           return alert("Please fill all fields");
@@ -366,14 +375,25 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             <div className={styles.fieldWrapper}>
               {/* --- PERUBAHAN DI SINI: Placeholder & required dinamis --- */}
               <input
-                className={styles.textInput}
+                // Tambahkan class conditional jika error
+                className={`${styles.textInput} ${
+                  passwordError ? styles.inputError : ""
+                }`}
                 type="password"
                 placeholder="User Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  // Hapus error jika user mulai mengetik lagi
+                  if (passwordError) setPasswordError("");
+                }}
                 required
                 autoComplete="new-password"
               />
+              {/* Tampilkan pesan error di sini */}
+              {passwordError && (
+                <span className={styles.errorMessage}>{passwordError}</span>
+              )}
             </div>
 
             <div className={styles.fieldWrapper}>

@@ -36,7 +36,7 @@ const UpdatedNotification = ({ isOpen, onClose }) => {
             d="M14.1 27.2l7.1 7.2 16.7-16.8"
           />
         </svg>
-        <div className={styles.message}>Student information updated</div>
+        <div className={styles.message}>Update Successfully</div>
       </div>
     </div>
   );

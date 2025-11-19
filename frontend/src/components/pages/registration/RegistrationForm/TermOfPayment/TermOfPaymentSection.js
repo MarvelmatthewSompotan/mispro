@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react"; // Hapus useRef jika tidak dipakai
 import styles from "./TermOfPaymentSection.module.css";
 import checkBoxIcon from "../../../../../assets/CheckBox.png";
 import { getRegistrationOptions } from "../../../../../services/api";
@@ -9,13 +9,15 @@ const TermOfPaymentSection = ({
   sharedData,
   prefill,
   errors,
-  forceError,
-  isDormitory = false,
+  isDormitory = false, // Pastikan default false
 }) => {
   const [tuitionFees, setTuitionFees] = useState("");
   const [residencePayment, setResidencePayment] = useState("");
   const [financialPolicy, setFinancialPolicy] = useState(false);
+
+  // State UI untuk menyimpan ID diskon
   const [discountName, setDiscountName] = useState("");
+
   const [discountNotes, setDiscountNotes] = useState("");
   const [vaMandiri, setVaMandiri] = useState("");
   const [vaBni, setVaBni] = useState("");
@@ -26,6 +28,7 @@ const TermOfPaymentSection = ({
   const [residencePaymentOption, setResidencePaymentOption] = useState([]);
   const [discountTypeOptions, setDiscountTypeOptions] = useState([]);
 
+  // 1. Load Options
   useEffect(() => {
     if (sharedData) {
       setTuitionFeesOption(sharedData.tuition_fees || []);
@@ -38,12 +41,11 @@ const TermOfPaymentSection = ({
           setResidencePaymentOption(data.residence_payment || []);
           setDiscountTypeOptions(data.discount_types || []);
         })
-        .catch((err) => {
-          console.error("Failed to fetch payment options:", err);
-        });
+        .catch((err) => console.error(err));
     }
   }, [sharedData]);
 
+  // 2. Handle Prefill Data (Masuk)
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
       setTuitionFees((v) => v || prefill.tuition_fees || "");
@@ -51,21 +53,56 @@ const TermOfPaymentSection = ({
       setFinancialPolicy((v) =>
         v ? v : prefill.financial_policy_contract === "Signed"
       );
-      setDiscountName((v) => v || prefill.discount_name || "");
+
+      // Logika Prefill Diskon: Prioritaskan ID UI, lalu DB data
+      if (prefill._discount_id_ui) {
+        setDiscountName(prefill._discount_id_ui);
+      } else if (prefill.discount_name) {
+        const isNumeric =
+          !isNaN(prefill.discount_name) &&
+          !isNaN(parseFloat(prefill.discount_name));
+
+        if (isNumeric) {
+          setDiscountName(prefill.discount_name); // Jika DB simpan ID
+        } else if (discountTypeOptions.length > 0) {
+          // Jika DB simpan String, cari ID-nya
+          const found = discountTypeOptions.find(
+            (d) => d.name === prefill.discount_name
+          );
+          setDiscountName(found ? found.discount_type_id : "");
+        }
+      }
+
       setDiscountNotes((v) => v || prefill.discount_notes || "");
       setVaMandiri((v) => (v !== "" ? v : prefill.va_mandiri || ""));
       setVaBni((v) => (v !== "" ? v : prefill.va_bni || ""));
       setVaBca((v) => (v !== "" ? v : prefill.va_bca || ""));
       setVaBri((v) => (v !== "" ? v : prefill.va_bri || ""));
     }
-  }, [prefill]);
+  }, [prefill, discountTypeOptions]);
 
+  // 3. Handle Output Data (Keluar ke Parent)
   useEffect(() => {
+    // Cari Nama String berdasarkan ID yang dipilih
+    const selectedDiscountObj = discountTypeOptions.find(
+      (d) => String(d.discount_type_id) === String(discountName)
+    );
+
+    const finalDiscountName = selectedDiscountObj
+      ? selectedDiscountObj.name
+      : "";
+
     onDataChange({
       tuition_fees: tuitionFees,
       residence_payment: residencePayment,
       financial_policy_contract: financialPolicy ? "Signed" : "Not Signed",
-      discount_name: discountName,
+
+      // KIRIM STRING KE PARENT (Untuk Backend)
+      discount_name: finalDiscountName,
+
+      // KIRIM ID KE PARENT (Untuk UI state retention saat navigasi)
+      _discount_id_ui: discountName,
+
       discount_notes: discountNotes,
       va_mandiri: vaMandiri,
       va_bni: vaBni,
@@ -83,41 +120,37 @@ const TermOfPaymentSection = ({
     vaBni,
     vaBca,
     vaBri,
+    discountTypeOptions,
   ]);
 
+  // Reset residence payment jika bukan dormitory
   useEffect(() => {
     if (!isDormitory && residencePayment) {
       setResidencePayment("");
     }
-    // eslint-disable-next-line
-  }, [isDormitory]);
+  }, [isDormitory, residencePayment]); // Tambahkan residencePayment ke dependency
 
+  // Handlers
   const handleTuitionFeesChange = (e, value) => {
     e.preventDefault();
-    setTuitionFees((current) => (current === value ? "" : value));
+    setTuitionFees((prev) => (prev === value ? "" : value));
   };
 
   const handleResidencePaymentChange = (e, value) => {
     e.preventDefault();
-    setResidencePayment((current) => (current === value ? "" : value));
+    setResidencePayment((prev) => (prev === value ? "" : value));
   };
 
-  const handleFinancialPolicyChange = (e) => {
+  const handleFinancialPolicyChange = (e) =>
     setFinancialPolicy(e.target.checked);
+
+  const handleDiscountChange = (opt) => {
+    const val = opt ? opt.value : "";
+    setDiscountName(val); // Simpan ID
+    if (!val) setDiscountNotes("");
   };
 
-  const handleDiscountChange = (selectedOption) => {
-    const value = selectedOption ? selectedOption.value : "";
-    setDiscountName(value);
-    if (!value) {
-      setDiscountNotes("");
-    }
-  };
-
-  const handleDiscountNotesChange = (e) => {
-    setDiscountNotes(e.target.value);
-  };
-
+  const handleDiscountNotesChange = (e) => setDiscountNotes(e.target.value);
   const handleVaMandiriChange = (e) => setVaMandiri(e.target.value);
   const handleVaBniChange = (e) => setVaBni(e.target.value);
   const handleVaBcaChange = (e) => setVaBca(e.target.value);
@@ -129,6 +162,7 @@ const TermOfPaymentSection = ({
         <span className={styles.headerText}>TERM OF PAYMENT</span>
       </div>
       <div className={styles.contentWrapper}>
+        {/* Tuition Fees */}
         <div className={styles.paymentSection}>
           <div className={styles.sectionTitle}>
             <div
@@ -169,6 +203,7 @@ const TermOfPaymentSection = ({
           </div>
         </div>
 
+        {/* Residence Hall - Only if isDormitory is true */}
         {isDormitory && (
           <div className={styles.paymentSection}>
             <div className={styles.sectionTitle}>
@@ -211,6 +246,7 @@ const TermOfPaymentSection = ({
           </div>
         )}
 
+        {/* Financial Policy */}
         <div className={styles.paymentSection}>
           <div className={styles.sectionTitle}>
             <div className={styles.sectionTitleText}>
@@ -241,6 +277,8 @@ const TermOfPaymentSection = ({
             </div>
           </div>
         </div>
+
+        {/* Discount Section */}
         <div
           className={`${styles.discountSection} ${
             !isDormitory ? styles.discountInline : ""
@@ -255,12 +293,19 @@ const TermOfPaymentSection = ({
                 placeholder="Select discount type"
                 isClearable
                 options={discountTypeOptions.map((d) => ({
-                  value: d.name,
+                  value: d.discount_type_id, // Value dropdown adalah ID
                   label: d.name,
                 }))}
                 value={
                   discountName
-                    ? { value: discountName, label: discountName }
+                    ? discountTypeOptions
+                        .map((d) => ({
+                          value: d.discount_type_id,
+                          label: d.name,
+                        }))
+                        .find(
+                          (opt) => String(opt.value) === String(discountName)
+                        )
                     : null
                 }
                 onChange={handleDiscountChange}
@@ -281,6 +326,8 @@ const TermOfPaymentSection = ({
             )}
           </div>
         </div>
+
+        {/* Virtual Accounts */}
         <div className={styles.virtualAccountContainer}>
           <div className={styles.virtualAccountItem}>
             <span className={styles.virtualAccountLabel}>

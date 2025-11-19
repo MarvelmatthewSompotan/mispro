@@ -253,7 +253,22 @@ const StudentProfile = () => {
           setStudentData(studentData);
           setProfileData(combinedData);
           setFormData(combinedData);
-          const studentInfoData = studentData.studentInfo || {};
+          const studentInfoData = {
+            ...(studentData.studentInfo || {}),
+            va_mandiri:
+              studentData.termOfPayment?.va_mandiri ||
+              studentData.studentInfo?.va_mandiri,
+            va_bni:
+              studentData.termOfPayment?.va_bni ||
+              studentData.studentInfo?.va_bni,
+            va_bca:
+              studentData.termOfPayment?.va_bca ||
+              studentData.studentInfo?.va_bca,
+            va_bri:
+              studentData.termOfPayment?.va_bri ||
+              studentData.studentInfo?.va_bri,
+          };
+
           setStudentInfo(studentInfoData);
           studentInfoKeys.current = new Set(Object.keys(studentInfoData));
         }
@@ -677,7 +692,7 @@ const StudentProfile = () => {
           newFormData.transportation_policy = "Not Signed";
         } else {
           // --- [BARU] Jika TIDAK memilih dormitory (atau dikosongkan), kosongkan residence_payment ---
-          newFormData.residence_payment = "";
+          newFormData.residence_payment = null;
         }
       }
 
@@ -698,7 +713,7 @@ const StudentProfile = () => {
           ) {
             newFormData.residence_id = "";
             // --- [BARU] Karena residence_id dikosongkan, kosongkan juga residence_payment ---
-            newFormData.residence_payment = "";
+            newFormData.residence_payment = null;
           }
         }
       }
@@ -1039,10 +1054,29 @@ const StudentProfile = () => {
 
   const handleConfirmUpdate = async () => {
     setIsUpdating(true);
+    // 1. Salin data dari state
     const dataToSend = { ...formData, ...studentInfo };
+
     if (selectedPhoto) {
       dataToSend.photo = selectedPhoto;
     }
+
+    // --- [PERBAIKAN UTAMA] Konversi Discount ID ke String ---
+    // Jika discount_name ada isinya DAN berupa Angka (ID), kita cari Namanya
+    if (dataToSend.discount_name && options?.discount_types) {
+      const val = dataToSend.discount_name;
+
+      // Cari diskon yang cocok di daftar opsi (baik berdasarkan Nama atau ID)
+      const foundDiscount = options.discount_types.find(
+        (d) => d.name === val || String(d.discount_type_id) === String(val)
+      );
+
+      if (foundDiscount) {
+        // UBAH DATA YANG AKAN DIKIRIM KE SERVER MENJADI ID
+        dataToSend.discount_name = foundDiscount.discount_type_id;
+      }
+    }
+    // -------------------------------------------------------
 
     const classIdNum = parseInt(dataToSend.class_id, 10);
     const needsMajor = [12, 13, 14, 15].includes(classIdNum);
@@ -1054,6 +1088,8 @@ const StudentProfile = () => {
     try {
       const response = await updateStudent(id, dataToSend);
       const updatedData = response.data.request_data;
+
+      // Update local state dengan data response yang sudah "bersih" dari server
       const combinedData = {
         id_primary: response.data.id,
         student_id: response.data.student_id,
@@ -1085,9 +1121,11 @@ const StudentProfile = () => {
       if (error.response && error.response.data) {
         if (error.response.data.type === "validation") {
           console.error("Validation Errors:", error.response.data.errors);
-          alert(
-            "Update failed due to validation errors. Please check the console (F12) for more details."
-          );
+          // Tampilkan pesan error yang lebih spesifik jika ada
+          const msg = Object.values(error.response.data.errors)
+            .flat()
+            .join(", ");
+          alert(`Validation Failed: ${msg}`);
         } else {
           console.error("Server Error:", error.response.data);
           alert(
@@ -1277,7 +1315,11 @@ const StudentProfile = () => {
     )?.type || "";
 
   const selectedDiscountOption = discountSelectOptions.find(
-    (opt) => String(opt.value) === String(formData.discount_name)
+    (opt) =>
+      // Cek kecocokan ID (jika data berupa angka/ID)
+      String(opt.value) === String(formData.discount_name) ||
+      // Cek kecocokan Nama/Label (jika data berupa string dari database)
+      opt.label === formData.discount_name
   );
 
   return (
