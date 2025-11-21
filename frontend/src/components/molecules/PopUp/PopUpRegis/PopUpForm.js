@@ -7,7 +7,7 @@ import {
 } from "../../../../services/api";
 import Button from "../../../atoms/Button";
 
-// --- Komponen Dropdown Kustom (DIMODIFIKASI) ---
+// Komponen Dropdown (tidak diubah)
 const CustomSelect = ({
   options,
   value,
@@ -25,22 +25,20 @@ const CustomSelect = ({
     return option ? option.label : undefined;
   };
 
-  // Label yang terpilih (atau string kosong jika tidak ada)
   const selectedLabel = getLabelForValue(value) || "";
 
-  // Opsi yang difilter (HANYA jika searchable)
   const filteredOptions =
     isSearchable && searchTerm
       ? options.filter((opt) =>
           opt.label.toLowerCase().includes(searchTerm.toLowerCase())
         )
-      : options; // Jika tidak searchable, biarkan semua opsi
+      : options;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (selectRef.current && !selectRef.current.contains(event.target)) {
         setIsOpen(false);
-        setSearchTerm(""); // Kosongkan pencarian saat menutup
+        setSearchTerm("");
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -53,11 +51,7 @@ const CustomSelect = ({
     setSearchTerm("");
   };
 
-  // Nilai display HANYA untuk input searchable
   const displayValue = searchTerm || (isOpen ? "" : selectedLabel);
-
-  // Tentukan opsi mana yang akan di-map (hasil filter atau semua)
-  // PERUBAHAN: Gunakan filteredOptions jika searchable, jika tidak, gunakan options
   const optionsToDisplay = isSearchable ? filteredOptions : options;
 
   return (
@@ -67,9 +61,7 @@ const CustomSelect = ({
       data-disabled={disabled}
       data-open={isOpen}
     >
-      {/* === PERUBAHAN UTAMA: RENDER KONDISIONAL === */}
       {isSearchable ? (
-        // --- 1. JIKA SEARCHABLE (Untuk School Year) ---
         <input
           type="text"
           className={`${styles.selectInput} ${
@@ -81,9 +73,7 @@ const CustomSelect = ({
             if (disabled) return;
             const newIsOpen = !isOpen;
             setIsOpen(newIsOpen);
-            if (newIsOpen) {
-              setSearchTerm("");
-            }
+            if (newIsOpen) setSearchTerm("");
           }}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -93,14 +83,12 @@ const CustomSelect = ({
           autoComplete="off"
         />
       ) : (
-        // --- 2. JIKA NON-SEARCHABLE (Untuk Semester / Role) ---
         <div
           className={`${styles.selectInput} ${
             !value ? styles.placeholder : ""
           }`}
           onClick={() => !disabled && setIsOpen(!isOpen)}
         >
-          {/* Gunakan logic display asli */}
           {selectedLabel || placeholder}
         </div>
       )}
@@ -108,7 +96,6 @@ const CustomSelect = ({
       {isOpen && (
         <div className={styles.optionsMenu}>
           <div className={styles.optionsList}>
-            {/* PERUBAHAN: Gunakan optionsToDisplay */}
             {optionsToDisplay.map((opt) => (
               <div
                 key={opt.value}
@@ -126,12 +113,19 @@ const CustomSelect = ({
     </div>
   );
 };
-// --- Akhir Komponen Dropdown Kustom ---
 
 // ==================================================================
-// === KOMPONEN POPUPFORM (Tidak ada perubahan di sini) ===
+// === POPUP FORM — SUDAH DITAMBAHI DUKUNGAN EDIT USER ===
 // ==================================================================
-const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
+const PopUpForm = ({
+  onClose,
+  onCreate,
+  type = "registration",
+
+  // === EDIT MODE PROPS ===
+  isEditMode = false,
+  initialData = null,
+}) => {
   const formRef = useRef();
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState({
@@ -140,25 +134,37 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     roles: [],
   });
 
-  // State fields tetap sama
+  // Fields untuk Registration (tidak diubah)
   const [schoolYear, setSchoolYear] = useState("");
   const [semester, setSemester] = useState("");
   const [date, setDate] = useState("");
   const [isAddingYear, setIsAddingYear] = useState(false);
 
-  // User fields
+  // === USER FIELDS ===
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(""); // opsional saat edit
   const [role, setRole] = useState("");
 
   const [passwordError, setPasswordError] = useState("");
 
+  // === PREFILL DATA SAAT EDIT MODE ===
+  useEffect(() => {
+    if (type === "user" && isEditMode && initialData) {
+      setUsername(initialData.username || "");
+      setName(initialData.full_name || "");
+      setEmail(initialData.email || "");
+      setPassword(""); // kosong (opsional)
+      setRole(initialData.role || "");
+    }
+  }, [isEditMode, initialData, type]);
+
+
   const resetForm = () => {
     setSchoolYear("");
     setSemester("");
-    setDate(new Date().toISOString().split("T")[0]); // Reset date ke hari ini
+    setDate(new Date().toISOString().split("T")[0]);
     setUsername("");
     setName("");
     setEmail("");
@@ -206,12 +212,14 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     }
   };
 
-  // --- PERUBAHAN DI SINI: Logika `handleSubmit` untuk membedakan Create vs Edit ---
+  // === HANDLE SUBMIT — MEMBEDAKAN CREATE & EDIT ===
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setPasswordError("");
+
     try {
+      // ========== REGISTRATION ==========
       if (type === "registration") {
         if (!schoolYear || !semester) {
           setLoading(false);
@@ -228,23 +236,55 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             },
             resetForm
           );
-        } else {
-          alert("Failed to start registration");
         }
-      } else if (type === "user") {
-        if (password.length <= 8) {
-          setPasswordError("Password must be more than 8 characters");
-          setLoading(false);
-          return; // Stop proses, jangan lanjut ke onCreate
+      }
+
+      // ========== USER MODE ==========
+      else if (type === "user") {
+        // === EDIT MODE: password optional ===
+        if (isEditMode) {
+          if (!username || !name || !email || !role) {
+            setLoading(false);
+            return alert("Please fill all fields except password");
+          }
+
+          const body = {
+            username,
+            full_name: name,
+            email,
+            role,
+          };
+
+          // Jika password diisi, sertakan
+          if (password) {
+            if (password.length <= 8) {
+              setPasswordError("Password must be more than 8 characters");
+              setLoading(false);
+              return;
+            }
+            body.password = password;
+          }
+
+          await onCreate(body);
         }
-        if (!username || !name || !email || !password || !role) {
-          setLoading(false);
-          return alert("Please fill all fields");
+
+        // === CREATE MODE ===
+        else {
+          if (!username || !name || !email || !password || !role) {
+            setLoading(false);
+            return alert("Please fill all fields");
+          }
+          if (password.length <= 8) {
+            setPasswordError("Password must be more than 8 characters");
+            setLoading(false);
+            return;
+          }
+
+          await onCreate(
+            { username, full_name: name, email, password, role },
+            resetForm
+          );
         }
-        await onCreate(
-          { username, full_name: name, email, password, role },
-          resetForm
-        );
       }
     } catch (err) {
       console.error(err);
@@ -254,6 +294,7 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
     }
   };
 
+  // OPTION MAPPERS (tidak diubah)
   const mapOptions = (optionsArray, valueKey, labelKey) => {
     return optionsArray.map((opt) => ({
       value: opt[valueKey],
@@ -289,28 +330,29 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
         ref={formRef}
         autoComplete="off"
       >
-        {/* --- PERUBAHAN DI SINI: Judul dinamis --- */}
+        {/* === TITLE DINAMIS === */}
         <div className={styles.createNewRegistration}>
-          {type === "registration" ? "Create New Registration" : "Add New User"}
+          {type === "registration"
+            ? "Create New Registration"
+            : isEditMode
+            ? "Edit User"
+            : "Add New User"}
         </div>
 
+        {/* === REGISTRATION FORM (tidak diubah) === */}
         {type === "registration" ? (
           <div className={styles.frameParent}>
-            {/* ... (Form registrasi tidak diubah) ... */}
             <div className={styles.fieldWrapper}>
               <CustomSelect
                 placeholder="Select Year"
                 value={schoolYear}
                 options={allSchoolYearOptions}
                 onChange={(val) => {
-                  if (val === "add_new") {
-                    handleAddNewSchoolYear();
-                  } else {
-                    setSchoolYear(val);
-                  }
+                  if (val === "add_new") handleAddNewSchoolYear();
+                  else setSchoolYear(val);
                 }}
                 disabled={isAddingYear}
-                isSearchable={true} // <-- Ini akan render <input>
+                isSearchable={true}
               />
             </div>
 
@@ -320,7 +362,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 value={semester}
                 options={semesterOptions}
                 onChange={(val) => setSemester(val)}
-                // <-- Karena isSearchable tidak ada, ini akan render <div>
               />
             </div>
 
@@ -334,8 +375,11 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
             </div>
           </div>
         ) : (
+          // ============================================
+          // === USER FORM — SEKARANG SUPPORT EDIT MODE ===
+          // ============================================
           <div className={styles.frameParent}>
-            {/* ... (Field Username, Full Name, Email tidak diubah) ... */}
+            {/* Username */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.textInput}
@@ -344,7 +388,6 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                autoComplete="new-password"
               />
             </div>
 
@@ -357,10 +400,10 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                autoComplete="name"
               />
             </div>
 
+            {/* Email */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.textInput}
@@ -369,57 +412,60 @@ const PopUpForm = ({ onClose, onCreate, type = "registration" }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="new-password"
               />
             </div>
+
+            {/* Password — opsional saat edit */}
             <div className={styles.fieldWrapper}>
-              {/* --- PERUBAHAN DI SINI: Placeholder & required dinamis --- */}
               <input
-                // Tambahkan class conditional jika error
                 className={`${styles.textInput} ${
                   passwordError ? styles.inputError : ""
                 }`}
                 type="password"
-                placeholder="User Password"
+                placeholder={
+                  isEditMode ? "New Password (optional)" : "User Password"
+                }
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  // Hapus error jika user mulai mengetik lagi
                   if (passwordError) setPasswordError("");
                 }}
-                required
-                autoComplete="new-password"
+                required={!isEditMode} // hanya wajib saat create
               />
-              {/* Tampilkan pesan error di sini */}
               {passwordError && (
                 <span className={styles.errorMessage}>{passwordError}</span>
               )}
             </div>
 
+            {/* Role */}
             <div className={styles.fieldWrapper}>
               <CustomSelect
                 placeholder="Select Role"
                 value={role}
                 options={roleOptions}
                 onChange={(val) => setRole(val)}
-                // <-- Karena isSearchable tidak ada, ini akan render <div>
               />
             </div>
           </div>
         )}
 
+        {/* BUTTONS */}
         <div className={styles.bAddSubjectParent}>
           <Button onClick={onClose} variant="outline">
             Cancel
           </Button>
-          {/* --- PERUBAHAN DI SINI: Teks tombol dinamis --- */}
+
           <Button
             type="submit"
             variant="solid"
             disabled={loading || isAddingYear}
             className={loading ? styles.loadingButton : ""}
           >
-            {loading ? "Processing..." : isAddingYear ? "Adding..." : "Create"}
+            {loading
+              ? "Processing..."
+              : isEditMode
+              ? "Update"
+              : "Create"}
           </Button>
         </div>
       </form>
