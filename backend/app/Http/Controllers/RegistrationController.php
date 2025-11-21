@@ -141,10 +141,11 @@ class RegistrationController extends Controller
                 if ($field === 'registration_id') {
                     $query->orderByRaw("
                         CASE
-                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%ES%' THEN 1    
-                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%MS%' THEN 2    
-                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%HS%' THEN 3    
-                            ELSE 4
+                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%ECP%' THEN 1    
+                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%ES%' THEN 2    
+                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%MS%' THEN 3    
+                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%HS%' THEN 4    
+                            ELSE 5
                         END $order
                     ")->orderByRaw("
                         CAST(SUBSTRING_INDEX(enrollments.registration_id, '/', 1) AS UNSIGNED) $order
