@@ -2,12 +2,13 @@
 
 namespace App\Providers;
 
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use App\Events\ApplicationFormCreated;
-use App\Events\ApplicationFormStatusUpdated;
-use App\Listeners\InvalidateDashboardCache;
 use App\Events\UserLoggedIn;
+use App\Events\StudentStatusUpdated;
+use App\Events\ApplicationFormCreated;
 use App\Listeners\InvalidateUserMetaCache;
+use App\Listeners\InvalidateDashboardCache;
+use App\Events\ApplicationFormStatusUpdated;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,9 @@ class EventServiceProvider extends ServiceProvider
             InvalidateDashboardCache::class,
         ],
         ApplicationFormStatusUpdated::class => [
+            InvalidateDashboardCache::class,
+        ],
+        StudentStatusUpdated::class => [
             InvalidateDashboardCache::class,
         ],
     ];

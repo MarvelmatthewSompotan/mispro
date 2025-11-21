@@ -13,6 +13,7 @@ use App\Models\StudentDiscount;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
+use App\Events\StudentStatusUpdated;
 use App\Models\ApplicationFormVersion;
 
 class StudentController extends Controller
@@ -269,6 +270,8 @@ class StudentController extends Controller
             'ids.*' => 'integer|exists:students,id'
         ]);
 
+        $students = Student::whereIn('id', $request->ids)->get();
+
         DB::transaction(function () use ($request) {
 
             Student::whereIn('id', $request->ids)
@@ -285,6 +288,10 @@ class StudentController extends Controller
                     'status' => 'INACTIVE'
             ]);
         });
+
+        foreach ($students as $student) {
+            StudentStatusUpdated::dispatch($student);
+        }
 
         return response()->json([
             'success' => true,
@@ -733,6 +740,7 @@ class StudentController extends Controller
                 'discount_notes' => 'sometimes|nullable|string',
             ]);
 
+            $shouldClearCache = false; 
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
             $student->update($studentData);
             if (isset($validated['status'])) {
@@ -751,6 +759,7 @@ class StudentController extends Controller
                 if (in_array(strtolower($validated['status']), $inactiveStatuses)) {
                     $student->active = 'NO';
                     $student->updated_at = now();
+                    $shouldClearCache = true; 
                     if ($validated['status'] === 'Graduate') {
                         $student->graduated_at = now();
                     }
@@ -761,6 +770,7 @@ class StudentController extends Controller
                 } else {
                     $student->active = 'YES';
                     $student->updated_at = now();
+                    $shouldClearCache = true; 
                     if ($latestEnrollment) {
                         $latestEnrollment->status =
                             ($currentSchoolYearId && $latestEnrollment->school_year_id === $currentSchoolYearId)
@@ -963,6 +973,11 @@ class StudentController extends Controller
             ]);
 
             DB::commit();
+
+            if ($shouldClearCache) {
+                $student->refresh(); 
+                StudentStatusUpdated::dispatch($student);
+            }
 
             $this->auditTrail->log('update_student', [
                 'student_id' => $student->student_id,

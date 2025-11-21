@@ -171,8 +171,6 @@ class DashboardController extends Controller
                 $yesterdayTotalCancelled = $yesterdayCancelledReturning + $yesterdayCancelledNew;
 
                 // Yearly Statistics
-                // ... existing code ...
-                // Yearly Statistics
                 $yearlyStats = ApplicationForm::join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
                     ->selectRaw('
                         -- Total All SY
@@ -205,6 +203,8 @@ class DashboardController extends Controller
                     ])
                     ->whereIn('enrollments.school_year_id', array_filter([$currentSchoolYearId, $previousSchoolYearId]))
                     ->first();
+                
+                $syTotalConfirmed = (int)$yearlyStats->sy_total_confirmed;
 
                 $syCancelledNew = 0;
                 $syCancelledReturning = 0;
@@ -245,6 +245,10 @@ class DashboardController extends Controller
                         ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
                         ->where('enrollments.school_year_id', $nextSchoolYearId)
                         ->count();
+
+                    $totalPreRegistersGrowth = $syTotalConfirmed > 0 
+                        ? round((($totalPreRegisters - $syTotalConfirmed) / $syTotalConfirmed) * 100, 2) 
+                        : 0;
                 }
 
                 // Total Active Students by Section
@@ -341,7 +345,7 @@ class DashboardController extends Controller
                 $syTotalGrowth = $syTotalPrevious > 0 ? round((($syTotal - $syTotalPrevious) / $syTotalPrevious) * 100, 2) : 0;
 
                 // Total Confirmed Current SY
-                $syTotalConfirmed = (int)$yearlyStats->sy_total_confirmed;
+                $syTotalConfirmed = $syTotalConfirmed;
                 $syTotalConfirmedPrevious = (int)$yearlyStats->sy_total_confirmed_previous;
                 $syTotalConfirmedGrowth = $syTotalConfirmedPrevious > 0 ? round((($syTotalConfirmed - $syTotalConfirmedPrevious) / $syTotalConfirmedPrevious) * 100, 2) : 0;
 
@@ -434,6 +438,7 @@ class DashboardController extends Controller
 
                     // Pre registers
                     'total_pre_registers_next_year' => $totalPreRegisters,
+                    'total_pre_registers_next_year_growth_percent' => $totalPreRegistersGrowth,
 
                     // Active students
                     'active_students_by_section' => $activeStudentsBySection,

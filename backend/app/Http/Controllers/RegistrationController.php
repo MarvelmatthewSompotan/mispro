@@ -30,6 +30,7 @@ use App\Models\StudentGuardian;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
+use App\Events\StudentStatusUpdated;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CancelledRegistration;
 use App\Events\ApplicationFormCreated;
@@ -316,7 +317,7 @@ class RegistrationController extends Controller
 
             $newStatus = 'Deleted New/Transferee (Invalid Data)';
             DB::commit();
-            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+            ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
             return response()->json([
                 'success' => true, 
@@ -334,7 +335,7 @@ class RegistrationController extends Controller
 
                     $newStatus = 'Deleted Old (Invalid Data)';
                     DB::commit();
-                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                    ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
                     return response()->json([
                         'success' => true, 
@@ -345,7 +346,7 @@ class RegistrationController extends Controller
 
                     $newStatus = 'Deleted Old (Invalid Data)';
                     DB::commit();
-                    event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                    ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
                     return response()->json([
                         'success' => true, 
@@ -369,7 +370,7 @@ class RegistrationController extends Controller
 
                 $newStatus = 'Deleted Old (Invalid Data)';
                 DB::commit();
-                event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
                 return response()->json([
                     'success' => true, 
@@ -433,7 +434,7 @@ class RegistrationController extends Controller
 
             $newStatus = 'Deleted New/Transferee (Cancelled)';
             DB::commit();
-            event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+            ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
             return response()->json([
                 'success' => true, 
@@ -455,7 +456,8 @@ class RegistrationController extends Controller
                 
                 $newStatus = 'Deleted Old (Cancelled)';
                 DB::commit();
-                event(new ApplicationFormStatusUpdated($applicationForm, $oldStatus, $newStatus));
+                ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
+                StudentStatusUpdated::dispatch($student);
 
                 return response()->json([
                     'success' => true, 
@@ -1001,7 +1003,7 @@ class RegistrationController extends Controller
                 // Create application form
                 $applicationForm = $this->createApplicationForm($enrollment);
                 $applicationForm->load('enrollment.schoolYear'); 
-                event(new ApplicationFormCreated($applicationForm));
+                ApplicationFormCreated::dispatch($applicationForm);
 
                 // Create application form version
                 $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
@@ -1068,7 +1070,7 @@ class RegistrationController extends Controller
                     // Create application form
                     $applicationForm = $this->createApplicationForm($enrollment);
                     $applicationForm->load('enrollment.schoolYear'); 
-                    event(new ApplicationFormCreated($applicationForm));
+                    ApplicationFormCreated::dispatch($applicationForm);
 
                     // Create application form version
                     $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
@@ -1152,7 +1154,7 @@ class RegistrationController extends Controller
 
                     $applicationForm = $this->createApplicationForm($enrollment);
                     $applicationForm->load('enrollment.schoolYear'); 
-                    event(new ApplicationFormCreated($applicationForm));
+                    ApplicationFormCreated::dispatch($applicationForm);
 
                     $applicationFormVersion = $this->createApplicationFormVersion($applicationForm, $validated, $student, $enrollment);
 
