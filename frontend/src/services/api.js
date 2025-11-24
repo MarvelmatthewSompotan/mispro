@@ -449,10 +449,37 @@ export const getDashboard = () => {
   return apiFetch('/dashboard', { method: 'GET' });
 };
 
-export const getUsers = ({ page = 1, per_page = 25 } = {}) => {
+export const getUsers = ({
+  page = 1,
+  per_page = 25,
+  search = '',
+  username = '',
+  full_name = '',
+  email = '',
+  user_id = '',
+  role = [], // array of role strings
+  sort_by = '',
+  sort_dir = '',
+} = {}) => {
   const params = new URLSearchParams();
   params.append('page', page);
   params.append('per_page', per_page);
+
+  if (search) params.append('search', search);
+  if (username) params.append('username', username);
+  if (full_name) params.append('full_name', full_name);
+  if (email) params.append('email', email);
+  if (user_id) params.append('user_id', user_id);
+
+  // role can be array: role[]=Admin&role[]=Head_registrar
+  if (Array.isArray(role)) {
+    role.forEach((r) => params.append('role[]', r));
+  } else if (role) {
+    params.append('role[]', role);
+  }
+
+  if (sort_by) params.append('sort_by', sort_by);
+  if (sort_dir) params.append('sort_dir', sort_dir);
 
   return apiFetch(`/users?${params.toString()}`);
 };

@@ -123,6 +123,17 @@
   margin: 0;
 }
 
+/* --- START: Penambahan untuk konsistensi Loading State --- */
+.messageCell {
+  padding: 48px 24px; /* Padding yang lebih besar untuk konten tengah */
+  text-align: center;
+  color: var(--main-grey);
+  font-size: 16px;
+  /* Opsional: Jika ingin ada garis atas seperti di StudentList, tambahkan: */
+  /* border-top: 1px solid var(--main-grey); */
+}
+/* --- END: Penambahan untuk konsistensi Loading State --- */
+
 .actionCell {
   padding: 16px 24px;
   display: flex;

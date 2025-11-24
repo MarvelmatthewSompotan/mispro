@@ -19,31 +19,41 @@ const formatRole = (role) => {
     .join(' ');
 };
 
+/**
+ * Roles list diambil dari informasi yang Anda kirimkan (useAuth snippet).
+ * Jika nanti ingin ambil dari API dynamic, kita bisa ganti ke fetch options.
+ */
+const ROLE_OPTIONS = [
+  { id: 'admin', name: 'Admin' },
+  { id: 'registrar', name: 'Registrar' },
+  { id: 'head_registrar', name: 'Head Registrar' },
+  { id: 'teacher', name: 'Teacher' },
+];
+
 const Users = () => {
+  // UI state
   const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState({});
+  const [sorts, setSorts] = useState([]);
+
+  // data state
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   // eslint-disable-next-line
   const [page, setPage] = useState(1);
-  const fetchControllerRef = useRef(null);
-  const [deletingUserId, setDeletingUserId] = useState(null);
 
+  const fetchControllerRef = useRef(null);
+
+  // popup / CRUD state
+  const [deletingUserId, setDeletingUserId] = useState(null);
   const [confirmDeleteUser, setConfirmDeleteUser] = useState(null);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupType, setPopupType] = useState('');
   const [showPopup, setShowPopup] = useState(false);
-  
-  // --- INI ADALAH STATE ASLI UNTUK "NEW USER" (TIDAK DIUBAH) ---
   const [showUserPopup, setShowUserPopup] = useState(false);
-
-  // --- TAMBAHAN BARU: State untuk mengontrol popup "Edit User" ---
-  // Jika null, popup edit tersembunyi.
-  // Jika berisi objek user, popup edit akan tampil dengan data user tsb.
   const [editingUser, setEditingUser] = useState(null);
 
-  // --- Fungsi helper untuk menampilkan popup (BARU) ---
-  // (Menggantikan logika setTimeout yang berulang)
   const showTemporaryPopup = (message, type) => {
     setPopupType(type);
     setPopupMessage(message);
@@ -51,10 +61,12 @@ const Users = () => {
     setTimeout(() => setShowPopup(false), 3000);
   };
 
-
+  /**
+   * fetchUsers mengirim semua parameter: page, per_page, search, filters, sort_by, sort_dir
+   * sehingga backend menerima role[]=... dan sort_by/sort_dir sesuai ekspektasi.
+   */
   const fetchUsers = useCallback(
-    async (options = {}) => {
-      const { isBackgroundRefresh = false } = options;
+    async ({ isBackgroundRefresh = false } = {}) => {
       if (!isBackgroundRefresh) setLoading(true);
       setError('');
 
@@ -64,49 +76,97 @@ const Users = () => {
       fetchControllerRef.current = controller;
 
       try {
-        const response = await getUsers({ page }, { signal });
-        if (response?.success) {
-          setUsers(response.data.data || []);
+        // Siapkan params sesuai contract backend
+        const params = {
+          page,
+          per_page: 25,
+          search: search || undefined,
+          username: filters.username || undefined,
+          full_name: filters.full_name || undefined,
+          email: filters.email || undefined,
+          user_id: filters.user_id || undefined,
+          // role can be array (role[]). If it's a single value convert to array.
+          role: Array.isArray(filters.role) ? filters.role : filters.role ? [filters.role] : undefined,
+          sort_by: sorts[0]?.field || undefined,
+          sort_dir: sorts[0]?.order || undefined,
+        };
+
+        // getUsers telah diperbarui di api.js (lihat file api.js di bawah)
+        const res = await getUsers(params, { signal });
+
+        if (res?.success) {
+          setUsers(res.data.data || []);
         } else {
           setError('Failed to load users');
         }
       } catch (err) {
-        if (err.name === 'AbortError') return;
+        if (err?.name === 'AbortError') return;
         console.error(err);
         setError('Error fetching user data');
       } finally {
         if (!isBackgroundRefresh) setLoading(false);
       }
     },
-    [page]
+    [page, search, filters, sorts]
   );
 
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchUsers]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      console.log('Auto refreshing user list (background)...');
       fetchUsers({ isBackgroundRefresh: true });
     }, REFRESH_INTERVAL);
     return () => clearInterval(intervalId);
   }, [fetchUsers]);
 
-  const filteredUsers = users.filter((user) =>
-    [user.username, user.user_id, user.full_name]
-      .join(' ')
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  // --- Sort handlers (sama pola StudentList/Registration) ---
+  const handleSortChange = (fieldKey) => {
+    setSorts((prev) => {
+      const current = prev[0]?.field === fieldKey ? prev[0] : null;
+      let next;
+      if (!current) next = { field: fieldKey, order: 'asc' };
+      else if (current.order === 'asc') next = { field: fieldKey, order: 'desc' };
+      else next = null;
+      return next ? [next] : [];
+    });
+  };
+  const getSortOrder = (fieldKey) => sorts.find((s) => s.field === fieldKey)?.order;
 
+  // --- Filter handler (mendukung single value atau array untuk role[]) ---
+  const handleFilterChange = (filterKey, selectedValue) => {
+    setFilters((prevFilters) => {
+      const newFilters = { ...prevFilters };
+      const isArray = Array.isArray(selectedValue);
+
+      if (isArray && selectedValue.length > 0) {
+        newFilters[filterKey] = selectedValue;
+      } else if (!isArray && selectedValue) {
+        newFilters[filterKey] = selectedValue;
+      } else {
+        delete newFilters[filterKey];
+      }
+
+      // Jika user mengetik global search di bar atas, biarkan tetap (tidak konflik)
+      return newFilters;
+    });
+  };
+
+  const handleResetFilters = () => {
+    setSearch('');
+    setFilters({});
+    setSorts([]);
+  };
+
+  // --- CRUD handlers tetap sama integrasinya ---
   const handleConfirmDelete = async () => {
     if (!confirmDeleteUser) return;
     setDeletingUserId(confirmDeleteUser.user_id);
 
     try {
       await deleteUser(confirmDeleteUser.user_id);
-      // Menggunakan helper popup
       showTemporaryPopup(
         `User "${confirmDeleteUser.username}" has been deleted.`,
         'success'
@@ -121,7 +181,6 @@ const Users = () => {
     }
   };
 
-  // --- FUNGSI INI TIDAK DIUBAH (UNTUK "NEW USER") ---
   const handleAddUser = async (userData, resetForm) => {
     if (
       !userData.username ||
@@ -147,23 +206,19 @@ const Users = () => {
       setShowUserPopup(false);
     } catch (error) {
       console.error('Failed to add user:', error);
-      // Menampilkan pesan error dari API jika ada
       const errorMessage =
         error.response?.data?.message || 'Failed to add user. Please try again.';
       showTemporaryPopup(errorMessage, 'error');
     }
   };
 
-  // --- TAMBAHAN BARU: Handler untuk "Edit User" ---
   const handleUpdateUser = async (userId, userData) => {
-    // Validasi dasar (password opsional untuk edit)
     if (!userData.username || !userData.full_name || !userData.email || !userData.role) {
       showTemporaryPopup('Username, Full Name, Email, and Role are required.', 'error');
       return;
     }
 
     try {
-      // Panggil API updateUser
       const response = await updateUser(userId, userData);
       const username = response.data?.username || userData.username;
       
@@ -172,8 +227,8 @@ const Users = () => {
         'success'
       );
       
-      await fetchUsers(); // Muat ulang data
-      setEditingUser(null); // Tutup popup edit
+      await fetchUsers();
+      setEditingUser(null);
 
     } catch (error) {
       console.error('Failed to update user:', error);
@@ -181,11 +236,6 @@ const Users = () => {
         error.response?.data?.message || 'Failed to update user. Please try again.';
       showTemporaryPopup(errorMessage, 'error');
     }
-  };
-
-
-  const handleResetFilters = () => {
-    setSearch('');
   };
 
   return (
@@ -203,7 +253,7 @@ const Users = () => {
             />
             <img
               src={searchIcon}
-              alt='Search'
+              alt='search icon'
               className={styles.searchIconImg}
             />
           </div>
@@ -215,27 +265,20 @@ const Users = () => {
             New User
           </Button>
 
-          {/* --- POPUP UNTUK "NEW USER" (TIDAK DIUBAH) --- */}
           {showUserPopup && (
             <PopUpForm
               type='user'
               onClose={() => setShowUserPopup(false)}
               onCreate={(data, resetForm) => handleAddUser(data, resetForm)}
-              // isEditMode tidak di-set (default-nya false)
             />
           )}
 
-          {/* --- POPUP BARU UNTUK "EDIT USER" --- */}
           {editingUser && (
             <PopUpForm
               type='user'
               onClose={() => setEditingUser(null)}
-              // onCreate akan memanggil handleUpdateUser
-              // Kita gunakan panah () => ... agar bisa memasukkan userId
               onCreate={(data) => handleUpdateUser(editingUser.user_id, data)}
-              // Prop baru untuk memberi tahu PopUpForm ini mode edit
               isEditMode={true} 
-              // Prop baru untuk mengisi data awal
               initialData={editingUser} 
             />
           )}
@@ -243,92 +286,138 @@ const Users = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div className={styles.loadingText}>Loading users...</div>
-      ) : error ? (
-        <div className={styles.errorText}>{error}</div>
-      ) : (
-        <div className={styles.tableContainer}>
-          <div className={styles.tableHeader}>
-            {/* ... (Header tidak berubah) ... */}
-            <ColumnHeader title='User ID' hasFilter={false} hasSort={false} />
-            <ColumnHeader title='Username' hasFilter={false} hasSort={true} />
-            <ColumnHeader title='Name' hasFilter={false} hasSort={true} />
-            <ColumnHeader title='User Email' hasFilter={false} hasSort={true} />
-            <ColumnHeader title='Role' hasFilter={true} hasSort={true} />
-            <ColumnHeader title='Actions' hasSort={false} hasFilter={false} />
-          </div>
+      <div className={styles.tableContainer}>
+        <div className={styles.tableHeader}>
+          <ColumnHeader
+            title='User ID'
+            hasSort={true}
+            fieldKey='user_id'
+            sortOrder={getSortOrder('user_id')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterType='search'
+            filterKey='user_id'
+            onFilterChange={handleFilterChange}
+            currentFilterValue={filters.user_id}
+          />
+          <ColumnHeader
+            title='Username'
+            hasSort={true}
+            fieldKey='username'
+            sortOrder={getSortOrder('username')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterType='search'
+            filterKey='username'
+            onFilterChange={handleFilterChange}
+            currentFilterValue={filters.username}
+          />
+          <ColumnHeader
+            title='Name'
+            hasSort={true}
+            fieldKey='full_name'
+            sortOrder={getSortOrder('full_name')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterType='search'
+            filterKey='full_name'
+            onFilterChange={handleFilterChange}
+            currentFilterValue={filters.full_name}
+          />
+          <ColumnHeader
+            title='User Email'
+            hasSort={true}
+            fieldKey='email'
+            sortOrder={getSortOrder('email')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterType='search'
+            filterKey='email'
+            onFilterChange={handleFilterChange}
+            currentFilterValue={filters.email}
+          />
+          <ColumnHeader
+            title='Role'
+            fieldKey='role'
+            hasSort={true}
+            sortOrder={getSortOrder('role')}
+            onSort={handleSortChange}
+            hasFilter={true}
+            filterKey='role'
+            onFilterChange={handleFilterChange}
+            filterOptions={ROLE_OPTIONS}
+            valueKey='id'
+            labelKey='name'
+            currentFilterValue={filters.role}
+          />
+          <ColumnHeader title='Actions' hasSort={false} hasFilter={false} />
+        </div>
 
-          <div className={styles.tableBody}>
-            {filteredUsers.length === 0 ? (
-              <div className={styles.noData}>No users found</div>
-            ) : (
-              filteredUsers.map((user) => (
-                <div key={user.user_id} className={styles.tableRow}>
-                  {/* ... (Cell data tidak berubah) ... */}
-                  <div className={styles.tableCell} title={user.user_id}>
-                    {user.user_id}
-                  </div>
-                  <div className={styles.tableCell} title={user.username}>
-                    {user.username}
-                  </div>
-                  <div className={styles.tableCell} title={user.name}>
-                    {user.full_name || '-'}
-                  </div>
-                  <div className={styles.tableCell} title={user.email}>
-                    {user.email}
-                  </div>
-                  <div
-                    className={styles.tableCell}
-                    title={formatRole(user.role)}
-                  >
-                    {formatRole(user.role)}
-                  </div>
-                  <div className={styles.actionCell}>
-                    <div className={styles.actionContainer}>
-                      
-                      {/* --- PERUBAHAN DI SINI: onClick pada icon edit --- */}
-                      <button
-                        className={styles.actionButton}
-                        // Set state 'editingUser' dengan data user yang di-klik
-                        onClick={() => setEditingUser(user)}
-                        aria-label='Edit User'
-                      >
-                        <img
-                          src={upenIcon}
-                          alt='Edit'
-                          className={`${styles.icon} ${styles.editIcon}`}
-                        />
-                      </button>
+        <div className={styles.tableBody}>
+          {loading ? (
+            // Menggunakan styles.messageCell
+            <div className={styles.messageCell}>Loading...</div> 
+          ) : error ? (
+            // Menggunakan styles.messageCell
+            <div className={styles.messageCell}>{error}</div>
+          ) : users.length === 0 ? (
+            // Menggunakan styles.messageCell
+            <div className={styles.messageCell}>No users found</div>
+          ) : (
+            users.map((user) => (
+              <div key={user.user_id} className={styles.tableRow}>
+                <div className={styles.tableCell} title={user.user_id}>
+                  {user.user_id}
+                </div>
+                <div className={styles.tableCell} title={user.username}>
+                  {user.username}
+                </div>
+                <div className={styles.tableCell} title={user.full_name}>
+                  {user.full_name || '-'}
+                </div>
+                <div className={styles.tableCell} title={user.email}>
+                  {user.email}
+                </div>
+                <div
+                  className={styles.tableCell}
+                  title={formatRole(user.role)}
+                >
+                  {formatRole(user.role)}
+                </div>
+                <div className={styles.actionCell}>
+                  <div className={styles.actionContainer}>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => setEditingUser(user)}
+                      aria-label='Edit User'
+                    >
+                      <img
+                        src={upenIcon}
+                        alt='Edit'
+                        className={`${styles.icon} ${styles.editIcon}`}
+                      />
+                    </button>
 
-                      {/* --- Tombol Delete (TIDAK DIUBAH) --- */}
-                      <button
-                        className={styles.actionButton}
-                        onClick={() => setConfirmDeleteUser(user)}
-                        disabled={deletingUserId === user.user_id}
-                        aria-label='Delete User'
-                      >
-                        <img
-                          src={utrashAltIcon}
-                          alt='Delete'
-                          className={`${styles.icon} ${styles.deleteIcon}`}
-                        />
-                        {deletingUserId === user.user_id && (
-                          <span className={styles.deletingText}>
-                            Deleting...
-                          </span>
-                        )}
-                      </button>
-                    </div>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => setConfirmDeleteUser(user)}
+                      disabled={deletingUserId === user.user_id}
+                      aria-label='Delete User'
+                    >
+                      <img
+                        src={utrashAltIcon}
+                        alt='Delete'
+                        className={`${styles.icon} ${styles.deleteIcon}`}
+                      />
+                    </button>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          )}
         </div>
-      )}
+      </div>
 
-      {/* --- Modal Konfirmasi Delete (TIDAK DIUBAH) --- */}
       {confirmDeleteUser && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -358,7 +447,6 @@ const Users = () => {
         </div>
       )}
 
-      {/* --- Popup Notifikasi (TIDAK DIUBAH) --- */}
       {showPopup && (
         <div
           className={`${styles.popup} ${
