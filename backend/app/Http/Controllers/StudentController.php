@@ -9,7 +9,10 @@ use App\Models\Enrollment;
 use App\Models\SchoolYear;
 use App\Models\StudentOld;
 use Illuminate\Http\Request;
+use App\Models\StudentParent;
+use App\Models\StudentAddress;
 use App\Models\StudentDiscount;
+use App\Models\StudentGuardian;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\Log;
@@ -270,9 +273,42 @@ class StudentController extends Controller
             'ids.*' => 'integer|exists:students,id'
         ]);
 
-        $students = Student::whereIn('id', $request->ids)->get();
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $schoolYearStr = ($currentMonth >= 7)
+            ? $currentYear . '/' . ($currentYear + 1)
+            : ($currentYear - 1) . '/' . $currentYear;
+        
+        $currentSchoolYear = SchoolYear::where('year', $schoolYearStr)->first();
+        $schoolYearLog = $currentSchoolYear ? $currentSchoolYear->year : $schoolYearStr;
 
-        DB::transaction(function () use ($request) {
+        $students = Student::select(
+                'students.id', 
+                'students.student_id', 
+                'students.first_name', 
+                'students.middle_name', 
+                'students.last_name',
+                'students.status', 
+                'students.active', 
+                'classes.grade'    
+            )
+            ->join('enrollments', 'students.id', '=', 'enrollments.id')
+            ->join('classes', 'enrollments.class_id', '=', 'classes.class_id')
+            ->whereIn('students.id', $request->ids)
+            ->where('enrollments.status', 'ACTIVE') 
+            ->get();
+
+        $studentDataList = [];
+        foreach ($students as $index => $student) {
+            $fullName = trim("{$student->first_name} {$student->middle_name} {$student->last_name}");
+            $studentDataList[] = ($index + 1) . ". {$fullName} (student id: {$student->student_id}) (grade: {$student->grade})";
+        }
+
+        $firstStudent = $students->first();
+        $oldStatus = $firstStudent ? $firstStudent->status : 'Active'; 
+        $oldActive = $firstStudent ? $firstStudent->active : 'YES';
+        
+        DB::transaction(function () use ($request, $studentDataList, $schoolYearLog, $oldStatus, $oldActive) {
 
             Student::whereIn('id', $request->ids)
                 ->update([
@@ -286,6 +322,23 @@ class StudentController extends Controller
                 ->where('status', 'ACTIVE')
                 ->update([
                     'status' => 'INACTIVE'
+            ]);
+
+            $this->auditTrail->log('auto_graduate', [
+                'school_year'  => $schoolYearLog,
+                'student_data' => $studentDataList,
+                'changes'      => [
+                    'status' => [
+                        'from' => $oldStatus, 
+                        'to'   => 'Graduate'
+                    ],
+                    'active' => [
+                        'from' => $oldActive,
+                        'to'   => 'NO'
+                    ],
+                    'graduated_at' => now()->toDateTimeString()
+                ],
+                'description'  => 'Student automatically graduated via Bulk Action.'
             ]);
         });
 
@@ -739,11 +792,16 @@ class StudentController extends Controller
                 'discount_name' => 'sometimes|nullable|exists:discount_types,discount_type_id',
                 'discount_notes' => 'sometimes|nullable|string',
             ]);
-
-            $shouldClearCache = false; 
+            
+            $auditChanges = [];
+            
+            // Update student
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
-            $student->update($studentData);
-            if (isset($validated['status'])) {
+            $student->fill($studentData);
+            
+            $shouldClearCache = false; 
+            if ($student->isDirty('status')) {
+                $newStatus = $student->status;
                 $inactiveStatuses = ['graduate', 'expelled', 'withdraw'];
                 $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
 
@@ -756,11 +814,11 @@ class StudentController extends Controller
                 $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
                 $currentSchoolYearId = $schoolYear?->school_year_id;
 
-                if (in_array(strtolower($validated['status']), $inactiveStatuses)) {
+                if (in_array(strtolower($newStatus), $inactiveStatuses)) {
                     $student->active = 'NO';
-                    $student->updated_at = now();
                     $shouldClearCache = true; 
-                    if ($validated['status'] === 'Graduate') {
+                    $student->updated_at = now();
+                    if ($newStatus === 'Graduate') {
                         $student->graduated_at = now();
                     }
                     if ($latestEnrollment) {
@@ -769,8 +827,8 @@ class StudentController extends Controller
                     }
                 } else {
                     $student->active = 'YES';
-                    $student->updated_at = now();
                     $shouldClearCache = true; 
+                    $student->updated_at = now();
                     if ($latestEnrollment) {
                         $latestEnrollment->status =
                             ($currentSchoolYearId && $latestEnrollment->school_year_id === $currentSchoolYearId)
@@ -779,10 +837,12 @@ class StudentController extends Controller
                         $latestEnrollment->save();
                     }
                 }
-
-                $student->save();
             }
 
+            $studentChanges = $student->getDirty();
+            $student->save();
+
+            $auditChanges = array_merge($auditChanges, collect($studentChanges)->except('updated_at')->toArray());
 
             if ($request->hasFile('photo')) {
                 $timestamp = now()->format('Y-m-d_H-i-s');
@@ -792,19 +852,25 @@ class StudentController extends Controller
                 $photoPath = $request->file('photo')->storeAs($folder, $fileName, 'public');
                 $student->photo_path = $photoPath;
                 $student->save();
+                $auditChanges['photo'] = 'Updated Photo';
             }
 
+            // Update student address
             if ($request->hasAny(['street', 'city_regency', 'province'])) {
-                $student->studentAddress()->updateOrCreate(
-                    ['id' => $student->id],
-                    $request->only(['street', 'city_regency', 'province'])
-                );
+                $address = $student->studentAddress ?? new StudentAddress(['id' => $student->id]);
+                $address->fill($request->only(['street', 'city_regency', 'province']));
+
+                if ($address->isDirty()) {
+                    $changes = $address->getDirty();
+                    $address->save();
+                    $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at', 'id'])->toArray());
+                }
             }
 
+            // Update parent
             if ($request->hasAny(['father_name', 'mother_name'])) {
-                $student->studentParent()->updateOrCreate(
-                    ['id' => $student->id],
-                    $request->only([
+                $parent = $student->studentParent ?? new StudentParent(['id' => $student->id]);
+                $parent->fill($request->only([
                         'father_name', 'father_company', 'father_occupation', 'father_phone', 'father_email',
                         'father_address_street', 'father_address_rt', 'father_address_rw', 'father_address_village',
                         'father_address_district', 'father_address_city_regency', 'father_address_province', 'father_address_other',
@@ -813,21 +879,32 @@ class StudentController extends Controller
                         'mother_address_street', 'mother_address_rt', 'mother_address_rw', 'mother_address_village',
                         'mother_address_district', 'mother_address_city_regency', 'mother_address_province', 'mother_address_other',
                         'mother_company_addresses',
-                    ])
-                );
+                ]));
+
+                if ($parent->isDirty()) {
+                    $changes = $parent->getDirty();
+                    $parent->save();
+                    $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at', 'id'])->toArray());
+                }
             }
 
+            // Update guardian
             if ($request->hasAny(['guardian_name'])) {
-                $student->studentGuardian()->updateOrCreate(
-                    ['id' => $student->id],
-                    $request->only([
+                $guardian = $student->studentGuardian ?? new StudentGuardian(['id' => $student->id]);
+                $guardian->fill($request->only([
                         'guardian_name', 'relation_to_student', 'guardian_phone', 'guardian_email',
                         'guardian_address_street', 'guardian_address_rt', 'guardian_address_rw', 'guardian_address_village',
                         'guardian_address_district', 'guardian_address_city_regency', 'guardian_address_province', 'guardian_address_other',
-                    ])
-                );
+                ]));
+                
+                if ($guardian->isDirty()) {
+                    $changes = $guardian->getDirty();
+                    $guardian->save();
+                    $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at', 'id'])->toArray());
+                }
             }
 
+            // Update enrollment
             if ($request->hasAny([
                 'residence_id', 'transportation_id', 'pickup_point_id',
                 'pickup_point_custom', 'residence_hall_policy', 'transportation_policy', 
@@ -837,7 +914,7 @@ class StudentController extends Controller
                 $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
 
                 if ($latestEnrollment) {
-                    $latestEnrollment->update([
+                    $latestEnrollment->fill([
                         'residence_id'          => $request->residence_id ?? $latestEnrollment->residence_id,
                         'transportation_id'     => $request->transportation_id ?? $latestEnrollment->transportation_id,
                         'pickup_point_id'       => $request->pickup_point_id ?? $latestEnrollment->pickup_point_id,
@@ -848,6 +925,12 @@ class StudentController extends Controller
                         'class_id'              => $request->class_id ?? $latestEnrollment->class_id,
                         'program_id'              => $request->program_id ?? $latestEnrollment->program_id,
                     ]);
+
+                    if ($latestEnrollment->isDirty()) {
+                        $changes = $latestEnrollment->getDirty();
+                        $latestEnrollment->save();
+                        $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at'])->toArray());
+                    }
                 } else {
                     $student->enrollments()->create([
                         'residence_id'          => $request->residence_id,
@@ -863,33 +946,25 @@ class StudentController extends Controller
                 }
             }
 
+            // Update payment
             if ($request->hasAny(['tuition_fees', 'residence_payment', 'financial_policy_contract'])) {
                 $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
                 if ($latestEnrollment) {
                     $payment = Payment::where('enrollment_id', $latestEnrollment->enrollment_id)->first();
                     
                     if ($payment) {
-                        $updateData = [];
+                        $payment->fill($request->only(['tuition_fees', 'residence_payment', 'financial_policy_contract']));
 
-                        if ($request->has('tuition_fees')) {
-                            $updateData['tuition_fees'] = $request->tuition_fees;
-                        }
-
-                        if ($request->has('residence_payment')) {
-                            $updateData['residence_payment'] = $request->residence_payment;
-                        }
-
-                        if ($request->has('financial_policy_contract')) {
-                            $updateData['financial_policy_contract'] = $request->financial_policy_contract;
-                        }
-
-                        if (!empty($updateData)) {
-                            $payment->update($updateData);
+                        if ($payment->isDirty()) {
+                            $changes = $payment->getDirty();
+                            $payment->save();
+                            $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at', 'id'])->toArray());
                         }
                     }
                 }
             }
 
+            // Update discount
             if ($request->hasAny(['discount_name', 'discount_notes'])) {
                 $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
                 
@@ -898,6 +973,7 @@ class StudentController extends Controller
                         ['enrollment_id' => $latestEnrollment->enrollment_id]
                     );
                     
+                    $discountData = [];
                     if ($request->has('discount_name')) {
                         $studentDiscount->discount_type_id = $validated['discount_name'];
                     }
@@ -905,7 +981,13 @@ class StudentController extends Controller
                         $studentDiscount->notes = $validated['discount_notes'];
                     }
                     
-                    $studentDiscount->save();
+                    $studentDiscount->fill($discountData);
+
+                    if ($studentDiscount->isDirty()) {
+                        $changes = $studentDiscount->getDirty();
+                        $studentDiscount->save();
+                        $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at', 'id'])->toArray());
+                    }
                 }
             }
 
@@ -979,10 +1061,12 @@ class StudentController extends Controller
                 StudentStatusUpdated::dispatch($student);
             }
 
-            $this->auditTrail->log('update_student', [
-                'student_id' => $student->student_id,
-                'changes'    => $validated,
-            ]);
+            if (!empty($auditChanges)) {
+                $this->auditTrail->log('update_student', [
+                    'student_id' => $student->student_id,
+                    'changes'    => $auditChanges,
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -1005,7 +1089,7 @@ class StudentController extends Controller
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => config('app.debug') ? $e->getTrace() : [] // trace dikirim hanya kalau APP_DEBUG=true
+                'trace' => config('app.debug') ? $e->getTrace() : [] 
             ], 500);
         }
     }

@@ -317,6 +317,19 @@ class RegistrationController extends Controller
             $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
 
             $newStatus = 'Deleted New/Transferee (Invalid Data)';
+            
+            $this->auditTrail->log('Invalidate Registration', [
+                'category'          => 'Invalid Data (New/Transferee)',
+                'application_id'    => $applicationForm->application_id,
+                'student_name'      => "{$student->first_name} {$student->middle_name} {$student->last_name}",
+                'student_id'        => $student->student_id,
+                'enrollment_ver'    => $current_version,
+                'reason'            => $invalidReason,
+                'notes'             => $notes,
+                'action_detail'     => 'Moved to Cancelled Registration table and deleted original data.',
+                'data_changes'      => null,
+            ]);
+
             DB::commit();
             ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
@@ -335,6 +348,19 @@ class RegistrationController extends Controller
                     $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, true);
 
                     $newStatus = 'Deleted Old (Invalid Data)';
+
+                    $this->auditTrail->log('Invalidate Registration', [
+                        'category'          => 'Invalid Data (Old Student - Version 1)',
+                        'application_id'    => $applicationForm->application_id,
+                        'student_name'      => "{$student->first_name} {$student->middle_name} {$student->last_name}",
+                        'student_id'        => $student->student_id,
+                        'enrollment_ver'    => $current_version,
+                        'reason'            => $invalidReason,
+                        'notes'             => $notes,
+                        'action_detail'     => 'Moved to Cancelled Registration table and deleted original data.',
+                        'data_changes'      => null,
+                    ]);
+
                     DB::commit();
                     ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
@@ -346,6 +372,19 @@ class RegistrationController extends Controller
                     $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
 
                     $newStatus = 'Deleted Old (Invalid Data)';
+
+                    $this->auditTrail->log('Invalidate Registration', [
+                        'category'          => 'Invalid Data (Old Student - Latest Version)',
+                        'application_id'    => $applicationForm->application_id,
+                        'student_name'      => "{$student->first_name} {$student->middle_name} {$student->last_name}",
+                        'student_id'        => $student->student_id,
+                        'enrollment_ver'    => $current_version,
+                        'reason'            => $invalidReason,
+                        'notes'             => $notes,
+                        'action_detail'     => 'Deleted registration records only.',
+                        'data_changes'      => null,
+                    ]);
+
                     DB::commit();
                     ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
@@ -370,6 +409,19 @@ class RegistrationController extends Controller
                 $this->deleteStudentAndRelatedData($applicationForm, $enrollment, $student, $enrollment_id, false);
 
                 $newStatus = 'Deleted Old (Invalid Data)';
+                
+                $this->auditTrail->log('Invalidate Registration', [
+                    'category'          => 'Invalid Data (Old Student - Latest Version)',
+                    'application_id'    => $applicationForm->application_id,
+                    'student_name'      => "{$student->first_name} {$student->middle_name} {$student->last_name}",
+                    'student_id'        => $student->student_id,
+                    'enrollment_ver'    => $current_version,
+                    'reason'            => $invalidReason,
+                    'notes'             => $notes,
+                    'action_detail'     => 'Deleted registration records only.',
+                    'data_changes'      => null,
+                ]);
+
                 DB::commit();
                 ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
@@ -435,6 +487,19 @@ class RegistrationController extends Controller
 
             $newStatus = 'Deleted New/Transferee (Cancelled)';
             DB::commit();
+
+            $this->auditTrail->log('Cancel Enrollment', [
+                'category'          => 'Cancellation (New/Transferee)',
+                'application_id'    => $applicationForm->application_id,
+                'student_name'      => "{$student->first_name} {$student->middle_name} {$student->last_name}",
+                'student_id'        => $student->student_id,
+                'enrollment_ver'    => $current_version,
+                'reason'            => $cancellationReason,
+                'notes'             => $notes,
+                'action_detail'     => 'Moved to Cancelled Registration table and deleted original data.',
+                'data_changes'      => null,
+            ]);
+
             ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
 
             return response()->json([
@@ -456,6 +521,24 @@ class RegistrationController extends Controller
                 $enrollment->save();
                 
                 $newStatus = 'Deleted Old (Cancelled)';
+
+                $this->auditTrail->log('Cancel Enrollment', [
+                    'category'          => 'Cancellation (Old Student - Withdraw)',
+                    'application_id'    => $applicationForm->application_id,
+                    'student_name'      => "{$student->first_name} {$student->middle_name} {$student->last_name}",
+                    'student_id'        => $student->student_id,
+                    'enrollment_ver'    => $current_version,
+                    'reason'            => $cancellationReason,
+                    'notes'             => $notes,
+                    'action_detail'     => 'Student status updated to Withdraw. Active set to NO.',
+                    'data_changes'      => [
+                        'student_status'     => 'Withdraw',
+                        'student_active'     => 'NO',
+                        'application_status' => 'Cancelled',
+                        'enrollment'         => 'INACTIVE'
+                    ]
+                ]);
+
                 DB::commit();
                 ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, $newStatus);
                 StudentStatusUpdated::dispatch($student);
@@ -848,6 +931,10 @@ class RegistrationController extends Controller
                 'discount_notes' => 'nullable|string',
 
             ]);
+            
+            if ($validated['citizenship'] === 'Indonesia') {
+                $validated['country'] = 'Indonesia';
+            }
 
             if (empty($validated['program_id']) && !empty($validated['program_other'])) {
                 $program = Program::create([
