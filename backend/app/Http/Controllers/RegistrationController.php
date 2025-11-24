@@ -243,6 +243,7 @@ class RegistrationController extends Controller
                 'invalidReason' => 'Invalid Data',
                 'cancellationReason' => 'Cancellation of Enrollment',
                 'notes' => $notes,
+                'isInactive' => strtoupper($student->active) === 'NO' && strtolower($student->status) !== 'not graduate',
             ];
             
             $data['isLatest'] = $this->isLatestVersion($data['student_id_enrollment'], $data['current_version']);
@@ -285,6 +286,14 @@ class RegistrationController extends Controller
     {
         extract($data); 
         $notes = $data['notes'] ?? null; 
+
+        if ($isInactive) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false, 
+                'message' => 'Registration cannot be cancelled because the student is already inactive.'
+            ], 400);
+        }
 
         if ($studentStatus === 'new' || $studentStatus === 'transferee') {
             
@@ -454,6 +463,14 @@ class RegistrationController extends Controller
     {
         extract($data); 
         $notes = $data['notes'];
+        
+        if ($isInactive) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false, 
+                'message' => 'Registration cannot be cancelled because the student is already inactive.'
+            ], 400);
+        }
         
         if ($studentStatus === 'new' || $studentStatus === 'transferee') {
             
