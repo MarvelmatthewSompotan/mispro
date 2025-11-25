@@ -70,6 +70,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::post('/store/{draft_id}', [RegistrationController::class, 'store']);
     Route::get('/preview/{applicationId}/version/{versionId}', [RegistrationController::class, 'showPreview']);
     Route::post('/{application_id}/cancel/{reason_type}', [RegistrationController::class, 'handleCancelRegistration']);
+    Route::get('/cancelled-registrations', [RegistrationController::class, 'getCancelledRegistrations']);
   });
 });
 

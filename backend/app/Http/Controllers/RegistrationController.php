@@ -37,6 +37,7 @@ use App\Events\ApplicationFormCreated;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
 use App\Events\ApplicationFormStatusUpdated;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class RegistrationController extends Controller
 {
@@ -189,6 +190,7 @@ class RegistrationController extends Controller
         return $current_version === (int)$latestVersion;
     }
 
+    // Cancel Registration
     public function handleCancelRegistration(Request $request, $application_id, string $reason_type)
     {
         if (empty($application_id) || !in_array($reason_type, ['invalidData', 'cancellationOfEnrollment'])) {
@@ -258,9 +260,9 @@ class RegistrationController extends Controller
             $data['isCancelled'] = $latestApplication->status === 'Cancelled';
             
             if ($reason_type === 'invalidData') {
-                return $this->InvalidDataCancellation($data);
+                return $this->invalidDataCancellation($data);
             } else if ($reason_type === 'cancellationOfEnrollment') {
-                return $this->EnrollmentCancellation($data);
+                return $this->enrollmentCancellation($data);
             }
             
             DB::rollBack();
@@ -282,7 +284,7 @@ class RegistrationController extends Controller
         }
     }
 
-    protected function InvalidDataCancellation(array $data)
+    protected function invalidDataCancellation(array $data)
     {
         extract($data); 
         $notes = $data['notes'] ?? null; 
@@ -459,7 +461,7 @@ class RegistrationController extends Controller
         ], 400);
     }
 
-    protected function EnrollmentCancellation(array $data)
+    protected function enrollmentCancellation(array $data)
     {
         extract($data); 
         $notes = $data['notes'];
@@ -648,6 +650,158 @@ class RegistrationController extends Controller
         }
     }
 
+    public function getCancelledRegistrations(Request $request)
+    {
+        $newStudents = CancelledRegistration::with(['schoolYear', 'section'])
+            ->where('reason', 'Cancellation of Enrollment')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'student_status'    => 'New',
+                    'full_name'         => $item->full_name, 
+                    'school_year'       => $item->schoolYear ? $item->schoolYear->year : null,
+                    'school_year_id'    => $item->school_year_id,
+                    'section'           => $item->section ? $item->section->name : null,
+                    'section_id'        => $item->section_id,
+                    'registration_date' => $item->registration_date,
+                    'cancelled_at'      => $item->cancelled_at,
+                    'notes'             => $item->notes,
+                ];
+            });
+
+        $oldStudents = ApplicationForm::with([
+                'enrollment.student', 
+                'enrollment.schoolYear', 
+                'enrollment.section'
+            ])
+            ->where('status', 'Cancelled')
+            ->get()
+            ->map(function ($item) {
+                $enrollment = $item->enrollment;
+                $student = $enrollment ? $enrollment->student : null;
+
+                $fullName = '';
+                if ($student) {
+                    $nameParts = [
+                        $student->first_name,
+                        $student->middle_name,
+                        $student->last_name
+                    ];
+                    $fullName = implode(' ', array_filter($nameParts)); 
+                }
+
+                return [
+                    'student_status'    => 'Old',
+                    'full_name'         => $fullName,
+                    'school_year'       => ($enrollment && $enrollment->schoolYear) ? $enrollment->schoolYear->year : null,
+                    'school_year_id'    => $enrollment ? $enrollment->school_year_id : null,
+                    'section'           => ($enrollment && $enrollment->section) ? $enrollment->section->name : null,
+                    'section_id'        => $enrollment ? $enrollment->section_id : null,
+                    'registration_date' => $enrollment ? $enrollment->registration_date : null,
+                    'cancelled_at'      => $item->updated_at,
+                    'notes'             => $item->notes,
+                ];
+            });
+
+        $collection = $newStudents->merge($oldStudents);
+        
+        // Global Search (Student Name)
+        if ($request->filled('search')) {
+            $keyword = strtolower($request->search);
+            $collection = $collection->filter(function ($item) use ($keyword) {
+                return str_contains(strtolower($item['full_name'] ?? ''), $keyword);
+            });
+        }
+
+        // Filter Full Name
+        if ($request->filled('filter_name')) {
+            $keywordName = strtolower($request->filter_name);
+            $collection = $collection->filter(function ($item) use ($keywordName) {
+                return str_contains(strtolower($item['full_name'] ?? ''), $keywordName);
+            });
+        }
+
+        // Filter School Year (Checkbox - Multiple Select)
+        if ($request->filled('school_years') && is_array($request->school_years)) {
+            $collection = $collection->whereIn('school_year_id', $request->school_years);
+        }
+
+        // Filter Section (Checkbox - Multiple Select)
+        if ($request->filled('sections') && is_array($request->sections)) {
+            $collection = $collection->whereIn('section_id', $request->sections);
+        }
+
+        // Filter Registration Date (Range)
+        if ($request->filled('reg_start_date') && $request->filled('reg_end_date')) {
+            $collection = $collection->filter(function ($item) use ($request) {
+                if (empty($item['registration_date'])) return false;
+
+                $registrationDate = date('Y-m-d', strtotime($item['registration_date']));
+                return $registrationDate >= $request->reg_start_date && 
+                    $registrationDate <= $request->reg_end_date;
+            });
+        }
+
+        // Filter Cancelled At (Range)
+        if ($request->filled('cancel_start_date') && $request->filled('cancel_end_date')) {
+            $collection = $collection->filter(function ($item) use ($request) {
+                if (empty($item['cancelled_at'])) return false;
+
+                $cancelDate = date('Y-m-d', strtotime($item['cancelled_at']));
+                return $cancelDate >= $request->cancel_start_date && 
+                    $cancelDate <= $request->cancel_end_date;
+            });
+        }
+
+        // Filter Notes
+        if ($request->filled('filter_notes')) {
+            $keywordNote = strtolower($request->filter_notes);
+            $collection = $collection->filter(function ($item) use ($keywordNote) {
+                return str_contains(strtolower($item['notes'] ?? ''), $keywordNote);
+            });
+        }
+
+        // Filter student status (Checkbox - Multiple)
+        if ($request->filled('student_status') && is_array($request->student_status)) {
+            $collection = $collection->whereIn('student_status', $request->student_status);
+        }
+
+        // Sort
+        $sortField = $request->input('sort_by', 'cancelled_at');
+        $sortOrder = $request->input('sort_order', 'desc');     
+
+        if ($sortOrder === 'asc') {
+            $collection = $collection->sortBy($sortField);
+        } else {
+            $collection = $collection->sortByDesc($sortField);
+        }
+        
+        // Reset keys
+        $collection = $collection->values();
+
+        // Manual pagination
+        $perPage = 25;
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        
+        $currentPageResults = $collection->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $paginatedData = new LengthAwarePaginator(
+            $currentPageResults,
+            $collection->count(),
+            $perPage,
+            $page,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => $request->query(), 
+            ]
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $paginatedData
+        ]);
+    }
+
     /**
      * Start registration process with initial context
      */
@@ -812,6 +966,7 @@ class RegistrationController extends Controller
         return "{$number}/RF.No-{$sectionCode}/{$romanMonth}-{$yearShort}";
     }
 
+    // Registration
     public function store(Request $request, $draft_id)
     {
         \Log::info('Registration store called', [
@@ -1209,8 +1364,8 @@ class RegistrationController extends Controller
                         'student_id' => $oldStudent->studentold_id ?? null,
                         'studentall_id' => $generatedId,
                         'first_name' => $validated['first_name'] ?? $oldStudent->first_name,
-                        'middle_name' => $validated['middle_name'] ?? $oldStudent->middle_name,
-                        'last_name' => $validated['last_name'] ?? $oldStudent->last_name,
+                        'middle_name' => $validated['middle_name'] ?? null,
+                        'last_name' => $validated['last_name'] ?? null,
                         'nickname' => $validated['nickname'] ?? $oldStudent->nickname,
                         'gender' => $validated['gender'] ?? strtoupper($oldStudent->gender),
                         'age' => $validated['age'] ?: $this->calculateAge($validated['date_of_birth']),
