@@ -231,8 +231,12 @@ class LogbookController extends Controller
                 }
 
                 switch ($field) {
+                    case 'student_id':
+                        $studentsQuery->orderByRaw("CAST(students.student_id AS UNSIGNED) $order");
+                        break;
+
                     case 'full_name':
-                        $studentsQuery->orderByRaw("CONCAT(students.first_name, ' ', COALESCE(students.middle_name, ''), ' ', students.last_name) $order");
+                        $studentsQuery->orderByRaw("CONCAT(COALESCE(students.first_name,''), ' ', COALESCE(students.middle_name, ''), ' ', COALESCE(students.last_name,'')) $order");
                         break;
 
                     case 'grade':
@@ -269,6 +273,15 @@ class LogbookController extends Controller
                             $joinMap['transportations'] = true;
                         }
                         $studentsQuery->orderBy('transportations.type', $order);
+                        break;
+
+                    case 'age':
+                        $dobOrder = (strtolower($order) === 'asc') ? 'desc' : 'asc';
+                        $studentsQuery->orderBy('students.date_of_birth', $dobOrder);
+                        break;
+
+                    case 'religion':
+                        $studentsQuery->orderByRaw("CAST(students.religion AS CHAR) $order");
                         break;
 
                     case 'father_name':
@@ -316,6 +329,8 @@ class LogbookController extends Controller
                 'students.va_bca',
                 'students.va_bni',
                 'students.va_bri',
+                'students.updated_at',
+                'students.graduated_at',
                 'e_latest_join.enrollment_id', 
                 'e_join.enrollment_id', 
                 'latest_app_version.data_snapshot',
@@ -654,8 +669,12 @@ class LogbookController extends Controller
                 }
 
                 switch ($field) {
+                    case 'student_id':
+                        $studentsQuery->orderByRaw("CAST(students.student_id AS UNSIGNED) $order");
+                        break;
+
                     case 'full_name':
-                        $studentsQuery->orderByRaw("CONCAT(students.first_name, ' ', COALESCE(students.middle_name, ''), ' ', students.last_name) $order");
+                        $studentsQuery->orderByRaw("CONCAT(COALESCE(students.first_name,''), ' ', COALESCE(students.middle_name, ''), ' ', COALESCE(students.last_name,'')) $order");
                         break;
 
                     case 'grade':
@@ -692,6 +711,15 @@ class LogbookController extends Controller
                             $joinMap['transportations'] = true;
                         }
                         $studentsQuery->orderBy('transportations.type', $order);
+                        break;
+                    
+                    case 'age':
+                        $dobOrder = (strtolower($order) === 'asc') ? 'desc' : 'asc';
+                        $studentsQuery->orderBy('students.date_of_birth', $dobOrder);
+                        break;
+
+                    case 'religion':
+                        $studentsQuery->orderByRaw("CAST(students.religion AS CHAR) $order");
                         break;
 
                     case 'father_name':
@@ -739,6 +767,8 @@ class LogbookController extends Controller
                 'students.va_bca',
                 'students.va_bni',
                 'students.va_bri',
+                'students.updated_at', 
+                'students.graduated_at',
                 'e_latest_join.enrollment_id', 
                 'e_join.enrollment_id', 
                 'latest_app_version.data_snapshot',

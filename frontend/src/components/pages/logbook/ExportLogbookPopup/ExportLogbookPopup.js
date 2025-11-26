@@ -143,20 +143,21 @@ const ExportLogbookPopup = ({
       };
 
       // 2. Siapkan Kolom & Header
+      // Kita filter kolom yang dipilih (kecuali School Year karena sudah ada di judul)
       const columnsForPDFTable = columns.filter(
         (column) => selectedColumns.has(column) && column !== "School Year"
       );
       const tableHeaders = ["No.", ...columnsForPDFTable];
       const photoColIndex = tableHeaders.indexOf("Photo");
 
-      // 3. Load semua gambar (Ini tetap sama, menggunakan data LENGKAP)
+      // 3. Load semua gambar
       const loadedImages = await Promise.all(
         logbookData.map((student) =>
           loadImage(student[HEADER_KEY_MAP["Photo"]])
         )
       );
 
-      // 4. Siapkan Data Tabel (Ini tetap sama)
+      // 4. Siapkan Data Tabel
       const tableData = logbookData.map((student, index) => {
         const row = [index + 1];
         columnsForPDFTable.forEach((column) => {
@@ -182,7 +183,7 @@ const ExportLogbookPopup = ({
       const titleText = `Student Logbook (School Year: ${schoolYear})`;
 
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
+      doc.setFontSize(16);
       doc.setTextColor(
         globalColors.mainText[0],
         globalColors.mainText[1],
@@ -191,7 +192,7 @@ const ExportLogbookPopup = ({
       doc.text(titleText, margin, 15);
 
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
+      doc.setFontSize(12);
       const now = new Date();
       const createdDate = `Created: ${now
         .getDate()
@@ -207,19 +208,44 @@ const ExportLogbookPopup = ({
         .padStart(2, "0")}`;
       doc.text(createdDate, margin, 22);
 
-      // --- PERBAIKAN: Tentukan Semua Ukuran di Sini (TETAP SAMA) ---
+      // --- PERBAIKAN: LOGIKA DINAMIS UKURAN ---
 
-      // 1. UBAH ANGKA INI UNTUK MENGUBAH UKURAN GAMBAR
-      const fixedImgHeight = 12; // (Sebelumnya 5, sekarang 15mm)
+      // Hitung jumlah kolom data (selain No.)
+      const colCount = columnsForPDFTable.length;
+
+      let dynamicImgHeight = 12; // Default (Kecil)
+      let dynamicFontSize = 4; // Default (Kecil)
+
+      // Logika penyesuaian ukuran:
+      if (colCount <= 5) {
+        // Jika kolom sangat sedikit (1-5), perbesar gambar dan font
+        dynamicImgHeight = 24;
+        dynamicFontSize = 12;
+      } else if (colCount <= 9) {
+        // Jika kolom sedang (6-9)
+        dynamicImgHeight = 18;
+        dynamicFontSize = 9;
+      } else if (colCount <= 14) {
+        // Jika kolom agak banyak (10-14)
+        dynamicImgHeight = 14;
+        dynamicFontSize = 6;
+      } else {
+        // Jika kolom sangat banyak (>14), gunakan default kecil
+        dynamicImgHeight = 12;
+        dynamicFontSize = 4;
+      }
+
+      // 1. Set fixed height berdasarkan logika di atas
+      const fixedImgHeight = dynamicImgHeight;
 
       // 2. Definisikan aspect ratio & padding
       const aspectRatio = 59.97 / 81;
-      const globalCellPadding = 2.5; // Sesuai 'styles.cellPadding'
+      const globalCellPadding = 2.5;
 
       // 3. Hitung ukuran sel foto secara otomatis
-      const fixedImgWidth = fixedImgHeight * aspectRatio; // Lebar gambar
-      const photoCellWidth = fixedImgWidth + globalCellPadding * 2; // Lebar sel = lebar gambar + padding kiri/kanan
-      const photoCellHeight = fixedImgHeight + globalCellPadding * 2; // Tinggi sel = tinggi gambar + padding atas/bawah
+      const fixedImgWidth = fixedImgHeight * aspectRatio;
+      const photoCellWidth = fixedImgWidth + globalCellPadding * 2;
+      const photoCellHeight = fixedImgHeight + globalCellPadding * 2;
 
       // 6. Panggil autoTable
       autoTable(doc, {
@@ -231,8 +257,8 @@ const ExportLogbookPopup = ({
         rowPageBreak: "auto",
         styles: {
           font: "helvetica",
-          fontSize: 4,
-          cellPadding: globalCellPadding, // Gunakan variabel
+          fontSize: dynamicFontSize, // Gunakan variabel dinamis
+          cellPadding: globalCellPadding,
           textColor: globalColors.mainText,
           lineColor: globalColors.mainGrey,
           lineWidth: 0.2,
@@ -240,7 +266,7 @@ const ExportLogbookPopup = ({
           minCellHeight: 1,
         },
         headStyles: {
-          fontSize: 4,
+          fontSize: dynamicFontSize, // Gunakan variabel dinamis juga untuk header
           fillColor: globalColors.secondaryBg,
           textColor: globalColors.mainText,
           halign: "middle",
@@ -251,7 +277,6 @@ const ExportLogbookPopup = ({
         },
         columnStyles: {
           [photoColIndex]: {
-            // Gunakan nilai yang sudah dihitung otomatis
             cellWidth: photoCellWidth,
             minCellHeight: photoCellHeight,
             halign: "center",
@@ -264,7 +289,7 @@ const ExportLogbookPopup = ({
             data.column.index === photoColIndex &&
             data.cell.section === "body"
           ) {
-            data.cell.text = []; // Tetap kosongkan teks
+            data.cell.text = [];
           }
         },
 
@@ -279,10 +304,8 @@ const ExportLogbookPopup = ({
             const imgData = loadedImages[data.row.index];
 
             if (imgData) {
-              // Gunakan 'fixedImgHeight' dan 'fixedImgWidth'
-              // yang kita definisikan di atas
-              const imgHeight = fixedImgHeight;
-              const imgWidth = fixedImgWidth;
+              const imgHeight = fixedImgHeight; // Menggunakan nilai dinamis
+              const imgWidth = fixedImgWidth; // Menggunakan nilai dinamis
 
               // Center gambar di dalam sel
               const x = data.cell.x + (cellWidth - imgWidth) / 2;
@@ -300,7 +323,6 @@ const ExportLogbookPopup = ({
                 );
               }
             } else {
-              // Gambar placeholder jika tidak ada imgData
               doc.text(
                 "-",
                 data.cell.x + cellWidth / 2,
@@ -312,7 +334,7 @@ const ExportLogbookPopup = ({
         },
       });
 
-      // --- Logika Nomor Halaman (TETAP SAMA) ---
+      // --- Logika Nomor Halaman ---
       const pageCount = doc.internal.getNumberOfPages();
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
@@ -325,7 +347,6 @@ const ExportLogbookPopup = ({
           { align: "right" }
         );
       }
-      // -----------------------------------------------------
 
       // 7. Simpan PDF
       const fileName = `Student_Logbook_${
@@ -344,7 +365,7 @@ const ExportLogbookPopup = ({
     hasSelectedColumns,
     isDownloading,
     dataLoaded,
-  ]); // Dependensi hook
+  ]);
 
   if (!isOpen) return null;
 
@@ -448,7 +469,6 @@ const ExportLogbookPopup = ({
               Please select at least one column first to see the preview.
             </div>
           )}
-          
         </div>
 
         <div className={styles.footer}>
