@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
-import searchIcon from "../../../assets/Search-icon.png";
+import SearchBar from "../../atoms/searchBar/searchBar";
 import { getStudents, getRegistrationOptions } from "../../../services/api";
 import Pagination from "../../atoms/Pagination";
 import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
@@ -219,16 +219,11 @@ const StudentList = () => {
       <div>
         <h1 className={styles.pageTitle}>Student List</h1>
         <div className={styles.searchAndFilterContainer}>
-          <div className={styles.searchContainer}>
-            <input
-              type="text"
-              placeholder="Find name or student id"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={styles.searchInput}
-            />
-            <img src={searchIcon} alt="Search" className={styles.searchIcon} />
-          </div>
+          <SearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Find name or student id"
+          />
           <ResetFilterButton
             onClick={() => {
               setSearch("");
@@ -382,8 +377,8 @@ const StudentList = () => {
         />
       )}
       {showAutoGraduate && (
-        <AutoGraduatePopup 
-          onClose={() => setShowAutoGraduate(false)} 
+        <AutoGraduatePopup
+          onClose={() => setShowAutoGraduate(false)}
           onSuccess={() => fetchStudents(currentPage)}
         />
       )}
