@@ -198,6 +198,7 @@ const StudentProfile = () => {
         setStatusOptions(data.active_status || []);
       })
       .catch((err) => console.error("Failed to fetch options:", err));
+      // eslint-disable-next-line
   }, []);
 
   const handleDownloadPdfClick = async () => {

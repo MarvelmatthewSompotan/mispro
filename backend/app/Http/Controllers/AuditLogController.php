@@ -9,18 +9,18 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
-        $logs = AuditLog::with('user:id,username,email')
+        $logs = AuditLog::with('user:user_id,username,full_name,email,role')
             ->when($request->action, fn($q) => $q->where('action', $request->action))
             ->when($request->user_id, fn($q) => $q->where('user_id', $request->user_id))
             ->latest()
-            ->paginate(20);
+            ->paginate(25);
 
         return response()->json($logs);
     }
 
     public function show($id)
     {
-        $log = AuditLog::with('user:id,username,email')->findOrFail($id);
+        $log = AuditLog::with('user:user_id,username,full_name,email,role')->findOrFail($id);
 
         return response()->json($log);
     }

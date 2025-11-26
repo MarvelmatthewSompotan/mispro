@@ -33,6 +33,7 @@ const RegistrationForm = () => {
     otherDetail: {}, // [MODIFIED 1/5] Menambahkan state untuk OtherDetail
   });
   const [resetKey, setResetKey] = useState(0);
+  // eslint-disable-next-line
   const [prefillTrigger, setPrefillTrigger] = useState(0);
   const [sharedData, setSharedData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

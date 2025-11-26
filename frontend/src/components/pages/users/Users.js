@@ -6,7 +6,6 @@ import searchIcon from '../../../assets/Search-icon.png';
 import upenIcon from '../../../assets/edit_pen.png';
 import utrashAltIcon from '../../../assets/trash_icon.png';
 import PopUpForm from '../../molecules/PopUp/PopUpRegis/PopUpForm';
-// --- PERUBAHAN DI SINI: Impor `updateUser` ---
 import { getUsers, deleteUser, postUser, updateUser } from '../../../services/api';
 import ResetFilterButton from '../../atoms/resetFilterButton/ResetFilterButton';
 

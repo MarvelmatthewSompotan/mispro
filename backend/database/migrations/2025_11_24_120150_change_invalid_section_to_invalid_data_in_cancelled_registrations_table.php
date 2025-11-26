@@ -12,6 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        DB::statement("ALTER TABLE cancelled_registrations MODIFY COLUMN reason ENUM('Cancellation of Enrollment', 'Invalid Section', 'Invalid Data') NULL");
+
         DB::table('cancelled_registrations')
             ->where('reason', 'Invalid Section')
             ->update(['reason' => 'Invalid Data']);
@@ -24,6 +26,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        DB::statement("ALTER TABLE cancelled_registrations MODIFY COLUMN reason ENUM('Cancellation of Enrollment', 'Invalid Data', 'Invalid Section') NULL");
+
         DB::table('cancelled_registrations')
             ->where('reason', 'Invalid Data')
             ->update(['reason' => 'Invalid Section']);

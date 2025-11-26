@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\User;
+use App\Services\AuditTrailService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +12,13 @@ use Illuminate\Validation\ValidationException;
 
 class UserManagementController extends Controller
 {
+    protected $auditTrail;
+
+    public function __construct(AuditTrailService $auditTrail)
+    {
+        $this->auditTrail = $auditTrail;
+    }
+
     public function index(Request $request)
     {
         try {
@@ -77,7 +85,6 @@ class UserManagementController extends Controller
         }
     }
 
-
     public function store(Request $request)
     {
         $messages = [
@@ -109,6 +116,14 @@ class UserManagementController extends Controller
                 'role' => $validated['role'],
             ]);
             
+            $this->auditTrail->log('Create User', [
+                'action' => 'Create',
+                'user_id' => $user->user_id,
+                'username' => $user->username,
+                'role' => $user->role,
+                'description' => "Created new user: {$user->username} ({$user->role})"
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'User created successfully',
@@ -165,7 +180,25 @@ class UserManagementController extends Controller
                 unset($validated['password']);
             }
 
-            $user->update($validated);
+            $user->fill($validated);
+
+            if ($user->isDirty()) {
+                $changes = $user->getDirty();
+                
+                if (isset($changes['password'])) {
+                    $changes['password'] = '******** (Password Changed)';
+                }
+
+                $user->save();
+
+                $this->auditTrail->log('Update User', [
+                    'action' => 'Update',
+                    'user_id' => $user->user_id,
+                    'username' => $user->username,
+                    'changes' => $changes,
+                    'description' => "Updated user details for {$user->username}"
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -214,6 +247,14 @@ class UserManagementController extends Controller
             }
 
             $user->delete();
+
+            $this->auditTrail->log('Delete User', [
+                'action' => 'Delete',
+                'user_id' => $user->user_id,
+                'username' => $user->username,
+                'deleted_data' => $user->only(['user_id', 'username', 'full_name', 'role']), // Helper 'only' mirip membuat array manual
+                'description' => "Deleted user: {$user->username} ({$user->role})"
+            ]);
 
             return response()->json([
                 'success' => true,
