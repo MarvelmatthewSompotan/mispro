@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./Logbook.module.css";
 import TableHeaderController from "../../molecules/TableHeaderController/TableHeaderController";
-import Button from "../../atoms/Button";
+import Button from "../../atoms/button/Button";
 import ExportLogbookPopup from "./ExportLogbookPopup/ExportLogbookPopup";
-import FilterPopup from "../../atoms/FilterPopUp";
-import filterStyles from "../../atoms/FilterPopUp.module.css";
-import Pagination from "../../atoms/Pagination"; // <-- 1. IMPORT Pagination
+import FilterPopup from "../../molecules/filterPopUp/FilterPopUp";
+import filterStyles from "../../molecules/filterPopUp/FilterPopUp.module.css";
+import Pagination from "../../molecules/pagination/Pagination"; // <-- 1. IMPORT Pagination
 import {
   getLogbook,
   getRegistrationOptions,
@@ -512,10 +512,10 @@ const Logbook = () => {
           </Button>
         </header>
         <div className={styles.selectionControls}>
-          <Button className={styles.btnChipDanger} onClick={unselectAllColumns}>
+          <Button variant="chip-danger" onClick={unselectAllColumns}>
             Unselect All
           </Button>
-          <Button className={styles.btnChipPrimary} onClick={selectAllColumns}>
+          <Button variant="chip-primary" onClick={selectAllColumns}>
             Select All
           </Button>
         </div>

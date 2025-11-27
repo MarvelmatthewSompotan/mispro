@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styles from "./PopUpConfirm.module.css";
 import { submitRegistrationForm } from "../../../../services/api";
 import WrongSectionPopup from "../../../pages/registration/RegistrationForm/PopUp/WrongSectionPopup";
-import Button from "../../../atoms/Button";
+import Button from "../../../atoms/button/Button";
 
 const PopUpConfirm = React.memo(
   ({
@@ -21,19 +21,17 @@ const PopUpConfirm = React.memo(
       onSetAllowNavigation(true);
       try {
         setIsSubmitting(true);
-        // [KEMBALIKAN] Data yang dikirim ke DB adalah data TANPA otherDetail
+      
         const transformedData = transformFormData(allFormData);
         const response = await submitRegistrationForm(draftId, transformedData);
 
         if (response.success) {
-          // [KEMBALIKAN]
-          // Kita "titipkan" data otherDetail di state navigasi
           navigate("/print", {
             state: {
               applicationId: response.data.application_id,
               version: response.data.version,
               fromSubmission: true,
-              otherDetail: allFormData.otherDetail, // <-- BARIS INI DITAMBAHKAN KEMBALI
+              otherDetail: allFormData.otherDetail, 
             },
             replace: true,
           });

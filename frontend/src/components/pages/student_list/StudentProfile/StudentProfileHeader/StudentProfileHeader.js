@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './StudentProfileHeader.module.css';
-import Button from '../../../../atoms/Button';
+import Button from '../../../../atoms/button/Button';
 import placeholder from '../../../../../assets/user.svg';
 
 const getStatusVariant = (status) => {

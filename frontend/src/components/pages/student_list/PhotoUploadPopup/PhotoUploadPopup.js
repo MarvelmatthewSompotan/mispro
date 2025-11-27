@@ -3,7 +3,7 @@ import React, { useState, useCallback, useRef } from "react";
 import Cropper from "react-easy-crop";
 import styles from "./PhotoUploadPopup.module.css";
 import getCroppedImg from "./cropImage"; // Kita akan buat file helper ini
-import Button from "../../../atoms/Button";
+import Button from "../../../atoms/button/Button";
 
 const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
   const [isDragging, setIsDragging] = useState(false);

@@ -12,7 +12,7 @@ import TeacherList from '../components/pages/TeacherList';
 import HomeroomList from '../components/pages/HomeroomList';
 import Registration from '../components/pages/registration/Registration.js';
 import RegistrationPage from '../components/pages/registration/RegistrationForm/RegistrationForm.js';
-import Print from '../components/Print_Content/Print.js';
+import Print from '../components/pages/Print_Content/Print.js';
 import MainLayout from '../components/layout/Main';
 import StudentProfile from '../components/pages/student_list/StudentProfile/StudentProfile.js';
 import Logbook from '../components/pages/logbook/Logbook.js';

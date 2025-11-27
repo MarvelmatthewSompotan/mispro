@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PopUpConfirm from "../../../../molecules/PopUp/PopUpConfirm/PopUpConfirm";
 import styles from "./FormButtonSection.module.css";
 import DuplicateStudentPopup from "../PopUp/DuplicateStudentPopup";
-import Button from "../../../../atoms/Button";
+import Button from "../../../../atoms/button/Button";
 
 const FormButtonSection = ({
   validationState,

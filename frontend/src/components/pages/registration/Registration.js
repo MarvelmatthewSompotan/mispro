@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import PopUpForm from "../../molecules/PopUp/PopUpRegis/PopUpForm";
-import Pagination from "../../atoms/Pagination";
+import Pagination from "../../molecules/pagination/Pagination";
 import StatusConfirmationPopup from "../../molecules/PopUp/PopUpRegis/StatusConfirmationPopup";
 import styles from "./Registration.module.css";
-import SearchBar from "../../atoms/searchBar/searchBar";
+import SearchBar from "../../molecules/searchBar/searchBar";
 import totalRegisIcon from "../../../assets/total_regis_icon.svg";
-import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
-import Button from "../../atoms/Button";
+import ColumnHeader from "../../molecules/columnHeader/ColumnHeader";
+import Button from "../../atoms/button/Button";
 import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
 
 import {

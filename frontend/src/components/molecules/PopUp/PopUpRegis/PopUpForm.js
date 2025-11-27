@@ -5,9 +5,8 @@ import {
   getRegistrationOptions,
   addSchoolYear,
 } from "../../../../services/api";
-import Button from "../../../atoms/Button";
+import Button from "../../../atoms/button/Button";
 
-// Komponen Dropdown (tidak diubah)
 const CustomSelect = ({
   options,
   value,
@@ -114,15 +113,10 @@ const CustomSelect = ({
   );
 };
 
-// ==================================================================
-// === POPUP FORM — SUDAH DITAMBAHI DUKUNGAN EDIT USER ===
-// ==================================================================
 const PopUpForm = ({
   onClose,
   onCreate,
   type = "registration",
-
-  // === EDIT MODE PROPS ===
   isEditMode = false,
   initialData = null,
 }) => {
@@ -134,7 +128,6 @@ const PopUpForm = ({
     roles: [],
   });
 
-  // Fields untuk Registration (tidak diubah)
   const [schoolYear, setSchoolYear] = useState("");
   const [semester, setSemester] = useState("");
   const [date, setDate] = useState("");
@@ -144,22 +137,20 @@ const PopUpForm = ({
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // opsional saat edit
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
   const [passwordError, setPasswordError] = useState("");
 
-  // === PREFILL DATA SAAT EDIT MODE ===
   useEffect(() => {
     if (type === "user" && isEditMode && initialData) {
       setUsername(initialData.username || "");
       setName(initialData.full_name || "");
       setEmail(initialData.email || "");
-      setPassword(""); // kosong (opsional)
+      setPassword("");
       setRole(initialData.role || "");
     }
   }, [isEditMode, initialData, type]);
-
 
   const resetForm = () => {
     setSchoolYear("");
@@ -212,14 +203,12 @@ const PopUpForm = ({
     }
   };
 
-  // === HANDLE SUBMIT — MEMBEDAKAN CREATE & EDIT ===
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setPasswordError("");
 
     try {
-      // ========== REGISTRATION ==========
       if (type === "registration") {
         if (!schoolYear || !semester) {
           setLoading(false);
@@ -237,11 +226,7 @@ const PopUpForm = ({
             resetForm
           );
         }
-      }
-
-      // ========== USER MODE ==========
-      else if (type === "user") {
-        // === EDIT MODE: password optional ===
+      } else if (type === "user") {
         if (isEditMode) {
           if (!username || !name || !email || !role) {
             setLoading(false);
@@ -255,7 +240,6 @@ const PopUpForm = ({
             role,
           };
 
-          // Jika password diisi, sertakan
           if (password) {
             if (password.length <= 8) {
               setPasswordError("Password must be more than 8 characters");
@@ -266,10 +250,7 @@ const PopUpForm = ({
           }
 
           await onCreate(body);
-        }
-
-        // === CREATE MODE ===
-        else {
+        } else {
           if (!username || !name || !email || !password || !role) {
             setLoading(false);
             return alert("Please fill all fields");
@@ -294,7 +275,6 @@ const PopUpForm = ({
     }
   };
 
-  // OPTION MAPPERS (tidak diubah)
   const mapOptions = (optionsArray, valueKey, labelKey) => {
     return optionsArray.map((opt) => ({
       value: opt[valueKey],
@@ -330,7 +310,6 @@ const PopUpForm = ({
         ref={formRef}
         autoComplete="off"
       >
-        {/* === TITLE DINAMIS === */}
         <div className={styles.createNewRegistration}>
           {type === "registration"
             ? "Create New Registration"
@@ -339,7 +318,6 @@ const PopUpForm = ({
             : "Add New User"}
         </div>
 
-        {/* === REGISTRATION FORM (tidak diubah) === */}
         {type === "registration" ? (
           <div className={styles.frameParent}>
             <div className={styles.fieldWrapper}>
@@ -375,11 +353,7 @@ const PopUpForm = ({
             </div>
           </div>
         ) : (
-          // ============================================
-          // === USER FORM — SEKARANG SUPPORT EDIT MODE ===
-          // ============================================
           <div className={styles.frameParent}>
-            {/* Username */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.textInput}
@@ -391,7 +365,6 @@ const PopUpForm = ({
               />
             </div>
 
-            {/* Full Name */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.textInput}
@@ -403,7 +376,6 @@ const PopUpForm = ({
               />
             </div>
 
-            {/* Email */}
             <div className={styles.fieldWrapper}>
               <input
                 className={styles.textInput}
@@ -415,7 +387,6 @@ const PopUpForm = ({
               />
             </div>
 
-            {/* Password — opsional saat edit */}
             <div className={styles.fieldWrapper}>
               <input
                 className={`${styles.textInput} ${
@@ -430,7 +401,7 @@ const PopUpForm = ({
                   setPassword(e.target.value);
                   if (passwordError) setPasswordError("");
                 }}
-                required={!isEditMode} // hanya wajib saat create
+                required={!isEditMode}
               />
               {passwordError && (
                 <span className={styles.errorMessage}>{passwordError}</span>
@@ -449,7 +420,6 @@ const PopUpForm = ({
           </div>
         )}
 
-        {/* BUTTONS */}
         <div className={styles.bAddSubjectParent}>
           <Button onClick={onClose} variant="outline">
             Cancel
@@ -461,11 +431,7 @@ const PopUpForm = ({
             disabled={loading || isAddingYear}
             className={loading ? styles.loadingButton : ""}
           >
-            {loading
-              ? "Processing..."
-              : isEditMode
-              ? "Update"
-              : "Create"}
+            {loading ? "Processing..." : isEditMode ? "Update" : "Create"}
           </Button>
         </div>
       </form>

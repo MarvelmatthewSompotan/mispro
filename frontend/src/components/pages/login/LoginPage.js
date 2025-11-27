@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, getMe, resetLogin } from "../../../services/api";
-import Button from "../../atoms/Button";
-import logoMis from "../../../assets/logo-mis-f.png";
+import Button from "../../atoms/button/Button";
+import Logo from "../../atoms/logo/Logo";
 import bgLogin from "../../../assets/bg_login.jpg";
 import ellipseTop from "../../../assets/elipse1_login.svg";
 import ellipseBottom from "../../../assets/elipse2_login.svg";
@@ -129,11 +129,9 @@ const LoginPage = () => {
           {/* ------------------------------------------- */}
 
           <div className={styles["login-card"]}>
-            <img
-              src={logoMis}
-              alt="Logo MIS"
-              className={styles["login-logo"]}
-            />
+            <div className={styles["login-logo"]}>
+              <Logo />
+            </div>
 
             <form
               onSubmit={isResetMode ? handleResetSubmit : handleSubmit}

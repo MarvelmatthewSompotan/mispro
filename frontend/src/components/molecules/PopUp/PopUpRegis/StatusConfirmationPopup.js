@@ -7,7 +7,7 @@ import {
   getRegistrationPreview,
 } from '../../../../services/api';
 
-import Button from '../../../atoms/Button';
+import Button from '../../../atoms/button/Button';
 
 const reasonOptions = [
   { label: 'Withdraw', value: 'cancellationOfEnrollment' },

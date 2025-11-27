@@ -1,8 +1,8 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import styles from "./Users.module.css";
-import Button from "../../atoms/Button";
-import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
-import SearchBar from "../../atoms/searchBar/searchBar";
+import Button from "../../atoms/button/Button";
+import ColumnHeader from "../../molecules/columnHeader/ColumnHeader";
+import SearchBar from "../../molecules/searchBar/searchBar";
 import upenIcon from "../../../assets/edit_pen.png";
 import utrashAltIcon from "../../../assets/trash_icon.png";
 import PopUpForm from "../../molecules/PopUp/PopUpRegis/PopUpForm";

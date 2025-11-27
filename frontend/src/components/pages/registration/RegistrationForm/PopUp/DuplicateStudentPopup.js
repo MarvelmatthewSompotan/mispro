@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./DuplicateStudentPopup.module.css";
-import Button from "../../../../atoms/Button";
+import Button from "../../../../atoms/button/Button";
 
 const DuplicateStudentPopup = ({ onClose }) => {
   return (

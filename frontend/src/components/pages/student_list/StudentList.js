@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
-import SearchBar from "../../atoms/searchBar/searchBar";
+import SearchBar from "../../molecules/searchBar/searchBar";
 import { getStudents, getRegistrationOptions } from "../../../services/api";
-import Pagination from "../../atoms/Pagination";
-import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
+import Pagination from "../../molecules/pagination/Pagination";
+import ColumnHeader from "../../molecules/columnHeader/ColumnHeader";
 import placeholder from "../../../assets/user.svg";
 import infoIcon from "../../../assets/info_icon.svg";
 import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
