@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from './Program_Content.module.css';
-import RadioButton from '../../../atoms/radiobutton/RadioButton';
+import styles from './ProgramContent.module.css';
+import RadioButton from '../../../Atoms/RadioButton/RadioButton';
 
 function ProgramContent({
   data,

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import PopUpForm from "../../molecules/PopUp/PopUpRegis/PopUpForm";
-import Pagination from "../../molecules/pagination/Pagination";
-import StatusConfirmationPopup from "../../molecules/PopUp/PopUpRegis/StatusConfirmationPopup";
+import PopUpForm from "../../Molecules/PopUp/PopUpRegis/PopUpForm";
+import Pagination from "../../Molecules/Pagination/Pagination";
+import StatusConfirmationPopup from "../../Molecules/PopUp/PopUpRegis/StatusConfirmationPopup";
 import styles from "./Registration.module.css";
-import SearchBar from "../../molecules/searchBar/searchBar";
+import SearchBar from "../../Molecules/SearchBar/SearchBar";
 import totalRegisIcon from "../../../assets/total_regis_icon.svg";
-import ColumnHeader from "../../molecules/columnHeader/ColumnHeader";
-import Button from "../../atoms/button/Button";
-import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
+import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
+import Button from "../../Atoms/Button/Button";
+import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
 
 import {
   getRegistrations,
@@ -261,7 +261,7 @@ const Registration = () => {
   const handleClosePopup = () => setShowPopupForm(false);
 
   const handleCreateForm = (formData) => {
-    navigate("/registration-form", {
+    navigate("/Registration-form", {
       state: { ...formData, fromPopup: true },
     });
     setShowPopupForm(false);

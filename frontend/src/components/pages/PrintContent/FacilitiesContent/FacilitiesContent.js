@@ -1,7 +1,7 @@
 import React from 'react';
-import styles from './Facilities_Content.module.css';
-import RadioButton from '../../../atoms/radiobutton/RadioButton';
-import Checkbox from '../../../atoms/checkbox/Checkbox';
+import styles from './FacilitiesContent.module.css';
+import RadioButton from '../../../Atoms/RadioButton/RadioButton';
+import Checkbox from '../../../Atoms/Checkbox/Checkbox';
 
 function FacilitiesContent({ data, pickupPointOptions }) {
   if (!data) return null;

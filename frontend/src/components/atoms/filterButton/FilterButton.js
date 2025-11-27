@@ -1,6 +1,6 @@
 // FilterButton.js
 import React from 'react';
-import '../../styles/Controls.css';
+import '../../Styles/Controls.css';
 import filterIcon from '../../../assets/filter.svg';
 import filterActiveIcon from '../../../assets/filterActive.svg'; // ⬅️ Tambahkan
 

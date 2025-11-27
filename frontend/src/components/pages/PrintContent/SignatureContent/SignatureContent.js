@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Signature_Content.module.css';
+import styles from './SignatureContent.module.css';
 
 function SignatureContent({ data }) {
   const formatDate = (dateString) => {

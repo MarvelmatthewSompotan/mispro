@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./WrongSectionPopup.module.css"; // Kita akan buat file CSS ini di langkah berikutnya
-import Button from "../../../../atoms/button/Button";
+import Button from "../../../../Atoms/Button/Button";
 
 const WrongSectionPopup = ({ onClose }) => {
   return (

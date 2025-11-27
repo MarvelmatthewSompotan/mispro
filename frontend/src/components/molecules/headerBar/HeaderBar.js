@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../../services/api";
-import Logo from "../../atoms/logo/Logo";
+import Logo from "../../Atoms/Logo/Logo";
 import backIcon from "../../../assets/back.svg";
 import "./HeaderBar.css";
 
@@ -15,7 +15,7 @@ const HeaderBar = ({ onHamburgerClick, showBackButton, onBackClick }) => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/login");
+      navigate("/Login");
     } catch (error) {
       console.error("Logout failed:", error);
     }

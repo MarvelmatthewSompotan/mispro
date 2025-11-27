@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Pledge_Content.module.css';
+import styles from './PledgeContent.module.css';
 
 function PledgeContent({ data }) {
   const fullName = () => {

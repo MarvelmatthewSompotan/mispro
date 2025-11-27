@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import styles from "./PopUpAutoGraduate.module.css";
-import Button from "../../../atoms/button/Button";
-import Checkbox from "../../../atoms/checkbox/Checkbox";
-import ColumnHeader from "../../columnHeader/ColumnHeader";
+import Button from "../../../Atoms/Button/Button";
+import Checkbox from "../../../Atoms/Checkbox/Checkbox";
+import ColumnHeader from "../../ColumnHeader/ColumnHeader";
 import {
   getAutoGraduatePreview,
   confirmAutoGraduate,
 } from "../../../../services/api";
 import placeholder from "../../../../assets/user.svg";
-import ConfirmUpdatePopup from "../../../pages/student_list/PopUpUpdate/PopUpConfirmUpdate";
-import UpdatedNotification from "../../../pages/student_list/UpdateNotification/UpdateNotification";
+import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate";
+import UpdatedNotification from "../UpdateNotification/UpdateNotification";
 
 const REFRESH_INTERVAL = 5000;
 

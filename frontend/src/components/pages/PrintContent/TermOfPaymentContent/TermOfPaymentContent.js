@@ -1,9 +1,9 @@
 import React from "react";
-import styles from "./TermofPayment_Content.module.css";
-import RadioButton from "../../../atoms/radiobutton/RadioButton";
-import Checkbox from "../../../atoms/checkbox/Checkbox";
+import styles from "./TermOfPaymentContent.module.css";
+import RadioButton from "../../../Atoms/RadioButton/RadioButton";
+import Checkbox from "../../../Atoms/Checkbox/Checkbox";
 
-function TermofPaymentContent({ data, isDormitory }) {
+function TermOfPaymentContent({ data, isDormitory }) {
   const option = ["Full Payment", "Installment"];
 
   return (
@@ -121,5 +121,4 @@ function TermofPaymentContent({ data, isDormitory }) {
   );
 }
 
-export default TermofPaymentContent;
-
+export default TermOfPaymentContent;

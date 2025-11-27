@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './searchBar.module.css';
+import styles from './SearchBar.module.css';
 import searchIcon from "../../../assets/Search-icon.png"; 
 
 const SearchBar = ({ value, onChange, placeholder, className }) => {

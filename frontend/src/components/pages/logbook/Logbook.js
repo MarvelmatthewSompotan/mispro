@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./Logbook.module.css";
-import TableHeaderController from "../../molecules/TableHeaderController/TableHeaderController";
-import Button from "../../atoms/button/Button";
+import TableHeaderController from "../../Molecules/TableHeaderController/TableHeaderController";
+import Button from "../../Atoms/Button/Button";
 import ExportLogbookPopup from "./ExportLogbookPopup/ExportLogbookPopup";
-import FilterPopup from "../../molecules/filterPopUp/FilterPopUp";
-import filterStyles from "../../molecules/filterPopUp/FilterPopUp.module.css";
-import Pagination from "../../molecules/pagination/Pagination"; // <-- 1. IMPORT Pagination
+import FilterPopup from "../../Molecules/FilterPopUp/FilterPopUp";
+import filterStyles from "../../Molecules/FilterPopUp/FilterPopUp.module.css";
+import Pagination from "../../Molecules/Pagination/Pagination"; // <-- 1. IMPORT Pagination
 import {
   getLogbook,
   getRegistrationOptions,

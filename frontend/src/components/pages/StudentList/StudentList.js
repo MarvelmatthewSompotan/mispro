@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
-import SearchBar from "../../molecules/searchBar/searchBar";
+import SearchBar from "../../Molecules/SearchBar/SearchBar";
 import { getStudents, getRegistrationOptions } from "../../../services/api";
-import Pagination from "../../molecules/pagination/Pagination";
-import ColumnHeader from "../../molecules/columnHeader/ColumnHeader";
+import Pagination from "../../Molecules/Pagination/Pagination";
+import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
 import placeholder from "../../../assets/user.svg";
 import infoIcon from "../../../assets/info_icon.svg";
-import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
-import AutoGraduatePopup from "../../molecules/PopUp/PopUpAutoGraduate/PopUpAutoGraduate";
+import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
+import AutoGraduatePopup from "../../Molecules/PopUp/PopUpAutoGraduate/PopUpAutoGraduate";
 
 const ITEMS_PER_PAGE = 25;
 const REFRESH_INTERVAL = 5000;

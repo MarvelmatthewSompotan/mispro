@@ -7,19 +7,19 @@ import kop from "../../../assets/LogoMIS_Print.png";
 import footer from "../../../assets/Footer_A4.svg";
 import footerF4Logos from "../../../assets/Footer_F4.svg";
 import switchIcon from "../../../assets/switch_icon.svg";
-import StudentsInformationContent from "./StudentsInformation_Content/StudentsInformation_Content";
-import ProgramContent from "./Program_Content/Program_Content";
-import FacilitiesContent from "./Facilities_Content/Facilities_Content";
-import ParentsGuardianInformationContent from "./ParentsGuardianInformation_Content/ParentsGuardianInformation_Content";
-import TermofPaymentContent from "./TermofPayment_Content/TermofPayment_Content";
-import PledgeContent from "./Pledge_Content/Pledge_Content";
-import SignatureContent from "./Signature_Content/Signature_Content";
-import OtherDetailContent from "./OtherDetail_Content/OtherDetail_Content";
+import StudentsInformationContent from "./StudentsInformationContent/StudentsInformationContent";
+import ProgramContent from "./ProgramContent/ProgramContent";
+import FacilitiesContent from "./FacilitiesContent/FacilitiesContent";
+import ParentsGuardianInformationContent from "./ParentsGuardianInformationContent/ParentsGuardianInformationContent";
+import TermOfPaymentContent from "./TermOfPaymentContent/TermOfPaymentContent";
+import PledgeContent from "./PledgeContent/PledgeContent";
+import SignatureContent from "./SignatureContent/SignatureContent";
+import OtherDetailContent from "./OtherDetailContent/OtherDetailContent";
 import {
   getRegistrationPreview,
   getRegistrationOptions,
 } from "../../../services/api";
-import Button from "../../atoms/button/Button";
+import Button from "../../Atoms/Button/Button";
 
 function Print() {
   const location = useLocation();
@@ -50,7 +50,7 @@ function Print() {
 
   useEffect(() => {
     if (!applicationId) {
-      navigate("/registration", { replace: true });
+      navigate("/Registration", { replace: true });
     }
   }, [applicationId, navigate]);
 
@@ -58,7 +58,7 @@ function Print() {
     if (fromStudentProfile) {
       navigate("/students");
     } else if (fromSubmission) {
-      navigate("/registration", { replace: true });
+      navigate("/Registration", { replace: true });
     } else {
       navigate(-1);
     }
@@ -388,7 +388,7 @@ function Print() {
             <div className={styles.header1}>
               <b className={styles.titleHeader}>TERM OF PAYMENT</b>
             </div>
-            <TermofPaymentContent
+            <TermOfPaymentContent
               data={previewData.request_data}
               isDormitory={isDormitorySelected}
             />
@@ -424,4 +424,3 @@ function Print() {
 }
 
 export default Print;
-

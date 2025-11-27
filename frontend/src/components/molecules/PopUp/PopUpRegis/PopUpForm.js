@@ -5,7 +5,7 @@ import {
   getRegistrationOptions,
   addSchoolYear,
 } from "../../../../services/api";
-import Button from "../../../atoms/button/Button";
+import Button from "../../../Atoms/Button/Button";
 
 const CustomSelect = ({
   options,

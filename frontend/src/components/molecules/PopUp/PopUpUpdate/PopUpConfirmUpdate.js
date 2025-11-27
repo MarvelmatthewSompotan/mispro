@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./PopUpConfirmUpdate.module.css";
-import Button from "../../../atoms/button/Button";
+import Button from "../../../Atoms/Button/Button";
 
 const ConfirmUpdatePopup = ({ isOpen, onClose, onConfirm, isUpdating }) => {
   if (!isOpen) {

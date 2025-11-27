@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./TableHeaderController.module.css";
-import Checkbox from "../../atoms/checkbox/Checkbox";
-import SortButton from "../../atoms/sortButton/SortButton";
-import FilterButton from "../../atoms/filterButton/FilterButton";
-import DragHandle from "../../atoms/dragHandle/DragHandle";
+import Checkbox from "../../Atoms/Checkbox/Checkbox";
+import SortButton from "../../Atoms/SortButton/SortButton";
+import FilterButton from "../../Atoms/FilterButton/FilterButton";
+import DragHandle from "../../Atoms/DragHandle/DragHandle";
 
 // Terima props baru dari dnd-kit
 const TableHeaderController = React.forwardRef(

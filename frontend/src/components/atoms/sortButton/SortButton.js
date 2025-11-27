@@ -1,6 +1,6 @@
 // SortButton.js
 import React from 'react';
-import '../../styles/Controls.css';
+import '../../Styles/Controls.css';
 import sortIcon from '../../../assets/sort.svg';
 import bawahIcon from '../../../assets/bawah.svg';
 import atasIcon from '../../../assets/atas.svg';

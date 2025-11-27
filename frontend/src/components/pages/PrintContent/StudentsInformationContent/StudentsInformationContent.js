@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './StudentsInformation_Content.module.css';
+import styles from './StudentsInformationContent.module.css';
 
 const StudentsInformationContent = ({ data }) => {
   if (!data) return null;

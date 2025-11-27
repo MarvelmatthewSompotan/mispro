@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import HeaderBar from "../molecules/headerBar/HeaderBar";
-import SidebarMenu from "../molecules/sidebarMenu/SidebarMenu";
+import HeaderBar from "../Molecules/HeaderBar/HeaderBar";
+import SidebarMenu from "../Molecules/SidebarMenu/SidebarMenu";
 import styles from "./Main.module.css";
 
 const Main = ({
@@ -13,13 +13,13 @@ const Main = ({
   const location = useLocation();
   const navigate = useNavigate();
   const isProfilePage = /^\/students\/.+/.test(location.pathname);
-  const isRegistrationFormPage = /^\/registration-form(\/|$)/.test(
+  const isRegistrationFormPage = /^\/Registration-form(\/|$)/.test(
     location.pathname
   );
   const isDetailLikePageInternal = isProfilePage || isRegistrationFormPage;
   const internalHandleBackClick = () => {
     if (isRegistrationFormPage) {
-      navigate("/registration");
+      navigate("/Registration");
     } else if (isProfilePage) {
       navigate("/students");
     } else {

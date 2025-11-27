@@ -1,8 +1,8 @@
-// File: src/components/pages/StudentProfileHeader/StudentProfileHeader.js
+// File: src/components/pages/studentProfileHeader/studentProfileHeader.js
 
 import React, { useState } from 'react';
 import styles from './StudentProfileHeader.module.css';
-import Button from '../../../../atoms/button/Button';
+import Button from '../../../../Atoms/Button/Button';
 import placeholder from '../../../../../assets/user.svg';
 
 const getStatusVariant = (status) => {

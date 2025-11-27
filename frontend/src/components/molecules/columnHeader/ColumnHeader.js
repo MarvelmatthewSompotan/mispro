@@ -1,8 +1,8 @@
 import React, { useState } from "react"; 
 import styles from "./ColumnHeader.module.css";
-import SortButton from "../../atoms/sortButton/SortButton";
-import FilterButton from "../../atoms/filterButton/FilterButton"; 
-import FilterPopup from "../filterPopUp/FilterPopUp"; 
+import SortButton from "../../Atoms/SortButton/SortButton";
+import FilterButton from "../../Atoms/FilterButton/FilterButton"; 
+import FilterPopup from "../FilterPopUp/FilterPopUp"; 
 
 const ColumnHeader = ({
   title,

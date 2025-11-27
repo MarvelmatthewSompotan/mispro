@@ -1,18 +1,18 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import styles from "./Users.module.css";
-import Button from "../../atoms/button/Button";
-import ColumnHeader from "../../molecules/columnHeader/ColumnHeader";
-import SearchBar from "../../molecules/searchBar/searchBar";
+import Button from "../../Atoms/Button/Button";
+import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
+import SearchBar from "../../Molecules/SearchBar/SearchBar";
 import upenIcon from "../../../assets/edit_pen.png";
 import utrashAltIcon from "../../../assets/trash_icon.png";
-import PopUpForm from "../../molecules/PopUp/PopUpRegis/PopUpForm";
+import PopUpForm from "../../Molecules/PopUp/PopUpRegis/PopUpForm";
 import {
   getUsers,
   deleteUser,
   postUser,
   updateUser,
 } from "../../../services/api";
-import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
+import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
 
 const REFRESH_INTERVAL = 5000;
 

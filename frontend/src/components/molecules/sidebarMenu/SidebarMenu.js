@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
-import Icon from "../../atoms/icon/Icon";
+import Icon from "../../Atoms/Icon/Icon";
 import useAuth from "../../../hooks/useAuth"; // <-- DITAMBAHKAN
 import homeIcon from "../../../assets/Home-icon.png";
 import studentIcon from "../../../assets/StudentList-icon.png";
@@ -14,13 +14,13 @@ import usersIcon from "../../../assets/user.png";
 import "./SidebarMenu.css"; 
 
 const allMenus = [
-  { to: "/home", icon: homeIcon, label: "Home" },
+  { to: "/Home", icon: homeIcon, label: "Home" },
   { to: "/students", icon: studentIcon, label: "Student List" },
-  { to: "/logbook", icon: logbookIcon, label: "Logbook" },
+  { to: "/Logbook", icon: logbookIcon, label: "Logbook" },
   { to: "/teachers", icon: teacherIcon, label: "Teacher List" },
-  { to: "/homerooms", icon: homeroomIcon, label: "Homeroom List" },
-  { to: "/registration", icon: registrationIcon, label: "Registration" },
-  { to: "/users", icon: usersIcon, label: "Users" },
+  { to: "/Homerooms", icon: homeroomIcon, label: "Homeroom List" },
+  { to: "/Registration", icon: registrationIcon, label: "Registration" },
+  { to: "/Users", icon: usersIcon, label: "Users" },
 ];
 
 
@@ -32,7 +32,7 @@ const SidebarMenu = ({ isOpen }) => {
  
   const filteredMenus = allMenus.filter((menu) => {
 
-    if (menu.to === "/users") {
+    if (menu.to === "/Users") {
       return isAdmin();
     }
     

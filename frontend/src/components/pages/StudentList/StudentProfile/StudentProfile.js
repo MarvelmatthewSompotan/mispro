@@ -22,14 +22,14 @@ import {
 } from "../../../../services/api";
 import Select from "react-select";
 import styles from "./StudentProfile.module.css";
-import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate.js";
-import UpdatedNotification from "../UpdateNotification/UpdateNotification.js";
-import PhotoUploadPopup from "../PhotoUploadPopup/PhotoUploadPopup.js";
-import Main from "../../../layout/Main.js";
+import ConfirmUpdatePopup from "../../../Molecules/PopUp/PopUpUpdate/PopUpConfirmUpdate.js";
+import UpdatedNotification from "../../../Molecules/PopUp/UpdateNotification/UpdateNotification.js";
+import PhotoUploadPopup from "../../../Molecules/PopUp/PhotoUploadPopup/PhotoUploadPopup.js";
+import Main from "../../../Layout/Main.js";
 import gsap from "gsap";
 import StudentProfileHeader from "./StudentProfileHeader/StudentProfileHeader.js";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import ConfirmBackPopup from "../../../molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm.js";
+import ConfirmBackPopup from "../../../Molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm.js";
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -198,7 +198,7 @@ const StudentProfile = () => {
         setStatusOptions(data.active_status || []);
       })
       .catch((err) => console.error("Failed to fetch options:", err));
-      // eslint-disable-next-line
+    // eslint-disable-next-line
   }, []);
 
   const handleDownloadPdfClick = async () => {
@@ -368,6 +368,10 @@ const StudentProfile = () => {
           student_active:
             snapshotData.student_active ?? studentInfo.student_active ?? "YES",
           status: snapshotData.status ?? studentInfo.status ?? "Not Graduated",
+          va_mandiri: snapshotData.va_mandiri,
+          va_bni: snapshotData.va_bni,
+          va_bca: snapshotData.va_bca,
+          va_bri: snapshotData.va_bri,
         };
 
         const combinedData = {

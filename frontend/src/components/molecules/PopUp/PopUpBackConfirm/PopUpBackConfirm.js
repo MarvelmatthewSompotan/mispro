@@ -2,14 +2,14 @@
 
 import React from "react";
 import styles from "./PopUpBackConfirm.module.css";
-import Button from "../../../atoms/button/Button";
+import Button from "../../../Atoms/Button/Button";
 
 /**
- * 
+ *
  * @param {object} props
- * @param {boolean} props.isOpen 
- * @param {function} props.onClose 
- * @param {function} props.onConfirm 
+ * @param {boolean} props.isOpen
+ * @param {function} props.onClose
+ * @param {function} props.onConfirm
  */
 const ConfirmBackPopup = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;

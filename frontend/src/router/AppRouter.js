@@ -1,30 +1,30 @@
 // src/router/AppRouter.js
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 // Komponen halaman
-import LoginPage from '../components/pages/login/LoginPage.js';
-import Home from '../components/pages/home/Home.js';
-import StudentList from '../components/pages/student_list/StudentList';
-import TeacherList from '../components/pages/TeacherList';
-import HomeroomList from '../components/pages/HomeroomList';
-import Registration from '../components/pages/registration/Registration.js';
-import RegistrationPage from '../components/pages/registration/RegistrationForm/RegistrationForm.js';
-import Print from '../components/pages/Print_Content/Print.js';
-import MainLayout from '../components/layout/Main';
-import StudentProfile from '../components/pages/student_list/StudentProfile/StudentProfile.js';
-import Logbook from '../components/pages/logbook/Logbook.js';
-import Users from '../components/pages/users/Users.js';
+import LoginPage from "../components/Pages/Login/LoginPage.js";
+import Home from "../components/Pages/Home/Home.js";
+import StudentList from "../components/Pages/StudentList/StudentList.js";
+import TeacherList from "../components/Pages/TeacherList.js";
+import HomeroomList from "../components/Pages/HomeroomList.js";
+import Registration from "../components/Pages/Registration/Registration.js";
+import RegistrationPage from "../components/Pages/Registration/RegistrationForm/RegistrationForm.js";
+import Print from "../components/Pages/PrintContent/Print.js";
+import MainLayout from "../components/Layout/Main";
+import StudentProfile from "../components/Pages/StudentList/StudentProfile/StudentProfile.js";
+import Logbook from "../components/Pages/Logbook/Logbook.js";
+import Users from "../components/Pages/Users/Users.js";
 
-import ProtectedRoute from './ProtectedRoute';
+import ProtectedRoute from "./ProtectedRoute";
 
 // Komponen 'Access' Anda tetap sama
 const RegistrarAccess = ({ children }) => {
   const { isAdmin, isRegistrar } = useAuth();
   if (!isAdmin() && !isRegistrar()) {
-    return <Navigate to='/home' replace />;
+    return <Navigate to="/Home" replace />;
   }
   return children;
 };
@@ -32,7 +32,7 @@ const RegistrarAccess = ({ children }) => {
 const AdminAccess = ({ children }) => {
   const { isAdmin } = useAuth();
   if (!isAdmin()) {
-    return <Navigate to='/home' replace />;
+    return <Navigate to="/Home" replace />;
   }
   return children;
 };
@@ -40,11 +40,11 @@ const AdminAccess = ({ children }) => {
 // Ini adalah 'AppRouter' baru, sekarang dalam format array
 const appRoutes = [
   {
-    path: '/login',
+    path: "/Login",
     element: <LoginPage />,
   },
   {
-    path: '/home',
+    path: "/Home",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -56,7 +56,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/students',
+    path: "/students",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -68,7 +68,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/students/:id',
+    path: "/students/:id",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -80,7 +80,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/teachers',
+    path: "/teachers",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -92,7 +92,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/logbook',
+    path: "/Logbook",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -104,7 +104,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/homerooms',
+    path: "/Homerooms",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -116,7 +116,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/registration',
+    path: "/Registration",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -128,7 +128,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/users',
+    path: "/Users",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -140,7 +140,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/registration-form',
+    path: "/Registration-form",
     element: (
       <ProtectedRoute>
         <MainLayout>
@@ -152,7 +152,7 @@ const appRoutes = [
     ),
   },
   {
-    path: '/print',
+    path: "/print",
     element: (
       <ProtectedRoute>
         <RegistrarAccess>
@@ -163,12 +163,12 @@ const appRoutes = [
   },
   // Pengalihan Default
   {
-    path: '/',
-    element: <Navigate to='/login' replace />,
+    path: "/",
+    element: <Navigate to="/Login" replace />,
   },
   {
-    path: '*',
-    element: <Navigate to='/login' replace />,
+    path: "*",
+    element: <Navigate to="/Login" replace />,
   },
 ];
 

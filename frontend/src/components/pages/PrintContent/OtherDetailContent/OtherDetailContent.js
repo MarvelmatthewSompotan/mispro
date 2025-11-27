@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from './OtherDetail_Content.module.css';
-import RadioButton from '../../../atoms/radiobutton/RadioButton';
+import styles from './OtherDetailContent.module.css';
+import RadioButton from '../../../Atoms/RadioButton/RadioButton';
 
 
 function OtherDetail_Content({ data }) {
