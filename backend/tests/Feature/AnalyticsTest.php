@@ -188,4 +188,38 @@ class AnalyticsTest extends TestCase
             $this->assertNotNull($todayGrowth);
         }
     }
+
+    public function test_analytics_future_date()
+    {
+        // 1. Tentukan Tanggal Masa Depan (Misal Juli 2025)
+        $futureDate = '2025-07-15';
+        $syName = '2025/2026';
+
+        // 2. Hitung Manual Data di DB (Source of Truth)
+        // Kita cari ID School Year '2025/2026' dulu
+        $syId = SchoolYear::where('year', $syName)->value('school_year_id');
+
+        if (!$syId) {
+            $this->markTestSkipped("School Year {$syName} tidak ditemukan di DB, skip test ini.");
+        }
+
+        // Hitung jumlah siswa Confirmed di School Year tersebut
+        $expectedCount = ApplicationForm::join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+            ->where('enrollments.school_year_id', $syId)
+            ->where('application_forms.status', 'Confirmed')
+            ->distinct('enrollments.id') // Sesuai logika controller (Unique Student)
+            ->count('enrollments.id');
+
+        // 3. Panggil API dengan Filter Date Masa Depan
+        $response = $this->getJson('/api/analytics?date=' . $futureDate, $this->getAuthHeaders());
+        
+        $response->assertStatus(200);
+
+        // 4. Assert Meta Data Berubah
+        $response->assertJsonPath('data.meta.current_sy', $syName);
+        
+        // 5. Assert Data Jumlah Siswa (Dinamis, bukan Hardcode 11)
+        // Kita bandingkan hasil API dengan hitungan manual DB di atas ($expectedCount)
+        $response->assertJsonPath('data.school_year.all.confirmed', $expectedCount);
+    }
 }
