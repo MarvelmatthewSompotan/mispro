@@ -140,13 +140,13 @@ class DashboardController extends Controller
                     SUM(CASE WHEN created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) AS today_total_af,
                     SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) AS today_total_confirmed,
                     SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? AND enrollments.student_status = "New" THEN 1 ELSE 0 END) AS today_new_confirmed,
-                    SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? AND enrollments.student_status = "Old" THEN 1 ELSE 0 END) AS today_returning_confirmed,
+                    SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? AND enrollments.student_status = "Transferee" THEN 1 ELSE 0 END) AS today_transferee_confirmed,
 
                     -- Yesterday Stats
                     SUM(CASE WHEN created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) AS yesterday_total_af,
                     SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) AS yesterday_total_confirmed,
                     SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? AND enrollments.student_status = "New" THEN 1 ELSE 0 END) AS yesterday_new_confirmed,
-                    SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? AND enrollments.student_status = "Old" THEN 1 ELSE 0 END) AS yesterday_returning_confirmed
+                    SUM(CASE WHEN application_forms.status = "Confirmed" AND created_at BETWEEN ? AND ? AND enrollments.student_status = "Transferee" THEN 1 ELSE 0 END) AS yesterday_transferee_confirmed
                 ', [
                     $startOfDay, $endOfDay, $startOfDay, $endOfDay, $startOfDay, $endOfDay, $startOfDay, $endOfDay,
                     $yesterdayStart, $yesterdayEnd, $yesterdayStart, $yesterdayEnd, $yesterdayStart, $yesterdayEnd, $yesterdayStart, $yesterdayEnd
@@ -154,11 +154,16 @@ class DashboardController extends Controller
                 ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
                 ->first();
 
-                $todayCancelledReturning = ApplicationForm::where('status', 'Cancelled')
-                    ->whereBetween('updated_at', [$startOfDay, $endOfDay])
-                    ->count();
                 $todayCancelledNew = CancelledRegistration::where('reason', 'Cancellation of Enrollment')
                     ->whereBetween('cancelled_at', [$startOfDay, $endOfDay])
+                    ->count();
+                $todayCancelledTransferee = ApplicationForm::where('application_forms.status', 'Cancelled')
+                    ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+                    ->where('enrollments.student_status', 'Transferee')
+                    ->whereBetween('application_forms.updated_at', [$startOfDay, $endOfDay])
+                    ->count();
+                $todayCancelledReturning = ApplicationForm::where('status', 'Cancelled')
+                    ->whereBetween('updated_at', [$startOfDay, $endOfDay])
                     ->count();
                 $todayTotalCancelled = $todayCancelledReturning + $todayCancelledNew;
 
@@ -253,13 +258,16 @@ class DashboardController extends Controller
 
                 // Total Active Students by Section
                 $sectionKeys = ['ecp' => 'ECP', 'elementary' => 'Elementary School', 'middle' => 'Middle School', 'high' => 'High School'];
+                $defaultStats = ['total_active' => 0, 'total_new' => 0, 'total_returning' => 0];
+
                 $activeStudentsBySection = array_fill_keys(array_keys($sectionKeys), 0);
 
                 if ($currentSchoolYearId) {
                     $activeStudentsData = DB::table('students')
                         ->select(
                             'sections.name as section_name', 
-                            DB::raw('COUNT(DISTINCT students.id) as total_active')
+                            DB::raw('COUNT(DISTINCT students.id) as total_active'),
+                            DB::raw('COUNT(DISTINCT CASE WHEN enrollments.student_status = "New" THEN students.id ELSE NULL END) as total_new'),
                         )
                         ->join('enrollments', 'enrollments.id', '=', 'students.id')
                         ->join('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
@@ -273,15 +281,25 @@ class DashboardController extends Controller
 
                     foreach ($activeStudentsData as $data) {
                         $normalizedName = strtolower($data->section_name);
-                        
+                        $realTotalActive = (int)$data->total_active;
+                        $realTotalNew = (int)$data->total_new;
+                        $realTotalReturning = $realTotalActive - $realTotalNew;
+
+                        $key = null;
                         if (str_contains($normalizedName, 'ecp')) {
-                            $activeStudentsBySection['ecp'] = $data->total_active;
+                            $key = 'ecp';
                         } elseif (str_contains($normalizedName, 'elementary')) {
-                            $activeStudentsBySection['elementary'] = $data->total_active;
+                            $key = 'elementary';
                         } elseif (str_contains($normalizedName, 'middle')) {
-                            $activeStudentsBySection['middle'] = $data->total_active;
+                            $key = 'middle';
                         } elseif (str_contains($normalizedName, 'high')) {
-                            $activeStudentsBySection['high'] = $data->total_active;
+                            $key = 'high';
+                        }
+
+                        if ($key) {
+                            $activeStudentsBySection[$key]['total_active'] += $realTotalActive;
+                            $activeStudentsBySection[$key]['total_new'] += $realTotalNew;
+                            $activeStudentsBySection[$key]['total_returning'] += $realTotalReturning;
                         }
                     }
                 }
