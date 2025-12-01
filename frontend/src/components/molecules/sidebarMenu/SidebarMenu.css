@@ -1,21 +1,20 @@
-/* src/components/styles/SidebarMenu.css */
+/* src/components/molecules/sidebarMenu/SidebarMenu.css */
 
 .sidebar-menu {
   width: 280px;
-  background: var(--secondary-background);
+  background: var(--secondary-background); /* KEMBALI KE VARIABLE ASLI */
   padding: 24px;
   height: calc(100vh - 76px);
   box-sizing: border-box;
   position: fixed;
   top: 76px;
   left: 0;
-  z-index: 1999;
+  z-index: 9999; /* Tetap pertahankan High Z-Index ini */
   border-right: 2px solid #ececec;
   transition: transform 0.3s ease-in-out;
   overflow-y: auto;
 }
 
-/* Saat sidebar tidak memiliki class 'open', sembunyikan sepenuhnya */
 .sidebar-menu:not(.open) {
   transform: translateX(-100%);
 }
@@ -65,7 +64,6 @@
   font-weight: 600;
 }
 
-/* Tambahkan styling untuk icon saat active */
 .sidebar-menu-item.active .sidebar-menu-icon {
   filter: brightness(0) invert(1);
 }
@@ -80,3 +78,59 @@
   align-items: center;
 }
 
+/* --- LOGIKA RESPONSIF (FIXED) --- */
+
+/* 1. Tablet/Laptop Kecil (Max 900px) */
+@media (max-width: 900px) {
+  .sidebar-menu {
+    top: 54px;
+    height: calc(100vh - 54px);
+    width: 280px !important;
+    padding: 24px !important;
+
+    /* FIX: Pastikan properti ini menimpa style desktop */
+    background: var(
+      --secondary-background
+    ) !important; /* Pakai Variable Asli */
+    z-index: 9999 !important;
+  }
+
+  .sidebar-menu .sidebar-menu-label {
+    display: block !important;
+  }
+  .sidebar-menu .sidebar-menu-icon {
+    margin-right: 16px !important;
+  }
+  .sidebar-menu .sidebar-menu-item {
+    justify-content: flex-start !important;
+  }
+
+  .sidebar-menu.open {
+    display: block !important;
+  }
+}
+
+/* 2. Tablet Portrait (Max 768px) */
+@media (max-width: 768px) {
+  .sidebar-menu {
+    top: 50px;
+    height: calc(100vh - 50px);
+  }
+}
+
+/* 3. Mobile Landscape/Large (Max 480px) */
+@media (max-width: 480px) {
+  .sidebar-menu {
+    top: 48px;
+    height: calc(100vh - 48px);
+    /* width: 100% !important; */ /* Uncomment jika ingin full width */
+  }
+}
+
+/* 4. Mobile Small (Max 360px) */
+@media (max-width: 360px) {
+  .sidebar-menu {
+    top: 44px;
+    height: calc(100vh - 44px);
+  }
+}

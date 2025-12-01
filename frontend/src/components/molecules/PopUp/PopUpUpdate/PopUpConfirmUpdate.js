@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import styles from "./PopUpConfirmUpdate.module.css";
 import Button from "../../../Atoms/Button/Button";
 
@@ -7,7 +8,7 @@ const ConfirmUpdatePopup = ({ isOpen, onClose, onConfirm, isUpdating }) => {
     return null;
   }
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.popupOverlay}>
       <div className={styles.popupContent}>
         <div className={styles.title}>Confirm Student Update Information</div>
@@ -40,7 +41,8 @@ const ConfirmUpdatePopup = ({ isOpen, onClose, onConfirm, isUpdating }) => {
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -12,11 +12,13 @@ const Main = ({
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
+
   const isProfilePage = /^\/students\/.+/.test(location.pathname);
   const isRegistrationFormPage = /^\/Registration-form(\/|$)/.test(
     location.pathname
   );
   const isDetailLikePageInternal = isProfilePage || isRegistrationFormPage;
+
   const internalHandleBackClick = () => {
     if (isRegistrationFormPage) {
       navigate("/Registration");
@@ -31,18 +33,26 @@ const Main = ({
     setSidebarOpen(!isSidebarOpen);
   };
 
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   useEffect(() => {
     const handleResize = () => {
-     
       if (isDetailLikePageInternal) {
         setSidebarOpen(false);
         return;
       }
+
       if (window.innerWidth >= 1024) {
         setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
       }
     };
+
     handleResize();
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [isDetailLikePageInternal, location.pathname]);
@@ -61,8 +71,10 @@ const Main = ({
         showBackButton={finalShowBackButton}
       />
 
+     
+      <SidebarMenu isOpen={isSidebarOpen} onClose={closeSidebar} />
+
       <div className={styles.contentWrapper}>
-        <SidebarMenu isOpen={isSidebarOpen} />
         <main
           className={`${styles.mainContent} ${
             isSidebarOpen ? styles.sidebarOpen : styles.sidebarClosed
@@ -76,4 +88,3 @@ const Main = ({
 };
 
 export default Main;
-

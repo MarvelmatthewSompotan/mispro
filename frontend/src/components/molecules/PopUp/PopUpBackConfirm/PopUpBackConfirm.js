@@ -2,6 +2,7 @@
 
 import React from "react";
 import styles from "./PopUpBackConfirm.module.css";
+import ReactDOM from "react-dom";
 import Button from "../../../Atoms/Button/Button";
 
 /**
@@ -14,7 +15,7 @@ import Button from "../../../Atoms/Button/Button";
 const ConfirmBackPopup = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <h3>Are you sure you want to go back?</h3>
@@ -33,7 +34,8 @@ const ConfirmBackPopup = ({ isOpen, onClose, onConfirm }) => {
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

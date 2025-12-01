@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import ReactDOM from "react-dom";
 import styles from "./UpdateNotification.module.css";
 
 const UpdatedNotification = ({ isOpen, onClose }) => {
@@ -18,7 +19,7 @@ const UpdatedNotification = ({ isOpen, onClose }) => {
     return null;
   }
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.popupOverlay}>
       <div className={styles.notificationContent}>
         {/* Ikon centang menggunakan SVG */}
@@ -38,7 +39,8 @@ const UpdatedNotification = ({ isOpen, onClose }) => {
         </svg>
         <div className={styles.message}>Update Successfully</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -1,9 +1,9 @@
 // src/components/molecules/sidebarMenu/SidebarMenu.js
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { NavLink } from "react-router-dom";
 import Icon from "../../Atoms/Icon/Icon";
-import useAuth from "../../../hooks/useAuth"; // <-- DITAMBAHKAN
+import useAuth from "../../../hooks/useAuth";
 import homeIcon from "../../../assets/Home-icon.png";
 import studentIcon from "../../../assets/StudentList-icon.png";
 import logbookIcon from "../../../assets/logbook.png";
@@ -11,7 +11,7 @@ import teacherIcon from "../../../assets/TeacherList-icon.png";
 import homeroomIcon from "../../../assets/HomeroomList-icon.png";
 import registrationIcon from "../../../assets/Registration-icon.png";
 import usersIcon from "../../../assets/user.png";
-import "./SidebarMenu.css"; 
+import "./SidebarMenu.css";
 
 const allMenus = [
   { to: "/Home", icon: homeIcon, label: "Home" },
@@ -23,69 +23,34 @@ const allMenus = [
   { to: "/Users", icon: usersIcon, label: "Users" },
 ];
 
-
-const SidebarMenu = ({ isOpen }) => {
+const SidebarMenu = ({ isOpen, onClose }) => {
   const { isAdmin } = useAuth();
   const asideRef = useRef(null);
-  const [isIconOnly, setIsIconOnly] = useState(false);
 
- 
   const filteredMenus = allMenus.filter((menu) => {
-
     if (menu.to === "/Users") {
       return isAdmin();
     }
-    
     return true;
   });
- 
 
-  useEffect(() => {
-
-    const decideCompact = () => {
-      const vw = Math.max(
-        document.documentElement.clientWidth,
-        window.innerWidth || 0
-      );
-  
-      const compact = vw < 560;
-      setIsIconOnly(compact);
-      if (compact) document.body.classList.add("sidebar-compact");
-      else document.body.classList.remove("sidebar-compact");
-      const MIN = 56;
-      const MAX = 280;
-      const buffer = 16; 
-      const computed = Math.min(MAX, Math.max(MIN, vw - buffer));
-      document.documentElement.style.setProperty(
-        "--sidebar-current-width",
-        `${computed}px`
-      );
-    };
-
-    decideCompact();
-    const ro = new ResizeObserver(decideCompact);
-    if (asideRef.current) ro.observe(asideRef.current);
-    window.addEventListener("resize", decideCompact);
-    return () => {
-      window.removeEventListener("resize", decideCompact);
-      ro.disconnect();
-    };
-  }, []);
+  // Fungsi: Jika layar kecil (< 1000px) dan menu diklik, tutup sidebar
+  const handleMenuClick = () => {
+    // Logika ini menutup sidebar otomatis setelah pilih menu di mode mobile
+    if (window.innerWidth <= 1000 && onClose) {
+      onClose();
+    }
+  };
 
   return (
-
-    <aside
-      ref={asideRef}
-      className={`sidebar-menu ${isOpen ? "open" : ""} ${
-        isIconOnly ? "icon-only" : ""
-      }`}
-    >
+    <aside ref={asideRef} className={`sidebar-menu ${isOpen ? "open" : ""}`}>
       <nav>
         <ul className="sidebar-menu-list">
           {filteredMenus.map((menu) => (
             <li key={menu.label}>
               <NavLink
                 to={menu.to}
+                onClick={handleMenuClick} // Event handler dipasang di sini
                 className={({ isActive }) =>
                   "sidebar-menu-item" + (isActive ? " active" : "")
                 }
@@ -108,4 +73,3 @@ const SidebarMenu = ({ isOpen }) => {
 };
 
 export default SidebarMenu;
-

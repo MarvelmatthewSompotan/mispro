@@ -1,8 +1,6 @@
-// src/components/molecules/filterPopUp/FilterPopUp.js (Diperbarui)
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import styles from "./FilterPopUp.module.css";
 
-// Hook kustom (tidak berubah)
 function useClickOutside(ref, handler) {
   useEffect(() => {
     const listener = (event) => {
@@ -30,25 +28,23 @@ const FilterPopup = ({
   filterKey,
   className = "",
   initialValue,
-  singleSelect = false, // <-- PROP BARU untuk School Year
+  singleSelect = false, 
 }) => {
   const popupRef = useRef(null);
+  const [popupStyle, setPopupStyle] = useState({ opacity: 0 });
 
-  // State untuk checkbox
   const [selected, setSelected] = useState(() => {
     return filterType === "checkbox" && Array.isArray(initialValue)
       ? initialValue
       : [];
   });
 
-  // State untuk search
   const [searchTerm, setSearchTerm] = useState(() => {
     return filterType === "search" && typeof initialValue === "string"
       ? initialValue
       : "";
   });
 
-  // State untuk date range
   const [startDate, setStartDate] = useState(() => {
     return filterType === "date-range" && Array.isArray(initialValue)
       ? initialValue[0] || ""
@@ -59,8 +55,6 @@ const FilterPopup = ({
       ? initialValue[1] || ""
       : "";
   });
-
-  // --- STATE BARU untuk Number Range (Age) ---
   const [minVal, setMinVal] = useState(() => {
     return filterType === "number-range" && Array.isArray(initialValue)
       ? initialValue[0] || ""
@@ -71,19 +65,50 @@ const FilterPopup = ({
       ? initialValue[1] || ""
       : "";
   });
-  // ----------------------------------------
 
   useClickOutside(popupRef, onClose);
 
-  // Handler checkbox (DIMODIFIKASI untuk singleSelect)
+  useEffect(() => {
+    const handleResizeOrScroll = () => {
+      if (onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener("resize", handleResizeOrScroll);
+    window.addEventListener("scroll", handleResizeOrScroll, true);
+
+    return () => {
+      window.removeEventListener("resize", handleResizeOrScroll);
+      window.removeEventListener("scroll", handleResizeOrScroll, true);
+    };
+  }, [onClose]);
+
+  useLayoutEffect(() => {
+    if (popupRef.current) {
+      const parentElement = popupRef.current.parentElement;
+
+      if (parentElement) {
+        const rect = parentElement.getBoundingClientRect();
+        const popupRect = popupRef.current.getBoundingClientRect();
+        let top = rect.bottom + 4;
+        let left = rect.right - popupRect.width;
+        if (left < 10) left = 10;
+
+        setPopupStyle({
+          position: "fixed",
+          top: `${top}px`,
+          left: `${left}px`,
+          opacity: 1,
+          zIndex: 9999,
+        });
+      }
+    }
+  }, []);
+
   const handleToggle = (value) => {
     if (singleSelect) {
-      // Jika single select, cek apakah sudah terpilih
-      // Jika ya, batalkan (set jadi array kosong)
-      // Jika belum, set jadi array berisi value itu saja
       setSelected((prev) => (prev.includes(value) ? [] : [value]));
     } else {
-      // Logika multi-select (tetap sama)
       setSelected((prev) =>
         prev.includes(value)
           ? prev.filter((v) => v !== value)
@@ -92,7 +117,6 @@ const FilterPopup = ({
     }
   };
 
-  // Handler Tombol Apply (DIMODIFIKASI)
   const handleApplyClick = () => {
     if (filterType === "checkbox") {
       onSubmit(selected);
@@ -101,13 +125,11 @@ const FilterPopup = ({
     } else if (filterType === "date-range") {
       onSubmit([startDate, endDate]);
     } else if (filterType === "number-range") {
-      // <-- LOGIKA BARU
       onSubmit([minVal, maxVal]);
     }
-    onClose(); // Tutup popup
+    onClose();
   };
 
-  // Handler Tombol Reset (DIMODIFIKASI)
   const handleResetClick = () => {
     if (filterType === "checkbox") {
       setSelected([]);
@@ -120,19 +142,15 @@ const FilterPopup = ({
       setEndDate("");
       onSubmit(["", ""]);
     } else if (filterType === "number-range") {
-      // <-- LOGIKA BARU
       setMinVal("");
       setMaxVal("");
       onSubmit(["", ""]);
     }
-    // Tidak menutup popup
   };
 
   const getSearchPlaceholder = () => {
-    // ... (logika placeholder Anda tetap sama)
     if (filterKey === "search_id") return "Enter Registration ID...";
     if (filterKey === "search_name") return "Enter Student name...";
-    // Placeholder baru untuk Logbook
     if (filterKey === "search_family_rank") return "Enter rank number...";
     if (filterKey === "search_religion") return "Enter religion...";
     if (filterKey === "search_country") return "Enter country...";
@@ -143,7 +161,11 @@ const FilterPopup = ({
   };
 
   return (
-    <div className={`${styles.popupContainer} ${className}`} ref={popupRef}>
+    <div
+      className={`${styles.popupContainer} ${className}`}
+      ref={popupRef}
+      style={popupStyle}
+    >
       <div className={styles.popupHeader}>
         <span>Filter by</span>
         <button onClick={onClose} className={styles.closeBtn}>
@@ -152,10 +174,7 @@ const FilterPopup = ({
       </div>
 
       <div className={styles.popupBody}>
-        {/* --- LOGIKA RENDER BODY DIMODIFIKASI --- */}
-
         {filterType === "date-range" ? (
-          // 1. Date Range (Registation Date)
           <div className={styles.dateRangePopupBody}>
             <label className={styles.dateLabel}>Start Date</label>
             <input
@@ -175,13 +194,12 @@ const FilterPopup = ({
             />
           </div>
         ) : filterType === "number-range" ? (
-          // 2. Number Range (Age) <-- TAMPILAN BARU
           <div className={styles.dateRangePopupBody}>
             <label className={styles.dateLabel}>Min Age</label>
             <input
               type="number"
               placeholder="Min"
-              className={styles.dateInput} // Pakai style yang sama dengan date input
+              className={styles.dateInput}
               value={minVal}
               onChange={(e) => setMinVal(e.target.value)}
             />
@@ -197,7 +215,6 @@ const FilterPopup = ({
             />
           </div>
         ) : filterType === "search" ? (
-          // 3. Search
           <div className={styles.searchPopupBody}>
             <input
               type="text"
@@ -208,8 +225,7 @@ const FilterPopup = ({
               autoFocus
             />
           </div>
-        ) : // 4. Checkbox
-        options.length > 0 ? (
+        ) : options.length > 0 ? (
           options.map((opt) => {
             const value = opt[valueKey];
             const label = opt[labelKey];
@@ -235,7 +251,6 @@ const FilterPopup = ({
         <button onClick={handleResetClick} className={styles.resetBtn}>
           Reset
         </button>
-        {/* --- Perubahan kecil: Grup tombol kanan --- */}
         <div className={styles.actionBtnGroup}>
           <button onClick={onClose} className={styles.actionBtn}>
             Cancel
@@ -250,4 +265,3 @@ const FilterPopup = ({
 };
 
 export default FilterPopup;
-

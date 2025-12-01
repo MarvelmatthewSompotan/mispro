@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
+import ReactDOM from "react-dom";
 import styles from "./PopUpAutoGraduate.module.css";
 import Button from "../../../Atoms/Button/Button";
 import Checkbox from "../../../Atoms/Checkbox/Checkbox";
@@ -112,7 +113,7 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
     onClose();
   };
 
-  return (
+  return ReactDOM.createPortal(
     <>
       <div className={styles.overlay}>
         <div className={styles.eautoGraduatePopup}>
@@ -290,7 +291,8 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
       />
 
       <UpdatedNotification isOpen={isSuccessOpen} onClose={handleFinish} />
-    </>
+    </>,
+    document.body
   );
 };
 

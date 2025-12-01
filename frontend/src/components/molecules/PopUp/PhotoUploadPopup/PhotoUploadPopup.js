@@ -1,5 +1,6 @@
 // src/components/PhotoUploadPopup/PhotoUploadPopup.js (Versi Baru dengan Cropper)
 import React, { useState, useCallback, useRef } from "react";
+import ReactDOM from "react-dom";
 import Cropper from "react-easy-crop";
 import styles from "./PhotoUploadPopup.module.css";
 import getCroppedImg from "./CropImage"; // Kita akan buat file helper ini
@@ -105,7 +106,7 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.overlay} onClick={handleClose}>
       <div
         className={styles.popupContainer}
@@ -200,7 +201,8 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
           style={{ display: "none" }}
         />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

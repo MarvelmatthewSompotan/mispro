@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styles from "./PopUpConfirm.module.css";
+import ReactDOM from "react-dom";
 import { submitRegistrationForm } from "../../../../services/api";
 import WrongSectionPopup from "../../../Pages/Registration/RegistrationForm/PopUp/WrongSectionPopup";
 import Button from "../../../Atoms/Button/Button";
@@ -221,50 +222,53 @@ const PopUpConfirm = React.memo(
     };
 
     return (
-      <>
-        {showWrongSectionPopup && (
-          <WrongSectionPopup onClose={() => onCancel()} />
-        )}
-        <div
-          className={styles.overlay}
-          style={{ visibility: showWrongSectionPopup ? "hidden" : "visible" }}
-        >
-          <div className={styles.popUpConfirm}>
-            <div className={styles.confirmStudentInformation}>
-              Confirm Student Information
-            </div>
-            <div className={styles.pleaseDoubleCheckThatContainer}>
-              <p className={styles.pleaseDoubleCheckThat}>
-                Please double-check that all the information you've entered is
-                correct.
-              </p>
-              <p className={styles.pleaseDoubleCheckThat}>&nbsp;</p>
-              <p className={styles.pleaseDoubleCheckThat}>
-                Once submitted, changes may not be possible.
-              </p>
-            </div>
-            <div className={styles.areYouSure}>
-              Are you sure you want to continue?
-            </div>
-            <div className={styles.bAddSubjectParent}>
-              <Button
-                onClick={onCancel}
-                disabled={isSubmitting}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleConfirm}
-                disabled={isSubmitting}
-                variant="solid"
-              >
-                {isSubmitting ? "Submitting..." : "Yes, I'm sure"}
-              </Button>
+      ReactDOM.createPortal(
+        <>
+          {showWrongSectionPopup && (
+            <WrongSectionPopup onClose={() => onCancel()} />
+          )}
+          <div
+            className={styles.overlay}
+            style={{ visibility: showWrongSectionPopup ? "hidden" : "visible" }}
+          >
+            <div className={styles.popUpConfirm}>
+              <div className={styles.confirmStudentInformation}>
+                Confirm Student Information
+              </div>
+              <div className={styles.pleaseDoubleCheckThatContainer}>
+                <p className={styles.pleaseDoubleCheckThat}>
+                  Please double-check that all the information you've entered is
+                  correct.
+                </p>
+                <p className={styles.pleaseDoubleCheckThat}>&nbsp;</p>
+                <p className={styles.pleaseDoubleCheckThat}>
+                  Once submitted, changes may not be possible.
+                </p>
+              </div>
+              <div className={styles.areYouSure}>
+                Are you sure you want to continue?
+              </div>
+              <div className={styles.bAddSubjectParent}>
+                <Button
+                  onClick={onCancel}
+                  disabled={isSubmitting}
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirm}
+                  disabled={isSubmitting}
+                  variant="solid"
+                >
+                  {isSubmitting ? "Submitting..." : "Yes, I'm sure"}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </>
+        </>
+      ),
+      document.body
     );
   }
 );

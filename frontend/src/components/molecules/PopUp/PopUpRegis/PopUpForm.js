@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./PopUpForm.module.css";
+import ReactDOM from "react-dom";
 import {
   startRegistration,
   getRegistrationOptions,
@@ -302,7 +303,7 @@ const PopUpForm = ({
     { value: "add_new", label: "+ Add more" },
   ];
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.overlay}>
       <form
         className={styles.popUpForm}
@@ -435,7 +436,8 @@ const PopUpForm = ({
           </Button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body
   );
 };
 
