@@ -59,6 +59,7 @@ class Student extends Model
         'phone_number', 
         'email',
         'photo_path',
+        'card_number'
         'previous_school', 
         'religion',
         'va_mandiri',
@@ -73,6 +74,7 @@ class Student extends Model
         'active',
         'status',
         'graduated_at'
+    
 
     ];
 
