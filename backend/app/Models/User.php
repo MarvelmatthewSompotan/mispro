@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Draft;
+use App\Models\Gate\GateSession;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -35,6 +36,15 @@ class User extends Authenticatable
         return $this->hasMany(
             Draft::class,
             'user_id',
+            'user_id'
+        );
+    }
+
+    public function gateSessions() : HasMany
+    {
+        return $this->hasMany(
+            GateSession::class,
+            'created_by',
             'user_id'
         );
     }

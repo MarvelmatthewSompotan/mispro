@@ -16,6 +16,7 @@ use App\Models\MotherAddress;
 use App\Models\ResidenceHall;
 use App\Models\StudentParent;
 use App\Models\StudentAddress;
+use App\Models\Gate\GateAttendance;
 use App\Models\Transportation;
 use App\Models\ApplicationForm;
 use App\Models\GuardianAddress;
@@ -59,7 +60,7 @@ class Student extends Model
         'phone_number', 
         'email',
         'photo_path',
-        'card_number'
+        'card_number',
         'previous_school', 
         'religion',
         'va_mandiri',
@@ -74,6 +75,7 @@ class Student extends Model
         'active',
         'status',
         'graduated_at'
+        
     
 
     ];
@@ -276,6 +278,15 @@ class Student extends Model
     public function getPickupPointAttribute()
     {
         return $this->transportations->map->pickupPoint->unique('pickup_point_id');
+    }
+
+    public function gateAttendances() : HasMany
+    {
+        return $this->hasMany(
+            GateAttendance::class,
+            'student_id',
+            'id'
+        );
     }
 
     protected function latestDataSnapshot(): Attribute
