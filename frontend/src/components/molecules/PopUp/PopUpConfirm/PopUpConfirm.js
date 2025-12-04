@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./PopUpConfirm.module.css";
 import ReactDOM from "react-dom";
 import { submitRegistrationForm } from "../../../../services/api";
@@ -17,7 +17,10 @@ const PopUpConfirm = React.memo(
   }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showWrongSectionPopup, setShowWrongSectionPopup] = useState(false);
-
+    const [domReady, setDomReady] = useState(false);
+    React.useEffect(() => {
+      setDomReady(true);
+    }, []);
     const handleConfirm = async () => {
       onSetAllowNavigation(true);
       try {
@@ -38,7 +41,7 @@ const PopUpConfirm = React.memo(
           });
           onConfirm();
         } else {
-          alert("Registration failed: "(response.error || "Unknown error"));
+          alert("Registration failed: " + (response.error || "Unknown error"));
         }
       } catch (error) {
         const errorMessage = error.response?.data?.error || "";
@@ -220,55 +223,54 @@ const PopUpConfirm = React.memo(
       };
       return transformed;
     };
+    if (!domReady) return null;
 
-    return (
-      ReactDOM.createPortal(
-        <>
-          {showWrongSectionPopup && (
-            <WrongSectionPopup onClose={() => onCancel()} />
-          )}
-          <div
-            className={styles.overlay}
-            style={{ visibility: showWrongSectionPopup ? "hidden" : "visible" }}
-          >
-            <div className={styles.popUpConfirm}>
-              <div className={styles.confirmStudentInformation}>
-                Confirm Student Information
-              </div>
-              <div className={styles.pleaseDoubleCheckThatContainer}>
-                <p className={styles.pleaseDoubleCheckThat}>
-                  Please double-check that all the information you've entered is
-                  correct.
-                </p>
-                <p className={styles.pleaseDoubleCheckThat}>&nbsp;</p>
-                <p className={styles.pleaseDoubleCheckThat}>
-                  Once submitted, changes may not be possible.
-                </p>
-              </div>
-              <div className={styles.areYouSure}>
-                Are you sure you want to continue?
-              </div>
-              <div className={styles.bAddSubjectParent}>
-                <Button
-                  onClick={onCancel}
-                  disabled={isSubmitting}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleConfirm}
-                  disabled={isSubmitting}
-                  variant="solid"
-                >
-                  {isSubmitting ? "Submitting..." : "Yes, I'm sure"}
-                </Button>
-              </div>
+    return ReactDOM.createPortal(
+      <>
+        {showWrongSectionPopup && (
+          <WrongSectionPopup onClose={() => onCancel()} />
+        )}
+        <div
+          className={styles.overlay}
+          style={{ visibility: showWrongSectionPopup ? "hidden" : "visible" }}
+        >
+          <div className={styles.popUpConfirm}>
+            <div className={styles.confirmStudentInformation}>
+              Confirm Student Information
+            </div>
+            <div className={styles.pleaseDoubleCheckThatContainer}>
+              <p className={styles.pleaseDoubleCheckThat}>
+                Please double-check that all the information you've entered is
+                correct.
+              </p>
+              <p className={styles.pleaseDoubleCheckThat}>&nbsp;</p>
+              <p className={styles.pleaseDoubleCheckThat}>
+                Once submitted, changes may not be possible.
+              </p>
+            </div>
+            <div className={styles.areYouSure}>
+              Are you sure you want to continue?
+            </div>
+            <div className={styles.bAddSubjectParent}>
+              <Button
+                onClick={onCancel}
+                disabled={isSubmitting}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={isSubmitting}
+                variant="solid"
+              >
+                {isSubmitting ? "Submitting..." : "Yes, I'm sure"}
+              </Button>
             </div>
           </div>
-        </>
-      ),
-      document.body
+        </div>
+      </>,
+      document.getElementById("root") || document.body
     );
   }
 );
