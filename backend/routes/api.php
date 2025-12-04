@@ -9,6 +9,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\Gates\GateManagementController; // Jery
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
@@ -79,5 +80,24 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
 
 Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar'])->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'index']);
+});
+// Jery
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin'])->prefix('gate')->group(function () {
+    Route::get('/points', [GateManagementController::class, 'indexGatePoints']);
+    Route::post('/points', [GateManagementController::class, 'storeGatePoint']);
+    Route::put('/points/{id}', [GateManagementController::class, 'updateGatePoint']);
+    Route::delete('/points/{id}', [GateManagementController::class, 'destroyGatePoint']);
+
+    Route::post('/sessions/start', [GateManagementController::class, 'startSession']);
+    Route::post('/sessions/{sessionId}/end', [GateManagementController::class, 'endSession']);
+    Route::put('/sessions/{sessionId}/thresholds', [GateManagementController::class, 'updateThresholds']);
+
+    Route::get('/sessions/current', [GateManagementController::class, 'currentSession']);
+    Route::get('/sessions/current/attendances', [GateManagementController::class, 'currentAttendances']);
+
+    Route::get('/sessions/past', [GateManagementController::class, 'pastSessions']);
+    Route::get('/sessions/{sessionId}', [GateManagementController::class, 'sessionDetail']);
+    Route::get('/sessions/{sessionId}/attendances', [GateManagementController::class, 'sessionAttendances']);
+    Route::get('/sessions/{sessionId}/export', [GateManagementController::class, 'exportSession']);
 });
 ?>
