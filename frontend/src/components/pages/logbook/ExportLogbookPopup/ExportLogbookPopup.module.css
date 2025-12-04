@@ -75,6 +75,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  vertical-align: middle;
 }
 
 .headerCell:last-child {
@@ -104,8 +105,7 @@
   border-right: 1px solid var(--main-grey);
   padding: 16px;
   text-align: center;
-  height: 100px;
-  vertical-align: middle;
+ 
 }
 
 .photoCell:last-child {
@@ -114,8 +114,8 @@
 
 /* Student photo */
 .studentPhoto {
-  width: 40px;
-  height: 54px;
+  width: 90px;
+  height: 125px;
   object-fit: cover;
   border-radius: 4px;
 }

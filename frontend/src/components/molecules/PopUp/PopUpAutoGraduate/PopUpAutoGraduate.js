@@ -1,17 +1,16 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
+import ReactDOM from "react-dom";
 import styles from "./PopUpAutoGraduate.module.css";
-import Button from "../../../atoms/Button";
-import Checkbox from "../../../atoms/checkbox/Checkbox";
-import ColumnHeader from "../../../atoms/columnHeader/ColumnHeader";
+import Button from "../../../Atoms/Button/Button";
+import Checkbox from "../../../Atoms/Checkbox/Checkbox";
+import ColumnHeader from "../../ColumnHeader/ColumnHeader";
 import {
   getAutoGraduatePreview,
   confirmAutoGraduate,
-} from "../../../../services/api"; // Pastikan path api service benar
+} from "../../../../services/api";
 import placeholder from "../../../../assets/user.svg";
-
-// Import komponen Popup tambahan
-import ConfirmUpdatePopup from "../../../pages/student_list/PopUpUpdate/PopUpConfirmUpdate";
-import UpdatedNotification from "../../../pages/student_list/UpdateNotification/UpdateNotification"; // Menggunakan file notifikasi yang baru
+import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate";
+import UpdatedNotification from "../UpdateNotification/UpdateNotification";
 
 const REFRESH_INTERVAL = 5000;
 
@@ -20,11 +19,9 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [schoolYear, setSchoolYear] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // State untuk mengontrol Popup
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false); // Untuk popup konfirmasi merah
-  const [isSuccessOpen, setIsSuccessOpen] = useState(false); // Untuk popup checklist hijau
-  const [isUpdating, setIsUpdating] = useState(false); // Loading saat proses simpan
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const onCloseRef = useRef(onClose);
 
@@ -39,8 +36,6 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
       if (res.success) {
         setSchoolYear(res.current_school_year);
         setStudents(res.students || []);
-        // Jika Anda ingin default select all saat pertama load, biarkan ini.
-        // Jika tidak, hapus bagian ini.
         if (!isBackgroundRefresh) {
           const allIds = (res.students || []).map((s) => s.id);
           setSelectedIds(allIds);
@@ -63,7 +58,6 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      // Pause refresh jika sedang ada popup konfirmasi/sukses terbuka
       if (!isConfirmOpen && !isSuccessOpen) {
         console.log("Auto refreshing popup data...");
         fetchData(true);
@@ -88,24 +82,20 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
     });
   };
 
-  // 1. Handler: Saat tombol "Confirm (n)" diklik
   const handleInitialConfirmClick = () => {
     if (selectedIds.length === 0) {
       alert("Please select at least one student.");
       return;
     }
-    // Buka popup konfirmasi (PopUpConfirmUpdate)
     setIsConfirmOpen(true);
   };
 
-  // 2. Handler: Saat user klik "Yes, I'm sure" di popup konfirmasi
   const handleExecuteUpdate = async () => {
     try {
       setIsUpdating(true);
       const res = await confirmAutoGraduate(selectedIds);
 
       if (res.success) {
-        // Tutup popup konfirmasi, Buka popup sukses
         setIsConfirmOpen(false);
         setIsSuccessOpen(true);
       }
@@ -117,14 +107,13 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
     }
   };
 
-  // 3. Handler: Saat popup sukses selesai (setelah 2 detik timer di UpdateNotification habis)
   const handleFinish = () => {
     setIsSuccessOpen(false);
-    onSuccess(); // Refresh data di parent page
-    onClose(); // Tutup AutoGraduatePopup utama
+    onSuccess();
+    onClose();
   };
 
-  return (
+  return ReactDOM.createPortal(
     <>
       <div className={styles.overlay}>
         <div className={styles.eautoGraduatePopup}>
@@ -135,12 +124,12 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
             </div>
             {!loading && (
               <div className={styles.unselectAllParent}>
-                <div className={styles.unselectAll} onClick={handleUnselectAll}>
+                <Button variant="chip-danger" onClick={handleUnselectAll}>
                   Unselect All
-                </div>
-                <div className={styles.selectAll} onClick={handleSelectAll}>
+                </Button>
+                <Button variant="chip-primary" onClick={handleSelectAll}>
                   Select All
-                </div>
+                </Button>
               </div>
             )}
           </div>
@@ -283,7 +272,6 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
               <Button variant="outline" onClick={onClose} disabled={isUpdating}>
                 Cancel
               </Button>
-              {/* Tombol Confirm dengan jumlah data yang diselect */}
               <Button
                 variant="solid"
                 onClick={handleInitialConfirmClick}
@@ -295,8 +283,6 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
           </div>
         </div>
       </div>
-
-      {/* Popup Konfirmasi (Merah) */}
       <ConfirmUpdatePopup
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
@@ -304,12 +290,9 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
         isUpdating={isUpdating}
       />
 
-      {/* Popup Sukses (Hijau - UpdatedNotification) */}
-      <UpdatedNotification
-        isOpen={isSuccessOpen}
-        onClose={handleFinish} // Ketika timer 2 detik habis, jalankan handleFinish
-      />
-    </>
+      <UpdatedNotification isOpen={isSuccessOpen} onClose={handleFinish} />
+    </>,
+    document.body
   );
 };
 

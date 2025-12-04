@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "../../../assets/logo-mis-f.png";
-import "../../styles/Logo.css";
+import "./Logo.css";
 
 const Logo = () => (
   <div className="logo-container">

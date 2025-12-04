@@ -1,5 +1,5 @@
 import React from "react";
-import "../../styles/Checkbox.css";
+import "./Checkbox.css";
 
 const Checkbox = ({ checked, onChange, name, readOnly = false }) => (
   <label className={`atom-checkbox ${readOnly ? 'read-only' : ''}`}>

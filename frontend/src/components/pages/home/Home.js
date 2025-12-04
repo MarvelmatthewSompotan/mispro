@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import StatCard from '../../molecules/StatCard';
-import WelcomeBanner from '../../molecules/WelcomeBanner';
-import styles from '../home/Home.module.css';
-import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
+import StatCard from '../../Molecules/StatCard/StatCard';
+import WelcomeBanner from '../../Molecules/WelcomeBanner/WelcomeBanner';
+import styles from '../Home/Home.module.css';
+import ColumnHeader from '../../Molecules/ColumnHeader/ColumnHeader';
 import { getDashboard } from '../../../services/api';
 
 const formatGrowthText = (percent, period) => {

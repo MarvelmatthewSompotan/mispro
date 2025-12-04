@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./Logbook.module.css";
-import TableHeaderController from "../../molecules/TableHeaderController/TableHeaderController";
-import Button from "../../atoms/Button";
+import TableHeaderController from "../../Molecules/TableHeaderController/TableHeaderController";
+import Button from "../../Atoms/Button/Button";
 import ExportLogbookPopup from "./ExportLogbookPopup/ExportLogbookPopup";
-import FilterPopup from "../../atoms/FilterPopUp";
-import filterStyles from "../../atoms/FilterPopUp.module.css";
-import Pagination from "../../atoms/Pagination"; // <-- 1. IMPORT Pagination
-import { 
-    getLogbook, 
-    getRegistrationOptions,
-    getLogbookForExport // <-- BARU: Import fungsi export
+import FilterPopup from "../../Molecules/FilterPopUp/FilterPopUp";
+import filterStyles from "../../Molecules/FilterPopUp/FilterPopUp.module.css";
+import Pagination from "../../Molecules/Pagination/Pagination"; // <-- 1. IMPORT Pagination
+import {
+  getLogbook,
+  getRegistrationOptions,
+  getLogbookForExport, // <-- BARU: Import fungsi export
 } from "../../../services/api"; // <-- 2. IMPORT API
 import placeholder from "../../../assets/user.svg"; // <-- 3. IMPORT Placeholder
 
@@ -283,19 +283,19 @@ const Logbook = () => {
   const fetchLogbookData = useCallback(
     async (page = 1, options = {}) => {
       // --- MODIFIKASI ---
-      const { isBackgroundRefresh = false } = options; 
-      if (!isBackgroundRefresh) setLoading(true); 
+      const { isBackgroundRefresh = false } = options;
+      if (!isBackgroundRefresh) setLoading(true);
 
       // 1. Siapkan parameter API dari state 'filters' dan 'sorts'
       const apiParams = {
         page: page,
-        per_page: 25, 
+        per_page: 25,
       };
 
       // 2. Terjemahkan state 'filters' ke 'apiParams'
       for (const headerTitle in filters) {
         const config = FILTER_CONFIG_MAP[headerTitle];
-        const value = filters[headerTitle]; 
+        const value = filters[headerTitle];
 
         if (config && value) {
           if (config.type === "search") {
@@ -328,59 +328,58 @@ const Logbook = () => {
         setTotalPages(1);
         setCurrentPage(1);
       } finally {
-        if (!isBackgroundRefresh) setLoading(false); 
+        if (!isBackgroundRefresh) setLoading(false);
       }
     },
     [filters, sorts]
-  ); 
-  
+  );
+
   // --- FUNGSI BARU: Mengambil Data Logbook LENGKAP untuk Export ---
   const fetchFullLogbookData = useCallback(async () => {
-        setExportLoading(true); // Mulai loading
-        
-        // 1. Siapkan parameter API dari state 'filters' dan 'sorts'
-        const apiParams = {}; 
-        
-        for (const headerTitle in filters) {
-            const config = FILTER_CONFIG_MAP[headerTitle];
-            const value = filters[headerTitle];
+    setExportLoading(true); // Mulai loading
 
-            if (config && value) {
-                if (config.type === "search") {
-                    apiParams[config.apiKeys[0]] = value;
-                } else if (config.type === "checkbox") {
-                    apiParams[config.apiKeys[0]] = value;
-                } else if (config.type === "date-range") {
-                    apiParams[config.apiKeys[0]] = value[0] || undefined;
-                    apiParams[config.apiKeys[1]] = value[1] || undefined;
-                } else if (config.type === "number-range") {
-                    apiParams[config.apiKeys[0]] = value[0] || undefined;
-                    apiParams[config.apiKeys[1]] = value[1] || undefined;
-                }
-            }
+    // 1. Siapkan parameter API dari state 'filters' dan 'sorts'
+    const apiParams = {};
+
+    for (const headerTitle in filters) {
+      const config = FILTER_CONFIG_MAP[headerTitle];
+      const value = filters[headerTitle];
+
+      if (config && value) {
+        if (config.type === "search") {
+          apiParams[config.apiKeys[0]] = value;
+        } else if (config.type === "checkbox") {
+          apiParams[config.apiKeys[0]] = value;
+        } else if (config.type === "date-range") {
+          apiParams[config.apiKeys[0]] = value[0] || undefined;
+          apiParams[config.apiKeys[1]] = value[1] || undefined;
+        } else if (config.type === "number-range") {
+          apiParams[config.apiKeys[0]] = value[0] || undefined;
+          apiParams[config.apiKeys[1]] = value[1] || undefined;
         }
-        
-        // 2. Tambahkan 'sorts' (Single sort dari tampilan utama)
-        apiParams.sort = sorts.length > 0 ? sorts : undefined;
+      }
+    }
 
-        // 3. Panggil API export BARU
-        try {
-            const res = await getLogbookForExport(apiParams); 
-            return res.data || []; // Kembalikan data lengkap
-        } catch (error) {
-            console.error("Failed to fetch full logbook data for export:", error);
-            throw error;
-        } finally {
-            setExportLoading(false); // Selesai loading
-        }
-    }, [filters, sorts]);
+    // 2. Tambahkan 'sorts' (Single sort dari tampilan utama)
+    apiParams.sort = sorts.length > 0 ? sorts : undefined;
 
+    // 3. Panggil API export BARU
+    try {
+      const res = await getLogbookForExport(apiParams);
+      return res.data || []; // Kembalikan data lengkap
+    } catch (error) {
+      console.error("Failed to fetch full logbook data for export:", error);
+      throw error;
+    } finally {
+      setExportLoading(false); // Selesai loading
+    }
+  }, [filters, sorts]);
 
   // 5. Trigger fetch data ketika filter, sort berubah
   useEffect(() => {
     // Reset ke halaman 1 setiap kali filter atau sort berubah
     fetchLogbookData(1);
-  }, [filters, sorts, fetchLogbookData]); 
+  }, [filters, sorts, fetchLogbookData]);
 
   // --- TAMBAHAN: useEffect untuk Background Refresh ---
   useEffect(() => {
@@ -392,7 +391,7 @@ const Logbook = () => {
 
     const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
     return () => clearInterval(intervalId);
-  }, [currentPage, fetchLogbookData]); 
+  }, [currentPage, fetchLogbookData]);
   // --------------------------------------------------
 
   // Handler untuk Pagination
@@ -513,10 +512,10 @@ const Logbook = () => {
           </Button>
         </header>
         <div className={styles.selectionControls}>
-          <Button className={styles.btnChipDanger} onClick={unselectAllColumns}>
+          <Button variant="chip-danger" onClick={unselectAllColumns}>
             Unselect All
           </Button>
-          <Button className={styles.btnChipPrimary} onClick={selectAllColumns}>
+          <Button variant="chip-primary" onClick={selectAllColumns}>
             Select All
           </Button>
         </div>
@@ -687,7 +686,7 @@ const Logbook = () => {
         selectedColumns={selectedColumns}
         // HAPUS: logbookData={logbookData} <-- Data paginasi DILARANG dikirim
         // TAMBAH: Kirim fungsi fetch dan status loading
-        fetchFullData={fetchFullLogbookData} 
+        fetchFullData={fetchFullLogbookData}
         isExportLoading={exportLoading}
         currentFilters={filters} // Kirim filters untuk info/preview
       />

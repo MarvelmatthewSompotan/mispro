@@ -1,39 +1,44 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import styles from './Users.module.css';
-import Button from '../../atoms/Button';
-import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
-import searchIcon from '../../../assets/Search-icon.png';
-import upenIcon from '../../../assets/edit_pen.png';
-import utrashAltIcon from '../../../assets/trash_icon.png';
-import PopUpForm from '../../molecules/PopUp/PopUpRegis/PopUpForm';
-import { getUsers, deleteUser, postUser, updateUser } from '../../../services/api';
-import ResetFilterButton from '../../atoms/resetFilterButton/ResetFilterButton';
+import React, { useCallback, useState, useEffect, useRef } from "react";
+import styles from "./Users.module.css";
+import Button from "../../Atoms/Button/Button";
+import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
+import SearchBar from "../../Molecules/SearchBar/SearchBar";
+import upenIcon from "../../../assets/edit_pen.png";
+import utrashAltIcon from "../../../assets/trash_icon.png";
+import PopUpForm from "../../Molecules/PopUp/PopUpRegis/PopUpForm";
+import {
+  getUsers,
+  deleteUser,
+  postUser,
+  updateUser,
+} from "../../../services/api";
+import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
 
 const REFRESH_INTERVAL = 5000;
 
 const formatRole = (role) => {
-  if (!role) return '';
+  if (!role) return "";
   return role
-    .split('_')
+    .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .join(" ");
 };
 
 const Users = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   // eslint-disable-next-line
   const [page, setPage] = useState(1);
   const fetchControllerRef = useRef(null);
   const [deletingUserId, setDeletingUserId] = useState(null);
 
   const [confirmDeleteUser, setConfirmDeleteUser] = useState(null);
-  const [popupMessage, setPopupMessage] = useState('');
-  const [popupType, setPopupType] = useState('');
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-  
+
   // --- INI ADALAH STATE ASLI UNTUK "NEW USER" (TIDAK DIUBAH) ---
   const [showUserPopup, setShowUserPopup] = useState(false);
 
@@ -51,12 +56,11 @@ const Users = () => {
     setTimeout(() => setShowPopup(false), 3000);
   };
 
-
   const fetchUsers = useCallback(
     async (options = {}) => {
       const { isBackgroundRefresh = false } = options;
       if (!isBackgroundRefresh) setLoading(true);
-      setError('');
+      setError("");
 
       const controller = new AbortController();
       const signal = controller.signal;
@@ -68,12 +72,12 @@ const Users = () => {
         if (response?.success) {
           setUsers(response.data.data || []);
         } else {
-          setError('Failed to load users');
+          setError("Failed to load users");
         }
       } catch (err) {
-        if (err.name === 'AbortError') return;
+        if (err.name === "AbortError") return;
         console.error(err);
-        setError('Error fetching user data');
+        setError("Error fetching user data");
       } finally {
         if (!isBackgroundRefresh) setLoading(false);
       }
@@ -87,7 +91,7 @@ const Users = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      console.log('Auto refreshing user list (background)...');
+      console.log("Auto refreshing user list (background)...");
       fetchUsers({ isBackgroundRefresh: true });
     }, REFRESH_INTERVAL);
     return () => clearInterval(intervalId);
@@ -95,7 +99,7 @@ const Users = () => {
 
   const filteredUsers = users.filter((user) =>
     [user.username, user.user_id, user.full_name]
-      .join(' ')
+      .join(" ")
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -109,12 +113,12 @@ const Users = () => {
       // Menggunakan helper popup
       showTemporaryPopup(
         `User "${confirmDeleteUser.username}" has been deleted.`,
-        'success'
+        "success"
       );
       await fetchUsers();
     } catch (error) {
-      console.error('Failed to delete user:', error);
-      showTemporaryPopup('Failed to delete user. Please try again.', 'error');
+      console.error("Failed to delete user:", error);
+      showTemporaryPopup("Failed to delete user. Please try again.", "error");
     } finally {
       setDeletingUserId(null);
       setConfirmDeleteUser(null);
@@ -130,7 +134,7 @@ const Users = () => {
       !userData.password ||
       !userData.role
     ) {
-      showTemporaryPopup('All fields are required.', 'error');
+      showTemporaryPopup("All fields are required.", "error");
       return;
     }
 
@@ -139,26 +143,35 @@ const Users = () => {
       const username = response.data?.username || userData.username;
       showTemporaryPopup(
         `User "${username}" has been added successfully.`,
-        'success'
+        "success"
       );
       await fetchUsers();
 
-      if (typeof resetForm === 'function') resetForm();
+      if (typeof resetForm === "function") resetForm();
       setShowUserPopup(false);
     } catch (error) {
-      console.error('Failed to add user:', error);
+      console.error("Failed to add user:", error);
       // Menampilkan pesan error dari API jika ada
       const errorMessage =
-        error.response?.data?.message || 'Failed to add user. Please try again.';
-      showTemporaryPopup(errorMessage, 'error');
+        error.response?.data?.message ||
+        "Failed to add user. Please try again.";
+      showTemporaryPopup(errorMessage, "error");
     }
   };
 
   // --- TAMBAHAN BARU: Handler untuk "Edit User" ---
   const handleUpdateUser = async (userId, userData) => {
     // Validasi dasar (password opsional untuk edit)
-    if (!userData.username || !userData.full_name || !userData.email || !userData.role) {
-      showTemporaryPopup('Username, Full Name, Email, and Role are required.', 'error');
+    if (
+      !userData.username ||
+      !userData.full_name ||
+      !userData.email ||
+      !userData.role
+    ) {
+      showTemporaryPopup(
+        "Username, Full Name, Email, and Role are required.",
+        "error"
+      );
       return;
     }
 
@@ -166,26 +179,25 @@ const Users = () => {
       // Panggil API updateUser
       const response = await updateUser(userId, userData);
       const username = response.data?.username || userData.username;
-      
+
       showTemporaryPopup(
         `User "${username}" has been updated successfully.`,
-        'success'
+        "success"
       );
-      
+
       await fetchUsers(); // Muat ulang data
       setEditingUser(null); // Tutup popup edit
-
     } catch (error) {
-      console.error('Failed to update user:', error);
+      console.error("Failed to update user:", error);
       const errorMessage =
-        error.response?.data?.message || 'Failed to update user. Please try again.';
-      showTemporaryPopup(errorMessage, 'error');
+        error.response?.data?.message ||
+        "Failed to update user. Please try again.";
+      showTemporaryPopup(errorMessage, "error");
     }
   };
 
-
   const handleResetFilters = () => {
-    setSearch('');
+    setSearch("");
   };
 
   return (
@@ -193,32 +205,23 @@ const Users = () => {
       <h2 className={styles.pageTitle}>Users</h2>
       <div className={styles.usersHeaderContent}>
         <div className={styles.searchAndFilterContainer}>
-          <div className={styles.searchBar}>
-            <input
-              type='text'
-              placeholder='Find username, name, or user ID'
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={styles.searchInput}
-            />
-            <img
-              src={searchIcon}
-              alt='Search'
-              className={styles.searchIconImg}
-            />
-          </div>
+          <SearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Find username, name, or user ID"
+          />
           <ResetFilterButton onClick={handleResetFilters} />
         </div>
 
         <div className={styles.button2Parent}>
-          <Button variant='solid' onClick={() => setShowUserPopup(true)}>
+          <Button variant="solid" onClick={() => setShowUserPopup(true)}>
             New User
           </Button>
 
           {/* --- POPUP UNTUK "NEW USER" (TIDAK DIUBAH) --- */}
           {showUserPopup && (
             <PopUpForm
-              type='user'
+              type="user"
               onClose={() => setShowUserPopup(false)}
               onCreate={(data, resetForm) => handleAddUser(data, resetForm)}
               // isEditMode tidak di-set (default-nya false)
@@ -228,18 +231,17 @@ const Users = () => {
           {/* --- POPUP BARU UNTUK "EDIT USER" --- */}
           {editingUser && (
             <PopUpForm
-              type='user'
+              type="user"
               onClose={() => setEditingUser(null)}
               // onCreate akan memanggil handleUpdateUser
               // Kita gunakan panah () => ... agar bisa memasukkan userId
               onCreate={(data) => handleUpdateUser(editingUser.user_id, data)}
               // Prop baru untuk memberi tahu PopUpForm ini mode edit
-              isEditMode={true} 
+              isEditMode={true}
               // Prop baru untuk mengisi data awal
-              initialData={editingUser} 
+              initialData={editingUser}
             />
           )}
-
         </div>
       </div>
 
@@ -251,12 +253,12 @@ const Users = () => {
         <div className={styles.tableContainer}>
           <div className={styles.tableHeader}>
             {/* ... (Header tidak berubah) ... */}
-            <ColumnHeader title='User ID' hasFilter={false} hasSort={false} />
-            <ColumnHeader title='Username' hasFilter={false} hasSort={true} />
-            <ColumnHeader title='Name' hasFilter={false} hasSort={true} />
-            <ColumnHeader title='User Email' hasFilter={false} hasSort={true} />
-            <ColumnHeader title='Role' hasFilter={true} hasSort={true} />
-            <ColumnHeader title='Actions' hasSort={false} hasFilter={false} />
+            <ColumnHeader title="User ID" hasFilter={false} hasSort={false} />
+            <ColumnHeader title="Username" hasFilter={false} hasSort={true} />
+            <ColumnHeader title="Name" hasFilter={false} hasSort={true} />
+            <ColumnHeader title="User Email" hasFilter={false} hasSort={true} />
+            <ColumnHeader title="Role" hasFilter={true} hasSort={true} />
+            <ColumnHeader title="Actions" hasSort={false} hasFilter={false} />
           </div>
 
           <div className={styles.tableBody}>
@@ -273,7 +275,7 @@ const Users = () => {
                     {user.username}
                   </div>
                   <div className={styles.tableCell} title={user.name}>
-                    {user.full_name || '-'}
+                    {user.full_name || "-"}
                   </div>
                   <div className={styles.tableCell} title={user.email}>
                     {user.email}
@@ -286,17 +288,16 @@ const Users = () => {
                   </div>
                   <div className={styles.actionCell}>
                     <div className={styles.actionContainer}>
-                      
                       {/* --- PERUBAHAN DI SINI: onClick pada icon edit --- */}
                       <button
                         className={styles.actionButton}
                         // Set state 'editingUser' dengan data user yang di-klik
                         onClick={() => setEditingUser(user)}
-                        aria-label='Edit User'
+                        aria-label="Edit User"
                       >
                         <img
                           src={upenIcon}
-                          alt='Edit'
+                          alt="Edit"
                           className={`${styles.icon} ${styles.editIcon}`}
                         />
                       </button>
@@ -306,11 +307,11 @@ const Users = () => {
                         className={styles.actionButton}
                         onClick={() => setConfirmDeleteUser(user)}
                         disabled={deletingUserId === user.user_id}
-                        aria-label='Delete User'
+                        aria-label="Delete User"
                       >
                         <img
                           src={utrashAltIcon}
-                          alt='Delete'
+                          alt="Delete"
                           className={`${styles.icon} ${styles.deleteIcon}`}
                         />
                         {deletingUserId === user.user_id && (
@@ -339,16 +340,16 @@ const Users = () => {
             </p>
             <div className={styles.modalActions}>
               <Button
-                variant='solid'
+                variant="solid"
                 onClick={handleConfirmDelete}
                 disabled={deletingUserId === confirmDeleteUser.user_id}
               >
                 {deletingUserId === confirmDeleteUser.user_id
-                  ? 'Deleting...'
-                  : 'Yes, Delete'}
+                  ? "Deleting..."
+                  : "Yes, Delete"}
               </Button>
               <Button
-                variant='outline'
+                variant="outline"
                 onClick={() => setConfirmDeleteUser(null)}
               >
                 Cancel
@@ -362,7 +363,7 @@ const Users = () => {
       {showPopup && (
         <div
           className={`${styles.popup} ${
-            popupType === 'success' ? styles.success : styles.error
+            popupType === "success" ? styles.success : styles.error
           }`}
         >
           {popupMessage}

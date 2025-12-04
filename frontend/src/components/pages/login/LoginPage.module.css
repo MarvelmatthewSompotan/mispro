@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
-@import url("../../styles/global-vars.css");
+@import url("../../Styles/global-vars.css");
 
 body {
   margin: 0;
@@ -103,6 +103,18 @@ body {
   width: 340px;
 }
 
+/* Tambahkan ini untuk override styling Logo component */
+.login-logo .logo-container {
+  margin-bottom: 0;
+  height: auto;
+}
+
+.login-logo .logo-img {
+  width: 340px !important;
+  transform: none !important;
+  max-width: 100%;
+}
+
 .login-form-new {
   display: flex;
   flex-direction: column;
@@ -119,7 +131,7 @@ body {
 }
 
 .input-group {
-  position: relative; 
+  position: relative;
 }
 
 .input-group input {
@@ -141,7 +153,7 @@ body {
 .password-toggle-icon {
   position: absolute;
   top: 50%;
-  right: 20px; 
+  right: 20px;
   transform: translateY(-50%);
   cursor: pointer;
   width: 20px;

@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, useNavigate, useBlocker } from "react-router-dom";
-import Main from "../../../layout/Main";
+import Main from "../../../Layout/Main";
 import StudentStatusSection from "./StudentStatus/StudentStatusSection";
 import StudentInformationSection from "./StudentInformation/StudentInformationSection";
 import ProgramSection from "./Program/ProgramSection";
@@ -10,7 +10,7 @@ import ParentGuardianSection from "./ParentGuardian/ParentGuardianSection";
 import TermOfPaymentSection from "./TermOfPayment/TermOfPaymentSection";
 import OtherDetailSection from "./OtherDetail/OtherDetailSection";
 import FormButtonSection from "./FormButtonSection/FormButtonSection";
-import ConfirmBackPopup from "../../../molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm";
+import ConfirmBackPopup from "../../../Molecules/PopUp/PopUpBackConfirm/PopUpBackConfirm";
 import styles from "./RegistrationForm.module.css";
 import { getRegistrationOptions } from "../../../../services/api";
 import { gsap } from "gsap";
@@ -53,7 +53,7 @@ const RegistrationForm = () => {
     const isValid = s.fromPopup && s.draftId && s.schoolYear && s.semester;
 
     if (!isValid) {
-      navigate("/registration", { replace: true });
+      navigate("/Registration", { replace: true });
     }
   }, [location.state, navigate]);
 
@@ -341,7 +341,7 @@ const RegistrationForm = () => {
 
   // [BARU] Handler untuk tombol back di HeaderBar
   const handleBackClick = () => {
-    navigate("/registration", { replace: true }); // Biarkan blocker menangkap ini
+    navigate("/Registration", { replace: true }); // Biarkan blocker menangkap ini
   };
 
   // [BARU] Handler untuk konfirmasi kembali (buang perubahan)

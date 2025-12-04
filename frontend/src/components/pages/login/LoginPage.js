@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, getMe, resetLogin } from "../../../services/api";
-import Button from "../../atoms/Button";
-import logoMis from "../../../assets/logo-mis-f.png";
+import Button from "../../Atoms/Button/Button";
+import Logo from "../../Atoms/Logo/Logo";
 import bgLogin from "../../../assets/bg_login.jpg";
 import ellipseTop from "../../../assets/elipse1_login.svg";
 import ellipseBottom from "../../../assets/elipse2_login.svg";
@@ -45,7 +45,7 @@ const LoginPage = () => {
       await login(form.identifier, form.password);
       const userData = await getMe();
       localStorage.setItem("user", JSON.stringify(userData));
-      navigate("/home");
+      navigate("/Home");
     } catch (error) {
       console.error("Login failed:", error);
       setError("Login failed. Please check your Email/Password.");
@@ -129,11 +129,9 @@ const LoginPage = () => {
           {/* ------------------------------------------- */}
 
           <div className={styles["login-card"]}>
-            <img
-              src={logoMis}
-              alt="Logo MIS"
-              className={styles["login-logo"]}
-            />
+            <div className={styles["login-logo"]}>
+              <Logo />
+            </div>
 
             <form
               onSubmit={isResetMode ? handleResetSubmit : handleSubmit}
