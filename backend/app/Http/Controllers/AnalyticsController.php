@@ -25,11 +25,11 @@ class AnalyticsController extends Controller
     {
         try {
             // Filter Date
-            $filterDate = $request->query('date') ? Carbon::parse($request->query('date')) : Carbon::now();
-            $dateKey = $filterDate->format('Y-m-d');
+            $now = Carbon::now();
+            $dateKey = $now->format('Y-m-d');
 
-            $currentYearInt = $filterDate->year;
-            $startYear = $filterDate->month >= 7 ? $currentYearInt : $currentYearInt - 1;
+            $currentYearInt = $now->year;
+            $startYear = $now->month >= 7 ? $currentYearInt : $currentYearInt - 1;
 
             $currentSyName = $startYear . '/' . ($startYear + 1);
             $prevSyName = ($startYear - 1) . '/' . $startYear;
@@ -37,14 +37,21 @@ class AnalyticsController extends Controller
 
             // Cache Key
             $cacheKey = 'analytics_full_' . $dateKey;
-
             $cacheTime = now()->addHours(24);
-            $data = Cache::remember($cacheKey, $cacheTime, function () use ($filterDate, $currentSyName, $prevSyName, $nextSyName, $startYear) {
-                $startOfDay = $filterDate->copy()->startOfDay();
-                $endOfDay = $filterDate->copy()->endOfDay();
-                $yesterdayStart = $filterDate->copy()->subDay()->startOfDay();
-                $yesterdayEnd = $filterDate->copy()->subDay()->endOfDay();
 
+            $data = Cache::remember($cacheKey, $cacheTime, function () use ($now, $dateKey, $currentSyName, $prevSyName, $nextSyName, $startYear) {
+                $startOfDay = $now->copy()->startOfDay();
+                $endOfDay = $now->copy()->endOfDay();
+                $yesterdayStart = $now->copy()->subDay()->startOfDay();
+                $yesterdayEnd = $now->copy()->subDay()->endOfDay();
+                
+                $sections = [
+                    'ECP' => ['ecp'], 
+                    'Elementary School' => ['elementary'], 
+                    'Middle School' => ['middle'], 
+                    'High School' => ['high']
+                ];
+                
                 // Get IDs for School Years
                 $syMap = SchoolYear::whereIn('year', [$currentSyName, $prevSyName, $nextSyName])->pluck('school_year_id', 'year');
                 $currSyId = $syMap[$currentSyName] ?? null;
@@ -87,188 +94,132 @@ class AnalyticsController extends Controller
                 $totalRegistrations = (int)($registrationStats->total_registrations ?? 0) + $globalCancelledNew + $globalCancelledTrans;
                 $prevTotalRegistrations = (int)$prevReg + $prevGlobalCancelledNew + $prevGlobalCancelledTrans;
 
-                // 2. TODAY REGISTRATION
-                $dailyQuery = function($start, $end) {
-                    return DB::table('application_forms')
-                        ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
-                        ->selectRaw('
-                            COUNT(*) as total,
-                            SUM(CASE WHEN application_forms.status = "Confirmed" THEN 1 ELSE 0 END) as confirmed,
-                            SUM(CASE WHEN application_forms.status = "Cancelled" THEN 1 ELSE 0 END) as cancelled_af,
-                            
-                            -- New Students
-                            SUM(CASE WHEN enrollments.student_status = "New" AND application_forms.status = "Confirmed" THEN 1 ELSE 0 END) as new_confirmed,
-                            SUM(CASE WHEN enrollments.student_status = "New" AND application_forms.status = "Cancelled" THEN 1 ELSE 0 END) as new_cancelled_af,
-                            
-                            -- Transferee
-                            SUM(CASE WHEN enrollments.student_status = "Transferee" AND application_forms.status = "Confirmed" THEN 1 ELSE 0 END) as trans_confirmed,
-                            SUM(CASE WHEN enrollments.student_status = "Transferee" AND application_forms.status = "Cancelled" THEN 1 ELSE 0 END) as trans_cancelled_af,
-
-                            -- Returning
-                            SUM(CASE WHEN enrollments.student_status = "Old" THEN 1 ELSE 0 END) as old_total,
-                            SUM(CASE WHEN enrollments.student_status = "Old" AND application_forms.status = "Confirmed" THEN 1 ELSE 0 END) as old_confirmed,
-                            SUM(CASE WHEN enrollments.student_status = "Old" AND application_forms.status = "Cancelled" THEN 1 ELSE 0 END) as old_cancelled_af
-                        ')
-                        ->whereBetween('application_forms.created_at', [$start, $end])
-                        ->first();
-                };
-
-                $todayStats = $dailyQuery($startOfDay, $endOfDay);
-                $yesterdayStats = $dailyQuery($yesterdayStart, $yesterdayEnd);
-
-                // Cancelled Registration Table 
-                $todayNewCancelledReg = CancelledRegistration::where('student_status', 'New')
-                    ->where('reason', 'Cancellation of Enrollment')
-                    ->whereBetween('cancelled_at', [$startOfDay, $endOfDay])
-                    ->count();
-                $yesterdayNewCancelledReg = CancelledRegistration::where('student_status', 'New')
-                    ->where('reason', 'Cancellation of Enrollment')
-                    ->whereBetween('cancelled_at', [$yesterdayStart, $yesterdayEnd])
-                    ->count();
-                $todayTransCancelledReg = CancelledRegistration::where('student_status', 'Transferee')
-                    ->where('reason', 'Cancellation of Enrollment')
-                    ->whereBetween('cancelled_at', [$startOfDay, $endOfDay])
-                    ->count();
-                $yesterdayTransCancelledReg = CancelledRegistration::where('student_status', 'Transferee')
-                    ->where('reason', 'Cancellation of Enrollment')
-                    ->whereBetween('cancelled_at', [$yesterdayStart, $yesterdayEnd])
-                    ->count();
-
-                // Helper safe access
+                // 2. TODAY REGISTRATION, CURRENT SCHOOL YEAR, PRE-REGISTER
                 $v = fn($obj, $prop) => (int)($obj->$prop ?? 0);
 
-                $new_cancelled_today = $v($todayStats, 'new_cancelled_af') + $todayNewCancelledReg;
-                $trans_cancelled_today = $v($todayStats, 'trans_cancelled_af') + $todayTransCancelledReg;
-
-                $new_cancelled_yesterday = $v($yesterdayStats, 'new_cancelled_af') + $yesterdayNewCancelledReg;
-                $trans_cancelled_yesterday = $v($yesterdayStats, 'trans_cancelled_af') + $yesterdayTransCancelledReg;
-
-                // Data Today (Cleaned)
-                $todayData = [
-                    'total' => $v($todayStats, 'total') + $todayNewCancelledReg + $todayTransCancelledReg,
-                    'confirmed' => $v($todayStats, 'confirmed'),
-                    'cancelled' => $v($todayStats, 'cancelled_af') + $todayNewCancelledReg + $todayTransCancelledReg,
+                $countCancTable = function($status, $dates = null, $syId = null) {
+                    $q = CancelledRegistration::where('student_status', $status)
+                        ->where('reason', 'Cancellation of Enrollment');
                     
-                    'new_confirmed' => $v($todayStats, 'new_confirmed'),
-                    'new_cancelled' => $new_cancelled_today,
-                    'new_total' => $v($todayStats, 'new_confirmed') + $new_cancelled_today,
-
-                    'trans_confirmed' => $v($todayStats, 'trans_confirmed'),
-                    'trans_cancelled' => $trans_cancelled_today,
-                    'trans_total' => $v($todayStats, 'trans_confirmed') + $trans_cancelled_today,
-
-                    'old_total' => $v($todayStats, 'old_total'),
-                    'old_confirmed' => $v($todayStats, 'old_confirmed'),
-                    'old_cancelled' => $v($todayStats, 'old_cancelled_af'),
-                ];
-                
-                // Data Yesterday
-                $yesterdayData = [
-                    'total' => $v($yesterdayStats, 'total') + $yesterdayNewCancelledReg + $yesterdayTransCancelledReg,
-                    'confirmed' => $v($yesterdayStats, 'confirmed'),
-                    'cancelled' => $v($yesterdayStats, 'cancelled_af') + $yesterdayNewCancelledReg + $yesterdayTransCancelledReg,
-
-                    'new_confirmed' => $v($yesterdayStats, 'new_confirmed'),
-                    'new_cancelled' => $new_cancelled_yesterday,
-                    'new_total' =>  $v($yesterdayStats, 'new_confirmed') + $new_cancelled_yesterday,
+                    if ($syId) $q->where('school_year_id', $syId);
+                    if ($dates) $q->whereBetween('cancelled_at', $dates);
                     
-                    'trans_confirmed' => $v($yesterdayStats, 'trans_confirmed'),
-                    'trans_cancelled' => $trans_cancelled_yesterday,
-                    'trans_total' => $v($yesterdayStats, 'trans_confirmed') + $trans_cancelled_yesterday,
-
-                    'old_total' => $v($yesterdayStats, 'old_total'),
-                    'old_confirmed' => $v($yesterdayStats, 'old_confirmed'),
-                    'old_cancelled' => $v($yesterdayStats, 'old_cancelled_af'),
-                ];
-
-                // 3. CURRENT SCHOOL YEAR
-                $syQuery = function($syId) {
-                    if (!$syId) return null;
-                    return DB::table('application_forms')
-                        ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
-                        ->selectRaw('
-                            -- Unique Students
-                            COUNT(DISTINCT enrollments.id) as total_unique_students,
-                            
-                            -- Unique Students (CONFIRMED)
-                            COUNT(DISTINCT CASE WHEN application_forms.status = "Confirmed" THEN enrollments.id END) as total_unique_confirmed,
-
-                            -- New Students (First Priority)
-                            COUNT(DISTINCT CASE WHEN enrollments.student_status = "New" THEN enrollments.id END) as new_total,
-                            COUNT(DISTINCT CASE WHEN enrollments.student_status = "New" AND application_forms.status = "Confirmed" THEN enrollments.id END) as new_confirmed,
-                            
-                            -- Transferee Students (Second Priority)
-                            COUNT(DISTINCT CASE WHEN enrollments.student_status = "Transferee" THEN enrollments.id END) as trans_total,
-                            COUNT(DISTINCT CASE WHEN enrollments.student_status = "Transferee" AND application_forms.status = "Confirmed" THEN enrollments.id END) as trans_confirmed
-                        ')
-                        ->where('enrollments.school_year_id', $syId)
-                        ->first();
+                    return $q->count();
                 };
 
-                $currSyStats = $syQuery($currSyId);
-                $prevSyStats = $syQuery($prevSyId);
+                $queryStats = function($dates = null, $syId = null) {
+                    if (!$dates && !$syId) return null; 
 
-                // Cancelled Reg Helper
-                $countCancSy = function($status, $syId) {
-                    return $syId ? CancelledRegistration::where('student_status', $status)
-                        ->where('reason', 'Cancellation of Enrollment')
-                        ->where('school_year_id', $syId)
-                        ->count() : 0;
+                    $q = DB::table('application_forms')
+                        ->join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id');
+
+                    if ($syId) $q->where('enrollments.school_year_id', $syId);
+                    elseif ($dates) $q->whereBetween('application_forms.created_at', $dates);
+
+                    return $q->selectRaw('
+                        SUM(CASE WHEN application_forms.status = "Confirmed" THEN 1 ELSE 0 END) as confirmed,
+                        SUM(CASE WHEN application_forms.status = "Cancelled" THEN 1 ELSE 0 END) as cancelled_af,
+                        
+                        -- New
+                        SUM(CASE WHEN enrollments.student_status = "New" THEN 1 ELSE 0 END) as new_total, -- Note: This is raw count in app_form
+                        SUM(CASE WHEN enrollments.student_status = "New" AND application_forms.status = "Confirmed" THEN 1 ELSE 0 END) as new_confirmed,
+                        SUM(CASE WHEN enrollments.student_status = "New" AND application_forms.status = "Cancelled" THEN 1 ELSE 0 END) as new_cancelled_af,
+                        
+                        -- Transferee
+                        SUM(CASE WHEN enrollments.student_status = "Transferee" THEN 1 ELSE 0 END) as trans_total,
+                        SUM(CASE WHEN enrollments.student_status = "Transferee" AND application_forms.status = "Confirmed" THEN 1 ELSE 0 END) as trans_confirmed,
+                        SUM(CASE WHEN enrollments.student_status = "Transferee" AND application_forms.status = "Cancelled" THEN 1 ELSE 0 END) as trans_cancelled_af
+                    ')->first();
                 };
 
-                $currSyNewCancelledReg = $countCancSy('New', $currSyId);
-                $prevSyNewCancelledReg = $countCancSy('New', $prevSyId);
-                $currSyTransCancelledReg = $countCancSy('Transferee', $currSyId);
-                $prevSyTransCancelledReg = $countCancSy('Transferee', $prevSyId);
+                $calculateFinalStats = function($rawStats, $cancNew, $cancTrans) use ($v) {
+                    if (!$rawStats) {
+                        $z = ['total' => 0, 'confirmed' => 0, 'cancelled' => 0];
+                        return ['all' => $z, 'new' => $z, 'transferee' => $z, 'returning' => $z];
+                    }
 
-                // == CURRENT ==
-                $currSyTotal = $v($currSyStats, 'total_unique_students') + $currSyNewCancelledReg + $currSyTransCancelledReg;
-                $currSyConfirmed = $v($currSyStats, 'total_unique_confirmed');
-                $currSyCancelledTotal = $currSyTotal - $currSyConfirmed;
-                
-                // A. New Students
-                $currSyNewTotal = $v($currSyStats, 'new_total') + $currSyNewCancelledReg;
-                $currSyNewConfirmed = $v($currSyStats, 'new_confirmed');
-                $currSyNewCancelled = $currSyNewTotal - $currSyNewConfirmed;
-                
-                // B. Transferee Students
-                $currSyTransTotal = $v($currSyStats, 'trans_total') + $currSyTransCancelledReg;
-                $currSyTransConfirmed = $v($currSyStats, 'trans_confirmed');
-                $currSyTransCancelled = $currSyTransTotal - $currSyTransConfirmed;
-                
-                // C. Returning / Old Students
-                $currSyOldTotal = max(0, $currSyTotal - ($currSyNewTotal + $currSyTransTotal));
-                $currSyOldConfirmed = max(0, $currSyConfirmed - ($currSyNewConfirmed + $currSyTransConfirmed));
-                $currSyOldCancelled = max(0, $currSyOldTotal - $currSyOldConfirmed);
-                
-                // == PREVIOUS ==
-                $prevSyTotal = $v($prevSyStats, 'total_unique_students') + $prevSyNewCancelledReg + $prevSyTransCancelledReg;
-                $prevSyConfirmed = $v($prevSyStats, 'total_unique_confirmed');
-                $prevSyCancelledTotal = $prevSyTotal - $prevSyConfirmed;
-                
-                // A. Prev New Students
-                $prevSyNewTotal = $v($prevSyStats, 'new_total') + $prevSyNewCancelledReg;
-                $prevSyNewConfirmed = $v($prevSyStats, 'new_confirmed');
-                $prevSyNewCancelled = $prevSyNewTotal - $prevSyNewConfirmed;
-                
-                // B. Prev Transferee Students
-                $prevSyTransTotal = $v($prevSyStats, 'trans_total') + $prevSyTransCancelledReg;
-                $prevSyTransConfirmed = $v($prevSyStats, 'trans_confirmed');
-                $prevSyTransCancelled = $prevSyTransTotal - $prevSyTransConfirmed;
-                
-                // C. Prev Returning / Old Students
-                $prevSyOldTotal = max(0, $prevSyTotal - ($prevSyNewTotal + $prevSyTransTotal));
-                $prevSyOldConfirmed = max(0, $prevSyConfirmed - ($prevSyNewConfirmed + $prevSyTransConfirmed));
-                $prevSyOldCancelled = max(0, $prevSyOldTotal - $prevSyOldConfirmed);
-                
+                    // A. New Students
+                    $newConfirmed = $v($rawStats, 'new_confirmed');
+                    $newCancelled = $v($rawStats, 'new_cancelled_af') + $cancNew;
+                    $newTotal     = $newConfirmed + $newCancelled;
+
+                    // B. Transferee Students
+                    $transConfirmed = $v($rawStats, 'trans_confirmed');
+                    $transCancelled = $v($rawStats, 'trans_cancelled_af') + $cancTrans;
+                    $transTotal     = $transConfirmed + $transCancelled;
+
+                    // C. Grand Total (Sum of all parts)
+                    $grandConfirmed = $v($rawStats, 'confirmed');
+                    $grandCancelled = $v($rawStats, 'cancelled_af') + $cancNew + $cancTrans;
+                    $grandTotal     = $grandConfirmed + $grandCancelled;
+
+                    // Old = Total - (New + Transferee)
+                    $oldTotal     = max(0, $grandTotal - ($newTotal + $transTotal));
+                    $oldConfirmed = max(0, $grandConfirmed - ($newConfirmed + $transConfirmed));
+                    $oldCancelled = max(0, $oldTotal - $oldConfirmed);
+
+                    // Calculate Percentage Helper
+                    $calcPct = fn($val, $total) => $total > 0 ? round(($val / $total) * 100, 2) : 0;
+                    $pctAll = $grandTotal > 0 ? 100 : 0;
+                    $pctNew = $calcPct($newTotal, $grandTotal);
+                    $pctTrans = $calcPct($transTotal, $grandTotal);
+                    $pctOld = $calcPct($oldTotal, $grandTotal);
+
+                    return [
+                        'all' => ['total' => $grandTotal, 'confirmed' => $grandConfirmed, 'cancelled' => $grandCancelled, 'percentage' => $pctAll],
+                        'new' => ['total' => $newTotal, 'confirmed' => $newConfirmed, 'cancelled' => $newCancelled, 'percentage' => $pctNew],
+                        'transferee' => ['total' => $transTotal, 'confirmed' => $transConfirmed, 'cancelled' => $transCancelled, 'percentage' => $pctTrans],
+                        'returning' => ['total' => $oldTotal, 'confirmed' => $oldConfirmed, 'cancelled' => $oldCancelled, 'percentage' => $pctOld]
+                    ];
+                };
+
+                // 1. TODAY DATA
+                $todayStats = $calculateFinalStats(
+                    $queryStats([$startOfDay, $endOfDay], null),
+                    $countCancTable('New', [$startOfDay, $endOfDay]),
+                    $countCancTable('Transferee', [$startOfDay, $endOfDay])
+                );
+
+                // 2. YESTERDAY DATA (For Growth)
+                $yesterdayStats = $calculateFinalStats(
+                    $queryStats([$yesterdayStart, $yesterdayEnd], null),
+                    $countCancTable('New', [$yesterdayStart, $yesterdayEnd]),
+                    $countCancTable('Transferee', [$yesterdayStart, $yesterdayEnd])
+                );
+
+                // 3. CURRENT SCHOOL YEAR DATA
+                $currSyStats = $calculateFinalStats(
+                    $queryStats(null, $currSyId),
+                    $countCancTable('New', null, $currSyId),
+                    $countCancTable('Transferee', null, $currSyId)
+                );
+
+                // 4. PREVIOUS SCHOOL YEAR DATA (For Growth)
+                $prevSyStats = $calculateFinalStats(
+                    $queryStats(null, $prevSyId),
+                    $countCancTable('New', null, $prevSyId),
+                    $countCancTable('Transferee', null, $prevSyId)
+                );
+
+                // 5. NEXT SCHOOL YEAR DATA (Pre-Register)
+                $preRegStats = $calculateFinalStats(
+                    $queryStats(null, $nextSyId),
+                    $countCancTable('New', null, $nextSyId),
+                    $countCancTable('Transferee', null, $nextSyId)
+                );
+
+                // ADD GROWTH METRICS
+                $addGrowth = function($curr, $prev) {
+                    $curr['growth'] = $this->calculateGrowth($curr['total'], $prev['total']);
+                    $curr['growth_confirmed'] = $this->calculateGrowth($curr['confirmed'], $prev['confirmed']);
+                    $curr['growth_cancelled'] = $this->calculateGrowth($curr['cancelled'], $prev['cancelled']);
+                    return $curr;
+                };
+
+                foreach ($todayStats as $k => $v) $todayStats[$k] = $addGrowth($v, $yesterdayStats[$k]);
+                foreach ($currSyStats as $k => $v) $currSyStats[$k] = $addGrowth($v, $prevSyStats[$k]);
+
                 // 4. ACTIVE STUDENT PER SECTION
-                $sections = [
-                    'ECP' => ['ecp'], 
-                    'Elementary School' => ['elementary'], 
-                    'Middle School' => ['middle'], 
-                    'High School' => ['high']
-                ];
-
                 $activeStudents = [];
 
                 $allActiveStudents = DB::table('students')
@@ -290,6 +241,13 @@ class AnalyticsController extends Controller
                     ->where('student_status', 'New')
                     ->pluck('student_id')
                     ->unique();
+
+                $grandTotalStats = [
+                    'total' => 0,
+                    'total_new' => 0,
+                    'total_transferee' => 0,
+                    'total_returning' => 0
+                ];
 
                 foreach ($sections as $label => $keywords) {
                     $sectionData = $allActiveStudents->filter(function($item) use ($keywords) {
@@ -326,13 +284,14 @@ class AnalyticsController extends Controller
                         'total_transferee' => $countTransferee,
                         'total_returning' => $totalReturning 
                     ];
+
+                    $grandTotalStats['total'] += $totalUnique;
+                    $grandTotalStats['total_new'] += $countNew;
+                    $grandTotalStats['total_transferee'] += $countTransferee;
+                    $grandTotalStats['total_returning'] += $totalReturning;
                 }
 
-                // 5. PRE REGISTER (Next School Year)
-                $preRegTotal = $nextSyId ? ApplicationForm::join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
-                    ->where('enrollments.school_year_id', $nextSyId)
-                    ->where('application_forms.status', 'Confirmed')
-                    ->count() : 0;
+                $activeStudents['Total'] = $grandTotalStats;
 
                 // 6. YEARLY TRENDS (July - June)
                 $trendLabels = [];
@@ -401,11 +360,96 @@ class AnalyticsController extends Controller
                     $yearsData[] = $count;
                 }
 
+                // 8. Enrollment unique student (Global & Brakedown)
+                $historicalEnrollments = DB::table('enrollments')
+                    ->join('application_forms', 'enrollments.enrollment_id', '=', 'application_forms.enrollment_id')
+                    ->join('sections', 'enrollments.section_id', '=', 'sections.section_id')
+                    ->join('students', 'enrollments.id', '=', 'students.id') 
+                    ->where(function($query) {
+                        $query->where('application_forms.status', 'Confirmed')
+                                ->orWhere(function($subQuery) {
+                                    $subQuery->where('application_forms.status', 'Cancelled')
+                                            ->whereIn('students.status', ['Graduate', 'Expelled', 'Withdraw']);
+                                });
+                    })
+                    ->select(
+                        'students.id as student_id',
+                        'sections.name as section_name',
+                        'students.active',          
+                        'students.status as student_status'
+                    )
+                    ->get();
+                
+                    $uniqueEnrollmentKeys = []; 
+
+                    $globalStats = [
+                        'total' => 0, 'active' => 0, 'graduate' => 0, 
+                        'expelled' => 0, 'withdraw' => 0, 'unknown' => 0
+                    ];
+
+                    $sectionStats = [];
+                    foreach ($sections as $label => $val) {
+                        $sectionStats[$label] = [
+                            'total' => 0, 'active' => 0, 'graduate' => 0, 
+                            'expelled' => 0, 'withdraw' => 0, 'unknown' => 0
+                        ];
+                    }
+
+                    foreach ($historicalEnrollments as $record) {
+                        $groupName = 'Other';
+                        foreach ($sections as $label => $keywords) {
+                            foreach ($keywords as $k) {
+                                if (stripos($record->section_name, $k) !== false) {
+                                    $groupName = $label;
+                                    break 2;
+                                }
+                            }
+                        }
+
+                        $compositeKey = $record->student_id . '_' . $groupName;
+
+                        if (!isset($uniqueEnrollmentKeys[$compositeKey])) {
+                            $uniqueEnrollmentKeys[$compositeKey] = true;
+
+                            $type = 'unknown'; // default
+                            
+                            if ($record->active === 'YES') {
+                                $type = 'active';
+                            } else {
+                                $st = strtolower($record->student_status ?? '');
+                                if (str_contains($st, 'graduate')) {
+                                    $type = 'graduate';
+                                } elseif (str_contains($st, 'expel')) {
+                                    $type = 'expelled';
+                                } elseif (str_contains($st, 'withdraw')) {
+                                    $type = 'withdraw';
+                                } else {
+                                    $type = 'unknown';
+                                }
+                            }
+
+                            $globalStats['total']++;
+                            $globalStats[$type]++;
+
+                            // INCREMENT PER SECTION 
+                            if (isset($sectionStats[$groupName])) {
+                                $sectionStats[$groupName]['total']++;
+                                $sectionStats[$groupName][$type]++;
+                            }
+                        }
+                    }
+
+                    $enrollmentFinal = [
+                        'summary' => $globalStats,       
+                        'breakdown' => $sectionStats
+                    ];
+
                 return [
                     'meta' => [
-                        'filter_date' => $filterDate->toDateString(),
+                        'date' => $dateKey,
                         'current_sy' => $currentSyName,
-                        'previous_sy' => $prevSyName
+                        'previous_sy' => $prevSyName,
+                        'next_sy' => $nextSyName
                     ],
                     'global' => [
                         'total' => $totalRegistrations,
@@ -415,76 +459,10 @@ class AnalyticsController extends Controller
                         'cancelled' => $totalCancelled,
                         'cancelled_growth' => $this->calculateGrowth($totalCancelled, $prevGlobalTotalCancelled),
                     ],
-                    'today' => [
-                        'all' => [
-                            'total' => $todayData['total'],
-                            'growth' => $this->calculateGrowth($todayData['total'], $yesterdayData['total']),
-                            'confirmed' => $todayData['confirmed'],
-                            'growth_confirmed' => $this->calculateGrowth($todayData['confirmed'], $yesterdayData['confirmed']),
-                            'cancelled' => $todayData['cancelled'],
-                            'growth_cancelled' => $this->calculateGrowth($todayData['cancelled'], $yesterdayData['cancelled']),
-                        ],
-                        'new' => [
-                            'total' => $todayData['new_total'],
-                            'growth' => $this->calculateGrowth($todayData['new_total'], $yesterdayData['new_total']),
-                            'confirmed' => $todayData['new_confirmed'],
-                            'growth_confirmed' => $this->calculateGrowth($todayData['new_confirmed'], $yesterdayData['new_confirmed']),
-                            'cancelled' => $todayData['new_cancelled'],
-                            'growth_cancelled' => $this->calculateGrowth($todayData['new_cancelled'], $yesterdayData['new_cancelled']),
-                        ],
-                        'transferee' => [
-                            'total' => $todayData['trans_total'],
-                            'growth' => $this->calculateGrowth($todayData['trans_total'], $yesterdayData['trans_total']),
-                            'confirmed' => $todayData['trans_confirmed'],
-                            'growth_confirmed' => $this->calculateGrowth($todayData['trans_confirmed'], $yesterdayData['trans_confirmed']),
-                            'cancelled' => $todayData['trans_cancelled'],
-                            'growth_cancelled' => $this->calculateGrowth($todayData['trans_cancelled'], $yesterdayData['trans_cancelled']),
-                        ],
-                        'returning' => [
-                            'total' => $todayData['old_total'],
-                            'growth' => $this->calculateGrowth($todayData['old_total'], $yesterdayData['old_total']),
-                            'confirmed' => $todayData['old_confirmed'],
-                            'growth_confirmed' => $this->calculateGrowth($todayData['old_confirmed'], $yesterdayData['old_confirmed']),
-                            'cancelled' => $todayData['old_cancelled'],
-                            'growth_cancelled' => $this->calculateGrowth($todayData['old_cancelled'], $yesterdayData['old_cancelled']),
-                        ],
-                    ],
-                    'school_year' => [
-                        'all' => [
-                            'total' => $currSyTotal,
-                            'growth' => $this->calculateGrowth($currSyTotal, $prevSyTotal),
-                            'confirmed' => $currSyConfirmed,
-                            'growth_confirmed' => $this->calculateGrowth($currSyConfirmed, $prevSyConfirmed),
-                            'cancelled' => $currSyCancelledTotal,
-                            'growth_cancelled' => $this->calculateGrowth($currSyCancelledTotal, $prevSyCancelledTotal),
-                        ],
-                        'new' => [
-                            'total' => $currSyNewTotal, 
-                            'growth' => $this->calculateGrowth($currSyNewTotal, $prevSyNewTotal),
-                            'confirmed' => $currSyNewConfirmed,
-                            'growth_confirmed' => $this->calculateGrowth($currSyNewConfirmed, $prevSyNewConfirmed),
-                            'cancelled' => $currSyNewCancelled,
-                            'growth_cancelled' => $this->calculateGrowth($currSyNewCancelled, $prevSyNewCancelled),
-                        ],
-                        'transferee' => [
-                            'total' => $currSyTransTotal,
-                            'growth' => $this->calculateGrowth($currSyTransTotal, $prevSyTransTotal),
-                            'confirmed' => $currSyTransConfirmed,
-                            'growth_confirmed' => $this->calculateGrowth($currSyTransConfirmed, $prevSyTransConfirmed),
-                            'cancelled' => $currSyTransCancelled,
-                            'growth_cancelled' => $this->calculateGrowth($currSyTransCancelled, $prevSyTransCancelled),
-                        ],
-                        'returning' => [
-                            'total' => $currSyOldTotal,
-                            'growth' => $this->calculateGrowth($currSyOldTotal, $prevSyOldTotal),
-                            'confirmed' => $currSyOldConfirmed,
-                            'growth_confirmed' => $this->calculateGrowth($currSyOldConfirmed, $prevSyOldConfirmed),
-                            'cancelled' => $currSyOldCancelled,
-                            'growth_cancelled' => $this->calculateGrowth($currSyOldCancelled, $prevSyOldCancelled),
-                        ]
-                    ],
+                    'today' => $todayStats,
+                    'school_year' => $currSyStats,
+                    'pre_register' => $preRegStats,
                     'active_students_matrix' => $activeStudents,
-                    'pre_register' => $preRegTotal,
                     'trends' => [
                         'labels' => $trendLabels,
                         'current_data' => $currTrendData,
@@ -495,7 +473,8 @@ class AnalyticsController extends Controller
                     'multi_year_trend' => [
                         'labels' => $yearsList,
                         'data' => $yearsData
-                    ]
+                    ],
+                    'enrollment_unique_students' => $enrollmentFinal,
                 ];
             });
 
