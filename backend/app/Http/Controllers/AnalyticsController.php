@@ -293,7 +293,7 @@ class AnalyticsController extends Controller
 
                 $activeStudents['Total'] = $grandTotalStats;
 
-                // 6. YEARLY TRENDS (July - June)
+                // 6. MONTHLY TRENDS (July - June)
                 $trendLabels = [];
                 $currTrendData = [];
                 $prevTrendData = [];
@@ -319,19 +319,52 @@ class AnalyticsController extends Controller
                     $prevStart = Carbon::create($prevYearMonth, $monthNum, 1)->startOfDay();
                     $prevEnd = $prevStart->copy()->endOfMonth()->endOfDay();
 
-                    // Query Count
+                    // === Current year calculations ===
+                    // total all
                     $currAppCount = ApplicationForm::whereBetween('created_at', [$currStart, $currEnd])->count();
+
+                    // confirmed applications
+                    $currAppConfirmed = ApplicationForm::where('status', 'Confirmed')
+                        ->whereBetween('created_at', [$currStart, $currEnd])
+                        ->count();
+                    
+                    // cancelled applications (old)
+                    $currAppCancelled = ApplicationForm::where('status', 'Cancelled')
+                        ->whereBetween('created_at', [$currStart, $currEnd])
+                        ->count();
+                    // cancelled applications (new)
                     $currCancelRegCount = CancelledRegistration::where('reason', 'Cancellation of Enrollment')
                         ->whereBetween('cancelled_at', [$currStart, $currEnd])
                         ->count();
                     
+                    // === Previous year calculations ===
                     $prevAppCount = ApplicationForm::whereBetween('created_at', [$prevStart, $prevEnd])->count();
+
+                    $prevAppConfirmed = ApplicationForm::where('status', 'Confirmed')
+                        ->whereBetween('created_at', [$prevStart, $prevEnd])
+                        ->count();
+
+                    $prevAppCancelled = ApplicationForm::where('status', 'Cancelled')
+                        ->whereBetween('created_at', [$prevStart, $prevEnd])
+                        ->count();
+
                     $prevCancelRegCount = CancelledRegistration::where('reason', 'Cancellation of Enrollment')
                         ->whereBetween('cancelled_at', [$prevStart, $prevEnd])
                         ->count();
                     
-                    $currTrendData[] = $currAppCount + $currCancelRegCount;
-                    $prevTrendData[] = $prevAppCount + $prevCancelRegCount;
+                    $currTrendData[] = [
+                        'month'     => $monthName,
+                        'total'     => $currAppCount + $currCancelRegCount,
+                        'confirmed' => $currAppConfirmed,
+                        'cancelled' => $currAppCancelled + $currCancelRegCount
+                    ];
+
+                    $prevTrendData[] = [
+                        'month'     => $monthName,
+                        'total'     => $prevAppCount + $prevCancelRegCount,
+                        'confirmed' => $prevAppConfirmed,
+                        'cancelled' => $prevAppCancelled + $prevCancelRegCount
+                    ];
                 }
 
                 // 7. MULTI-YEAR TREND
@@ -345,19 +378,40 @@ class AnalyticsController extends Controller
                     
                     $sId = SchoolYear::where('year', $syString)->value('school_year_id');
                     
-                    $count = 0;
+                    $countTotal = 0;
+                    $countConfirmed = 0;
+                    $countCancelled = 0;
+                    
                     if ($sId) {
-                        $c1 = ApplicationForm::join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
-                            ->where('enrollments.school_year_id', $sId)
-                            ->count();
+                        $baseAppQuery = ApplicationForm::join('enrollments', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+                            ->where('enrollments.school_year_id', $sId);
+
+                        // 1. Total Application Forms
+                        $c1 = (clone $baseAppQuery)->count();
+
+                        // 2. Confirmed Application Forms
+                        $cConfirmed = (clone $baseAppQuery)->where('application_forms.status', 'Confirmed')->count();
+
+                        // 3. Cancelled Application Forms (old)
+                        $cAppCancelled = (clone $baseAppQuery)->where('application_forms.status', 'Cancelled')->count();
+
+                        // 4. Cancelled Registrations (new)
                         $c2 = CancelledRegistration::where('reason', 'Cancellation of Enrollment')
                             ->where('school_year_id', $sId)
                             ->count();
-                        $count = $c1 + $c2;
+
+                        $countTotal = $c1 + $c2;
+                        $countConfirmed = $cConfirmed;
+                        $countCancelled = $cAppCancelled + $c2;
                     }
                     
                     $yearsList[] = $syString;
-                    $yearsData[] = $count;
+                    $yearsData[] = [
+                        'school_year' => $syString,
+                        'total'     => $countTotal,
+                        'confirmed' => $countConfirmed,
+                        'cancelled' => $countCancelled
+                    ];
                 }
 
                 // 8. Enrollment unique student (Global & Brakedown)
