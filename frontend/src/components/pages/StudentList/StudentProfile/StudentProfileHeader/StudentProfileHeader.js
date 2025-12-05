@@ -1,18 +1,18 @@
 // File: src/components/pages/studentProfileHeader/studentProfileHeader.js
 
-import React, { useState } from 'react';
-import styles from './StudentProfileHeader.module.css';
-import Button from '../../../../Atoms/Button/Button';
-import placeholder from '../../../../../assets/user.svg';
+import React, { useState } from "react";
+import styles from "./StudentProfileHeader.module.css";
+import Button from "../../../../Atoms/Button/Button";
+import placeholder from "../../../../../assets/user.svg";
 
 const getStatusVariant = (status) => {
-  if (!status) return 'not-graduated';
+  if (!status) return "not-graduated";
   const lowerStatus = status.toLowerCase();
-  if (lowerStatus.includes('not graduate')) return 'not-graduated';
-  if (lowerStatus.includes('graduate')) return 'graduated';
-  if (lowerStatus.includes('expelled')) return 'expelled';
-  if (lowerStatus.includes('withdraw')) return 'withdraw';
-  return 'not-graduated'; // Default variant
+  if (lowerStatus.includes("not graduate")) return "not-graduated";
+  if (lowerStatus.includes("graduate")) return "graduated";
+  if (lowerStatus.includes("expelled")) return "expelled";
+  if (lowerStatus.includes("withdraw")) return "withdraw";
+  return "not-graduated"; // Default variant
 };
 
 const StudentProfileHeader = ({
@@ -33,8 +33,8 @@ const StudentProfileHeader = ({
   onSaveClick,
   statusOptions,
   onAddPhotoClick,
-  editableStatus, // <-- Prop added
-  onStatusChange, // <-- Prop added
+  editableStatus,
+  onStatusChange,
   onDownloadPdfClick,
 }) => {
   const [isStatusDropdownOpen, setStatusDropdownOpen] = useState(false);
@@ -53,9 +53,9 @@ const StudentProfileHeader = ({
       {/* Kolom Kiri: Foto */}
       <div className={styles.headerPhotoSection}>
         <img
-          className={imageClass} // Gunakan variabel kelas
-          src={imageUrl} // Gunakan variabel URL
-          alt=''
+          className={imageClass} // Style diperbarui di CSS
+          src={imageUrl}
+          alt=""
         />
       </div>
 
@@ -70,32 +70,36 @@ const StudentProfileHeader = ({
 
         <div className={styles.schoolYearContainer}>
           <span className={styles.yearLabel}>School year</span>
-          <b className={styles.yearValue}>{formData.school_year || '-'}</b>
+          <b className={styles.yearValue}>{formData.school_year || "-"}</b>
+        </div>
+
+        <div
+          className={`${styles.idCardContainer} ${
+            isEditing ? styles.idCardContainerEdit : ""
+          }`}
+        >
+          <span className={styles.idLabel}>ID Card number :</span>
+          <b className={styles.idValue}>-</b>
         </div>
 
         {isEditing ? (
-          // --- EDIT MODE ---
           <div className={styles.statusAndEditPhotoContainer}>
             <div className={styles.statusGroup}>
-              {/* This button now reflects the state but is not clickable */}
               <Button
                 variant={
-                  studentInfo.student_active === 'YES' ? 'active' : 'not-active'
+                  studentInfo.student_active === "YES" ? "active" : "not-active"
                 }
               >
-                {studentInfo.student_active === 'YES' ? 'Active' : 'Not Active'}
+                {studentInfo.student_active === "YES" ? "Active" : "Not Active"}
               </Button>
 
-              {/* New Status Dropdown Button */}
               <div className={styles.historyContainer}>
-                {' '}
-                {/* Re-using history container for positioning */}
                 <Button
                   variant={getStatusVariant(studentInfo.status)}
                   showDropdownIcon={true}
                   onClick={() => setStatusDropdownOpen(!isStatusDropdownOpen)}
                 >
-                  {studentInfo.status || 'Select Status'}
+                  {studentInfo.status || "Select Status"}
                 </Button>
                 {isStatusDropdownOpen && (
                   <ul className={styles.historyDropdown}>
@@ -120,9 +124,9 @@ const StudentProfileHeader = ({
               </div>
             </div>
             <Button
-              className={styles.editPhotoButton}
+              className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
               onClick={onAddPhotoClick}
-              variant='solid'
+              variant="solid"
             >
               Edit photo
             </Button>
@@ -130,33 +134,30 @@ const StudentProfileHeader = ({
         ) : (
           // --- VIEW MODE ---
           !selectedVersionId && (
-            // --- [UBAH] Tambahkan div untuk menampung button status dan PDF
             <div className={styles.statusAndActionGroup}>
               <div className={styles.statusTagContainer}>
                 <Button
                   variant={
-                    studentInfo.student_active === 'YES'
-                      ? 'active'
-                      : 'not-active'
+                    studentInfo.student_active === "YES"
+                      ? "active"
+                      : "not-active"
                   }
                 >
-                  {studentInfo.student_active === 'YES'
-                    ? 'Active'
-                    : 'Not Active'}
+                  {studentInfo.student_active === "YES"
+                    ? "Active"
+                    : "Not Active"}
                 </Button>
                 <Button variant={getStatusVariant(studentInfo.status)}>
-                  {studentInfo.status || 'Not Graduated'}
+                  {studentInfo.status || "Not Graduated"}
                 </Button>
               </div>
-              {/* --- [BARU] Tombol Download PDF (desain sama dengan button edit) */}
               <Button
-                className={`${styles.actionButton} ${styles.actionButtonPrimary}`} // Menggunakan style yang sama dengan Edit
+                className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
                 onClick={onDownloadPdfClick}
-                variant='solid'
+                variant="solid"
               >
                 Download PDF
               </Button>
-              {/* --- [AKHIR BARU] */}
             </div>
           )
         )}
@@ -166,10 +167,10 @@ const StudentProfileHeader = ({
       <div className={styles.headerActionSection}>
         {!isEditing && (
           <div className={styles.historyContainer} ref={historyRef}>
-            <Button variant='outline' onClick={onViewHistoryClick}>
+            <Button variant="outline" onClick={onViewHistoryClick}>
               {selectedVersionId
-                ? 'Back to Latest Version'
-                : 'View version history'}
+                ? "Back to Latest Version"
+                : "View data version history"}
             </Button>
             {isHistoryVisible && (
               <ul className={styles.historyDropdown}>
@@ -189,7 +190,6 @@ const StudentProfileHeader = ({
                             onHistoryDateChange(version.version_id)
                           }
                         >
-                          {/* Backend sudah memformat tanggalnya */}
                           {version.updated_at}
                         </li>
                       ))}
@@ -209,7 +209,7 @@ const StudentProfileHeader = ({
               className={styles.actionButton}
               onClick={onCancelClick}
               disabled={isUpdating}
-              variant='outline'
+              variant="outline"
             >
               Cancel
             </Button>
@@ -217,20 +217,31 @@ const StudentProfileHeader = ({
               className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
               onClick={onSaveClick}
               disabled={isUpdating}
-              variant='solid'
+              variant="solid"
             >
-              {isUpdating ? 'Saving...' : 'Save changes'}
+              {isUpdating ? "Saving..." : "Save changes"}
             </Button>
           </>
         ) : (
           !selectedVersionId && (
-            <Button
-              className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
-              onClick={onEditClick}
-              variant='solid'
-            >
-              Edit
-            </Button>
+            <>
+              <Button
+                className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
+                onClick={onEditClick}
+                variant="solid"
+              >
+                Edit
+              </Button>
+              {/* --- [BARU] Tombol New ID Card (Belum difungsikan) --- */}
+              <Button
+                className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
+                onClick={() => {}} // Belum difungsikan
+                variant="solid"
+              >
+                New ID Card
+              </Button>
+              {/* --- [AKHIR BARU] --- */}
+            </>
           )
         )}
       </div>
