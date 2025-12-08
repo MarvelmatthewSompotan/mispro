@@ -11,9 +11,13 @@ return new class extends Migration
         Schema::create('gate_points', function (Blueprint $table) {
             $table->id('gate_point_id');
             $table->string('name', 100);
-            $table->enum('type', ['Main', 'Bus', 'Dorm']);
-            $table->enum('direction', ['Entry', 'Exit', 'Both'])->default('Both');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();
+
+            $table->foreign('user_id')
+                ->references('user_id')
+                ->on('users')
+                ->nullOnDelete();
         });
     }
 
@@ -22,4 +26,3 @@ return new class extends Migration
         Schema::dropIfExists('gate_points');
     }
 };
-

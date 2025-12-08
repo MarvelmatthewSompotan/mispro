@@ -10,6 +10,7 @@ use App\Models\Gate\GateParentNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class GateAttendance extends Model
 {
@@ -32,6 +33,11 @@ class GateAttendance extends Model
         'exit_status',
         'last_scan_type',
         'notes',
+    ];
+
+    protected $casts = [
+        'check_in_at' => 'datetime',
+        'check_out_at' => 'datetime',
     ];
 
     public function session(): BelongsTo
@@ -62,5 +68,18 @@ class GateAttendance extends Model
     public function notifications(): HasMany
     {
         return $this->hasMany(GateParentNotification::class, 'gate_attendance_id', 'gate_attendance_id');
+    }
+
+    public function latestScan(): HasOne
+    {
+        return $this->hasOne(GateScanLog::class, 'gate_attendance_id', 'gate_attendance_id')->latestOfMany('scan_time');
+    }
+
+    public function previousScan(): HasOne
+    {
+        return $this->hasOne(GateScanLog::class, 'gate_attendance_id', 'gate_attendance_id')
+            ->orderByDesc('scan_time')
+            ->offset(1)
+            ->limit(1);
     }
 }

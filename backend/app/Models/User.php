@@ -40,11 +40,11 @@ class User extends Authenticatable
         );
     }
 
-    public function gateSessions() : HasMany
+    public function endedGateSessions() : HasMany
     {
         return $this->hasMany(
             GateSession::class,
-            'created_by',
+            'ended_by',
             'user_id'
         );
     }

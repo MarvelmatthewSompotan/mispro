@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\User;
+use App\Models\Gate\GateAssignment;
+use App\Models\Gate\GatePoint;
 use App\Services\AuditTrailService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -11,7 +13,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class UserManagementController extends Controller
-{
+{   
+    // konstanta yang menandai role mana saja yang wajib punya gate point (Jery)
+    private const GATE_ROLES = ['security', 'gate_display'];
+    //Jery
+
     protected $auditTrail;
 
     public function __construct(AuditTrailService $auditTrail)
@@ -92,6 +98,7 @@ class UserManagementController extends Controller
             'password.min' => 'The password must be at least 8 characters.',
             'email.unique' => 'This email address is already registered. Please use another email.',
             'email.regex' => 'The email format is invalid. It must use the domain @mis-mdo.sch.id.',
+            'gate_point_id.exists' => 'Gate point tidak ditemukan.',
         ];
 
         try {
@@ -105,8 +112,26 @@ class UserManagementController extends Controller
                 ],
                 'full_name' => 'required|string|max:255',
                 'password' => 'required|min:8',
-                'role' => ['required', Rule::in(['admin', 'head_registrar', 'registrar', 'teacher'])],
+                'role' => ['required', Rule::in(['admin', 'head_registrar', 'registrar', 'teacher', 'security', 'gate_display'])],
+                'gate_point_id' => ['nullable', 'integer', 'exists:gate_points,gate_point_id'],
             ], $messages);
+
+            $gatePointId = $validated['gate_point_id'] ?? null;
+            $roleValue = $validated['role'];
+            $requiresGate = $this->requiresGateRole($roleValue);
+
+            if ($requiresGate) {
+                if (!$gatePointId) {
+                    throw ValidationException::withMessages([
+                        'gate_point_id' => ['Gate point wajib dipilih untuk role ini.'],
+                    ]);
+                }
+                $this->ensureGatePointAvailable($gatePointId, $roleValue);
+            } else {
+                $gatePointId = null;
+            }
+
+            unset($validated['gate_point_id']);
 
             $user = User::create([
                 'username' => $validated['username'],
@@ -116,6 +141,11 @@ class UserManagementController extends Controller
                 'role' => $validated['role'],
             ]);
             
+            if ($gatePointId) {
+                $this->syncGatePointAssignment($gatePointId, $user, $roleValue);
+            } else {
+                $this->removeGateAssignments($user);
+            }
             $this->auditTrail->log('Create User', [
                 'action' => 'Create',
                 'user_id' => $user->user_id,
@@ -151,6 +181,7 @@ class UserManagementController extends Controller
             'password.min' => 'The password must be at least 8 characters.',
             'email.unique' => 'This email address is already registered to another user. Please use another email.',
             'email.regex' => 'The email format is invalid. It must use the domain @mis-mdo.sch.id.',
+            'gate_point_id.exists' => 'Gate point tidak ditemukan.',
         ];
 
         try {
@@ -171,8 +202,34 @@ class UserManagementController extends Controller
                 ],
                 'full_name' => 'sometimes|string|max:255',
                 'password' => 'nullable|min:8',
-                'role' => ['sometimes', Rule::in(['admin', 'head_registrar', 'registrar', 'teacher'])],
+                'role' => ['sometimes', Rule::in(['admin', 'head_registrar', 'registrar', 'teacher', 'security', 'gate_display'])],
+                'gate_point_id' => ['nullable', 'integer', 'exists:gate_points,gate_point_id'],
             ], $messages);
+
+            $requestedGatePointId = $validated['gate_point_id'] ?? null;
+            unset($validated['gate_point_id']);
+
+            $targetRole = $validated['role'] ?? $user->role;
+            $requiresGate = $this->requiresGateRole($targetRole);
+
+            $currentAssignment = GateAssignment::where('user_id', $user->user_id)
+                ->where('assignment_type', $targetRole)
+                ->first();
+            $currentGatePointId = $currentAssignment?->gate_point_id;
+
+            if ($requiresGate) {
+                $targetGatePointId = $requestedGatePointId ?? $currentGatePointId;
+
+                if (!$targetGatePointId) {
+                    throw ValidationException::withMessages([
+                        'gate_point_id' => ['Gate point wajib dipilih untuk role ini.'],
+                    ]);
+                }
+
+                $this->ensureGatePointAvailable($targetGatePointId, $targetRole, $currentAssignment?->gate_assignment_id);
+            } else {
+                $targetGatePointId = null;
+            }
 
             if (!empty($validated['password'])) {
                 $validated['password'] = Hash::make($validated['password']);
@@ -198,6 +255,12 @@ class UserManagementController extends Controller
                     'changes' => $changes,
                     'description' => "Updated user details for {$user->username}"
                 ]);
+            }
+
+            if ($requiresGate) {
+                $this->syncGatePointAssignment($targetGatePointId, $user, $targetRole);
+            } else {
+                $this->removeGateAssignments($user);
             }
 
             return response()->json([
@@ -246,6 +309,8 @@ class UserManagementController extends Controller
                 ], 403);
             }
 
+            GateAssignment::where('user_id', $user->user_id)->delete();
+
             $user->delete();
 
             $this->auditTrail->log('Delete User', [
@@ -267,5 +332,56 @@ class UserManagementController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function requiresGateRole(string $role): bool
+    {
+        return in_array($role, self::GATE_ROLES, true);
+    }
+
+    private function ensureGatePointAvailable(int $gatePointId, string $assignmentType, ?int $ignoreAssignmentId = null): void
+    {
+        $exists = GatePoint::where('gate_point_id', $gatePointId)->exists();
+
+        if (!$exists) {
+            throw ValidationException::withMessages([
+                'gate_point_id' => ['Gate point tidak ditemukan.'],
+            ]);
+        }
+
+        $conflict = GateAssignment::where('gate_point_id', $gatePointId)
+            ->where('assignment_type', $assignmentType)
+            ->when($ignoreAssignmentId, function ($query) use ($ignoreAssignmentId) {
+                $query->where('gate_assignment_id', '!=', $ignoreAssignmentId);
+            })
+            ->exists();
+
+        if ($conflict) {
+            throw ValidationException::withMessages([
+                'gate_point_id' => ['Gate point sudah terhubung ke user lain untuk penugasan ini.'],
+            ]);
+        }
+    }
+
+    private function syncGatePointAssignment(int $gatePointId, User $user, string $assignmentType): void
+    {
+        GateAssignment::updateOrCreate(
+            [
+                'user_id' => $user->user_id,
+                'assignment_type' => $assignmentType,
+            ],
+            [
+                'gate_point_id' => $gatePointId,
+            ]
+        );
+
+        GateAssignment::where('user_id', $user->user_id)
+            ->where('assignment_type', '!=', $assignmentType)
+            ->delete();
+    }
+
+    private function removeGateAssignments(User $user): void
+    {
+        GateAssignment::where('user_id', $user->user_id)->delete();
     }
 }

@@ -23,6 +23,10 @@ class GateScanLog extends Model
         'payload',
     ];
 
+    protected $casts = [
+        'scan_time' => 'datetime',
+    ];
+
     public function attendance(): BelongsTo
     {
         return $this->belongsTo(GateAttendance::class, 'gate_attendance_id', 'gate_attendance_id');

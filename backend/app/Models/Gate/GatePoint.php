@@ -14,8 +14,6 @@ class GatePoint extends Model
 
     protected $fillable = [
         'name',
-        'type',
-        'direction',
     ];
 
     public function entryAttendances(): HasMany
@@ -31,5 +29,10 @@ class GatePoint extends Model
     public function scanLogs(): HasMany
     {
         return $this->hasMany(GateScanLog::class, 'gate_point_id', 'gate_point_id');
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(GateAssignment::class, 'gate_point_id', 'gate_point_id');
     }
 }

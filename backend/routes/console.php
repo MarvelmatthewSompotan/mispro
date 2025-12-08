@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('update:enrollment-status')->dailyAt('01:00');
+Schedule::command('gate:sessions:create')->dailyAt('00:01'); //Jery

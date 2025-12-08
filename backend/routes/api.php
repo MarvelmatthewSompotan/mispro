@@ -82,13 +82,8 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/analytics', [AnalyticsController::class, 'index']);
 });
 // Jery
-Route::middleware(['auth:sanctum', 'lifetime', 'role:admin'])->prefix('gate')->group(function () {
+Route::middleware(['auth:sanctum', 'lifetime', 'role:security,gate_display'])->prefix('gate')->group(function () {
     Route::get('/points', [GateManagementController::class, 'indexGatePoints']);
-    Route::post('/points', [GateManagementController::class, 'storeGatePoint']);
-    Route::put('/points/{id}', [GateManagementController::class, 'updateGatePoint']);
-    Route::delete('/points/{id}', [GateManagementController::class, 'destroyGatePoint']);
-
-    Route::post('/sessions/start', [GateManagementController::class, 'startSession']);
     Route::post('/sessions/{sessionId}/end', [GateManagementController::class, 'endSession']);
     Route::put('/sessions/{sessionId}/thresholds', [GateManagementController::class, 'updateThresholds']);
 
@@ -99,5 +94,14 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin'])->prefix('gate')->g
     Route::get('/sessions/{sessionId}', [GateManagementController::class, 'sessionDetail']);
     Route::get('/sessions/{sessionId}/attendances', [GateManagementController::class, 'sessionAttendances']);
     Route::get('/sessions/{sessionId}/export', [GateManagementController::class, 'exportSession']);
+    Route::post('/scan', [GateManagementController::class, 'scan']);
+});
+
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin'])->prefix('gate')->group(function () {
+    Route::post('/points', [GateManagementController::class, 'storeGatePoint']);
+});
+
+Route::middleware(['auth:sanctum', 'lifetime', 'role:gate_display'])->prefix('gate')->group(function () {
+    Route::get('/display/state', [GateManagementController::class, 'displayState']);
 });
 ?>

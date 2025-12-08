@@ -3,6 +3,7 @@
 namespace App\Models\Gate;
 
 use App\Models\Gate\GateAttendance;
+use App\Models\Gate\GatePoint;
 use App\Models\Gate\GateScanLog;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -15,15 +16,21 @@ class GateSession extends Model
     protected $primaryKey = 'gate_session_id';
 
     protected $fillable = [
+        'gate_point_id',
         'session_date',
         'start_at',
         'end_at',
         'status',
         'entry_threshold',
         'exit_threshold',
+        'exit_threshold_map',
         'check_in_count',
         'check_out_count',
-        'created_by',
+        'ended_by',
+    ];
+
+    protected $casts = [
+        'exit_threshold_map' => 'array',
     ];
 
     public function attendances(): HasMany
@@ -36,8 +43,13 @@ class GateSession extends Model
         return $this->hasMany(GateScanLog::class, 'gate_session_id', 'gate_session_id');
     }
 
-    public function creator(): BelongsTo
+    public function endedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by', 'user_id');
+        return $this->belongsTo(User::class, 'ended_by', 'user_id');
+    }
+
+    public function gatePoint(): BelongsTo
+    {
+        return $this->belongsTo(GatePoint::class, 'gate_point_id', 'gate_point_id');
     }
 }
