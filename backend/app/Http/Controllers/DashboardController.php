@@ -11,40 +11,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CancelledRegistration;
 use App\Services\AnalyticsService;
+use App\Services\DashboardCacheService; 
 use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
     protected $analyticsService;
+    protected $cacheService;
 
-    public function __construct(AnalyticsService $analyticsService)
+    public function __construct(AnalyticsService $analyticsService, DashboardCacheService $cacheService)
     {
         $this->analyticsService = $analyticsService;
-    }
-
-    private function addCacheKey($key)
-    {
-        $keys = Cache::get('dashboard_keys', []);
-        if (!in_array($key, $keys)) {
-            $keys[] = $key;
-            Cache::put('dashboard_keys', $keys, now()->addDays(30));
-        }
-    }
-
-    public function forgetDashboardCacheByYear($yearStr)
-    {
-        $keys = Cache::get('dashboard_keys', []);
-        $remaining = [];
-
-        foreach ($keys as $key) {
-            if (str_contains($key, $yearStr)) {
-                Cache::forget($key);
-            } else {
-                $remaining[] = $key;
-            }
-        }
-
-        Cache::put('dashboard_keys', $remaining, now()->addDays(30));
+        $this->cacheService = $cacheService;
     }
 
     public function index(Request $request)
@@ -71,7 +49,8 @@ class DashboardController extends Controller
             $lastCachedSchoolYear = Cache::get('last_cached_school_year');
             if ($lastCachedSchoolYear) {
                 if ($lastCachedSchoolYear !== $currentSyName) {
-                    $this->forgetDashboardCacheByYear($lastCachedSchoolYear);
+                    $this->cacheService->invalidateStatsCacheByYear($lastCachedSchoolYear);
+
                     Cache::forget('dashboard_meta_' . $user->user_id . '_' . $lastCachedSchoolYear);
                     Cache::put('last_cached_school_year', $currentSyName);
                     \Log::info('Dashboard meta cache invalidated due to new school year: ' . $currentSyName);
@@ -99,7 +78,7 @@ class DashboardController extends Controller
                     'next_school_year_id' => $syMap[$nextSyName] ?? null, 
                 ];
             });
-            $this->addCacheKey($metaCacheKey);
+            $this->cacheService->addCacheKey($metaCacheKey);
 
             // CACHE 2: Statistik Data 
             $statCacheKey = 'dashboard_stats_' . $currentSyName . '_' . now()->format('Ymd');
@@ -129,7 +108,7 @@ class DashboardController extends Controller
                     'daily_trend' => $dailyTrend,
                 ];
             });
-            $this->addCacheKey($statCacheKey);
+            $this->cacheService->addCacheKey($statCacheKey);
 
             // Real-time Data
             $latestRegistrations = ApplicationForm::with([
