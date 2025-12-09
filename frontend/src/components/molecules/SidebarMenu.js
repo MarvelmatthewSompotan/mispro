@@ -11,12 +11,14 @@ import teacherIcon from "../../assets/TeacherList-icon.png";
 import homeroomIcon from "../../assets/HomeroomList-icon.png";
 import registrationIcon from "../../assets/Registration-icon.png";
 import usersIcon from "../../assets/user.png";
-import "../styles/SidebarMenu.css"; // Menggunakan file CSS yang sudah ada
+import gateAttendanceIcon from "../../assets/GateAttendence_icon.svg";
+import "../styles/SidebarMenu.css";
 
 // Nama variabel diubah agar lebih jelas
 const allMenus = [
   { to: "/home", icon: homeIcon, label: "Home" },
   { to: "/students", icon: studentIcon, label: "Student List" },
+  { to: "/gate-attendance", icon: gateAttendanceIcon, label: "Gate Attendance" },
   { to: "/logbook", icon: logbookIcon, label: "Logbook" },
   { to: "/teachers", icon: teacherIcon, label: "Teacher List" },
   { to: "/homerooms", icon: homeroomIcon, label: "Homeroom List" },
@@ -26,7 +28,7 @@ const allMenus = [
 
 // Terima prop 'isOpen' dari komponen Main.js
 const SidebarMenu = ({ isOpen }) => {
-  const { isAdmin } = useAuth(); // <-- DITAMBAHKAN
+  const { isAdmin } = useAuth();
   const asideRef = useRef(null);
   const [isIconOnly, setIsIconOnly] = useState(false);
 
@@ -58,8 +60,7 @@ const SidebarMenu = ({ isOpen }) => {
       //    min 56px (ikon saja), max 280px, dan tak mepet ke tepi (beri buffer 16px)
       const MIN = 56;
       const MAX = 280;
-      const buffer = 16; // jarak aman dari tepi
-      // sisakan ruang konten: sidebar <= vw - buffer, tapi tetap di range MIN..MAX
+      const buffer = 16;
       const computed = Math.min(MAX, Math.max(MIN, vw - buffer));
       document.documentElement.style.setProperty(
         "--sidebar-current-width",
@@ -78,7 +79,6 @@ const SidebarMenu = ({ isOpen }) => {
   }, []);
 
   return (
-    // Tambahkan class 'icon-only' saat kompak
     <aside
       ref={asideRef}
       className={`sidebar-menu ${isOpen ? "open" : ""} ${
@@ -87,7 +87,6 @@ const SidebarMenu = ({ isOpen }) => {
     >
       <nav>
         <ul className="sidebar-menu-list">
-          {/* DIUBAH: Menggunakan 'filteredMenus' hasil filter, bukan 'allMenus' */}
           {filteredMenus.map((menu) => (
             <li key={menu.label}>
               <NavLink

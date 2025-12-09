@@ -17,6 +17,7 @@ import MainLayout from '../components/layout/Main';
 import StudentProfile from '../components/pages/student_list/StudentProfile/StudentProfile.js';
 import Logbook from '../components/pages/logbook/Logbook.js';
 import Users from '../components/pages/users/Users.js';
+import GateAttendance from '../components/pages/gate_attendance/GateAttendance.js';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -135,6 +136,18 @@ const appRoutes = [
           <AdminAccess>
             <Users />
           </AdminAccess>
+        </MainLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/gate-attendance',
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <RegistrarAccess>
+            <GateAttendance />
+          </RegistrarAccess>
         </MainLayout>
       </ProtectedRoute>
     ),

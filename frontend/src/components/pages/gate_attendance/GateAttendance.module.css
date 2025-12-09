@@ -1,0 +1,149 @@
+.gateAttendanceContainer {
+    padding: 25px 32px 25px 32px;
+    background-color: var(--secondary-background);
+    margin-top: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  
+  /* Wrapper untuk area header */
+  .headerWrapper {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .titleSection {
+    /* Menggunakan flex space-between agar Title di Kiri, Actions di Kanan */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Align top agar sejajar dengan margin atas judul */
+    width: 100%;
+  }
+  
+  .pageTitle {
+    font-family: var(--font-primary);
+    font-weight: var(--font-weight-bold);
+    font-size: 32px;
+    /* Hapus 'margin: 0' agar margin default browser (h1) muncul, 
+       menyamakan tinggi dengan StudentList */
+  }
+  
+  /* Container untuk tombol Gear dan Check-In */
+  .rightActions {
+    /* Tidak menggunakan absolute lagi, tapi flex item */
+    display: flex;
+    flex-direction: column; /* Menyusun Gear dan Button secara Vertikal */
+    align-items: flex-end; /* Rata kanan */
+    gap: 12px; /* Jarak antara Gear dan Tombol Check-in */
+  }
+  
+  /* Styling Search Bar */
+  .searchAndFilterContainer {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  
+  .searchContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 426px;
+    border: 2px solid var(--main-grey);
+    border-radius: 5px;
+    background-color: var(--secondary-background);
+    height: 40px;
+  }
+  
+  .searchInput {
+    flex: 1;
+    height: 100%;
+    padding: 0 18px;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: var(--font-weight-regular);
+    display: flex;
+    align-items: center;
+  }
+  
+  .searchInput::placeholder {
+    color: var(--main-accent);
+    opacity: 0.8;
+    font-size: 15px;
+    font-family: var(--font-primary);
+  }
+  
+  .searchIcon {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+  }
+  
+  /* Styling Check-In/Out Button */
+  .checkInOutButton {
+    position: relative;
+    border-radius: 23px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    gap: 6px;
+    text-align: left;
+    font-size: 16px;
+    color: var(--main-text); 
+    font-family: var(--font-primary);
+    cursor: pointer;
+    border: 1px solid transparent; 
+    transition: background-color 0.2s;
+    padding: 4px 8px;
+  }
+  
+  .checkInOutButton:hover {
+    background-color: var(--main-grey-light); 
+  }
+  
+  .checkInText {
+    position: relative;
+    line-height: 100%;
+    font-weight: var(--font-weight-semibold); 
+    text-decoration: underline; 
+    min-width: 80px;
+    text-align: right;
+  }
+  
+  .syncIcon {
+    width: 16px;
+    height: 16px; 
+    position: relative;
+    max-height: 100%;
+    flex-shrink: 0;
+  }
+  
+  /* Styling Icon Gear */
+  .settingIconContainer {
+    width: 45px; 
+    height: 45px; 
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Rata kanan di dalam container */
+    cursor: pointer;
+  }
+  
+  .settingIcon {
+    width: 45px; 
+    height: 45px; 
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+  }
