@@ -7,7 +7,7 @@ import {
 } from "../../../../services/api";
 import Button from "../../../atoms/Button";
 
-// Komponen Dropdown (tidak diubah)
+// Komponen Dropdown
 const CustomSelect = ({
   options,
   value,
@@ -115,7 +115,7 @@ const CustomSelect = ({
 };
 
 // ==================================================================
-// === POPUP FORM — SUDAH DITAMBAHI DUKUNGAN EDIT USER ===
+// === POPUP FORM — ADDED SUPPORT FOR EDIT USER ===
 // ==================================================================
 const PopUpForm = ({
   onClose,
@@ -134,7 +134,7 @@ const PopUpForm = ({
     roles: [],
   });
 
-  // Fields untuk Registration (tidak diubah)
+    // Fields untuk Registration (tidak diubah)
   const [schoolYear, setSchoolYear] = useState("");
   const [semester, setSemester] = useState("");
   const [date, setDate] = useState("");
@@ -144,7 +144,7 @@ const PopUpForm = ({
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // opsional saat edit
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
   const [passwordError, setPasswordError] = useState("");
@@ -155,7 +155,7 @@ const PopUpForm = ({
       setUsername(initialData.username || "");
       setName(initialData.full_name || "");
       setEmail(initialData.email || "");
-      setPassword(""); // kosong (opsional)
+      setPassword("");
       setRole(initialData.role || "");
     }
   }, [isEditMode, initialData, type]);
@@ -212,7 +212,7 @@ const PopUpForm = ({
     }
   };
 
-  // === HANDLE SUBMIT — MEMBEDAKAN CREATE & EDIT ===
+  // === HANDLE SUBMIT — DIFFERENTIATE CREATE & EDIT ===
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -241,7 +241,7 @@ const PopUpForm = ({
 
       // ========== USER MODE ==========
       else if (type === "user") {
-        // === EDIT MODE: password optional ===
+        // === EDIT MODE: password is optional ===
         if (isEditMode) {
           if (!username || !name || !email || !role) {
             setLoading(false);
@@ -255,7 +255,6 @@ const PopUpForm = ({
             role,
           };
 
-          // Jika password diisi, sertakan
           if (password) {
             if (password.length <= 8) {
               setPasswordError("Password must be more than 8 characters");
@@ -294,7 +293,7 @@ const PopUpForm = ({
     }
   };
 
-  // OPTION MAPPERS (tidak diubah)
+  // OPTION MAPPERS
   const mapOptions = (optionsArray, valueKey, labelKey) => {
     return optionsArray.map((opt) => ({
       value: opt[valueKey],
@@ -339,7 +338,7 @@ const PopUpForm = ({
             : "Add New User"}
         </div>
 
-        {/* === REGISTRATION FORM (tidak diubah) === */}
+        {/* === REGISTRATION FORM === */}
         {type === "registration" ? (
           <div className={styles.frameParent}>
             <div className={styles.fieldWrapper}>
@@ -376,7 +375,7 @@ const PopUpForm = ({
           </div>
         ) : (
           // ============================================
-          // === USER FORM — SEKARANG SUPPORT EDIT MODE ===
+          // === USER FORM — NOW SUPPORT EDIT MODE ===
           // ============================================
           <div className={styles.frameParent}>
             {/* Username */}
@@ -415,7 +414,7 @@ const PopUpForm = ({
               />
             </div>
 
-            {/* Password — opsional saat edit */}
+            {/* Password — optional when edit */}
             <div className={styles.fieldWrapper}>
               <input
                 className={`${styles.textInput} ${
@@ -430,7 +429,7 @@ const PopUpForm = ({
                   setPassword(e.target.value);
                   if (passwordError) setPasswordError("");
                 }}
-                required={!isEditMode} // hanya wajib saat create
+                required={!isEditMode}
               />
               {passwordError && (
                 <span className={styles.errorMessage}>{passwordError}</span>

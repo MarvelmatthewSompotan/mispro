@@ -76,7 +76,6 @@ const Users = () => {
       fetchControllerRef.current = controller;
 
       try {
-        // Siapkan params sesuai contract backend
         const params = {
           page,
           per_page: 25,
@@ -85,13 +84,11 @@ const Users = () => {
           full_name: filters.full_name || undefined,
           email: filters.email || undefined,
           user_id: filters.user_id || undefined,
-          // role can be array (role[]). If it's a single value convert to array.
           role: Array.isArray(filters.role) ? filters.role : filters.role ? [filters.role] : undefined,
           sort_by: sorts[0]?.field || undefined,
           sort_dir: sorts[0]?.order || undefined,
         };
 
-        // getUsers telah diperbarui di api.js (lihat file api.js di bawah)
         const res = await getUsers(params, { signal });
 
         if (res?.success) {
@@ -122,7 +119,6 @@ const Users = () => {
     return () => clearInterval(intervalId);
   }, [fetchUsers]);
 
-  // --- Sort handlers (sama pola StudentList/Registration) ---
   const handleSortChange = (fieldKey) => {
     setSorts((prev) => {
       const current = prev[0]?.field === fieldKey ? prev[0] : null;
@@ -135,7 +131,6 @@ const Users = () => {
   };
   const getSortOrder = (fieldKey) => sorts.find((s) => s.field === fieldKey)?.order;
 
-  // --- Filter handler (mendukung single value atau array untuk role[]) ---
   const handleFilterChange = (filterKey, selectedValue) => {
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters };
@@ -149,7 +144,6 @@ const Users = () => {
         delete newFilters[filterKey];
       }
 
-      // Jika user mengetik global search di bar atas, biarkan tetap (tidak konflik)
       return newFilters;
     });
   };
@@ -160,7 +154,6 @@ const Users = () => {
     setSorts([]);
   };
 
-  // --- CRUD handlers tetap sama integrasinya ---
   const handleConfirmDelete = async () => {
     if (!confirmDeleteUser) return;
     setDeletingUserId(confirmDeleteUser.user_id);
@@ -355,13 +348,10 @@ const Users = () => {
 
         <div className={styles.tableBody}>
           {loading ? (
-            // Menggunakan styles.messageCell
             <div className={styles.messageCell}>Loading...</div> 
           ) : error ? (
-            // Menggunakan styles.messageCell
             <div className={styles.messageCell}>{error}</div>
           ) : users.length === 0 ? (
-            // Menggunakan styles.messageCell
             <div className={styles.messageCell}>No users found</div>
           ) : (
             users.map((user) => (
