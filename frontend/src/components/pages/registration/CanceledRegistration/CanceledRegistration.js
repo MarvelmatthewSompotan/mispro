@@ -1,89 +1,85 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PopUpForm from '../../molecules/PopUp/PopUpRegis/PopUpForm';
-import Pagination from '../../atoms/Pagination';
-import StatusConfirmationPopup from '../../molecules/PopUp/PopUpRegis/StatusConfirmationPopup';
-import styles from './Registration.module.css';
-import searchIcon from '../../../assets/Search-icon.png';
-import editPenIcon from '../../../assets/edit_pen_icon.svg'; 
-import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
-import Button from '../../atoms/Button';
-import ResetFilterButton from '../../atoms/resetFilterButton/ResetFilterButton';
+import Pagination from '../../../atoms/Pagination';
+import styles from './CanceledRegistration.module.css';
+import searchIcon from '../../../../assets/Search-icon.png';
+import ColumnHeader from '../../../atoms/columnHeader/ColumnHeader';
+import Button from '../../../atoms/Button';
+import ResetFilterButton from '../../../atoms/resetFilterButton/ResetFilterButton';
 
 import {
   getRegistrations,
   getRegistrationOptions,
-} from '../../../services/api';
+} from '../../../../services/api';
 
-const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
-  const status = registration.application_status?.toLowerCase() || 'confirmed';
-  const statusStyle =
-    status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
-
+const CanceledRegistrationRow = ({ registration, onRowClick }) => {
   return (
     <div
       className={styles.registrationDataRow}
       onClick={() => onRowClick(registration)}
     >
+      {/* 1. Registration Date */}
       <div className={styles.tableCell}>
-        {new Date(registration.registration_date).toLocaleDateString('id-ID', {
+        {registration.registration_date ? new Date(registration.registration_date).toLocaleDateString('id-ID', {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
-        })}
+        }) : '-'}
       </div>
-      <div className={styles.tableCell}>{registration.registration_id}</div>
+      
+      {/* 2. Cancellation Date */}
+      <div className={styles.tableCell}>
+        {registration.cancellation_date 
+          ? new Date(registration.cancellation_date).toLocaleDateString('id-ID', {
+              day: 'numeric', month: 'long', year: 'numeric'
+            }) 
+          : '-'}
+      </div>
+
+      {/* 3. Student Name */}
       <div className={styles.tableCell}>{registration.full_name}</div>
+      
+      {/* 4. Grade */}
       <div className={styles.tableCell}>{registration.grade || 'N/A'}</div>
+      
+      {/* 5. Section */}
+      <div className={styles.tableCell}>{registration.section_name || 'N/A'}</div>
+      
+      {/* 6. Type */}
       <div className={styles.tableCell}>
-        {registration.section_name || 'N/A'}
+        {registration.student_type || '-'}
       </div>
+
+      {/* 7. Notes */}
       <div className={styles.tableCell}>
-        <div
-          className={statusStyle}
-          onClick={(e) => {
-            e.stopPropagation();
-            onStatusClick(registration);
-          }}
-        >
-          <div className={styles.statusText}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </div>
-        </div>
+        {registration.cancellation_reason || '-'}
       </div>
     </div>
   );
 };
 
-const Registration = () => {
+const CanceledRegistration = () => {
   const navigate = useNavigate();
   const [registrationData, setRegistrationData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [perPage] = useState(25);
-  const [showPopupForm, setShowPopupForm] = useState(false);
-  const REFRESH_INTERVAL = 5000;
-  const [showStatusPopup, setShowStatusPopup] = useState(false);
-  const [selectedRegistration, setSelectedRegistration] = useState(null);
+  
+  const CANCELED_STATUS_ID = 'Cancelled'; 
+
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({});
   const [sorts, setSorts] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
     sections: [],
     classes: [],
-    applicationStatus: [
-      { id: 'Confirmed', name: 'Confirmed' },
-      { id: 'Cancelled', name: 'Cancelled' },
-    ],
   });
   const fetchControllerRef = useRef(null);
 
   const fetchRegistrations = useCallback(
-    async (filters = {}, page = 1, sorts = [], options = {}) => {
-      const { isBackgroundRefresh = false } = options;
-      
-      if (!isBackgroundRefresh) setLoading(true);
+    async (currentFilters = {}, page = 1, currentSorts = []) => {
+      setLoading(true);
 
       const controller = new AbortController();
       const signal = controller.signal;
@@ -91,14 +87,15 @@ const Registration = () => {
       fetchControllerRef.current?.abort();
       fetchControllerRef.current = controller;
 
-      let currentSearch = search;
       const allParams = {
-        ...filters,
-        ...(currentSearch ? { search: currentSearch } : {}),
-        sort: sorts.length > 0 ? sorts : undefined,
+        ...currentFilters,
+        status: CANCELED_STATUS_ID,
+        search: search || undefined,
+        sort: currentSorts.length > 0 ? currentSorts : undefined,
         page: page,
         per_page: perPage,
       };
+
       try {
         const res = await getRegistrations(allParams, { signal });
         setRegistrationData(res.data.data || []);
@@ -106,14 +103,13 @@ const Registration = () => {
         setCurrentPage(res.data.current_page || 1);
       } catch (err) {
         if (err.name === 'AbortError') {
-          console.log('Previous fetch aborted due to new input');
+          console.log('Fetch aborted');
           return;
         }
-        console.error('Error fetching registrations:', err);
+        console.error('Error fetching canceled registrations:', err);
         setRegistrationData([]);
-        setTotalPages(1);
       } finally {
-        if (!isBackgroundRefresh) setLoading(false);
+        setLoading(false);
       }
     },
     [perPage, search]
@@ -129,7 +125,7 @@ const Registration = () => {
           classes: opts.classes || [],
         }));
       } catch (err) {
-        console.error('Error fetching registration options:', err);
+        console.error('Error fetching options:', err);
       }
     };
     fetchFilterOptions();
@@ -137,18 +133,7 @@ const Registration = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (search) {
-        setCurrentPage(1);
-        setFilters((prev) => {
-          if (prev.search_name) {
-            const newFilters = { ...prev };
-            delete newFilters.search_name;
-            return newFilters;
-          }
-          return prev;
-        });
         fetchRegistrations(filters, 1, sorts);
-      }
     }, 400);
     return () => {
       clearTimeout(timer);
@@ -156,17 +141,10 @@ const Registration = () => {
     };
   }, [search, filters, sorts, fetchRegistrations]);
 
-  useEffect(() => {
-    if (search) return;
-
-    fetchRegistrations(filters, 1, sorts);
-  }, [filters, sorts, fetchRegistrations, search]);
-
   const handleSortChange = (fieldKey) => {
     setSorts((prev) => {
       const current = prev[0]?.field === fieldKey ? prev[0] : null;
       let next;
-
       if (!current) {
         next = { field: fieldKey, order: 'asc' };
       } else if (current.order === 'asc') {
@@ -174,9 +152,7 @@ const Registration = () => {
       } else {
         next = null;
       }
-
-      const newSorts = next ? [next] : [];
-      return newSorts;
+      return next ? [next] : [];
     });
   };
 
@@ -195,7 +171,6 @@ const Registration = () => {
         delete newFilters[filterKey];
       } else {
         const isArray = Array.isArray(selectedValue);
-
         if (isArray && selectedValue.length > 0) {
           newFilters[filterKey] = selectedValue;
         } else if (!isArray && selectedValue) {
@@ -203,12 +178,7 @@ const Registration = () => {
         } else {
           delete newFilters[filterKey];
         }
-
-        if (filterKey === 'search_name' && selectedValue) {
-          setSearch('');
-        }
       }
-
       return newFilters;
     });
   };
@@ -230,36 +200,6 @@ const Registration = () => {
     }
   };
 
-  useEffect(() => {
-    fetchRegistrations(filters, 1, sorts);
-    // eslint-disable-next-line
-  }, [fetchRegistrations]);
-
-  useEffect(() => {
-    const refreshData = () => {
-      const currentFilters = {
-        ...filters,
-        search: search || filters.search || undefined,
-      };
-      console.log('Auto refreshing registration list (background)...');
-      fetchRegistrations(currentFilters, currentPage, sorts, {
-        isBackgroundRefresh: true,
-      });
-    };
-    const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
-    return () => clearInterval(intervalId);
-  }, [search, currentPage, fetchRegistrations, filters, sorts]);
-
-  const handleNewForm = () => setShowPopupForm(true);
-  const handleClosePopup = () => setShowPopupForm(false);
-
-  const handleCreateForm = (formData) => {
-    navigate('/registration-form', {
-      state: { ...formData, fromPopup: true },
-    });
-    setShowPopupForm(false);
-  };
-
   const handleRowClick = (row) => {
     const applicationId = row.application_id || null;
     const version = row.version_id ?? null;
@@ -268,94 +208,46 @@ const Registration = () => {
     });
   };
 
-  const handleStatusClick = (row) => {
-    setSelectedRegistration(row);
-    setShowStatusPopup(true);
-  };
-
-  const handleCloseStatusPopup = () => {
-    setShowStatusPopup(false);
-    setSelectedRegistration(null);
-  };
-
-  const handleUpdateStatus = (id, newStatus) => {
-    setRegistrationData((prevData) =>
-      prevData.map((reg) => {
-        if (reg.registration_id === id) {
-          return {
-            ...reg,
-            application_status: newStatus,
-            application_form: {
-              ...(reg.application_form || {}),
-              status: newStatus,
-            },
-          };
-        }
-        return reg;
-      })
-    );
-
-    fetchRegistrations(
-      { ...filters, search: search || undefined },
-      currentPage,
-      sorts
-    );
-  };
-
-  const handleCanceledRegistration = () => {
-    navigate('/canceled-registration');
+  const handleBackToRegistration = () => {
+    navigate('/registration');
   };
 
   return (
     <div className={styles.registrationContainer}>
       <div className={styles.frameParent}>
-        <div>
-          <div className={styles.title}>Registration</div>
-
-          <div className={styles.searchAndFilterContainer}>
-            <div className={styles.searchBar}>
-              <input
-                type='text'
-                placeholder='Find name or student id'
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className={styles.searchInput}
-              />
-              <img
-                src={searchIcon}
-                alt='Search'
-                className={styles.searchIconImg}
-                style={{ right: '12px' }}
-              />
+        <div className={styles.headerTopRow}>
+          <div>
+            <div className={styles.title}>Canceled Registration</div>
+            <div className={styles.searchAndFilterContainer}>
+              <div className={styles.searchBar}>
+                <input
+                  type='text'
+                  placeholder='Find name or student id'
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className={styles.searchInput}
+                />
+                <img
+                  src={searchIcon}
+                  alt='Search'
+                  className={styles.searchIconImg}
+                />
+              </div>
+              <ResetFilterButton onClick={handleResetFilters} />
             </div>
-            <ResetFilterButton onClick={handleResetFilters} />
           </div>
-        </div>
 
-        <div className={styles.rightHeaderSection}>
           <div className={styles.actionButtonsContainer}>
-            <Button onClick={handleCanceledRegistration} variant='outline'>
-              Canceled Registration
+            <Button onClick={handleBackToRegistration} variant='solid'>
+              Back to registration
             </Button>
-            <Button onClick={handleNewForm} variant='solid'>
-              New Form
-            </Button>
-          </div>
-          
-          <div className={styles.editButtonContainer}>
-            <span className={styles.editButtonText}>Edit</span>
-            
-            <img 
-              src={editPenIcon} 
-              alt="Edit" 
-              className={styles.editButtonIcon}
-            />
           </div>
         </div>
       </div>
 
       <div className={styles.tableContainer}>
         <div className={styles.tableHeaderGrid}>
+          {/* 1. Registration Date */}
           <ColumnHeader
             title='Registration Date'
             hasSort={true}
@@ -368,18 +260,16 @@ const Registration = () => {
             onFilterChange={handleFilterChange}
             currentFilterValue={[filters.start_date, filters.end_date]}
           />
-          <ColumnHeader
-            title='Registration ID'
+           {/* 2. Cancellation Date */}
+           <ColumnHeader
+            title='Cancellation Date'
             hasSort={true}
-            fieldKey='registration_id'
-            sortOrder={getSortOrder('registration_id')}
+            fieldKey='cancellation_date'
+            sortOrder={getSortOrder('cancellation_date')}
             onSort={handleSortChange}
             hasFilter={true}
-            filterType='search'
-            filterKey='search_id'
-            onFilterChange={handleFilterChange}
-            currentFilterValue={filters.search_id}
           />
+          {/* 3. Student Name */}
           <ColumnHeader
             title='Student Name'
             hasSort={true}
@@ -392,6 +282,7 @@ const Registration = () => {
             onFilterChange={handleFilterChange}
             currentFilterValue={filters.search_name}
           />
+          {/* 4. Grade */}
           <ColumnHeader
             title='Grade'
             hasSort={true}
@@ -406,6 +297,7 @@ const Registration = () => {
             labelKey='grade'
             currentFilterValue={filters.grade}
           />
+          {/* 5. Section */}
           <ColumnHeader
             title='Section'
             hasSort={true}
@@ -420,19 +312,19 @@ const Registration = () => {
             labelKey='name'
             currentFilterValue={filters.section}
           />
+          {/* 6. Type */}
           <ColumnHeader
-            title='Status'
-            hasSort={true}
-            fieldKey='application_status'
-            sortOrder={getSortOrder('application_status')}
+            title='Type'
+            hasSort={true} 
+            fieldKey='student_type'
+            sortOrder={getSortOrder('student_type')}
             onSort={handleSortChange}
-            hasFilter={true}
-            filterKey='status'
-            onFilterChange={handleFilterChange}
-            filterOptions={filterOptions.applicationStatus}
-            valueKey='id'
-            labelKey='name'
-            currentFilterValue={filters.status}
+          />
+          {/* 7. Notes */}
+          <ColumnHeader
+            title='Notes'
+            hasSort={false}
+            fieldKey='notes'
           />
         </div>
 
@@ -441,15 +333,14 @@ const Registration = () => {
             <div className={styles.messageCell}>Loading...</div>
           ) : registrationData.length > 0 ? (
             registrationData.map((row, idx) => (
-              <RegistrationRow
+              <CanceledRegistrationRow
                 key={idx}
                 registration={row}
                 onRowClick={handleRowClick}
-                onStatusClick={handleStatusClick}
               />
             ))
           ) : (
-            <div className={styles.messageCell}>No data available</div>
+            <div className={styles.messageCell}>No canceled registrations found</div>
           )}
         </div>
       </div>
@@ -469,24 +360,8 @@ const Registration = () => {
           />
         </div>
       )}
-
-      {showPopupForm && (
-        <PopUpForm
-          type='registration'
-          onClose={handleClosePopup}
-          onCreate={handleCreateForm}
-        />
-      )}
-
-      {showStatusPopup && selectedRegistration && (
-        <StatusConfirmationPopup
-          registration={selectedRegistration}
-          onClose={handleCloseStatusPopup}
-          onUpdateStatus={handleUpdateStatus}
-        />
-      )}
     </div>
   );
 };
 
-export default Registration;
+export default CanceledRegistration;

@@ -1,16 +1,13 @@
-// src/router/AppRouter.js
-
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-
-// Komponen halaman
 import LoginPage from '../components/pages/login/LoginPage.js';
 import Home from '../components/pages/home/Home.js';
 import StudentList from '../components/pages/student_list/StudentList';
 import TeacherList from '../components/pages/TeacherList';
 import HomeroomList from '../components/pages/HomeroomList';
 import Registration from '../components/pages/registration/Registration.js';
+import CanceledRegistration from '../components/pages/registration/CanceledRegistration/CanceledRegistration.js';
 import RegistrationPage from '../components/pages/registration/RegistrationForm/RegistrationForm.js';
 import Print from '../components/Print_Content/Print.js';
 import MainLayout from '../components/layout/Main';
@@ -21,7 +18,6 @@ import GateAttendance from '../components/pages/gate_attendance/GateAttendance.j
 
 import ProtectedRoute from './ProtectedRoute';
 
-// Komponen 'Access' Anda tetap sama
 const RegistrarAccess = ({ children }) => {
   const { isAdmin, isRegistrar } = useAuth();
   if (!isAdmin() && !isRegistrar()) {
@@ -38,7 +34,6 @@ const AdminAccess = ({ children }) => {
   return children;
 };
 
-// Ini adalah 'AppRouter' baru, sekarang dalam format array
 const appRoutes = [
   {
     path: '/login',
@@ -128,6 +123,20 @@ const appRoutes = [
       </ProtectedRoute>
     ),
   },
+  // --- ROUTE BARU DITAMBAHKAN DI SINI ---
+  {
+    path: '/canceled-registration',
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <RegistrarAccess>
+            <CanceledRegistration />
+          </RegistrarAccess>
+        </MainLayout>
+      </ProtectedRoute>
+    ),
+  },
+  // -------------------------------------
   {
     path: '/users',
     element: (
@@ -174,7 +183,6 @@ const appRoutes = [
       </ProtectedRoute>
     ),
   },
-  // Pengalihan Default
   {
     path: '/',
     element: <Navigate to='/login' replace />,

@@ -25,6 +25,17 @@
   font-size: 32px;
 }
 
+.rightHeaderSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.actionButtonsContainer {
+  display: flex;
+  gap: 10px;
+}
+
 .totalRecords {
   display: flex;
   align-items: center;
@@ -94,6 +105,29 @@
   width: 20px;
   height: 20px;
   pointer-events: none;
+}
+
+.editButtonContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  
+  margin-top: 42px; 
+}
+
+.editButtonText {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: 14px;
+  color: var(--main-accent);
+  text-decoration: underline;
+  line-height: 1;
+}
+
+.editButtonIcon {
+  width: 14px;
+  height: 14px;
 }
 
 .tableContainer {

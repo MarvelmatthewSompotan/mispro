@@ -3,7 +3,8 @@ import styles from './GateAttendance.module.css';
 import searchIcon from "../../../assets/Search-icon.png";
 import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
 import gearIcon from "../../../assets/Circle-Gear_icon.svg";
-import switchIcon from "../../../assets/switch_icon.svg";
+import checkInIcon from "../../../assets/check-in_icon.svg";
+import checkOutIcon from "../../../assets/check-out_icon.svg";
 
 const GateAttendance = () => {
   const [search, setSearch] = useState("");
@@ -19,60 +20,54 @@ const GateAttendance = () => {
 
   return (
     <div className={styles.gateAttendanceContainer}>
-      {/* Wrapper untuk Header (Judul + Actions) dan Search */}
-      <div className={styles.headerWrapper}>
+      
+      <div className={styles.headerContainer}>
         
-        {/* Bagian Judul dan Tombol Kanan */}
-        <div className={styles.titleSection}>
+        <div className={styles.leftSection}>
           <h1 className={styles.pageTitle}>Gate Attendance</h1>
           
-          {/* Action Icons (Sekarang menggunakan Flex Column) */}
-          <div className={styles.rightActions}>
-            {/* Gear Icon diletakkan DI ATAS */}
-            <div className={styles.settingIconContainer}>
-              <img 
-                src={gearIcon} 
-                alt="Settings" 
-                className={styles.settingIcon} 
+          <div className={styles.searchAndFilterContainer}>
+            <div className={styles.searchContainer}>
+              <input
+                type="text"
+                placeholder="Find name or student id"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={styles.searchInput}
               />
+              <img src={searchIcon} alt="Search" className={styles.searchIcon} />
             </div>
+            <ResetFilterButton onClick={handleResetClick} />
+          </div>
+        </div>
 
-            {/* Tombol Check-In diletakkan DI BAWAH Gear */}
-            <div 
-              className={styles.checkInOutButton} 
-              onClick={handleCheckInOutClick}
-            >
-              <span className={styles.checkInText}>
-                {isCheckedIn ? "Check-Out" : "Check-In"}
-              </span>
-              <img 
-                src={switchIcon} 
-                alt="Switch" 
-                className={styles.syncIcon} 
-              />
-            </div>
-          </div>
-        </div>
-        
-        {/* Container Search dan Reset Filter */}
-        <div className={styles.searchAndFilterContainer}>
-          <div className={styles.searchContainer}>
-            <input
-              type="text"
-              placeholder="Find name or student id"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={styles.searchInput}
+        {/* Right Section: Settings & Toggle */}
+        <div className={styles.rightSection}>
+          <div className={styles.settingIconContainer}>
+            <img 
+              src={gearIcon} 
+              alt="Settings" 
+              className={styles.settingIcon} 
             />
-            <img src={searchIcon} alt="Search" className={styles.searchIcon} />
           </div>
-          <ResetFilterButton
-            onClick={handleResetClick}
-          />
+
+          <div className={styles.checkInOutContainer}>
+            <img 
+              src={isCheckedIn ? checkOutIcon : checkInIcon} 
+              alt={isCheckedIn ? "Check Out" : "Check In"}
+              className={styles.actionIcon} 
+              onClick={handleCheckInOutClick}
+            />
+            
+            <span className={styles.checkInText}>
+              {isCheckedIn ? "Check-Out" : "Check-In"}
+            </span>
+          </div>
         </div>
+
       </div>
       
-      {/* Konten halaman lainnya akan ditambahkan di sini */}
+      {/* Konten halaman lainnya... */}
     </div>
   );
 };
