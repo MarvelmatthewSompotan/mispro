@@ -10,10 +10,12 @@ use App\Models\Gate\GateParentNotification;
 use App\Models\Gate\GatePoint;
 use App\Models\Gate\GateScanLog;
 use App\Models\Gate\GateSession;
+use App\Models\SchoolYear;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class GateManagementController extends Controller
@@ -216,7 +218,7 @@ class GateManagementController extends Controller
 
         $session = GateSession::where('status', 'Ongoing')
             ->where('gate_point_id', $assignment->gate_point_id)
-            ->whereDate('session_date', Carbon::now()->toDateString())
+            ->whereDate('session_date', Carbon::now(config('app.timezone'))->toDateString())
             ->orderByDesc('gate_session_id')
             ->first();
 
@@ -227,8 +229,29 @@ class GateManagementController extends Controller
             ], 422);
         }
 
+        $this->ensureSessionRoster($session);
+
+        $lastScanSub = DB::table('gate_scan_logs as gsl')
+            ->select('gsl.gate_attendance_id', 'gsl.scan_type', 'gsl.scan_time')
+            ->join(DB::raw('(SELECT gate_attendance_id, MAX(scan_time) AS max_time FROM gate_scan_logs GROUP BY gate_attendance_id) gl_max'), function ($join) {
+                $join->on('gsl.gate_attendance_id', '=', 'gl_max.gate_attendance_id')
+                    ->on('gsl.scan_time', '=', 'gl_max.max_time');
+            });
+
+        // Global last scan per student (lintas sesi/hari)
+        $globalLastScanSub = null; // removed to simplify current attendances
+
         $query = GateAttendance::where('gate_session_id', $session->gate_session_id)
-            ->with(['latestScan', 'previousScan']);
+            ->leftJoinSub($lastScanSub, 'last_scan', function ($join) {
+                $join->on('last_scan.gate_attendance_id', '=', 'gate_attendance_records.gate_attendance_id');
+            })
+            ->leftJoin('students', 'students.id', '=', 'gate_attendance_records.student_id')
+            ->select(
+                'gate_attendance_records.*',
+                'students.student_id as student_code',
+                'last_scan.scan_type as last_scan_type',
+                'last_scan.scan_time as last_scan_time'
+            );
 
         if ($request->filled('name')) {
             $query->where('student_name', 'like', '%'.$request->name.'%');
@@ -282,13 +305,14 @@ class GateManagementController extends Controller
             $query->orderBy($sortBy, $sortDir);
         }
 
-        $attendances = $query
-            ->paginate($request->get('per_page', 25));
+        $attendances = $query->paginate($request->get('per_page', 25));
 
         $attendances->getCollection()->transform(function ($attendance) {
-            $source = $attendance->previousScan ?: $attendance->latestScan;
-            $attendance->last_activity = $source?->scan_type;
-            $attendance->last_activity_time = optional($source?->scan_time)->toDateTimeString();
+            // Gunakan student_code sebagai student_id untuk output (bukan FK internal)
+            $attendance->student_id = $attendance->student_code ?? $attendance->student_id;
+
+            // last_activity not needed here; focus on roster/status
+            unset($attendance->last_scan_type, $attendance->last_scan_time, $attendance->student_code);
             return $attendance;
         });
 
@@ -351,20 +375,35 @@ class GateManagementController extends Controller
             ->first();
 
         $attendance = $latestLog?->attendance;
-        $lastScan = $attendance ? [
-            'scan_type' => $latestLog->scan_type,
-            'scan_time' => optional($latestLog->scan_time)->toDateTimeString(),
-            'student_id' => $attendance->student_id,
-            'student_name' => $attendance->student_name,
-            'grade' => $attendance->student_grade,
-            'section' => $attendance->student_section,
-            'residency_status' => $attendance->residency_status,
-            'card_number' => $attendance->card_number,
-            'entry_status' => $attendance->entry_status,
-            'exit_status' => $attendance->exit_status,
-            'check_in_at' => optional($attendance->check_in_at)->toDateTimeString(),
-            'check_out_at' => optional($attendance->check_out_at)->toDateTimeString(),
-        ] : null;
+        $lastScan = null;
+
+        if ($attendance) {
+            $previousLog = GateScanLog::join('gate_attendance_records as gar', 'gar.gate_attendance_id', '=', 'gate_scan_logs.gate_attendance_id')
+                ->where('gar.student_id', $attendance->student_id)
+                ->where('gate_scan_logs.scan_time', '<', $latestLog->scan_time)
+                ->orderByDesc('gate_scan_logs.scan_time')
+                ->first(['gate_scan_logs.scan_type', 'gate_scan_logs.scan_time']);
+
+            $lastActivityType = $previousLog->scan_type ?? $latestLog->scan_type;
+            $lastActivityTime = $previousLog->scan_time ?? $latestLog->scan_time;
+
+            $lastScan = [
+                'scan_type' => $latestLog->scan_type,
+                'scan_time' => optional($latestLog->scan_time)->toDateTimeString(),
+                'student_id' => $attendance->student?->student_id ?? $attendance->student_id,
+                'student_name' => $attendance->student_name,
+                'grade' => $attendance->student_grade,
+                'section' => $attendance->student_section,
+                'residency_status' => $attendance->residency_status,
+                'card_number' => $attendance->card_number,
+                'entry_status' => $attendance->entry_status,
+                'exit_status' => $attendance->exit_status,
+                'check_in_at' => optional($attendance->check_in_at)->toDateTimeString(),
+                'check_out_at' => optional($attendance->check_out_at)->toDateTimeString(),
+                'last_activity' => $lastActivityType,
+                'last_activity_time' => $lastActivityTime ? optional($lastActivityTime)->toDateTimeString() : null,
+            ];
+        }
 
         return response()->json([
             'gate' => [
@@ -503,6 +542,8 @@ class GateManagementController extends Controller
                 'message' => 'Session not found for this gate.',
             ], 404);
         }
+
+        $this->ensureSessionRoster($session);
 
         $query = GateAttendance::where('gate_session_id', $session->gate_session_id);
 
@@ -646,7 +687,7 @@ class GateManagementController extends Controller
 
         $session = GateSession::where('status', 'Ongoing')
             ->where('gate_point_id', $gatePoint->gate_point_id)
-            ->whereDate('session_date', Carbon::now()->toDateString())
+            ->whereDate('session_date', Carbon::now(config('app.timezone'))->toDateString())
             ->orderByDesc('gate_session_id')
             ->first();
 
@@ -655,6 +696,8 @@ class GateManagementController extends Controller
                 'message' => 'No active gate session.',
             ], 422);
         }
+
+        $this->ensureSessionRoster($session);
 
         $attendance = GateAttendance::firstOrNew([
             'gate_session_id' => $session->gate_session_id,
@@ -680,6 +723,7 @@ class GateManagementController extends Controller
         $now = Carbon::now(config('app.timezone'));
         $mode = $data['mode'];
         $message = 'Student verified.';
+        $stateUpdated = false;
 
         if ($mode === 'check_in') {
             if ($attendance->check_in_at) {
@@ -696,6 +740,7 @@ class GateManagementController extends Controller
                 $session->increment('check_in_count');
 
                 $attendance->last_scan_type = 'Check In';
+                $stateUpdated = true;
             }
         } else {
             if ($attendance->check_out_at) {
@@ -714,33 +759,61 @@ class GateManagementController extends Controller
                 $session->increment('check_out_count');
 
                 $attendance->last_scan_type = 'Check Out';
+                $stateUpdated = true;
             }
         }
 
-        $attendance->save();
+        if ($stateUpdated && $attendance->isDirty()) {
+            $attendance->save();
+        } elseif ($attendance->wasRecentlyCreated) {
+            // ensure new attendance is persisted even if no state update (edge case)
+            $attendance->save();
+        }
 
-        GateScanLog::create([
-            'gate_attendance_id' => $attendance->gate_attendance_id,
-            'gate_session_id' => $session->gate_session_id,
-            'gate_point_id' => $gatePoint->gate_point_id,
-            'scan_type' => $mode === 'check_in' ? 'Check In' : 'Check Out',
-            'scan_time' => $now,
-            'card_number' => $student->card_number,
-            'payload' => null,
-        ]);
+        if ($stateUpdated) {
+            GateScanLog::create([
+                'gate_attendance_id' => $attendance->gate_attendance_id,
+                'gate_session_id' => $session->gate_session_id,
+                'gate_point_id' => $gatePoint->gate_point_id,
+                'scan_type' => $mode === 'check_in' ? 'Check In' : 'Check Out',
+                'scan_time' => $now,
+                'card_number' => $student->card_number,
+                'payload' => null,
+            ]);
 
-        $parent = $student->studentParent()->first();
-        $contact = $parent->father_phone ?? $parent->mother_phone ?? $student->phone_number;
+            $parent = $student->studentParent()->first();
+            $fallbackContacts = array_filter([
+                $parent?->father_phone ?? null,
+                $parent?->mother_phone ?? null,
+                $student->phone_number ?? null,
+            ]);
 
-        GateParentNotification::create([
-            'gate_attendance_id' => $attendance->gate_attendance_id,
-            'recipient_contact' => $contact,
-            'message_type' => $mode === 'check_in' ? 'Check In' : 'Check Out',
-            'message_body' => ($mode === 'check_in'
-                ? "{$attendance->student_name} checked in at {$attendance->check_in_at?->format('H:i')}"
-                : "{$attendance->student_name} checked out at {$attendance->check_out_at?->format('H:i')}"),
-            'status' => 'Pending',
-        ]);
+            $parentContacts = $this->resolveLatestParentContacts($student->id);
+            if (empty($parentContacts)) {
+                $parentContacts = $fallbackContacts;
+            }
+
+            if (!empty($parentContacts)) {
+                $parentContacts = array_values(array_unique(array_filter($parentContacts)));
+                $messageBody = ($mode === 'check_in'
+                    ? "{$attendance->student_name} checked in at {$attendance->check_in_at?->format('H:i')}"
+                    : "{$attendance->student_name} checked out at {$attendance->check_out_at?->format('H:i')}");
+
+                foreach ($parentContacts as $recipient) {
+                    GateParentNotification::create([
+                        'gate_attendance_id' => $attendance->gate_attendance_id,
+                        'recipient_contact' => $recipient,
+                        'message_type' => $mode === 'check_in' ? 'Check In' : 'Check Out',
+                        'message_body' => $messageBody,
+                        'status' => 'Pending',
+                        'sent_at' => null,
+                        'provider_response' => null,
+                    ]);
+                }
+            }
+
+            $this->syncAttendanceAcrossSessions($session, $attendance);
+        }
 
         return response()->json([
             'message' => $message,
@@ -804,6 +877,170 @@ class GateManagementController extends Controller
         return $session->exit_threshold
             ? Carbon::parse($session->exit_threshold, config('app.timezone'))
             : null;
+    }
+
+    private function ensureSessionRoster(GateSession $session): void
+    {
+        $students = $this->fetchLatestActiveStudents();
+
+        foreach ($students as $student) {
+            $attendance = GateAttendance::firstOrNew([
+                'gate_session_id' => $session->gate_session_id,
+                'student_id' => $student->id,
+            ]);
+
+            // Update profile fields to latest data
+            $attendance->student_name = $student->full_name ?: $student->first_name;
+            $attendance->student_grade = $student->grade;
+            $attendance->student_section = $student->section_name;
+            $attendance->residency_status = $this->resolveResidencyStatus($student->residence_type);
+            $attendance->card_number = $student->card_number;
+
+            if (!$attendance->exists) {
+                $attendance->entry_status = 'Not Present';
+                $attendance->exit_status = 'Not Checked Out';
+            }
+
+            $attendance->save();
+        }
+    }
+
+    private function fetchLatestActiveStudents()
+    {
+        $now = Carbon::now(config('app.timezone'));
+        $currentMonth = $now->month;
+        $currentYear = $now->year;
+        $schoolYearStr = ($currentMonth >= 7)
+            ? $currentYear . '/' . ($currentYear + 1)
+            : ($currentYear - 1) . '/' . $currentYear;
+
+        $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
+        $targetSchoolYearId = $schoolYear?->school_year_id;
+
+        $latestEnrollments = DB::table('enrollments as e1')
+            ->select('e1.id', 'e1.enrollment_id')
+            ->when($targetSchoolYearId, function ($query) use ($targetSchoolYearId) {
+                $query->where('e1.school_year_id', $targetSchoolYearId);
+            })
+            ->whereRaw('e1.registration_date = (
+                SELECT MAX(e2.registration_date)
+                FROM enrollments AS e2
+                WHERE e2.id = e1.id
+                ' . ($targetSchoolYearId ? 'AND e2.school_year_id = e1.school_year_id' : '') . '
+            )');
+
+        return DB::table('students')
+            ->select([
+                'students.id',
+                'students.student_id',
+                'students.first_name',
+                'students.middle_name',
+                'students.last_name',
+                'students.card_number',
+                DB::raw("TRIM(CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)) AS full_name"),
+                'classes.grade',
+                'sections.name as section_name',
+                'residence_halls.type as residence_type',
+                'parents.father_phone',
+                'parents.mother_phone',
+            ])
+            ->joinSub($latestEnrollments, 'latest_enrollments', function ($join) {
+                $join->on('latest_enrollments.id', '=', 'students.id');
+            })
+            ->join('enrollments', 'enrollments.enrollment_id', '=', 'latest_enrollments.enrollment_id')
+            ->leftJoin('classes', 'classes.class_id', '=', 'enrollments.class_id')
+            ->leftJoin('sections', 'sections.section_id', '=', 'enrollments.section_id')
+            ->leftJoin('residence_halls', 'residence_halls.residence_id', '=', 'enrollments.residence_id')
+            ->leftJoin('parents', 'parents.enrollment_id', '=', 'enrollments.enrollment_id')
+            ->where('students.active', 'YES')
+            ->where('enrollments.status', 'Active')
+            ->get();
+    }
+
+    private function resolveLatestParentContacts(int $studentId): array
+    {
+        $now = Carbon::now(config('app.timezone'));
+        $currentMonth = $now->month;
+        $currentYear = $now->year;
+        $schoolYearStr = ($currentMonth >= 7)
+            ? $currentYear . '/' . ($currentYear + 1)
+            : ($currentYear - 1) . '/' . $currentYear;
+
+        $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
+        $targetSchoolYearId = $schoolYear?->school_year_id;
+
+        $latestEnrollment = DB::table('enrollments as e1')
+            ->select('e1.enrollment_id')
+            ->where('e1.id', $studentId)
+            ->when($targetSchoolYearId, function ($query) use ($targetSchoolYearId) {
+                $query->where('e1.school_year_id', $targetSchoolYearId);
+            })
+            ->whereRaw('e1.registration_date = (
+                SELECT MAX(e2.registration_date)
+                FROM enrollments AS e2
+                WHERE e2.id = e1.id
+                ' . ($targetSchoolYearId ? 'AND e2.school_year_id = e1.school_year_id' : '') . '
+            )')
+            ->first();
+
+        if (!$latestEnrollment) {
+            return [];
+        }
+
+        $parent = DB::table('parents')
+            ->where('enrollment_id', $latestEnrollment->enrollment_id)
+            ->first();
+
+        if (!$parent) {
+            return [];
+        }
+
+        return array_filter([
+            $parent->father_phone ?? null,
+            $parent->mother_phone ?? null,
+        ]);
+    }
+
+    private function syncAttendanceAcrossSessions(GateSession $session, GateAttendance $sourceAttendance): void
+    {
+        $sessions = GateSession::whereDate('session_date', $session->session_date)
+            ->where('gate_session_id', '!=', $session->gate_session_id)
+            ->get();
+
+        foreach ($sessions as $otherSession) {
+            $attendance = GateAttendance::firstOrNew([
+                'gate_session_id' => $otherSession->gate_session_id,
+                'student_id' => $sourceAttendance->student_id,
+            ]);
+
+            // Always refresh profile data from source attendance
+            $attendance->student_name = $sourceAttendance->student_name;
+            $attendance->student_grade = $sourceAttendance->student_grade;
+            $attendance->student_section = $sourceAttendance->student_section;
+            $attendance->residency_status = $sourceAttendance->residency_status;
+            $attendance->card_number = $sourceAttendance->card_number;
+
+            if (!$attendance->exists) {
+                $attendance->entry_status = 'Not Present';
+                $attendance->exit_status = 'Not Checked Out';
+            }
+
+            if ($sourceAttendance->check_in_at && !$attendance->check_in_at) {
+                $attendance->check_in_at = $sourceAttendance->check_in_at;
+                $attendance->entry_status = $sourceAttendance->entry_status;
+                $attendance->entry_gate_id = $sourceAttendance->entry_gate_id;
+                $attendance->last_scan_type = $sourceAttendance->last_scan_type;
+            }
+
+            if ($sourceAttendance->check_out_at && !$attendance->check_out_at) {
+                $attendance->check_out_at = $sourceAttendance->check_out_at;
+                $attendance->exit_status = $sourceAttendance->exit_status;
+                $attendance->exit_gate_id = $sourceAttendance->exit_gate_id;
+                $attendance->last_scan_type = $sourceAttendance->last_scan_type;
+            }
+
+            $attendance->save();
+        }
     }
 
     private function generateNextGateName(): string
