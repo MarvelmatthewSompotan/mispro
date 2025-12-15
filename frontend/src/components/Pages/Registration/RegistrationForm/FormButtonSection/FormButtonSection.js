@@ -124,7 +124,7 @@ const FormButtonSection = ({
       if (
         !kitasAsString ||
         kitasAsString.length < 11 ||
-        kitasAsString.length > 16
+        kitasAsString.length > 51
       ) {
         errors.studentInfo = { ...errors.studentInfo, kitas: true };
       }

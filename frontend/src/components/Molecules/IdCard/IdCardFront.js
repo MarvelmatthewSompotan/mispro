@@ -14,7 +14,9 @@ import waveBlue from "../../../assets/waveBlue.png";
 import waveYellow from "../../../assets/WaveYellow.png";
 
 const IdCardFront = ({ data, variant = "ecp" }) => {
-  const { firstName, lastName, photoUrl, studentId, sectionName } = data;
+  // PERUBAHAN: Mengambil data dengan key snake_case sesuai response API
+  const { first_name, last_name, photo_url, student_id, section_name } =
+    data || {};
 
   // Mapping konfigurasi: Wave Image & Logo Variant
   const config = {
@@ -45,13 +47,13 @@ const IdCardFront = ({ data, variant = "ecp" }) => {
       {/* Foto Student */}
       <img
         className={styles.photoBase}
-        alt="Student"
-        src={photoUrl || userPlaceholder}
+        alt=""
+        src={photo_url}
         onError={(e) => {
           e.target.src = userPlaceholder;
         }}
       />
-
+  
       {/* Konten Bawah */}
       <div className={styles.bottomWrapper}>
         <img className={styles.waveBg} alt="" src={currentConfig.wave} />
@@ -60,16 +62,17 @@ const IdCardFront = ({ data, variant = "ecp" }) => {
           {/* Nama & ID */}
           <div className={styles.infoGroup}>
             <div className={styles.nameGroup}>
-              <div className={styles.lastName}>{lastName},</div>
-              <div className={styles.firstName}>{firstName}</div>
+              {/* PERUBAHAN: Gunakan variable snake_case */}
+              <div className={styles.lastName}>{last_name},</div>
+              <div className={styles.firstName}>{first_name}</div>
             </div>
-            <div className={styles.studentId}>ID: {studentId}</div>
+            <div className={styles.studentId}>ID: {student_id}</div>
           </div>
 
           {/* Footer: Section & Logo & QR */}
           <div className={styles.footerGroup}>
             <div className={styles.schoolInfo}>
-              <div className={styles.sectionName}>{sectionName}</div>
+              <div className={styles.sectionName}>{section_name}</div>
               {/* Panggil Component Logo */}
               <Logo
                 variant={currentConfig.logoVariant}

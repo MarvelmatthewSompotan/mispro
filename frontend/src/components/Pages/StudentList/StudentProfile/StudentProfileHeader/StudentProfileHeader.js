@@ -51,7 +51,10 @@ const StudentProfileHeader = ({
       ? styles.profileImage
       : styles.profilePlaceholder;
 
+  // --- PERUBAHAN: Menambahkan 'id' agar bisa dipakai fetch API di dalam Popup ---
   const idCardData = {
+    id: studentInfo.id, // ID Database untuk fetch API
+    // Data di bawah ini hanya fallback/initial, karena popup akan mengambil data fresh dari API
     firstName: studentInfo.first_name,
     lastName: studentInfo.last_name,
     studentId: formData.student_id || studentInfo.student_id,
@@ -60,33 +63,26 @@ const StudentProfileHeader = ({
     placeOfBirth: studentInfo.place_of_birth,
     dateOfBirth: studentInfo.date_of_birth,
     schoolYear: formData.school_year,
-    // [PERBAIKAN 1]: Perbaiki logika sectionName berdasarkan ID 1, 2, 3, 4
     sectionName: (() => {
       const secId = parseInt(formData.section_id, 10);
-      // Asumsi mapping dari StudentProfile.js: 1=ECP, 2=Elem, 3=Middle, 4=High
       if (secId === 3) return "Middle School";
       if (secId === 4) return "High School";
-      return "Elementary School"; // Covers ID 1 (ECP) & 2 (Elementary)
+      return "Elementary School";
     })(),
   };
 
   const getSectionType = () => {
     const secId = parseInt(formData.section_id, 10);
-    // Asumsi mapping: 3 = MS, 4 = HS, Sisanya = ECP/ES
     if (secId === 3) return "ms";
     if (secId === 4) return "hs";
-    return "ecp"; // Default untuk ID 1 & 2
+    return "ecp";
   };
 
   return (
     <div className={styles.profileHeader}>
       {/* Kolom Kiri: Foto */}
       <div className={styles.headerPhotoSection}>
-        <img
-          className={imageClass} // Style diperbarui di CSS
-          src={imageUrl}
-          alt=""
-        />
+        <img className={imageClass} src={imageUrl} alt="" />
       </div>
 
       {/* Kolom Tengah: Info & Status */}
@@ -269,13 +265,11 @@ const StudentProfileHeader = ({
               >
                 New ID Card
               </Button>
-              {/* --- [AKHIR BARU] --- */}
             </>
           )
         )}
       </div>
 
-      {/* Render ID Card Popup di sini */}
       <IdCardPopup
         isOpen={isIdCardPopupOpen}
         onClose={() => setIdCardPopupOpen(false)}

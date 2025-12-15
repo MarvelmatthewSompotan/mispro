@@ -1,37 +1,49 @@
-// src/components/PhotoUploadPopup/PhotoUploadPopup.js (Versi Baru dengan Cropper)
+// src/components/PhotoUploadPopup/PhotoUploadPopup.js
 import React, { useState, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import Cropper from "react-easy-crop";
 import styles from "./PhotoUploadPopup.module.css";
-import getCroppedImg from "./CropImage"; // Kita akan buat file helper ini
-import Button from "../../../Atoms/Button/Button";
+import getCroppedImg from "./CropImage"; // Pastikan path import benar
+import Button from "../../../Atoms/Button/Button"; // Sesuaikan path Button Anda
 
 const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
-  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
-  // State baru untuk cropping
+  // State
   const [imageSrc, setImageSrc] = useState(null);
+  const [fileType, setFileType] = useState("image/jpeg"); // Default jpeg
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+
+  // UI State
+  const [isDragging, setIsDragging] = useState(false);
   const [isCropping, setIsCropping] = useState(false);
 
-  // Fungsi yang dipanggil saat pengguna selesai mengatur area crop
+  // --- Handlers ---
+
   const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  // Fungsi untuk membaca file yang dipilih dan menampilkannya di cropper
   const handleFileSelectedForCropping = (file) => {
+    // Simpan tipe file (png/jpeg) untuk referensi saat save nanti
+    setFileType(file.type || "image/jpeg");
+
     const reader = new FileReader();
     reader.addEventListener("load", () => {
       setImageSrc(reader.result);
+      setZoom(1); // Reset zoom saat ganti gambar
     });
     reader.readAsDataURL(file);
   };
 
-  // Handler untuk drag-and-drop
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFileSelectedForCropping(e.target.files[0]);
+    }
+  };
+
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -39,7 +51,7 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith("image/")) {
-        handleFileSelectedForCropping(file); // Tampilkan di cropper, bukan langsung kirim
+        handleFileSelectedForCropping(file);
       } else {
         alert("Please select an image file.");
       }
@@ -47,36 +59,40 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
     }
   }, []);
 
-  // Handler untuk tombol browse
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFileSelectedForCropping(e.target.files[0]); // Tampilkan di cropper
-    }
-  };
-
-  // Fungsi untuk memproses gambar yang sudah di-crop dan mengirimkannya
   const showCroppedImage = useCallback(async () => {
+    // Defensive check: pastikan data pixel sudah ada
+    if (!imageSrc || !croppedAreaPixels) return;
+
     try {
       setIsCropping(true);
-      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-      onFileSelect(croppedImage); // Kirim file yang sudah di-crop ke parent
-      handleClose(); // Tutup popup setelah selesai
+      // Kirim fileType ke fungsi crop agar transparansi terjaga
+      const croppedImage = await getCroppedImg(
+        imageSrc,
+        croppedAreaPixels,
+        fileType
+      );
+
+      onFileSelect(croppedImage);
+      handleClose();
     } catch (e) {
-      console.error(e);
+      console.error("Failed to crop image:", e);
+      alert("Something went wrong while cropping the image.");
     } finally {
       setIsCropping(false);
     }
-    // eslint-disable-next-line
-  }, [imageSrc, croppedAreaPixels, onFileSelect]);
+  }, [imageSrc, croppedAreaPixels, fileType, onFileSelect]);
 
-  // Fungsi untuk mereset state dan menutup popup
   const handleClose = () => {
+    // Reset semua state saat tutup
     setImageSrc(null);
     setZoom(1);
     setCrop({ x: 0, y: 0 });
+    setCroppedAreaPixels(null);
+    setIsDragging(false);
     onClose();
   };
 
+  // --- Drag Styling Logic ---
   const handleDrag = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -101,7 +117,7 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
   );
 
   const onBrowseClick = () => {
-    fileInputRef.current.click();
+    fileInputRef.current?.click();
   };
 
   if (!isOpen) return null;
@@ -113,41 +129,47 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <button className={styles.closeButton} onClick={handleClose}>
-          {" "}
-          ×{" "}
+          ×
         </button>
 
         {imageSrc ? (
-          // Tampilan kedua: Cropper
+          /* --- TAMPILAN CROPPER --- */
           <>
             <div className={styles.cropperContainer}>
               <Cropper
                 image={imageSrc}
                 crop={crop}
                 zoom={zoom}
-                aspect={154 / 208} // Sesuaikan dengan rasio gambar profil Anda
+                aspect={3 / 4} // Rasio foto profil standar (sesuaikan jika perlu)
                 onCropChange={setCrop}
                 onCropComplete={onCropComplete}
                 onZoomChange={setZoom}
+                showGrid={true}
+                // Batasi area geser agar tidak keluar batas terlalu jauh
+                restrictPosition={false}
               />
             </div>
+
             <div className={styles.controls}>
-              <label>Zoom</label>
-              <input
-                type="range"
-                value={zoom}
-                min={1}
-                max={3}
-                step={0.1}
-                aria-labelledby="Zoom"
-                onChange={(e) => setZoom(e.target.value)}
-                className={styles.zoomRange}
-              />
+              <div className={styles.sliderContainer}>
+                <label>Zoom</label>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className={styles.zoomRange}
+                />
+              </div>
             </div>
+
             <div className={styles.actionButtons}>
               <Button
                 className={styles.cancelButton}
-                onClick={() => setImageSrc(null)}
+                onClick={() => setImageSrc(null)} // Kembali ke upload screen
                 variant="outline"
               >
                 Change Photo
@@ -163,7 +185,7 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
             </div>
           </>
         ) : (
-          // Tampilan pertama: Drag and Drop
+          /* --- TAMPILAN DRAG & DROP --- */
           <div
             className={styles.dragAndDrop}
             onDragEnter={handleDragIn}
@@ -173,7 +195,9 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
           >
             {isDragging ? (
               <div className={styles.dropYourFileWrapper}>
-                <div className={styles.dropYourFile}>Drop your file</div>
+                <div className={styles.dropYourFile}>
+                  Drop your file to upload
+                </div>
               </div>
             ) : (
               <div className={styles.dragAndDropYourFileHereParent}>
@@ -186,7 +210,7 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
                   onClick={onBrowseClick}
                   variant="solid"
                 >
-                  <div className={styles.browseText}>Browse</div>
+                  <span className={styles.browseText}>Browse Files</span>
                 </Button>
               </div>
             )}

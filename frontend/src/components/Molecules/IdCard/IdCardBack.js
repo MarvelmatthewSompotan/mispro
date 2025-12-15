@@ -4,7 +4,9 @@ import styles from "./IdCardBack.module.css";
 import Logo from "../../Atoms/Logo/Logo";
 
 const IdCardBack = ({ data, variant = "ecp" }) => {
-  const { nisn, placeOfBirth, dateOfBirth, schoolYear } = data;
+  // PERUBAHAN: Mengambil data dengan key snake_case sesuai response API
+  const { nisn, place_of_birth, date_of_birth, school_year, valid_until } =
+    data || {};
 
   // Logika Warna Background & Logo Variant
   let variantClass = styles.bgEcp;
@@ -19,15 +21,12 @@ const IdCardBack = ({ data, variant = "ecp" }) => {
   }
 
   // Format Tanggal
-  const dobFormatted = dateOfBirth
-    ? new Date(dateOfBirth).toLocaleDateString("en-GB")
+  const dobFormatted = date_of_birth
+    ? new Date(date_of_birth).toLocaleDateString("en-GB")
     : "-";
 
-  // Hitung Valid Until
-  const entryYear = schoolYear
-    ? parseInt(schoolYear.split("-")[0])
-    : new Date().getFullYear();
-  const validYear = entryYear + 3;
+  // PERUBAHAN: Gunakan valid_until langsung dari API
+  const validUntilStr = valid_until || "-";
 
   return (
     <div className={`${styles.idCardBackBase} ${variantClass}`}>
@@ -59,7 +58,7 @@ const IdCardBack = ({ data, variant = "ecp" }) => {
           <div className={styles.dataRow}>
             <span className={styles.label}>Place, DOB:</span>
             <span className={styles.value}>
-              {placeOfBirth ? placeOfBirth.toUpperCase() : "MANADO"},{" "}
+              {place_of_birth ? place_of_birth.toUpperCase() : "MANADO"},{" "}
               {dobFormatted}
             </span>
           </div>
@@ -71,14 +70,14 @@ const IdCardBack = ({ data, variant = "ecp" }) => {
               School Year Entry:
               <br />
             </span>
-            <span className={styles.value}>{schoolYear || "-"}</span>
+            <span className={styles.value}>{school_year || "-"}</span>
           </div>
           <div>
             <span className={styles.label}>
               Valid Until:
               <br />
             </span>
-            <span className={styles.value}>20/06/{validYear}</span>
+            <span className={styles.value}>{validUntilStr}</span>
           </div>
         </div>
 

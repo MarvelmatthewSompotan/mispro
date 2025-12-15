@@ -10,44 +10,40 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Header Image Static (Gedung) */
 .headerBg {
   position: absolute;
   top: 0px;
-  left: -160px;
+  left: -50px;
   width: 643px;
   height: 298px;
   object-fit: cover;
   z-index: 1;
 }
 
-/* === BAGIAN FOTO (Fixed Position Global) === */
 .photoBase {
   position: absolute;
-  /* Koordinat High School sebagai standar */
-  top: 11px;
-  left: 166px;
+  top: 43px;
+  left: 145px;
+  right: 0;
   width: 252.6px;
   height: 336px;
   object-fit: cover;
   object-position: top center;
   z-index: 2;
-  background-color: transparent;
-  border-radius: 8px 8px 0 0;
+
+
 }
 
-/* === VARIAN WARNA TEKS (Hanya Warna) === */
 .variantEcp {
-  color: var(--text-accent); /* Putih */
+  color: var(--text-accent); 
 }
 .variantMs {
-  color: var(--text-accent); /* Putih */
+  color: var(--text-accent);
 }
 .variantHs {
-  color: #12295e; /* Navy Blue */
+  color: #12295e; 
 }
 
-/* --- LAYOUT BAWAH --- */
 .bottomWrapper {
   position: absolute;
   top: 288px;
@@ -104,36 +100,31 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Footer Group Container */
 .footerGroup {
   display: flex;
-  align-items: flex-end; /* Logo dan QR sejajar bawah */
+  align-items: flex-end; 
   justify-content: space-between;
 }
 
-/* Bagian Kiri Footer (Section Text & Logo) */
 .schoolInfo {
   width: 248px;
   display: flex;
   flex-direction: column;
-  
 }
 
-/* Teks Section (High School / Middle School) */
 .sectionName {
   font-size: 20px;
   font-weight: var(--font-weight-semibold);
-  line-height: 100%; /* Pastikan line-height rapat */
+  line-height: 100%;
   margin-top: 18px;
   display: block;
 }
 
-/* Logo Image */
 .logoMis {
-  margin-top: 30px;
+  margin-top: 35px;
   width: 100%;
   object-fit: contain;
-  object-position: left bottom; /* Logo menempel ke kiri bawah container-nya */
+  object-position: left bottom; 
   display: block;
 }
 

@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./IdCardPopup.module.css";
 import Button from "../../../Atoms/Button/Button";
 import IdCardFront from "../../IdCard/IdCardFront";
 import IdCardBack from "../../IdCard/IdCardBack";
 import ReactDOM from "react-dom";
+// Import API
+import { getStudentLatestApplication } from "../../../../services/api";
 
 // Icon Panah Sederhana (SVG Inline)
 const ArrowLeft = () => (
@@ -42,20 +44,76 @@ const ArrowRight = () => (
   </svg>
 );
 
-const IdCardPopup = ({ isOpen, onClose, studentData, sectionType }) => {
+const IdCardPopup = ({ isOpen, onClose, studentData }) => {
   const [currentView, setCurrentView] = useState("front"); // 'front' or 'back'
+
+  // State untuk data API dan Loading
+  const [cardData, setCardData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [idCardNumber, setIdCardNumber] = useState("");
+
+  // Fetch data saat popup open & ada ID student
+  useEffect(() => {
+    if (isOpen && studentData?.id) {
+      setLoading(true);
+      // Gunakan source='registration'
+      getStudentLatestApplication(studentData.id, "registration")
+        .then((res) => {
+          if (res?.success && res?.data?.idCardInfo) {
+            const info = res.data.idCardInfo;
+            setCardData(info);
+            // Set nomor kartu dari API
+            setIdCardNumber(info.card_number || "");
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch ID Card info", err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      // Reset card data jika ditutup atau ganti student
+      setCardData(null);
+      setIdCardNumber("");
+    }
+  }, [isOpen, studentData]);
 
   if (!isOpen) return null;
 
-  // Tentukan variant code ('ecp', 'ms', atau 'hs')
-  let variant = "ecp"; // Default
-  const type = sectionType ? sectionType.toLowerCase() : "";
+  // --- PERBAIKAN DI SINI ---
+  // Kita buat Initial Data dari props 'studentData' (camelCase)
+  // dan mengubahnya menjadi format API (snake_case) agar IdCardFront bisa membacanya
+  // selagi menunggu loading API selesai.
+  const initialData = {
+    first_name: studentData?.firstName,
+    last_name: studentData?.lastName,
+    student_id: studentData?.studentId,
+    photo_url: studentData?.photoUrl,
+    section_name: studentData?.sectionName,
+    nisn: studentData?.nisn,
+    place_of_birth: studentData?.placeOfBirth,
+    date_of_birth: studentData?.dateOfBirth,
+    school_year: studentData?.schoolYear,
+    // valid_until mungkin kosong di props, biarkan handling di Back component
+  };
 
-  if (type === "ms" || type.includes("middle")) {
+  // Prioritas Data:
+  // 1. Data dari API (cardData) jika sudah load.
+  // 2. Data dari Props (initialData) sebagai fallback agar tidak kosong.
+  const displayData = cardData || initialData;
+
+  // Tentukan variant
+  let variant = "ecp";
+  const sectionName = displayData?.section_name || "";
+  const type = sectionName.toLowerCase();
+
+  if (type.includes("middle")) {
     variant = "ms";
-  } else if (type === "hs" || type.includes("high")) {
+  } else if (type.includes("high")) {
     variant = "hs";
   }
+  // -------------------------
 
   // Handle Switch View
   const toggleView = () => {
@@ -65,7 +123,7 @@ const IdCardPopup = ({ isOpen, onClose, studentData, sectionType }) => {
   return ReactDOM.createPortal(
     <div className={styles.overlay}>
       <div className={styles.idCardPopup}>
-        {/* Header Section - Text berubah tergantung sisi kartu */}
+        {/* Header Section */}
         <div className={styles.headerTextGroup}>
           <div className={styles.adjustStudentPhoto}>
             {currentView === "front"
@@ -89,13 +147,26 @@ const IdCardPopup = ({ isOpen, onClose, studentData, sectionType }) => {
 
           {/* Area Kartu */}
           <div className={styles.cardPreviewWrapper}>
-            <div className={styles.cardScaleContainer}>
-              {currentView === "front" ? (
-                <IdCardFront data={studentData} variant={variant} />
-              ) : (
-                <IdCardBack data={studentData} variant={variant} />
-              )}
-            </div>
+            {loading && !cardData ? (
+              // Tampilkan loading text ATAU tetap tampilkan kartu dengan data props (pilihan UX)
+              // Disini saya biarkan render kartu dengan displayData (dari props) agar mulus
+              <div className={styles.cardScaleContainer}>
+                {currentView === "front" ? (
+                  <IdCardFront data={displayData} variant={variant} />
+                ) : (
+                  <IdCardBack data={displayData} variant={variant} />
+                )}
+              </div>
+            ) : (
+              <div className={styles.cardScaleContainer}>
+                {currentView === "front" ? (
+                  // Pass displayData yang sudah pasti snake_case
+                  <IdCardFront data={displayData} variant={variant} />
+                ) : (
+                  <IdCardBack data={displayData} variant={variant} />
+                )}
+              </div>
+            )}
           </div>
 
           {/* Tombol Kanan */}
@@ -104,7 +175,7 @@ const IdCardPopup = ({ isOpen, onClose, studentData, sectionType }) => {
           </button>
         </div>
 
-        {/* Indikator Halaman Kecil (Optional, untuk UX) */}
+        {/* Indikator Halaman */}
         <div className={styles.pageIndicator}>
           <span
             className={currentView === "front" ? styles.dotActive : styles.dot}
@@ -114,13 +185,14 @@ const IdCardPopup = ({ isOpen, onClose, studentData, sectionType }) => {
           ></span>
         </div>
 
-        {/* ID Number Box */}
-        <div className={styles.idCardNumberWrapper}>
-          <div className={styles.idCardNumberLabel}>ID Card number</div>
-          <div className={styles.idCardNumberValue}>
-            {studentData.studentId || "-"}
-          </div>
-        </div>
+        {/* Input Nomor Kartu */}
+        <input
+          type="text"
+          className={styles.idCardNumberInput}
+          placeholder="ID Card number"
+          value={idCardNumber}
+          onChange={(e) => setIdCardNumber(e.target.value)}
+        />
 
         {/* Footer Buttons */}
         <div className={styles.footer}>

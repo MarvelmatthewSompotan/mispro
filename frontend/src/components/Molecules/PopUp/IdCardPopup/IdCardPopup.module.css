@@ -11,40 +11,37 @@
   z-index: 9999;
 }
 
-/* Container Utama Popup */
 .idCardPopup {
   position: relative;
   border-radius: 10px;
   background-color: var(--secondary-background);
   width: 95%;
   max-width: 500px;
-  /* Max height agar tidak overflow di layar kecil */
   max-height: 95vh;
-  overflow-y: auto; /* Scroll jika layar sangat pendek */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px; /* Padding sedikit diperkecil */
+  padding: 24px;
   box-sizing: border-box;
-  gap: 16px; /* Gap diperkecil dari 24px */
+  gap: 16px;
   text-align: left;
   font-family: var(--font-primary);
   color: var(--main-text);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-/* Header Text */
 .headerTextGroup {
   align-self: stretch;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  min-height: 46px; /* Menjaga tinggi header stabil saat text warning hilang */
+  min-height: 46px;
 }
 
 .adjustStudentPhoto {
-  font-size: 18px; /* Font size sedikit disesuaikan */
+  font-size: 18px;
   line-height: 100%;
   font-weight: 600;
   color: var(--main-text);
@@ -57,7 +54,6 @@
   color: var(--red);
 }
 
-/* --- PREVIEW CONTAINER (Row Layout: Arrow - Card - Arrow) --- */
 .previewContainer {
   display: flex;
   flex-direction: row;
@@ -83,37 +79,27 @@
   background-color: #f0f0f0;
 }
 
-/* Wrapper Kartu */
 .cardPreviewWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Container visual kartu dibatasi agar scale bekerja sebagai layout boundary */
-  width: 260px; /* 398px * 0.6 = ~238px, kasih buffer dikit */
-  height: 380px; /* 631px * 0.6 = ~378px */
-  overflow: hidden; /* Hide overflow dari scale margin negatif */
+  width: 260px;
+  height: 380px;
+  overflow: hidden;
 }
 
 .cardScaleContainer {
-  /* Logika Scaling Baru: Lebih Kecil */
-  /* Ukuran Asli IdCardFront: 398px x 631px */
-  /* Target Scale: 0.6 (60%) */
-
   width: 398px;
   height: 631px;
   transform: scale(0.6);
   transform-origin: center top;
-
-  /* Kompensasi whitespace karena scaling */
-  /* 631px * (1 - 0.6) = 252.4px space kosong di bawah */
   margin-bottom: -252px;
-  /* margin-right/left auto handle centering */
+
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Shadow dipindah ke sini agar ikut scale visual */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Dots Indicator */
 .pageIndicator {
   display: flex;
   gap: 6px;
@@ -130,31 +116,26 @@
   background-color: var(--main-accent);
 }
 
-/* ID Card Number Input Box */
-.idCardNumberWrapper {
+.idCardNumberInput {
   align-self: stretch;
-  height: 44px; /* Tinggi sedikit diperkecil */
+  height: 44px;
   border-radius: 5px;
-  background-color: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  background-color: var(--main-background);
+  border: 1px solid transparent;
   padding: 0 16px;
   box-sizing: border-box;
+  font-family: var(--font-primary);
   font-size: 14px;
-  color: var(--main-grey);
+  color: var(--main-text);
+  outline: none;
+  transition: all 0.2s ease;
 }
 
-.idCardNumberLabel {
+.idCardNumberInput::placeholder {
+  color: var(--main-grey);
   font-weight: 400;
 }
 
-.idCardNumberValue {
-  font-weight: 600;
-  color: var(--main-text);
-}
-
-/* Footer Buttons */
 .footer {
   align-self: stretch;
   display: flex;
