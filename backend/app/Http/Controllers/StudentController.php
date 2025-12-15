@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Enrollment;
@@ -15,7 +14,6 @@ use App\Models\StudentDiscount;
 use App\Models\StudentGuardian;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
-use Illuminate\Support\Facades\Log;
 use App\Events\StudentStatusUpdated;
 use App\Models\ApplicationFormVersion;
 
@@ -504,7 +502,10 @@ class StudentController extends Controller
             ]);
         }
 
-        $latestVersion = ApplicationFormVersion::with(['applicationForm.enrollment.student'])
+        $latestVersion = ApplicationFormVersion::with([
+            'applicationForm.enrollment.student',
+            'applicationForm.enrollment.section'
+            ])
             ->whereHas('applicationForm.enrollment.student', function ($q) use ($id) {
                 $q->where('id', $id);
             })
@@ -519,11 +520,45 @@ class StudentController extends Controller
         }
 
         $dataSnapshot = $latestVersion->data_snapshot ? json_decode($latestVersion->data_snapshot, true) : [];
-        
-        $student = $latestVersion->applicationForm->enrollment->student ?? null;
+        $enrollment = $latestVersion->applicationForm->enrollment ?? null;
+        $student = $enrollment->student ?? null;
 
         // Extract request_data from snapshot
         $requestData = $dataSnapshot['request_data'] ?? [];
+        
+        // For ID CARD
+        $schoolYearRaw = $requestData['school_year'] ?? null;
+        $validUntil = null;
+
+        if ($schoolYearRaw) {
+            $parts = explode('/', $schoolYearRaw);
+            if (count($parts) >= 2) {
+                $endYear = trim($parts[1]);  
+                $validUntil = "31/07/" . $endYear; 
+            }
+        }
+
+        $firstName = $requestData['first_name'] ?? '';
+        $middleName = $requestData['middle_name'] ?? '';
+        $lastName = $requestData['last_name'] ?? '';
+
+        $realSectionId = $enrollment->section_id ?? $requestData['section_id'] ?? '';
+        $realSectionName = $enrollment->section->name ?? '';
+
+        $idCardData = [
+            'first_name'     => $firstName,
+            'middle_name'    => $middleName,
+            'last_name'      => $lastName,
+            'student_id'     => $student->student_id ?? $requestData['student_id'] ?? '',
+            'nisn'           => $requestData['nisn'] ?? '',
+            'place_of_birth' => $requestData['place_of_birth'] ?? '',
+            'date_of_birth'  => $requestData['date_of_birth'] ?? '',
+            'section_name'   => $realSectionName, 
+            'school_year'    => $schoolYearRaw,
+            'valid_until'    => $validUntil, 
+            'photo_url'      => $requestData['photo_url'] ?? '',
+            'card_number'    => $student->card_number ?? null, 
+        ];
         
         $formattedData = [
             'studentInfo' => [
@@ -635,6 +670,7 @@ class StudentController extends Controller
             'student_id' => $student->student_id ?? null,
             'application_id' => $latestVersion->application_id,
             'version_id' => $latestVersion->version_id,
+            'idCardInfo' => $idCardData, 
         ];
 
         return response()->json([
@@ -1154,4 +1190,44 @@ class StudentController extends Controller
         }
     }
 
+    public function storeCardNumber(Request $request, $id)
+    {
+        $request->validate([
+            'card_number' => 'required|string|max:50|unique:students,card_number,' . $id,
+        ]);
+
+        try {
+            $student = Student::findOrFail($id);
+
+            $oldCardNumber = $student->card_number;
+            $student->card_number = $request->card_number;
+            $student->save();
+
+            $this->auditTrail->log('generate_id_card', [
+                'student_id' => $student->student_id,
+                'changes' => [
+                    'card_number' => [
+                        'from' => $oldCardNumber,
+                        'to' => $request->card_number
+                    ]
+                ],
+                'description' => 'ID Card number generated/updated.'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Card number saved successfully.',
+                'data' => [
+                    'card_number' => $student->card_number
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save card number.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
