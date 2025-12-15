@@ -112,7 +112,7 @@
 
 .checkInText {
   font-family: var(--font-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-decoration: underline;
   font-size: 16px;
   position: relative;
@@ -133,4 +133,35 @@
 
 .actionIcon:active {
   transform: scale(0.95); 
+}
+
+.sessionSwitcher {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  padding: 3px;
+  background-color: var(--main-background);
+  border-radius: 6px;
+}
+
+.sessionButton {
+  flex: 1;
+  padding: 12px 0;
+  text-align: center;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-primary);
+  cursor: pointer;
+  color: var(--main-grey);
+}
+
+.activeSession {
+  background-color: var(--secondary-accent);
+  color: var(--main-accent);
+}
+
+.tablePlaceholder {
+  width: 100%;
+  min-height: 300px;
 }

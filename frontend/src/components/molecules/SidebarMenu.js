@@ -3,18 +3,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import Icon from "../atoms/Icon";
-import useAuth from "../../hooks/useAuth"; // <-- DITAMBAHKAN
-import homeIcon from "../../assets/Home-icon.png";
-import studentIcon from "../../assets/StudentList-icon.png";
-import logbookIcon from "../../assets/logbook.png";
-import teacherIcon from "../../assets/TeacherList-icon.png";
-import homeroomIcon from "../../assets/HomeroomList-icon.png";
-import registrationIcon from "../../assets/Registration-icon.png";
-import usersIcon from "../../assets/user.png";
+import useAuth from "../../hooks/useAuth";
+import homeIcon from "../../assets/Home_icon.svg";
+import studentIcon from "../../assets/Student-List_icon.svg";
+import logbookIcon from "../../assets/Logbook_icon.svg";
+import teacherIcon from "../../assets/Teacher-List_icon.svg";
+import homeroomIcon from "../../assets/Homeroom-List_icon.svg";
+import registrationIcon from "../../assets/Registration_icon.svg";
+import usersIcon from "../../assets/User_icon.svg";
 import gateAttendanceIcon from "../../assets/GateAttendence_icon.svg";
 import "../styles/SidebarMenu.css";
 
-// Nama variabel diubah agar lebih jelas
 const allMenus = [
   { to: "/home", icon: homeIcon, label: "Home" },
   { to: "/students", icon: studentIcon, label: "Student List" },
@@ -26,38 +25,29 @@ const allMenus = [
   { to: "/users", icon: usersIcon, label: "Users" },
 ];
 
-// Terima prop 'isOpen' dari komponen Main.js
 const SidebarMenu = ({ isOpen }) => {
   const { isAdmin } = useAuth();
   const asideRef = useRef(null);
   const [isIconOnly, setIsIconOnly] = useState(false);
 
-  // <-- DITAMBAHKAN: Logika untuk memfilter menu -->
   const filteredMenus = allMenus.filter((menu) => {
-    // Jika menu adalah '/users', periksa apakah pengguna adalah admin
     if (menu.to === "/users") {
       return isAdmin();
     }
-    // Jika bukan menu '/users', tampilkan seperti biasa
     return true;
   });
-  // <-- BATAS PENAMBAHAN -->
 
   useEffect(() => {
-    // Pakai ResizeObserver + window resize utk memutuskan kapan "icon-only".
     const decideCompact = () => {
       const vw = Math.max(
         document.documentElement.clientWidth,
         window.innerWidth || 0
       );
-      // 1) Mode icon-only jika layar sangat sempit
       const compact = vw < 560;
       setIsIconOnly(compact);
       if (compact) document.body.classList.add("sidebar-compact");
       else document.body.classList.remove("sidebar-compact");
 
-      // 2) Lebar dinamis agar sidebar SELALU bisa muncul:
-      //    min 56px (ikon saja), max 280px, dan tak mepet ke tepi (beri buffer 16px)
       const MIN = 56;
       const MAX = 280;
       const buffer = 16;

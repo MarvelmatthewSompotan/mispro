@@ -5,11 +5,16 @@ import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
 import gearIcon from "../../../assets/Circle-Gear_icon.svg";
 import checkInIcon from "../../../assets/check-in_icon.svg";
 import checkOutIcon from "../../../assets/check-out_icon.svg";
+import CurrentSessionTable from "./CurrentSessionTable/CurrentSessionTable";
+import PastSessionTable from "./PastSessionTable/PastSessionTable";
 
 const GateAttendance = () => {
   const [search, setSearch] = useState("");
   const [isCheckedIn, setIsCheckedIn] = useState(false);
-  
+
+  // ✅ SESSION STATE
+  const [activeSession, setActiveSession] = useState("current");
+
   const handleResetClick = () => {
     setSearch("");
   };
@@ -20,12 +25,13 @@ const GateAttendance = () => {
 
   return (
     <div className={styles.gateAttendanceContainer}>
-      
+
+      {/* ================= HEADER ================= */}
       <div className={styles.headerContainer}>
-        
+
         <div className={styles.leftSection}>
           <h1 className={styles.pageTitle}>Gate Attendance</h1>
-          
+
           <div className={styles.searchAndFilterContainer}>
             <div className={styles.searchContainer}>
               <input
@@ -41,24 +47,18 @@ const GateAttendance = () => {
           </div>
         </div>
 
-        {/* Right Section: Settings & Toggle */}
         <div className={styles.rightSection}>
           <div className={styles.settingIconContainer}>
-            <img 
-              src={gearIcon} 
-              alt="Settings" 
-              className={styles.settingIcon} 
-            />
+            <img src={gearIcon} alt="Settings" className={styles.settingIcon} />
           </div>
 
           <div className={styles.checkInOutContainer}>
-            <img 
-              src={isCheckedIn ? checkOutIcon : checkInIcon} 
+            <img
+              src={isCheckedIn ? checkOutIcon : checkInIcon}
               alt={isCheckedIn ? "Check Out" : "Check In"}
-              className={styles.actionIcon} 
+              className={styles.actionIcon}
               onClick={handleCheckInOutClick}
             />
-            
             <span className={styles.checkInText}>
               {isCheckedIn ? "Check-Out" : "Check-In"}
             </span>
@@ -66,8 +66,40 @@ const GateAttendance = () => {
         </div>
 
       </div>
-      
-      {/* Konten halaman lainnya... */}
+
+      {/* ================= SESSION SWITCH ================= */}
+      <div className={styles.sessionSwitcher}>
+        <div
+          className={`${styles.sessionButton} ${
+            activeSession === "current" ? styles.activeSession : ""
+          }`}
+          onClick={() => setActiveSession("current")}
+        >
+          Current Session
+        </div>
+
+        <div
+          className={`${styles.sessionButton} ${
+            activeSession === "past" ? styles.activeSession : ""
+          }`}
+          onClick={() => setActiveSession("past")}
+        >
+          Past Sessions
+        </div>
+      </div>
+
+      {activeSession === "current" && (
+        <div className={styles.tablePlaceholder}>
+          {activeSession === "current" && <CurrentSessionTable />}
+        </div>
+      )}
+
+      {activeSession === "past" && (
+        <div className={styles.tablePlaceholder}>
+          {activeSession === "past" && <PastSessionTable />}
+        </div>
+      )}
+
     </div>
   );
 };

@@ -25,8 +25,6 @@ function Print() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // [KEMBALIKAN 1/3]
-  // Ambil kembali 'otherDetail' dari location.state
   const {
     applicationId,
     version,
@@ -142,36 +140,29 @@ function Print() {
 
         const apiData = previewResp.data;
 
-        // [KEMBALIKAN 2/3]
-        // Gabungkan data API dengan data 'otherDetail' yang dititipkan
         if (otherDetail && apiData && apiData.request_data) {
           apiData.request_data = {
-            ...apiData.request_data, // Data lama dari API
-            ...otherDetail, // Timpa/tambah dengan data dari form
+            ...apiData.request_data,
+            ...otherDetail,
           };
         }
         const discountList = optionsResp.discount_types || [];
 
-        // Cek jika data dan daftar diskon ada
         if (apiData && apiData.request_data && discountList.length > 0) {
-          // Ambil ID diskon dari data
           const discountId = apiData.request_data.discount_name;
 
           if (discountId) {
-            // Cari nama diskon yang sesuai berdasarkan ID
             const foundDiscount = discountList.find(
               (d) => String(d.discount_type_id) === String(discountId)
             );
 
-            // Jika ketemu, ganti ID dengan NAMA di data yang akan di-set
             if (foundDiscount) {
               apiData.request_data.discount_name = foundDiscount.name;
             }
           }
         }
-        // --- [AKHIR PERUBAHAN] ---
 
-        setPreviewData(apiData); // Set data yang sudah digabungkan
+        setPreviewData(apiData);
         console.log(
           "Data yang diterima dari getRegistrationPreview:",
           apiData.request_data
@@ -196,8 +187,6 @@ function Print() {
       console.error("No applicationId provided in navigation state");
       setLoading(false);
     }
-    // [KEMBALIKAN 3/3]
-    // Tambahkan 'otherDetail' kembali ke dependency array
   }, [applicationId, version, otherDetail]);
 
   if (loading)
@@ -291,7 +280,6 @@ function Print() {
         </Button>
       </div>
 
-      {/* Konten PDF */}
       <div
         ref={printRef}
         className={pageSize === "A4" ? styles.printPageA4 : styles.printPageF4}
