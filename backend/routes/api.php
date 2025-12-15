@@ -57,6 +57,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
     Route::post('/auto-graduate/preview', [StudentController::class, 'autoGraduatePreview']);
     Route::post('/auto-graduate/confirm', [StudentController::class, 'autoGraduateConfirm']);
+    Route::post('/{id}/card-number', [StudentController::class, 'storeCardNumber']);
   });
 });
 

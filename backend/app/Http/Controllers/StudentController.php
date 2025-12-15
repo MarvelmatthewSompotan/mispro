@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use App\Events\StudentStatusUpdated;
 use App\Models\ApplicationFormVersion;
+use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller
 {
@@ -1192,9 +1193,17 @@ class StudentController extends Controller
 
     public function storeCardNumber(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'card_number' => 'required|string|max:50|unique:students,card_number,' . $id,
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed. Please check your input.',
+                'errors'  => $validator->errors() 
+            ], 422);
+        }
 
         try {
             $student = Student::findOrFail($id);
