@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import styles from "./StudentProfileHeader.module.css";
 import Button from "../../../../Atoms/Button/Button";
 import placeholder from "../../../../../assets/user.svg";
+import IdCardPopup from "../../../../Molecules/PopUp/IdCardPopup/IdCardPopup";
 
 const getStatusVariant = (status) => {
   if (!status) return "not-graduated";
@@ -37,6 +38,7 @@ const StudentProfileHeader = ({
   onStatusChange,
   onDownloadPdfClick,
 }) => {
+  const [isIdCardPopupOpen, setIdCardPopupOpen] = useState(false);
   const [isStatusDropdownOpen, setStatusDropdownOpen] = useState(false);
 
   const hasPreview = !!photoPreview;
@@ -48,6 +50,34 @@ const StudentProfileHeader = ({
     hasPreview || hasFormDataUrl
       ? styles.profileImage
       : styles.profilePlaceholder;
+
+  const idCardData = {
+    firstName: studentInfo.first_name,
+    lastName: studentInfo.last_name,
+    studentId: formData.student_id || studentInfo.student_id,
+    photoUrl: photoPreview || formData.photo_url,
+    nisn: studentInfo.nisn,
+    placeOfBirth: studentInfo.place_of_birth,
+    dateOfBirth: studentInfo.date_of_birth,
+    schoolYear: formData.school_year,
+    // [PERBAIKAN 1]: Perbaiki logika sectionName berdasarkan ID 1, 2, 3, 4
+    sectionName: (() => {
+      const secId = parseInt(formData.section_id, 10);
+      // Asumsi mapping dari StudentProfile.js: 1=ECP, 2=Elem, 3=Middle, 4=High
+      if (secId === 3) return "Middle School";
+      if (secId === 4) return "High School";
+      return "Elementary School"; // Covers ID 1 (ECP) & 2 (Elementary)
+    })(),
+  };
+
+  const getSectionType = () => {
+    const secId = parseInt(formData.section_id, 10);
+    // Asumsi mapping: 3 = MS, 4 = HS, Sisanya = ECP/ES
+    if (secId === 3) return "ms";
+    if (secId === 4) return "hs";
+    return "ecp"; // Default untuk ID 1 & 2
+  };
+
   return (
     <div className={styles.profileHeader}>
       {/* Kolom Kiri: Foto */}
@@ -232,10 +262,9 @@ const StudentProfileHeader = ({
               >
                 Edit
               </Button>
-              {/* --- [BARU] Tombol New ID Card (Belum difungsikan) --- */}
               <Button
                 className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
-                onClick={() => {}} // Belum difungsikan
+                onClick={() => setIdCardPopupOpen(true)}
                 variant="solid"
               >
                 New ID Card
@@ -245,6 +274,14 @@ const StudentProfileHeader = ({
           )
         )}
       </div>
+
+      {/* Render ID Card Popup di sini */}
+      <IdCardPopup
+        isOpen={isIdCardPopupOpen}
+        onClose={() => setIdCardPopupOpen(false)}
+        studentData={idCardData}
+        sectionType={getSectionType()}
+      />
     </div>
   );
 };

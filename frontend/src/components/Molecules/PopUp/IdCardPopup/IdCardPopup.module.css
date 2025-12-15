@@ -1,0 +1,181 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Container Utama Popup */
+.idCardPopup {
+  position: relative;
+  border-radius: 10px;
+  background-color: var(--secondary-background);
+  width: 95%;
+  max-width: 500px;
+  /* Max height agar tidak overflow di layar kecil */
+  max-height: 95vh;
+  overflow-y: auto; /* Scroll jika layar sangat pendek */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px; /* Padding sedikit diperkecil */
+  box-sizing: border-box;
+  gap: 16px; /* Gap diperkecil dari 24px */
+  text-align: left;
+  font-family: var(--font-primary);
+  color: var(--main-text);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Header Text */
+.headerTextGroup {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 46px; /* Menjaga tinggi header stabil saat text warning hilang */
+}
+
+.adjustStudentPhoto {
+  font-size: 18px; /* Font size sedikit disesuaikan */
+  line-height: 100%;
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.makeSureTo {
+  font-size: 13px;
+  line-height: 130%;
+  font-weight: 500;
+  color: var(--red);
+}
+
+/* --- PREVIEW CONTAINER (Row Layout: Arrow - Card - Arrow) --- */
+.previewContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.navButton:hover {
+  background-color: #f0f0f0;
+}
+
+/* Wrapper Kartu */
+.cardPreviewWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Container visual kartu dibatasi agar scale bekerja sebagai layout boundary */
+  width: 260px; /* 398px * 0.6 = ~238px, kasih buffer dikit */
+  height: 380px; /* 631px * 0.6 = ~378px */
+  overflow: hidden; /* Hide overflow dari scale margin negatif */
+}
+
+.cardScaleContainer {
+  /* Logika Scaling Baru: Lebih Kecil */
+  /* Ukuran Asli IdCardFront: 398px x 631px */
+  /* Target Scale: 0.6 (60%) */
+
+  width: 398px;
+  height: 631px;
+  transform: scale(0.6);
+  transform-origin: center top;
+
+  /* Kompensasi whitespace karena scaling */
+  /* 631px * (1 - 0.6) = 252.4px space kosong di bawah */
+  margin-bottom: -252px;
+  /* margin-right/left auto handle centering */
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Shadow dipindah ke sini agar ikut scale visual */
+}
+
+/* Dots Indicator */
+.pageIndicator {
+  display: flex;
+  gap: 6px;
+  margin-top: -5px;
+}
+.dot,
+.dotActive {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+}
+.dotActive {
+  background-color: var(--main-accent);
+}
+
+/* ID Card Number Input Box */
+.idCardNumberWrapper {
+  align-self: stretch;
+  height: 44px; /* Tinggi sedikit diperkecil */
+  border-radius: 5px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: var(--main-grey);
+}
+
+.idCardNumberLabel {
+  font-weight: 400;
+}
+
+.idCardNumberValue {
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+/* Footer Buttons */
+.footer {
+  align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.cancelButton {
+  min-width: 90px;
+  justify-content: center;
+}
+
+.exportButton {
+  min-width: 130px;
+  justify-content: center;
+  background-color: var(--main-accent);
+}

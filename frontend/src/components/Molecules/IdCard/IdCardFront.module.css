@@ -1,0 +1,146 @@
+/* Container Utama */
+.idCardBase {
+  width: 398px;
+  height: 631px;
+  position: relative;
+  background-color: var(--secondary-background);
+  overflow: hidden;
+  text-align: left;
+  font-family: var(--font-primary);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Image Static (Gedung) */
+.headerBg {
+  position: absolute;
+  top: 0px;
+  left: -160px;
+  width: 643px;
+  height: 298px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* === BAGIAN FOTO (Fixed Position Global) === */
+.photoBase {
+  position: absolute;
+  /* Koordinat High School sebagai standar */
+  top: 11px;
+  left: 166px;
+  width: 252.6px;
+  height: 336px;
+  object-fit: cover;
+  object-position: top center;
+  z-index: 2;
+  background-color: transparent;
+  border-radius: 8px 8px 0 0;
+}
+
+/* === VARIAN WARNA TEKS (Hanya Warna) === */
+.variantEcp {
+  color: var(--text-accent); /* Putih */
+}
+.variantMs {
+  color: var(--text-accent); /* Putih */
+}
+.variantHs {
+  color: #12295e; /* Navy Blue */
+}
+
+/* --- LAYOUT BAWAH --- */
+.bottomWrapper {
+  position: absolute;
+  top: 288px;
+  left: 0px;
+  width: 398px;
+  height: 344px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.waveBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.contentOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 60px 14px 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lastName {
+  font-weight: var(--font-weight-semibold);
+  font-size: 36px;
+  line-height: 100%;
+}
+
+.firstName {
+  font-size: 24px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 120%;
+  margin-top: 8px;
+}
+
+.studentId {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Footer Group Container */
+.footerGroup {
+  display: flex;
+  align-items: flex-end; /* Logo dan QR sejajar bawah */
+  justify-content: space-between;
+}
+
+/* Bagian Kiri Footer (Section Text & Logo) */
+.schoolInfo {
+  width: 248px;
+  display: flex;
+  flex-direction: column;
+  
+}
+
+/* Teks Section (High School / Middle School) */
+.sectionName {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 100%; /* Pastikan line-height rapat */
+  margin-top: 18px;
+  display: block;
+}
+
+/* Logo Image */
+.logoMis {
+  margin-top: 30px;
+  width: 100%;
+  object-fit: contain;
+  object-position: left bottom; /* Logo menempel ke kiri bawah container-nya */
+  display: block;
+}
+
+.qrCode {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  background-color: #fff;
+  padding: 4px;
+}
