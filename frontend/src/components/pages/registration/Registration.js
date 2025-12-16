@@ -16,8 +16,6 @@ import {
 } from '../../../services/api';
 
 const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
-  // Logic status style dihapus/tidak digunakan di render karena diganti tombol Edit
-  // const status = registration.application_status?.toLowerCase() || 'confirmed';
 
   return (
     <div
@@ -38,11 +36,9 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
         {registration.section_name || 'N/A'}
       </div>
       
-      {/* --- PERUBAHAN Task 1: Kolom Type (Placeholder 'New') --- */}
       <div className={styles.tableCell}>
         {registration.student_type || 'New'}
       </div>
-      {/* --------------------------------------------------------- */}
 
       {/* --- PERUBAHAN Task 3 & 4: Ganti Status menjadi Edit Button & Tetap Trigger Popup --- */}
       <div className={styles.tableCell}>
@@ -50,7 +46,7 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
           className={styles.tableEditButton}
           onClick={(e) => {
             e.stopPropagation();
-            onStatusClick(registration); // Task 4: Tetap memanggil fungsi popup
+            onStatusClick(registration);
           }}
         >
           <span className={styles.editButtonText}>Edit</span>
@@ -61,7 +57,6 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
           />
         </div>
       </div>
-      {/* ---------------------------------------------------------------------------------- */}
     </div>
   );
 };
@@ -432,22 +427,18 @@ const Registration = () => {
             currentFilterValue={filters.section}
           />
           
-          {/* --- PERUBAHAN Task 1: Header Baru 'Type' --- */}
           <ColumnHeader
             title='Type'
-            hasSort={false} // Integrasi belum ada, disable sort
-            hasFilter={false} // Integrasi belum ada, disable filter
+            hasSort={true}
+            hasFilter={true}
           />
-          {/* ------------------------------------------- */}
 
-          {/* --- PERUBAHAN Task 2: Header Status Kosong & Disabled --- */}
           <ColumnHeader
-            title='' // Title dikosongkan
-            hasSort={false} // Disable Sort
-            hasFilter={false} // Disable Filter
+            title=''
+            hasSort={false}
+            hasFilter={false}
             fieldKey='application_status'
           />
-          {/* -------------------------------------------------------- */}
         </div>
 
         <div className={styles.tableBody}>

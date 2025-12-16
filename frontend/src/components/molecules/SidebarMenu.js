@@ -1,5 +1,3 @@
-// src/components/molecules/SidebarMenu.js
-
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import Icon from "../atoms/Icon";

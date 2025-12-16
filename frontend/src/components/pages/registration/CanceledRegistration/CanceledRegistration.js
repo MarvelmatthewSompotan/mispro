@@ -8,7 +8,7 @@ import Button from '../../../atoms/Button';
 import ResetFilterButton from '../../../atoms/resetFilterButton/ResetFilterButton';
 
 import {
-  getRegistrations,
+  getCancelledRegistrations,
   getRegistrationOptions,
 } from '../../../../services/api';
 
@@ -20,39 +20,46 @@ const CanceledRegistrationRow = ({ registration, onRowClick }) => {
     >
       {/* 1. Registration Date */}
       <div className={styles.tableCell}>
-        {registration.registration_date ? new Date(registration.registration_date).toLocaleDateString('id-ID', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        }) : '-'}
+        {registration.registration_date
+          ? new Date(registration.registration_date).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })
+          : '-'}
       </div>
-      
+
       {/* 2. Cancellation Date */}
       <div className={styles.tableCell}>
-        {registration.cancellation_date 
-          ? new Date(registration.cancellation_date).toLocaleDateString('id-ID', {
-              day: 'numeric', month: 'long', year: 'numeric'
-            }) 
+        {registration.cancelled_at
+          ? new Date(registration.cancelled_at).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })
           : '-'}
       </div>
 
       {/* 3. Student Name */}
       <div className={styles.tableCell}>{registration.full_name}</div>
-      
+
       {/* 4. Grade */}
       <div className={styles.tableCell}>{registration.grade || 'N/A'}</div>
-      
+
       {/* 5. Section */}
-      <div className={styles.tableCell}>{registration.section_name || 'N/A'}</div>
-      
-      {/* 6. Type */}
       <div className={styles.tableCell}>
-        {registration.student_type || '-'}
+        {registration.section || registration.section_name || 'N/A'}
       </div>
+
+      {/* 6. Type */}
+      <div className={styles.tableCell}>{registration.student_status || '-'}</div>
 
       {/* 7. Notes */}
       <div className={styles.tableCell}>
-        {registration.cancellation_reason || '-'}
+        {registration.notes ||
+          registration.application_form?.notes ||
+          registration.cancellation_notes ||
+          '-'}
       </div>
     </div>
   );
@@ -65,8 +72,6 @@ const CanceledRegistration = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [perPage] = useState(25);
-  
-  const CANCELED_STATUS_ID = 'Cancelled'; 
 
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({});
@@ -74,6 +79,10 @@ const CanceledRegistration = () => {
   const [filterOptions, setFilterOptions] = useState({
     sections: [],
     classes: [],
+    studentType: [
+      { id: 'New', name: 'New' },
+      { id: 'Old', name: 'Old' },
+    ],
   });
   const fetchControllerRef = useRef(null);
 
@@ -87,17 +96,34 @@ const CanceledRegistration = () => {
       fetchControllerRef.current?.abort();
       fetchControllerRef.current = controller;
 
-      const allParams = {
-        ...currentFilters,
-        status: CANCELED_STATUS_ID,
+      const mappedFilters = {
         search: search || undefined,
+        search_name: currentFilters.search_name || undefined,
+
+        grade: currentFilters.grade || undefined,
+        section: currentFilters.section || undefined,
+
+        reg_start_date: currentFilters.reg_start_date || undefined,
+        reg_end_date: currentFilters.reg_end_date || undefined,
+
+        cancel_start_date: currentFilters.cancel_start_date || undefined,
+        cancel_end_date: currentFilters.cancel_end_date || undefined,
+
+        filter_notes: currentFilters.filter_notes || undefined,
+
+        student_status: currentFilters.student_status || undefined,
+      };
+
+      const allParams = {
+        ...mappedFilters,
         sort: currentSorts.length > 0 ? currentSorts : undefined,
         page: page,
         per_page: perPage,
       };
 
       try {
-        const res = await getRegistrations(allParams, { signal });
+        const res = await getCancelledRegistrations(allParams, { signal });
+
         setRegistrationData(res.data.data || []);
         setTotalPages(res.data.last_page || 1);
         setCurrentPage(res.data.current_page || 1);
@@ -133,7 +159,7 @@ const CanceledRegistration = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-        fetchRegistrations(filters, 1, sorts);
+      fetchRegistrations(filters, 1, sorts);
     }, 400);
     return () => {
       clearTimeout(timer);
@@ -159,14 +185,25 @@ const CanceledRegistration = () => {
   const handleFilterChange = (filterKey, selectedValue) => {
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters };
-      if (filterKey === 'date_range' && Array.isArray(selectedValue)) {
+
+      if (filterKey === 'reg_date_range' && Array.isArray(selectedValue)) {
         const [startDate, endDate] = selectedValue;
         if (startDate || endDate) {
-          newFilters['start_date'] = startDate || undefined;
-          newFilters['end_date'] = endDate || undefined;
+          newFilters['reg_start_date'] = startDate || undefined;
+          newFilters['reg_end_date'] = endDate || undefined;
         } else {
-          delete newFilters['start_date'];
-          delete newFilters['end_date'];
+          delete newFilters['reg_start_date'];
+          delete newFilters['reg_end_date'];
+        }
+        delete newFilters[filterKey];
+      } else if (filterKey === 'cancel_date_range' && Array.isArray(selectedValue)) {
+        const [startDate, endDate] = selectedValue;
+        if (startDate || endDate) {
+          newFilters['cancel_start_date'] = startDate || undefined;
+          newFilters['cancel_end_date'] = endDate || undefined;
+        } else {
+          delete newFilters['cancel_start_date'];
+          delete newFilters['cancel_end_date'];
         }
         delete newFilters[filterKey];
       } else {
@@ -247,7 +284,6 @@ const CanceledRegistration = () => {
 
       <div className={styles.tableContainer}>
         <div className={styles.tableHeaderGrid}>
-          {/* 1. Registration Date */}
           <ColumnHeader
             title='Registration Date'
             hasSort={true}
@@ -256,20 +292,22 @@ const CanceledRegistration = () => {
             onSort={handleSortChange}
             hasFilter={true}
             filterType='date-range'
-            filterKey='date_range'
+            filterKey='reg_date_range'
             onFilterChange={handleFilterChange}
-            currentFilterValue={[filters.start_date, filters.end_date]}
+            currentFilterValue={[filters.reg_start_date, filters.reg_end_date]}
           />
-           {/* 2. Cancellation Date */}
-           <ColumnHeader
+          <ColumnHeader
             title='Cancellation Date'
             hasSort={true}
-            fieldKey='cancellation_date'
-            sortOrder={getSortOrder('cancellation_date')}
+            fieldKey='cancelled_at'
+            sortOrder={getSortOrder('cancelled_at')}
             onSort={handleSortChange}
             hasFilter={true}
+            filterType='date-range'
+            filterKey='cancel_date_range'
+            onFilterChange={handleFilterChange}
+            currentFilterValue={[filters.cancel_start_date, filters.cancel_end_date]}
           />
-          {/* 3. Student Name */}
           <ColumnHeader
             title='Student Name'
             hasSort={true}
@@ -282,7 +320,6 @@ const CanceledRegistration = () => {
             onFilterChange={handleFilterChange}
             currentFilterValue={filters.search_name}
           />
-          {/* 4. Grade */}
           <ColumnHeader
             title='Grade'
             hasSort={true}
@@ -297,7 +334,6 @@ const CanceledRegistration = () => {
             labelKey='grade'
             currentFilterValue={filters.grade}
           />
-          {/* 5. Section */}
           <ColumnHeader
             title='Section'
             hasSort={true}
@@ -312,19 +348,29 @@ const CanceledRegistration = () => {
             labelKey='name'
             currentFilterValue={filters.section}
           />
-          {/* 6. Type */}
           <ColumnHeader
             title='Type'
-            hasSort={true} 
-            fieldKey='student_type'
-            sortOrder={getSortOrder('student_type')}
+            hasSort={true}
+            fieldKey='student_status'
+            sortOrder={getSortOrder('student_status')}
             onSort={handleSortChange}
+            hasFilter={true}
+            filterKey='student_status'
+            onFilterChange={handleFilterChange}
+            filterOptions={filterOptions.studentType}
+            valueKey='id'
+            labelKey='name'
+            currentFilterValue={filters.student_status}
           />
-          {/* 7. Notes */}
           <ColumnHeader
             title='Notes'
             hasSort={false}
             fieldKey='notes'
+            hasFilter={true}
+            filterType='search'
+            filterKey='filter_notes'
+            onFilterChange={handleFilterChange}
+            currentFilterValue={filters.filter_notes}
           />
         </div>
 
@@ -335,7 +381,16 @@ const CanceledRegistration = () => {
             registrationData.map((row, idx) => (
               <CanceledRegistrationRow
                 key={idx}
-                registration={row}
+                registration={{
+                  ...row,
+                  // fallback mapping dari struktur backend yang umum
+                  notes:
+                    row.notes ||
+                    row.application_form?.notes ||
+                    row.cancellation_notes ||
+                    null,
+                  student_status: row.student_status,
+                }}
                 onRowClick={handleRowClick}
               />
             ))
