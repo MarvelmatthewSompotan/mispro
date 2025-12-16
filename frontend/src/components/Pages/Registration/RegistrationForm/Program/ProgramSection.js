@@ -357,48 +357,68 @@ const ProgramSection = ({ onDataChange, sharedData, prefill, errors }) => {
               Program
             </div>
           </div>
-          {programOptions.map((option) => (
-            <div key={option.value} className={styles.optionItem}>
-              <label
-                className={styles.radioLabel}
-                onClick={(e) => handleProgramChange(e, option.value)}
-              >
-                <input
-                  type="radio"
-                  name="program"
-                  value={option.value}
-                  checked={selectedProgram === option.value}
-                  readOnly
-                  className={styles.hiddenRadio}
-                />
-                <span className={styles.radioButton}>
-                  <span className={styles.radioButtonCircle} />
-                  {selectedProgram === option.value && (
-                    <span className={styles.radioButtonSelected} />
-                  )}
-                </span>
-                <span className={styles.label}>{option.label}</span>
-                {option.value === OTHER && selectedProgram === OTHER && (
+          {programOptions.map((option) => {
+            const isOther = option.value === OTHER;
+            const isSelected = selectedProgram === option.value;
+            // Cek error khusus untuk field Other ini
+            const isError = isOther && errors?.program_other && !programOther;
+
+            return (
+              <div key={option.value} className={styles.optionItem}>
+                <label
+                  className={styles.radioLabel}
+                  onClick={(e) => handleProgramChange(e, option.value)}
+                >
                   <input
-                    className={styles.valueRegular}
-                    type="text"
-                    value={programOther}
-                    onBlur={handleProgramOtherBlur}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={handleProgramOtherChange}
-                    placeholder="Enter other program"
-                    style={{
-                      marginLeft: 12,
-                      padding: 0,
-                      border: "none",
-                      background: "transparent",
-                      borderBottom: "1px solid #ccc",
-                    }}
+                    type="radio"
+                    name="program"
+                    value={option.value}
+                    checked={isSelected}
+                    readOnly
+                    className={styles.hiddenRadio}
                   />
-                )}
-              </label>
-            </div>
-          ))}
+                  <span className={styles.radioButton}>
+                    <span className={styles.radioButtonCircle} />
+                    {isSelected && (
+                      <span className={styles.radioButtonSelected} />
+                    )}
+                  </span>
+
+                  <span className={styles.label}>{option.label}</span>
+
+                  {/* INPUT LANGSUNG DISINI AGAR SEJAJAR */}
+                  {isOther && isSelected && (
+                    <input
+                      // Pakai class inputError jika error
+                      className={`${styles.valueRegular} ${
+                        isError ? styles.inputError : ""
+                      }`}
+                      type="text"
+                      value={programOther}
+                      onBlur={handleProgramOtherBlur}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={handleProgramOtherChange}
+                      // Ganti teks placeholder jika error
+                      placeholder={
+                        isError
+                          ? "Specify the program"
+                          : "Enter other program"
+                      }
+                      style={{
+                        marginLeft: 12,
+                        padding: 0,
+                        background: "transparent",
+                        border: "none",
+                        // Border default abu-abu, kalau error biar CSS yang handle
+                        borderBottom: isError ? "" : "1px solid #ccc",
+                        width: "200px",
+                      }}
+                    />
+                  )}
+                </label>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

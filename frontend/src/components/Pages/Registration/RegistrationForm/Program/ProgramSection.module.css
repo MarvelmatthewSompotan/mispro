@@ -88,13 +88,10 @@
 }
 
 @keyframes grow-in {
-  /* Tahap Awal: Mulai dari ukuran 0 (tidak terlihat) */
   from {
     transform: scale(0);
     opacity: 0;
   }
-
-  /* Tahap Akhir: Selesai di ukuran normal */
   to {
     transform: scale(1);
     opacity: 1;
@@ -256,4 +253,13 @@ textarea::placeholder {
 .programSectionErrorLabel {
   color: var(--red) !important;
   font-weight: var(--font-weight-semibold);
+}
+
+.inputError {
+  border-bottom: 1px solid var(--red) !important;
+}
+
+.inputError::placeholder {
+  color: var(--red) !important;
+  opacity: 1;
 }

@@ -762,7 +762,7 @@ const StudentInformationSection = ({
                     value={kitas}
                     onChange={(e) => handleKitas(e.target.value)}
                     placeholder='KITAS is required'
-                    maxLength={16}
+                    maxLength={50}
                   />
                   {kitasError && (
                     <div className={styles.inlineErrorMessage}>
