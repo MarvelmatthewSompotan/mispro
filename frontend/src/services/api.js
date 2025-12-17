@@ -507,3 +507,7 @@ export const confirmAutoGraduate = (ids) => {
     body: JSON.stringify({ ids }),
   });
 };
+
+export const getAnalytics = () => {
+  return apiFetch("/analytics");
+};
