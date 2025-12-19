@@ -17,32 +17,24 @@ import {
 } from 'recharts';
 import { FaUserFriends, FaSync } from 'react-icons/fa';
 import styles from './Analytics.module.css';
-import { getAnalytics } from '../../../services/api'; // Pastikan path import benar
+import { getAnalytics } from '../../../services/api';
 
 // --- HELPER FUNCTIONS ---
 const formatNumber = (num) => {
   if (num === undefined || num === null) return '0';
-  // Format angka dengan pemisah ribuan titik (style Indonesia)
   return new Intl.NumberFormat('id-ID').format(num);
-};
-
-const formatPercent = (val) => {
-  if (val === undefined || val === null) return '0%';
-  return `${Number(val).toFixed(1)}%`;
 };
 
 // --- SUB-COMPONENT: TREND TEXT ---
 const TrendTextRight = ({ growth, isPositive }) => {
-  // Jika growth undefined/null anggap 0
   const val = growth ? Number(growth) : 0;
-  // Tentukan positif/negatif otomatis jika isPositive tidak dipassing
   const positive = isPositive !== undefined ? isPositive : val >= 0;
 
   return (
     <div className={styles.trendRightContainer}>
       <span>{positive ? 'Increased' : 'Decreased'}&nbsp;</span>
       <span className={positive ? styles.trendPositive : styles.trendNegative}>
-        {Math.abs(val)}%
+        {Math.abs(val).toFixed(1)}%
       </span>
       <span>&nbsp;from last year</span>
     </div>
@@ -50,7 +42,6 @@ const TrendTextRight = ({ growth, isPositive }) => {
 };
 
 // --- SUB-COMPONENTS CARDS ---
-
 const SimpleStatCard = ({ title, count, growth }) => (
   <div className={styles.card}>
     <div className={styles.cardTopRow}>
@@ -66,16 +57,23 @@ const SimpleStatCard = ({ title, count, growth }) => (
 
 const DetailedStatCard = ({ title, data }) => {
   if (!data) return null;
-  // Data expects structure: { total, growth_total, confirmed, growth_confirmed, cancelled, growth_cancelled }
 
-  const isCancelledPositive = Number(data.growth_cancelled) <= 0; // Cancelled turun itu bagus (positif)
+  // Handle mixed keys from backend (growth_total vs growth)
+  const growthTotal =
+    data.growth_total !== undefined ? data.growth_total : data.growth;
+  const growthConfirmed =
+    data.growth_confirmed !== undefined ? data.growth_confirmed : 0;
+  const growthCancelled =
+    data.growth_cancelled !== undefined ? data.growth_cancelled : 0;
+
+  const isCancelledPositive = Number(growthCancelled) <= 0;
 
   return (
     <div className={styles.card}>
       <div style={{ marginBottom: '16px' }}>
         <div className={styles.cardTopRow}>
           <div className={styles.cardTitle}>{title}</div>
-          <TrendTextRight growth={data.growth_total} />
+          <TrendTextRight growth={growthTotal} />
         </div>
 
         <div className={styles.cardMainStat}>
@@ -84,9 +82,8 @@ const DetailedStatCard = ({ title, data }) => {
         </div>
       </div>
 
-      {/* Section Bawah (Sub Stats) */}
       <div className={styles.subStatsContainer}>
-        {/* Confirmed Box */}
+        {/* Confirmed */}
         <div className={styles.subStatBox}>
           <div className={styles.subStatLabel}>Confirmed</div>
           <div className={styles.subStatContentCenter}>
@@ -98,18 +95,18 @@ const DetailedStatCard = ({ title, data }) => {
           <div className={styles.trendCenterText}>
             <span
               className={
-                Number(data.growth_confirmed) >= 0
+                Number(growthConfirmed) >= 0
                   ? styles.trendPositive
                   : styles.trendNegative
               }
             >
-              {Number(data.growth_confirmed).toFixed(1)}%
+              {Number(growthConfirmed).toFixed(1)}%
             </span>{' '}
             from last year
           </div>
         </div>
 
-        {/* Cancelled Box */}
+        {/* Cancelled */}
         <div className={styles.subStatBox}>
           <div className={styles.subStatLabel}>Cancelled</div>
           <div className={styles.subStatContentCenter}>
@@ -126,7 +123,7 @@ const DetailedStatCard = ({ title, data }) => {
                   : styles.trendNegative
               }
             >
-              {Number(data.growth_cancelled).toFixed(1)}%
+              {Number(growthCancelled).toFixed(1)}%
             </span>{' '}
             from last year
           </div>
@@ -136,13 +133,12 @@ const DetailedStatCard = ({ title, data }) => {
   );
 };
 
-// --- UPDATED ORANGE CARD COMPONENT ---
+// --- ORANGE PIE CARD ---
 const OrangePieCard = ({ syData }) => {
-  // Hitung persentase untuk Pie Chart berdasarkan data 'school_year'
   const returningVal = syData?.returning?.total || 0;
   const newVal = syData?.new?.total || 0;
   const transferVal = syData?.transferee?.total || 0;
-  const totalVal = syData?.all?.total || 1; // avoid division by zero
+  const totalVal = syData?.all?.total || 1;
 
   const returningPct = Math.round((returningVal / totalVal) * 100);
   const newPct = Math.round((newVal / totalVal) * 100);
@@ -151,14 +147,19 @@ const OrangePieCard = ({ syData }) => {
   const data = [
     {
       name: 'Returning Students',
-      value: returningPct,
+      value: returningPct || 0,
       count: returningVal,
       color: '#ffffff',
     },
-    { name: 'New Students', value: newPct, count: newVal, color: '#ffeb53' },
+    {
+      name: 'New Students',
+      value: newPct || 0,
+      count: newVal,
+      color: '#ffeb53',
+    },
     {
       name: 'Transferred Students',
-      value: transferPct,
+      value: transferPct || 0,
       count: transferVal,
       color: '#ffcf30',
     },
@@ -166,13 +167,9 @@ const OrangePieCard = ({ syData }) => {
 
   return (
     <div className={styles.orangeCard}>
-      {/* Bagian Kiri: Header + Legend */}
       <div className={styles.orangeContentLeft}>
-        {/* Header Section */}
         <div className={styles.orangeHeaderSection}>
-          <div className={styles.orangeTitle}>
-            Total Registered (Current SY)
-          </div>
+          <div className={styles.orangeTitle}>Total Registered</div>
           <div className={styles.orangeValueWrapper}>
             <div className={styles.orangeValue}>
               {formatNumber(syData?.all?.total)}
@@ -181,7 +178,6 @@ const OrangePieCard = ({ syData }) => {
           </div>
         </div>
 
-        {/* Legend Section */}
         <div className={styles.orangeLegendContainer}>
           {data.map((item, index) => (
             <div key={index} className={styles.orangeLegendRow}>
@@ -200,7 +196,6 @@ const OrangePieCard = ({ syData }) => {
         </div>
       </div>
 
-      {/* Bagian Kanan: Chart */}
       <div className={styles.orangeChartWrapper}>
         <ResponsiveContainer width='100%' height='100%'>
           <PieChart>
@@ -224,11 +219,15 @@ const OrangePieCard = ({ syData }) => {
   );
 };
 
-// --- COMPONENT: GROSS STAT CARD ---
+// --- GROSS STAT CARD ---
 const GrossStatCard = ({ globalData, trendData }) => {
-  // Gunakan trendData (monthly) untuk visualisasi area chart kecil
+  // Safe mapping for chart
   const chartData =
-    trendData?.current_data?.map((d) => ({ val: d.total })) || [];
+    trendData?.current_data?.map((val) => {
+      // Check if val is object (old format) or number (new format)
+      const safeVal = typeof val === 'object' && val !== null ? val.total : val;
+      return { val: safeVal || 0 };
+    }) || [];
 
   return (
     <div className={styles.grossCard}>
@@ -280,25 +279,19 @@ const GrossStatCard = ({ globalData, trendData }) => {
   );
 };
 
-// --- COMPONENT: ACTIVE STUDENTS TABLE ---
+// --- ACTIVE STUDENTS TABLE ---
 const ActiveStudentsTable = ({ matrixData, syName }) => {
   if (!matrixData) return null;
-
-  // Urutan baris yang diinginkan
   const levels = ['High', 'Middle', 'Elementary', 'ECP'];
 
   return (
     <div className={styles.tableSectionContainer}>
       <div className={styles.asCard}>
-        {/* Header Bagian Atas */}
         <div className={styles.asHeaderRow}>
           <div className={styles.asTitle}>Active Students</div>
           <div className={styles.asYear}>S.Y {syName}</div>
         </div>
-
-        {/* Container Tabel (Flex Row of Columns) */}
         <div className={styles.asTableFlex}>
-          {/* ================= KOLOM 1: LABELS ================= */}
           <div className={styles.asColLabels}>
             <div
               className={`${styles.asCell} ${styles.asCellHeader} ${styles.asBgTransparent}`}
@@ -319,8 +312,6 @@ const ActiveStudentsTable = ({ matrixData, syName }) => {
             ))}
             <div className={`${styles.asCell} ${styles.asCellTotal}`}></div>
           </div>
-
-          {/* ================= KOLOM 2: NEW STUDENT ================= */}
           <div className={styles.asColData}>
             <div
               className={`${styles.asCell} ${styles.asCellHeader} ${styles.asBgGrey}`}
@@ -341,8 +332,6 @@ const ActiveStudentsTable = ({ matrixData, syName }) => {
               </span>
             </div>
           </div>
-
-          {/* ================= KOLOM 3: OLD STUDENT (Returning) ================= */}
           <div className={styles.asColData}>
             <div
               className={`${styles.asCell} ${styles.asCellHeader} ${styles.asBgGrey}`}
@@ -363,8 +352,6 @@ const ActiveStudentsTable = ({ matrixData, syName }) => {
               </span>
             </div>
           </div>
-
-          {/* ================= KOLOM 4: TRANSFEREE ================= */}
           <div className={styles.asColData}>
             <div
               className={`${styles.asCell} ${styles.asCellHeader} ${styles.asBgGrey}`}
@@ -391,15 +378,27 @@ const ActiveStudentsTable = ({ matrixData, syName }) => {
   );
 };
 
-// --- CHART COMPONENTS ---
-const RegistrationGrowthChart = ({ data }) => {
-  // Data multi_year_trend dari API: array of { school_year, total, ... }
-  // Recharts butuh key yang konsisten.
-  const chartData =
-    data?.map((d) => ({
-      year: d.school_year,
-      value: d.total,
-    })) || [];
+// --- CHART COMPONENTS (FIXED ERROR HERE) ---
+
+const RegistrationGrowthChart = ({ multiYearData }) => {
+  if (!multiYearData || !multiYearData.labels) return null;
+
+  const chartData = multiYearData.labels.map((year, index) => {
+    const rawData = multiYearData.data[index];
+    let finalValue = 0;
+
+    if (typeof rawData === 'object' && rawData !== null) {
+      finalValue = rawData.total || 0;
+    } else {
+      // New format: just a number (e.g., 10)
+      finalValue = rawData || 0;
+    }
+
+    return {
+      year: year,
+      value: finalValue,
+    };
+  });
 
   return (
     <div className={styles.chartCard}>
@@ -443,12 +442,24 @@ const RegistrationGrowthChart = ({ data }) => {
 const RegistrationTrendChart = ({ trends }) => {
   if (!trends) return null;
 
-  const chartData = trends.current_data.map((item, index) => {
-    const prevItem = trends.previous_data[index] || {};
+  const chartData = trends.labels.map((month, index) => {
+    const currentRaw = trends.current_data[index];
+    const previousRaw = trends.previous_data[index];
+
+    const currentVal =
+      typeof currentRaw === 'object' && currentRaw !== null
+        ? currentRaw.total || 0
+        : currentRaw || 0;
+
+    const previousVal =
+      typeof previousRaw === 'object' && previousRaw !== null
+        ? previousRaw.total || 0
+        : previousRaw || 0;
+
     return {
-      month: item.month,
-      current: item.total,
-      previous: prevItem.total || 0,
+      month: month,
+      current: currentVal,
+      previous: previousVal,
     };
   });
 
@@ -488,7 +499,7 @@ const RegistrationTrendChart = ({ trends }) => {
             <Tooltip />
             <Line
               type='monotone'
-              dataKey='current' // Merah
+              dataKey='current'
               stroke='#EE0808'
               strokeWidth={3}
               dot={false}
@@ -496,7 +507,7 @@ const RegistrationTrendChart = ({ trends }) => {
             />
             <Line
               type='monotone'
-              dataKey='previous' // Biru
+              dataKey='previous'
               stroke='#5F84FE'
               strokeWidth={3}
               dot={false}
@@ -509,7 +520,6 @@ const RegistrationTrendChart = ({ trends }) => {
   );
 };
 
-// --- MAIN ANALYTICS COMPONENT ---
 const Analytics = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -517,23 +527,12 @@ const Analytics = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('Memulai fetch analytics...'); // 1. Cek apakah fungsi jalan
         const response = await getAnalytics();
-
-        console.log('Response dari API:', response); // 2. LIHAT INI DI CONSOLE
-
-        if (response && response.success) {
-          console.log('Set Data berhasil:', response.data);
+        if (response.success) {
           setData(response.data);
-        } else {
-          console.error('Response success bukan true:', response);
         }
       } catch (error) {
-        console.error('Error fetching analytics (Masuk Catch):', error);
-        // Cek apakah ada detail response dari api.js
-        if (error.response) {
-          console.error('Detail Error Backend:', error.response);
-        }
+        console.error('Error fetching analytics:', error);
       } finally {
         setLoading(false);
       }
@@ -560,24 +559,77 @@ const Analytics = () => {
 
   const global = data.global;
   const sy = data.school_year;
+  const trendsData = data.trends || data.monthly_trends;
 
-  // 2. Data Active Students Matrix
-  const activeMatrix = data.active_students_matrix;
+  const rawMatrix = data.active_students_matrix || {};
+  const hs = rawMatrix['High School'] || {
+    total: 0,
+    total_new: 0,
+    total_returning: 0,
+    total_transferee: 0,
+  };
+  const ms = rawMatrix['Middle School'] || {
+    total: 0,
+    total_new: 0,
+    total_returning: 0,
+    total_transferee: 0,
+  };
+  const es = rawMatrix['Elementary School'] || {
+    total: 0,
+    total_new: 0,
+    total_returning: 0,
+    total_transferee: 0,
+  };
+  const ecp = rawMatrix['ECP'] || {
+    total: 0,
+    total_new: 0,
+    total_returning: 0,
+    total_transferee: 0,
+  };
 
-  // Data Chart untuk Active Student (Bar Chart Tengah)
+  const totalMatrix = {
+    total: hs.total + ms.total + es.total + ecp.total,
+    total_new: hs.total_new + ms.total_new + es.total_new + ecp.total_new,
+    total_returning:
+      hs.total_returning +
+      ms.total_returning +
+      es.total_returning +
+      ecp.total_returning,
+    total_transferee:
+      hs.total_transferee +
+      ms.total_transferee +
+      es.total_transferee +
+      ecp.total_transferee,
+  };
+
+  const activeMatrix = {
+    High: hs,
+    Middle: ms,
+    Elementary: es,
+    ECP: ecp,
+    Total: totalMatrix,
+  };
+
   const activeStudentChartData = [
-    { name: 'HS', value: activeMatrix.High.total, max: 1000 },
-    { name: 'MS', value: activeMatrix.Middle.total, max: 1000 },
-    { name: 'ES', value: activeMatrix.Elementary.total, max: 1000 },
-    { name: 'ECP', value: activeMatrix.ECP.total, max: 1000 },
+    { name: 'HS', value: activeMatrix.High.total },
+    { name: 'MS', value: activeMatrix.Middle.total },
+    { name: 'ES', value: activeMatrix.Elementary.total },
+    { name: 'ECP', value: activeMatrix.ECP.total },
   ];
 
-  // 3. Data Served Students (Donut Charts)
-  const servedSummary = data.enrollment_unique_students.summary;
+  const servedSummary = data.enrollment_unique_students?.summary || {
+    total: 0,
+    active: 0,
+    graduate: 0,
+    expelled: 0,
+    withdraw: 0,
+    unknown: 0,
+  };
   const servedTotal = servedSummary.total;
-
-  // Helper untuk donut data (Value vs Sisa)
-  const getDonutData = (val, max) => [{ value: val }, { value: max - val }];
+  const getDonutData = (val, max) => {
+    const safeMax = max > 0 ? max : 1;
+    return [{ value: val }, { value: safeMax - val }];
+  };
 
   return (
     <div className={styles.mainContainer}>
@@ -586,15 +638,12 @@ const Analytics = () => {
       </div>
 
       <div className={styles.topSectionSplit}>
-        {/* WRAPPER KIRI */}
         <div className={styles.leftColumnWrapper}>
           <div className={styles.preRegisteredHeader}>
-            Registration Stats ({data.meta.current_sy})
+            ({data.meta.current_sy})
             <FaSync style={{ fontSize: '12px', marginLeft: '6px' }} />
           </div>
-
           <div className={styles.leftColumnCards}>
-            {/* Menggunakan data GLOBAL untuk Total Registration */}
             <SimpleStatCard
               title='Total Registration'
               count={global.total}
@@ -607,8 +656,6 @@ const Analytics = () => {
             />
           </div>
         </div>
-
-        {/* WRAPPER KANAN */}
         <div className={styles.rightColumnCards}>
           <OrangePieCard syData={sy} />
           <DetailedStatCard
@@ -618,7 +665,6 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* --- BAGIAN 2: TENGAH --- */}
       <div className={styles.dashboardGrid}>
         <div className={`${styles.sectionCard} ${styles.activeStudentCard}`}>
           <div className={styles.sectionHeader}>
@@ -665,9 +711,7 @@ const Analytics = () => {
         </div>
 
         <div className={styles.rightColumnStack}>
-          {/* Gross Card menggunakan data Global & Monthly Trends untuk chart kecil */}
-          <GrossStatCard globalData={global} trendData={data.monthly_trends} />
-
+          <GrossStatCard globalData={global} trendData={trendsData} />
           <div className={`${styles.sectionCard} ${styles.servedStudentsCard}`}>
             <div className={styles.sectionHeader}>
               <div className={styles.sectionTitle}>Total Served Students</div>
@@ -688,7 +732,6 @@ const Analytics = () => {
               <FaUserFriends className={styles.statIcon} />
             </div>
             <div className={styles.servedStatsGrid}>
-              {/* Graduate Donut */}
               <div className={styles.donutStat}>
                 <ResponsiveContainer>
                   <PieChart>
@@ -718,8 +761,6 @@ const Analytics = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Withdrawn Donut */}
               <div className={styles.donutStat}>
                 <ResponsiveContainer>
                   <PieChart>
@@ -749,8 +790,6 @@ const Analytics = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Expelled Donut */}
               <div className={styles.donutStat}>
                 <ResponsiveContainer>
                   <PieChart>
@@ -791,8 +830,8 @@ const Analytics = () => {
       />
 
       <div className={styles.bottomChartsGrid}>
-        <RegistrationGrowthChart data={data.multi_year_trend} />
-        <RegistrationTrendChart trends={data.monthly_trends} />
+        <RegistrationGrowthChart multiYearData={data.multi_year_trend} />
+        <RegistrationTrendChart trends={trendsData} />
       </div>
     </div>
   );
