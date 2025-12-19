@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import ReactDOM from "react-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import styles from "./ExportLogbookPopup.module.css";
@@ -207,47 +208,32 @@ const ExportLogbookPopup = ({
         .toString()
         .padStart(2, "0")}`;
       doc.text(createdDate, margin, 22);
-
-      // --- PERBAIKAN: LOGIKA DINAMIS UKURAN ---
-
-      // Hitung jumlah kolom data (selain No.)
       const colCount = columnsForPDFTable.length;
 
-      let dynamicImgHeight = 12; // Default (Kecil)
-      let dynamicFontSize = 4; // Default (Kecil)
+      let dynamicImgHeight = 12;
+      let dynamicFontSize = 4;
 
-      // Logika penyesuaian ukuran:
       if (colCount <= 5) {
-        // Jika kolom sangat sedikit (1-5), perbesar gambar dan font
         dynamicImgHeight = 24;
         dynamicFontSize = 12;
       } else if (colCount <= 9) {
-        // Jika kolom sedang (6-9)
         dynamicImgHeight = 18;
         dynamicFontSize = 9;
       } else if (colCount <= 14) {
-        // Jika kolom agak banyak (10-14)
         dynamicImgHeight = 14;
         dynamicFontSize = 6;
       } else {
-        // Jika kolom sangat banyak (>14), gunakan default kecil
         dynamicImgHeight = 12;
         dynamicFontSize = 4;
       }
 
-      // 1. Set fixed height berdasarkan logika di atas
       const fixedImgHeight = dynamicImgHeight;
-
-      // 2. Definisikan aspect ratio & padding
       const aspectRatio = 59.97 / 81;
       const globalCellPadding = 2.5;
-
-      // 3. Hitung ukuran sel foto secara otomatis
       const fixedImgWidth = fixedImgHeight * aspectRatio;
       const photoCellWidth = fixedImgWidth + globalCellPadding * 2;
       const photoCellHeight = fixedImgHeight + globalCellPadding * 2;
 
-      // 6. Panggil autoTable
       autoTable(doc, {
         head: [tableHeaders],
         body: tableData,
@@ -257,7 +243,7 @@ const ExportLogbookPopup = ({
         rowPageBreak: "auto",
         styles: {
           font: "helvetica",
-          fontSize: dynamicFontSize, // Gunakan variabel dinamis
+          fontSize: dynamicFontSize,
           cellPadding: globalCellPadding,
           textColor: globalColors.mainText,
           lineColor: globalColors.mainGrey,
@@ -266,7 +252,7 @@ const ExportLogbookPopup = ({
           minCellHeight: 1,
         },
         headStyles: {
-          fontSize: dynamicFontSize, // Gunakan variabel dinamis juga untuk header
+          fontSize: dynamicFontSize,
           fillColor: globalColors.secondaryBg,
           textColor: globalColors.mainText,
           halign: "middle",
@@ -313,6 +299,13 @@ const ExportLogbookPopup = ({
 
               try {
                 doc.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
+                const originalDrawColor = doc.getDrawColor();
+                const originalLineWidth = doc.getLineWidth();
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.2);
+                doc.rect(x, y, imgWidth, imgHeight);
+                doc.setDrawColor(originalDrawColor);
+                doc.setLineWidth(originalLineWidth);
               } catch (e) {
                 console.error("Gagal menambah gambar ke PDF:", e);
                 doc.text(
@@ -348,7 +341,6 @@ const ExportLogbookPopup = ({
         );
       }
 
-      // 7. Simpan PDF
       const fileName = `Student_Logbook_${
         new Date().toISOString().split("T")[0]
       }.pdf`;
@@ -369,7 +361,7 @@ const ExportLogbookPopup = ({
 
   if (!isOpen) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.overlay}>
       <div className={styles.popup}>
         <div className={styles.header}>
@@ -500,7 +492,8 @@ const ExportLogbookPopup = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

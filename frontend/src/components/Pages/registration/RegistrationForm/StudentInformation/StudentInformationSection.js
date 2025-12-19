@@ -761,12 +761,12 @@ const StudentInformationSection = ({
                     type='text'
                     value={kitas}
                     onChange={(e) => handleKitas(e.target.value)}
-                    placeholder='KITAS (11-16 characters)'
-                    maxLength={16}
+                    placeholder='KITAS is required'
+                    maxLength={50}
                   />
                   {kitasError && (
                     <div className={styles.inlineErrorMessage}>
-                      KITAS must be between 11 and 16 characters
+                      KITAS must be more than 11 characters
                     </div>
                   )}
                 </div>

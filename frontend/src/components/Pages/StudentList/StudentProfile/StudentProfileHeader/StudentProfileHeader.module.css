@@ -24,19 +24,19 @@
 .profileImage {
   width: 154px;
   height: 208px;
-  background-color: #d9d9d9;
   object-fit: cover;
-  border-radius: 8px;
+  border: 4px solid var(--main-accent);
+
+  box-sizing: border-box;
 }
 
 .profilePlaceholder {
   width: 154px;
   height: 208px;
-  background-color: var(--main-background);
+  background-color: var(--main-background); /* Background dalam placeholder */
   object-fit: contain;
   padding: 20px;
   box-sizing: border-box;
-  border-radius: 8px;
 }
 
 .headerInfoSection {
@@ -57,13 +57,28 @@
   font-size: 16px;
 }
 
-/* === [NEW] Styles for School Year === */
 .schoolYearContainer {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 10px;
   font-size: 16px;
+}
+
+.idCardContainer {
+  width: 281px;
+  height: auto;
+  min-height: 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 16px;
+  padding-bottom: 2px;
+}
+
+.idCardContainerEdit {
+  border-bottom: 1px solid #000;
 }
 
 .yearLabel {
@@ -74,7 +89,6 @@
   color: var(--main-text);
   font-weight: var(--font-weight-bold);
 }
-/* === End of New Styles === */
 
 .idLabel {
   color: var(--main-grey);
@@ -85,7 +99,6 @@
   font-weight: var(--font-weight-bold);
 }
 
-/* --- Style untuk MODE TAMPILAN (VIEW MODE) --- */
 .statusTagContainer {
   display: flex;
   flex-direction: row;
@@ -93,7 +106,6 @@
   gap: 12px;
 }
 
-/* --- Style BARU untuk MODE EDIT --- */
 .statusAndEditPhotoContainer {
   display: flex;
   flex-direction: column;
@@ -176,7 +188,7 @@
   font-size: 14px;
   font-weight: var(--font-weight-bold);
   color: var(--text-accent);
-  background-color: var(--main-grey); 
+  background-color: var(--main-grey);
   border-top: 1px solid #e9ecef;
   border-bottom: 1px solid #e9ecef;
 }
@@ -188,10 +200,9 @@
   gap: 12px;
 }
 
-
 .statusAndActionGroup {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
 }

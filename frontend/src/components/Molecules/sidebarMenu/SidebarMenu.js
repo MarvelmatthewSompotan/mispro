@@ -4,6 +4,8 @@ import React, { useRef } from "react";
 import { NavLink } from "react-router-dom";
 import Icon from "../../Atoms/Icon/Icon";
 import useAuth from "../../../hooks/useAuth";
+
+// Import icons existing
 import homeIcon from "../../../assets/Home-icon.png";
 import studentIcon from "../../../assets/StudentList-icon.png";
 import logbookIcon from "../../../assets/logbook.png";
@@ -11,10 +13,14 @@ import teacherIcon from "../../../assets/TeacherList-icon.png";
 import homeroomIcon from "../../../assets/HomeroomList-icon.png";
 import registrationIcon from "../../../assets/Registration-icon.png";
 import usersIcon from "../../../assets/user.png";
+// TODO: Import icon Analytics Anda di sini
+
+
 import "./SidebarMenu.css";
 
 const allMenus = [
   { to: "/Home", icon: homeIcon, label: "Home" },
+  { to: "/Analytics", label: "Analytics" }, // <--- MENU BARU
   { to: "/students", icon: studentIcon, label: "Student List" },
   { to: "/Logbook", icon: logbookIcon, label: "Logbook" },
   { to: "/teachers", icon: teacherIcon, label: "Teacher List" },
@@ -28,15 +34,16 @@ const SidebarMenu = ({ isOpen, onClose }) => {
   const asideRef = useRef(null);
 
   const filteredMenus = allMenus.filter((menu) => {
+    // Jika ingin Analytics hanya untuk Admin, tambahkan kondisi ini:
+    // if (menu.to === "/Analytics" || menu.to === "/Users") { return isAdmin(); }
+
     if (menu.to === "/Users") {
       return isAdmin();
     }
     return true;
   });
 
-  // Fungsi: Jika layar kecil (< 1000px) dan menu diklik, tutup sidebar
   const handleMenuClick = () => {
-    // Logika ini menutup sidebar otomatis setelah pilih menu di mode mobile
     if (window.innerWidth <= 1000 && onClose) {
       onClose();
     }
@@ -50,7 +57,7 @@ const SidebarMenu = ({ isOpen, onClose }) => {
             <li key={menu.label}>
               <NavLink
                 to={menu.to}
-                onClick={handleMenuClick} // Event handler dipasang di sini
+                onClick={handleMenuClick}
                 className={({ isActive }) =>
                   "sidebar-menu-item" + (isActive ? " active" : "")
                 }

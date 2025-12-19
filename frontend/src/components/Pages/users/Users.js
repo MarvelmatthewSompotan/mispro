@@ -15,7 +15,6 @@ import {
 import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
 
 const REFRESH_INTERVAL = 5000;
-
 const formatRole = (role) => {
   if (!role) return "";
   return role
@@ -29,7 +28,6 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  // eslint-disable-next-line
   const [page, setPage] = useState(1);
   const fetchControllerRef = useRef(null);
   const [deletingUserId, setDeletingUserId] = useState(null);
@@ -38,17 +36,8 @@ const Users = () => {
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-
-  // --- INI ADALAH STATE ASLI UNTUK "NEW USER" (TIDAK DIUBAH) ---
   const [showUserPopup, setShowUserPopup] = useState(false);
-
-  // --- TAMBAHAN BARU: State untuk mengontrol popup "Edit User" ---
-  // Jika null, popup edit tersembunyi.
-  // Jika berisi objek user, popup edit akan tampil dengan data user tsb.
   const [editingUser, setEditingUser] = useState(null);
-
-  // --- Fungsi helper untuk menampilkan popup (BARU) ---
-  // (Menggantikan logika setTimeout yang berulang)
   const showTemporaryPopup = (message, type) => {
     setPopupType(type);
     setPopupMessage(message);
@@ -110,7 +99,6 @@ const Users = () => {
 
     try {
       await deleteUser(confirmDeleteUser.user_id);
-      // Menggunakan helper popup
       showTemporaryPopup(
         `User "${confirmDeleteUser.username}" has been deleted.`,
         "success"
@@ -125,7 +113,6 @@ const Users = () => {
     }
   };
 
-  // --- FUNGSI INI TIDAK DIUBAH (UNTUK "NEW USER") ---
   const handleAddUser = async (userData, resetForm) => {
     if (
       !userData.username ||
@@ -159,9 +146,7 @@ const Users = () => {
     }
   };
 
-  // --- TAMBAHAN BARU: Handler untuk "Edit User" ---
   const handleUpdateUser = async (userId, userData) => {
-    // Validasi dasar (password opsional untuk edit)
     if (
       !userData.username ||
       !userData.full_name ||
@@ -176,7 +161,6 @@ const Users = () => {
     }
 
     try {
-      // Panggil API updateUser
       const response = await updateUser(userId, userData);
       const username = response.data?.username || userData.username;
 
@@ -185,8 +169,8 @@ const Users = () => {
         "success"
       );
 
-      await fetchUsers(); // Muat ulang data
-      setEditingUser(null); // Tutup popup edit
+      await fetchUsers();
+      setEditingUser(null);
     } catch (error) {
       console.error("Failed to update user:", error);
       const errorMessage =
@@ -217,28 +201,19 @@ const Users = () => {
           <Button variant="solid" onClick={() => setShowUserPopup(true)}>
             New User
           </Button>
-
-          {/* --- POPUP UNTUK "NEW USER" (TIDAK DIUBAH) --- */}
           {showUserPopup && (
             <PopUpForm
               type="user"
               onClose={() => setShowUserPopup(false)}
               onCreate={(data, resetForm) => handleAddUser(data, resetForm)}
-              // isEditMode tidak di-set (default-nya false)
             />
           )}
-
-          {/* --- POPUP BARU UNTUK "EDIT USER" --- */}
           {editingUser && (
             <PopUpForm
               type="user"
               onClose={() => setEditingUser(null)}
-              // onCreate akan memanggil handleUpdateUser
-              // Kita gunakan panah () => ... agar bisa memasukkan userId
               onCreate={(data) => handleUpdateUser(editingUser.user_id, data)}
-              // Prop baru untuk memberi tahu PopUpForm ini mode edit
               isEditMode={true}
-              // Prop baru untuk mengisi data awal
               initialData={editingUser}
             />
           )}
@@ -252,7 +227,6 @@ const Users = () => {
       ) : (
         <div className={styles.tableContainer}>
           <div className={styles.tableHeader}>
-            {/* ... (Header tidak berubah) ... */}
             <ColumnHeader title="User ID" hasFilter={false} hasSort={false} />
             <ColumnHeader title="Username" hasFilter={false} hasSort={true} />
             <ColumnHeader title="Name" hasFilter={false} hasSort={true} />
@@ -267,7 +241,6 @@ const Users = () => {
             ) : (
               filteredUsers.map((user) => (
                 <div key={user.user_id} className={styles.tableRow}>
-                  {/* ... (Cell data tidak berubah) ... */}
                   <div className={styles.tableCell} title={user.user_id}>
                     {user.user_id}
                   </div>
@@ -288,10 +261,8 @@ const Users = () => {
                   </div>
                   <div className={styles.actionCell}>
                     <div className={styles.actionContainer}>
-                      {/* --- PERUBAHAN DI SINI: onClick pada icon edit --- */}
                       <button
                         className={styles.actionButton}
-                        // Set state 'editingUser' dengan data user yang di-klik
                         onClick={() => setEditingUser(user)}
                         aria-label="Edit User"
                       >
@@ -301,8 +272,6 @@ const Users = () => {
                           className={`${styles.icon} ${styles.editIcon}`}
                         />
                       </button>
-
-                      {/* --- Tombol Delete (TIDAK DIUBAH) --- */}
                       <button
                         className={styles.actionButton}
                         onClick={() => setConfirmDeleteUser(user)}
@@ -328,8 +297,6 @@ const Users = () => {
           </div>
         </div>
       )}
-
-      {/* --- Modal Konfirmasi Delete (TIDAK DIUBAH) --- */}
       {confirmDeleteUser && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -358,8 +325,6 @@ const Users = () => {
           </div>
         </div>
       )}
-
-      {/* --- Popup Notifikasi (TIDAK DIUBAH) --- */}
       {showPopup && (
         <div
           className={`${styles.popup} ${

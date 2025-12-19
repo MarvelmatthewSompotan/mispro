@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import styles from './PopUpConfirm.module.css';
 import ReactDOM from 'react-dom';
 import { submitRegistrationForm } from '../../../../services/api';
 import WrongSectionPopup from '../../../Pages/Registration/RegistrationForm/PopUp/WrongSectionPopup';
 import Button from '../../../Atoms/Button/Button';
+=======
+import React, { useState } from "react";
+import styles from "./PopUpConfirm.module.css";
+import ReactDOM from "react-dom";
+import { submitRegistrationForm } from "../../../../services/api";
+import WrongSectionPopup from "../../../Pages/Registration/RegistrationForm/PopUp/WrongSectionPopup";
+import Button from "../../../Atoms/Button/Button";
+>>>>>>> origin/Hizkia_Registration_Form
 
 const PopUpConfirm = React.memo(
   ({
@@ -38,7 +47,11 @@ const PopUpConfirm = React.memo(
           });
           onConfirm();
         } else {
+<<<<<<< HEAD
           alert('Registration failed: '(response.error || 'Unknown error'));
+=======
+          alert("Registration failed: "(response.error || "Unknown error"));
+>>>>>>> origin/Hizkia_Registration_Form
         }
       } catch (error) {
         const errorMessage = error.response?.data?.error || '';

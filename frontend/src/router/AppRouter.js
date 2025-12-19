@@ -7,6 +7,8 @@ import useAuth from "../hooks/useAuth";
 // Komponen halaman
 import LoginPage from "../components/Pages/Login/LoginPage.js";
 import Home from "../components/Pages/Home/Home.js";
+// --- IMPORT ANALYTICS DISINI ---
+import Analytics from "../components/Pages/Analytics/Analytics.js";
 import StudentList from "../components/Pages/StudentList/StudentList.js";
 import TeacherList from "../components/Pages/TeacherList.js";
 import HomeroomList from "../components/Pages/HomeroomList.js";
@@ -37,7 +39,7 @@ const AdminAccess = ({ children }) => {
   return children;
 };
 
-// Ini adalah 'AppRouter' baru, sekarang dalam format array
+// Ini adalah 'AppRouter' baru
 const appRoutes = [
   {
     path: "/Login",
@@ -50,6 +52,19 @@ const appRoutes = [
         <MainLayout>
           <RegistrarAccess>
             <Home />
+          </RegistrarAccess>
+        </MainLayout>
+      </ProtectedRoute>
+    ),
+  },
+  // --- TAMBAHKAN ROUTE ANALYTICS DISINI ---
+  {
+    path: "/Analytics",
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <RegistrarAccess>
+            <Analytics />
           </RegistrarAccess>
         </MainLayout>
       </ProtectedRoute>

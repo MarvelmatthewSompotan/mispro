@@ -1,6 +1,6 @@
-import React from 'react';
-import styles from './ProgramContent.module.css';
-import RadioButton from '../../../Atoms/RadioButton/RadioButton';
+import React from "react";
+import styles from "./ProgramContent.module.css";
+import RadioButton from "../../../Atoms/RadioButton/RadioButton";
 
 function ProgramContent({
   data,
@@ -12,9 +12,9 @@ function ProgramContent({
   const getGradeName = () => {
     if (data?.class_id) {
       const found = classOptions.find((cls) => cls.class_id === data.class_id);
-      return found ? found.grade : '';
+      return found ? found.grade : "";
     }
-    return '';
+    return "";
   };
 
   const getMajorName = () => {
@@ -22,9 +22,9 @@ function ProgramContent({
       const found = majorOptions?.find(
         (m) => m.major_id === parseInt(data.major_id, 10)
       );
-      return found ? found.name : '';
+      return found ? found.name : "";
     }
-    return '';
+    return "";
   };
 
   return (
@@ -62,35 +62,49 @@ function ProgramContent({
           <div className={styles.section}>Program</div>
         </div>
 
-        {programOptions.map((program) => (
-          <div key={program.program_id} className={styles.answer}>
-            <RadioButton
-              name="program"
-              value={program.program_id}
-              checked={data?.program_id === program.program_id}
-              onChange={() => {}}
-              readOnly={true}
-            />
-            <div className={styles.option}>{program.name}</div>
-          </div>
-        ))}
+        {programOptions.map((program) => {
+          const originalName = program.name || "";
+          const customProgram = data?.program_other || "";
+          const isOtherOption = originalName
+            .toLowerCase()
+            .trim()
+            .includes("other");
+          if (
+            !isOtherOption &&
+            customProgram &&
+            originalName.toLowerCase().trim() ===
+              customProgram.toLowerCase().trim()
+          ) {
+            return null;
+          }
+          if (isOtherOption && !customProgram) {
+            return null;
+          }
+          let displayLabel = originalName;
+          if (isOtherOption && customProgram) {
+            displayLabel = customProgram;
+          }
+          let isChecked = data?.program_id === program.program_id;
+          if (isOtherOption && customProgram) {
+            isChecked = true;
+          }
 
-        {data?.program_other && (
-          <div className={styles.answer}>
-            <RadioButton
-              name="program"
-              value="other"
-              checked={!data?.program_id}
-              onChange={() => {}}
-              readOnly={true}
-            />
-            <div className={styles.option}>{data.program_other}</div>
-          </div>
-        )}
+          return (
+            <div key={program.program_id} className={styles.answer}>
+              <RadioButton
+                name="program"
+                value={program.program_id}
+                checked={isChecked}
+                onChange={() => {}}
+                readOnly={true}
+              />
+              <div className={styles.option}>{displayLabel}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 export default ProgramContent;
-
