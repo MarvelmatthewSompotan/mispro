@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -14,20 +14,20 @@ import {
   Cell,
   BarChart,
   Bar,
-} from "recharts";
-import { FaUserFriends, FaSync } from "react-icons/fa";
-import styles from "./Analytics.module.css";
-import { getAnalytics } from "../../../services/api"; // Pastikan path import benar
+} from 'recharts';
+import { FaUserFriends, FaSync } from 'react-icons/fa';
+import styles from './Analytics.module.css';
+import { getAnalytics } from '../../../services/api'; // Pastikan path import benar
 
 // --- HELPER FUNCTIONS ---
 const formatNumber = (num) => {
-  if (num === undefined || num === null) return "0";
+  if (num === undefined || num === null) return '0';
   // Format angka dengan pemisah ribuan titik (style Indonesia)
-  return new Intl.NumberFormat("id-ID").format(num);
+  return new Intl.NumberFormat('id-ID').format(num);
 };
 
 const formatPercent = (val) => {
-  if (val === undefined || val === null) return "0%";
+  if (val === undefined || val === null) return '0%';
   return `${Number(val).toFixed(1)}%`;
 };
 
@@ -40,7 +40,7 @@ const TrendTextRight = ({ growth, isPositive }) => {
 
   return (
     <div className={styles.trendRightContainer}>
-      <span>{positive ? "Increased" : "Decreased"}&nbsp;</span>
+      <span>{positive ? 'Increased' : 'Decreased'}&nbsp;</span>
       <span className={positive ? styles.trendPositive : styles.trendNegative}>
         {Math.abs(val)}%
       </span>
@@ -72,7 +72,7 @@ const DetailedStatCard = ({ title, data }) => {
 
   return (
     <div className={styles.card}>
-      <div style={{ marginBottom: "16px" }}>
+      <div style={{ marginBottom: '16px' }}>
         <div className={styles.cardTopRow}>
           <div className={styles.cardTitle}>{title}</div>
           <TrendTextRight growth={data.growth_total} />
@@ -104,7 +104,7 @@ const DetailedStatCard = ({ title, data }) => {
               }
             >
               {Number(data.growth_confirmed).toFixed(1)}%
-            </span>{" "}
+            </span>{' '}
             from last year
           </div>
         </div>
@@ -127,7 +127,7 @@ const DetailedStatCard = ({ title, data }) => {
               }
             >
               {Number(data.growth_cancelled).toFixed(1)}%
-            </span>{" "}
+            </span>{' '}
             from last year
           </div>
         </div>
@@ -150,17 +150,17 @@ const OrangePieCard = ({ syData }) => {
 
   const data = [
     {
-      name: "Returning Students",
+      name: 'Returning Students',
       value: returningPct,
       count: returningVal,
-      color: "#ffffff",
+      color: '#ffffff',
     },
-    { name: "New Students", value: newPct, count: newVal, color: "#ffeb53" },
+    { name: 'New Students', value: newPct, count: newVal, color: '#ffeb53' },
     {
-      name: "Transferred Students",
+      name: 'Transferred Students',
       value: transferPct,
       count: transferVal,
-      color: "#ffcf30",
+      color: '#ffcf30',
     },
   ];
 
@@ -177,7 +177,7 @@ const OrangePieCard = ({ syData }) => {
             <div className={styles.orangeValue}>
               {formatNumber(syData?.all?.total)}
             </div>
-            <FaUserFriends style={{ fontSize: "24px", marginBottom: "6px" }} />
+            <FaUserFriends style={{ fontSize: '24px', marginBottom: '6px' }} />
           </div>
         </div>
 
@@ -202,14 +202,14 @@ const OrangePieCard = ({ syData }) => {
 
       {/* Bagian Kanan: Chart */}
       <div className={styles.orangeChartWrapper}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width='100%' height='100%'>
           <PieChart>
             <Pie
               data={data}
               innerRadius={45}
               outerRadius={65}
-              dataKey="value"
-              stroke="none"
+              dataKey='value'
+              stroke='none'
               startAngle={90}
               endAngle={-270}
             >
@@ -242,7 +242,7 @@ const GrossStatCard = ({ globalData, trendData }) => {
         </div>
         <div className={styles.trendContainerWhite}>
           <span>
-            {Number(globalData?.total_growth) >= 0 ? "Increased" : "Decreased"}{" "}
+            {Number(globalData?.total_growth) >= 0 ? 'Increased' : 'Decreased'}{' '}
             by
           </span>
           <span
@@ -258,19 +258,19 @@ const GrossStatCard = ({ globalData, trendData }) => {
         </div>
       </div>
       <div className={styles.grossChart}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width='100%' height='100%'>
           <AreaChart data={chartData}>
             <defs>
-              <linearGradient id="grossGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#00f413" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#00f413" stopOpacity={0} />
+              <linearGradient id='grossGradient' x1='0' y1='0' x2='0' y2='1'>
+                <stop offset='5%' stopColor='#00f413' stopOpacity={0.8} />
+                <stop offset='95%' stopColor='#00f413' stopOpacity={0} />
               </linearGradient>
             </defs>
             <Area
-              type="monotone"
-              dataKey="val"
-              stroke="#00f413"
-              fill="url(#grossGradient)"
+              type='monotone'
+              dataKey='val'
+              stroke='#00f413'
+              fill='url(#grossGradient)'
               strokeWidth={2}
             />
           </AreaChart>
@@ -285,7 +285,7 @@ const ActiveStudentsTable = ({ matrixData, syName }) => {
   if (!matrixData) return null;
 
   // Urutan baris yang diinginkan
-  const levels = ["High", "Middle", "Elementary", "ECP"];
+  const levels = ['High', 'Middle', 'Elementary', 'ECP'];
 
   return (
     <div className={styles.tableSectionContainer}>
@@ -308,13 +308,13 @@ const ActiveStudentsTable = ({ matrixData, syName }) => {
                 key={level}
                 className={`${styles.asCell} ${styles.asCellBody} ${styles.asBgGrey}`}
               >
-                {level === "High"
-                  ? "High School"
-                  : level === "Middle"
-                  ? "Middle School"
-                  : level === "Elementary"
-                  ? "Elementary School"
-                  : "Early Childhood Program"}
+                {level === 'High'
+                  ? 'High School'
+                  : level === 'Middle'
+                  ? 'Middle School'
+                  : level === 'Elementary'
+                  ? 'Elementary School'
+                  : 'Early Childhood Program'}
               </div>
             ))}
             <div className={`${styles.asCell} ${styles.asCellTotal}`}></div>
@@ -408,17 +408,17 @@ const RegistrationGrowthChart = ({ data }) => {
         <div className={styles.growthSubtitle}>5 Year</div>
       </div>
       <div className={styles.chartContainer}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width='100%' height='100%'>
           <AreaChart data={chartData}>
             <defs>
-              <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#00f413" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#00f413" stopOpacity={0} />
+              <linearGradient id='colorGrowth' x1='0' y1='0' x2='0' y2='1'>
+                <stop offset='5%' stopColor='#00f413' stopOpacity={0.3} />
+                <stop offset='95%' stopColor='#00f413' stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <CartesianGrid strokeDasharray='3 3' vertical={false} />
             <XAxis
-              dataKey="year"
+              dataKey='year'
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fontWeight: 600 }}
@@ -427,11 +427,11 @@ const RegistrationGrowthChart = ({ data }) => {
             <YAxis axisLine={false} tickLine={false} />
             <Tooltip />
             <Area
-              type="monotone"
-              dataKey="value"
-              stroke="var(--green)"
+              type='monotone'
+              dataKey='value'
+              stroke='var(--green)'
               fillOpacity={1}
-              fill="url(#colorGrowth)"
+              fill='url(#colorGrowth)'
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -460,25 +460,25 @@ const RegistrationTrendChart = ({ trends }) => {
           <div className={styles.legendItem}>
             <div
               className={styles.legendColorBox}
-              style={{ backgroundColor: "#EE0808" }}
+              style={{ backgroundColor: '#EE0808' }}
             ></div>
             <span>{trends.current_label}</span>
           </div>
           <div className={styles.legendItem}>
             <div
               className={styles.legendColorBox}
-              style={{ backgroundColor: "#5F84FE" }}
+              style={{ backgroundColor: '#5F84FE' }}
             ></div>
             <span>{trends.previous_label}</span>
           </div>
         </div>
       </div>
       <div className={styles.chartContainer}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width='100%' height='100%'>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <CartesianGrid strokeDasharray='3 3' vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey='month'
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fontWeight: 600 }}
@@ -487,17 +487,17 @@ const RegistrationTrendChart = ({ trends }) => {
             <YAxis axisLine={false} tickLine={false} />
             <Tooltip />
             <Line
-              type="monotone"
-              dataKey="current" // Merah
-              stroke="#EE0808"
+              type='monotone'
+              dataKey='current' // Merah
+              stroke='#EE0808'
               strokeWidth={3}
               dot={false}
               name={trends.current_label}
             />
             <Line
-              type="monotone"
-              dataKey="previous" // Biru
-              stroke="#5F84FE"
+              type='monotone'
+              dataKey='previous' // Biru
+              stroke='#5F84FE'
               strokeWidth={3}
               dot={false}
               name={trends.previous_label}
@@ -517,22 +517,22 @@ const Analytics = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Memulai fetch analytics..."); // 1. Cek apakah fungsi jalan
+        console.log('Memulai fetch analytics...'); // 1. Cek apakah fungsi jalan
         const response = await getAnalytics();
 
-        console.log("Response dari API:", response); // 2. LIHAT INI DI CONSOLE
+        console.log('Response dari API:', response); // 2. LIHAT INI DI CONSOLE
 
         if (response && response.success) {
-          console.log("Set Data berhasil:", response.data);
+          console.log('Set Data berhasil:', response.data);
           setData(response.data);
         } else {
-          console.error("Response success bukan true:", response);
+          console.error('Response success bukan true:', response);
         }
       } catch (error) {
-        console.error("Error fetching analytics (Masuk Catch):", error);
+        console.error('Error fetching analytics (Masuk Catch):', error);
         // Cek apakah ada detail response dari api.js
         if (error.response) {
-          console.error("Detail Error Backend:", error.response);
+          console.error('Detail Error Backend:', error.response);
         }
       } finally {
         setLoading(false);
@@ -566,10 +566,10 @@ const Analytics = () => {
 
   // Data Chart untuk Active Student (Bar Chart Tengah)
   const activeStudentChartData = [
-    { name: "HS", value: activeMatrix.High.total, max: 1000 },
-    { name: "MS", value: activeMatrix.Middle.total, max: 1000 },
-    { name: "ES", value: activeMatrix.Elementary.total, max: 1000 },
-    { name: "ECP", value: activeMatrix.ECP.total, max: 1000 },
+    { name: 'HS', value: activeMatrix.High.total, max: 1000 },
+    { name: 'MS', value: activeMatrix.Middle.total, max: 1000 },
+    { name: 'ES', value: activeMatrix.Elementary.total, max: 1000 },
+    { name: 'ECP', value: activeMatrix.ECP.total, max: 1000 },
   ];
 
   // 3. Data Served Students (Donut Charts)
@@ -590,19 +590,19 @@ const Analytics = () => {
         <div className={styles.leftColumnWrapper}>
           <div className={styles.preRegisteredHeader}>
             Registration Stats ({data.meta.current_sy})
-            <FaSync style={{ fontSize: "12px", marginLeft: "6px" }} />
+            <FaSync style={{ fontSize: '12px', marginLeft: '6px' }} />
           </div>
 
           <div className={styles.leftColumnCards}>
             {/* Menggunakan data GLOBAL untuk Total Registration */}
             <SimpleStatCard
-              title="Total Registration"
+              title='Total Registration'
               count={global.total}
               growth={global.total_growth}
             />
-            <DetailedStatCard title="Total Registration (New)" data={sy.new} />
+            <DetailedStatCard title='Total Registration (New)' data={sy.new} />
             <DetailedStatCard
-              title="Total Registration (Returning)"
+              title='Total Registration (Returning)'
               data={sy.returning}
             />
           </div>
@@ -612,7 +612,7 @@ const Analytics = () => {
         <div className={styles.rightColumnCards}>
           <OrangePieCard syData={sy} />
           <DetailedStatCard
-            title="Total Registration (Transfer)"
+            title='Total Registration (Transfer)'
             data={sy.transferee}
           />
         </div>
@@ -623,7 +623,7 @@ const Analytics = () => {
         <div className={`${styles.sectionCard} ${styles.activeStudentCard}`}>
           <div className={styles.sectionHeader}>
             <div className={styles.sectionTitle}>Active Students</div>
-            <div style={{ fontSize: "12px", color: "var(--main-grey)" }}>
+            <div style={{ fontSize: '12px', color: 'var(--main-grey)' }}>
               S.Y {data.meta.current_sy}
             </div>
           </div>
@@ -634,13 +634,13 @@ const Analytics = () => {
             <FaUserFriends className={styles.statIcon} />
           </div>
           <div className={styles.activeChartContainer}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width='100%' height='100%'>
               <BarChart
                 data={activeStudentChartData}
                 margin={{ top: 20, right: 0, left: -25, bottom: 0 }}
               >
                 <XAxis
-                  dataKey="name"
+                  dataKey='name'
                   tick={{ fontSize: 12, fontWeight: 600 }}
                   axisLine={false}
                   tickLine={false}
@@ -649,15 +649,15 @@ const Analytics = () => {
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10, fill: "#7A7A7A" }}
+                  tick={{ fontSize: 10, fill: '#7A7A7A' }}
                 />
                 <Tooltip />
                 <Bar
-                  dataKey="value"
-                  fill="var(--green)"
+                  dataKey='value'
+                  fill='var(--green)'
                   radius={[20, 20, 20, 20]}
                   barSize={24}
-                  background={{ fill: "#f0f0f0", radius: [20, 20, 20, 20] }}
+                  background={{ fill: '#f0f0f0', radius: [20, 20, 20, 20] }}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -673,14 +673,14 @@ const Analytics = () => {
               <div className={styles.sectionTitle}>Total Served Students</div>
               <div
                 className={styles.trendContainer}
-                style={{ cursor: "pointer", color: "var(--main-accent)" }}
+                style={{ cursor: 'pointer', color: 'var(--main-accent)' }}
               >
-                All Levels <FaSync style={{ fontSize: "10px" }} />
+                All Levels <FaSync style={{ fontSize: '10px' }} />
               </div>
             </div>
             <div
               className={styles.activeBigNumber}
-              style={{ marginBottom: "20px" }}
+              style={{ marginBottom: '20px' }}
             >
               <div className={styles.textGradientPurple}>
                 {formatNumber(servedTotal)}
@@ -696,14 +696,14 @@ const Analytics = () => {
                       data={getDonutData(servedSummary.graduate, servedTotal)}
                       innerRadius={60}
                       outerRadius={80}
-                      dataKey="value"
-                      stroke="none"
+                      dataKey='value'
+                      stroke='none'
                       startAngle={90}
                       endAngle={-270}
                       paddingAngle={5}
                     >
-                      <Cell fill="#00C49F" />
-                      <Cell fill="var(--main-background)" />
+                      <Cell fill='#00C49F' />
+                      <Cell fill='var(--main-background)' />
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
@@ -727,14 +727,14 @@ const Analytics = () => {
                       data={getDonutData(servedSummary.withdraw, servedTotal)}
                       innerRadius={60}
                       outerRadius={80}
-                      dataKey="value"
-                      stroke="none"
+                      dataKey='value'
+                      stroke='none'
                       startAngle={90}
                       endAngle={-270}
                       paddingAngle={5}
                     >
-                      <Cell fill="#ca66ff" />
-                      <Cell fill="var(--main-background)" />
+                      <Cell fill='#ca66ff' />
+                      <Cell fill='var(--main-background)' />
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
@@ -758,14 +758,14 @@ const Analytics = () => {
                       data={getDonutData(servedSummary.expelled, servedTotal)}
                       innerRadius={60}
                       outerRadius={80}
-                      dataKey="value"
-                      stroke="none"
+                      dataKey='value'
+                      stroke='none'
                       startAngle={90}
                       endAngle={-270}
                       paddingAngle={5}
                     >
-                      <Cell fill="#FF8042" />
-                      <Cell fill="var(--main-background)" />
+                      <Cell fill='#FF8042' />
+                      <Cell fill='var(--main-background)' />
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>

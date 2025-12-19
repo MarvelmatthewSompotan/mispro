@@ -1,32 +1,27 @@
 // src/components/molecules/sidebarMenu/SidebarMenu.js
 
-import React, { useRef } from "react";
-import { NavLink } from "react-router-dom";
-import Icon from "../../Atoms/Icon/Icon";
-import useAuth from "../../../hooks/useAuth";
+import React, { useRef } from 'react';
+import { NavLink } from 'react-router-dom';
+import Icon from '../../Atoms/Icon/Icon';
+import useAuth from '../../../hooks/useAuth';
 
 // Import icons existing
-import homeIcon from "../../../assets/Home-icon.png";
-import studentIcon from "../../../assets/StudentList-icon.png";
-import logbookIcon from "../../../assets/logbook.png";
-import teacherIcon from "../../../assets/TeacherList-icon.png";
-import homeroomIcon from "../../../assets/HomeroomList-icon.png";
-import registrationIcon from "../../../assets/Registration-icon.png";
-import usersIcon from "../../../assets/user.png";
+import homeIcon from '../../../assets/Home-icon.png';
+import studentIcon from '../../../assets/StudentList-icon.png';
+import logbookIcon from '../../../assets/logbook.png';
+import registrationIcon from '../../../assets/Registration-icon.png';
+import usersIcon from '../../../assets/user.png';
 // TODO: Import icon Analytics Anda di sini
 
-
-import "./SidebarMenu.css";
+import './SidebarMenu.css';
 
 const allMenus = [
-  { to: "/Home", icon: homeIcon, label: "Home" },
-  { to: "/Analytics", label: "Analytics" }, // <--- MENU BARU
-  { to: "/students", icon: studentIcon, label: "Student List" },
-  { to: "/Logbook", icon: logbookIcon, label: "Logbook" },
-  { to: "/teachers", icon: teacherIcon, label: "Teacher List" },
-  { to: "/Homerooms", icon: homeroomIcon, label: "Homeroom List" },
-  { to: "/Registration", icon: registrationIcon, label: "Registration" },
-  { to: "/Users", icon: usersIcon, label: "Users" },
+  { to: '/Home', icon: homeIcon, label: 'Home' },
+  { to: '/Analytics', label: 'Analytics' },
+  { to: '/students', icon: studentIcon, label: 'Student List' },
+  { to: '/Logbook', icon: logbookIcon, label: 'Logbook' },
+  { to: '/Registration', icon: registrationIcon, label: 'Registration' },
+  { to: '/Users', icon: usersIcon, label: 'Users' },
 ];
 
 const SidebarMenu = ({ isOpen, onClose }) => {
@@ -37,7 +32,7 @@ const SidebarMenu = ({ isOpen, onClose }) => {
     // Jika ingin Analytics hanya untuk Admin, tambahkan kondisi ini:
     // if (menu.to === "/Analytics" || menu.to === "/Users") { return isAdmin(); }
 
-    if (menu.to === "/Users") {
+    if (menu.to === '/Users') {
       return isAdmin();
     }
     return true;
@@ -50,26 +45,26 @@ const SidebarMenu = ({ isOpen, onClose }) => {
   };
 
   return (
-    <aside ref={asideRef} className={`sidebar-menu ${isOpen ? "open" : ""}`}>
+    <aside ref={asideRef} className={`sidebar-menu ${isOpen ? 'open' : ''}`}>
       <nav>
-        <ul className="sidebar-menu-list">
+        <ul className='sidebar-menu-list'>
           {filteredMenus.map((menu) => (
             <li key={menu.label}>
               <NavLink
                 to={menu.to}
                 onClick={handleMenuClick}
                 className={({ isActive }) =>
-                  "sidebar-menu-item" + (isActive ? " active" : "")
+                  'sidebar-menu-item' + (isActive ? ' active' : '')
                 }
               >
-                <span className="sidebar-menu-icon">
+                <span className='sidebar-menu-icon'>
                   <Icon
                     src={menu.icon}
                     alt={menu.label}
                     style={{ width: 24, height: 24 }}
                   />
                 </span>
-                <span className="sidebar-menu-label">{menu.label}</span>
+                <span className='sidebar-menu-label'>{menu.label}</span>
               </NavLink>
             </li>
           ))}
