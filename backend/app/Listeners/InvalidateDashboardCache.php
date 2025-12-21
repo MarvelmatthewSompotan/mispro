@@ -9,16 +9,18 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Events\ApplicationFormStatusUpdated;
 use App\Events\StudentStatusUpdated;
-use App\Http\Controllers\DashboardController;
+use App\Services\DashboardCacheService;
 
 class InvalidateDashboardCache
 {
+    protected $cacheService;
+    
     /**
      * Create the event listener.
      */
-    public function __construct()
+    public function __construct(DashboardCacheService $cacheService)
     {
-        //
+        $this->cacheService = $cacheService;
     }
 
     /**
@@ -51,10 +53,9 @@ class InvalidateDashboardCache
         }
 
         $schoolYears = SchoolYear::pluck('year');
-        $controller = new DashboardController();
         
         foreach ($schoolYears as $year) {
-            $controller->forgetDashboardCacheByYear($year);
+            $this->cacheService->invalidateStatsCacheByYear($year);        
         }
 
         \Log::info("Dashboard cache invalidated due to {$reason} (school year: {$schoolYearLog})");

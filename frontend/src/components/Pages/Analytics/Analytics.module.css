@@ -5,6 +5,8 @@
   background-color: var(--secondary-background);
   font-family: var(--font-primary);
   box-sizing: border-box;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .headerSection {
@@ -15,8 +17,8 @@
 }
 
 .pageTitle {
-  font-size: 24px;
-  font-weight: var(--font-weight-semibold);
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
   color: var(--main-text);
 }
 

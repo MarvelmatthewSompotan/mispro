@@ -5,13 +5,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LogbookController;
+use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\StorageController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/reset-login', [AuthController::class, 'resetLogin']);
@@ -20,23 +21,20 @@ Route::get('/storage-file/{path}', [StorageController::class, 'serveFile'])
     ->where('path', '.*') 
     ->middleware('cors');
 
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin'])->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
     Route::get('/audit-logs/{id}', [AuditLogController::class, 'show']);
 });
 
-Route::middleware(['auth:sanctum', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });
 
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'lifetime','role:admin'])->group(function () {
+    Route::get('/users', [UserManagementController::class, 'index']);
     Route::post('/users', [UserManagementController::class, 'store']);
     Route::patch('/users/{user_id}', [UserManagementController::class, 'update']);
     Route::delete('/users/{user_id}', [UserManagementController::class, 'destroy']);
-});
-
-Route::middleware(['auth:sanctum', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
-    Route::get('/users', [UserManagementController::class, 'index']);
 });
 
 Route::middleware('auth:sanctum', 'lifetime')->group(function() {
@@ -59,6 +57,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
     Route::post('/auto-graduate/preview', [StudentController::class, 'autoGraduatePreview']);
     Route::post('/auto-graduate/confirm', [StudentController::class, 'autoGraduateConfirm']);
+    Route::post('/{id}/card-number', [StudentController::class, 'storeCardNumber']);
   });
 });
 
@@ -70,12 +69,16 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::post('/store/{draft_id}', [RegistrationController::class, 'store']);
     Route::get('/preview/{applicationId}/version/{versionId}', [RegistrationController::class, 'showPreview']);
     Route::post('/{application_id}/cancel/{reason_type}', [RegistrationController::class, 'handleCancelRegistration']);
+    Route::get('/cancelled-registrations', [RegistrationController::class, 'getCancelledRegistrations']);
   });
 });
 
-Route::middleware(['auth:sanctum', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
     Route::get('/logbook', [LogbookController::class, 'index']);
     Route::get('/logbook/export', [LogbookController::class, 'export']);
 });
 
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar'])->group(function () {
+    Route::get('/analytics', [AnalyticsController::class, 'index']);
+});
 ?>
