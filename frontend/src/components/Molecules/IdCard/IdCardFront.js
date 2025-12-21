@@ -1,17 +1,13 @@
-// IdCardFront.js
-import React, { useState, useRef } from "react"; // Tambah useRef & useState
+import React, { useState } from "react"; 
 import styles from "./IdCardFront.module.css";
 import Logo from "../../Atoms/Logo/Logo";
-
 import headerBg from "../../../assets/headerBg.png";
 import userPlaceholder from "../../../assets/user.svg";
 import qrPlaceholder from "../../../assets/qr.svg";
-
 import waveRed from "../../../assets/waveRed.png";
 import waveBlue from "../../../assets/waveBlue.png";
 import waveYellow from "../../../assets/WaveYellow.png";
 
-// Tambahkan props: editable (boolean) & scale (number)
 const IdCardFront = ({
   data,
   variant = "ecp",
@@ -20,18 +16,14 @@ const IdCardFront = ({
 }) => {
   const { first_name, last_name, photo_url, student_id, section_name } =
     data || {};
-
-  // --- STATE UNTUK POSISI FOTO ---
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 }); // Posisi awal mouse
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
-  // --- LOGIKA DRAGGING ---
   const handleMouseDown = (e) => {
     if (!editable) return;
-    e.preventDefault(); // Mencegah default drag behavior browser
+    e.preventDefault();
     setIsDragging(true);
-    // Simpan posisi mouse awal
     setStartPos({
       x: e.clientX,
       y: e.clientY,
@@ -41,8 +33,6 @@ const IdCardFront = ({
   const handleMouseMove = (e) => {
     if (!isDragging || !editable) return;
 
-    // Hitung selisih gerakan mouse
-    // PENTING: Bagi dengan scale agar gerakan mouse sinkron dengan gambar yang diperkecil/diperbesar
     const deltaX = (e.clientX - startPos.x) / scale;
     const deltaY = (e.clientY - startPos.y) / scale;
 
@@ -51,7 +41,6 @@ const IdCardFront = ({
       y: prev.y + deltaY,
     }));
 
-    // Update startPos untuk frame selanjutnya
     setStartPos({
       x: e.clientX,
       y: e.clientY,
@@ -61,8 +50,6 @@ const IdCardFront = ({
   const handleMouseUp = () => {
     setIsDragging(false);
   };
-
-  // -------------------------
 
   const config = {
     ecp: {
@@ -87,38 +74,28 @@ const IdCardFront = ({
   return (
     <div
       className={`${styles.idCardBase} ${currentConfig.styleClass}`}
-      // Event Mouse Up global di container kartu agar drag berhenti jika mouse lepas di luar foto
+      onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      onMouseMove={handleMouseMove}
     >
       <img className={styles.headerBg} alt="" src={headerBg} />
-
-      {/* --- AREA FOTO BARU --- */}
       <div className={styles.photoContainer}>
         <img
           className={editable ? styles.photoDraggable : styles.photoStatic}
           alt="Student"
           src={photo_url}
-          draggable={false} // Disable native HTML5 drag
+          draggable={false}
           onError={(e) => {
             e.target.src = userPlaceholder;
           }}
-          // Pasang Style Posisi dinamis
           style={{
             transform: `translate(${position.x}px, ${position.y}px)`,
-            // Note: scale(1.2) opsional agar gambar lebih besar dari kotak, memudahkan geser
-          }}
-          // Event Handlers
+          }}   
           onMouseDown={handleMouseDown}
         />
       </div>
-      {/* ---------------------- */}
-
       <div className={styles.bottomWrapper}>
-        {/* ... (Sisa kode sama persis) ... */}
         <img className={styles.waveBg} alt="" src={currentConfig.wave} />
-
         <div className={styles.contentOverlay}>
           <div className={styles.infoGroup}>
             <div className={styles.nameGroup}>
@@ -127,7 +104,6 @@ const IdCardFront = ({
             </div>
             <div className={styles.studentId}>ID: {student_id}</div>
           </div>
-
           <div className={styles.footerGroup}>
             <div className={styles.schoolInfo}>
               <div className={styles.sectionName}>{section_name}</div>
