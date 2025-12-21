@@ -20,28 +20,47 @@
   z-index: 1;
 }
 
-.photoBase {
+.photoContainer {
   position: absolute;
   top: 43px;
   left: 145px;
   right: 0;
   width: 252.6px;
   height: 336px;
-  object-fit: cover;
-  object-position: top center;
   z-index: 2;
+  overflow: hidden; 
+  border: 1px solid var(--main-grey);
+}
 
+.photoDraggable {
+  position: absolute;
+  min-width: 100%;
+  min-height: 100%;
+  width: 100%; 
+  height: 100%;
+  object-fit: cover;
+  user-select: none; 
+  cursor: grab; 
+}
 
+.photoDraggable:active {
+  cursor: grabbing; 
+}
+
+.photoStatic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .variantEcp {
-  color: var(--text-accent); 
+  color: var(--text-accent);
 }
 .variantMs {
   color: var(--text-accent);
 }
 .variantHs {
-  color: #12295e; 
+  color: #12295e;
 }
 
 .bottomWrapper {
@@ -102,7 +121,7 @@
 
 .footerGroup {
   display: flex;
-  align-items: flex-end; 
+  align-items: flex-end;
   justify-content: space-between;
 }
 
@@ -124,7 +143,7 @@
   margin-top: 35px;
   width: 100%;
   object-fit: contain;
-  object-position: left bottom; 
+  object-position: left bottom;
   display: block;
 }
 
