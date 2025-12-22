@@ -100,13 +100,12 @@
   .registrationDataRow {
     display: grid;
     grid-template-columns:
-      minmax(140px, 1fr) /* Registration Date */
-      minmax(140px, 1fr) /* Cancellation Date */
+      minmax(140px, 1fr)   /* Registration Date */
+      minmax(140px, 1fr)   /* Cancellation Date */
       minmax(220px, 1.5fr) /* Student Name */
-      minmax(80px, 0.7fr) /* Grade */
-      minmax(100px, 1fr) /* Section */
-      minmax(80px, 0.7fr) /* Type */
-      minmax(150px, 1.2fr); /* Notes (Filter Notes) */
+      minmax(100px, 1fr)   /* Section */
+      minmax(80px, 0.7fr)  /* Type */
+      minmax(150px, 1.2fr); /* Notes */
     border-bottom: 4px solid var(--main-grey);
   }
   
@@ -115,12 +114,8 @@
       border-bottom: 1px solid var(--main-grey);
       border-top: none;
       min-height: 60px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-  }
-  
-  .registrationDataRow:hover {
-    background-color: #f7f7f7;
+      cursor: default;
+      transition: none;
   }
   
   .registrationDataRow:last-child {

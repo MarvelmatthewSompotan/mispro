@@ -7,7 +7,7 @@ import Pagination from "../../atoms/Pagination";
 import ColumnHeader from "../../atoms/columnHeader/ColumnHeader";
 import placeholder from "../../../assets/user.svg";
 import infoIcon from "../../../assets/info_icon.svg";
-import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
+import ResetFilterButton from "../../atoms/ResetFilterButton/ResetFilterButton";
 import AutoGraduatePopup from "../../molecules/PopUp/PopUpAutoGraduate/PopUpAutoGraduate";
 
 const ITEMS_PER_PAGE = 25;

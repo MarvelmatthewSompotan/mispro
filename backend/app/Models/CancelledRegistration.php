@@ -28,6 +28,7 @@ class CancelledRegistration extends Model
         'cancelled_at',
         'cancelled_by',
         'is_use_student_id',
+        'student_status'
     ];
 
     public function schoolYear(): BelongsTo

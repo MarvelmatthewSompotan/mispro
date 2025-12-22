@@ -8,7 +8,7 @@ import searchIcon from '../../../assets/Search-icon.png';
 import editPenIcon from '../../../assets/edit_pen_icon.svg'; 
 import ColumnHeader from '../../atoms/columnHeader/ColumnHeader';
 import Button from '../../atoms/Button';
-import ResetFilterButton from '../../atoms/resetFilterButton/ResetFilterButton';
+import ResetFilterButton from '../../atoms/ResetFilterButton/ResetFilterButton';
 
 import {
   getRegistrations,
@@ -40,7 +40,6 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
         {registration.student_type || 'New'}
       </div>
 
-      {/* --- PERUBAHAN Task 3 & 4: Ganti Status menjadi Edit Button & Tetap Trigger Popup --- */}
       <div className={styles.tableCell}>
         <div
           className={styles.tableEditButton}

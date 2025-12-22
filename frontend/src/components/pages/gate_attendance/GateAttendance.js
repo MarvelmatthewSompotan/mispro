@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './GateAttendance.module.css';
 import searchIcon from "../../../assets/Search-icon.png";
-import ResetFilterButton from "../../atoms/resetFilterButton/ResetFilterButton";
+import ResetFilterButton from "../../atoms/ResetFilterButton/ResetFilterButton";
 import gearIcon from "../../../assets/Circle-Gear_icon.svg";
 import checkInIcon from "../../../assets/check-in_icon.svg";
 import checkOutIcon from "../../../assets/check-out_icon.svg";

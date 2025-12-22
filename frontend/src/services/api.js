@@ -1,5 +1,3 @@
-// src/api.js
-
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 /**
@@ -360,59 +358,23 @@ export const getRegistrations = ({
   return apiFetch(`/registration?${params.toString()}`);
 };
 
-export const getCancelledRegistrations = (
-  {
-    search = '',
-    search_name = '',
-    search_id = '',
-    reg_start_date = null,
-    reg_end_date = null,
-    cancel_start_date = null,
-    cancel_end_date = null,
-    filter_notes = '',
-    student_status = null,
-    grade = null,
-    section = null,
-    sort = null,
-    page = 1,
-    per_page = 25,
-  } = {},
-  fetchOptions = {}
-) => {
-  const params = new URLSearchParams();
+export const cancelRegistration = (applicationId, reasonType, payload = {}) => {
+  const method = 'POST';
 
-  params.append('page', page);
-  params.append('per_page', per_page);
-  params.append('status[]', 'Cancelled');
-
-  if (search) params.append('search', search);
-  if (search_name) params.append('search_name', search_name);
-  if (search_id) params.append('search_id', search_id);
-
-  if (reg_start_date) params.append('start_date', reg_start_date);
-  if (reg_end_date) params.append('end_date', reg_end_date);
-
-  if (filter_notes) params.append('filter_notes', filter_notes);
-
-
-  if (Array.isArray(grade)) {
-    grade.forEach((id) => params.append('grade[]', id));
-  }
-  if (Array.isArray(section)) {
-    section.forEach((id) => params.append('section[]', id));
+  if (reasonType === 'cancellationOfEnrollment' && payload.notes) {
+    return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
   }
 
-  sort?.forEach((s, index) => {
-    params.append(`sort[${index}][field]`, s.field);
-    params.append(`sort[${index}][order]`, s.order);
+  return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
+    method: method,
   });
-
-  return apiFetch(
-    `/registration/cancelled-registrations?${params.toString()}`,
-    fetchOptions
-  );  
 };
-
 
 export const getStudentHistoryDates = (id) =>
   apiFetch(`/students/${id}/history-dates`);
@@ -478,22 +440,44 @@ export const updateUser = (userId, userData) => {
   });
 };
 
-export const cancelRegistration = (applicationId, reasonType, payload = {}) => {
-  const method = 'POST';
+export const getCancelledRegistrations = (filters = {}) => {
+  const params = new URLSearchParams();
 
-  if (reasonType === 'cancellationOfEnrollment' && payload.notes) {
-    return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+  // 1. Mapping Pagination
+  params.append('page', filters.page || 1);
+  params.append('per_page', filters.per_page || 25);
+
+  // 2. Mapping String filters sesuai kebutuhan Backend
+  if (filters.search) params.append('search', filters.search);
+  if (filters.filter_name) params.append('filter_name', filters.filter_name);
+  if (filters.filter_notes) params.append('filter_notes', filters.filter_notes);
+  
+  // 3. Mapping Date filters
+  if (filters.reg_start_date) params.append('reg_start_date', filters.reg_start_date);
+  if (filters.reg_end_date) params.append('reg_end_date', filters.reg_end_date);
+  if (filters.cancel_start_date) params.append('cancel_start_date', filters.cancel_start_date);
+  if (filters.cancel_end_date) params.append('cancel_end_date', filters.cancel_end_date);
+
+  // 4. Mapping Array filters (agar sesuai format sections[]=1&sections[]=2)
+  if (Array.isArray(filters.sections)) {
+    filters.sections.forEach((v) => params.append('sections[]', v));
+  }
+  if (Array.isArray(filters.student_status)) {
+    filters.student_status.forEach((v) => params.append('student_status[]', v));
+  }
+  if (Array.isArray(filters.school_years)) {
+    filters.school_years.forEach((v) => params.append('school_years[]', v));
+  }
+  if (Array.isArray(filters.grades)) {
+    filters.grades.forEach((v) => params.append('grades[]', v));
   }
 
-  return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
-    method: method,
-  });
+  // 5. Mapping Sorting
+  if (filters.sort_by) params.append('sort_by', filters.sort_by);
+  if (filters.sort_order) params.append('sort_order', filters.sort_order);
+
+  // Menggunakan apiFetch agar URL otomatis menyertakan prefix /api dan header Auth
+  return apiFetch(`/registration/cancelled-registrations?${params.toString()}`);
 };
 
 export const getAutoGraduatePreview = () => {
