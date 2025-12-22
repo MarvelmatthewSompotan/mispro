@@ -37,7 +37,8 @@ const CanceledRegistrationRow = ({ registration }) => {
 
       <div className={styles.tableCell}>{registration.full_name}</div>
 
-      {/* Kolom Grade telah dihapus dari sini */}
+      {/* PERUBAHAN: Menambahkan kolom School Year di sini */}
+      <div className={styles.tableCell}>{registration.school_year || '-'}</div>
 
       <div className={styles.tableCell}>
         {registration.section || 'N/A'}
@@ -258,7 +259,12 @@ const CanceledRegistration = () => {
             currentFilterValue={filters.filter_name}
           />
           
-          {/* ColumnHeader Grade telah dihapus dari sini */}
+          {/* PERUBAHAN: Menambahkan ColumnHeader School Year dengan sort/filter disabled */}
+          <ColumnHeader
+            title='School Year'
+            hasSort={false}
+            hasFilter={false}
+          />
 
           <ColumnHeader
             title='Section'
