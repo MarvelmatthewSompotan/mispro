@@ -2,21 +2,31 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 /**
  * Wrapper function untuk fetch API.
+ * Fungsi ini secara otomatis menangani:
+ * 1. Penambahan Authorization header untuk rute yang memerlukan otentikasi.
+ * 2. Pengecekan response. Jika response 401 (Unauthorized), akan otomatis logout.
+ * 3. Parsing JSON dari response.
+ *
+ * @param {string} endpoint - Endpoint API yang akan dipanggil (misal: '/me').
+ * @param {object} options - Opsi konfigurasi untuk fetch (method, body, dll).
+ * @param {boolean} requiresAuth - Set ke `false` jika request tidak butuh token (misal: login).
+ * @returns {Promise<any>} - Data JSON dari response.
  */
+
 const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
   const headers = {
-    Accept: 'application/json',
+    Accept: "application/json",
     ...options.headers,
   };
 
   if (!(options.body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
+    headers["Content-Type"] = "application/json";
   }
 
   if (requiresAuth) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     } else {
       console.error('No token found for authenticated request');
       window.location.href = '/login';
@@ -30,11 +40,11 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
   });
 
   if (res.status === 401 && requiresAuth) {
-    console.error('Token is expired or invalid. Logging out...');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
-    throw new Error('Unauthorized');
+    console.error("Token is expired or invalid. Logging out...");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+    throw new Error("Unauthorized");
   }
 
   if (!res.ok) {
@@ -53,24 +63,24 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
 
 export const login = async (identifier, password) => {
   const data = await apiFetch(
-    '/login',
+    "/login",
     {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ identifier, password }),
     },
     false
   );
   if (data.token) {
-    localStorage.setItem('token', data.token);
+    localStorage.setItem("token", data.token);
   }
   return data;
 };
 
 export const resetLogin = async (identifier, password) => {
   return apiFetch(
-    '/reset-login',
+    "/reset-login",
     {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ identifier, password }),
     },
     false
@@ -82,17 +92,17 @@ export const logout = async () => {
     await apiFetch('/logout', { method: 'POST' });
   } catch (error) {
     console.warn(
-      'Logout failed on server, proceeding to clear local data.',
+      "Logout failed on server, proceeding to clear local data.",
       error
     );
   } finally {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
   }
 };
 
-export const getMe = () => apiFetch('/me');
+export const getMe = () => apiFetch("/me");
 
-export const getRegistrationOptions = () => apiFetch('/registration-option');
+export const getRegistrationOptions = () => apiFetch("/registration-option");
 
 export const addSchoolYear = () => {
   return apiFetch('/school-year/add', {
@@ -102,8 +112,8 @@ export const addSchoolYear = () => {
 };
 
 export const startRegistration = (schoolYear, semester, registrationDate) => {
-  return apiFetch('/registration/start', {
-    method: 'POST',
+  return apiFetch("/registration/start", {
+    method: "POST",
     body: JSON.stringify({
       school_year_id: schoolYear,
       semester_id: semester,
@@ -114,7 +124,7 @@ export const startRegistration = (schoolYear, semester, registrationDate) => {
 
 export const submitRegistrationForm = (draftId, formData) => {
   return apiFetch(`/registration/store/${draftId}`, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(formData),
   });
 };
@@ -143,21 +153,21 @@ export const getStudents = (filters = {}) => {
   params.append('per_page', filters.per_page || 25);
 
   if (filters.search) {
-    params.append('search', filters.search);
+    params.append("search", filters.search);
   } else if (filters.search_name) {
-    params.append('search_name', filters.search_name);
+    params.append("search_name", filters.search_name);
   }
   if (filters.school_year_id) {
-    params.append('school_year_id', filters.school_year_id);
+    params.append("school_year_id", filters.school_year_id);
   }
 
   filters.class_id?.forEach((id) => params.append('class_id[]', id));
   filters.section_id?.forEach((id) => params.append('section_id[]', id));
   filters.enrollment_status?.forEach((status) =>
-    params.append('enrollment_status[]', status)
+    params.append("enrollment_status[]", status)
   );
   filters.student_status?.forEach((status) =>
-    params.append('student_status[]', status)
+    params.append("student_status[]", status)
   );
 
   filters.sort?.forEach((s, index) => {
@@ -170,7 +180,7 @@ export const getStudents = (filters = {}) => {
 
 export const updateStudent = (id, studentData) => {
   const formData = new FormData();
-  formData.append('_method', 'PATCH');
+  formData.append("_method", "PATCH");
   for (const key in studentData) {
     if (Object.prototype.hasOwnProperty.call(studentData, key)) {
       const value = studentData[key];
@@ -181,7 +191,7 @@ export const updateStudent = (id, studentData) => {
   }
 
   return apiFetch(`/students/${id}/update`, {
-    method: 'POST',
+    method: "POST",
     body: formData,
   });
 };
@@ -207,31 +217,31 @@ export const getLogbook = ({
   per_page = 25,
 } = {}) => {
   const params = new URLSearchParams();
-  params.append('page', page);
-  params.append('per_page', per_page);
+  params.append("page", page);
+  params.append("per_page", per_page);
 
   if (search_name) params.append('search_name', search_name);
   if (search_family_rank)
-    params.append('search_family_rank', search_family_rank);
-  if (search_religion) params.append('search_religion', search_religion);
-  if (search_country) params.append('search_country', search_country);
-  if (search_father) params.append('search_father', search_father);
-  if (search_mother) params.append('search_mother', search_mother);
+    params.append("search_family_rank", search_family_rank);
+  if (search_religion) params.append("search_religion", search_religion);
+  if (search_country) params.append("search_country", search_country);
+  if (search_father) params.append("search_father", search_father);
+  if (search_mother) params.append("search_mother", search_mother);
 
   (Array.isArray(grades) ? grades : []).forEach((v) =>
-    params.append('grades[]', v)
+    params.append("grades[]", v)
   );
   (Array.isArray(sections) ? sections : []).forEach((v) =>
-    params.append('sections[]', v)
+    params.append("sections[]", v)
   );
   (Array.isArray(school_years) ? school_years : []).forEach((v) =>
-    params.append('school_years[]', v)
+    params.append("school_years[]", v)
   );
   (Array.isArray(genders) ? genders : []).forEach((v) =>
-    params.append('genders[]', v)
+    params.append("genders[]", v)
   );
   (Array.isArray(transportations) ? transportations : []).forEach((v) =>
-    params.append('transportations[]', v)
+    params.append("transportations[]", v)
   );
 
   if (start_date) params.append('start_date', start_date);
@@ -270,26 +280,26 @@ export const getLogbookForExport = ({
 
   if (search_name) params.append('search_name', search_name);
   if (search_family_rank)
-    params.append('search_family_rank', search_family_rank);
-  if (search_religion) params.append('search_religion', search_religion);
-  if (search_country) params.append('search_country', search_country);
-  if (search_father) params.append('search_father', search_father);
-  if (search_mother) params.append('search_mother', search_mother);
+    params.append("search_family_rank", search_family_rank);
+  if (search_religion) params.append("search_religion", search_religion);
+  if (search_country) params.append("search_country", search_country);
+  if (search_father) params.append("search_father", search_father);
+  if (search_mother) params.append("search_mother", search_mother);
 
   (Array.isArray(grades) ? grades : []).forEach((v) =>
-    params.append('grades[]', v)
+    params.append("grades[]", v)
   );
   (Array.isArray(sections) ? sections : []).forEach((v) =>
-    params.append('sections[]', v)
+    params.append("sections[]", v)
   );
   (Array.isArray(school_years) ? school_years : []).forEach((v) =>
-    params.append('school_years[]', v)
+    params.append("school_years[]", v)
   );
   (Array.isArray(genders) ? genders : []).forEach((v) =>
-    params.append('genders[]', v)
+    params.append("genders[]", v)
   );
   (Array.isArray(transportations) ? transportations : []).forEach((v) =>
-    params.append('transportations[]', v)
+    params.append("transportations[]", v)
   );
 
   if (start_date) params.append('start_date', start_date);
@@ -320,34 +330,34 @@ export const getRegistrations = ({
   per_page = 10,
 } = {}) => {
   const params = new URLSearchParams();
-  params.append('page', page);
-  params.append('per_page', per_page);
+  params.append("page", page);
+  params.append("per_page", per_page);
 
   if (search) {
-    params.append('search', search);
+    params.append("search", search);
   } else if (search_name) {
-    params.append('search_name', search_name);
+    params.append("search_name", search_name);
   }
-  if (search_id) params.append('search_id', search_id);
-  if (start_date) params.append('start_date', start_date);
-  if (end_date) params.append('end_date', end_date);
+  if (search_id) params.append("search_id", search_id);
+  if (start_date) params.append("start_date", start_date);
+  if (end_date) params.append("end_date", end_date);
 
   if (Array.isArray(grade)) {
-    grade.forEach((id) => params.append('grade[]', id));
+    grade.forEach((id) => params.append("grade[]", id));
   } else if (grade) {
     params.append('grade[]', grade); 
   }
 
   if (Array.isArray(section)) {
-    section.forEach((id) => params.append('section[]', id));
+    section.forEach((id) => params.append("section[]", id));
   } else if (section) {
-    params.append('section[]', section);
+    params.append("section[]", section);
   }
 
   if (Array.isArray(status)) {
-    status.forEach((status) => params.append('status[]', status));
+    status.forEach((status) => params.append("status[]", status));
   } else if (status) {
-    params.append('status[]', status);
+    params.append("status[]", status);
   }
 
   sort?.forEach((s, index) => {
@@ -383,7 +393,7 @@ export const getHistoryDetail = (versionId) =>
   apiFetch(`/students/history/${versionId}`);
 
 export const getDashboard = () => {
-  return apiFetch('/dashboard', { method: 'GET' });
+  return apiFetch("/dashboard", { method: "GET" });
 };
 
 export const getUsers = ({
@@ -422,20 +432,20 @@ export const getUsers = ({
 
 export const deleteUser = (userId) => {
   return apiFetch(`/users/${userId}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 };
 
 export const postUser = async (userData) => {
-  return apiFetch('/users', {
-    method: 'POST',
+  return apiFetch("/users", {
+    method: "POST",
     body: JSON.stringify(userData),
   });
 };
 
 export const updateUser = (userId, userData) => {
   return apiFetch(`/users/${userId}`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: JSON.stringify(userData),
   });
 };
@@ -481,14 +491,17 @@ export const getCancelledRegistrations = (filters = {}) => {
 };
 
 export const getAutoGraduatePreview = () => {
-  return apiFetch('/students/auto-graduate/preview', {
-    method: 'POST',
+  return apiFetch("/students/auto-graduate/preview", {
+    method: "POST",
   });
 };
 
 export const confirmAutoGraduate = (ids) => {
-  return apiFetch('/students/auto-graduate/confirm', {
-    method: 'POST',
+  return apiFetch("/students/auto-graduate/confirm", {
+    method: "POST",
     body: JSON.stringify({ ids }),
   });
+};
+export const getAnalytics = () => {
+  return apiFetch("/analytics");
 };
