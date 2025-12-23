@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import PopUpForm from "../../Molecules/PopUp/PopUpRegis/PopUpForm";
-import Pagination from "../../Molecules/Pagination/Pagination";
-import StatusConfirmationPopup from "../../Molecules/PopUp/PopUpRegis/StatusConfirmationPopup";
-import styles from "./Registration.module.css";
-import SearchBar from "../../Molecules/SearchBar/SearchBar";
-import editPenIcon from "../../../assets/edit_pen_icon.svg";
-import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
-import Button from "../../Atoms/Button/Button";
-import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import PopUpForm from '../../Molecules/PopUp/PopUpRegis/PopUpForm';
+import Pagination from '../../Molecules/Pagination/Pagination';
+import StatusConfirmationPopup from '../../Molecules/PopUp/PopUpRegis/StatusConfirmationPopup';
+import styles from './Registration.module.css';
+import SearchBar from '../../Molecules/SearchBar/SearchBar';
+import editPenIcon from '../../../assets/edit_pen_icon.svg';
+import ColumnHeader from '../../Molecules/ColumnHeader/ColumnHeader';
+import Button from '../../Atoms/Button/Button';
+import ResetFilterButton from '../../Atoms/ResetFilterButton/ResetFilterButton';
 
 import {
   getRegistrations,
   getRegistrationOptions,
-} from "../../../services/api";
+} from '../../../services/api';
 
 const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
-  const status = registration.application_status?.toLowerCase() || "confirmed";
+  const status = registration.application_status?.toLowerCase() || 'confirmed';
   // eslint-disable-next-line
   const statusStyle =
-    status === "confirmed" ? styles.statusConfirmed : styles.statusCancelled;
+    status === 'confirmed' ? styles.statusConfirmed : styles.statusCancelled;
 
   return (
     <div
@@ -27,19 +27,19 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
       onClick={() => onRowClick(registration)}
     >
       <div className={styles.tableCell}>
-        {new Date(registration.registration_date).toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
+        {new Date(registration.registration_date).toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
         })}
       </div>
       <div className={styles.tableCell}>{registration.registration_id}</div>
       <div className={styles.tableCell}>{registration.full_name}</div>
-      <div className={styles.tableCell}>{registration.grade || "N/A"}</div>
+      <div className={styles.tableCell}>{registration.grade || 'N/A'}</div>
       <div className={styles.tableCell}>
-        {registration.section_name || "N/A"}
+        {registration.section_name || 'N/A'}
       </div>
-      
+
       <div className={styles.tableCell}>
         {registration.student_type || 'New'}
       </div>
@@ -53,11 +53,7 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
           }}
         >
           <span className={styles.editButtonText}>Edit</span>
-          <img 
-            src={editPenIcon} 
-            alt="Edit" 
-            className={styles.editButtonIcon}
-          />
+          <img src={editPenIcon} alt='Edit' className={styles.editButtonIcon} />
         </div>
       </div>
     </div>
@@ -75,15 +71,15 @@ const Registration = () => {
   const REFRESH_INTERVAL = 5000;
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({});
   const [sorts, setSorts] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
     sections: [],
     classes: [],
     applicationStatus: [
-      { id: "Confirmed", name: "Confirmed" },
-      { id: "Cancelled", name: "Cancelled" },
+      { id: 'Confirmed', name: 'Confirmed' },
+      { id: 'Cancelled', name: 'Cancelled' },
     ],
   });
   const fetchControllerRef = useRef(null);
@@ -92,7 +88,6 @@ const Registration = () => {
     async (filters = {}, page = 1, sorts = [], options = {}) => {
       const { isBackgroundRefresh = false } = options;
 
-      
       if (!isBackgroundRefresh) setLoading(true);
 
       const controller = new AbortController();
@@ -115,11 +110,11 @@ const Registration = () => {
         setTotalPages(res.data.last_page || 1);
         setCurrentPage(res.data.current_page || 1);
       } catch (err) {
-        if (err.name === "AbortError") {
-          console.log("Previous fetch aborted due to new input");
+        if (err.name === 'AbortError') {
+          console.log('Previous fetch aborted due to new input');
           return;
         }
-        console.error("Error fetching registrations:", err);
+        console.error('Error fetching registrations:', err);
         setRegistrationData([]);
         setTotalPages(1);
       } finally {
@@ -139,7 +134,7 @@ const Registration = () => {
           classes: opts.classes || [],
         }));
       } catch (err) {
-        console.error("Error fetching registration options:", err);
+        console.error('Error fetching registration options:', err);
       }
     };
     fetchFilterOptions();
@@ -178,9 +173,9 @@ const Registration = () => {
       let next;
 
       if (!current) {
-        next = { field: fieldKey, order: "asc" };
-      } else if (current.order === "asc") {
-        next = { field: fieldKey, order: "desc" };
+        next = { field: fieldKey, order: 'asc' };
+      } else if (current.order === 'asc') {
+        next = { field: fieldKey, order: 'desc' };
       } else {
         next = null;
       }
@@ -193,14 +188,14 @@ const Registration = () => {
   const handleFilterChange = (filterKey, selectedValue) => {
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters };
-      if (filterKey === "date_range" && Array.isArray(selectedValue)) {
+      if (filterKey === 'date_range' && Array.isArray(selectedValue)) {
         const [startDate, endDate] = selectedValue;
         if (startDate || endDate) {
-          newFilters["start_date"] = startDate || undefined;
-          newFilters["end_date"] = endDate || undefined;
+          newFilters['start_date'] = startDate || undefined;
+          newFilters['end_date'] = endDate || undefined;
         } else {
-          delete newFilters["start_date"];
-          delete newFilters["end_date"];
+          delete newFilters['start_date'];
+          delete newFilters['end_date'];
         }
         delete newFilters[filterKey];
       } else {
@@ -214,8 +209,8 @@ const Registration = () => {
           delete newFilters[filterKey];
         }
 
-        if (filterKey === "search_name" && selectedValue) {
-          setSearch("");
+        if (filterKey === 'search_name' && selectedValue) {
+          setSearch('');
         }
       }
 
@@ -224,7 +219,7 @@ const Registration = () => {
   };
 
   const handleResetFilters = () => {
-    setSearch("");
+    setSearch('');
     setFilters({});
     setSorts([]);
   };
@@ -251,7 +246,7 @@ const Registration = () => {
         ...filters,
         search: search || filters.search || undefined,
       };
-      console.log("Auto refreshing registration list (background)...");
+      console.log('Auto refreshing registration list (background)...');
       fetchRegistrations(currentFilters, currentPage, sorts, {
         isBackgroundRefresh: true,
       });
@@ -264,7 +259,7 @@ const Registration = () => {
   const handleClosePopup = () => setShowPopupForm(false);
 
   const handleCreateForm = (formData) => {
-    navigate("/Registration-form", {
+    navigate('/Registration-form', {
       state: { ...formData, fromPopup: true },
     });
     setShowPopupForm(false);
@@ -273,7 +268,7 @@ const Registration = () => {
   const handleRowClick = (row) => {
     const applicationId = row.application_id || null;
     const version = row.version_id ?? null;
-    navigate("/print", {
+    navigate('/print', {
       state: { applicationId, version },
     });
   };
@@ -328,7 +323,7 @@ const Registration = () => {
             <SearchBar
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Find name or student id"
+              placeholder='Find name or student id'
             />
             <ResetFilterButton onClick={handleResetFilters} />
           </div>
@@ -343,91 +338,77 @@ const Registration = () => {
               New Form
             </Button>
           </div>
-          
-          <div className={styles.editButtonContainer}>
-            <span className={styles.editButtonText}>Edit</span>
-            
-            <img 
-              src={editPenIcon} 
-              alt="Edit" 
-              className={styles.editButtonIcon}
-            />
-          </div>
         </div>
       </div>
 
       <div className={styles.tableContainer}>
         <div className={styles.tableHeaderGrid}>
           <ColumnHeader
-            title="Registration Date"
+            title='Registration Date'
             hasSort={true}
-            fieldKey="registration_date"
-            sortOrder={getSortOrder("registration_date")}
+            fieldKey='registration_date'
+            sortOrder={getSortOrder('registration_date')}
             onSort={handleSortChange}
             hasFilter={true}
-            filterType="date-range"
-            filterKey="date_range"
+            filterType='date-range'
+            filterKey='date_range'
             onFilterChange={handleFilterChange}
             currentFilterValue={[filters.start_date, filters.end_date]}
           />
           <ColumnHeader
-            title="Registration ID"
+            title='Registration ID'
             hasSort={true}
-            fieldKey="registration_id"
-            sortOrder={getSortOrder("registration_id")}
+            fieldKey='registration_id'
+            sortOrder={getSortOrder('registration_id')}
             onSort={handleSortChange}
             hasFilter={true}
-            filterType="search"
-            filterKey="search_id"
+            filterType='search'
+            filterKey='search_id'
             onFilterChange={handleFilterChange}
             currentFilterValue={filters.search_id}
           />
           <ColumnHeader
-            title="Student Name"
+            title='Student Name'
             hasSort={true}
-            fieldKey="full_name"
-            sortOrder={getSortOrder("full_name")}
+            fieldKey='full_name'
+            sortOrder={getSortOrder('full_name')}
             onSort={handleSortChange}
             hasFilter={true}
-            filterType="search"
-            filterKey="search_name"
+            filterType='search'
+            filterKey='search_name'
             onFilterChange={handleFilterChange}
             currentFilterValue={filters.search_name}
           />
           <ColumnHeader
-            title="Grade"
+            title='Grade'
             hasSort={true}
-            fieldKey="grade"
-            sortOrder={getSortOrder("grade")}
+            fieldKey='grade'
+            sortOrder={getSortOrder('grade')}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey="grade"
+            filterKey='grade'
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.classes}
-            valueKey="grade"
-            labelKey="grade"
+            valueKey='grade'
+            labelKey='grade'
             currentFilterValue={filters.grade}
           />
           <ColumnHeader
-            title="Section"
+            title='Section'
             hasSort={true}
-            fieldKey="section"
-            sortOrder={getSortOrder("section")}
+            fieldKey='section'
+            sortOrder={getSortOrder('section')}
             onSort={handleSortChange}
             hasFilter={true}
-            filterKey="section"
+            filterKey='section'
             onFilterChange={handleFilterChange}
             filterOptions={filterOptions.sections}
-            valueKey="name"
-            labelKey="name"
+            valueKey='name'
+            labelKey='name'
             currentFilterValue={filters.section}
           />
-          
-          <ColumnHeader
-            title='Type'
-            hasSort={true}
-            hasFilter={true}
-          />
+
+          <ColumnHeader title='Type' hasSort={true} hasFilter={true} />
 
           <ColumnHeader
             title=''
@@ -458,9 +439,9 @@ const Registration = () => {
       {!loading && totalPages > 1 && (
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "20px",
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: '20px',
           }}
         >
           <Pagination
@@ -473,7 +454,7 @@ const Registration = () => {
 
       {showPopupForm && (
         <PopUpForm
-          type="registration"
+          type='registration'
           onClose={handleClosePopup}
           onCreate={handleCreateForm}
         />
