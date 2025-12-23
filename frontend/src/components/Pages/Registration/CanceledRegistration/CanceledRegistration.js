@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Pagination from '../../../atoms/Pagination';
+import Pagination from '../../../Molecules/Pagination/Pagination';
 import styles from './CanceledRegistration.module.css';
 import searchIcon from '../../../../assets/Search-icon.png';
-import ColumnHeader from '../../../atoms/columnHeader/ColumnHeader';
-import Button from '../../../atoms/Button';
-import ResetFilterButton from '../../../atoms/ResetFilterButton/ResetFilterButton';
+import ColumnHeader from '../../../Molecules/ColumnHeader/ColumnHeader';
+import Button from '../../../Atoms/Button/Button';
+import ResetFilterButton from '../../../Atoms/ResetFilterButton/ResetFilterButton';
 
 import {
   getCancelledRegistrations,
@@ -37,7 +37,6 @@ const CanceledRegistrationRow = ({ registration }) => {
 
       <div className={styles.tableCell}>{registration.full_name}</div>
 
-      {/* PERUBAHAN: Menambahkan kolom School Year di sini */}
       <div className={styles.tableCell}>{registration.school_year || '-'}</div>
 
       <div className={styles.tableCell}>

@@ -5,7 +5,7 @@ import Pagination from "../../Molecules/Pagination/Pagination";
 import StatusConfirmationPopup from "../../Molecules/PopUp/PopUpRegis/StatusConfirmationPopup";
 import styles from "./Registration.module.css";
 import SearchBar from "../../Molecules/SearchBar/SearchBar";
-import totalRegisIcon from "../../../assets/total_regis_icon.svg";
+import editPenIcon from "../../../assets/edit_pen_icon.svg";
 import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
 import Button from "../../Atoms/Button/Button";
 import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
@@ -16,8 +16,8 @@ import {
 } from "../../../services/api";
 
 const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
-  // Komponen ini membaca 'application_status' (Ini sudah benar)
   const status = registration.application_status?.toLowerCase() || "confirmed";
+  // eslint-disable-next-line
   const statusStyle =
     status === "confirmed" ? styles.statusConfirmed : styles.statusCancelled;
 
@@ -92,7 +92,7 @@ const Registration = () => {
     async (filters = {}, page = 1, sorts = [], options = {}) => {
       const { isBackgroundRefresh = false } = options;
 
-      // Jika BUKAN background refresh, set loading (INI YANG BENAR)
+      
       if (!isBackgroundRefresh) setLoading(true);
 
       const controller = new AbortController();
