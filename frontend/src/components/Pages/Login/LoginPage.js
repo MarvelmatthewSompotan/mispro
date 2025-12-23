@@ -13,7 +13,6 @@ import eyeOpenIcon from "../../../assets/open.svg";
 import styles from "./LoginPage.module.css";
 
 const LoginPage = () => {
-  // --- Logika dari LoginForm.js lama ---
   const [form, setForm] = useState({
     identifier: "",
     password: "",
@@ -21,12 +20,8 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
   const [isResetMode, setIsResetMode] = useState(false);
-
-  // --- TAMBAHKAN STATE INI ---
   const [showPassword, setShowPassword] = useState(false);
-  // -------------------------
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,7 +57,7 @@ const LoginPage = () => {
       await resetLogin(form.identifier, form.password);
       alert("Reset login berhasil! Silakan login kembali.");
       setIsResetMode(false);
-      setForm({ identifier: "", password: "" }); // Bersihkan form
+      setForm({ identifier: "", password: "" });
       setShowPassword(false);
     } catch (error) {
       console.error("Reset login failed:", error);
@@ -84,14 +79,12 @@ const LoginPage = () => {
     setIsResetMode((prev) => !prev);
     setError("");
     setForm({ identifier: "", password: "" });
-    setShowPassword(false); // <-- TAMBAHKAN INI: Reset ikon mata
+    setShowPassword(false);
   };
 
-  // --- TAMBAHKAN FUNGSI INI ---
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
   };
-  // ---------------------------
 
   return (
     <div
@@ -105,7 +98,6 @@ const LoginPage = () => {
         key={isResetMode ? "reset-left" : "login-left"}
       >
         <div className={styles["login-card-wrapper"]}>
-          {/* ... (kode elips tidak berubah) ... */}
           <img
             src={ellipseTop}
             alt="Decorative ellipse 1"
@@ -126,7 +118,6 @@ const LoginPage = () => {
             alt="Decorative ellipse 4"
             className={styles["login-blob-bottom-reset"]}
           />
-          {/* ------------------------------------------- */}
 
           <div className={styles["login-card"]}>
             <div className={styles["login-logo"]}>
@@ -162,7 +153,7 @@ const LoginPage = () => {
               {/* --- MODIFIKASI FIELD PASSWORD --- */}
               <div className={styles["input-group"]}>
                 <input
-                  type={showPassword ? "text" : "password"} // <-- UBAH INI
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
                   placeholder="Password"
@@ -171,16 +162,15 @@ const LoginPage = () => {
                   disabled={isLoading}
                   required
                 />
-                {/* --- TAMBAHKAN IKON INI --- */}
                 <img
                   src={showPassword ? eyeOpenIcon : eyeClosedIcon}
                   alt="Toggle password visibility"
                   className={styles["password-toggle-icon"]}
                   onClick={toggleShowPassword}
                 />
-                {/* ------------------------- */}
-              </div>
-              {/* --------------------------------- */}
+              </div>         
+              
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
               <a
                 href="#"
                 className={styles["reset-login-link"]}
@@ -192,6 +182,7 @@ const LoginPage = () => {
               <div className={styles["button-container"]}>
                 <Button type="submit" variant="solid" disabled={isLoading}>
                   {isLoading
+            
                     ? "Processing..."
                     : isResetMode
                     ? "Reset"

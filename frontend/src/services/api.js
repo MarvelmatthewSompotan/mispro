@@ -1,5 +1,3 @@
-// src/api.js
-
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 /**
@@ -14,13 +12,13 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
  * @param {boolean} requiresAuth - Set ke `false` jika request tidak butuh token (misal: login).
  * @returns {Promise<any>} - Data JSON dari response.
  */
+
 const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
   const headers = {
     Accept: "application/json",
     ...options.headers,
   };
 
-  // Jangan set Content-Type jika body adalah FormData
   if (!(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
@@ -30,11 +28,9 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     } else {
-      // Jika butuh auth tapi token tidak ada, langsung gagalkan
-      console.error("No token found for authenticated request");
-      // Arahkan ke login
-      window.location.href = "/login";
-      return Promise.reject(new Error("Authentication token is missing."));
+      console.error('No token found for authenticated request');
+      window.location.href = '/login';
+      return Promise.reject(new Error('Authentication token is missing.'));
     }
   }
 
@@ -43,7 +39,6 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
     headers,
   });
 
-  // Cek jika status 401 (Unauthorized / Token Expired)
   if (res.status === 401 && requiresAuth) {
     console.error("Token is expired or invalid. Logging out...");
     localStorage.removeItem("token");
@@ -53,14 +48,12 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
   }
 
   if (!res.ok) {
-    // Untuk error selain 401, coba parse body error dari API
-    const errorData = await res.json().catch(() => ({})); // default ke objek kosong jika body bukan json
+    const errorData = await res.json().catch(() => ({})); 
     const error = new Error(`HTTP error! status: ${res.status}`);
     error.response = { data: errorData, status: res.status };
     throw error;
   }
 
-  // Jika response tidak memiliki body (misal: status 204 No Content), kembalikan null
   if (res.status === 204) {
     return null;
   }
@@ -69,7 +62,6 @@ const apiFetch = async (endpoint, options = {}, requiresAuth = true) => {
 };
 
 export const login = async (identifier, password) => {
-  // `requiresAuth` diset `false` karena login belum punya token
   const data = await apiFetch(
     "/login",
     {
@@ -78,7 +70,6 @@ export const login = async (identifier, password) => {
     },
     false
   );
-  // Simpan token setelah login berhasil
   if (data.token) {
     localStorage.setItem("token", data.token);
   }
@@ -86,7 +77,6 @@ export const login = async (identifier, password) => {
 };
 
 export const resetLogin = async (identifier, password) => {
-  // requiresAuth = false karena user belum login / sedang bermasalah loginnya
   return apiFetch(
     "/reset-login",
     {
@@ -99,10 +89,8 @@ export const resetLogin = async (identifier, password) => {
 
 export const logout = async () => {
   try {
-    // Endpoint logout tetap butuh token untuk tahu sesi mana yang harus dihapus di backend
-    await apiFetch("/logout", { method: "POST" });
+    await apiFetch('/logout', { method: 'POST' });
   } catch (error) {
-    // Abaikan error saat logout (misal: token sudah expired), yang penting data di local storage bersih
     console.warn(
       "Logout failed on server, proceeding to clear local data.",
       error
@@ -116,15 +104,9 @@ export const getMe = () => apiFetch("/me");
 
 export const getRegistrationOptions = () => apiFetch("/registration-option");
 
-/**
- * Menambahkan school year baru ke database.
- * Backend akan otomatis meng-increment tahun ajaran terakhir.
- * @returns {Promise<any>} - Data dari response API, termasuk school year yang baru dibuat.
- */
 export const addSchoolYear = () => {
-  // Mengirim body kosong karena backend yang akan menangani logika increment
-  return apiFetch("/school-year/add", {
-    method: "POST",
+  return apiFetch('/school-year/add', {
+    method: 'POST',
     body: JSON.stringify({}),
   });
 };
@@ -167,11 +149,9 @@ export const getRegistrationPreview = (applicationId, versionId) => {
 export const getStudents = (filters = {}) => {
   const params = new URLSearchParams();
 
-  // --- Parameter Wajib (Paginasi) ---
-  params.append("page", filters.page || 1);
-  params.append("per_page", filters.per_page || 25);
+  params.append('page', filters.page || 1);
+  params.append('per_page', filters.per_page || 25);
 
-  // --- Parameter Filter Opsional ---
   if (filters.search) {
     params.append("search", filters.search);
   } else if (filters.search_name) {
@@ -181,9 +161,8 @@ export const getStudents = (filters = {}) => {
     params.append("school_year_id", filters.school_year_id);
   }
 
-  // Filter Array (contoh: class_id[]=1&class_id[]=2)
-  filters.class_id?.forEach((id) => params.append("class_id[]", id));
-  filters.section_id?.forEach((id) => params.append("section_id[]", id));
+  filters.class_id?.forEach((id) => params.append('class_id[]', id));
+  filters.section_id?.forEach((id) => params.append('section_id[]', id));
   filters.enrollment_status?.forEach((status) =>
     params.append("enrollment_status[]", status)
   );
@@ -191,14 +170,11 @@ export const getStudents = (filters = {}) => {
     params.append("student_status[]", status)
   );
 
-  // --- Parameter Sort Opsional ---
-  // (contoh: sort[0][field]=grade&sort[0][order]=asc)
   filters.sort?.forEach((s, index) => {
     params.append(`sort[${index}][field]`, s.field);
     params.append(`sort[${index}][order]`, s.order);
   });
 
-  // Diasumsikan API endpoint untuk student list adalah /students
   return apiFetch(`/students?${params.toString()}`);
 };
 
@@ -220,33 +196,23 @@ export const updateStudent = (id, studentData) => {
   });
 };
 
-// api.js
 export const getLogbook = ({
-  // Search (string) - Sesuai LogbookController
-  search_name = "",
-  search_family_rank = "",
-  search_religion = "",
-  search_country = "",
-  search_father = "",
-  search_mother = "",
-
-  // Checkbox (array) - Sesuai LogbookController
+  search_name = '',
+  search_family_rank = '',
+  search_religion = '',
+  search_country = '',
+  search_father = '',
+  search_mother = '',
   grades = [],
   sections = [],
-  school_years = [], // Controller menerima array
+  school_years = [], 
   genders = [],
   transportations = [],
-
-  // Range - Sesuai LogbookController
-  start_date = "", // registration date start
-  end_date = "", // registration date end
-  min_age = "",
-  max_age = "",
-
-  // Sort (array of {field, order})
+  start_date = '', 
+  end_date = '', 
+  min_age = '',
+  max_age = '',
   sort = [],
-
-  // Pagination
   page = 1,
   per_page = 25,
 } = {}) => {
@@ -254,8 +220,7 @@ export const getLogbook = ({
   params.append("page", page);
   params.append("per_page", per_page);
 
-  // Search
-  if (search_name) params.append("search_name", search_name);
+  if (search_name) params.append('search_name', search_name);
   if (search_family_rank)
     params.append("search_family_rank", search_family_rank);
   if (search_religion) params.append("search_religion", search_religion);
@@ -263,7 +228,6 @@ export const getLogbook = ({
   if (search_father) params.append("search_father", search_father);
   if (search_mother) params.append("search_mother", search_mother);
 
-  // Checkbox arrays (menggunakan nama plural sesuai controller)
   (Array.isArray(grades) ? grades : []).forEach((v) =>
     params.append("grades[]", v)
   );
@@ -280,62 +244,41 @@ export const getLogbook = ({
     params.append("transportations[]", v)
   );
 
-  // Date range (sesuai controller)
-  if (start_date) params.append("start_date", start_date);
-  if (end_date) params.append("end_date", end_date);
+  if (start_date) params.append('start_date', start_date);
+  if (end_date) params.append('end_date', end_date);
 
-  // Age range (sesuai controller)
-  if (min_age !== "" && min_age !== null) params.append("min_age", min_age);
-  if (max_age !== "" && max_age !== null) params.append("max_age", max_age);
+  if (min_age !== '' && min_age !== null) params.append('min_age', min_age);
+  if (max_age !== '' && max_age !== null) params.append('max_age', max_age);
 
-  // Sort (multi-field)
   sort?.forEach((s, i) => {
     params.append(`sort[${i}][field]`, s.field);
-    params.append(`sort[${i}][order]`, s.order); // 'asc' | 'desc'
+    params.append(`sort[${i}][order]`, s.order); 
   });
 
-  // Panggil endpoint /logbook
   return apiFetch(`/logbook?${params.toString()}`);
 };
 
-/**
- * @function getLogbookForExport
- * Memanggil API logbook/export untuk mendapatkan SEMUA data yang terfilter (tanpa pagination).
- * Menggunakan parameter yang sama dengan getLogbook, namun mengabaikan 'page' dan 'per_page'.
- */
 export const getLogbookForExport = ({
-  // Search
-  search_name = "",
-  search_family_rank = "",
-  search_religion = "",
-  search_country = "",
-  search_father = "",
-  search_mother = "",
-
-  // Checkbox
+  search_name = '',
+  search_family_rank = '',
+  search_religion = '',
+  search_country = '',
+  search_father = '',
+  search_mother = '',
   grades = [],
   sections = [],
   school_years = [],
   genders = [],
   transportations = [],
-
-  // Range
-  start_date = "",
-  end_date = "",
-  min_age = "",
-  max_age = "",
-
-  // Sort
+  start_date = '',
+  end_date = '',
+  min_age = '',
+  max_age = '',
   sort = [],
-
-  // Parameter pagination diabaikan di sini
 } = {}) => {
   const params = new URLSearchParams();
 
-  // --- HANYA LOGIKA FILTER DAN SORT YANG DIKIRIM ---
-
-  // Search
-  if (search_name) params.append("search_name", search_name);
+  if (search_name) params.append('search_name', search_name);
   if (search_family_rank)
     params.append("search_family_rank", search_family_rank);
   if (search_religion) params.append("search_religion", search_religion);
@@ -343,7 +286,6 @@ export const getLogbookForExport = ({
   if (search_father) params.append("search_father", search_father);
   if (search_mother) params.append("search_mother", search_mother);
 
-  // Checkbox arrays
   (Array.isArray(grades) ? grades : []).forEach((v) =>
     params.append("grades[]", v)
   );
@@ -360,34 +302,30 @@ export const getLogbookForExport = ({
     params.append("transportations[]", v)
   );
 
-  // Date range
-  if (start_date) params.append("start_date", start_date);
-  if (end_date) params.append("end_date", end_date);
+  if (start_date) params.append('start_date', start_date);
+  if (end_date) params.append('end_date', end_date);
 
-  // Age range
-  if (min_age !== "" && min_age !== null) params.append("min_age", min_age);
-  if (max_age !== "" && max_age !== null) params.append("max_age", max_age);
+  if (min_age !== '' && min_age !== null) params.append('min_age', min_age);
+  if (max_age !== '' && max_age !== null) params.append('max_age', max_age);
 
-  // Sort (multi-field) - Bekerja sebagai single sort karena state sorts hanya berisi 1 elemen
   sort?.forEach((s, i) => {
     params.append(`sort[${i}][field]`, s.field);
-    params.append(`sort[${i}][order]`, s.order); // 'asc' | 'desc'
+    params.append(`sort[${i}][order]`, s.order); 
   });
 
-  // Panggil endpoint BARU /logbook/export
   return apiFetch(`/logbook/export?${params.toString()}`);
 };
 
 export const getRegistrations = ({
-  search = "",
-  search_name = "",
-  search_id = "", // <-- BARU: Filter ID
-  start_date = null, // <-- BARU: Filter Tanggal Awal
-  end_date = null, // <-- BARU: Filter Tanggal Akhir
-  grade = null, // <-- BARU: Grade
+  search = '',
+  search_name = '',
+  search_id = '', 
+  start_date = null, 
+  end_date = null, 
+  grade = null, 
   section = null,
-  status = null, // <-- BARU: Status (Confirmed/Cancelled)
-  sort = null, // <-- BARU: Sort
+  status = null, 
+  sort = null, 
   page = 1,
   per_page = 10,
 } = {}) => {
@@ -395,8 +333,6 @@ export const getRegistrations = ({
   params.append("page", page);
   params.append("per_page", per_page);
 
-  // --- Parameter Filter Opsional (String/Date) ---
-  // 'search' untuk Student Name (filter bar atas/popup)
   if (search) {
     params.append("search", search);
   } else if (search_name) {
@@ -406,37 +342,48 @@ export const getRegistrations = ({
   if (start_date) params.append("start_date", start_date);
   if (end_date) params.append("end_date", end_date);
 
-  // --- Filter Array (Checkbox) ---
-  // Contoh: class_id[]=1&class_id[]=2
-  // Untuk Grade
   if (Array.isArray(grade)) {
     grade.forEach((id) => params.append("grade[]", id));
   } else if (grade) {
-    params.append("grade[]", grade); // Asumsi grade selalu array dari filter popup
+    params.append('grade[]', grade); 
   }
 
-  // Untuk Section
   if (Array.isArray(section)) {
     section.forEach((id) => params.append("section[]", id));
   } else if (section) {
     params.append("section[]", section);
   }
 
-  // Untuk Status
   if (Array.isArray(status)) {
     status.forEach((status) => params.append("status[]", status));
   } else if (status) {
     params.append("status[]", status);
   }
 
-  // --- Parameter Sort Opsional ---
-  // (contoh: sort[0][field]=grade&sort[0][order]=asc)
   sort?.forEach((s, index) => {
     params.append(`sort[${index}][field]`, s.field);
     params.append(`sort[${index}][order]`, s.order);
   });
 
   return apiFetch(`/registration?${params.toString()}`);
+};
+
+export const cancelRegistration = (applicationId, reasonType, payload = {}) => {
+  const method = 'POST';
+
+  if (reasonType === 'cancellationOfEnrollment' && payload.notes) {
+    return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+  }
+
+  return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
+    method: method,
+  });
 };
 
 export const getStudentHistoryDates = (id) =>
@@ -449,10 +396,36 @@ export const getDashboard = () => {
   return apiFetch("/dashboard", { method: "GET" });
 };
 
-export const getUsers = ({ page = 1, per_page = 25 } = {}) => {
+export const getUsers = ({
+  page = 1,
+  per_page = 25,
+  search = '',
+  username = '',
+  full_name = '',
+  email = '',
+  user_id = '',
+  role = [], 
+  sort_by = '',
+  sort_dir = '',
+} = {}) => {
   const params = new URLSearchParams();
-  params.append("page", page);
-  params.append("per_page", per_page);
+  params.append('page', page);
+  params.append('per_page', per_page);
+
+  if (search) params.append('search', search);
+  if (username) params.append('username', username);
+  if (full_name) params.append('full_name', full_name);
+  if (email) params.append('email', email);
+  if (user_id) params.append('user_id', user_id);
+
+  if (Array.isArray(role)) {
+    role.forEach((r) => params.append('role[]', r));
+  } else if (role) {
+    params.append('role[]', role);
+  }
+
+  if (sort_by) params.append('sort_by', sort_by);
+  if (sort_dir) params.append('sort_dir', sort_dir);
 
   return apiFetch(`/users?${params.toString()}`);
 };
@@ -477,22 +450,44 @@ export const updateUser = (userId, userData) => {
   });
 };
 
-export const cancelRegistration = (applicationId, reasonType, payload = {}) => {
-  const method = "POST";
+export const getCancelledRegistrations = (filters = {}) => {
+  const params = new URLSearchParams();
 
-  if (reasonType === "cancellationOfEnrollment" && payload.notes) {
-    return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+  // 1. Mapping Pagination
+  params.append('page', filters.page || 1);
+  params.append('per_page', filters.per_page || 25);
+
+  // 2. Mapping String filters sesuai kebutuhan Backend
+  if (filters.search) params.append('search', filters.search);
+  if (filters.filter_name) params.append('filter_name', filters.filter_name);
+  if (filters.filter_notes) params.append('filter_notes', filters.filter_notes);
+  
+  // 3. Mapping Date filters
+  if (filters.reg_start_date) params.append('reg_start_date', filters.reg_start_date);
+  if (filters.reg_end_date) params.append('reg_end_date', filters.reg_end_date);
+  if (filters.cancel_start_date) params.append('cancel_start_date', filters.cancel_start_date);
+  if (filters.cancel_end_date) params.append('cancel_end_date', filters.cancel_end_date);
+
+  // 4. Mapping Array filters (agar sesuai format sections[]=1&sections[]=2)
+  if (Array.isArray(filters.sections)) {
+    filters.sections.forEach((v) => params.append('sections[]', v));
+  }
+  if (Array.isArray(filters.student_status)) {
+    filters.student_status.forEach((v) => params.append('student_status[]', v));
+  }
+  if (Array.isArray(filters.school_years)) {
+    filters.school_years.forEach((v) => params.append('school_years[]', v));
+  }
+  if (Array.isArray(filters.grades)) {
+    filters.grades.forEach((v) => params.append('grades[]', v));
   }
 
-  return apiFetch(`/registration/${applicationId}/cancel/${reasonType}`, {
-    method: method,
-  });
+  // 5. Mapping Sorting
+  if (filters.sort_by) params.append('sort_by', filters.sort_by);
+  if (filters.sort_order) params.append('sort_order', filters.sort_order);
+
+  // Menggunakan apiFetch agar URL otomatis menyertakan prefix /api dan header Auth
+  return apiFetch(`/registration/cancelled-registrations?${params.toString()}`);
 };
 
 export const getAutoGraduatePreview = () => {
@@ -507,7 +502,6 @@ export const confirmAutoGraduate = (ids) => {
     body: JSON.stringify({ ids }),
   });
 };
-
 export const getAnalytics = () => {
   return apiFetch("/analytics");
 };

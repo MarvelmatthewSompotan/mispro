@@ -4,15 +4,14 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
-// Komponen halaman
 import LoginPage from "../components/Pages/Login/LoginPage.js";
 import Home from "../components/Pages/Home/Home.js";
-// --- IMPORT ANALYTICS DISINI ---
 import Analytics from "../components/Pages/Analytics/Analytics.js";
 import StudentList from "../components/Pages/StudentList/StudentList.js";
 import TeacherList from "../components/Pages/TeacherList.js";
 import HomeroomList from "../components/Pages/HomeroomList.js";
 import Registration from "../components/Pages/Registration/Registration.js";
+import CanceledRegistration from '../components/Pages/Registration/CanceledRegistration/CanceledRegistration.js';
 import RegistrationPage from "../components/Pages/Registration/RegistrationForm/RegistrationForm.js";
 import Print from "../components/Pages/PrintContent/Print.js";
 import MainLayout from "../components/Layout/Main";
@@ -22,7 +21,6 @@ import Users from "../components/Pages/Users/Users.js";
 
 import ProtectedRoute from "./ProtectedRoute";
 
-// Komponen 'Access' Anda tetap sama
 const RegistrarAccess = ({ children }) => {
   const { isAdmin, isRegistrar } = useAuth();
   if (!isAdmin() && !isRegistrar()) {
@@ -39,7 +37,6 @@ const AdminAccess = ({ children }) => {
   return children;
 };
 
-// Ini adalah 'AppRouter' baru
 const appRoutes = [
   {
     path: "/Login",
@@ -57,7 +54,6 @@ const appRoutes = [
       </ProtectedRoute>
     ),
   },
-  // --- TAMBAHKAN ROUTE ANALYTICS DISINI ---
   {
     path: "/Analytics",
     element: (
@@ -143,6 +139,18 @@ const appRoutes = [
     ),
   },
   {
+    path: '/canceled-registration',
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <RegistrarAccess>
+            <CanceledRegistration />
+          </RegistrarAccess>
+        </MainLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: "/Users",
     element: (
       <ProtectedRoute>
@@ -176,7 +184,6 @@ const appRoutes = [
       </ProtectedRoute>
     ),
   },
-  // Pengalihan Default
   {
     path: "/",
     element: <Navigate to="/Login" replace />,

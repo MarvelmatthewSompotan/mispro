@@ -30,7 +30,7 @@ const RegistrationForm = () => {
     facilities: {},
     parentGuardian: {},
     termOfPayment: {},
-    otherDetail: {}, // [MODIFIED 1/5] Menambahkan state untuk OtherDetail
+    otherDetail: {}, 
   });
   const [resetKey, setResetKey] = useState(0);
   // eslint-disable-next-line
@@ -47,7 +47,7 @@ const RegistrationForm = () => {
 
   const navigate = useNavigate();
 
-  // Guard akses langsung: wajib datang dari PopUpForm
+  // Guard direct access: must come from PopUpForm
   useEffect(() => {
     const s = location.state || {};
     const isValid = s.fromPopup && s.draftId && s.schoolYear && s.semester;
@@ -61,7 +61,6 @@ const RegistrationForm = () => {
     if (!dateString) return "";
     const date = new Date(dateString);
 
-    // Gunakan Intl.DateTimeFormat biar otomatis ke nama bulan lokal
     return new Intl.DateTimeFormat("id-ID", {
       day: "numeric",
       month: "long",
@@ -69,7 +68,6 @@ const RegistrationForm = () => {
     }).format(date);
   };
 
-  // Fetch all registration options once at the top level
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -94,7 +92,7 @@ const RegistrationForm = () => {
       "facilities",
       "parentGuardian",
       "termOfPayment",
-      "otherDetail", // [MODIFIED 2/5] Menambahkan otherDetail ke urutan error
+      "otherDetail", 
     ];
 
     const firstErrorSection = sectionOrder.find(
@@ -108,15 +106,13 @@ const RegistrationForm = () => {
       const targetElement = document.getElementById(targetId);
 
       if (targetElement) {
-        // Menggunakan GSAP untuk animasi scroll
         gsap.to(window, {
-          // Targetkan 'window' atau kontainer scroll Anda
-          duration: 0.8, // Durasi animasi dalam detik (misal: 0.8 detik)
+          duration: 0.8,
           scrollTo: {
-            y: targetElement, // Scroll ke elemen target
-            offsetY: 100, // Beri jarak dari atas layar sebesar 100px
+            y: targetElement,
+            offsetY: 100,
           },
-          ease: "power2.inOut", // Jenis animasi untuk efek lebih dinamis
+          ease: "power2.inOut",
         });
       }
     }
@@ -144,8 +140,6 @@ const RegistrationForm = () => {
 
   const handleStudentStatusDataChange = useCallback(
     (data) => {
-      // Langsung teruskan data apa adanya dari komponen child.
-      // Jangan berikan nilai default di sini.
       handleSectionDataChange("studentStatus", data);
     },
     [handleSectionDataChange]
@@ -190,7 +184,7 @@ const RegistrationForm = () => {
     [handleSectionDataChange]
   );
 
-  // [MODIFIED 3/5] Menambahkan handler untuk data dari OtherDetailSection
+
   const handleOtherDetailDataChange = useCallback(
     (data) => {
       handleSectionDataChange("otherDetail", data);
@@ -199,7 +193,7 @@ const RegistrationForm = () => {
   );
 
   const handleSelectOldStudent = (latestData) => {
-    console.log("Received latest data for prefill:", latestData); // Debug log
+    console.log("Received latest data for prefill:", latestData);
 
     // Prefill semua form sections dengan data dari backend
     if (latestData) {
@@ -251,32 +245,27 @@ const RegistrationForm = () => {
       }
     }
 
-    // Signal children to apply prefill
-    setPrefillTrigger((prev) => prev + 1); // [INI SEKARANG AKAN BERHASIL]
+    setPrefillTrigger((prev) => prev + 1);
   };
 
   const handleClearFormOnStatusChange = useCallback(() => {
-    // Reset semua section form KECUALI studentStatus
     setFormSections((prev) => ({
-      ...prev, // Pertahankan studentStatus yang akan diupdate oleh child nanti
+      ...prev,
       studentInfo: {},
       program: {},
       facilities: {},
       parentGuardian: {},
       termOfPayment: {},
-      otherDetail: {}, // [MODIFIED 4/5] Reset otherDetail juga
+      otherDetail: {},
     }));
 
-    // Hapus juga prefilled data dan error yang mungkin ada
     setPrefilledData({});
     setErrors({});
     setForceError({});
 
-    // Trigger re-render pada komponen anak dengan mengubah key
     setResetKey((prevKey) => prevKey + 1);
   }, []);
 
-  // Handler untuk menerima status validasi dari child components
   const handleValidationChange = useCallback((sectionName, validationData) => {
     setValidationState((prev) => ({
       ...prev,
@@ -284,14 +273,12 @@ const RegistrationForm = () => {
     }));
   }, []);
 
-  // Handler untuk mengatur error state (sekarang menerima seluruh objek errors)
   const handleSetErrors = useCallback((allNewErrors) => {
     setErrors(allNewErrors);
     setForceError(allNewErrors);
   }, []);
 
   const handleResetForm = () => {
-    //kode reset yang sudah ada
     setFormSections({
       studentStatus: {},
       studentInfo: {},
@@ -299,7 +286,7 @@ const RegistrationForm = () => {
       facilities: {},
       parentGuardian: {},
       termOfPayment: {},
-      otherDetail: {}, // [MODIFIED 5/5] Reset otherDetail juga
+      otherDetail: {},
     });
 
     setPrefilledData({});
@@ -307,13 +294,11 @@ const RegistrationForm = () => {
     setErrors({});
     setForceError({});
 
-    // TAMBAHKAN BARIS INI UNTUK MENGUBAH KEY
     setResetKey((prevKey) => prevKey + 1);
 
     window.scrollTo(0, 0);
   };
 
-  // Function to get display values for school year and semester
   const getDisplayValues = useCallback(() => {
     if (!sharedData || !formData.schoolYear || !formData.semester) {
       return { schoolYearDisplay: "", semesterDisplay: "" };
@@ -339,31 +324,28 @@ const RegistrationForm = () => {
     }
   }, [blocker.state]);
 
-  // [BARU] Handler untuk tombol back di HeaderBar
   const handleBackClick = () => {
     navigate("/Registration", { replace: true }); // Biarkan blocker menangkap ini
   };
 
-  // [BARU] Handler untuk konfirmasi kembali (buang perubahan)
   const handleConfirmBack = () => {
     setIsBackPopupOpen(false);
     if (blocker.state === "blocked") {
-      blocker.proceed(); // Lanjutkan navigasi
+      blocker.proceed();
     }
   };
 
   const handleClosePopup = () => {
     setIsBackPopupOpen(false);
     if (blocker.state === "blocked") {
-      blocker.reset(); // Batalkan navigasi
+      blocker.reset();
     }
   };
 
   const resId = formSections?.facilities?.residence_id;
-  let isDormitoryStudent = false; // Default false
+  let isDormitoryStudent = false;
   if (resId && sharedData?.residence_halls) {
     const selectedResidence = sharedData.residence_halls.find(
-      // [UBAH] Selalu bandingkan sebagai string untuk keamanan tipe data
       (r) => String(r.residence_id) === String(resId)
     );
     isDormitoryStudent = selectedResidence
@@ -371,7 +353,6 @@ const RegistrationForm = () => {
       : false;
   }
 
-  // Show loading state while data is being fetched
   if (isLoading) {
     return (
       <Main>
@@ -383,7 +364,6 @@ const RegistrationForm = () => {
     );
   }
 
-  // Extract draft ID from formData
   const draftId = formData.draftId;
   const { schoolYearDisplay, semesterDisplay } = getDisplayValues();
 
@@ -477,11 +457,10 @@ const RegistrationForm = () => {
           />
         </div>
 
-        {/* [MODIFIED 5/5] Memberikan props onDataChange dan error ke OtherDetailSection */}
         <div id="otherDetail">
           <OtherDetailSection
-            key={resetKey} // Tambahkan key agar ikut ter-reset
-            prefill={formSections.otherDetail || {}} // Berikan prefill jika ada
+            key={resetKey}
+            prefill={formSections.otherDetail || {}}
             onDataChange={handleOtherDetailDataChange}
             errors={errors.otherDetail || {}}
             forceError={forceError.otherDetail || {}}
@@ -490,7 +469,7 @@ const RegistrationForm = () => {
       </div>
       <ConfirmBackPopup
         isOpen={isBackPopupOpen}
-        onClose={handleClosePopup} // <-- Gunakan handler baru
+        onClose={handleClosePopup}
         onConfirm={handleConfirmBack}
       />
     </Main>

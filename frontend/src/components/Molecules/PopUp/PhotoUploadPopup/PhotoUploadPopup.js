@@ -3,15 +3,15 @@ import React, { useState, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import Cropper from "react-easy-crop";
 import styles from "./PhotoUploadPopup.module.css";
-import getCroppedImg from "./CropImage"; // Pastikan path import benar
-import Button from "../../../Atoms/Button/Button"; // Sesuaikan path Button Anda
+import getCroppedImg from "./CropImage";
+import Button from "../../../Atoms/Button/Button";
 
 const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
   const fileInputRef = useRef(null);
 
   // State
   const [imageSrc, setImageSrc] = useState(null);
-  const [fileType, setFileType] = useState("image/jpeg"); // Default jpeg
+  const [fileType, setFileType] = useState("image/jpeg");
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -27,7 +27,6 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
   }, []);
 
   const handleFileSelectedForCropping = (file) => {
-    // Simpan tipe file (png/jpeg) untuk referensi saat save nanti
     setFileType(file.type || "image/jpeg");
 
     const reader = new FileReader();
@@ -60,12 +59,10 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
   }, []);
 
   const showCroppedImage = useCallback(async () => {
-    // Defensive check: pastikan data pixel sudah ada
     if (!imageSrc || !croppedAreaPixels) return;
 
     try {
       setIsCropping(true);
-      // Kirim fileType ke fungsi crop agar transparansi terjaga
       const croppedImage = await getCroppedImg(
         imageSrc,
         croppedAreaPixels,
@@ -80,10 +77,10 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
     } finally {
       setIsCropping(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageSrc, croppedAreaPixels, fileType, onFileSelect]);
 
   const handleClose = () => {
-    // Reset semua state saat tutup
     setImageSrc(null);
     setZoom(1);
     setCrop({ x: 0, y: 0 });
@@ -140,12 +137,11 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
                 image={imageSrc}
                 crop={crop}
                 zoom={zoom}
-                aspect={3 / 4} // Rasio foto profil standar (sesuaikan jika perlu)
+                aspect={3 / 4}
                 onCropChange={setCrop}
                 onCropComplete={onCropComplete}
                 onZoomChange={setZoom}
                 showGrid={true}
-                // Batasi area geser agar tidak keluar batas terlalu jauh
                 restrictPosition={false}
               />
             </div>
@@ -169,7 +165,7 @@ const PhotoUploadPopup = ({ isOpen, onClose, onFileSelect }) => {
             <div className={styles.actionButtons}>
               <Button
                 className={styles.cancelButton}
-                onClick={() => setImageSrc(null)} // Kembali ke upload screen
+                onClick={() => setImageSrc(null)}
                 variant="outline"
               >
                 Change Photo

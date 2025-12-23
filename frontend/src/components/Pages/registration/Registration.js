@@ -5,7 +5,7 @@ import Pagination from "../../Molecules/Pagination/Pagination";
 import StatusConfirmationPopup from "../../Molecules/PopUp/PopUpRegis/StatusConfirmationPopup";
 import styles from "./Registration.module.css";
 import SearchBar from "../../Molecules/SearchBar/SearchBar";
-import totalRegisIcon from "../../../assets/total_regis_icon.svg";
+import editPenIcon from "../../../assets/edit_pen_icon.svg";
 import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
 import Button from "../../Atoms/Button/Button";
 import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
@@ -16,8 +16,8 @@ import {
 } from "../../../services/api";
 
 const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
-  // Komponen ini membaca 'application_status' (Ini sudah benar)
   const status = registration.application_status?.toLowerCase() || "confirmed";
+  // eslint-disable-next-line
   const statusStyle =
     status === "confirmed" ? styles.statusConfirmed : styles.statusCancelled;
 
@@ -39,17 +39,25 @@ const RegistrationRow = ({ registration, onRowClick, onStatusClick }) => {
       <div className={styles.tableCell}>
         {registration.section_name || "N/A"}
       </div>
+      
+      <div className={styles.tableCell}>
+        {registration.student_type || 'New'}
+      </div>
+
       <div className={styles.tableCell}>
         <div
-          className={statusStyle}
+          className={styles.tableEditButton}
           onClick={(e) => {
             e.stopPropagation();
             onStatusClick(registration);
           }}
         >
-          <div className={styles.statusText}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </div>
+          <span className={styles.editButtonText}>Edit</span>
+          <img 
+            src={editPenIcon} 
+            alt="Edit" 
+            className={styles.editButtonIcon}
+          />
         </div>
       </div>
     </div>
@@ -62,7 +70,6 @@ const Registration = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
   const [perPage] = useState(25);
   const [showPopupForm, setShowPopupForm] = useState(false);
   const REFRESH_INTERVAL = 5000;
@@ -81,13 +88,11 @@ const Registration = () => {
   });
   const fetchControllerRef = useRef(null);
 
-  // Fungsi fetchRegistrations Anda yang baru sudah benar
   const fetchRegistrations = useCallback(
     async (filters = {}, page = 1, sorts = [], options = {}) => {
-      // Opsi 'isBackgroundRefresh' ini HANYA untuk auto-refresh
       const { isBackgroundRefresh = false } = options;
 
-      // Jika BUKAN background refresh, set loading (INI YANG BENAR)
+      
       if (!isBackgroundRefresh) setLoading(true);
 
       const controller = new AbortController();
@@ -108,7 +113,6 @@ const Registration = () => {
         const res = await getRegistrations(allParams, { signal });
         setRegistrationData(res.data.data || []);
         setTotalPages(res.data.last_page || 1);
-        setTotalRecords(res.total_registered || 0);
         setCurrentPage(res.data.current_page || 1);
       } catch (err) {
         if (err.name === "AbortError") {
@@ -118,7 +122,6 @@ const Registration = () => {
         console.error("Error fetching registrations:", err);
         setRegistrationData([]);
         setTotalPages(1);
-        setTotalRecords(0);
       } finally {
         if (!isBackgroundRefresh) setLoading(false);
       }
@@ -250,7 +253,7 @@ const Registration = () => {
       };
       console.log("Auto refreshing registration list (background)...");
       fetchRegistrations(currentFilters, currentPage, sorts, {
-        isBackgroundRefresh: true, // Auto-refresh boleh di background
+        isBackgroundRefresh: true,
       });
     };
     const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
@@ -285,8 +288,6 @@ const Registration = () => {
     setSelectedRegistration(null);
   };
 
-  // === PERBAIKAN TASK 1 ===
-  // Mengembalikan logika dari KODE LAMA ANDA (yang berfungsi)
   const handleUpdateStatus = (id, newStatus) => {
     // 1. Update state LOKAL (untuk instant feedback di tabel)
     setRegistrationData((prevData) =>
@@ -306,18 +307,16 @@ const Registration = () => {
       })
     );
 
-    // 2. Refresh data dari SERVER (seperti kode lama Anda)
-    //    Memanggil 'fetchRegistrations' TANPA 'isBackgroundRefresh'.
-    //    Ini akan memicu 'setLoading(true)' (sesuai logika lama Anda)
-    //    yang akan menutup popup dan me-refresh tabel dengan benar.
     fetchRegistrations(
       { ...filters, search: search || undefined },
       currentPage,
       sorts
-      // Opsi { isBackgroundRefresh: true } DIHAPUS agar loading state ter-trigger
     );
   };
-  // === AKHIR PERBAIKAN ===
+
+  const handleCanceledRegistration = () => {
+    navigate('/canceled-registration');
+  };
 
   return (
     <div className={styles.registrationContainer}>
@@ -334,25 +333,25 @@ const Registration = () => {
             <ResetFilterButton onClick={handleResetFilters} />
           </div>
         </div>
-        <div>
-          <div
-            style={{
-              marginBottom: "20px",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Button onClick={handleNewForm} variant="solid">
+
+        <div className={styles.rightHeaderSection}>
+          <div className={styles.actionButtonsContainer}>
+            <Button onClick={handleCanceledRegistration} variant='outline'>
+              Canceled Registration
+            </Button>
+            <Button onClick={handleNewForm} variant='solid'>
               New Form
             </Button>
           </div>
-          <div className={styles.totalRecords} title="Total Registrations">
-            <img
-              src={totalRegisIcon}
-              alt="Total Registrations"
-              className={styles.totalRecordsIcon}
+          
+          <div className={styles.editButtonContainer}>
+            <span className={styles.editButtonText}>Edit</span>
+            
+            <img 
+              src={editPenIcon} 
+              alt="Edit" 
+              className={styles.editButtonIcon}
             />
-            <div className={styles.div}>{loading ? "..." : totalRecords}</div>
           </div>
         </div>
       </div>
@@ -423,21 +422,19 @@ const Registration = () => {
             labelKey="name"
             currentFilterValue={filters.section}
           />
+          
           <ColumnHeader
-            title="Status"
+            title='Type'
             hasSort={true}
-            fieldKey="application_status"
-            sortOrder={getSortOrder("application_status")}
-            onSort={handleSortChange}
             hasFilter={true}
-            filterKey="status"
-            onFilterChange={handleFilterChange}
-            filterOptions={filterOptions.applicationStatus}
-            valueKey="id"
-            labelKey="name"
-            currentFilterValue={filters.status}
-          />{" "}
-          {/* <-- PERBAIKAN SYNTAX ERROR DI SINI (sebelumnya '}') */}
+          />
+
+          <ColumnHeader
+            title=''
+            hasSort={false}
+            hasFilter={false}
+            fieldKey='application_status'
+          />
         </div>
 
         <div className={styles.tableBody}>

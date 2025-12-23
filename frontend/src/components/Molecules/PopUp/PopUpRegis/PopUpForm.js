@@ -204,6 +204,7 @@ const PopUpForm = ({
     }
   };
 
+  // --- BAGIAN YANG DIUBAH ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -227,8 +228,11 @@ const PopUpForm = ({
             resetForm
           );
         }
-      } else if (type === "user") {
+      }
+      // Gabungkan pengecekan type="user" di sini
+      else if (type === "user") {
         if (isEditMode) {
+          // LOGIKA EDIT USER
           if (!username || !name || !email || !role) {
             setLoading(false);
             return alert("Please fill all fields except password");
@@ -252,6 +256,7 @@ const PopUpForm = ({
 
           await onCreate(body);
         } else {
+          // LOGIKA TAMBAH USER BARU (CREATE)
           if (!username || !name || !email || !password || !role) {
             setLoading(false);
             return alert("Please fill all fields");
@@ -262,6 +267,7 @@ const PopUpForm = ({
             return;
           }
 
+          // Memanggil fungsi onCreate dari Users.js
           await onCreate(
             { username, full_name: name, email, password, role },
             resetForm
@@ -275,6 +281,7 @@ const PopUpForm = ({
       setLoading(false);
     }
   };
+  // --- AKHIR BAGIAN YANG DIUBAH ---
 
   const mapOptions = (optionsArray, valueKey, labelKey) => {
     return optionsArray.map((opt) => ({

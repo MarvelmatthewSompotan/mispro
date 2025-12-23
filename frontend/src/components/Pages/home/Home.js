@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import StatCard from '../../Molecules/StatCard/StatCard';
-import WelcomeBanner from '../../Molecules/WelcomeBanner/WelcomeBanner';
-import styles from '../Home/Home.module.css';
-import ColumnHeader from '../../Molecules/ColumnHeader/ColumnHeader';
-import { getDashboard } from '../../../services/api';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import StatCard from "../../Molecules/StatCard/StatCard";
+import WelcomeBanner from "../../Molecules/WelcomeBanner/WelcomeBanner";
+import styles from "../Home/Home.module.css";
+import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
+import { getDashboard } from "../../../services/api";
 
 const formatGrowthText = (percent, period) => {
-  const absPercent = Math.abs(percent);
-  const trend = percent < 0 ? 'decreased' : 'increased';
+  const val = Number(percent) || 0;
+  const absPercent = Math.abs(val);
+  const trend = val < 0 ? "decreased" : "increased";
   return `${trend} ${absPercent}% from ${period}`;
 };
 
@@ -30,13 +31,15 @@ const Home = () => {
 
     try {
       const res = await getDashboard({ signal });
-      setDashboardData(res.data);
+      if (res.success) {
+        setDashboardData(res.data);
+      }
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('Previous dashboard fetch aborted.');
+      if (error.name === "AbortError") {
+        console.log("Previous dashboard fetch aborted.");
         return;
       }
-      console.error('Failed to load dashboard data:', error);
+      console.error("Failed to load dashboard data:", error);
     } finally {
       if (!isBackgroundRefresh) setLoading(false);
     }
@@ -48,7 +51,7 @@ const Home = () => {
 
   useEffect(() => {
     const refreshData = () => {
-      console.log('Auto refreshing dashboard data (background)...');
+      console.log("Auto refreshing dashboard data (background)...");
       fetchDashboard({ isBackgroundRefresh: true });
     };
 
@@ -80,55 +83,60 @@ const Home = () => {
   const {
     username,
     last_login,
-    total_registrations,
-    total_registration_growth_percent,
-    today_registration,
-    today_registration_growth_percent,
-    new_students_today_total,
-    new_students_today_total_growth_percent,
-    returning_students_today_total,
-    returning_students_today_total_growth_percent,
-    sy_new_students_total,
-    sy_returning_students_total,
-    sy_new_students_total_growth_percent,
-    sy_returning_students_total_growth_percent,
+    today, 
+    school_year, 
+    pre_register, 
     latest_registrations,
   } = dashboardData;
 
+  const total_registrations = school_year?.total || 0;
+  const total_registration_growth_percent = school_year?.growth_total || 0;
+  const today_registration = today?.total || 0;
+  const today_registration_growth_percent = today?.growth_total || 0;
+  const new_students_today = 0;
+  const new_students_today_growth_percent = 0;
+  const new_students_current_year = pre_register?.total || 0; 
+  const new_students_yearly_growth_percent = pre_register?.growth_total || 0;
+  const returning_students_today = 0; 
+  const returning_students_today_growth_percent = 0;
+
+  const returning_students_current_year = school_year?.confirmed || 0;
+  const returning_students_yearly_growth_percent =
+    school_year?.growth_confirmed || 0;
   const newStudentData = [
     {
-      value: new_students_today_total,
-      label: 'New students (Today)',
+      value: Number(new_students_today),
+      label: "New students (Today)",
       footerText: formatGrowthText(
-        new_students_today_total_growth_percent,
-        'yesterday'
+        new_students_today_growth_percent,
+        "yesterday"
       ),
     },
     {
-      value: sy_new_students_total,
-      label: 'New students (This Year)',
+      value: Number(new_students_current_year),
+      label: "Pre-Register (Next Year)",
       footerText: formatGrowthText(
-        sy_new_students_total_growth_percent,
-        'last year'
+        new_students_yearly_growth_percent,
+        "last year"
       ),
     },
   ];
 
   const returnStudentData = [
     {
-      value: returning_students_today_total,
-      label: 'Returning students (Today)',
+      value: Number(returning_students_today),
+      label: "Returning students (Today)",
       footerText: formatGrowthText(
-        returning_students_today_total_growth_percent,
-        'yesterday'
+        returning_students_today_growth_percent,
+        "yesterday"
       ),
     },
     {
-      value: sy_returning_students_total,
-      label: 'Returning students (This Year)',
+      value: Number(returning_students_current_year),
+      label: "Confirmed Students (Active)",
       footerText: formatGrowthText(
-        sy_returning_students_total_growth_percent,
-        'last year'
+        returning_students_yearly_growth_percent,
+        "last year"
       ),
     },
   ];
@@ -141,27 +149,27 @@ const Home = () => {
           <div className={styles.cardWithDotsWrapper}>
             <StatCard
               value={total_registrations}
-              label='Total registration'
-              variant='gradient'
+              label="Total registration"
+              variant="gradient"
               footerText={formatGrowthText(
                 total_registration_growth_percent,
-                'last year'
+                "last year"
               )}
-              style={{ flex: 'none' }}
+              style={{ flex: "none" }}
             />
             <div className={styles.dotsPlaceholder} />
           </div>
 
           <div className={styles.cardWithDotsWrapper}>
             <StatCard
-              value={today_registration}
-              label='Total registration (Today)'
-              variant='blue'
+              value={Number(today_registration)}
+              label="Total registration (Today)"
+              variant="blue"
               footerText={formatGrowthText(
                 today_registration_growth_percent,
-                'yesterday'
+                "yesterday"
               )}
-              style={{ flex: 'none' }}
+              style={{ flex: "none" }}
             />
             <div className={styles.dotsPlaceholder} />
           </div>
@@ -170,20 +178,20 @@ const Home = () => {
             <StatCard
               value={newStudentData[newStudentSlide].value}
               label={newStudentData[newStudentSlide].label}
-              variant='blue'
+              variant="blue"
               footerText={newStudentData[newStudentSlide].footerText}
               onClick={handleNewStudentClick}
-              style={{ flex: 'none' }}
+              style={{ flex: "none" }}
             />
             <div className={styles.paginationDots}>
               <span
                 className={`${styles.dot} ${
-                  newStudentSlide === 0 ? styles.active : ''
+                  newStudentSlide === 0 ? styles.active : ""
                 }`}
               ></span>
               <span
                 className={`${styles.dot} ${
-                  newStudentSlide === 1 ? styles.active : ''
+                  newStudentSlide === 1 ? styles.active : ""
                 }`}
               ></span>
             </div>
@@ -193,20 +201,20 @@ const Home = () => {
             <StatCard
               value={returnStudentData[returnStudentSlide].value}
               label={returnStudentData[returnStudentSlide].label}
-              variant='blue'
+              variant="blue"
               footerText={returnStudentData[returnStudentSlide].footerText}
               onClick={handleReturnStudentClick}
-              style={{ flex: 'none' }}
+              style={{ flex: "none" }}
             />
             <div className={styles.paginationDots}>
               <span
                 className={`${styles.dot} ${
-                  returnStudentSlide === 0 ? styles.active : ''
+                  returnStudentSlide === 0 ? styles.active : ""
                 }`}
               ></span>
               <span
                 className={`${styles.dot} ${
-                  returnStudentSlide === 1 ? styles.active : ''
+                  returnStudentSlide === 1 ? styles.active : ""
                 }`}
               ></span>
             </div>
@@ -218,18 +226,21 @@ const Home = () => {
         <h3>Latest Registration</h3>
         <div className={styles.tableContainer}>
           <div className={styles.tableHeader}>
-            <ColumnHeader title='Student ID' />
-            <ColumnHeader title='Student Name' />
-            <ColumnHeader title='Grade' />
-            <ColumnHeader title='Section' />
-            <ColumnHeader title='School Year' />
-            <ColumnHeader title='Status' />
+            <ColumnHeader title="Student ID" />
+            <ColumnHeader title="Student Name" />
+            <ColumnHeader title="Grade" />
+            <ColumnHeader title="Section" />
+            <ColumnHeader title="School Year" />
+            <ColumnHeader title="Status" />
           </div>
 
           <div className={styles.tableBody}>
             {latest_registrations?.length > 0 ? (
-              latest_registrations.map((student) => (
-                <div key={student.application_id} className={styles.tableRow}>
+              latest_registrations.map((student, index) => (
+                <div
+                  key={`${student.student_id}-${index}`}
+                  className={styles.tableRow}
+                >
                   <div className={styles.tableCell}>{student.student_id}</div>
                   <div className={styles.tableCell}>{student.full_name}</div>
                   <div className={styles.tableCell}>{student.grade}</div>
@@ -238,11 +249,11 @@ const Home = () => {
                   <div className={styles.tableCell}>
                     <div
                       className={` ${
-                        student.status?.toLowerCase() === 'confirmed'
+                        student.status?.toLowerCase() === "confirmed"
                           ? styles.statusConfirmed
-                          : student.status?.toLowerCase() === 'cancelled'
+                          : student.status?.toLowerCase() === "cancelled"
                           ? styles.statusCancelled
-                          : ''
+                          : ""
                       }`}
                     >
                       {student.status}

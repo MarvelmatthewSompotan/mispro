@@ -123,6 +123,13 @@
   margin: 0;
 }
 
+.messageCell {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--main-grey);
+  font-size: 16px;
+}
+
 .actionCell {
   padding: 16px 24px;
   display: flex;
@@ -173,7 +180,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2001;
+  z-index: 99999 !important;
 }
 
 .modal {
@@ -184,6 +191,7 @@
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   animation: fadeIn 0.2s ease;
+  z-index: 99999 !important;
 }
 
 .modal h3 {

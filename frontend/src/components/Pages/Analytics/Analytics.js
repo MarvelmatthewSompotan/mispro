@@ -19,7 +19,6 @@ import { FaUserFriends, FaSync } from 'react-icons/fa';
 import styles from './Analytics.module.css';
 import { getAnalytics } from '../../../services/api';
 
-// --- HELPER FUNCTIONS ---
 const formatNumber = (num) => {
   if (num === undefined || num === null) return '0';
   return new Intl.NumberFormat('id-ID').format(num);
@@ -34,6 +33,7 @@ const TrendTextRight = ({ growth, isPositive }) => {
     <div className={styles.trendRightContainer}>
       <span>{positive ? 'Increased' : 'Decreased'}&nbsp;</span>
       <span className={positive ? styles.trendPositive : styles.trendNegative}>
+        {Math.abs(val).toFixed(1)}%
         {Math.abs(val).toFixed(1)}%
       </span>
       <span>&nbsp;from last year</span>
@@ -74,6 +74,7 @@ const DetailedStatCard = ({ title, data }) => {
         <div className={styles.cardTopRow}>
           <div className={styles.cardTitle}>{title}</div>
           <TrendTextRight growth={growthTotal} />
+          <TrendTextRight growth={growthTotal} />
         </div>
 
         <div className={styles.cardMainStat}>
@@ -95,6 +96,7 @@ const DetailedStatCard = ({ title, data }) => {
           <div className={styles.trendCenterText}>
             <span
               className={
+                Number(growthConfirmed) >= 0
                 Number(growthConfirmed) >= 0
                   ? styles.trendPositive
                   : styles.trendNegative
@@ -424,7 +426,7 @@ const RegistrationGrowthChart = ({ multiYearData }) => {
               dy={10}
             />
             <YAxis axisLine={false} tickLine={false} />
-            <Tooltip />
+            <Tooltip content={<CustomTooltipGrowth />} />
             <Area
               type='monotone'
               dataKey='value'
@@ -463,6 +465,55 @@ const RegistrationTrendChart = ({ trends }) => {
     };
   });
 
+  const CustomTooltipTrend = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          style={{
+            backgroundColor: "#fff",
+            padding: "10px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+            fontSize: "12px",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+          }}
+        >
+          <p style={{ fontWeight: "bold", margin: "0 0 8px 0" }}>{label}</p>
+          {payload.map((entry, index) => {
+            const isCurrent = entry.dataKey === "current";
+            const confirmed = isCurrent
+              ? entry.payload.current_confirmed
+              : entry.payload.previous_confirmed;
+            const cancelled = isCurrent
+              ? entry.payload.current_cancelled
+              : entry.payload.previous_cancelled;
+
+            return (
+              <div key={index} style={{ marginBottom: "10px" }}>
+                <p
+                  style={{
+                    margin: 0,
+                    color: entry.color,
+                    fontWeight: 600,
+                  }}
+                >
+                  {entry.name}: {entry.value}
+                </p>
+                <p style={{ margin: 0, color: "#555" }}>
+                  confirmed: {confirmed}
+                </p>
+                <p style={{ margin: 0, color: "#555" }}>
+                  cancelled: {cancelled}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className={styles.chartCard}>
       <div className={styles.chartHeader}>
@@ -496,7 +547,7 @@ const RegistrationTrendChart = ({ trends }) => {
               dy={10}
             />
             <YAxis axisLine={false} tickLine={false} />
-            <Tooltip />
+            <Tooltip content={<CustomTooltipTrend />} />
             <Line
               type='monotone'
               dataKey='current'
@@ -523,11 +574,14 @@ const RegistrationTrendChart = ({ trends }) => {
 const Analytics = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [regMode, setRegMode] = useState("pre_register");
+  const [servedLevel, setServedLevel] = useState("All");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getAnalytics();
+        if (response.success) {
         if (response.success) {
           setData(response.data);
         }
@@ -540,6 +594,37 @@ const Analytics = () => {
 
     fetchData();
   }, []);
+  const handleRegModeClick = (e) => {
+    e.preventDefault();
+    const modes = ["pre_register", "daily", "yearly"];
+    const currentIndex = modes.indexOf(regMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    console.log("Tombol Reg diklik. Mode baru:", modes[nextIndex]);
+    setRegMode(modes[nextIndex]);
+  };
+
+  const handleServedLevelClick = (e) => {
+    e.preventDefault();
+    const levels = ["All", "ECP", "Elementary", "Middle", "High"];
+    const currentIndex = levels.indexOf(servedLevel);
+    const nextIndex = (currentIndex + 1) % levels.length;
+    console.log("Tombol Served diklik. Level baru:", levels[nextIndex]);
+    setServedLevel(levels[nextIndex]);
+  };
+
+  const getRegModeLabel = () => {
+    if (regMode === "daily") return "Daily";
+    if (regMode === "yearly") return "Yearly";
+    return "Pre-Registered";
+  };
+
+  const getServedLevelLabel = () => {
+    if (servedLevel === "ECP") return "ECP";
+    if (servedLevel === "High") return "High School";
+    if (servedLevel === "Middle") return "Middle School";
+    if (servedLevel === "Elementary") return "Elementary School";
+    return "All Levels";
+  };
 
   if (loading) {
     return (
@@ -657,7 +742,10 @@ const Analytics = () => {
           </div>
         </div>
         <div className={styles.rightColumnCards}>
-          <OrangePieCard syData={sy} />
+          <OrangePieCard
+            syData={currentRegData}
+            titleLabel={getRegModeLabel()}
+          />
           <DetailedStatCard
             title='Total Registration (Transfer)'
             data={sy.transferee}
@@ -711,6 +799,7 @@ const Analytics = () => {
         </div>
 
         <div className={styles.rightColumnStack}>
+          <GrossStatCard globalData={global} trendData={trendsData} />
           <GrossStatCard globalData={global} trendData={trendsData} />
           <div className={`${styles.sectionCard} ${styles.servedStudentsCard}`}>
             <div className={styles.sectionHeader}>
@@ -830,6 +919,8 @@ const Analytics = () => {
       />
 
       <div className={styles.bottomChartsGrid}>
+        <RegistrationGrowthChart multiYearData={data.multi_year_trend} />
+        <RegistrationTrendChart trends={trendsData} />
         <RegistrationGrowthChart multiYearData={data.multi_year_trend} />
         <RegistrationTrendChart trends={trendsData} />
       </div>

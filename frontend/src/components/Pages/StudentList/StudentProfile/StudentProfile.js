@@ -141,8 +141,6 @@ const StudentProfile = () => {
     { value: "Non Indonesia", label: "Non Indonesia" },
   ];
   const currentApplicationId = studentData?.application_id;
-
-  // --- [BARU] Opsi untuk dropdown Agama ---
   const religionOptions = [
     "Islam",
     "Kristen",
@@ -202,9 +200,7 @@ const StudentProfile = () => {
   }, []);
 
   const handleDownloadPdfClick = async () => {
-    // Pastikan kita punya ID yang dibutuhkan
     const applicationId = currentApplicationId;
-    // Gunakan versionId terbaru (null jika tidak ada riwayat yang dipilih)
     const defaultVersionId = studentData?.version_id;
     const versionIdToPrint = selectedVersionId || defaultVersionId;
 
@@ -1321,9 +1317,7 @@ const StudentProfile = () => {
 
   const selectedDiscountOption = discountSelectOptions.find(
     (opt) =>
-      // Cek kecocokan ID (jika data berupa angka/ID)
       String(opt.value) === String(formData.discount_name) ||
-      // Cek kecocokan Nama/Label (jika data berupa string dari database)
       opt.label === formData.discount_name
   );
 
@@ -1724,7 +1718,6 @@ const StudentProfile = () => {
                     >
                       Religion
                     </label>
-                    {/* --- [UBAH] Ganti Input menjadi Select --- */}
                     {isEditing ? (
                       <div className={styles.selectWrapper}>
                         <Select
@@ -1758,7 +1751,6 @@ const StudentProfile = () => {
                         {studentInfo.religion || "-"}
                       </b>
                     )}
-                    {/* --- [AKHIR UBAH] --- */}
                   </div>
                 </div>
                 <div className={styles.row}>

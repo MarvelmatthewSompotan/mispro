@@ -148,11 +148,14 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
           {/* Area Kartu */}
           <div className={styles.cardPreviewWrapper}>
             {loading && !cardData ? (
-              // Tampilkan loading text ATAU tetap tampilkan kartu dengan data props (pilihan UX)
-              // Disini saya biarkan render kartu dengan displayData (dari props) agar mulus
               <div className={styles.cardScaleContainer}>
                 {currentView === "front" ? (
-                  <IdCardFront data={displayData} variant={variant} />
+                  <IdCardFront
+                    data={displayData}
+                    variant={variant}
+                    editable={true} // Aktifkan mode drag
+                    scale={0.6}
+                  />
                 ) : (
                   <IdCardBack data={displayData} variant={variant} />
                 )}
@@ -161,7 +164,12 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
               <div className={styles.cardScaleContainer}>
                 {currentView === "front" ? (
                   // Pass displayData yang sudah pasti snake_case
-                  <IdCardFront data={displayData} variant={variant} />
+                  <IdCardFront
+                    data={displayData}
+                    variant={variant}
+                    editable={true} // Aktifkan mode drag
+                    scale={0.6}
+                  />
                 ) : (
                   <IdCardBack data={displayData} variant={variant} />
                 )}

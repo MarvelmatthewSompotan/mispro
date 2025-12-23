@@ -1,4 +1,6 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom"; // Menambahkan import ReactDOM untuk Portal
+
 import styles from "./Users.module.css";
 import Button from "../../Atoms/Button/Button";
 import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
@@ -28,6 +30,7 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // eslint-disable-next-line
   const [page, setPage] = useState(1);
   const fetchControllerRef = useRef(null);
   const [deletingUserId, setDeletingUserId] = useState(null);
@@ -38,6 +41,7 @@ const Users = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [showUserPopup, setShowUserPopup] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  
   const showTemporaryPopup = (message, type) => {
     setPopupType(type);
     setPopupMessage(message);
@@ -138,7 +142,6 @@ const Users = () => {
       setShowUserPopup(false);
     } catch (error) {
       console.error("Failed to add user:", error);
-      // Menampilkan pesan error dari API jika ada
       const errorMessage =
         error.response?.data?.message ||
         "Failed to add user. Please try again.";
@@ -297,7 +300,9 @@ const Users = () => {
           </div>
         </div>
       )}
-      {confirmDeleteUser && (
+
+      {/* Gunakan Portal untuk modal konfirmasi agar berada di luar flow DOM normal */}
+      {confirmDeleteUser && ReactDOM.createPortal(
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <h3>Confirm Deletion</h3>
@@ -323,16 +328,20 @@ const Users = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-      {showPopup && (
+
+      {/* Gunakan Portal untuk toast notification juga */}
+      {showPopup && ReactDOM.createPortal(
         <div
           className={`${styles.popup} ${
             popupType === "success" ? styles.success : styles.error
           }`}
         >
           {popupMessage}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

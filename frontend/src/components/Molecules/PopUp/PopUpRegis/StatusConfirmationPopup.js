@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './StatusConfirmationPopup.module.css';
-
+import ReactDOM from "react-dom";
 import WarningSign from '../../../../assets/Warning_Sign.png';
 import {
   cancelRegistration,
@@ -151,7 +151,7 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
     if (apiError) setApiError('');
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.popUp} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
@@ -316,7 +316,8 @@ const StatusConfirmationPopup = ({ registration, onClose, onUpdateStatus }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
