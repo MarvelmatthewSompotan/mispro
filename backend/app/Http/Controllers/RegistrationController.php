@@ -43,7 +43,8 @@ class RegistrationController extends Controller
             ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id')           
             ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
             ->leftJoin('application_form_versions', 'application_form_versions.version_id', '=', DB::raw('(SELECT MAX(version_id) FROM application_form_versions WHERE application_id = application_forms.application_id AND action = "registration")'))
-            ->addSelect('application_form_versions.version_id as registration_version_id');
+            ->addSelect('application_form_versions.version_id as registration_version_id')
+            ->where('application_forms.status', 'Confirmed');
 
         // Filter Range
         if ($request->filled('start_date') && $request->filled('end_date')) {
