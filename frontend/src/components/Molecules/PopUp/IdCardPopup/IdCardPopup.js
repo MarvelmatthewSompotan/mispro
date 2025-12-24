@@ -4,10 +4,12 @@ import Button from "../../../Atoms/Button/Button";
 import IdCardFront from "../../IdCard/IdCardFront";
 import IdCardBack from "../../IdCard/IdCardBack";
 import ReactDOM from "react-dom";
-// Import API
-import { getStudentLatestApplication } from "../../../../services/api";
+// [UPDATE] Import saveStudentCardNumber
+import {
+  getStudentLatestApplication,
+  saveStudentCardNumber,
+} from "../../../../services/api";
 
-// Icon Panah Sederhana (SVG Inline)
 const ArrowLeft = () => (
   <svg
     width="24"
@@ -44,25 +46,26 @@ const ArrowRight = () => (
   </svg>
 );
 
-const IdCardPopup = ({ isOpen, onClose, studentData }) => {
-  const [currentView, setCurrentView] = useState("front"); // 'front' or 'back'
+// [UPDATE] Tambahkan prop onSaveSuccess
+const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
+  const [currentView, setCurrentView] = useState("front");
 
-  // State untuk data API dan Loading
   const [cardData, setCardData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [idCardNumber, setIdCardNumber] = useState("");
+  // [BARU] State untuk loading saat saving
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch data saat popup open & ada ID student
   useEffect(() => {
+    // Pastikan studentData.id ada sebelum fetch
     if (isOpen && studentData?.id) {
       setLoading(true);
-      // Gunakan source='registration'
       getStudentLatestApplication(studentData.id, "registration")
         .then((res) => {
           if (res?.success && res?.data?.idCardInfo) {
             const info = res.data.idCardInfo;
             setCardData(info);
-            // Set nomor kartu dari API
+            // Isi state input dengan data dari API jika ada
             setIdCardNumber(info.card_number || "");
           }
         })
@@ -73,7 +76,6 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
           setLoading(false);
         });
     } else {
-      // Reset card data jika ditutup atau ganti student
       setCardData(null);
       setIdCardNumber("");
     }
@@ -81,12 +83,9 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
 
   if (!isOpen) return null;
 
-  // --- PERBAIKAN DI SINI ---
-  // Kita buat Initial Data dari props 'studentData' (camelCase)
-  // dan mengubahnya menjadi format API (snake_case) agar IdCardFront bisa membacanya
-  // selagi menunggu loading API selesai.
   const initialData = {
     first_name: studentData?.firstName,
+    middle_name: studentData?.middleName,
     last_name: studentData?.lastName,
     student_id: studentData?.studentId,
     photo_url: studentData?.photoUrl,
@@ -95,15 +94,10 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
     place_of_birth: studentData?.placeOfBirth,
     date_of_birth: studentData?.dateOfBirth,
     school_year: studentData?.schoolYear,
-    // valid_until mungkin kosong di props, biarkan handling di Back component
   };
 
-  // Prioritas Data:
-  // 1. Data dari API (cardData) jika sudah load.
-  // 2. Data dari Props (initialData) sebagai fallback agar tidak kosong.
   const displayData = cardData || initialData;
 
-  // Tentukan variant
   let variant = "ecp";
   const sectionName = displayData?.section_name || "";
   const type = sectionName.toLowerCase();
@@ -113,17 +107,43 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
   } else if (type.includes("high")) {
     variant = "hs";
   }
-  // -------------------------
 
-  // Handle Switch View
   const toggleView = () => {
     setCurrentView((prev) => (prev === "front" ? "back" : "front"));
+  };
+
+  // [BARU] Fungsi handle Export
+  const handleExport = async () => {
+    if (!studentData?.id) {
+      alert("Student ID is missing.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // 1. Simpan Card Number ke backend
+      await saveStudentCardNumber(studentData.id, idCardNumber);
+
+      // 2. Trigger refresh di parent jika berhasil
+      if (onSaveSuccess) {
+        onSaveSuccess();
+      }
+
+      // 3. (Opsional) Di sini logika download gambar/pdf ID Card bisa dijalankan
+      // Untuk sekarang kita anggap sukses dan tutup popup
+      alert("ID Card exported and number saved successfully!");
+      onClose();
+    } catch (error) {
+      console.error("Failed to save card number", error);
+      alert("Failed to save ID Card number.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return ReactDOM.createPortal(
     <div className={styles.overlay}>
       <div className={styles.idCardPopup}>
-        {/* Header Section */}
         <div className={styles.headerTextGroup}>
           <div className={styles.adjustStudentPhoto}>
             {currentView === "front"
@@ -137,53 +157,29 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
             </div>
           )}
         </div>
-
-        {/* Card Preview Section dengan Navigasi */}
         <div className={styles.previewContainer}>
-          {/* Tombol Kiri */}
           <button className={styles.navButton} onClick={toggleView}>
             <ArrowLeft />
           </button>
-
-          {/* Area Kartu */}
           <div className={styles.cardPreviewWrapper}>
-            {loading && !cardData ? (
-              <div className={styles.cardScaleContainer}>
-                {currentView === "front" ? (
-                  <IdCardFront
-                    data={displayData}
-                    variant={variant}
-                    editable={true} // Aktifkan mode drag
-                    scale={0.6}
-                  />
-                ) : (
-                  <IdCardBack data={displayData} variant={variant} />
-                )}
-              </div>
-            ) : (
-              <div className={styles.cardScaleContainer}>
-                {currentView === "front" ? (
-                  // Pass displayData yang sudah pasti snake_case
-                  <IdCardFront
-                    data={displayData}
-                    variant={variant}
-                    editable={true} // Aktifkan mode drag
-                    scale={0.6}
-                  />
-                ) : (
-                  <IdCardBack data={displayData} variant={variant} />
-                )}
-              </div>
-            )}
+            <div className={styles.cardScaleContainer}>
+              {currentView === "front" ? (
+                <IdCardFront
+                  data={displayData}
+                  variant={variant}
+                  editable={true}
+                  scale={0.6}
+                />
+              ) : (
+                <IdCardBack data={displayData} variant={variant} />
+              )}
+            </div>
           </div>
-
-          {/* Tombol Kanan */}
           <button className={styles.navButton} onClick={toggleView}>
             <ArrowRight />
           </button>
         </div>
 
-        {/* Indikator Halaman */}
         <div className={styles.pageIndicator}>
           <span
             className={currentView === "front" ? styles.dotActive : styles.dot}
@@ -193,7 +189,6 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
           ></span>
         </div>
 
-        {/* Input Nomor Kartu */}
         <input
           type="text"
           className={styles.idCardNumberInput}
@@ -202,18 +197,23 @@ const IdCardPopup = ({ isOpen, onClose, studentData }) => {
           onChange={(e) => setIdCardNumber(e.target.value)}
         />
 
-        {/* Footer Buttons */}
         <div className={styles.footer}>
           <div className={styles.buttonGroup}>
             <Button
               variant="outline"
               onClick={onClose}
               className={styles.cancelButton}
+              disabled={isSaving}
             >
               Cancel
             </Button>
-            <Button variant="solid" className={styles.exportButton}>
-              Export ID Card
+            <Button
+              variant="solid"
+              className={styles.exportButton}
+              onClick={handleExport} // [UPDATE] Pasang handler
+              disabled={isSaving}
+            >
+              {isSaving ? "Exporting..." : "Export ID Card"}
             </Button>
           </div>
         </div>

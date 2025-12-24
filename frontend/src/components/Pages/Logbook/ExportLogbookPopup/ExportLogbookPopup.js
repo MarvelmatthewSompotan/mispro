@@ -20,7 +20,8 @@ const loadImage = (url) =>
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
       try {
-        const dataURL = canvas.toDataURL("image/jpeg");
+        // PERBAIKAN 1: Ganti jpeg ke png agar transparansi tetap terjaga (background putih/kertas)
+        const dataURL = canvas.toDataURL("image/png");
         resolve(dataURL);
       } catch (e) {
         console.error(
@@ -298,7 +299,8 @@ const ExportLogbookPopup = ({
               const y = data.cell.y + (cellHeight - imgHeight) / 2;
 
               try {
-                doc.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
+                // PERBAIKAN 2: Gunakan format PNG saat menambahkan ke PDF
+                doc.addImage(imgData, "PNG", x, y, imgWidth, imgHeight);
                 const originalDrawColor = doc.getDrawColor();
                 const originalLineWidth = doc.getLineWidth();
                 doc.setDrawColor(0, 0, 0);

@@ -5,7 +5,6 @@ import SortButton from "../../Atoms/SortButton/SortButton";
 import FilterButton from "../../Atoms/FilterButton/FilterButton";
 import DragHandle from "../../Atoms/DragHandle/DragHandle";
 
-// Terima props baru dari dnd-kit
 const TableHeaderController = React.forwardRef(
   (
     {
@@ -30,7 +29,6 @@ const TableHeaderController = React.forwardRef(
     ref
   ) => {
     return (
-
       <th
         className={styles.tableHeaderController}
         ref={ref}
@@ -47,14 +45,14 @@ const TableHeaderController = React.forwardRef(
               <>
                 <SortButton
                   disabled={disableSort || controlsDisabled}
-                  direction={sortDirection} 
-                  onClick={onSortClick} 
+                  direction={sortDirection}
+                  onClick={onSortClick}
                 />
                 <FilterButton
                   disabled={disableFilter || controlsDisabled}
-                  onClick={onFilterClick} 
+                  onClick={onFilterClick}
                   isActive={isFilterActive}
-                  isApplied={isFilterApplied} 
+                  isApplied={isFilterApplied}
                 />
               </>
             </div>

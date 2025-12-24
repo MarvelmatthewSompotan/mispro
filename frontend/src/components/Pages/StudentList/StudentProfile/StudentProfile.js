@@ -1321,9 +1321,7 @@ const StudentProfile = () => {
 
   const selectedDiscountOption = discountSelectOptions.find(
     (opt) =>
-      // Cek kecocokan ID (jika data berupa angka/ID)
       String(opt.value) === String(formData.discount_name) ||
-      // Cek kecocokan Nama/Label (jika data berupa string dari database)
       opt.label === formData.discount_name
   );
 
@@ -1350,6 +1348,9 @@ const StudentProfile = () => {
           statusOptions={statusOptions}
           onStatusChange={handleStatusChange}
           onDownloadPdfClick={handleDownloadPdfClick}
+          studentPrimaryId={id}
+          idCardInfo={studentData?.idCardInfo}
+          onIdCardUpdate={() => fetchData({ isBackgroundRefresh: true })}
         />
 
         <div className={styles.profileContent}>

@@ -1,273 +1,345 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import StatCard from "../../Molecules/StatCard/StatCard";
-import WelcomeBanner from "../../Molecules/WelcomeBanner/WelcomeBanner";
-import styles from "../Home/Home.module.css";
-import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { FaUserFriends, FaPlus } from "react-icons/fa";
+import styles from "./Home.module.css";
 import { getDashboard } from "../../../services/api";
+import WelcomeBanner from "../../Molecules/WelcomeBanner/WelcomeBanner";
 
-const formatGrowthText = (percent, period) => {
-  const val = Number(percent) || 0;
-  const absPercent = Math.abs(val);
-  const trend = val < 0 ? "decreased" : "increased";
-  return `${trend} ${absPercent}% from ${period}`;
+const formatNumber = (num) => {
+  if (num === undefined || num === null) return "0";
+  return new Intl.NumberFormat("id-ID").format(num);
 };
 
+// Disamakan dengan TrendTextRight di Analytics
+const TrendText = ({ growth, periodLabel }) => {
+  const val = growth ? Number(growth) : 0;
+  const isPositive = val >= 0;
+
+  return (
+    <div className={styles.trendTextContainer}>
+      <span>{isPositive ? "Increased" : "Decreased"}&nbsp;</span>
+      <span
+        className={isPositive ? styles.trendPositive : styles.trendNegative}
+      >
+        {Math.abs(val).toFixed(0)}%
+      </span>
+      <span>&nbsp;from {periodLabel}</span>
+    </div>
+  );
+};
+
+// Struktur disamakan persis dengan SimpleStatCard di Analytics
+const SimpleStatCard = ({ title, count, growth, periodLabel }) => (
+  <div className={styles.statCard}>
+    <div className={styles.cardTopRow}>
+      <div className={styles.cardLabel}>{title}</div>
+      <TrendText growth={growth} periodLabel={periodLabel} />
+    </div>
+    <div className={styles.cardMainStat}>
+      <div className={styles.cardBigValue}>{formatNumber(count)}</div>
+      <FaUserFriends className={styles.cardIcon} />
+    </div>
+  </div>
+);
+
 const Home = () => {
-  const [dashboardData, setDashboardData] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [newStudentSlide, setNewStudentSlide] = useState(0);
-  const [returnStudentSlide, setReturnStudentSlide] = useState(0);
-  const REFRESH_INTERVAL = 5000;
-  const fetchControllerRef = useRef(null);
+  const navigate = useNavigate();
 
-  const fetchDashboard = useCallback(async (options = {}) => {
-    const { isBackgroundRefresh = false } = options;
-    if (!isBackgroundRefresh) setLoading(true);
-
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchControllerRef.current?.abort();
-    fetchControllerRef.current = controller;
-
+  // Fetch Data dari Backend
+  const fetchDashboardData = useCallback(async () => {
     try {
-      const res = await getDashboard({ signal });
+      setLoading(true);
+      const res = await getDashboard();
       if (res.success) {
-        setDashboardData(res.data);
+        setData(res.data);
       }
     } catch (error) {
-      if (error.name === "AbortError") {
-        console.log("Previous dashboard fetch aborted.");
-        return;
-      }
       console.error("Failed to load dashboard data:", error);
     } finally {
-      if (!isBackgroundRefresh) setLoading(false);
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
-  useEffect(() => {
-    const refreshData = () => {
-      console.log("Auto refreshing dashboard data (background)...");
-      fetchDashboard({ isBackgroundRefresh: true });
-    };
-
-    const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
-    return () => clearInterval(intervalId);
-  }, [fetchDashboard]);
-
-  const handleNewStudentClick = () => {
-    setNewStudentSlide((prev) => (prev === 0 ? 1 : 0));
-  };
-
-  const handleReturnStudentClick = () => {
-    setReturnStudentSlide((prev) => (prev === 0 ? 1 : 0));
+  const handleFullAnalytics = () => {
+    navigate("/analytics");
   };
 
   if (loading) {
     return (
-      <div className={styles.loading}>
+      <div className={styles.centerMessage}>
         <div className={styles.spinner}></div>
-        <div>Loading dashboard...</div>
+        <p>Loading dashboard...</p>
       </div>
     );
   }
 
-  if (!dashboardData) {
-    return <div className={styles.error}>Failed to load dashboard data.</div>;
+  if (!data) {
+    return (
+      <div className={styles.centerMessage}>Failed to load dashboard data.</div>
+    );
   }
 
+  // Destructure Data sesuai JSON Backend
   const {
     username,
     last_login,
-    today, 
-    school_year, 
-    pre_register, 
+    today,
+    school_year,
+    active_students_matrix,
+    daily_trend,
     latest_registrations,
-  } = dashboardData;
+  } = data;
 
-  const total_registrations = school_year?.total || 0;
-  const total_registration_growth_percent = school_year?.growth_total || 0;
-  const today_registration = today?.total || 0;
-  const today_registration_growth_percent = today?.growth_total || 0;
-  const new_students_today = 0;
-  const new_students_today_growth_percent = 0;
-  const new_students_current_year = pre_register?.total || 0; 
-  const new_students_yearly_growth_percent = pre_register?.growth_total || 0;
-  const returning_students_today = 0; 
-  const returning_students_today_growth_percent = 0;
+  // 1. Data untuk Chart di Kartu Hitam (Total Active Student Trend)
+  const activeChartData = daily_trend
+    ? daily_trend.map((d) => ({
+        name: d.date,
+        val: d.total,
+      }))
+    : [];
 
-  const returning_students_current_year = school_year?.confirmed || 0;
-  const returning_students_yearly_growth_percent =
-    school_year?.growth_confirmed || 0;
-  const newStudentData = [
-    {
-      value: Number(new_students_today),
-      label: "New students (Today)",
-      footerText: formatGrowthText(
-        new_students_today_growth_percent,
-        "yesterday"
-      ),
-    },
-    {
-      value: Number(new_students_current_year),
-      label: "Pre-Register (Next Year)",
-      footerText: formatGrowthText(
-        new_students_yearly_growth_percent,
-        "last year"
-      ),
-    },
-  ];
+  const totalActiveStudents = active_students_matrix?.Total || 0;
 
-  const returnStudentData = [
-    {
-      value: Number(returning_students_today),
-      label: "Returning students (Today)",
-      footerText: formatGrowthText(
-        returning_students_today_growth_percent,
-        "yesterday"
-      ),
-    },
-    {
-      value: Number(returning_students_current_year),
-      label: "Confirmed Students (Active)",
-      footerText: formatGrowthText(
-        returning_students_yearly_growth_percent,
-        "last year"
-      ),
-    },
-  ];
+  const registrationTrendData = daily_trend
+    ? daily_trend.map((d) => ({
+        date: d.date,
+        current: d.total,
+        lastMonth: 0,
+      }))
+    : [];
 
   return (
     <div className={styles.homeContainer}>
-      <div className={styles.topContentWrapper}>
-        <WelcomeBanner name={username} lastLogin={last_login} />
-        <div className={styles.statCardGrid}>
-          <div className={styles.cardWithDotsWrapper}>
-            <StatCard
-              value={total_registrations}
-              label="Total registration"
-              variant="gradient"
-              footerText={formatGrowthText(
-                total_registration_growth_percent,
-                "last year"
-              )}
-              style={{ flex: "none" }}
-            />
-            <div className={styles.dotsPlaceholder} />
-          </div>
+      <WelcomeBanner name={username} lastLogin={last_login} />
 
-          <div className={styles.cardWithDotsWrapper}>
-            <StatCard
-              value={Number(today_registration)}
-              label="Total registration (Today)"
-              variant="blue"
-              footerText={formatGrowthText(
-                today_registration_growth_percent,
-                "yesterday"
-              )}
-              style={{ flex: "none" }}
-            />
-            <div className={styles.dotsPlaceholder} />
-          </div>
+      <div className={styles.topStatsGrid}>
+        <div className={styles.leftColumnStack}>
+          <SimpleStatCard
+            title="Today Registration"
+            count={today?.total}
+            growth={today?.growth_total}
+            periodLabel="yesterday"
+          />
+          <SimpleStatCard
+            title="Current S.Y Registration"
+            count={school_year?.total}
+            growth={school_year?.growth_total}
+            periodLabel="last year"
+          />
+        </div>
 
-          <div className={styles.cardWithDotsWrapper}>
-            <StatCard
-              value={newStudentData[newStudentSlide].value}
-              label={newStudentData[newStudentSlide].label}
-              variant="blue"
-              footerText={newStudentData[newStudentSlide].footerText}
-              onClick={handleNewStudentClick}
-              style={{ flex: "none" }}
-            />
-            <div className={styles.paginationDots}>
-              <span
-                className={`${styles.dot} ${
-                  newStudentSlide === 0 ? styles.active : ""
-                }`}
-              ></span>
-              <span
-                className={`${styles.dot} ${
-                  newStudentSlide === 1 ? styles.active : ""
-                }`}
-              ></span>
+        <div className={styles.darkCard}>
+          <div className={styles.grossInfo}>
+            <div className={styles.cardTitleWhite}>Total Active Student</div>
+            <div className={styles.cardMainStatDark}>
+              <div className={styles.statValueWhite}>
+                {formatNumber(totalActiveStudents)}
+              </div>
+              <FaUserFriends className={styles.statIconWhite} />
+            </div>
+            <div className={styles.darkTrendText}>
+              Increased{" "}
+              <span style={{ color: "#00f413", fontWeight: "bold" }}>20%</span>{" "}
+              from last year
             </div>
           </div>
 
-          <div className={styles.cardWithDotsWrapper}>
-            <StatCard
-              value={returnStudentData[returnStudentSlide].value}
-              label={returnStudentData[returnStudentSlide].label}
-              variant="blue"
-              footerText={returnStudentData[returnStudentSlide].footerText}
-              onClick={handleReturnStudentClick}
-              style={{ flex: "none" }}
-            />
-            <div className={styles.paginationDots}>
-              <span
-                className={`${styles.dot} ${
-                  returnStudentSlide === 0 ? styles.active : ""
-                }`}
-              ></span>
-              <span
-                className={`${styles.dot} ${
-                  returnStudentSlide === 1 ? styles.active : ""
-                }`}
-              ></span>
-            </div>
+          <div className={styles.grossChart}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={activeChartData}>
+                <defs>
+                  <linearGradient
+                    id="grossGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#00f413" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#00f413" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                {/* CartesianGrid dihapus agar clean seperti Analytics */}
+                <Area
+                  type="monotone"
+                  dataKey="val"
+                  stroke="#00f413"
+                  fill="url(#grossGradient)"
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <div className={styles.mainContentArea}>
-        <h3>Latest Registration</h3>
-        <div className={styles.tableContainer}>
-          <div className={styles.tableHeader}>
-            <ColumnHeader title="Student ID" />
-            <ColumnHeader title="Student Name" />
-            <ColumnHeader title="Grade" />
-            <ColumnHeader title="Section" />
-            <ColumnHeader title="School Year" />
-            <ColumnHeader title="Status" />
-          </div>
+      {/* --- 3. Middle Section: Latest Registration Table --- */}
+      <div className={styles.sectionHeader}>Latest registration</div>
+      <div className={styles.tableContainer}>
+        {/* Header Tabel */}
+        <div className={styles.tableHeader}>
+          <div>Registration ID</div>
+          <div>Student Name</div>
+          <div>Grade</div>
+          <div>Section</div>
+          <div>School year</div>
+          <div>Type</div>
+          <div>Status</div>
+        </div>
 
-          <div className={styles.tableBody}>
-            {latest_registrations?.length > 0 ? (
-              latest_registrations.map((student, index) => (
-                <div
-                  key={`${student.student_id}-${index}`}
-                  className={styles.tableRow}
-                >
-                  <div className={styles.tableCell}>{student.student_id}</div>
-                  <div className={styles.tableCell}>{student.full_name}</div>
-                  <div className={styles.tableCell}>{student.grade}</div>
-                  <div className={styles.tableCell}>{student.section}</div>
-                  <div className={styles.tableCell}>{student.school_year}</div>
-                  <div className={styles.tableCell}>
-                    <div
-                      className={` ${
-                        student.status?.toLowerCase() === "confirmed"
-                          ? styles.statusConfirmed
-                          : student.status?.toLowerCase() === "cancelled"
-                          ? styles.statusCancelled
-                          : ""
-                      }`}
-                    >
-                      {student.status}
-                    </div>
+        {/* Body Tabel */}
+        <div>
+          {latest_registrations && latest_registrations.length > 0 ? (
+            latest_registrations.map((row, idx) => (
+              <div key={idx} className={styles.tableRow}>
+                <div>
+                  {row.student_id
+                    ? row.student_id
+                    : `APP-${row.application_id}`}
+                </div>
+                <div style={{ fontWeight: 500 }}>{row.full_name}</div>
+                <div>{row.grade}</div>
+                <div>{row.section}</div>
+                <div>{row.school_year}</div>
+                <div>{row.type}</div>
+                <div>
+                  <div
+                    className={`${styles.statusBadge} ${
+                      row.status === "Confirmed"
+                        ? styles.statusConfirmed
+                        : row.status === "Cancelled"
+                        ? styles.statusCancelled
+                        : styles.statusPending
+                    }`}
+                  >
+                    {row.status}
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className={styles.emptyState}>
-                No recent registrations found.
               </div>
-            )}
+            ))
+          ) : (
+            <div
+              style={{
+                padding: "32px",
+                textAlign: "center",
+                color: "var(--main-grey)",
+              }}
+            >
+              No recent registrations found.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* --- 4. Bottom Section: Registration Trend Chart --- */}
+      <div className={styles.chartSection}>
+        <div className={styles.chartTopRow}>
+          {/* Title & Legend di Kiri */}
+          <div className={styles.chartTitleGroup}>
+            <div className={styles.sectionHeader} style={{ margin: 0 }}>
+              Registration Trend
+            </div>
+            <div className={styles.chartLegend}>
+              <div className={styles.legendItem}>
+                <div
+                  className={styles.legendBox}
+                  style={{ backgroundColor: "var(--red)" }}
+                ></div>
+                <span>Last Month</span>
+              </div>
+              <div className={styles.legendItem}>
+                <div
+                  className={styles.legendBox}
+                  style={{ backgroundColor: "var(--main-accent)" }}
+                ></div>
+                <span>Current Month</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Link di Kanan */}
+          <div className={styles.linkText} onClick={handleFullAnalytics}>
+            Show Full Analytics
           </div>
         </div>
+
+        <div style={{ width: "100%", height: 320 }}>
+          <ResponsiveContainer>
+            <LineChart
+              data={registrationTrendData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#e0e0e0"
+              />
+              <XAxis
+                dataKey="date"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: "#7A7A7A", fontWeight: 500 }}
+                dy={10}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: "#7A7A7A" }}
+              />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "none",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  fontSize: "12px",
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="lastMonth"
+                stroke="var(--red)"
+                strokeWidth={3}
+                dot={false}
+                name="Last Month"
+              />
+              <Line
+                type="monotone"
+                dataKey="current"
+                stroke="var(--main-accent)"
+                strokeWidth={3}
+                dot={false}
+                activeDot={{ r: 6, strokeWidth: 0 }}
+                name="Current Month"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* FAB */}
+        <button
+          className={styles.floatingBtn}
+          onClick={handleFullAnalytics}
+          title="View Analytics"
+        >
+          <FaPlus />
+        </button>
       </div>
     </div>
   );

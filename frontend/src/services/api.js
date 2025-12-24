@@ -511,3 +511,10 @@ export const confirmAutoGraduate = (ids) => {
 export const getAnalytics = () => {
   return apiFetch("/analytics");
 };
+
+export const saveStudentCardNumber = (id, cardNumber) => {
+  return apiFetch(`/students/${id}/card-number`, {
+    method: "POST",
+    body: JSON.stringify({ card_number: cardNumber }),
+  });
+};

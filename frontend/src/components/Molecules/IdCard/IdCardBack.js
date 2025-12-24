@@ -1,39 +1,39 @@
 import React from "react";
 import styles from "./IdCardBack.module.css";
-// Import Component Logo
 import Logo from "../../Atoms/Logo/Logo";
 
 const IdCardBack = ({ data, variant = "ecp" }) => {
-  // PERUBAHAN: Mengambil data dengan key snake_case sesuai response API
   const { nisn, place_of_birth, date_of_birth, school_year, valid_until } =
     data || {};
-
-  // Logika Warna Background & Logo Variant
   let variantClass = styles.bgEcp;
-  let logoVariant = "white"; // Default Logo Putih
+  let logoVariant = "white";
 
   if (variant === "ms") {
     variantClass = styles.bgMs;
-    logoVariant = "white"; // Logo Putih
+    logoVariant = "white";
   } else if (variant === "hs") {
     variantClass = styles.bgHs;
-    logoVariant = "blue"; // Logo Biru
+    logoVariant = "blue";
   }
 
-  // Format Tanggal
   const dobFormatted = date_of_birth
     ? new Date(date_of_birth).toLocaleDateString("en-GB")
     : "-";
 
-  // PERUBAHAN: Gunakan valid_until langsung dari API
-  const validUntilStr = valid_until || "-";
+  let validUntilStr = "-";
+  if (valid_until) {
+    validUntilStr = valid_until;
+  } else if (school_year && school_year.includes("/")) {
+    const years = school_year.split("/");
+    if (years.length > 1) {
+      validUntilStr = `June ${years[1]}`;
+    }
+  }
 
   return (
     <div className={`${styles.idCardBackBase} ${variantClass}`}>
       <div className={styles.contentWrapper}>
-        {/* Header Info Sekolah */}
         <div className={styles.headerInfo}>
-          {/* Panggil Component Logo */}
           <Logo
             variant={logoVariant}
             isCard={true}

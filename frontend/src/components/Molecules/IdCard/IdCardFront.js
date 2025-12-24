@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import styles from "./IdCardFront.module.css";
 import Logo from "../../Atoms/Logo/Logo";
 import headerBg from "../../../assets/headerBg.png";
@@ -14,8 +14,15 @@ const IdCardFront = ({
   editable = false,
   scale = 1,
 }) => {
-  const { first_name, last_name, photo_url, student_id, section_name } =
-    data || {};
+  const {
+    first_name,
+    middle_name,
+    last_name,
+    photo_url,
+    student_id,
+    section_name,
+  } = data || {};
+
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -70,6 +77,7 @@ const IdCardFront = ({
   };
 
   const currentConfig = config[variant] || config.ecp;
+  const hasLastName = last_name && last_name.trim() !== "" && last_name !== "-";
 
   return (
     <div
@@ -90,7 +98,7 @@ const IdCardFront = ({
           }}
           style={{
             transform: `translate(${position.x}px, ${position.y}px)`,
-          }}   
+          }}
           onMouseDown={handleMouseDown}
         />
       </div>
@@ -99,9 +107,33 @@ const IdCardFront = ({
         <div className={styles.contentOverlay}>
           <div className={styles.infoGroup}>
             <div className={styles.nameGroup}>
-              <div className={styles.lastName}>{last_name},</div>
-              <div className={styles.firstName}>{first_name}</div>
+              {hasLastName ? (
+                <>
+                  <div className={styles.lastName}>{last_name},</div>
+                  <div
+                    className={styles.firstName}
+                    style={{ whiteSpace: "normal", wordWrap: "break-word" }}
+                  >
+                    {first_name} {middle_name}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className={styles.lastName}
+                    style={{
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
+                      lineHeight: "1.1",
+                    }}
+                  >
+                    {first_name}
+                  </div>
+                  <div className={styles.firstName}>{middle_name}</div>
+                </>
+              )}
             </div>
+
             <div className={styles.studentId}>ID: {student_id}</div>
           </div>
           <div className={styles.footerGroup}>

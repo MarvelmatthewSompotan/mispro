@@ -28,7 +28,7 @@ const FilterPopup = ({
   filterKey,
   className = "",
   initialValue,
-  singleSelect = false, 
+  singleSelect = false,
 }) => {
   const popupRef = useRef(null);
   const [popupStyle, setPopupStyle] = useState({ opacity: 0 });
@@ -68,12 +68,19 @@ const FilterPopup = ({
 
   useClickOutside(popupRef, onClose);
 
+  // FIXED: Hanya tutup popup jika scroll BUKAN dari dalam popup
   useEffect(() => {
-    const handleResizeOrScroll = () => {
+    const handleResizeOrScroll = (event) => {
+      // Cek apakah scroll berasal dari dalam popup
+      if (popupRef.current && popupRef.current.contains(event.target)) {
+        return; // Jangan tutup popup jika scroll dari dalam popup
+      }
+
       if (onClose) {
         onClose();
       }
     };
+
     window.addEventListener("resize", handleResizeOrScroll);
     window.addEventListener("scroll", handleResizeOrScroll, true);
 
