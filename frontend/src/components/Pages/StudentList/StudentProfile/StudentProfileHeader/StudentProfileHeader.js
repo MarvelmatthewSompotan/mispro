@@ -34,9 +34,12 @@ const StudentProfileHeader = ({
   onSaveClick,
   statusOptions,
   onAddPhotoClick,
-  editableStatus,
   onStatusChange,
   onDownloadPdfClick,
+  // [BARU] Props untuk ID Card
+  studentPrimaryId,
+  idCardInfo,
+  onIdCardUpdate,
 }) => {
   const [isIdCardPopupOpen, setIdCardPopupOpen] = useState(false);
   const [isStatusDropdownOpen, setStatusDropdownOpen] = useState(false);
@@ -51,11 +54,12 @@ const StudentProfileHeader = ({
       ? styles.profileImage
       : styles.profilePlaceholder;
 
-  // --- PERUBAHAN: Menambahkan 'id' agar bisa dipakai fetch API di dalam Popup ---
+  // [UPDATE] Persiapan data untuk popup ID Card
   const idCardData = {
-    id: studentInfo.id, // ID Database untuk fetch API
-    // Data di bawah ini hanya fallback/initial, karena popup akan mengambil data fresh dari API
+    // Gunakan Primary ID (dari URL/params) agar endpoint API valid
+    id: studentPrimaryId,
     firstName: studentInfo.first_name,
+    middleName: studentInfo.middle_name,
     lastName: studentInfo.last_name,
     studentId: formData.student_id || studentInfo.student_id,
     photoUrl: photoPreview || formData.photo_url,
@@ -69,6 +73,8 @@ const StudentProfileHeader = ({
       if (secId === 4) return "High School";
       return "Elementary School";
     })(),
+    // [BARU] Kirim data card number jika ada, agar popup terisi otomatis
+    card_number: idCardInfo?.card_number || "",
   };
 
   const getSectionType = () => {
@@ -77,6 +83,9 @@ const StudentProfileHeader = ({
     if (secId === 4) return "hs";
     return "ecp";
   };
+
+  // [BARU] Logika tampilan Card Number
+  const displayedCardNumber = idCardInfo?.card_number || "-";
 
   return (
     <div className={styles.profileHeader}>
@@ -105,7 +114,8 @@ const StudentProfileHeader = ({
           }`}
         >
           <span className={styles.idLabel}>ID Card number :</span>
-          <b className={styles.idValue}>-</b>
+          {/* [UPDATE] Tampilkan card number dari API */}
+          <b className={styles.idValue}>{displayedCardNumber}</b>
         </div>
 
         {isEditing ? (
@@ -275,6 +285,8 @@ const StudentProfileHeader = ({
         onClose={() => setIdCardPopupOpen(false)}
         studentData={idCardData}
         sectionType={getSectionType()}
+        // [UPDATE] Pass handler sukses
+        onSaveSuccess={onIdCardUpdate}
       />
     </div>
   );

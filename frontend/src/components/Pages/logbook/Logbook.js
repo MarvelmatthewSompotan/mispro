@@ -5,15 +5,14 @@ import Button from "../../Atoms/Button/Button";
 import ExportLogbookPopup from "./ExportLogbookPopup/ExportLogbookPopup";
 import FilterPopup from "../../Molecules/FilterPopUp/FilterPopUp";
 import filterStyles from "../../Molecules/FilterPopUp/FilterPopUp.module.css";
-import Pagination from "../../Molecules/Pagination/Pagination"; // <-- 1. IMPORT Pagination
+import Pagination from "../../Molecules/Pagination/Pagination";
 import {
   getLogbook,
   getRegistrationOptions,
-  getLogbookForExport, // <-- BARU: Import fungsi export
-} from "../../../services/api"; // <-- 2. IMPORT API
-import placeholder from "../../../assets/user.svg"; // <-- 3. IMPORT Placeholder
+  getLogbookForExport,
+} from "../../../services/api";
+import placeholder from "../../../assets/user.svg";
 
-// 1. Impor dari dnd-kit (Tetap Sama)
 import {
   DndContext,
   closestCenter,
@@ -29,7 +28,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// INITIAL_HEADERS tetap dipakai untuk urutan default dan dnd
 const INITIAL_HEADERS = [
   "Photo",
   "Student ID",
@@ -58,7 +56,7 @@ const INITIAL_HEADERS = [
   "KITAS",
 ];
 
-const REFRESH_INTERVAL = 5000; // --- TAMBAHAN ---
+const REFRESH_INTERVAL = 5000;
 
 const HEADER_KEY_MAP = {
   Photo: "photo_url",
@@ -88,12 +86,6 @@ const HEADER_KEY_MAP = {
   KITAS: "kitas",
 };
 
-// ======================================================================
-// --- 4. KONFIGURASI FILTER & SORT (BARU) ---
-// ======================================================================
-
-// Map Header Title -> API Sort Field Key
-// Sesuai daftar 'Sort' dari requirements Anda
 const SORT_CONFIG_MAP = {
   "Student ID": "student_id",
   "Full Name": "full_name",
@@ -111,13 +103,9 @@ const SORT_CONFIG_MAP = {
   "Father Occupation": "father_occupation",
   "Mother Name": "mother_name",
   "Mother Occupation": "mother_occupation",
-  // Kolom tanpa sort (Photo, NISN, Place DOB, Address, Phone, dll)
 };
 
-// Map Header Title -> Konfigurasi Filter
-// Sesuai daftar 'Filter' dari requirements Anda
 const FILTER_CONFIG_MAP = {
-  // Filter Search
   "Full Name": { type: "search", apiKeys: ["search_name"] },
   "Family Rank": { type: "search", apiKeys: ["search_family_rank"] },
   Religion: { type: "search", apiKeys: ["search_religion"] },
@@ -125,56 +113,48 @@ const FILTER_CONFIG_MAP = {
   "Father Name": { type: "search", apiKeys: ["search_father"] },
   "Mother Name": { type: "search", apiKeys: ["search_mother"] },
 
-  // Filter Checkbox
   Grade: {
     type: "checkbox",
     apiKeys: ["grades"],
-    optionsKey: "classes", // Dari getRegistrationOptions
-    valueKey: "grade", // Sesuai Registration.js
+    optionsKey: "classes",
+    valueKey: "grade",
     labelKey: "grade",
   },
   Section: {
     type: "checkbox",
     apiKeys: ["sections"],
-    optionsKey: "sections", // Dari getRegistrationOptions
-    valueKey: "name", // Sesuai Registration.js
+    optionsKey: "sections",
+    valueKey: "name",
     labelKey: "name",
   },
   Gender: {
     type: "checkbox",
     apiKeys: ["genders"],
-    optionsKey: "genders", // Kita akan hardcode ini
+    optionsKey: "genders",
     valueKey: "id",
     labelKey: "name",
   },
   Transportation: {
     type: "checkbox",
     apiKeys: ["transportations"],
-    optionsKey: "transportations", // Dari getRegistrationOptions
-    valueKey: "type", // Asumsi key dari API
+    optionsKey: "transportations",
+    valueKey: "type",
     labelKey: "type",
   },
   "School Year": {
     type: "checkbox",
     apiKeys: ["school_years"],
-    optionsKey: "schoolYears", // Dari getRegistrationOptions
-    valueKey: "year", // Sesuai Registration.js
+    optionsKey: "schoolYears",
+    valueKey: "year",
     labelKey: "year",
-    singleSelect: true, // Sesuai requirement "hanya bisa pilih 1"
+    singleSelect: true,
   },
-
-  // Filter Range
   "Registration Date": {
     type: "date-range",
     apiKeys: ["start_date", "end_date"],
   },
   Age: { type: "number-range", apiKeys: ["min_age", "max_age"] },
-
-  // Kolom tanpa filter (Student ID, Photo, NISN, dll)
 };
-// ======================================================================
-
-// Komponen SortableHeader (Tetap Sama)
 const SortableHeader = ({
   header,
   selectedColumns,
@@ -186,7 +166,6 @@ const SortableHeader = ({
   onFilterClick,
   showFilterPopup,
   filterPopupNode,
-  // Props baru untuk disable sort/filter
   disableSort,
   disableFilter,
 }) => {
@@ -223,7 +202,6 @@ const SortableHeader = ({
 };
 
 const Logbook = () => {
-  // --- 5. STATE BARU ---
   const [logbookData, setLogbookData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -232,35 +210,23 @@ const Logbook = () => {
     classes: [],
     sections: [],
     schoolYears: [],
-    transportations: [], // Asumsi ini ada di getRegistrationOptions
+    transportations: [],
     genders: [
       { id: "MALE", name: "Male" },
       { id: "FEMALE", name: "Female" },
     ],
   });
-
-  // --- STATE LAMA (diganti/disesuaikan) ---
   const [columns, setColumns] = useState(INITIAL_HEADERS);
   const [selectedColumns, setSelectedColumns] = useState(
     new Set(INITIAL_HEADERS)
   );
   const [isExportPopupOpen, setIsExportPopupOpen] = useState(false);
-
-  // State filter & sort baru (mengikuti pola Registration.js)
-  const [filters, setFilters] = useState({}); // Menyimpan semua filter yang TEPAT
-  const [sorts, setSorts] = useState([]); // Menyimpan sort yang TEPAT
-
-  // State untuk popup filter
-  const [activeFilter, setActiveFilter] = useState(null); // { column, config }
-
-  // --- STATE BARU UNTUK KEPENTINGAN EXPORT ---
+  const [filters, setFilters] = useState({});
+  const [sorts, setSorts] = useState([]);
+  const [activeFilter, setActiveFilter] = useState(null);
   const [exportLoading, setExportLoading] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor));
-
-  // --- 6. FUNGSI FETCH DATA ---
-
-  // Mengambil Opsi Filter (Grade, Section, SchoolYear)
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
@@ -270,7 +236,7 @@ const Logbook = () => {
           classes: opts.classes || [],
           sections: opts.sections || [],
           schoolYears: opts.school_years || [],
-          transportations: opts.transportations || [], // Asumsi
+          transportations: opts.transportations || [],
         }));
       } catch (err) {
         console.error("Error fetching registration options:", err);
@@ -278,21 +244,14 @@ const Logbook = () => {
     };
     fetchFilterOptions();
   }, []);
-
-  // Fungsi utama untuk mengambil data logbook (PAGINATED)
   const fetchLogbookData = useCallback(
     async (page = 1, options = {}) => {
-      // --- MODIFIKASI ---
       const { isBackgroundRefresh = false } = options;
       if (!isBackgroundRefresh) setLoading(true);
-
-      // 1. Siapkan parameter API dari state 'filters' dan 'sorts'
       const apiParams = {
         page: page,
         per_page: 25,
       };
-
-      // 2. Terjemahkan state 'filters' ke 'apiParams'
       for (const headerTitle in filters) {
         const config = FILTER_CONFIG_MAP[headerTitle];
         const value = filters[headerTitle];
@@ -311,12 +270,7 @@ const Logbook = () => {
           }
         }
       }
-
-      // 3. Tambahkan 'sorts'
-      // Hanya 1 sort field yang akan terkirim (Single Sort)
       apiParams.sort = sorts.length > 0 ? sorts : undefined;
-
-      // 4. Panggil API
       try {
         const res = await getLogbook(apiParams);
         setLogbookData(res.data || []);
@@ -334,11 +288,8 @@ const Logbook = () => {
     [filters, sorts]
   );
 
-  // --- FUNGSI BARU: Mengambil Data Logbook LENGKAP untuk Export ---
   const fetchFullLogbookData = useCallback(async () => {
-    setExportLoading(true); // Mulai loading
-
-    // 1. Siapkan parameter API dari state 'filters' dan 'sorts'
+    setExportLoading(true);
     const apiParams = {};
 
     for (const headerTitle in filters) {
@@ -359,50 +310,33 @@ const Logbook = () => {
         }
       }
     }
-
-    // 2. Tambahkan 'sorts' (Single sort dari tampilan utama)
     apiParams.sort = sorts.length > 0 ? sorts : undefined;
-
-    // 3. Panggil API export BARU
     try {
       const res = await getLogbookForExport(apiParams);
-      return res.data || []; // Kembalikan data lengkap
+      return res.data || [];
     } catch (error) {
       console.error("Failed to fetch full logbook data for export:", error);
       throw error;
     } finally {
-      setExportLoading(false); // Selesai loading
+      setExportLoading(false);
     }
   }, [filters, sorts]);
-
-  // 5. Trigger fetch data ketika filter, sort berubah
   useEffect(() => {
-    // Reset ke halaman 1 setiap kali filter atau sort berubah
     fetchLogbookData(1);
   }, [filters, sorts, fetchLogbookData]);
-
-  // --- TAMBAHAN: useEffect untuk Background Refresh ---
   useEffect(() => {
     const refreshData = () => {
       console.log("Auto refreshing logbook data (background)...");
-      // Panggil fetchLogbookData dengan page saat ini dan opsi background
       fetchLogbookData(currentPage, { isBackgroundRefresh: true });
     };
 
     const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
     return () => clearInterval(intervalId);
   }, [currentPage, fetchLogbookData]);
-  // --------------------------------------------------
-
-  // Handler untuk Pagination
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchLogbookData(page); // Panggil fetch data untuk halaman baru
+    fetchLogbookData(page);
   };
-
-  // --- 7. HANDLER UNTUK UI (Tombol Select, DND, Export) ---
-
-  // Fungsi handleColumnSelect, selectAll, unselectAll (Tetap Sama)
   const handleColumnSelect = (columnTitle, isChecked) => {
     const newSelectedColumns = new Set(selectedColumns);
     if (isChecked) {
@@ -418,8 +352,6 @@ const Logbook = () => {
   const unselectAllColumns = () => {
     setSelectedColumns(new Set());
   };
-
-  // Fungsi DND (Tetap Sama)
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (active.id !== over.id) {
@@ -430,78 +362,61 @@ const Logbook = () => {
       });
     }
   };
-
-  // Fungsi Export Popup (Tetap Sama)
   const handleOpenExportPopup = () => {
     setIsExportPopupOpen(true);
   };
   const handleCloseExportPopup = () => {
     setIsExportPopupOpen(false);
   };
-
-  // --- 8. HANDLER BARU (Filter & Sort) ---
-
-  // Handle KLIK TOMBOL SORT di header (SINGLE SORT)
   const handleSortClick = (headerTitle) => {
     const fieldKey = SORT_CONFIG_MAP[headerTitle];
-    if (!fieldKey) return; // Tidak bisa di-sort
+    if (!fieldKey) return;
 
     setSorts((prev) => {
-      // Logika Single Sort: Jika kolom sama, ganti urutan (asc -> desc -> none)
       const current = prev[0]?.field === fieldKey ? prev[0] : null;
       let next;
 
       if (!current) next = { field: fieldKey, order: "asc" };
       else if (current.order === "asc")
         next = { field: fieldKey, order: "desc" };
-      else next = null; // asc -> desc -> none
+      else next = null;
 
       return next ? [next] : [];
     });
   };
-
-  // Handle KLIK TOMBOL FILTER di header (Membuka Popup)
   const handleFilterClick = (headerTitle) => {
     const config = FILTER_CONFIG_MAP[headerTitle];
-    if (!config) return; // Tidak bisa di-filter
+    if (!config) return;
 
     setActiveFilter({
       column: headerTitle,
       config: config,
-      initialValue: filters[headerTitle], // Kirim nilai yang sudah ada
+      initialValue: filters[headerTitle],
     });
   };
-
-  // Handle TUTUP Popup
   const handleFilterClose = () => setActiveFilter(null);
-
-  // Handle SUBMIT dari Popup
   const handleFilterSubmit = (value) => {
     const column = activeFilter.column;
 
     setFilters((prev) => {
       const newFilters = { ...prev };
-
-      // Cek apakah value "kosong"
       const isEmpty =
         value === null ||
         value === undefined ||
         value === "" ||
         (Array.isArray(value) && value.length === 0) ||
-        (Array.isArray(value) && value.every((v) => v === "" || v === null)); // Untuk range [ "", "" ]
+        (Array.isArray(value) && value.every((v) => v === "" || v === null));
 
       if (isEmpty) {
-        delete newFilters[column]; // Hapus filter jika kosong
+        delete newFilters[column];
       } else {
-        newFilters[column] = value; // Set filter jika ada isi
+        newFilters[column] = value;
       }
       return newFilters;
     });
 
-    setActiveFilter(null); // Tutup popup
+    setActiveFilter(null);
   };
-
-  // --- 9. RENDER JSX ---
   return (
     <div className={styles.logbookPage}>
       <div className={styles.logbookContainer}>
@@ -533,18 +448,12 @@ const Logbook = () => {
                     items={columns}
                     strategy={horizontalListSortingStrategy}
                   >
-                    {/* --- MAPPING HEADER (DIMODIFIKASI) --- */}
                     {columns.map((header) => {
-                      // Cek config
                       const sortField = SORT_CONFIG_MAP[header];
                       const filterConfig = FILTER_CONFIG_MAP[header];
-
-                      // Dapatkan sort order
                       const sortOrder =
                         sorts.find((s) => s.field === sortField)?.order ||
                         "none";
-
-                      // Cek apakah filter ter-apply
                       const appliedValue = filters[header];
                       const isFilterApplied =
                         appliedValue != null &&
@@ -557,11 +466,7 @@ const Logbook = () => {
                           Array.isArray(appliedValue) &&
                           appliedValue.every((v) => v === "")
                         );
-
-                      // Cek apakah popup filter ini sedang aktif
                       const isFilterActive = activeFilter?.column === header;
-
-                      // Siapkan node popup jika aktif
                       let filterPopupNode = null;
                       if (isFilterActive) {
                         const config = activeFilter.config;
@@ -573,9 +478,9 @@ const Logbook = () => {
                             valueKey={config.valueKey}
                             labelKey={config.labelKey}
                             filterType={config.type}
-                            filterKey={config.apiKeys[0]} // Untuk placeholder di search
+                            filterKey={config.apiKeys[0]}
                             initialValue={activeFilter.initialValue}
-                            singleSelect={config.singleSelect || false} // Kirim prop singleSelect
+                            singleSelect={config.singleSelect || false}
                             onSubmit={handleFilterSubmit}
                             onClose={handleFilterClose}
                             className={
@@ -594,16 +499,13 @@ const Logbook = () => {
                           header={header}
                           selectedColumns={selectedColumns}
                           handleColumnSelect={handleColumnSelect}
-                          // Sort props
                           sortDirection={sortOrder}
                           onSortClick={() => handleSortClick(header)}
-                          disableSort={!sortField} // Disable jika tidak ada di map
-                          // Filter props
+                          disableSort={!sortField}
                           isFilterActive={isFilterActive}
                           isFilterApplied={isFilterApplied}
                           onFilterClick={() => handleFilterClick(header)}
-                          disableFilter={!filterConfig} // Disable jika tidak ada di map
-                          // Popup props
+                          disableFilter={!filterConfig}
                           showFilterPopup={isFilterActive}
                           filterPopupNode={filterPopupNode}
                         />
@@ -612,8 +514,6 @@ const Logbook = () => {
                   </SortableContext>
                 </tr>
               </thead>
-
-              {/* --- MAPPING BODY (DIMODIFIKASI) --- */}
               <tbody>
                 {loading ? (
                   <tr>
@@ -637,7 +537,7 @@ const Logbook = () => {
                               }`}
                             >
                               <img
-                                src={item[dataKey] || placeholder} // Gunakan placeholder
+                                src={item[dataKey] || placeholder}
                                 alt={item.full_name}
                                 className={styles.studentPhoto}
                               />
@@ -668,7 +568,6 @@ const Logbook = () => {
           </DndContext>
         </div>
 
-        {/* --- 10. TAMBAHKAN PAGINATION --- */}
         {!loading && totalPages > 1 && (
           <div className={styles.paginationContainer}>
             <Pagination
@@ -684,11 +583,9 @@ const Logbook = () => {
         onClose={handleCloseExportPopup}
         columns={columns}
         selectedColumns={selectedColumns}
-        // HAPUS: logbookData={logbookData} <-- Data paginasi DILARANG dikirim
-        // TAMBAH: Kirim fungsi fetch dan status loading
         fetchFullData={fetchFullLogbookData}
         isExportLoading={exportLoading}
-        currentFilters={filters} // Kirim filters untuk info/preview
+        currentFilters={filters}
       />
     </div>
   );

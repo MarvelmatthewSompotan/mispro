@@ -1344,6 +1344,9 @@ const StudentProfile = () => {
           statusOptions={statusOptions}
           onStatusChange={handleStatusChange}
           onDownloadPdfClick={handleDownloadPdfClick}
+          studentPrimaryId={id}
+          idCardInfo={studentData?.idCardInfo}
+          onIdCardUpdate={() => fetchData({ isBackgroundRefresh: true })}
         />
 
         <div className={styles.profileContent}>
