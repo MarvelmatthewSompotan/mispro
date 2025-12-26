@@ -11,22 +11,24 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+  padding-bottom: 100px;
 }
 
 /* ==================== TOP STATS GRID ==================== */
 .topStatsGrid {
   display: grid;
   /* PERBAIKAN: Ubah ratio kanan dari 1.8fr menjadi 1.3fr agar card Active Student lebih kecil/ramping */
-  grid-template-columns: 1fr 1.3fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
-  align-items: stretch;
+  align-items: start;
 }
 
-.leftColumnStack {
+.leftColumnStack,
+.rightColumnStack {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  justify-content: space-between;
+  flex: 1;
 }
 
 /* --- White Stat Card Style (Updated to exactly match Analytics) --- */
@@ -72,7 +74,35 @@
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  margin-bottom: 4px; /* Tambahan margin bottom agar tidak terlalu mepet bawah */
+  margin-bottom: 8px;
+}
+
+.cardSubStatRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #f7f7f7;
+}
+
+.subStatItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--main-grey);
+  font-weight: 500;
+}
+
+.dotConfirmed {
+  color: var(--green);
+  font-size: 10px;
+}
+
+.dotCancelled {
+  color: var(--red);
+  font-size: 10px;
 }
 
 .cardBigValue {
@@ -110,9 +140,10 @@
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  min-height: 280px;
+  min-height: 120px;
   position: relative;
   overflow: hidden;
+  flex: 1;
 }
 
 .grossInfo {
@@ -120,7 +151,7 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   height: 100%;
 }
 
@@ -133,13 +164,13 @@
 
 .cardMainStatDark {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
   margin-bottom: 8px;
 }
 
 .statValueWhite {
-  font-size: 48px;
+  font-size: 32px;
   font-weight: var(--font-weight-semibold);
   line-height: 1;
   color: #fff;
@@ -147,12 +178,12 @@
 
 .statIconWhite {
   color: #fff;
-  font-size: 24px;
+  font-size: 20px;
   margin-bottom: 4px;
 }
 
 .darkTrendText {
-  font-size: 12px;
+  font-size: 10px;
   color: #ccc;
   margin-top: 8px;
 }
@@ -288,7 +319,7 @@
 }
 
 .floatingBtn {
-  position: absolute;
+  position: fixed;
   bottom: 40px;
   right: 40px;
   width: 50px;
@@ -303,7 +334,7 @@
   box-shadow: 0 4px 12px rgba(95, 132, 254, 0.4);
   cursor: pointer;
   border: none;
-  z-index: 10;
+  z-index: 1000;
   transition: transform 0.2s, background-color 0.2s;
 }
 
