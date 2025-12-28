@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './FacilitiesContent.module.css';
-import RadioButton from '../../../Atoms/RadioButton/RadioButton';
+import RadioButton from '../../../Atoms/Radiobutton/RadioButton';
 import Checkbox from '../../../Atoms/Checkbox/Checkbox';
 
 function FacilitiesContent({ data, pickupPointOptions }) {

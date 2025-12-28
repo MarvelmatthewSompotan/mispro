@@ -1,11 +1,8 @@
-import React from 'react';
-import styles from './OtherDetailContent.module.css';
-import RadioButton from '../../../Atoms/RadioButton/RadioButton';
-
+import React from "react";
+import styles from "./OtherDetailContent.module.css";
+import RadioButton from "../../../Atoms/Radiobutton/RadioButton";
 
 function OtherDetail_Content({ data }) {
-
-
   const status = data?.student_requirement_status || "";
 
   return (
@@ -26,7 +23,7 @@ function OtherDetail_Content({ data }) {
               <RadioButton
                 name="requirement_status_print"
                 value="complete"
-                checked={status === 'complete'}
+                checked={status === "complete"}
                 onChange={() => {}} // Handler kosong karena read-only
                 readOnly={true}
               />
@@ -36,7 +33,7 @@ function OtherDetail_Content({ data }) {
               <RadioButton
                 name="requirement_status_print"
                 value="incomplete"
-                checked={status === 'incomplete'}
+                checked={status === "incomplete"}
                 onChange={() => {}} // Handler kosong karena read-only
                 readOnly={true}
               />
@@ -45,7 +42,9 @@ function OtherDetail_Content({ data }) {
           </div>
           <div className={styles.note}>
             <div className={styles.txtIcDocs}>
-              <div className={styles.incompleteDocuments}>Incomplete documents:</div>
+              <div className={styles.incompleteDocuments}>
+                Incomplete documents:
+              </div>
             </div>
           </div>
         </div>
@@ -69,4 +68,3 @@ function OtherDetail_Content({ data }) {
 }
 
 export default OtherDetail_Content;
-
