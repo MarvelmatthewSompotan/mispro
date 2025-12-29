@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import styles from "./UpdateNotification.module.css";
 
-const UpdatedNotification = ({ isOpen, onClose }) => {
+const UpdatedNotification = ({ isOpen, onClose, message }) => {
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
@@ -33,7 +33,7 @@ const UpdatedNotification = ({ isOpen, onClose }) => {
             d="M14.1 27.2l7.1 7.2 16.7-16.8"
           />
         </svg>
-        <div className={styles.message}>Update Successfully</div>
+        <div className={styles.message}>{message || "Update Successfully"}</div>
       </div>
     </div>,
     document.body

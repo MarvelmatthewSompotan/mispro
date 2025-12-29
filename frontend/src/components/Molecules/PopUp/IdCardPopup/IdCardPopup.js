@@ -4,7 +4,7 @@ import Button from "../../../Atoms/Button/Button";
 import IdCardFront from "../../IdCard/IdCardFront";
 import IdCardBack from "../../IdCard/IdCardBack";
 import ReactDOM from "react-dom";
-// [UPDATE] Import saveStudentCardNumber
+import UpdatedNotification from "../UpdateNotification/UpdateNotification";
 import {
   getStudentLatestApplication,
   saveStudentCardNumber,
@@ -46,18 +46,16 @@ const ArrowRight = () => (
   </svg>
 );
 
-// [UPDATE] Tambahkan prop onSaveSuccess
 const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
   const [currentView, setCurrentView] = useState("front");
 
   const [cardData, setCardData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [idCardNumber, setIdCardNumber] = useState("");
-  // [BARU] State untuk loading saat saving
   const [isSaving, setIsSaving] = useState(false);
+  const [showSuccessNotify, setShowSuccessNotify] = useState(false);
 
   useEffect(() => {
-    // Pastikan studentData.id ada sebelum fetch
     if (isOpen && studentData?.id) {
       setLoading(true);
       getStudentLatestApplication(studentData.id, "registration")
@@ -65,7 +63,6 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
           if (res?.success && res?.data?.idCardInfo) {
             const info = res.data.idCardInfo;
             setCardData(info);
-            // Isi state input dengan data dari API jika ada
             setIdCardNumber(info.card_number || "");
           }
         })
@@ -112,7 +109,6 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
     setCurrentView((prev) => (prev === "front" ? "back" : "front"));
   };
 
-  // [BARU] Fungsi handle Export
   const handleExport = async () => {
     if (!studentData?.id) {
       alert("Student ID is missing.");
@@ -121,18 +117,15 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
 
     setIsSaving(true);
     try {
-      // 1. Simpan Card Number ke backend
       await saveStudentCardNumber(studentData.id, idCardNumber);
 
-      // 2. Trigger refresh di parent jika berhasil
       if (onSaveSuccess) {
         onSaveSuccess();
       }
-
-      // 3. (Opsional) Di sini logika download gambar/pdf ID Card bisa dijalankan
-      // Untuk sekarang kita anggap sukses dan tutup popup
-      alert("ID Card exported and number saved successfully!");
-      onClose();
+      setShowSuccessNotify(true);
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error("Failed to save card number", error);
       alert("Failed to save ID Card number.");
@@ -142,83 +135,93 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
   };
 
   return ReactDOM.createPortal(
-    <div className={styles.overlay}>
-      <div className={styles.idCardPopup}>
-        <div className={styles.headerTextGroup}>
-          <div className={styles.adjustStudentPhoto}>
-            {currentView === "front"
-              ? "Adjust student photo"
-              : "ID Card Back View"}
-          </div>
-          {currentView === "front" && (
-            <div className={styles.makeSureTo}>
-              *Make sure to keep the student image inside and in the middle of
-              the box
+    <>
+      <div className={styles.overlay}>
+        <div className={styles.idCardPopup}>
+          <div className={styles.headerTextGroup}>
+            <div className={styles.adjustStudentPhoto}>
+              {currentView === "front"
+                ? "Adjust student photo"
+                : "ID Card Back View"}
             </div>
-          )}
-        </div>
-        <div className={styles.previewContainer}>
-          <button className={styles.navButton} onClick={toggleView}>
-            <ArrowLeft />
-          </button>
-          <div className={styles.cardPreviewWrapper}>
-            <div className={styles.cardScaleContainer}>
-              {currentView === "front" ? (
-                <IdCardFront
-                  data={displayData}
-                  variant={variant}
-                  editable={true}
-                  scale={0.6}
-                />
-              ) : (
-                <IdCardBack data={displayData} variant={variant} />
-              )}
-            </div>
+            {currentView === "front" && (
+              <div className={styles.makeSureTo}>
+                *Make sure to keep the student image inside and in the middle of
+                the box
+              </div>
+            )}
           </div>
-          <button className={styles.navButton} onClick={toggleView}>
-            <ArrowRight />
-          </button>
-        </div>
+          <div className={styles.previewContainer}>
+            <button className={styles.navButton} onClick={toggleView}>
+              <ArrowLeft />
+            </button>
+            <div className={styles.cardPreviewWrapper}>
+              <div className={styles.cardScaleContainer}>
+                {currentView === "front" ? (
+                  <IdCardFront
+                    data={displayData}
+                    variant={variant}
+                    editable={true}
+                    scale={0.6}
+                  />
+                ) : (
+                  <IdCardBack data={displayData} variant={variant} />
+                )}
+              </div>
+            </div>
+            <button className={styles.navButton} onClick={toggleView}>
+              <ArrowRight />
+            </button>
+          </div>
 
-        <div className={styles.pageIndicator}>
-          <span
-            className={currentView === "front" ? styles.dotActive : styles.dot}
-          ></span>
-          <span
-            className={currentView === "back" ? styles.dotActive : styles.dot}
-          ></span>
-        </div>
+          <div className={styles.pageIndicator}>
+            <span
+              className={
+                currentView === "front" ? styles.dotActive : styles.dot
+              }
+            ></span>
+            <span
+              className={currentView === "back" ? styles.dotActive : styles.dot}
+            ></span>
+          </div>
 
-        <input
-          type="text"
-          className={styles.idCardNumberInput}
-          placeholder="ID Card number"
-          value={idCardNumber}
-          onChange={(e) => setIdCardNumber(e.target.value)}
-        />
+          <input
+            type="text"
+            className={styles.idCardNumberInput}
+            placeholder="ID Card number"
+            value={idCardNumber}
+            onChange={(e) => setIdCardNumber(e.target.value)}
+          />
 
-        <div className={styles.footer}>
-          <div className={styles.buttonGroup}>
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className={styles.cancelButton}
-              disabled={isSaving}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="solid"
-              className={styles.exportButton}
-              onClick={handleExport} // [UPDATE] Pasang handler
-              disabled={isSaving}
-            >
-              {isSaving ? "Exporting..." : "Export ID Card"}
-            </Button>
+          <div className={styles.footer}>
+            <div className={styles.buttonGroup}>
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className={styles.cancelButton}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                className={styles.exportButton}
+                onClick={handleExport}
+                disabled={isSaving}
+              >
+                {isSaving ? "Exporting..." : "Export ID Card"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>,
+
+      <UpdatedNotification
+        isOpen={showSuccessNotify}
+        onClose={() => setShowSuccessNotify(false)}
+        message="Export Successfully"
+      />
+    </>,
     document.body
   );
 };

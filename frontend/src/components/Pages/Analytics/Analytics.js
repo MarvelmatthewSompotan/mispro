@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -14,36 +14,36 @@ import {
   Cell,
   BarChart,
   Bar,
-} from 'recharts';
-import { FaUserFriends, FaSync } from 'react-icons/fa';
-import styles from './Analytics.module.css';
-import { getAnalytics } from '../../../services/api';
+} from "recharts";
+import { FaUserFriends, FaSync } from "react-icons/fa";
+import styles from "./Analytics.module.css";
+import { getAnalytics } from "../../../services/api";
 
 const formatNumber = (num) => {
-  if (num === undefined || num === null) return '0';
-  return new Intl.NumberFormat('id-ID').format(num);
+  if (num === undefined || num === null) return "0";
+  return new Intl.NumberFormat("id-ID").format(num);
 };
 
-const TrendTextRight = ({ growth, isPositive }) => {
+const TrendTextRight = ({ growth, isPositive, label = "from last year" }) => {
   const val = growth ? Number(growth) : 0;
   const positive = isPositive !== undefined ? isPositive : val >= 0;
 
   return (
     <div className={styles.trendRightContainer}>
-      <span>{positive ? 'Increased' : 'Decreased'}&nbsp;</span>
+      <span>{positive ? "Increased" : "Decreased"}&nbsp;</span>
       <span className={positive ? styles.trendPositive : styles.trendNegative}>
         {Math.abs(val).toFixed(1)}%
       </span>
-      <span>&nbsp;from last year</span>
+      <span>&nbsp;{label}</span>
     </div>
   );
 };
 
-const SimpleStatCard = ({ title, count, growth }) => (
+const SimpleStatCard = ({ title, count, growth, trendLabel }) => (
   <div className={styles.card}>
     <div className={styles.cardTopRow}>
       <div className={styles.cardTitle}>{title}</div>
-      <TrendTextRight growth={growth} />
+      <TrendTextRight growth={growth} label={trendLabel} />
     </div>
     <div className={styles.cardMainStat}>
       <div className={styles.statValue}>{formatNumber(count)}</div>
@@ -52,7 +52,7 @@ const SimpleStatCard = ({ title, count, growth }) => (
   </div>
 );
 
-const DetailedStatCard = ({ title, data }) => {
+const DetailedStatCard = ({ title, data, trendLabel }) => {
   if (!data) return null;
   const growthTotal =
     data.growth_total !== undefined ? data.growth_total : data.growth;
@@ -65,10 +65,10 @@ const DetailedStatCard = ({ title, data }) => {
 
   return (
     <div className={styles.card}>
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: "16px" }}>
         <div className={styles.cardTopRow}>
           <div className={styles.cardTitle}>{title}</div>
-          <TrendTextRight growth={growthTotal} />
+          <TrendTextRight growth={growthTotal} label={trendLabel} />
         </div>
 
         <div className={styles.cardMainStat}>
@@ -95,8 +95,8 @@ const DetailedStatCard = ({ title, data }) => {
               }
             >
               {Number(growthConfirmed).toFixed(1)}%
-            </span>{' '}
-            from last year
+            </span>{" "}
+            {trendLabel || "from last year"}
           </div>
         </div>
         <div className={styles.subStatBox}>
@@ -116,8 +116,8 @@ const DetailedStatCard = ({ title, data }) => {
               }
             >
               {Number(growthCancelled).toFixed(1)}%
-            </span>{' '}
-            from last year
+            </span>{" "}
+            {trendLabel || "from last year"}
           </div>
         </div>
       </div>
@@ -137,22 +137,22 @@ const OrangePieCard = ({ syData, titleLabel }) => {
 
   const data = [
     {
-      name: 'Returning Students',
+      name: "Returning Students",
       value: returningPct || 0,
       count: returningVal,
-      color: '#ffffff',
+      color: "#ffffff",
     },
     {
-      name: 'New Students',
+      name: "New Students",
       value: newPct || 0,
       count: newVal,
-      color: '#ffeb53',
+      color: "#ffeb53",
     },
     {
-      name: 'Transferred Students',
+      name: "Transferred Students",
       value: transferPct || 0,
       count: transferVal,
-      color: '#ffcf30',
+      color: "#ffcf30",
     },
   ];
 
@@ -167,7 +167,7 @@ const OrangePieCard = ({ syData, titleLabel }) => {
             <div className={styles.orangeValue}>
               {formatNumber(syData?.all?.total)}
             </div>
-            <FaUserFriends style={{ fontSize: '24px', marginBottom: '6px' }} />
+            <FaUserFriends style={{ fontSize: "24px", marginBottom: "6px" }} />
           </div>
         </div>
 
@@ -190,14 +190,14 @@ const OrangePieCard = ({ syData, titleLabel }) => {
       </div>
 
       <div className={styles.orangeChartWrapper}>
-        <ResponsiveContainer width='100%' height='100%'>
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               innerRadius={45}
               outerRadius={65}
-              dataKey='value'
-              stroke='none'
+              dataKey="value"
+              stroke="none"
               startAngle={90}
               endAngle={-270}
             >
@@ -215,7 +215,7 @@ const OrangePieCard = ({ syData, titleLabel }) => {
 const GrossStatCard = ({ globalData, trendData }) => {
   const chartData =
     trendData?.current_data?.map((val) => {
-      const safeVal = typeof val === 'object' && val !== null ? val.total : val;
+      const safeVal = typeof val === "object" && val !== null ? val.total : val;
       return { val: safeVal || 0 };
     }) || [];
 
@@ -231,19 +231,19 @@ const GrossStatCard = ({ globalData, trendData }) => {
         </div>
       </div>
       <div className={styles.grossChart}>
-        <ResponsiveContainer width='100%' height='100%'>
+        <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
-              <linearGradient id='grossGradient' x1='0' y1='0' x2='0' y2='1'>
-                <stop offset='5%' stopColor='#00f413' stopOpacity={0.8} />
-                <stop offset='95%' stopColor='#00f413' stopOpacity={0} />
+              <linearGradient id="grossGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#00f413" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#00f413" stopOpacity={0} />
               </linearGradient>
             </defs>
             <Area
-              type='monotone'
-              dataKey='val'
-              stroke='#00f413'
-              fill='url(#grossGradient)'
+              type="monotone"
+              dataKey="val"
+              stroke="#00f413"
+              fill="url(#grossGradient)"
               strokeWidth={2}
             />
           </AreaChart>
@@ -255,7 +255,7 @@ const GrossStatCard = ({ globalData, trendData }) => {
 
 const ActiveStudentsTable = ({ matrixData, syName }) => {
   if (!matrixData) return null;
-  const levels = ['High', 'Middle', 'Elementary', 'ECP'];
+  const levels = ["High", "Middle", "Elementary", "ECP"];
 
   return (
     <div className={styles.tableSectionContainer}>
@@ -274,13 +274,13 @@ const ActiveStudentsTable = ({ matrixData, syName }) => {
                 key={level}
                 className={`${styles.asCell} ${styles.asCellBody} ${styles.asBgGrey}`}
               >
-                {level === 'High'
-                  ? 'High School'
-                  : level === 'Middle'
-                  ? 'Middle School'
-                  : level === 'Elementary'
-                  ? 'Elementary School'
-                  : 'Early Childhood Program'}
+                {level === "High"
+                  ? "High School"
+                  : level === "Middle"
+                  ? "Middle School"
+                  : level === "Elementary"
+                  ? "Elementary School"
+                  : "Early Childhood Program"}
               </div>
             ))}
             <div className={`${styles.asCell} ${styles.asCellTotal}`}></div>
@@ -360,7 +360,7 @@ const RegistrationGrowthChart = ({ multiYearData }) => {
     let confirmedVal = 0;
     let cancelledVal = 0;
 
-    if (typeof rawData === 'object' && rawData !== null) {
+    if (typeof rawData === "object" && rawData !== null) {
       finalValue = rawData.total || 0;
       confirmedVal = rawData.confirmed || 0;
       cancelledVal = rawData.cancelled || 0;
@@ -382,22 +382,22 @@ const RegistrationGrowthChart = ({ multiYearData }) => {
       return (
         <div
           style={{
-            backgroundColor: '#fff',
-            padding: '10px',
-            border: '1px solid #ccc',
-            borderRadius: '5px',
-            fontSize: '12px',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+            backgroundColor: "#fff",
+            padding: "10px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+            fontSize: "12px",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
           }}
         >
-          <p style={{ fontWeight: 'bold', margin: '0 0 5px 0' }}>{label}</p>
+          <p style={{ fontWeight: "bold", margin: "0 0 5px 0" }}>{label}</p>
           <p style={{ margin: 0 }}>
             Total: <strong>{data.value}</strong>
           </p>
-          <p style={{ margin: 0, color: '#5F84FE' }}>
+          <p style={{ margin: 0, color: "#5F84FE" }}>
             confirmed: {data.confirmed}
           </p>
-          <p style={{ margin: 0, color: '#EE0808' }}>
+          <p style={{ margin: 0, color: "#EE0808" }}>
             cancelled: {data.cancelled}
           </p>
         </div>
@@ -413,17 +413,17 @@ const RegistrationGrowthChart = ({ multiYearData }) => {
         <div className={styles.growthSubtitle}>5 Year</div>
       </div>
       <div className={styles.chartContainer}>
-        <ResponsiveContainer width='100%' height='100%'>
+        <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
-              <linearGradient id='colorGrowth' x1='0' y1='0' x2='0' y2='1'>
-                <stop offset='5%' stopColor='#00f413' stopOpacity={0.3} />
-                <stop offset='95%' stopColor='#00f413' stopOpacity={0} />
+              <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#00f413" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#00f413" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray='3 3' vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
-              dataKey='year'
+              dataKey="year"
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fontWeight: 600 }}
@@ -432,11 +432,11 @@ const RegistrationGrowthChart = ({ multiYearData }) => {
             <YAxis axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltipGrowth />} />
             <Area
-              type='monotone'
-              dataKey='value'
-              stroke='var(--green)'
+              type="monotone"
+              dataKey="value"
+              stroke="var(--green)"
               fillOpacity={1}
-              fill='url(#colorGrowth)'
+              fill="url(#colorGrowth)"
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -448,27 +448,38 @@ const RegistrationGrowthChart = ({ multiYearData }) => {
 const RegistrationTrendChart = ({ trends }) => {
   if (!trends) return null;
 
+  // REVISI 2: Fungsi helper untuk memformat tahun (cth: "2024/2025" atau "2024-2025" -> "2025")
+  const formatTrendYear = (label) => {
+    if (!label) return "";
+    // Pisahkan string berdasarkan "/" ATAU "-" agar mencakup semua format (screenshot pakai "/")
+    const parts = label.split(/[\/-]/);
+    if (parts.length > 1) {
+      return parts[parts.length - 1].trim();
+    }
+    return label;
+  };
+
   const chartData = trends.labels.map((month, index) => {
     const currentRaw = trends.current_data[index];
     const previousRaw = trends.previous_data[index];
 
     const currentVal =
-      typeof currentRaw === 'object' && currentRaw !== null
+      typeof currentRaw === "object" && currentRaw !== null
         ? currentRaw.total || 0
         : currentRaw || 0;
     const currentConfirmed =
-      typeof currentRaw === 'object' ? currentRaw.confirmed || 0 : 0;
+      typeof currentRaw === "object" ? currentRaw.confirmed || 0 : 0;
     const currentCancelled =
-      typeof currentRaw === 'object' ? currentRaw.cancelled || 0 : 0;
+      typeof currentRaw === "object" ? currentRaw.cancelled || 0 : 0;
 
     const previousVal =
-      typeof previousRaw === 'object' && previousRaw !== null
+      typeof previousRaw === "object" && previousRaw !== null
         ? previousRaw.total || 0
         : previousRaw || 0;
     const previousConfirmed =
-      typeof previousRaw === 'object' ? previousRaw.confirmed || 0 : 0;
+      typeof previousRaw === "object" ? previousRaw.confirmed || 0 : 0;
     const previousCancelled =
-      typeof previousRaw === 'object' ? previousRaw.cancelled || 0 : 0;
+      typeof previousRaw === "object" ? previousRaw.cancelled || 0 : 0;
 
     return {
       month: month,
@@ -486,17 +497,17 @@ const RegistrationTrendChart = ({ trends }) => {
       return (
         <div
           style={{
-            backgroundColor: '#fff',
-            padding: '10px',
-            border: '1px solid #ccc',
-            borderRadius: '5px',
-            fontSize: '12px',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+            backgroundColor: "#fff",
+            padding: "10px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+            fontSize: "12px",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
           }}
         >
-          <p style={{ fontWeight: 'bold', margin: '0 0 8px 0' }}>{label}</p>
+          <p style={{ fontWeight: "bold", margin: "0 0 8px 0" }}>{label}</p>
           {payload.map((entry, index) => {
-            const isCurrent = entry.dataKey === 'current';
+            const isCurrent = entry.dataKey === "current";
             const confirmed = isCurrent
               ? entry.payload.current_confirmed
               : entry.payload.previous_confirmed;
@@ -505,7 +516,7 @@ const RegistrationTrendChart = ({ trends }) => {
               : entry.payload.previous_cancelled;
 
             return (
-              <div key={index} style={{ marginBottom: '10px' }}>
+              <div key={index} style={{ marginBottom: "10px" }}>
                 <p
                   style={{
                     margin: 0,
@@ -515,10 +526,10 @@ const RegistrationTrendChart = ({ trends }) => {
                 >
                   {entry.name}: {entry.value}
                 </p>
-                <p style={{ margin: 0, color: '#555' }}>
+                <p style={{ margin: 0, color: "#555" }}>
                   confirmed: {confirmed}
                 </p>
-                <p style={{ margin: 0, color: '#555' }}>
+                <p style={{ margin: 0, color: "#555" }}>
                   cancelled: {cancelled}
                 </p>
               </div>
@@ -538,25 +549,25 @@ const RegistrationTrendChart = ({ trends }) => {
           <div className={styles.legendItem}>
             <div
               className={styles.legendColorBox}
-              style={{ backgroundColor: '#EE0808' }}
+              style={{ backgroundColor: "#EE0808" }}
             ></div>
-            <span>{trends.current_label}</span>
+            <span>{formatTrendYear(trends.current_label)}</span>
           </div>
           <div className={styles.legendItem}>
             <div
               className={styles.legendColorBox}
-              style={{ backgroundColor: '#5F84FE' }}
+              style={{ backgroundColor: "#5F84FE" }}
             ></div>
-            <span>{trends.previous_label}</span>
+            <span>{formatTrendYear(trends.previous_label)}</span>
           </div>
         </div>
       </div>
       <div className={styles.chartContainer}>
-        <ResponsiveContainer width='100%' height='100%'>
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray='3 3' vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
-              dataKey='month'
+              dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fontWeight: 600 }}
@@ -565,20 +576,20 @@ const RegistrationTrendChart = ({ trends }) => {
             <YAxis axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltipTrend />} />
             <Line
-              type='monotone'
-              dataKey='current'
-              stroke='#EE0808'
+              type="monotone"
+              dataKey="current"
+              stroke="#EE0808"
               strokeWidth={3}
               dot={false}
-              name={trends.current_label}
+              name={formatTrendYear(trends.current_label)}
             />
             <Line
-              type='monotone'
-              dataKey='previous'
-              stroke='#5F84FE'
+              type="monotone"
+              dataKey="previous"
+              stroke="#5F84FE"
               strokeWidth={3}
               dot={false}
-              name={trends.previous_label}
+              name={formatTrendYear(trends.previous_label)}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -590,8 +601,8 @@ const RegistrationTrendChart = ({ trends }) => {
 const Analytics = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [regMode, setRegMode] = useState('pre_register');
-  const [servedLevel, setServedLevel] = useState('All');
+  const [regMode, setRegMode] = useState("pre_register");
+  const [servedLevel, setServedLevel] = useState("All");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -601,7 +612,7 @@ const Analytics = () => {
           setData(response.data);
         }
       } catch (error) {
-        console.error('Error fetching analytics:', error);
+        console.error("Error fetching analytics:", error);
       } finally {
         setLoading(false);
       }
@@ -611,34 +622,34 @@ const Analytics = () => {
   }, []);
   const handleRegModeClick = (e) => {
     e.preventDefault();
-    const modes = ['pre_register', 'daily', 'yearly'];
+    const modes = ["pre_register", "daily", "yearly"];
     const currentIndex = modes.indexOf(regMode);
     const nextIndex = (currentIndex + 1) % modes.length;
-    console.log('Tombol Reg diklik. Mode baru:', modes[nextIndex]);
+    console.log("Tombol Reg diklik. Mode baru:", modes[nextIndex]);
     setRegMode(modes[nextIndex]);
   };
 
   const handleServedLevelClick = (e) => {
     e.preventDefault();
-    const levels = ['All', 'ECP', 'Elementary', 'Middle', 'High'];
+    const levels = ["All", "ECP", "Elementary", "Middle", "High"];
     const currentIndex = levels.indexOf(servedLevel);
     const nextIndex = (currentIndex + 1) % levels.length;
-    console.log('Tombol Served diklik. Level baru:', levels[nextIndex]);
+    console.log("Tombol Served diklik. Level baru:", levels[nextIndex]);
     setServedLevel(levels[nextIndex]);
   };
 
   const getRegModeLabel = () => {
-    if (regMode === 'daily') return 'Daily';
-    if (regMode === 'yearly') return 'Yearly';
-    return 'Pre-Registered';
+    if (regMode === "daily") return "Daily";
+    if (regMode === "yearly") return "Yearly";
+    return "Pre-Registered";
   };
 
   const getServedLevelLabel = () => {
-    if (servedLevel === 'ECP') return 'ECP';
-    if (servedLevel === 'High') return 'High School';
-    if (servedLevel === 'Middle') return 'Middle School';
-    if (servedLevel === 'Elementary') return 'Elementary School';
-    return 'All Levels';
+    if (servedLevel === "ECP") return "ECP";
+    if (servedLevel === "High") return "High School";
+    if (servedLevel === "Middle") return "Middle School";
+    if (servedLevel === "Elementary") return "Elementary School";
+    return "All Levels";
   };
 
   if (loading) {
@@ -658,13 +669,15 @@ const Analytics = () => {
   }
 
   let currentRegData = {};
-  if (regMode === 'daily') {
+  if (regMode === "daily") {
     currentRegData = data.today || {};
-  } else if (regMode === 'yearly') {
+  } else if (regMode === "yearly") {
     currentRegData = data.school_year || {};
   } else {
     currentRegData = data.pre_register || {};
   }
+
+  const trendLabel = regMode === "daily" ? "from yesterday" : "from last year";
 
   let servedSummary = {
     total: 0,
@@ -675,7 +688,7 @@ const Analytics = () => {
     unknown: 0,
   };
 
-  if (servedLevel === 'All') {
+  if (servedLevel === "All") {
     servedSummary = data.enrollment_unique_students?.summary || servedSummary;
   } else {
     servedSummary =
@@ -692,25 +705,25 @@ const Analytics = () => {
   const global = data.global;
   const trendsData = data.trends || data.monthly_trends;
   const rawMatrix = data.active_students_matrix || {};
-  const hs = rawMatrix['High'] || {
+  const hs = rawMatrix["High"] || {
     total: 0,
     total_new: 0,
     total_returning: 0,
     total_transferee: 0,
   };
-  const ms = rawMatrix['Middle'] || {
+  const ms = rawMatrix["Middle"] || {
     total: 0,
     total_new: 0,
     total_returning: 0,
     total_transferee: 0,
   };
-  const es = rawMatrix['Elementary'] || {
+  const es = rawMatrix["Elementary"] || {
     total: 0,
     total_new: 0,
     total_returning: 0,
     total_transferee: 0,
   };
-  const ecp = rawMatrix['ECP'] || {
+  const ecp = rawMatrix["ECP"] || {
     total: 0,
     total_new: 0,
     total_returning: 0,
@@ -741,10 +754,10 @@ const Analytics = () => {
   };
 
   const activeStudentChartData = [
-    { name: 'HS', value: activeMatrix.High.total },
-    { name: 'MS', value: activeMatrix.Middle.total },
-    { name: 'ES', value: activeMatrix.Elementary.total },
-    { name: 'ECP', value: activeMatrix.ECP.total },
+    { name: "HS", value: activeMatrix.High.total },
+    { name: "MS", value: activeMatrix.Middle.total },
+    { name: "ES", value: activeMatrix.Elementary.total },
+    { name: "ECP", value: activeMatrix.ECP.total },
   ];
 
   return (
@@ -759,31 +772,34 @@ const Analytics = () => {
             className={styles.preRegisteredHeader}
             onClick={handleRegModeClick}
             style={{
-              cursor: 'pointer',
-              userSelect: 'none',
+              cursor: "pointer",
+              userSelect: "none",
               zIndex: 10,
-              position: 'relative',
-              display: 'inline-flex',
+              position: "relative",
+              display: "inline-flex",
             }}
-            title='Click to toggle view'
+            title="Click to toggle view"
           >
             {getRegModeLabel()}
-            <FaSync style={{ fontSize: '12px', marginLeft: '6px' }} />
+            <FaSync style={{ fontSize: "12px", marginLeft: "6px" }} />
           </div>
 
           <div className={styles.leftColumnCards}>
             <SimpleStatCard
-              title='Total Registration'
+              title="Total Registration"
               count={currentRegData.all?.total}
               growth={currentRegData.all?.growth_total}
+              trendLabel={trendLabel}
             />
             <DetailedStatCard
-              title='Total Registration (New)'
+              title="Total Registration (New)"
               data={currentRegData.new}
+              trendLabel={trendLabel}
             />
             <DetailedStatCard
-              title='Total Registration (Returning)'
+              title="Total Registration (Returning)"
               data={currentRegData.returning}
+              trendLabel={trendLabel}
             />
           </div>
         </div>
@@ -794,8 +810,9 @@ const Analytics = () => {
             titleLabel={getRegModeLabel()}
           />
           <DetailedStatCard
-            title='Total Registration (Transfer)'
+            title="Total Registration (Transfer)"
             data={currentRegData.transferee}
+            trendLabel={trendLabel}
           />
         </div>
       </div>
@@ -804,7 +821,7 @@ const Analytics = () => {
         <div className={`${styles.sectionCard} ${styles.activeStudentCard}`}>
           <div className={styles.sectionHeader}>
             <div className={styles.sectionTitle}>Active Students</div>
-            <div style={{ fontSize: '12px', color: 'var(--main-grey)' }}>
+            <div style={{ fontSize: "12px", color: "var(--main-grey)" }}>
               S.Y {data.meta.current_sy}
             </div>
           </div>
@@ -815,13 +832,13 @@ const Analytics = () => {
             <FaUserFriends className={styles.statIcon} />
           </div>
           <div className={styles.activeChartContainer}>
-            <ResponsiveContainer width='100%' height='100%'>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={activeStudentChartData}
                 margin={{ top: 20, right: 0, left: -25, bottom: 0 }}
               >
                 <XAxis
-                  dataKey='name'
+                  dataKey="name"
                   tick={{ fontSize: 12, fontWeight: 600 }}
                   axisLine={false}
                   tickLine={false}
@@ -830,15 +847,15 @@ const Analytics = () => {
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10, fill: '#7A7A7A' }}
+                  tick={{ fontSize: 10, fill: "#7A7A7A" }}
                 />
                 <Tooltip />
                 <Bar
-                  dataKey='value'
-                  fill='var(--green)'
+                  dataKey="value"
+                  fill="var(--green)"
                   radius={[20, 20, 20, 20]}
                   barSize={24}
-                  background={{ fill: '#f0f0f0', radius: [20, 20, 20, 20] }}
+                  background={{ fill: "#f0f0f0", radius: [20, 20, 20, 20] }}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -854,19 +871,19 @@ const Analytics = () => {
                 className={styles.trendContainer}
                 onClick={handleServedLevelClick}
                 style={{
-                  cursor: 'pointer',
-                  color: 'var(--main-accent)',
-                  userSelect: 'none',
+                  cursor: "pointer",
+                  color: "var(--main-accent)",
+                  userSelect: "none",
                   zIndex: 10,
-                  position: 'relative',
+                  position: "relative",
                 }}
               >
-                {getServedLevelLabel()} <FaSync style={{ fontSize: '10px' }} />
+                {getServedLevelLabel()} <FaSync style={{ fontSize: "10px" }} />
               </div>
             </div>
             <div
               className={styles.activeBigNumber}
-              style={{ marginBottom: '20px' }}
+              style={{ marginBottom: "20px" }}
             >
               <div className={styles.textGradientPurple}>
                 {formatNumber(servedTotal)}
@@ -881,14 +898,14 @@ const Analytics = () => {
                       data={getDonutData(servedSummary.graduate, servedTotal)}
                       innerRadius={60}
                       outerRadius={80}
-                      dataKey='value'
-                      stroke='none'
+                      dataKey="value"
+                      stroke="none"
                       startAngle={90}
                       endAngle={-270}
                       paddingAngle={5}
                     >
-                      <Cell fill='#00C49F' />
-                      <Cell fill='var(--main-background)' />
+                      <Cell fill="#00C49F" />
+                      <Cell fill="var(--main-background)" />
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
@@ -910,14 +927,14 @@ const Analytics = () => {
                       data={getDonutData(servedSummary.withdraw, servedTotal)}
                       innerRadius={60}
                       outerRadius={80}
-                      dataKey='value'
-                      stroke='none'
+                      dataKey="value"
+                      stroke="none"
                       startAngle={90}
                       endAngle={-270}
                       paddingAngle={5}
                     >
-                      <Cell fill='#ca66ff' />
-                      <Cell fill='var(--main-background)' />
+                      <Cell fill="#ca66ff" />
+                      <Cell fill="var(--main-background)" />
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
@@ -939,14 +956,14 @@ const Analytics = () => {
                       data={getDonutData(servedSummary.expelled, servedTotal)}
                       innerRadius={60}
                       outerRadius={80}
-                      dataKey='value'
-                      stroke='none'
+                      dataKey="value"
+                      stroke="none"
                       startAngle={90}
                       endAngle={-270}
                       paddingAngle={5}
                     >
-                      <Cell fill='#FF8042' />
-                      <Cell fill='var(--main-background)' />
+                      <Cell fill="#FF8042" />
+                      <Cell fill="var(--main-background)" />
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
