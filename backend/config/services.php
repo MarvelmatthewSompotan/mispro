@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // WhatsApp gateway (Fonnte)
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+        'url' => env('FONNTE_URL'),
+    ],
+
 ];

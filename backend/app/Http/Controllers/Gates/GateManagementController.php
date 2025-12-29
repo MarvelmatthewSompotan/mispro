@@ -12,6 +12,7 @@ use App\Models\Gate\GateScanLog;
 use App\Models\Gate\GateSession;
 use App\Models\SchoolYear;
 use App\Models\Student;
+use App\Jobs\SendGateParentNotificationJob;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -305,11 +306,15 @@ class GateManagementController extends Controller
             $query->orderBy($sortBy, $sortDir);
         }
 
+        $gatePoints = GatePoint::pluck('name', 'gate_point_id');
+
         $attendances = $query->paginate($request->get('per_page', 25));
 
-        $attendances->getCollection()->transform(function ($attendance) {
+        $attendances->getCollection()->transform(function ($attendance) use ($gatePoints) {
             // Gunakan student_code sebagai student_id untuk output (bukan FK internal)
             $attendance->student_id = $attendance->student_code ?? $attendance->student_id;
+            $attendance->entry_gate = $attendance->entry_gate_id ? ($gatePoints[$attendance->entry_gate_id] ?? $attendance->entry_gate_id) : null;
+            $attendance->exit_gate = $attendance->exit_gate_id ? ($gatePoints[$attendance->exit_gate_id] ?? $attendance->exit_gate_id) : null;
 
             // last_activity not needed here; focus on roster/status
             unset($attendance->last_scan_type, $attendance->last_scan_time, $attendance->student_code);
@@ -506,6 +511,17 @@ class GateManagementController extends Controller
             ], 404);
         }
 
+        $gatePoints = GatePoint::pluck('name', 'gate_point_id');
+        $studentCodes = Student::whereIn('id', $session->attendances->pluck('student_id'))
+            ->pluck('student_id', 'id');
+
+        $session->attendances->transform(function ($attendance) use ($gatePoints, $studentCodes) {
+            $attendance->student_id = $studentCodes[$attendance->student_id] ?? $attendance->student_id;
+            $attendance->entry_gate = $attendance->entry_gate_id ? ($gatePoints[$attendance->entry_gate_id] ?? $attendance->entry_gate_id) : null;
+            $attendance->exit_gate = $attendance->exit_gate_id ? ($gatePoints[$attendance->exit_gate_id] ?? $attendance->exit_gate_id) : null;
+            return $attendance;
+        });
+
         return response()->json([
             'data' => $session,
         ]);
@@ -545,7 +561,14 @@ class GateManagementController extends Controller
 
         $this->ensureSessionRoster($session);
 
-        $query = GateAttendance::where('gate_session_id', $session->gate_session_id);
+        $gatePoints = GatePoint::pluck('name', 'gate_point_id');
+
+        $query = GateAttendance::where('gate_session_id', $session->gate_session_id)
+            ->leftJoin('students', 'students.id', '=', 'gate_attendance_records.student_id')
+            ->select(
+                'gate_attendance_records.*',
+                'students.student_id as student_code'
+            );
 
         if ($request->filled('student_id')) {
             $query->where('student_id', $request->student_id);
@@ -606,6 +629,14 @@ class GateManagementController extends Controller
 
         $attendances = $query->paginate($request->get('per_page', 25));
 
+        $attendances->getCollection()->transform(function ($attendance) use ($gatePoints) {
+            $attendance->student_id = $attendance->student_code ?? $attendance->student_id;
+            $attendance->entry_gate = $attendance->entry_gate_id ? ($gatePoints[$attendance->entry_gate_id] ?? $attendance->entry_gate_id) : null;
+            $attendance->exit_gate = $attendance->exit_gate_id ? ($gatePoints[$attendance->exit_gate_id] ?? $attendance->exit_gate_id) : null;
+            unset($attendance->student_code);
+            return $attendance;
+        });
+
         return response()->json($attendances);
     }
 
@@ -613,14 +644,21 @@ class GateManagementController extends Controller
     {
         $session = GateSession::findOrFail($sessionId);
 
-        $attendances = GateAttendance::where('gate_session_id', $session->gate_session_id)
+        $gatePoints = GatePoint::pluck('name', 'gate_point_id');
+
+        $rawAttendances = GateAttendance::where('gate_session_id', $session->gate_session_id)
             ->orderBy('student_name')
-            ->get()
+            ->get();
+
+        $studentCodes = Student::whereIn('id', $rawAttendances->pluck('student_id'))
+            ->pluck('student_id', 'id');
+
+        $attendances = $rawAttendances
             ->values()
-            ->map(function ($attendance, $index) {
+            ->map(function ($attendance, $index) use ($gatePoints, $studentCodes) {
                 return [
                     'no' => $index + 1,
-                    'student_id' => $attendance->student_id,
+                    'student_id' => $studentCodes[$attendance->student_id] ?? $attendance->student_id,
                     'student_name' => $attendance->student_name,
                     'grade' => $attendance->student_grade,
                     'section' => $attendance->student_section,
@@ -628,6 +666,8 @@ class GateManagementController extends Controller
                     'check_out' => optional($attendance->check_out_at)->format('H:i'),
                     'entry_status' => $attendance->entry_status,
                     'exit_status' => $attendance->exit_status,
+                    'entry_gate' => $attendance->entry_gate_id ? ($gatePoints[$attendance->entry_gate_id] ?? $attendance->entry_gate_id) : null,
+                    'exit_gate' => $attendance->exit_gate_id ? ($gatePoints[$attendance->exit_gate_id] ?? $attendance->exit_gate_id) : null,
                 ];
             });
 
@@ -795,12 +835,32 @@ class GateManagementController extends Controller
 
             if (!empty($parentContacts)) {
                 $parentContacts = array_values(array_unique(array_filter($parentContacts)));
-                $messageBody = ($mode === 'check_in'
-                    ? "{$attendance->student_name} checked in at {$attendance->check_in_at?->format('H:i')}"
-                    : "{$attendance->student_name} checked out at {$attendance->check_out_at?->format('H:i')}");
+                if ($mode === 'check_in') {
+                    $messageBody = "*Manado Independent School – Official Student Arrival Notice* \n\n"
+                        ."*Dear Parent,*\n"
+                        ."This message serves as an official notification that *{$attendance->student_name}* has successfully checked in at the school premises.\n\n"
+                        ."*Details:*\n"
+                        ."*Student Name: {$attendance->student_name}*\n"
+                        ."*Section: {$attendance->student_section}*\n"
+                        ."*Class: {$attendance->student_grade}*\n"
+                        ."*Date: {$attendance->check_in_at?->format('d M Y')}*\n"
+                        ."*Time of Arrival: {$attendance->check_in_at?->format('H:i')}*\n\n"
+                        ."*We appreciate your continued cooperation.*";
+                } else {
+                    $messageBody = "*Manado Independent School – Official Student Departure Notice*\n\n"
+                        ."*Dear Parent,*\n"
+                        ."This message is to formally inform you that *{$attendance->student_name}* has checked out and has departed from the school premises.\n\n"
+                        ."*Details:*\n"
+                        ."*Student Name: {$attendance->student_name}*\n"
+                        ."*Section: {$attendance->student_section}*\n"
+                        ."*Class: {$attendance->student_grade}*\n"
+                        ."*Date: {$attendance->check_out_at?->format('d M Y')}*\n"
+                        ."*Time of Departure: {$attendance->check_out_at?->format('H:i')}*\n\n"
+                        ."*Thank you for your trust and support.*";
+                }
 
                 foreach ($parentContacts as $recipient) {
-                    GateParentNotification::create([
+                    $notification = GateParentNotification::create([
                         'gate_attendance_id' => $attendance->gate_attendance_id,
                         'recipient_contact' => $recipient,
                         'message_type' => $mode === 'check_in' ? 'Check In' : 'Check Out',
@@ -809,6 +869,8 @@ class GateManagementController extends Controller
                         'sent_at' => null,
                         'provider_response' => null,
                     ]);
+
+                    SendGateParentNotificationJob::dispatch($notification->notification_id);
                 }
             }
 
