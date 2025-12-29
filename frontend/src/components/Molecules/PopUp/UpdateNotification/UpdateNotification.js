@@ -5,12 +5,9 @@ import styles from "./UpdateNotification.module.css";
 const UpdatedNotification = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
-      // Set timer untuk menutup notifikasi setelah 2 detik
       const timer = setTimeout(() => {
         onClose();
       }, 2000);
-
-      // Membersihkan timer jika komponen di-unmount sebelum waktunya habis
       return () => clearTimeout(timer);
     }
   }, [isOpen, onClose]);
@@ -22,7 +19,6 @@ const UpdatedNotification = ({ isOpen, onClose }) => {
   return ReactDOM.createPortal(
     <div className={styles.popupOverlay}>
       <div className={styles.notificationContent}>
-        {/* Ikon centang menggunakan SVG */}
         <svg className={styles.checkmarkIcon} viewBox="0 0 52 52">
           <circle
             className={styles.checkmarkCircle}
