@@ -448,17 +448,6 @@ const RegistrationGrowthChart = ({ multiYearData }) => {
 const RegistrationTrendChart = ({ trends }) => {
   if (!trends) return null;
 
-  // REVISI 2: Fungsi helper untuk memformat tahun (cth: "2024/2025" atau "2024-2025" -> "2025")
-  const formatTrendYear = (label) => {
-    if (!label) return "";
-    // Pisahkan string berdasarkan "/" ATAU "-" agar mencakup semua format (screenshot pakai "/")
-    const parts = label.split(/[\/-]/);
-    if (parts.length > 1) {
-      return parts[parts.length - 1].trim();
-    }
-    return label;
-  };
-
   const chartData = trends.labels.map((month, index) => {
     const currentRaw = trends.current_data[index];
     const previousRaw = trends.previous_data[index];
@@ -551,14 +540,14 @@ const RegistrationTrendChart = ({ trends }) => {
               className={styles.legendColorBox}
               style={{ backgroundColor: "#EE0808" }}
             ></div>
-            <span>{formatTrendYear(trends.current_label)}</span>
+            <span>{trends.current_label}</span>
           </div>
           <div className={styles.legendItem}>
             <div
               className={styles.legendColorBox}
               style={{ backgroundColor: "#5F84FE" }}
             ></div>
-            <span>{formatTrendYear(trends.previous_label)}</span>
+            <span>{trends.previous_label}</span>
           </div>
         </div>
       </div>
@@ -581,7 +570,7 @@ const RegistrationTrendChart = ({ trends }) => {
               stroke="#EE0808"
               strokeWidth={3}
               dot={false}
-              name={formatTrendYear(trends.current_label)}
+              name={trends.current_label}
             />
             <Line
               type="monotone"
@@ -589,7 +578,7 @@ const RegistrationTrendChart = ({ trends }) => {
               stroke="#5F84FE"
               strokeWidth={3}
               dot={false}
-              name={formatTrendYear(trends.previous_label)}
+              name={trends.previous_label}
             />
           </LineChart>
         </ResponsiveContainer>

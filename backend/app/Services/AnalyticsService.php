@@ -402,31 +402,24 @@ class AnalyticsService
         return $trendData;
     }
 
-    public function getMonthlyTrend($startYear)
+    public function getMonthlyTrend($year)
     {
         $trendLabels = [];
         $currTrendData = [];
         $prevTrendData = [];
 
         for ($i = 0; $i < 12; $i++) {
-            $monthNum = 7 + $i;
-            $yearOffset = 0;
-            if ($monthNum > 12) {
-                $monthNum -= 12;
-                $yearOffset = 1;
-            }
+            $monthNum = $i;
             
             $monthName = Carbon::create()->month($monthNum)->format('M');
             $trendLabels[] = $monthName;
 
             // Current SY Date Range
-            $currYearMonth = ($startYear + $yearOffset);
-            $currStart = Carbon::create($currYearMonth, $monthNum, 1)->startOfDay();
+            $currStart = Carbon::create($year, $monthNum, 1)->startOfDay();
             $currEnd = $currStart->copy()->endOfMonth()->endOfDay();
 
             // Previous SY Date Range
-            $prevYearMonth = ($startYear - 1 + $yearOffset);
-            $prevStart = Carbon::create($prevYearMonth, $monthNum, 1)->startOfDay();
+            $prevStart = Carbon::create($year - 1, $monthNum, 1)->startOfDay();
             $prevEnd = $prevStart->copy()->endOfMonth()->endOfDay();
 
             // Get Stats

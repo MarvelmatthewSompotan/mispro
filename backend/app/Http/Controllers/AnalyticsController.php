@@ -34,7 +34,7 @@ class AnalyticsController extends Controller
             $cacheKey = 'analytics_full_' . $dateKey;
             $cacheTime = now()->addHours(24);
 
-            $data = Cache::remember($cacheKey, $cacheTime, function () use ($now, $dateKey, $currentSyName, $prevSyName, $nextSyName, $startYear) { 
+            $data = Cache::remember($cacheKey, $cacheTime, function () use ($now, $dateKey, $currentSyName, $prevSyName, $nextSyName, $startYear, $currentYearInt) { 
                 // Get IDs for School Years
                 $syMap = SchoolYear::whereIn('year', [$currentSyName, $prevSyName, $nextSyName])->pluck('school_year_id', 'year');
                 $currSyId = $syMap[$currentSyName] ?? null;
@@ -60,7 +60,7 @@ class AnalyticsController extends Controller
                 $activeStudents = $this->analyticsService->getActiveStudentsBySection($currSyId, true);
 
                 // 7. TRENDS 
-                $monthlyTrend = $this->analyticsService->getMonthlyTrend($startYear);
+                $monthlyTrend = $this->analyticsService->getMonthlyTrend($currentYearInt);
                 $multiYearTrend = $this->analyticsService->getMultiYearTrend($startYear);
 
                 // 8. Enrollment Unique Served
@@ -89,8 +89,8 @@ class AnalyticsController extends Controller
                         'labels' => $monthlyTrend['labels'],
                         'current_data' => $monthlyTrend['current_data'],
                         'previous_data' => $monthlyTrend['previous_data'],
-                        'current_label' => $currentSyName,
-                        'previous_label' => $prevSyName
+                        'current_label' => (string) $currentYearInt,
+                        'previous_label' => (string) ($currentYearInt - 1)
                     ],
                     'multi_year_trend' => $multiYearTrend,
                     'enrollment_unique_students' => $enrollmentFinal,

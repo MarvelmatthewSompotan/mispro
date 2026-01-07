@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './FacilitiesContent.module.css';
-import RadioButton from '../../../Atoms/Radiobutton/RadioButton';
+import RadioButton from '../../../Atoms/RadioButton/RadioButton';
 import Checkbox from '../../../Atoms/Checkbox/Checkbox';
 
 function FacilitiesContent({ data, pickupPointOptions }) {
@@ -24,7 +24,7 @@ function FacilitiesContent({ data, pickupPointOptions }) {
     }
     return data?.pickup_point_custom ?? '-';
   };
-// eslint-disable-next-line
+  // eslint-disable-next-line
   const getTransportationName = () => {
     if (data?.transportation_id) {
       const idToMatch = parseInt(data.transportation_id, 10);
@@ -33,7 +33,7 @@ function FacilitiesContent({ data, pickupPointOptions }) {
     }
     return '-';
   };
-// eslint-disable-next-line
+  // eslint-disable-next-line
   const getResidenceName = () => {
     if (data?.residence_id) {
       const idToMatch = parseInt(data.residence_id, 10);
@@ -53,7 +53,7 @@ function FacilitiesContent({ data, pickupPointOptions }) {
         {localTransportations.map((transport) => (
           <div key={transport.id} className={styles.ownCar}>
             <RadioButton
-              name="transportation"
+              name='transportation'
               value={transport.id}
               checked={String(data?.transportation_id) === String(transport.id)}
               onChange={() => {}}
@@ -74,7 +74,7 @@ function FacilitiesContent({ data, pickupPointOptions }) {
           <Checkbox
             checked={data?.transportation_policy === 'Signed'}
             onChange={() => {}}
-            name="transportation_policy"
+            name='transportation_policy'
             readOnly={true}
           />
           <div className={styles.checkBoxPolicy}>Transportation policy</div>
@@ -89,7 +89,7 @@ function FacilitiesContent({ data, pickupPointOptions }) {
         {localResidences.map((residence) => (
           <div key={residence.id} className={styles.ownCar}>
             <RadioButton
-              name="residence"
+              name='residence'
               value={residence.id}
               checked={String(data?.residence_id) === String(residence.id)}
               onChange={() => {}}
@@ -103,7 +103,7 @@ function FacilitiesContent({ data, pickupPointOptions }) {
           <Checkbox
             checked={data?.residence_hall_policy === 'Signed'}
             onChange={() => {}}
-            name="residence_hall_policy"
+            name='residence_hall_policy'
             readOnly={true}
           />
           <div className={styles.checkBoxPolicy}>Residence Hall policy</div>
@@ -114,4 +114,3 @@ function FacilitiesContent({ data, pickupPointOptions }) {
 }
 
 export default FacilitiesContent;
-

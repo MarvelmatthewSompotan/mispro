@@ -1,9 +1,9 @@
-import React from "react";
-import styles from "./OtherDetailContent.module.css";
-import RadioButton from "../../../Atoms/Radiobutton/RadioButton";
+import React from 'react';
+import styles from './OtherDetailContent.module.css';
+import RadioButton from '../../../Atoms/RadioButton/RadioButton';
 
 function OtherDetail_Content({ data }) {
-  const status = data?.student_requirement_status || "";
+  const status = data?.student_requirement_status || '';
 
   return (
     <div className={styles.otherDetail}>
@@ -21,9 +21,9 @@ function OtherDetail_Content({ data }) {
           <div className={styles.status}>
             <div className={styles.choice}>
               <RadioButton
-                name="requirement_status_print"
-                value="complete"
-                checked={status === "complete"}
+                name='requirement_status_print'
+                value='complete'
+                checked={status === 'complete'}
                 onChange={() => {}} // Handler kosong karena read-only
                 readOnly={true}
               />
@@ -31,9 +31,9 @@ function OtherDetail_Content({ data }) {
             </div>
             <div className={styles.choice}>
               <RadioButton
-                name="requirement_status_print"
-                value="incomplete"
-                checked={status === "incomplete"}
+                name='requirement_status_print'
+                value='incomplete'
+                checked={status === 'incomplete'}
                 onChange={() => {}} // Handler kosong karena read-only
                 readOnly={true}
               />

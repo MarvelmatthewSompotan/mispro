@@ -1,10 +1,10 @@
-import React from "react";
-import styles from "./TermOfPaymentContent.module.css";
-import RadioButton from "../../../Atoms/Radiobutton/RadioButton";
-import Checkbox from "../../../Atoms/Checkbox/Checkbox";
+import React from 'react';
+import styles from './TermOfPaymentContent.module.css';
+import RadioButton from '../../../Atoms/RadioButton/RadioButton';
+import Checkbox from '../../../Atoms/Checkbox/Checkbox';
 
 function TermOfPaymentContent({ data, isDormitory }) {
-  const option = ["Full Payment", "Installment"];
+  const option = ['Full Payment', 'Installment'];
 
   return (
     // DIV INI DIUBAH DARI styles.content MENJADI styles.contentParent
@@ -20,7 +20,7 @@ function TermOfPaymentContent({ data, isDormitory }) {
             {option.map((opt, index) => (
               <div key={index} className={styles.full}>
                 <RadioButton
-                  name="tuition_fees"
+                  name='tuition_fees'
                   value={opt}
                   checked={data?.tuition_fees === opt}
                   onChange={() => {}}
@@ -42,7 +42,7 @@ function TermOfPaymentContent({ data, isDormitory }) {
               {option.map((opt, index) => (
                 <div key={index} className={styles.full}>
                   <RadioButton
-                    name="residence_payment"
+                    name='residence_payment'
                     value={opt}
                     checked={data?.residence_payment === opt}
                     onChange={() => {}}
@@ -62,7 +62,7 @@ function TermOfPaymentContent({ data, isDormitory }) {
           </div>
           <div className={styles.discountText}>
             <span className={styles.discountName}>
-              {data?.discount_name || "No discount"}
+              {data?.discount_name || 'No discount'}
             </span>
             {data?.discount_notes && (
               <span className={styles.discountNotes}>
@@ -80,9 +80,9 @@ function TermOfPaymentContent({ data, isDormitory }) {
           <div className={styles.financialPolicyContent}>
             <div className={styles.financialPolicyCheckbox}>
               <Checkbox
-                checked={data?.financial_policy_contract === "Signed"}
+                checked={data?.financial_policy_contract === 'Signed'}
                 onChange={() => {}}
-                name="financial_policy_contract"
+                name='financial_policy_contract'
                 readOnly={true}
               />
             </div>
@@ -96,25 +96,25 @@ function TermOfPaymentContent({ data, isDormitory }) {
         {/* VA Mandiri */}
         <div className={styles.vaItem}>
           <div className={styles.vaLabel}>Virtual Account Mandiri</div>
-          <div className={styles.vaNumber}>{data?.va_mandiri || "-"}</div>
+          <div className={styles.vaNumber}>{data?.va_mandiri || '-'}</div>
         </div>
 
         {/* VA BNI */}
         <div className={styles.vaItem}>
           <div className={styles.vaLabel}>Virtual Account BNI</div>
-          <div className={styles.vaNumber}>{data?.va_bni || "-"}</div>
+          <div className={styles.vaNumber}>{data?.va_bni || '-'}</div>
         </div>
 
         {/* VA BCA */}
         <div className={styles.vaItem}>
           <div className={styles.vaLabel}>Virtual Account BCA</div>
-          <div className={styles.vaNumber}>{data?.va_bca || "-"}</div>
+          <div className={styles.vaNumber}>{data?.va_bca || '-'}</div>
         </div>
 
         {/* VA BRI */}
         <div className={styles.vaItem}>
           <div className={styles.vaLabel}>Virtual Account BRI</div>
-          <div className={styles.vaNumber}>{data?.va_bri || "-"}</div>
+          <div className={styles.vaNumber}>{data?.va_bri || '-'}</div>
         </div>
       </div>
     </div>
