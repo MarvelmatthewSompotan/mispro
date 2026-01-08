@@ -1,16 +1,17 @@
-import React, { useState } from "react";
-import styles from "./IdCardFront.module.css";
-import Logo from "../../Atoms/Logo/Logo";
-import headerBg from "../../../assets/headerBg.png";
-import userPlaceholder from "../../../assets/user.svg";
-import qrPlaceholder from "../../../assets/qr.svg";
-import waveRed from "../../../assets/waveRed.png";
-import waveBlue from "../../../assets/waveBlue.png";
-import waveYellow from "../../../assets/WaveYellow.png";
+import React, { useState, useEffect } from 'react';
+import styles from './IdCardFront.module.css';
+import Logo from '../../Atoms/Logo/Logo';
+import headerBg from '../../../assets/headerBg.png';
+import userPlaceholder from '../../../assets/user.svg';
+import qrPlaceholder from '../../../assets/qr.svg';
+import waveRed from '../../../assets/waveRed.png';
+import waveBlue from '../../../assets/waveBlue.png';
+import waveYellow from '../../../assets/WaveYellow.png';
+import { fetchAuthenticatedImage } from '../../../services/api';
 
 const IdCardFront = ({
   data,
-  variant = "ecp",
+  variant = 'ecp',
   editable = false,
   scale = 1,
   position = { x: 0, y: 0 },
@@ -28,6 +29,36 @@ const IdCardFront = ({
 
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [cardImageSrc, setCardImageSrc] = useState(userPlaceholder);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCardImage = async () => {
+      if (!photo_url) {
+        setCardImageSrc(userPlaceholder);
+        return;
+      }
+
+      // Jika URL sudah berupa blob (dari StudentProfileHeader) atau base64
+      if (photo_url.startsWith('blob:') || photo_url.startsWith('data:')) {
+        setCardImageSrc(photo_url);
+        return;
+      }
+
+      // Jika masih URL API, fetch dengan token
+      const blobUrl = await fetchAuthenticatedImage(photo_url);
+      if (isMounted) {
+        setCardImageSrc(blobUrl || userPlaceholder);
+      }
+    };
+
+    loadCardImage();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [photo_url]);
 
   const handleMouseDown = (e) => {
     if (!editable) return;
@@ -65,26 +96,26 @@ const IdCardFront = ({
   const config = {
     ecp: {
       wave: waveRed,
-      logoVariant: "blue",
+      logoVariant: 'blue',
       styleClass: styles.variantEcp,
     },
     ms: {
       wave: waveBlue,
-      logoVariant: "blue",
+      logoVariant: 'blue',
       styleClass: styles.variantMs,
     },
     hs: {
       wave: waveYellow,
-      logoVariant: "blue",
+      logoVariant: 'blue',
       styleClass: styles.variantHs,
     },
   };
 
   const currentConfig = config[variant] || config.ecp;
-  const hasLastName = last_name && last_name.trim() !== "" && last_name !== "-";
+  const hasLastName = last_name && last_name.trim() !== '' && last_name !== '-';
 
   // DETEKSI APAKAH URL ADALAH BASE64
-  const isBase64 = photo_url && photo_url.startsWith("data:");
+  const isBase64 = photo_url && photo_url.startsWith('data:');
 
   return (
     <div
@@ -93,22 +124,22 @@ const IdCardFront = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      <img className={styles.headerBg} alt="" src={headerBg} />
+      <img className={styles.headerBg} alt='' src={headerBg} />
 
       <div
         className={styles.photoContainer}
         style={{
-          border: editable ? "1px solid var(--main-grey)" : "none",
+          border: editable ? '1px solid var(--main-grey)' : 'none',
         }}
       >
         <img
           className={editable ? styles.photoDraggable : styles.photoStatic}
-          alt="Student"
-          src={photo_url}
+          alt='Student'
+          src={cardImageSrc}
           draggable={false}
-          crossOrigin={
-            isBase64 ? undefined : isExport ? "anonymous" : undefined
-          }
+          // crossOrigin={
+          //   isBase64 ? undefined : isExport ? "anonymous" : undefined
+          // }
           onError={(e) => {
             e.target.src = userPlaceholder;
           }}
@@ -120,7 +151,7 @@ const IdCardFront = ({
       </div>
 
       <div className={styles.bottomWrapper}>
-        <img className={styles.waveBg} alt="" src={currentConfig.wave} />
+        <img className={styles.waveBg} alt='' src={currentConfig.wave} />
         <div className={styles.contentOverlay}>
           <div className={styles.infoGroup}>
             <div className={styles.nameGroup}>
@@ -129,7 +160,7 @@ const IdCardFront = ({
                   <div className={styles.lastName}>{last_name},</div>
                   <div
                     className={styles.firstName}
-                    style={{ whiteSpace: "normal", wordWrap: "break-word" }}
+                    style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}
                   >
                     {first_name} {middle_name}
                   </div>
@@ -139,9 +170,9 @@ const IdCardFront = ({
                   <div
                     className={styles.lastName}
                     style={{
-                      whiteSpace: "normal",
-                      wordWrap: "break-word",
-                      lineHeight: "1.1",
+                      whiteSpace: 'normal',
+                      wordWrap: 'break-word',
+                      lineHeight: '1.1',
                     }}
                   >
                     {first_name}
@@ -162,7 +193,7 @@ const IdCardFront = ({
                 className={styles.logoMis}
               />
             </div>
-            <img className={styles.qrCode} alt="QR" src={qrPlaceholder} />
+            <img className={styles.qrCode} alt='QR' src={qrPlaceholder} />
           </div>
         </div>
       </div>

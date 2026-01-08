@@ -17,6 +17,7 @@ use App\Services\AuditTrailService;
 use App\Events\StudentStatusUpdated;
 use App\Models\ApplicationFormVersion;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\URL;
 
 class StudentController extends Controller
 {
@@ -527,6 +528,26 @@ class StudentController extends Controller
         // Extract request_data from snapshot
         $requestData = $dataSnapshot['request_data'] ?? [];
         
+        $rawPhotoPath = $requestData['photo_url'] ?? null;
+        $processedPhotoUrl = '';
+
+        if ($rawPhotoPath) {
+            $pathOnly = parse_url($rawPhotoPath, PHP_URL_PATH);
+            
+            if (!$pathOnly) {
+                $pathOnly = $rawPhotoPath;
+            }
+
+            // 2. Bersihkan slash di depan
+            $pathOnly = ltrim($pathOnly, '/');
+
+            // 3. Hapus prefix "storage/"
+            $cleanPath = preg_replace('/^storage\//', '', $pathOnly);
+
+            // 4. Generate URL Proxy yang bersih
+            $processedPhotoUrl = URL::to("api/storage-file/{$cleanPath}");
+        }
+
         // For ID CARD
         $schoolYearRaw = $requestData['school_year'] ?? null;
         $validUntil = null;
@@ -557,7 +578,7 @@ class StudentController extends Controller
             'section_name'   => $realSectionName, 
             'school_year'    => $schoolYearRaw,
             'valid_until'    => $validUntil, 
-            'photo_url'      => $requestData['photo_url'] ?? '',
+            'photo_url'      => $processedPhotoUrl,
             'card_number'    => $student->card_number ?? null, 
         ];
         
@@ -594,7 +615,7 @@ class StudentController extends Controller
                 'city_regency' => $requestData['city_regency'] ?? '',
                 'province' => $requestData['province'] ?? '',
                 'other' => $requestData['other'] ?? '',
-                'photo_url' => $requestData['photo_url'] ?? '',
+                'photo_url' => $processedPhotoUrl,
                 'student_active' => $latestVersion->applicationForm?->enrollment?->student?->active ?? '',
                 'status' => $latestVersion->applicationForm?->enrollment?->student?->status ?? '',
             ],

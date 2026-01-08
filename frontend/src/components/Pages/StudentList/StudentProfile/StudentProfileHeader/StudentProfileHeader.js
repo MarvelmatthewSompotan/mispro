@@ -1,19 +1,20 @@
 // File: src/components/pages/studentProfileHeader/studentProfileHeader.js
 
-import React, { useState } from "react";
-import styles from "./StudentProfileHeader.module.css";
-import Button from "../../../../Atoms/Button/Button";
-import placeholder from "../../../../../assets/user.svg";
-import IdCardPopup from "../../../../Molecules/PopUp/IdCardPopup/IdCardPopup";
+import React, { useState, useEffect } from 'react';
+import styles from './StudentProfileHeader.module.css';
+import Button from '../../../../Atoms/Button/Button';
+import placeholder from '../../../../../assets/user.svg';
+import IdCardPopup from '../../../../Molecules/PopUp/IdCardPopup/IdCardPopup';
+import { fetchAuthenticatedImage } from '../../../../../services/api';
 
 const getStatusVariant = (status) => {
-  if (!status) return "not-graduated";
+  if (!status) return 'not-graduated';
   const lowerStatus = status.toLowerCase();
-  if (lowerStatus.includes("not graduate")) return "not-graduated";
-  if (lowerStatus.includes("graduate")) return "graduated";
-  if (lowerStatus.includes("expelled")) return "expelled";
-  if (lowerStatus.includes("withdraw")) return "withdraw";
-  return "not-graduated"; // Default variant
+  if (lowerStatus.includes('not graduate')) return 'not-graduated';
+  if (lowerStatus.includes('graduate')) return 'graduated';
+  if (lowerStatus.includes('expelled')) return 'expelled';
+  if (lowerStatus.includes('withdraw')) return 'withdraw';
+  return 'not-graduated'; // Default variant
 };
 
 const StudentProfileHeader = ({
@@ -43,14 +44,49 @@ const StudentProfileHeader = ({
 }) => {
   const [isIdCardPopupOpen, setIdCardPopupOpen] = useState(false);
   const [isStatusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const [displayPhotoUrl, setDisplayPhotoUrl] = useState(placeholder);
 
   const hasPreview = !!photoPreview;
   const hasFormDataUrl = !!(formData && formData.photo_url);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadPhoto = async () => {
+      // 1. Prioritas: Photo Preview (saat user baru upload tapi belum save)
+      if (photoPreview) {
+        setDisplayPhotoUrl(photoPreview);
+        return;
+      }
+
+      // 2. Jika ada photo_url dari API (format: http://api.../storage-file/...)
+      const apiPhotoUrl = formData?.photo_url;
+
+      if (apiPhotoUrl) {
+        // Fetch gambar sebagai blob dengan token
+        const blobUrl = await fetchAuthenticatedImage(apiPhotoUrl);
+        if (isMounted && blobUrl) {
+          setDisplayPhotoUrl(blobUrl);
+        } else if (isMounted) {
+          setDisplayPhotoUrl(placeholder);
+        }
+      } else {
+        if (isMounted) setDisplayPhotoUrl(placeholder);
+      }
+    };
+
+    loadPhoto();
+
+    // Cleanup blob URL untuk menghindari memory leak
+    return () => {
+      isMounted = false;
+    };
+  }, [photoPreview, formData?.photo_url]);
+
   const imageUrl =
     photoPreview || (formData && formData.photo_url) || placeholder;
   const imageClass =
-    hasPreview || hasFormDataUrl
+    displayPhotoUrl !== placeholder
       ? styles.profileImage
       : styles.profilePlaceholder;
 
@@ -62,36 +98,40 @@ const StudentProfileHeader = ({
     middleName: studentInfo.middle_name,
     lastName: studentInfo.last_name,
     studentId: formData.student_id || studentInfo.student_id,
-    photoUrl: photoPreview || formData.photo_url,
+    photoUrl: displayPhotoUrl,
     nisn: studentInfo.nisn,
     placeOfBirth: studentInfo.place_of_birth,
     dateOfBirth: studentInfo.date_of_birth,
     schoolYear: formData.school_year,
     sectionName: (() => {
       const secId = parseInt(formData.section_id, 10);
-      if (secId === 3) return "Middle School";
-      if (secId === 4) return "High School";
-      return "Elementary School";
+      if (secId === 3) return 'Middle School';
+      if (secId === 4) return 'High School';
+      return 'Elementary School';
     })(),
     // [BARU] Kirim data card number jika ada, agar popup terisi otomatis
-    card_number: idCardInfo?.card_number || "",
+    card_number: idCardInfo?.card_number || '',
   };
 
   const getSectionType = () => {
     const secId = parseInt(formData.section_id, 10);
-    if (secId === 3) return "ms";
-    if (secId === 4) return "hs";
-    return "ecp";
+    if (secId === 3) return 'ms';
+    if (secId === 4) return 'hs';
+    return 'ecp';
   };
 
   // [BARU] Logika tampilan Card Number
-  const displayedCardNumber = idCardInfo?.card_number || "-";
+  const displayedCardNumber = idCardInfo?.card_number || '-';
 
   return (
     <div className={styles.profileHeader}>
       {/* Kolom Kiri: Foto */}
       <div className={styles.headerPhotoSection}>
-        <img className={imageClass} src={imageUrl} alt="" />
+        <img
+          className={imageClass}
+          src={displayPhotoUrl}
+          alt='Student Profile'
+        />
       </div>
 
       {/* Kolom Tengah: Info & Status */}
@@ -105,12 +145,12 @@ const StudentProfileHeader = ({
 
         <div className={styles.schoolYearContainer}>
           <span className={styles.yearLabel}>School year</span>
-          <b className={styles.yearValue}>{formData.school_year || "-"}</b>
+          <b className={styles.yearValue}>{formData.school_year || '-'}</b>
         </div>
 
         <div
           className={`${styles.idCardContainer} ${
-            isEditing ? styles.idCardContainerEdit : ""
+            isEditing ? styles.idCardContainerEdit : ''
           }`}
         >
           <span className={styles.idLabel}>ID Card number :</span>
@@ -123,10 +163,10 @@ const StudentProfileHeader = ({
             <div className={styles.statusGroup}>
               <Button
                 variant={
-                  studentInfo.student_active === "YES" ? "active" : "not-active"
+                  studentInfo.student_active === 'YES' ? 'active' : 'not-active'
                 }
               >
-                {studentInfo.student_active === "YES" ? "Active" : "Not Active"}
+                {studentInfo.student_active === 'YES' ? 'Active' : 'Not Active'}
               </Button>
 
               <div className={styles.historyContainer}>
@@ -135,7 +175,7 @@ const StudentProfileHeader = ({
                   showDropdownIcon={true}
                   onClick={() => setStatusDropdownOpen(!isStatusDropdownOpen)}
                 >
-                  {studentInfo.status || "Select Status"}
+                  {studentInfo.status || 'Select Status'}
                 </Button>
                 {isStatusDropdownOpen && (
                   <ul className={styles.historyDropdown}>
@@ -162,7 +202,7 @@ const StudentProfileHeader = ({
             <Button
               className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
               onClick={onAddPhotoClick}
-              variant="solid"
+              variant='solid'
             >
               Edit photo
             </Button>
@@ -174,23 +214,23 @@ const StudentProfileHeader = ({
               <div className={styles.statusTagContainer}>
                 <Button
                   variant={
-                    studentInfo.student_active === "YES"
-                      ? "active"
-                      : "not-active"
+                    studentInfo.student_active === 'YES'
+                      ? 'active'
+                      : 'not-active'
                   }
                 >
-                  {studentInfo.student_active === "YES"
-                    ? "Active"
-                    : "Not Active"}
+                  {studentInfo.student_active === 'YES'
+                    ? 'Active'
+                    : 'Not Active'}
                 </Button>
                 <Button variant={getStatusVariant(studentInfo.status)}>
-                  {studentInfo.status || "Not Graduated"}
+                  {studentInfo.status || 'Not Graduated'}
                 </Button>
               </div>
               <Button
                 className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
                 onClick={onDownloadPdfClick}
-                variant="solid"
+                variant='solid'
               >
                 Download PDF
               </Button>
@@ -203,10 +243,10 @@ const StudentProfileHeader = ({
       <div className={styles.headerActionSection}>
         {!isEditing && (
           <div className={styles.historyContainer} ref={historyRef}>
-            <Button variant="outline" onClick={onViewHistoryClick}>
+            <Button variant='outline' onClick={onViewHistoryClick}>
               {selectedVersionId
-                ? "Back to Latest Version"
-                : "View data version history"}
+                ? 'Back to Latest Version'
+                : 'View data version history'}
             </Button>
             {isHistoryVisible && (
               <ul className={styles.historyDropdown}>
@@ -245,7 +285,7 @@ const StudentProfileHeader = ({
               className={styles.actionButton}
               onClick={onCancelClick}
               disabled={isUpdating}
-              variant="outline"
+              variant='outline'
             >
               Cancel
             </Button>
@@ -253,9 +293,9 @@ const StudentProfileHeader = ({
               className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
               onClick={onSaveClick}
               disabled={isUpdating}
-              variant="solid"
+              variant='solid'
             >
-              {isUpdating ? "Saving..." : "Save changes"}
+              {isUpdating ? 'Saving...' : 'Save changes'}
             </Button>
           </>
         ) : (
@@ -264,14 +304,14 @@ const StudentProfileHeader = ({
               <Button
                 className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
                 onClick={onEditClick}
-                variant="solid"
+                variant='solid'
               >
                 Edit
               </Button>
               <Button
                 className={`${styles.actionButton} ${styles.actionButtonPrimary}`}
                 onClick={() => setIdCardPopupOpen(true)}
-                variant="solid"
+                variant='solid'
               >
                 New ID Card
               </Button>
