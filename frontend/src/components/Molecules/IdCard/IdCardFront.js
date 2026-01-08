@@ -13,6 +13,9 @@ const IdCardFront = ({
   variant = "ecp",
   editable = false,
   scale = 1,
+  position = { x: 0, y: 0 },
+  onPositionChange,
+  isExport = false,
 }) => {
   const {
     first_name,
@@ -23,7 +26,6 @@ const IdCardFront = ({
     section_name,
   } = data || {};
 
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
@@ -43,10 +45,12 @@ const IdCardFront = ({
     const deltaX = (e.clientX - startPos.x) / scale;
     const deltaY = (e.clientY - startPos.y) / scale;
 
-    setPosition((prev) => ({
-      x: prev.x + deltaX,
-      y: prev.y + deltaY,
-    }));
+    if (onPositionChange) {
+      onPositionChange({
+        x: position.x + deltaX,
+        y: position.y + deltaY,
+      });
+    }
 
     setStartPos({
       x: e.clientX,
@@ -79,6 +83,9 @@ const IdCardFront = ({
   const currentConfig = config[variant] || config.ecp;
   const hasLastName = last_name && last_name.trim() !== "" && last_name !== "-";
 
+  // DETEKSI APAKAH URL ADALAH BASE64
+  const isBase64 = photo_url && photo_url.startsWith("data:");
+
   return (
     <div
       className={`${styles.idCardBase} ${currentConfig.styleClass}`}
@@ -87,12 +94,21 @@ const IdCardFront = ({
       onMouseLeave={handleMouseUp}
     >
       <img className={styles.headerBg} alt="" src={headerBg} />
-      <div className={styles.photoContainer}>
+
+      <div
+        className={styles.photoContainer}
+        style={{
+          border: editable ? "1px solid var(--main-grey)" : "none",
+        }}
+      >
         <img
           className={editable ? styles.photoDraggable : styles.photoStatic}
           alt="Student"
           src={photo_url}
           draggable={false}
+          crossOrigin={
+            isBase64 ? undefined : isExport ? "anonymous" : undefined
+          }
           onError={(e) => {
             e.target.src = userPlaceholder;
           }}
@@ -102,6 +118,7 @@ const IdCardFront = ({
           onMouseDown={handleMouseDown}
         />
       </div>
+
       <div className={styles.bottomWrapper}>
         <img className={styles.waveBg} alt="" src={currentConfig.wave} />
         <div className={styles.contentOverlay}>

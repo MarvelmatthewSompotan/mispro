@@ -1,6 +1,6 @@
-import React from 'react';
-import styles from './ProgramContent.module.css';
-import RadioButton from '../../../Atoms/RadioButton/RadioButton';
+import React from "react";
+import styles from "./ProgramContent.module.css";
+import RadioButton from "../../../Atoms/Radiobutton/RadioButton";
 
 function ProgramContent({
   data,
@@ -12,9 +12,9 @@ function ProgramContent({
   const getGradeName = () => {
     if (data?.class_id) {
       const found = classOptions.find((cls) => cls.class_id === data.class_id);
-      return found ? found.grade : '';
+      return found ? found.grade : "";
     }
-    return '';
+    return "";
   };
 
   const getMajorName = () => {
@@ -22,9 +22,9 @@ function ProgramContent({
       const found = majorOptions?.find(
         (m) => m.major_id === parseInt(data.major_id, 10)
       );
-      return found ? found.name : '';
+      return found ? found.name : "";
     }
-    return '';
+    return "";
   };
 
   return (
@@ -37,7 +37,7 @@ function ProgramContent({
         {sectionOptions.map((section) => (
           <div key={section.section_id} className={styles.answer}>
             <RadioButton
-              name='section'
+              name="section"
               value={section.section_id}
               checked={data?.section_id === section.section_id}
               onChange={() => {}}
@@ -63,12 +63,12 @@ function ProgramContent({
         </div>
 
         {programOptions.map((program) => {
-          const originalName = program.name || '';
-          const customProgram = data?.program_other || '';
+          const originalName = program.name || "";
+          const customProgram = data?.program_other || "";
           const isOtherOption = originalName
             .toLowerCase()
             .trim()
-            .includes('other');
+            .includes("other");
           if (
             !isOtherOption &&
             customProgram &&
@@ -92,7 +92,7 @@ function ProgramContent({
           return (
             <div key={program.program_id} className={styles.answer}>
               <RadioButton
-                name='program'
+                name="program"
                 value={program.program_id}
                 checked={isChecked}
                 onChange={() => {}}

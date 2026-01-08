@@ -9,6 +9,8 @@ import {
   getStudentLatestApplication,
   saveStudentCardNumber,
 } from "../../../../services/api";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const ArrowLeft = () => (
   <svg
@@ -54,10 +56,19 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
   const [idCardNumber, setIdCardNumber] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccessNotify, setShowSuccessNotify] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [photoPosition, setPhotoPosition] = useState({ x: 0, y: 0 });
+
+  const [exportDisplayData, setExportDisplayData] = useState(null);
 
   useEffect(() => {
     if (isOpen && studentData?.id) {
       setLoading(true);
+      setExportError("");
+      setShowSuccessNotify(false);
+      setPhotoPosition({ x: 0, y: 0 });
+      setExportDisplayData(null);
+
       getStudentLatestApplication(studentData.id, "registration")
         .then((res) => {
           if (res?.success && res?.data?.idCardInfo) {
@@ -73,8 +84,13 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
           setLoading(false);
         });
     } else {
+      // Reset saat tutup
       setCardData(null);
       setIdCardNumber("");
+      setExportError("");
+      setShowSuccessNotify(false);
+      setPhotoPosition({ x: 0, y: 0 });
+      setExportDisplayData(null);
     }
   }, [isOpen, studentData]);
 
@@ -94,6 +110,7 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
   };
 
   const displayData = cardData || initialData;
+  const finalExportData = exportDisplayData || displayData;
 
   let variant = "ecp";
   const sectionName = displayData?.section_name || "";
@@ -109,7 +126,48 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
     setCurrentView((prev) => (prev === "front" ? "back" : "front"));
   };
 
+  const convertUrlToPngBase64 = (url) => {
+    return new Promise((resolve) => {
+      if (!url) {
+        resolve(null);
+        return;
+      }
+      const img = new Image();
+      img.crossOrigin = "Anonymous"; 
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        try {
+   
+          const dataURL = canvas.toDataURL("image/png");
+          resolve(dataURL);
+        } catch (e) {
+          console.error("Canvas export failed (CORS/Taint):", e);
+    
+          resolve(url);
+        }
+      };
+
+      img.onerror = (err) => {
+        console.error("Image load failed inside export logic:", err);
+        resolve(url);
+      };
+
+      img.src = url;
+    });
+  };
+
   const handleExport = async () => {
+    if (!displayData?.photo_url) {
+      setExportError("Student photo is required to export ID Card.");
+      return;
+    }
+    setExportError("");
+
     if (!studentData?.id) {
       alert("Student ID is missing.");
       return;
@@ -117,20 +175,82 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
 
     setIsSaving(true);
     try {
-      await saveStudentCardNumber(studentData.id, idCardNumber);
+      const base64Photo = await convertUrlToPngBase64(displayData.photo_url);
 
-      if (onSaveSuccess) {
-        onSaveSuccess();
+      setExportDisplayData({
+        ...displayData,
+        photo_url: base64Photo,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const frontElement = document.getElementById("hidden-id-front");
+      const backElement = document.getElementById("hidden-id-back");
+      const wrapperElement = document.querySelector(
+        `.${styles.hiddenExportWrapper}`
+      );
+
+      if (frontElement && backElement && wrapperElement) {
+        wrapperElement.style.visibility = "visible";
+
+        const canvasOptions = {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true, 
+          backgroundColor: null, 
+          width: 398,
+          height: 631,
+          windowWidth: 398,
+          windowHeight: 631,
+          x: 0,
+          y: 0,
+          scrollX: 0,
+          scrollY: 0,
+        };
+
+        const frontCanvas = await html2canvas(frontElement, canvasOptions);
+        const frontImgData = frontCanvas.toDataURL("image/png");
+
+        const backCanvas = await html2canvas(backElement, canvasOptions);
+        const backImgData = backCanvas.toDataURL("image/png");
+
+        wrapperElement.style.visibility = "hidden";
+
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "px",
+          format: [398, 631],
+        });
+
+        pdf.addImage(frontImgData, "PNG", 0, 0, 398, 631);
+        pdf.addPage();
+        pdf.addImage(backImgData, "PNG", 0, 0, 398, 631);
+
+        pdf.save(`${displayData.student_id}_ID_Card.pdf`);
+
+        try {
+          await saveStudentCardNumber(studentData.id, idCardNumber);
+        } catch (apiError) {
+          console.warn("API Error (Non-fatal for export):", apiError);
+        }
+
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
+        setShowSuccessNotify(true);
+        setTimeout(() => {
+          setShowSuccessNotify(false);
+          setTimeout(() => {
+            onClose();
+          }, 500);
+        }, 3000);
       }
-      setShowSuccessNotify(true);
-      setTimeout(() => {
-        onClose();
-      }, 2000);
     } catch (error) {
-      console.error("Failed to save card number", error);
-      alert("Failed to save ID Card number.");
+      console.error("Export Failed", error);
+      setExportError("Failed to export. Possible CORS issue or network error.");
     } finally {
       setIsSaving(false);
+      setExportDisplayData(null);
     }
   };
 
@@ -151,6 +271,7 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
               </div>
             )}
           </div>
+
           <div className={styles.previewContainer}>
             <button className={styles.navButton} onClick={toggleView}>
               <ArrowLeft />
@@ -163,6 +284,9 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
                     variant={variant}
                     editable={true}
                     scale={0.6}
+                    position={photoPosition}
+                    onPositionChange={setPhotoPosition}
+                    isExport={false}
                   />
                 ) : (
                   <IdCardBack data={displayData} variant={variant} />
@@ -194,25 +318,51 @@ const IdCardPopup = ({ isOpen, onClose, studentData, onSaveSuccess }) => {
           />
 
           <div className={styles.footer}>
-            <div className={styles.buttonGroup}>
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className={styles.cancelButton}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="solid"
-                className={styles.exportButton}
-                onClick={handleExport}
-                disabled={isSaving}
-              >
-                {isSaving ? "Exporting..." : "Export ID Card"}
-              </Button>
+            <div className={styles.footerColumn}>
+              <div className={styles.buttonGroup}>
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  className={styles.cancelButton}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="solid"
+                  className={styles.exportButton}
+                  onClick={handleExport}
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Exporting..." : "Export ID Card"}
+                </Button>
+              </div>
+              {exportError && (
+                <div className={styles.errorMessage}>{exportError}</div>
+              )}
             </div>
           </div>
+        </div>
+      </div>
+      <div className={styles.hiddenExportWrapper}>
+        <div
+          id="hidden-id-front"
+          style={{ width: "398px", height: "631px", margin: 0, padding: 0 }}
+        >
+          <IdCardFront
+            data={finalExportData}
+            variant={variant}
+            editable={false}
+            scale={1}
+            position={photoPosition}
+            isExport={true}
+          />
+        </div>
+        <div
+          id="hidden-id-back"
+          style={{ width: "398px", height: "631px", margin: 0, padding: 0 }}
+        >
+          <IdCardBack data={finalExportData} variant={variant} />
         </div>
       </div>
 

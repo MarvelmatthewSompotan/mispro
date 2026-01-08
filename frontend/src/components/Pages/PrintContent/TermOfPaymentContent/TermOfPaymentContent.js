@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './TermOfPaymentContent.module.css';
-import RadioButton from '../../../Atoms/RadioButton/RadioButton';
+import RadioButton from '../../../Atoms/Radiobutton/RadioButton';
 import Checkbox from '../../../Atoms/Checkbox/Checkbox';
 
 function TermOfPaymentContent({ data, isDormitory }) {
