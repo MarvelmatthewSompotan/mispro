@@ -505,8 +505,9 @@ export const confirmAutoGraduate = (ids) => {
     body: JSON.stringify({ ids }),
   });
 };
-export const getAnalytics = () => {
-  return apiFetch('/analytics');
+export const getAnalytics = (refresh = false) => {
+  const endpoint = refresh ? '/analytics?refresh=true' : '/analytics';
+  return apiFetch(endpoint);
 };
 
 export const saveStudentCardNumber = (id, cardNumber) => {

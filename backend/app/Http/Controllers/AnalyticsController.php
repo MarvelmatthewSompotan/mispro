@@ -32,6 +32,11 @@ class AnalyticsController extends Controller
 
             // Cache Key
             $cacheKey = 'analytics_full_' . $dateKey;
+
+            if ($request->has('refresh') && $request->refresh == 'true') {
+                Cache::forget($cacheKey);
+            }
+            
             $cacheTime = now()->addHours(24);
 
             $data = Cache::remember($cacheKey, $cacheTime, function () use ($now, $dateKey, $currentSyName, $prevSyName, $nextSyName, $startYear, $currentYearInt) { 
