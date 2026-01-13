@@ -66,6 +66,7 @@ class DashboardController extends Controller
                 $lastLogin = AuditLog::where('action', 'login_success')
                     ->where('user_id', $user->user_id)
                     ->orderByDesc('created_at')
+                    ->skip(1)
                     ->first();
 
                 return [
