@@ -859,6 +859,7 @@ const Analytics = () => {
                   axisLine={false}
                   tickLine={false}
                   tick={{ fontSize: 10, fill: '#7A7A7A' }}
+                  allowDecimals={false} 
                 />
                 <Tooltip />
                 <Bar
