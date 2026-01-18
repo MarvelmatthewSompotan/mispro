@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Log;
 use Exception;
 use App\Models\Student;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Log;
 
 class LogbookController extends Controller
 {
@@ -443,10 +443,16 @@ class LogbookController extends Controller
                 ],
             ], 200);
         } catch (Exception $e) {
-            Log::error('Failed to get logbook data', ['error' => $e->getMessage()]);
+            Log::error('Logbook Index Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'message' => 'Failed to retrieve logbook data.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -871,10 +877,16 @@ class LogbookController extends Controller
                 'data' => $data,
             ], 200);
         } catch (Exception $e) {
-            Log::error('Failed to get logbook data', ['error' => $e->getMessage()]);
+            Log::error('Logbook Export Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'message' => 'Failed to export logbook data.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }

@@ -7,12 +7,13 @@ use App\Models\AuditLog;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use App\Models\ApplicationForm;
+use App\Services\AnalyticsService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CancelledRegistration;
-use App\Services\AnalyticsService;
-use App\Services\DashboardCacheService; 
 use Illuminate\Support\Facades\Cache;
+use App\Services\DashboardCacheService; 
 
 class DashboardController extends Controller
 {
@@ -155,7 +156,11 @@ class DashboardController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            \Log::error('DashboardController Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('DashboardController Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,

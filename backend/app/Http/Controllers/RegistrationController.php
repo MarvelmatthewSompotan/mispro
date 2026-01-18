@@ -26,136 +26,151 @@ class RegistrationController extends Controller
 
     public function index(Request $request)
     {
-        $query = Enrollment::query()
-            ->select(
-                'enrollments.*',
-                'application_forms.application_id',
-                'school_years.year as school_year',
-                'classes.grade',
-                'sections.name as section_name',
-                'application_forms.status as application_status'
-            )
-            ->selectRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name")
-            ->addSelect('application_form_versions.version_id')
-            ->join('students', 'students.id', '=', 'enrollments.id')
-            ->leftJoin('school_years', 'enrollments.school_year_id', '=', 'school_years.school_year_id')
-            ->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id')
-            ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id')           
-            ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
-            ->leftJoin('application_form_versions', 'application_form_versions.version_id', '=', DB::raw('(SELECT MAX(version_id) FROM application_form_versions WHERE application_id = application_forms.application_id AND action = "registration")'))
-            ->addSelect('application_form_versions.version_id as registration_version_id')
-            ->where('application_forms.status', 'Confirmed');
-
-        // Filter Range
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $start = Carbon::parse($request->input('start_date'))->startOfDay();
-            $end = Carbon::parse($request->input('end_date'))->endOfDay();
-            $query->whereBetween('enrollments.registration_date', [$start, $end]);
-        }
-
-        // Filter Search
-        if ($regisId = $request->input('search_id')) {
-            $query->where('registration_id', 'like', "%$regisId%");
-        }
-
-        // Filter Global
-        if ($search = trim($request->input('search', ''))) {
-            $query->where(function ($q) use ($search) {
-                if (is_numeric($search)) {
-                    $q->where('students.id', 'LIKE', "%{$search}%");
-                } else {
-                    $q->whereRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) LIKE ?", ["%{$search}%"]);
-                }
-            });
-        } elseif ($request->filled('search_name')) {
-            $searchName = strtolower(trim($request->input('search_name')));
-            $query->whereRaw("LOWER(CONCAT_WS(' ', COALESCE(students.first_name,''), COALESCE(students.middle_name,''), COALESCE(students.last_name,''))) LIKE ?", ["%{$searchName}%"]);
-        }
-
-        // Filter Checkbox
-        if ($request->input('school_year')) {
-            $schoolYear = $request->input('school_year');
-            $query->whereIn('school_years.year', (array)$schoolYear);
-        }
-
-        if ($request->filled('grade')) {
-            $grades = (array) $request->input('grade');
-            $query->whereIn('classes.grade', $grades);
-        }
-
-        if ($request->filled('section')) {
-            $sections = (array) $request->input('section');
-            $query->whereIn('sections.name', $sections);
-        }
-
-        if ($request->filled('status')) {
-            $statuses = (array) $request->input('status');
-            $query->whereIn('application_forms.status', $statuses);
-        }
-
-        // Sort
-        $sorts = $request->input('sort', []);
-
-        $sortable = [
-            'registration_date' => 'enrollments.registration_date',
-            'registration_id' => 'enrollments.registration_id',
-            'school_year' => 'school_years.year',
-            'full_name' => "CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)",
-            'grade' => 'classes.grade',
-            'section' => 'sections.name',
-            'application_status' => 'application_forms.status',
-        ];
-
-        if (empty($sorts)) {
-            $query->orderBy('enrollments.registration_date', 'desc');
-        } else {
-            foreach ($sorts as $sort) {
-                $field = $sort['field'] ?? null;
-                $order = strtolower($sort['order'] ?? 'asc');
-                $order = ($order === 'desc') ? 'desc' : 'asc';
-
-                if (!$field || !array_key_exists($field, $sortable)) continue;
-
-                if ($field === 'registration_id') {
-                    $query->orderByRaw("
-                        CASE
-                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%ECP%' THEN 1    
-                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%ES%' THEN 2    
-                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%MS%' THEN 3    
-                            WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%HS%' THEN 4    
-                            ELSE 5
-                        END $order
-                    ")->orderByRaw("
-                        CAST(SUBSTRING_INDEX(enrollments.registration_id, '/', 1) AS UNSIGNED) $order
-                    ")->orderByRaw("
-                        CAST(SUBSTRING_INDEX(enrollments.registration_id, '-', -1) AS UNSIGNED) $order
-                    ");
-                } elseif ($field === 'full_name') {
-                    $query->orderByRaw($sortable[$field] . ' ' . $order);
-                } elseif ($field === 'application_status') {
-                    $query->orderByRaw("
-                        CASE application_forms.status
-                            WHEN 'Cancelled' THEN 1
-                            WHEN 'Confirmed' THEN 2
-                            ELSE 3
-                        END $order
-                    ");
-                } else {
-                    $query->orderByRaw($sortable[$field] . ' ' . $order);
+        try {
+            $query = Enrollment::query()
+                ->select(
+                    'enrollments.*',
+                    'application_forms.application_id',
+                    'school_years.year as school_year',
+                    'classes.grade',
+                    'sections.name as section_name',
+                    'application_forms.status as application_status'
+                )
+                ->selectRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name")
+                ->addSelect('application_form_versions.version_id')
+                ->join('students', 'students.id', '=', 'enrollments.id')
+                ->leftJoin('school_years', 'enrollments.school_year_id', '=', 'school_years.school_year_id')
+                ->leftJoin('classes', 'enrollments.class_id', '=', 'classes.class_id')
+                ->leftJoin('sections', 'enrollments.section_id', '=', 'sections.section_id')           
+                ->leftJoin('application_forms', 'application_forms.enrollment_id', '=', 'enrollments.enrollment_id')
+                ->leftJoin('application_form_versions', 'application_form_versions.version_id', '=', DB::raw('(SELECT MAX(version_id) FROM application_form_versions WHERE application_id = application_forms.application_id AND action = "registration")'))
+                ->addSelect('application_form_versions.version_id as registration_version_id')
+                ->where('application_forms.status', 'Confirmed');
+    
+            // Filter Range
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $start = Carbon::parse($request->input('start_date'))->startOfDay();
+                $end = Carbon::parse($request->input('end_date'))->endOfDay();
+                $query->whereBetween('enrollments.registration_date', [$start, $end]);
+            }
+    
+            // Filter Search
+            if ($regisId = $request->input('search_id')) {
+                $query->where('registration_id', 'like', "%$regisId%");
+            }
+    
+            // Filter Global
+            if ($search = trim($request->input('search', ''))) {
+                $query->where(function ($q) use ($search) {
+                    if (is_numeric($search)) {
+                        $q->where('students.id', 'LIKE', "%{$search}%");
+                    } else {
+                        $q->whereRaw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) LIKE ?", ["%{$search}%"]);
+                    }
+                });
+            } elseif ($request->filled('search_name')) {
+                $searchName = strtolower(trim($request->input('search_name')));
+                $query->whereRaw("LOWER(CONCAT_WS(' ', COALESCE(students.first_name,''), COALESCE(students.middle_name,''), COALESCE(students.last_name,''))) LIKE ?", ["%{$searchName}%"]);
+            }
+    
+            // Filter Checkbox
+            if ($request->input('school_year')) {
+                $schoolYear = $request->input('school_year');
+                $query->whereIn('school_years.year', (array)$schoolYear);
+            }
+    
+            if ($request->filled('grade')) {
+                $grades = (array) $request->input('grade');
+                $query->whereIn('classes.grade', $grades);
+            }
+    
+            if ($request->filled('section')) {
+                $sections = (array) $request->input('section');
+                $query->whereIn('sections.name', $sections);
+            }
+    
+            if ($request->filled('status')) {
+                $statuses = (array) $request->input('status');
+                $query->whereIn('application_forms.status', $statuses);
+            }
+    
+            // Sort
+            $sorts = $request->input('sort', []);
+    
+            $sortable = [
+                'registration_date' => 'enrollments.registration_date',
+                'registration_id' => 'enrollments.registration_id',
+                'school_year' => 'school_years.year',
+                'full_name' => "CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name)",
+                'grade' => 'classes.grade',
+                'section' => 'sections.name',
+                'application_status' => 'application_forms.status',
+            ];
+    
+            if (empty($sorts)) {
+                $query->orderBy('enrollments.registration_date', 'desc');
+            } else {
+                foreach ($sorts as $sort) {
+                    $field = $sort['field'] ?? null;
+                    $order = strtolower($sort['order'] ?? 'asc');
+                    $order = ($order === 'desc') ? 'desc' : 'asc';
+    
+                    if (!$field || !array_key_exists($field, $sortable)) continue;
+    
+                    if ($field === 'registration_id') {
+                        $query->orderByRaw("
+                            CASE
+                                WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%ECP%' THEN 1    
+                                WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%ES%' THEN 2    
+                                WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%MS%' THEN 3    
+                                WHEN SUBSTRING_INDEX(SUBSTRING_INDEX(enrollments.registration_id, '/', -2), '/', 1) LIKE '%HS%' THEN 4    
+                                ELSE 5
+                            END $order
+                        ")->orderByRaw("
+                            CAST(SUBSTRING_INDEX(enrollments.registration_id, '/', 1) AS UNSIGNED) $order
+                        ")->orderByRaw("
+                            CAST(SUBSTRING_INDEX(enrollments.registration_id, '-', -1) AS UNSIGNED) $order
+                        ");
+                    } elseif ($field === 'full_name') {
+                        $query->orderByRaw($sortable[$field] . ' ' . $order);
+                    } elseif ($field === 'application_status') {
+                        $query->orderByRaw("
+                            CASE application_forms.status
+                                WHEN 'Cancelled' THEN 1
+                                WHEN 'Confirmed' THEN 2
+                                ELSE 3
+                            END $order
+                        ");
+                    } else {
+                        $query->orderByRaw($sortable[$field] . ' ' . $order);
+                    }
                 }
             }
-        }
-        
-        // Pagination
-        $data = $query->paginate($request->input('per_page', 25));
-        $totalRegistered = ApplicationForm::count();
+            
+            // Pagination
+            $data = $query->paginate($request->input('per_page', 25));
+            $totalRegistered = ApplicationForm::count();
+    
+            return response()->json([
+                'success' => true,
+                'message' => $data->isEmpty() ? 'No students found' : 'Students retrieved successfully',
+                'total_registered' => $totalRegistered,
+                'data' => $data
+            ], 200);
 
-        return response()->json([
-            'success' => true,
-            'message' => $data->isEmpty() ? 'No students found' : 'Students retrieved successfully',
-            'total_registered' => $totalRegistered,
-            'data' => $data
-        ], 200);
+        } catch (\Exception $e) {
+            Log::error('Registration Index Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve registration list.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
     }
 
     // Registration
@@ -174,10 +189,10 @@ class RegistrationController extends Controller
             ], 422);
         }
         
-        $validated = $validator->validated();
-        $userId = auth()->id();
-
         try {
+            $validated = $validator->validated();
+            $userId = auth()->id();
+
             $result = $this->registrationService->createRegistrationDraft($validated, $userId);
 
             return response()->json([
@@ -187,32 +202,55 @@ class RegistrationController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
+            Log::error('Start Registration Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false, 
-                'error' => $e->getMessage()
+                'message' => 'Failed to initialize registration.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
 
     public function getRegistrationContext($draft_id)
     {
-        $draft = $this->registrationService->getDraftContext($draft_id, auth()->id());
-        
-        if (!$draft) {
+        try {
+            $draft = $this->registrationService->getRegistrationContext($draft_id, auth()->id());
+            
+            if (!$draft) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Draft not found or unauthorized access.',
+                ], 404);
+            }
+    
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'school_year' => $draft->school_year_id,
+                    'semester' => $draft->semester_id,
+                    'registration_date' => $draft->registration_date_draft,
+                ],
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Get Registration Context Error: ' . $e->getMessage(), [
+                'draft_id' => $draft_id,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Draft not found or unauthorized access.',
-            ], 404);
+                'message' => 'Failed to retrieve registration context.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'school_year' => $draft->school_year_id,
-                'semester' => $draft->semester_id,
-                'registration_date' => $draft->registration_date_draft,
-            ],
-        ], 200);
     }
 
     public function store(Request $request, $draft_id)
@@ -352,8 +390,9 @@ class RegistrationController extends Controller
             
         } catch (\Exception $e) {
             DB::rollback();
-            \Log::error('Registration store error', [
-                'error' => $e->getMessage(),
+            Log::error('Registration Store Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -361,7 +400,8 @@ class RegistrationController extends Controller
             
             return response()->json([
                 'success' => false, 
-                'error' => 'Registration failed: ' . $e->getMessage()
+                'message' => 'Registration failed due to a server error.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], $statusCode);
         }
     }
@@ -370,7 +410,7 @@ class RegistrationController extends Controller
     public function showPreview($applicationId, $versionId)
     {
         try {
-            \Log::info('Preview called', [
+            Log::info('Preview called', [
                 'application_id' => $applicationId,
                 'version_id' => $versionId
             ]);
@@ -384,16 +424,18 @@ class RegistrationController extends Controller
             ], 200, [], JSON_PRETTY_PRINT);
 
         } catch (\Exception $e) {
-            \Log::error('Preview failed', [
+            Log::error('Preview Failed Error: ' . $e->getMessage(), [
                 'application_id' => $applicationId,
                 'version_id' => $versionId,
-                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'error' => 'Preview failed: ' . $e->getMessage()
+                'message' => 'Failed to load preview data.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -407,10 +449,10 @@ class RegistrationController extends Controller
             ]);
         }
 
-        $notes = $request->input('notes');
-        $user_name = auth()->user()->username ?? 'anonymous';
-
         try {
+            $notes = $request->input('notes');
+            $user_name = auth()->user()->username ?? 'anonymous';
+            
             $successMessage = $this->registrationService->cancelRegistration(
                 $application_id, 
                 $reason_type, 
@@ -424,92 +466,109 @@ class RegistrationController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Failed to cancel registration', [
-                'error' => $e->getMessage(),
+            Log::error('Cancel Registration Error: ' . $e->getMessage(), [
                 'application_form_id' => $application_id,
-                'reason_type' => $reason_type
+                'reason_type' => $reason_type,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             $statusCode = $e->getCode() && is_numeric($e->getCode()) && $e->getCode() >= 400 ? $e->getCode() : 500;
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(), 
-                'error' => $e->getMessage(),
+                'message' => 'Failed to cancel registration.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], $statusCode);
         }
     }
 
     public function getCancelledRegistrations(Request $request)
     {
-        $query = CancelledRegistrationView::query();
-
-        // Global Search (Student Name)
-        if ($request->filled('search')) {
-            $keyword = $request->search;
-            $query->where('full_name', 'LIKE', "%{$keyword}%");
-        }
-
-        // Filter Full Name
-        if ($request->filled('filter_name')) {
-            $keyword = $request->filter_name;
-            $query->where('full_name', 'LIKE', "%{$keyword}%");
-        }
-
-        // Filter School Year (Checkbox - Multiple Select)
-        if ($request->filled('school_years') && is_array($request->school_years)) {
-            $query->whereIn('school_year_id', $request->school_years);
-        }
-
-        // Filter Section (Checkbox - Multiple Select)
-        if ($request->filled('sections') && is_array($request->sections)) {
-            $query->whereIn('section_id', $request->sections);
-        }
-
-        // Filter Registration Date (Range)
-        if ($request->filled('reg_start_date') && $request->filled('reg_end_date')) {
-            $query->whereBetween('registration_date', [
-                Carbon::parse($request->reg_start_date)->startOfDay(),
-                Carbon::parse($request->reg_end_date)->endOfDay()
+        try {
+            $query = CancelledRegistrationView::query();
+    
+            // Global Search (Student Name)
+            if ($request->filled('search')) {
+                $keyword = $request->search;
+                $query->where('full_name', 'LIKE', "%{$keyword}%");
+            }
+    
+            // Filter Full Name
+            if ($request->filled('filter_name')) {
+                $keyword = $request->filter_name;
+                $query->where('full_name', 'LIKE', "%{$keyword}%");
+            }
+    
+            // Filter School Year (Checkbox - Multiple Select)
+            if ($request->filled('school_years') && is_array($request->school_years)) {
+                $query->whereIn('school_year_id', $request->school_years);
+            }
+    
+            // Filter Section (Checkbox - Multiple Select)
+            if ($request->filled('sections') && is_array($request->sections)) {
+                $query->whereIn('section_id', $request->sections);
+            }
+    
+            // Filter Registration Date (Range)
+            if ($request->filled('reg_start_date') && $request->filled('reg_end_date')) {
+                $query->whereBetween('registration_date', [
+                    Carbon::parse($request->reg_start_date)->startOfDay(),
+                    Carbon::parse($request->reg_end_date)->endOfDay()
+                ]);
+            }
+    
+            // Filter Cancelled At (Range)
+            if ($request->filled('cancel_start_date') && $request->filled('cancel_end_date')) {
+                $query->whereBetween('cancelled_at', [
+                    Carbon::parse($request->cancel_start_date)->startOfDay(),
+                    Carbon::parse($request->cancel_end_date)->endOfDay()
+                ]);
+            }
+    
+            // Filter Notes
+            if ($request->filled('filter_notes')) {
+                $keyword = $request->filter_notes;
+                $query->where('notes', 'LIKE', "%{$keyword}%");
+            }
+    
+            // Filter student status (Checkbox - Multiple)
+            if ($request->filled('student_status') && is_array($request->student_status)) {
+                $query->whereIn('student_status', $request->student_status);
+            }
+    
+            // Sort
+            $sortField = $request->input('sort_by', 'cancelled_at');
+            $sortOrder = $request->input('sort_order', 'desc');     
+    
+            $allowedSorts = ['full_name', 'registration_date', 'cancelled_at', 'school_year', 'section', 'student_status', 'notes'];
+    
+            if (in_array($sortField, $allowedSorts)) {
+                $query->orderBy($sortField, $sortOrder);
+            } else {
+                $query->orderBy('cancelled_at', 'desc');
+            }
+            
+            $data = $query->paginate($request->input('per_page', 25));
+    
+            return response()->json([
+                'status' => 'success',
+                'data' => $data
             ]);
-        }
 
-        // Filter Cancelled At (Range)
-        if ($request->filled('cancel_start_date') && $request->filled('cancel_end_date')) {
-            $query->whereBetween('cancelled_at', [
-                Carbon::parse($request->cancel_start_date)->startOfDay(),
-                Carbon::parse($request->cancel_end_date)->endOfDay()
+        } catch (\Exception $e) {
+            Log::error('Get Cancelled Registrations Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve cancelled registrations.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
         }
-
-        // Filter Notes
-        if ($request->filled('filter_notes')) {
-            $keyword = $request->filter_notes;
-            $query->where('notes', 'LIKE', "%{$keyword}%");
-        }
-
-        // Filter student status (Checkbox - Multiple)
-        if ($request->filled('student_status') && is_array($request->student_status)) {
-            $query->whereIn('student_status', $request->student_status);
-        }
-
-        // Sort
-        $sortField = $request->input('sort_by', 'cancelled_at');
-        $sortOrder = $request->input('sort_order', 'desc');     
-
-        $allowedSorts = ['full_name', 'registration_date', 'cancelled_at', 'school_year', 'section', 'student_status', 'notes'];
-
-        if (in_array($sortField, $allowedSorts)) {
-            $query->orderBy($sortField, $sortOrder);
-        } else {
-            $query->orderBy('cancelled_at', 'desc');
-        }
-        
-        $data = $query->paginate($request->input('per_page', 25));
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $data
-        ]);
     }
 }

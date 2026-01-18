@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use App\Services\AnalyticsService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
 class AnalyticsController extends Controller
@@ -107,10 +108,16 @@ class AnalyticsController extends Controller
                 'data' => $data
             ]);
         } catch (\Exception $e) {
-            \Log::error('Analytics Error: ' . $e->getMessage());
+            Log::error('Analytics Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);            
+            
             return response()->json([
                 'success' => false, 
-                'message' => 'Error loading analytics'
+                'message' => 'Error loading analytics',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }

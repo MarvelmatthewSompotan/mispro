@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log; 
 
 class UserManagementController extends Controller
 {
@@ -77,10 +78,16 @@ class UserManagementController extends Controller
             ]);
 
         } catch (Exception $e) {
+            Log::error('User Management Index Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve users.',
-                'error' => $e->getMessage(),
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -136,10 +143,16 @@ class UserManagementController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (Exception $e) {
+            Log::error('User Management Store Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create user.',
-                'error' => $e->getMessage(),
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -212,10 +225,17 @@ class UserManagementController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         } catch (Exception $e) {
+            Log::error('User Management Update Error: ' . $e->getMessage(), [
+                'user_id_target' => $user_id,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update user.',
-                'error' => $e->getMessage(),
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -261,10 +281,17 @@ class UserManagementController extends Controller
                 'message' => 'User deleted successfully',
             ]);
         } catch (Exception $e) {
+            Log::error('User Management Destroy Error: ' . $e->getMessage(), [
+                'user_id_target' => $user_id,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete user.',
-                'error' => $e->getMessage(),
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
