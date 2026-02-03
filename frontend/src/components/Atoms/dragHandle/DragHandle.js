@@ -2,9 +2,7 @@ import React from "react";
 import "../../Styles/Controls.css";
 import dragIcon from "../../../assets/DragHandle.svg";
 
-// Terima 'listeners' dari dnd-kit
 const DragHandle = ({ listeners }) => (
-  // Sebarkan 'listeners' ke button
   <button
     type="button"
     className="control-btn"

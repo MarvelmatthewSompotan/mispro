@@ -7,11 +7,8 @@ function TermOfPaymentContent({ data, isDormitory }) {
   const option = ['Full Payment', 'Installment'];
 
   return (
-    // DIV INI DIUBAH DARI styles.content MENJADI styles.contentParent
     <div className={styles.contentParent}>
-      {/* BARIS PERTAMA */}
       <div className={styles.contentRow}>
-        {/* Tuition Fee */}
         <div className={styles.tuitionFee}>
           <div className={styles.txtTuitionFee}>
             <div className={styles.contentTuitionFee}>Tuition Fee</div>
@@ -91,7 +88,6 @@ function TermOfPaymentContent({ data, isDormitory }) {
         </div>
       </div>
 
-      {/* --- BARIS KEDUA (VIRTUAL ACCOUNT) --- */}
       <div className={styles.contentRow}>
         {/* VA Mandiri */}
         <div className={styles.vaItem}>
