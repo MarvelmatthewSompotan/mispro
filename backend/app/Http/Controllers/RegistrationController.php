@@ -272,7 +272,7 @@ class RegistrationController extends Controller
             },
             'religion' => 'required|string',
             'place_of_birth' => 'required|string',
-            'date_of_birth' => 'required|date',
+            'date_of_birth' => 'required|date|before:today',
             'email' => 'required|email',
             'phone_number' => 'required|string',
             'previous_school' => 'nullable|string',
@@ -475,7 +475,7 @@ class RegistrationController extends Controller
             ]);
 
             $statusCode = $e->getCode() && is_numeric($e->getCode()) && $e->getCode() >= 400 ? $e->getCode() : 500;
-
+            
             $clientMessage = ($statusCode >= 400 && $statusCode < 500) 
             ? $e->getMessage() 
             : 'Failed to cancel registration (Internal Server Error).';
