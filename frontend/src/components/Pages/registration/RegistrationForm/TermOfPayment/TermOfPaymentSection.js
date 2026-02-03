@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Hapus useRef jika tidak dipakai
+import React, { useState, useEffect } from "react";
 import styles from "./TermOfPaymentSection.module.css";
 import checkBoxIcon from "../../../../../assets/CheckBox.png";
 import { getRegistrationOptions } from "../../../../../services/api";
