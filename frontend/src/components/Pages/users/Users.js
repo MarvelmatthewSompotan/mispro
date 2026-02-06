@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom"; 
+import ReactDOM from "react-dom";
 
 import styles from "./Users.module.css";
 import Button from "../../Atoms/Button/Button";
@@ -15,8 +15,14 @@ import {
   updateUser,
 } from "../../../services/api";
 import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
-
 const REFRESH_INTERVAL = 5000;
+const roleOptions = [
+  { value: "admin", label: "Admin" },
+  { value: "head_registrar", label: "Head Registrar" },
+  { value: "registrar", label: "Registrar" },
+  { value: "teacher", label: "Teacher" },
+];
+
 const formatRole = (role) => {
   if (!role) return "";
   return role
@@ -30,18 +36,19 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  // eslint-disable-next-line
   const [page, setPage] = useState(1);
   const fetchControllerRef = useRef(null);
   const [deletingUserId, setDeletingUserId] = useState(null);
-
+  const [sortBy, setSortBy] = useState("");
+  const [sortDir, setSortDir] = useState(""); 
+  const [roleFilter, setRoleFilter] = useState([]);
   const [confirmDeleteUser, setConfirmDeleteUser] = useState(null);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [showUserPopup, setShowUserPopup] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  
+
   const showTemporaryPopup = (message, type) => {
     setPopupType(type);
     setPopupMessage(message);
@@ -52,6 +59,7 @@ const Users = () => {
   const fetchUsers = useCallback(
     async (options = {}) => {
       const { isBackgroundRefresh = false } = options;
+      
       if (!isBackgroundRefresh) setLoading(true);
       setError("");
 
@@ -61,7 +69,17 @@ const Users = () => {
       fetchControllerRef.current = controller;
 
       try {
-        const response = await getUsers({ page }, { signal });
+      
+        const response = await getUsers(
+          {
+            page,
+            sort_by: sortBy,
+            sort_dir: sortDir,
+            role: roleFilter,
+          },
+          { signal }
+        );
+
         if (response?.success) {
           setUsers(response.data.data || []);
         } else {
@@ -75,7 +93,7 @@ const Users = () => {
         if (!isBackgroundRefresh) setLoading(false);
       }
     },
-    [page]
+    [page, sortBy, sortDir, roleFilter] 
   );
 
   useEffect(() => {
@@ -96,6 +114,27 @@ const Users = () => {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+
+  const handleSort = (field) => {
+    if (sortBy !== field) {
+   
+      setSortBy(field);
+      setSortDir("asc");
+    } else if (sortDir === "asc") {
+    
+      setSortDir("desc");
+    } else {
+   
+      setSortBy("");
+      setSortDir("");
+    }
+  };
+
+  const handleFilterChange = (key, values) => {
+    if (key === "role") {
+      setRoleFilter(values);
+    }
+  };
 
   const handleConfirmDelete = async () => {
     if (!confirmDeleteUser) return;
@@ -185,6 +224,9 @@ const Users = () => {
 
   const handleResetFilters = () => {
     setSearch("");
+    setRoleFilter([]);
+    setSortBy("");
+    setSortDir("");
   };
 
   return (
@@ -223,7 +265,7 @@ const Users = () => {
         </div>
       </div>
 
-      {loading ? (
+      {loading && users.length === 0 ? (
         <div className={styles.loadingText}>Loading users...</div>
       ) : error ? (
         <div className={styles.errorText}>{error}</div>
@@ -231,10 +273,50 @@ const Users = () => {
         <div className={styles.tableContainer}>
           <div className={styles.tableHeader}>
             <ColumnHeader title="User ID" hasFilter={false} hasSort={false} />
-            <ColumnHeader title="Username" hasFilter={false} hasSort={true} />
-            <ColumnHeader title="Name" hasFilter={false} hasSort={true} />
-            <ColumnHeader title="User Email" hasFilter={false} hasSort={true} />
-            <ColumnHeader title="Role" hasFilter={true} hasSort={true} />
+
+            <ColumnHeader
+              title="Username"
+              hasFilter={false}
+              hasSort={true}
+              fieldKey="username"
+              onSort={handleSort}
+              sortOrder={sortBy === "username" ? sortDir : null}
+            />
+
+            <ColumnHeader
+              title="Name"
+              hasFilter={false}
+              hasSort={true}
+              fieldKey="full_name"
+              onSort={handleSort}
+              sortOrder={sortBy === "full_name" ? sortDir : null}
+            />
+
+            <ColumnHeader
+              title="User Email"
+              hasFilter={false}
+              hasSort={true}
+              fieldKey="email"
+              onSort={handleSort}
+              sortOrder={sortBy === "email" ? sortDir : null}
+            />
+
+            <ColumnHeader
+              title="Role"
+              hasFilter={true}
+              hasSort={true}
+              fieldKey="role"
+              filterKey="role"
+              filterType="checkbox"
+              filterOptions={roleOptions} // WAJIB ADA
+              valueKey="value" 
+              labelKey="label" 
+              currentFilterValue={roleFilter}
+              onSort={handleSort}
+              onFilterChange={handleFilterChange}
+              sortOrder={sortBy === "role" ? sortDir : null}
+            />
+
             <ColumnHeader title="Actions" hasSort={false} hasFilter={false} />
           </div>
 
@@ -301,46 +383,48 @@ const Users = () => {
         </div>
       )}
 
-      {confirmDeleteUser && ReactDOM.createPortal(
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <h3>Confirm Deletion</h3>
-            <p>
-              Are you sure you want to delete user "
-              <strong>{confirmDeleteUser.username}</strong>"?
-            </p>
-            <div className={styles.modalActions}>
-              <Button
-                variant="solid"
-                onClick={handleConfirmDelete}
-                disabled={deletingUserId === confirmDeleteUser.user_id}
-              >
-                {deletingUserId === confirmDeleteUser.user_id
-                  ? "Deleting..."
-                  : "Yes, Delete"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setConfirmDeleteUser(null)}
-              >
-                Cancel
-              </Button>
+      {confirmDeleteUser &&
+        ReactDOM.createPortal(
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <h3>Confirm Deletion</h3>
+              <p>
+                Are you sure you want to delete user "
+                <strong>{confirmDeleteUser.username}</strong>"?
+              </p>
+              <div className={styles.modalActions}>
+                <Button
+                  variant="solid"
+                  onClick={handleConfirmDelete}
+                  disabled={deletingUserId === confirmDeleteUser.user_id}
+                >
+                  {deletingUserId === confirmDeleteUser.user_id
+                    ? "Deleting..."
+                    : "Yes, Delete"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setConfirmDeleteUser(null)}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          </div>,
+          document.body
+        )}
 
-      {showPopup && ReactDOM.createPortal(
-        <div
-          className={`${styles.popup} ${
-            popupType === "success" ? styles.success : styles.error
-          }`}
-        >
-          {popupMessage}
-        </div>,
-        document.body
-      )}
+      {showPopup &&
+        ReactDOM.createPortal(
+          <div
+            className={`${styles.popup} ${
+              popupType === "success" ? styles.success : styles.error
+            }`}
+          >
+            {popupMessage}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
