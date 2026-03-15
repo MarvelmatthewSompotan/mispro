@@ -50,7 +50,6 @@ textarea {
 .errorFieldWrapper .dateInput,
 .errorFieldWrapper .otherInput {
   background-color: transparent !important;
-
   transition: all 0.2s ease;
 }
 
@@ -88,10 +87,22 @@ textarea {
   border-left: 3px solid var(--red);
 }
 
-/* Error select styling */
 .errorSelect {
   border: 2px solid var(--red) !important;
   border-radius: 4px !important;
+}
+
+.labelRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.requiredMark {
+  color: var(--red);
+  font-family: var(--font-primary);
+  font-size: 16px;
 }
 
 .otherInputWrapper {
@@ -140,6 +151,7 @@ textarea[value]:not([value=""]) {
   font-weight: var(--font-weight-bold);
   font-size: 20px;
   color: var(--main-text);
+  text-transform: uppercase;
 }
 
 .sectionHeader {
@@ -152,6 +164,9 @@ textarea[value]:not([value=""]) {
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: 20px;
 }
 
 .label {
@@ -172,34 +187,25 @@ textarea[value]:not([value=""]) {
 .academicStatusField,
 .phoneField,
 .previousSchoolField,
-.otherField {
+.otherField,
+.emailField {
   flex: 1;
   border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
-  height: 80px;
+  min-height: 72px;     
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 12px;
+  padding: 10px 12px;
   margin: 0;
-  gap: 8px;
+  gap: 4px;              
   min-width: 0;
   width: 100%;
 }
 
-.emailField {
-  flex: 1;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  padding: 12px;
-  margin: 0;
-  min-width: 0;
-  border-bottom: 1px solid var(--main-text);
-}
-.ageField,
-.emailField {
+
+.ageField{
   gap: 20px;
 }
 
@@ -216,24 +222,16 @@ textarea[value]:not([value=""]) {
   padding: 0;
 }
 
-.row:nth-child(3) {
-  margin-top: 20px;
+.row + .row,
+.row + .genderRow,
+.genderRow + .row,
+.topRow + .topRow,
+.addressRow + .addressRow {
+  margin-top: 16px;
 }
 
-.row:nth-child(4) {
-  margin-top: 15px;
-}
-
-.row:nth-child(5) {
-  margin-top: 20px;
-}
-
-.topRow:nth-of-type(2) {
-  margin-top: 15px;
-}
-
-.genderRow {
-  margin-top: 20px;
+.identityBottomRow {
+  margin-top: 24px;
 }
 
 .addressSection {
@@ -243,7 +241,6 @@ textarea[value]:not([value=""]) {
   align-items: flex-start;
   justify-content: center;
   padding: 6px 0px;
-  margin-top: 24px;
 }
 
 .valueHighlight {
@@ -264,14 +261,14 @@ textarea[value]:not([value=""]) {
   flex: 1;
   border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
-  height: 80px;
+  min-height: 72px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 12px;
+  padding: 10px 12px;
   margin: 0;
-  gap: 8px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -282,7 +279,6 @@ textarea[value]:not([value=""]) {
   justify-content: space-between;
   gap: 16px;
   flex: 1;
-  width: calc(50% - 8px);
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -292,13 +288,13 @@ textarea[value]:not([value=""]) {
   flex: 1;
   border-bottom: 1px solid var(--main-text);
   box-sizing: border-box;
-  height: 80px;
+  min-height: 72px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 12px;
-  gap: 8px;
+  padding: 10px 12px;
+  gap: 4px;
 }
 
 .academicStatusWrapper {
@@ -404,7 +400,7 @@ textarea[value]:not([value=""]) {
   height: 24px;
   overflow: hidden;
   flex-shrink: 0;
-  color: var(--main-text); /* Diubah dari #000 */
+  color: var(--main-text);
   pointer-events: none;
 }
 
@@ -515,12 +511,43 @@ textarea[value]:not([value=""]) {
 /* Section styling */
 .infoSection {
   align-self: stretch;
-  background-color: var(--cream);
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 12px;
+  padding: 6px 12px;
+}
+
+/* Jarak antar block besar (Identity / Contact / Address) */
+.infoSection + .infoSection {
+  margin-top: 24px;
+}
+
+/* ===== Subsection header for Identity / Contact / Address ===== */
+.subsectionHeader {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px 0;
+  margin-bottom: 0;
+}
+
+.subsectionTitle {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: 20px;
+  color: var(--main-text);
+  white-space: nowrap;
+}
+
+.subsectionDivider {
+  flex: 1;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.15);
+  margin-left: 12px;
 }
 
 .contentWrapper {
@@ -674,6 +701,25 @@ textarea,
   padding-bottom: 2px !important;
 }
 
+
+/* =========================================================
+   FIX STREET & RT/RW LAYOUT (50/50 SPLIT PRESISI)
+========================================================= */
+
+/* Memaksa elemen di dalam addressRow (Street, Village, dll) terbagi mutlak 50/50 */
+.addressRow > * {
+  flex: none !important;
+  width: calc(50% - 8px) !important;
+  max-width: calc(50% - 8px) !important;
+}
+
+/* Memaksa RT dan RW di dalam rtrwGroup terbagi mutlak 50/50 */
+.rtrwGroup > * {
+  flex: none !important;
+  width: calc(50% - 8px) !important;
+  max-width: calc(50% - 8px) !important;
+}
+
 @media (max-width: 1000px) {
   .row,
   .addressRow,
@@ -696,7 +742,7 @@ textarea,
   .otherField {
     min-width: 0;
     width: 100%;
-    height: 80px;
+    min-height: 72px;
   }
 
   .ageField,
@@ -731,6 +777,16 @@ textarea,
   textarea {
     width: 100%;
     box-sizing: border-box;
+  }
+
+  .addressRow > * {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .rtrwGroup > * {
+    width: calc(50% - 8px) !important;
+    max-width: calc(50% - 8px) !important;
   }
 }
 
