@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\Response;
 
 class StorageController extends Controller
 {
@@ -13,7 +12,7 @@ class StorageController extends Controller
     {
         try {
             $path = str_replace('storage/', '', $path);
-            
+
             if (!Storage::disk('public')->exists($path)) {
                 return response()->json([
                     'success' => false,
@@ -21,8 +20,12 @@ class StorageController extends Controller
                     'error' => null
                 ], 404);
             }
-    
-            return Storage::disk('public')->response($path);
+
+            $fullPath = Storage::disk('public')->path($path);
+
+            return response()->file($fullPath, [
+                'Cache-Control' => 'public, max-age=86400, immutable',
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Storage ServeFile Error: ' . $e->getMessage(), [

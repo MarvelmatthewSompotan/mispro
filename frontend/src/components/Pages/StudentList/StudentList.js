@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../../Molecules/SearchBar/SearchBar";
@@ -9,15 +9,14 @@ import placeholder from "../../../assets/user.svg";
 import infoIcon from "../../../assets/info_icon.svg";
 import ResetFilterButton from "../../Atoms/ResetFilterButton/ResetFilterButton";
 import AutoGraduatePopup from "../../Molecules/PopUp/PopUpAutoGraduate/PopUpAutoGraduate";
+import { getCurrentSchoolYearStr } from "../../../utils/schoolYear";
 
 const ITEMS_PER_PAGE = 25;
-const REFRESH_INTERVAL = 5000;
 
+// ===================== ROW =====================
 const StudentRow = ({ student, onClick }) => {
   const enrollmentStyle =
     student.enrollment_status === "ACTIVE" ? styles.active : styles.status;
-
-  const statusStyle = styles.status;
 
   return (
     <div className={styles.studentDataRow} onClick={onClick}>
@@ -25,9 +24,12 @@ const StudentRow = ({ student, onClick }) => {
         <img
           src={student.photo_url || placeholder}
           alt=""
+          loading="lazy"
+          onError={(e) => (e.target.src = placeholder)}
           className={student.photo_url ? styles.photo : styles.placeholderPhoto}
         />
       </div>
+
       <div className={styles.tableCell} title={student.student_id}>
         {student.student_id}
       </div>
@@ -43,33 +45,46 @@ const StudentRow = ({ student, onClick }) => {
       <div className={styles.tableCell} title={student.school_year}>
         {student.school_year}
       </div>
+
       <div className={styles.tableCell}>
         <div className={enrollmentStyle}>
-          <div className={styles.statusText}>{student.enrollment_status}</div>
+          <div className={styles.statusText}>
+            {student.enrollment_status}
+          </div>
         </div>
       </div>
+
       <div className={styles.tableCell}>
-        <div className={statusStyle}>
-          <div className={styles.statusText}>{student.student_status}</div>
+        <div className={styles.status}>
+          <div className={styles.statusText}>
+            {student.student_status}
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
+// ===================== MAIN =====================
 const StudentList = () => {
   const navigate = useNavigate();
+  
+  const hasFetchedOptions = useRef(false);
+  const hasFetchedStudents = useRef(false);
+
   const [studentData, setStudentData] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const [search, setSearch] = useState("");
-
   const [filters, setFilters] = useState({});
-
   const [sorts, setSorts] = useState([]);
+
+  const [isInitialized, setIsInitialized] = useState(false);
   const [showAutoGraduate, setShowAutoGraduate] = useState(false);
+
   const [filterOptions, setFilterOptions] = useState({
     sections: [],
     classes: [],
@@ -86,52 +101,101 @@ const StudentList = () => {
     ],
   });
 
+  // ===================== FETCH STUDENTS =====================
   const fetchStudents = useCallback(
-    async (page = 1, options = {}) => {
-      const { isBackgroundRefresh = false } = options;
-      if (!isBackgroundRefresh) setLoading(true);
+    async (page = 1) => {
+      // console.log("FETCHING STUDENTS...", {
+      //   page,
+      //   search,
+      //   filters,
+      //   sorts,
+      //   time: new Date().toISOString(),
+      // });
+
+      setLoading(true);
 
       try {
-        const allParams = {
+        const params = {
           ...filters,
           search: search || undefined,
           search_name: search ? undefined : filters.search_name || undefined,
           sort: sorts.length > 0 ? sorts : undefined,
-          page: page,
+          page,
           per_page: ITEMS_PER_PAGE,
         };
 
-        const res = await getStudents(allParams);
-        const data = res.data?.data || [];
-        setStudentData(data);
+        const res = await getStudents(params);
+
+        setStudentData(res.data?.data || []);
         setTotalPages(res.data?.last_page || 1);
         setCurrentPage(res.data?.current_page || 1);
       } catch (err) {
-        console.error("Error fetching student data:", err);
+        console.error("Error fetching students:", err);
       } finally {
-        if (!isBackgroundRefresh) setLoading(false);
+        setLoading(false);
       }
     },
     [search, filters, sorts]
   );
 
+  // ===================== FETCH OPTIONS (ONLY ONCE) =====================
   useEffect(() => {
-    const fetchFilterOptions = async () => {
+    if (hasFetchedOptions.current) return;
+    hasFetchedOptions.current = true;
+
+    // console.log("INIT FILTER OPTIONS");
+
+    const fetchOptions = async () => {
       try {
-        const opts = await getRegistrationOptions();
+        const opts = await getRegistrationOptions({
+          only: "sections,classes,school_years"
+        });
+        const schoolYears = opts.school_years || [];
+
         setFilterOptions((prev) => ({
           ...prev,
           sections: opts.sections || [],
           classes: opts.classes || [],
-          schoolYears: opts.school_years || [],
+          schoolYears: schoolYears,
         }));
+
+        // FIRSTLOAD DEFAULT SCHOOL YEAR
+        const currentSY = getCurrentSchoolYearStr();
+        const foundSY = schoolYears.find((sy) => sy.year === currentSY);
+
+        if (foundSY) {
+          handleFilterChange("school_year_id", [foundSY.school_year_id]);
+        }
       } catch (err) {
         console.error("Error fetching registration options:", err);
+      } finally {
+        setIsInitialized(true);
       }
     };
-    fetchFilterOptions();
+
+    fetchOptions();
   }, []);
 
+  // ===================== FETCH STUDENTS =====================
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    // FIRST LOAD
+    if (!hasFetchedStudents.current) {
+      hasFetchedStudents.current = true;
+      fetchStudents(1);
+      return;
+    }
+
+    // NEXT LOAD (SEARCH / FILTER / SORT)
+    const timer = setTimeout(() => {
+      fetchStudents(currentPage);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search, filters, sorts, currentPage, isInitialized]);
+
+  // ===================== CLEAN SEARCH_NAME =====================
   useEffect(() => {
     if (search && filters.search_name) {
       setFilters((prev) => {
@@ -140,63 +204,33 @@ const StudentList = () => {
         return newFilters;
       });
     }
-  }, [search, filters.search_name, setFilters]);
+  }, [search, filters.search_name]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentPage(1);
-
-      if (search || !filters.search_name) {
-        fetchStudents(1);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [search, filters.search_name, fetchStudents]);
-
-  useEffect(() => {
-    if (search) return;
-    fetchStudents(1);
-  }, [filters, sorts, fetchStudents, search]);
-
-  useEffect(() => {
-    const refreshData = () => {
-      console.log("Auto refreshing student list (background)...");
-      fetchStudents(currentPage, {
-        isBackgroundRefresh: true,
-      });
-    };
-
-    const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
-
-    return () => clearInterval(intervalId);
-  }, [currentPage, fetchStudents]);
-
-  const handlePageChange = (page) => {
-    fetchStudents(page);
-  };
+  // ===================== HANDLERS =====================
+  const handlePageChange = (page) => setCurrentPage(page);
 
   const handleSortChange = (fieldKey) => {
     setSorts((prev) => {
       const current = prev[0]?.field === fieldKey ? prev[0] : null;
+
       let next;
       if (!current) next = { field: fieldKey, order: "asc" };
-      else if (current.order === "asc")
-        next = { field: fieldKey, order: "desc" };
+      else if (current.order === "asc") next = { field: fieldKey, order: "desc" };
       else next = null;
 
-      const newSorts = next ? [next] : [];
-      return newSorts;
+      return next ? [next] : [];
     });
+
+    setCurrentPage(1);
   };
 
   const handleFilterChange = (filterKey, selectedValue) => {
-    setFilters((prevFilters) => {
-      const newFilters = { ...prevFilters };
-      const isArray = Array.isArray(selectedValue);
+    setFilters((prev) => {
+      const newFilters = { ...prev };
 
-      if (isArray && selectedValue.length > 0) {
+      if (Array.isArray(selectedValue) && selectedValue.length > 0) {
         newFilters[filterKey] = selectedValue;
-      } else if (!isArray && selectedValue) {
+      } else if (selectedValue) {
         newFilters[filterKey] = selectedValue;
       } else {
         delete newFilters[filterKey];
@@ -208,22 +242,29 @@ const StudentList = () => {
 
       return newFilters;
     });
+
+    setCurrentPage(1);
   };
 
-  const getSortOrder = (fieldKey) => {
-    return sorts.find((s) => s.field === fieldKey)?.order;
-  };
+  const getSortOrder = (fieldKey) =>
+    sorts.find((s) => s.field === fieldKey)?.order;
 
+  // ===================== UI =====================
   return (
     <div className={styles.studentListContainer}>
       <div>
         <h1 className={styles.pageTitle}>Student List</h1>
+
         <div className={styles.searchAndFilterContainer}>
           <SearchBar
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Find name or student id"
           />
+
           <ResetFilterButton
             onClick={() => {
               setSearch("");
@@ -243,6 +284,7 @@ const StudentList = () => {
           >
             Auto Graduate
           </div>
+
           <img className={styles.infoIcon} alt="Info" src={infoIcon} />
         </div>
 
@@ -264,6 +306,7 @@ const StudentList = () => {
               onSort={handleSortChange}
               hasFilter={false}
             />
+
             <ColumnHeader
               title="Student Name"
               hasSort={true}
@@ -276,6 +319,7 @@ const StudentList = () => {
               onFilterChange={handleFilterChange}
               currentFilterValue={filters.search_name}
             />
+
             <ColumnHeader
               title="Grade"
               hasSort={true}
@@ -290,6 +334,7 @@ const StudentList = () => {
               labelKey="grade"
               currentFilterValue={filters.class_id}
             />
+
             <ColumnHeader
               title="Section"
               hasSort={true}
@@ -304,19 +349,20 @@ const StudentList = () => {
               labelKey="name"
               currentFilterValue={filters.section_id}
             />
+
             <ColumnHeader
               title="School Year"
-              hasSort={true}
+              hasSort={false}
               hasFilter={true}
               filterKey="school_year_id"
               onFilterChange={handleFilterChange}
               filterOptions={filterOptions.schoolYears}
               valueKey="school_year_id"
               labelKey="year"
-              disableSort={true}
               currentFilterValue={filters.school_year_id}
               singleSelect={true}
             />
+
             <ColumnHeader
               title="Enrollment"
               hasSort={true}
@@ -331,6 +377,7 @@ const StudentList = () => {
               labelKey="name"
               currentFilterValue={filters.enrollment_status}
             />
+
             <ColumnHeader
               title="Status"
               hasSort={true}
@@ -338,7 +385,7 @@ const StudentList = () => {
               sortOrder={getSortOrder("student_status")}
               onSort={handleSortChange}
               hasFilter={true}
-              filterKey="student_status" 
+              filterKey="student_status"
               onFilterChange={handleFilterChange}
               filterOptions={filterOptions.studentStatus}
               valueKey="id"
@@ -376,6 +423,7 @@ const StudentList = () => {
           onPageChange={handlePageChange}
         />
       )}
+
       {showAutoGraduate && (
         <AutoGraduatePopup
           onClose={() => setShowAutoGraduate(false)}

@@ -10,29 +10,32 @@ export const createImage = (url) =>
 export default async function getCroppedImg(
   imageSrc,
   pixelCrop,
-  mimeType = "image/jpeg"
+  mimeType = "image/png" // default PNG biar support transparansi
 ) {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
-  if (!ctx) {
-    return null;
-  }
+  if (!ctx) return null;
 
-  // Set ukuran canvas sesuai area crop
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  const MAX_WIDTH = 400;
+  const scale = MAX_WIDTH / pixelCrop.width;
 
-  // Bersihkan canvas 
+  const outputWidth = MAX_WIDTH;
+  const outputHeight = pixelCrop.height * scale;
+
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
+
+  // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Background putih hanya untuk JPG
   if (mimeType === "image/jpeg") {
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Gambar area yang dicrop ke canvas
   ctx.drawImage(
     image,
     pixelCrop.x,
@@ -41,11 +44,11 @@ export default async function getCroppedImg(
     pixelCrop.height,
     0,
     0,
-    pixelCrop.width,
-    pixelCrop.height
+    outputWidth,
+    outputHeight
   );
 
-  // Convert canvas ke Blob/File
+  // COMPRESS (PNG ignore quality, tapi tetap kita set)
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -53,13 +56,17 @@ export default async function getCroppedImg(
           reject(new Error("Canvas is empty"));
           return;
         }
+
         const fileName =
-          mimeType === "image/png" ? "cropped-photo.png" : "cropped-photo.jpg";
+          mimeType === "image/png"
+            ? "cropped-photo.png"
+            : "cropped-photo.jpg";
+
         const file = new File([blob], fileName, { type: mimeType });
         resolve(file);
       },
       mimeType,
-      1
-    ); 
+      mimeType === "image/jpeg" ? 0.9 : 1 // JPG bisa compress, PNG ignore
+    );
   });
 }

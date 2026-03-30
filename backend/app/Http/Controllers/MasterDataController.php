@@ -60,46 +60,43 @@ class MasterDataController extends Controller
         }
     }
 
-    public function getRegistrationOption()
+    public function getRegistrationOption(Request $request)
     {
         try {
-            $sections = Section::select('section_id', 'name')->get();
-            $majors = Major::select('major_id', 'name')->get();
-            $classes = SchoolClass::select('class_id', 'grade')->get();
-            
-            $pickupPoints = PickupPoint::select('pickup_point_id', 'name')->get();
-            
-            return response()->json([
-                'sections' => $sections,
-                'majors' => $majors,
-                'classes' => $classes,
-                'programs' => Program::select('program_id', 'name')->get(),
-                'school_years' => SchoolYear::select('school_year_id', 'year')->get(),
-                'semesters' => Semester::select('semester_id', 'name')->get(),
-                'transportations' => Transportation::select('transport_id', 'type')->get(),
-                'residence_halls' => ResidenceHall::select('residence_id', 'type')->get(),
-                'discount_types' => DiscountType::select('discount_type_id', 'name')->get(),
-                'student_status' => ['New', 'Old', 'Transferee'],
-                'academic_status' => ['REGULAR', 'SIT-IN', 'OTHER'],
-                'tuition_fees' => ['Full Payment', 'Installment'],
-                'residence_payment' => ['Full Payment', 'Installment'],
-                'financial_policy_contract' => ['Signed', 'Not Signed'],
-                'pickup_points' => $pickupPoints,
-                'active_status' => ['Not Graduate', 'Graduate', 'Expelled', 'Withdraw'],
-                'roles' => ['admin', 'registrar', 'head_registrar', 'teacher']
-            ]);
+            $only = $request->query('only');
+
+            $only = $only ? explode(',', $only) : [];
+
+            $data = [];
+
+            if (empty($only) || in_array('sections', $only)) {
+                $data['sections'] = Section::select('section_id', 'name')->get();
+            }
+
+            if (empty($only) || in_array('classes', $only)) {
+                $data['classes'] = SchoolClass::select('class_id', 'grade')->get();
+            }
+
+            if (empty($only) || in_array('school_years', $only)) {
+                $data['school_years'] = SchoolYear::select('school_year_id', 'year')->get();
+            }
+
+            if (empty($only) || in_array('majors', $only)) {
+                $data['majors'] = Major::select('major_id', 'name')->get();
+            }
+
+            if (empty($only) || in_array('programs', $only)) {
+                $data['programs'] = Program::select('program_id', 'name')->get();
+            }
+
+            // dst sesuai kebutuhan...
+
+            return response()->json($data);
 
         } catch (\Exception $e) {
-            Log::error('MasterData Options Error: ' . $e->getMessage(), [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
             return response()->json([
-                'success' => false,
                 'message' => 'Failed to retrieve registration options.',
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'error' => $e->getMessage()
             ], 500);
         }
     }
