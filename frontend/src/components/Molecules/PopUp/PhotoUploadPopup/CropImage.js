@@ -10,32 +10,29 @@ export const createImage = (url) =>
 export default async function getCroppedImg(
   imageSrc,
   pixelCrop,
-  mimeType = "image/png" // default PNG biar support transparansi
+  mimeType = "image/jpeg"
 ) {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
-  if (!ctx) return null;
+  if (!ctx) {
+    return null;
+  }
 
-  const MAX_WIDTH = 400;
-  const scale = MAX_WIDTH / pixelCrop.width;
+  // Set ukuran canvas sesuai area crop
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
 
-  const outputWidth = MAX_WIDTH;
-  const outputHeight = pixelCrop.height * scale;
-
-  canvas.width = outputWidth;
-  canvas.height = outputHeight;
-
-  // Clear canvas
+  // Bersihkan canvas 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Background putih hanya untuk JPG
   if (mimeType === "image/jpeg") {
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
+  // Gambar area yang dicrop ke canvas
   ctx.drawImage(
     image,
     pixelCrop.x,
@@ -44,11 +41,11 @@ export default async function getCroppedImg(
     pixelCrop.height,
     0,
     0,
-    outputWidth,
-    outputHeight
+    pixelCrop.width,
+    pixelCrop.height
   );
 
-  // COMPRESS (PNG ignore quality, tapi tetap kita set)
+  // Convert canvas ke Blob/File
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -56,17 +53,13 @@ export default async function getCroppedImg(
           reject(new Error("Canvas is empty"));
           return;
         }
-
         const fileName =
-          mimeType === "image/png"
-            ? "cropped-photo.png"
-            : "cropped-photo.jpg";
-
+          mimeType === "image/png" ? "cropped-photo.png" : "cropped-photo.jpg";
         const file = new File([blob], fileName, { type: mimeType });
         resolve(file);
       },
       mimeType,
-      mimeType === "image/jpeg" ? 0.9 : 1 // JPG bisa compress, PNG ignore
-    );
+      1
+    ); 
   });
 }

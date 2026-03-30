@@ -96,10 +96,7 @@ export const logout = async () => {
 
 export const getMe = () => apiFetch('/me');
 
-export const getRegistrationOptions = (params = {}) => {
-  const query = new URLSearchParams(params).toString();
-  return apiFetch(`/registration-option?${query}`);
-};
+export const getRegistrationOptions = () => apiFetch('/registration-option');
 
 export const addSchoolYear = () => {
   return apiFetch('/school-year/add', {
