@@ -32,6 +32,54 @@
   --line-height-base: 1.5;     /* Tinggi baris standar */
 }
 
+/* ==================== GLOBAL FORM LAYOUT UTILS ==================== */
+
+.form-section-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+.form-section {
+  width: 100%;
+  background-color: var(--secondary-background);
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+  box-sizing: border-box;
+}
+
+.form-section + .form-section {
+  margin-top: 24px;
+}
+
+.form-section-header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.form-section-title {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: 20px;
+  color: var(--main-text);
+  white-space: nowrap;
+}
+
+.form-row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+}
+
 /* Poppins Regular (400) */
 @font-face {
 font-family: 'Poppins';

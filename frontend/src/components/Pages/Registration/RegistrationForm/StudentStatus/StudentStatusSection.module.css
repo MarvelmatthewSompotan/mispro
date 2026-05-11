@@ -330,7 +330,7 @@
   gap: 12px;
   min-width: 422px;
   font-size: 16px;
-  background-color: var(--cream);
+  background-color: var(--secondary-background);
 }
 .container {
   position: relative;

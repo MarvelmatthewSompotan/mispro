@@ -15,6 +15,45 @@ const religionOptions = [
   'Kristen Advent',
 ];
 
+// Reusable text input field with label on the left, matching Figma layout
+const StandardField = ({
+  id,
+  label,
+  required = false,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+  error = false,
+  wrapperClass = '',
+  inputClass = '',
+  onFocus,
+  inputProps = {},
+}) => (
+  <div
+    className={`${wrapperClass} ${
+      error ? styles.errorFieldWrapper : ''
+    }`}
+  >
+    <div className={styles.labelRow}>
+      <span className={`${styles.label} ${error ? styles.errorLabel : ''}`}>{label}</span>
+      {required && <span className={styles.requiredMark}>*</span>}
+    </div>
+    <input
+      id={id}
+      type={type}
+      className={`${styles.label} ${inputClass} ${value ? 'hasValue' : ''} ${
+        error ? styles.errorInput : ''
+      }`}
+      value={value}
+      onChange={onChange}
+      onFocus={onFocus}
+      placeholder={placeholder}
+      {...inputProps}
+    />
+  </div>
+);
+
 const StudentInformationSection = ({
   prefill,
   onDataChange,
@@ -108,12 +147,6 @@ const StudentInformationSection = ({
 
   useEffect(() => {
     if (prefill && Object.keys(prefill).length > 0) {
-    } else if (Object.keys(prefill).length === 0) {
-    }
-  }, [prefill]);
-
-  useEffect(() => {
-    if (prefill && Object.keys(prefill).length > 0) {
       setFirstName(prefill.first_name || '');
       setMiddleName(prefill.middle_name || '');
       setLastName(prefill.last_name || '');
@@ -134,8 +167,8 @@ const StudentInformationSection = ({
       setAcademicStatus(prefill.academic_status || '');
       setAcademicStatusOther(prefill.academic_status_other || '');
       setStreet(prefill.street || '');
-      setRt(prefill.rt || '0'); 
-      setRw(prefill.rw || '0'); 
+      setRt(prefill.rt || '0');
+      setRw(prefill.rw || '0');
       setVillage(prefill.village || '');
       setDistrict(prefill.district || '');
       setCity(prefill.city_regency || '');
@@ -349,14 +382,13 @@ const StudentInformationSection = ({
 
     const inputDate = new Date(value);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); 
+    today.setHours(0, 0, 0, 0);
 
     let isValid = true;
     let errorMessage = null;
 
     if (value && inputDate > today) {
       isValid = false;
-      errorMessage = "Date of birth cannot be in the future";
       setDateOfBirthError(true);
     } else {
       if (dateOfBirthError) setDateOfBirthError(false);
@@ -366,7 +398,7 @@ const StudentInformationSection = ({
 
     if (onValidationChange) {
       onValidationChange({
-        date_of_birth: isValid ? null : errorMessage
+        date_of_birth: isValid ? null : errorMessage,
       });
     }
   };
@@ -472,126 +504,96 @@ const StudentInformationSection = ({
   }, [dateOfBirth, updateAge]);
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} form-section-container`}>
       <div className={styles.sectionHeader}>
         <span className={styles.headerTitle}>STUDENT'S INFORMATION</span>
       </div>
       <div className={styles.contentWrapper}>
-        <div className={styles.infoSection}>
-          <div className={styles.row}>
-            <div
-              className={`${styles.nameField} ${
-                firstNameError ? styles.errorFieldWrapper : ''
-              }`}
-            >
-              <label
-                className={`${styles.label} ${
-                  firstNameError ? styles.errorLabel : ''
-                }`}
-                htmlFor='firstName'
-              >
-                First name
-              </label>
-              <input
-                id='firstName'
-                className={`${styles.label} ${firstName ? 'hasValue' : ''} ${
-                  firstNameError ? styles.errorInput : ''
-                }`}
-                type='text'
-                value={firstName}
-                onChange={(e) => {
-                  handleFirstName(e.target.value);
-                  if (firstNameError && e.target.value.trim()) {
-                    setFirstNameError(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (firstNameError) {
-                    setFirstNameError(false);
-                  }
-                }}
-                placeholder='First name'
-              />
-            </div>
-            <div className={styles.nameField}>
-              <label className={styles.label} htmlFor='middleName'>
-                Middle name
-              </label>
-              <input
-                id='middleName'
-                className={`${styles.label} ${middleName ? 'hasValue' : ''}`}
-                type='text'
-                value={middleName}
-                onChange={(e) => handleMiddleName(e.target.value)}
-                placeholder='Middle name'
-              />
-            </div>
+
+        <div className={`${styles.infoSection} form-section`}>
+          <div className={`${styles.subsectionHeader} form-section-header`}>
+            <span className={`${styles.subsectionTitle} form-section-title`}>
+              Student&apos;s Identity
+            </span>
           </div>
-          <div className={styles.row}>
-            <div className={styles.nicknameField}>
-              <label className={styles.label} htmlFor='lastName'>
-                Last name
-              </label>
-              <input
-                id='lastName'
-                className={`${styles.label} ${lastName ? 'hasValue' : ''}`}
-                type='text'
-                value={lastName}
-                onChange={(e) => handleLastName(e.target.value)}
-                placeholder='Last name'
-              />
-            </div>
-            <div
-              className={`${styles.nicknameField} ${
-                nicknameError ? styles.errorFieldWrapper : ''
-              }`}
-            >
-              <label
-                className={`${styles.label} ${
-                  nicknameError ? styles.errorLabel : ''
-                }`}
-                htmlFor='nickname'
-              >
-                Nickname
-              </label>
-              <input
-                id='nickname'
-                className={`${styles.valueHighlight} ${
-                  nickname ? 'hasValue' : ''
-                } ${nicknameError ? styles.errorInput : ''}`}
-                type='text'
-                value={nickname}
-                onChange={(e) => {
-                  handleNickname(e.target.value);
-                  if (nicknameError && e.target.value.trim()) {
-                    setNicknameError(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (nicknameError) {
-                    setNicknameError(false);
-                  }
-                }}
-                placeholder='Nickname'
-              />
-            </div>
+
+          <div className={`${styles.row} form-row`}>
+            <StandardField
+              id="firstName"
+              label="First name"
+              required
+              value={firstName}
+              error={firstNameError}
+              placeholder="First name"
+              wrapperClass={styles.nameField}
+              onChange={(e) => {
+                handleFirstName(e.target.value);
+                if (firstNameError && e.target.value.trim()) {
+                  setFirstNameError(false);
+                }
+              }}
+              onFocus={() => {
+                if (firstNameError) {
+                  setFirstNameError(false);
+                }
+              }}
+            />
+            <StandardField
+              id="middleName"
+              label="Middle name"
+              value={middleName}
+              placeholder="Middle name"
+              wrapperClass={styles.nameField}
+              onChange={(e) => handleMiddleName(e.target.value)}
+            />
           </div>
-          <div className={styles.row}>
+
+          <div className={`${styles.row} form-row`}>
+            <StandardField
+              id="lastName"
+              label="Last name"
+              value={lastName}
+              placeholder="Last name"
+              wrapperClass={styles.nicknameField}
+              onChange={(e) => handleLastName(e.target.value)}
+            />
+            <StandardField
+              id="nickname"
+              label="Nickname"
+              required
+              value={nickname}
+              error={nicknameError}
+              placeholder="Nickname"
+              wrapperClass={styles.nicknameField}
+              inputClass={styles.valueHighlight}
+              onChange={(e) => {
+                handleNickname(e.target.value);
+                if (nicknameError && e.target.value.trim()) {
+                  setNicknameError(false);
+                }
+              }}
+              onFocus={() => {
+                if (nicknameError) {
+                  setNicknameError(false);
+                }
+              }}
+            />
+          </div>
+
+          <div className={`${styles.row} form-row`}>
             <div
               className={`${styles.citizenshipField} ${
                 citizenshipError ? styles.errorFieldWrapper : ''
               }`}
             >
-              <label
-                className={`${styles.label} ${
-                  citizenshipError ? styles.errorLabel : ''
-                }`}
-                htmlFor='citizenship'
-              >
-                Citizenship
-              </label>
+              <div className={styles.labelRow}>
+                <span className={`${styles.label} ${citizenshipError ? styles.errorLabel : ''}`}>
+                  Citizenship
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
               <Select
-                id='citizenship'
+                id="citizenship"
                 value={
                   citizenship
                     ? { value: citizenship, label: citizenship }
@@ -603,7 +605,7 @@ const StudentInformationSection = ({
                   label: opt,
                 }))}
                 styles={customSelectStyles}
-                placeholder='Select citizenship'
+                placeholder="Select citizenship"
                 isClearable
                 className={citizenshipError ? styles.errorInput : ''}
               />
@@ -613,16 +615,14 @@ const StudentInformationSection = ({
                 religionError ? styles.errorFieldWrapper : ''
               }`}
             >
-              <label
-                className={`${styles.label} ${
-                  religionError ? styles.errorLabel : ''
-                }`}
-                htmlFor='religion'
-              >
-                Religion
-              </label>
+              <div className={styles.labelRow}>
+                <span className={`${styles.label} ${religionError ? styles.errorLabel : ''}`}>
+                  Religion
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
               <Select
-                id='religion'
+                id="religion"
                 value={religion ? { value: religion, label: religion } : null}
                 onChange={handleReligion}
                 options={religionOptions.map((opt) => ({
@@ -630,7 +630,7 @@ const StudentInformationSection = ({
                   label: opt,
                 }))}
                 styles={customSelectStyles}
-                placeholder='Select religion'
+                placeholder="Select religion"
                 isClearable
                 onFocus={() => {
                   if (religionError) {
@@ -639,57 +639,42 @@ const StudentInformationSection = ({
                 }}
               />
             </div>
-            <div
-              className={`${styles.citizenshipField} ${
-                placeOfBirthError ? styles.errorFieldWrapper : ''
-              }`}
-            >
-              <label
-                className={`${styles.label} ${
-                  placeOfBirthError ? styles.errorLabel : ''
-                }`}
-                htmlFor='placeOfBirth'
-              >
-                Place of birth
-              </label>
-              <input
-                id='placeOfBirth'
-                className={`${styles.valueHighlight} ${
-                  placeOfBirth ? 'hasValue' : ''
-                } ${placeOfBirthError ? styles.errorInput : ''}`}
-                type='text'
-                value={placeOfBirth}
-                onChange={(e) => {
-                  handlePlaceOfBirth(e.target.value);
-                  if (placeOfBirthError && e.target.value.trim()) {
-                    setPlaceOfBirthError(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (placeOfBirthError) {
-                    setPlaceOfBirthError(false);
-                  }
-                }}
-                placeholder='Place of birth'
-              />
-            </div>
+            <StandardField
+              id="placeOfBirth"
+              label="Place of birth"
+              required
+              value={placeOfBirth}
+              error={placeOfBirthError}
+              placeholder="Place of birth"
+              wrapperClass={styles.citizenshipField}
+              inputClass={styles.valueHighlight}
+              onChange={(e) => {
+                handlePlaceOfBirth(e.target.value);
+                if (placeOfBirthError && e.target.value.trim()) {
+                  setPlaceOfBirthError(false);
+                }
+              }}
+              onFocus={() => {
+                if (placeOfBirthError) {
+                  setPlaceOfBirthError(false);
+                }
+              }}
+            />
             <div
               className={`${styles.nicknameField} ${
                 dateOfBirthError ? styles.errorFieldWrapper : ''
               }`}
             >
-              <label
-                className={`${styles.label} ${
-                  dateOfBirthError ? styles.errorLabel : ''
-                }`}
-                htmlFor='dateOfBirth'
-              >
-                Date of birth
-              </label>
+              <div className={styles.labelRow}>
+                <span className={`${styles.label} ${dateOfBirthError ? styles.errorLabel : ''}`}>
+                  Date of birth
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
               <div className={styles.dateInputWrapper}>
                 <input
-                  id='dateOfBirth'
-                  type='date'
+                  id="dateOfBirth"
+                  type="date"
                   value={dateOfBirth}
                   onChange={(e) => {
                     handleDateOfBirth(e.target.value);
@@ -709,50 +694,46 @@ const StudentInformationSection = ({
                 />
                 <div className={styles.calendarIcon}>
                   <svg
-                    width='20'
-                    height='20'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    xmlns='http://www.w3.org/2000/svg'
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d='M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z'
-                      stroke='currentColor'
-                      strokeWidth='1.5'
-                      strokeMiterlimit='10'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
+                      d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
                 </div>
               </div>
-              {dateOfBirthError && (
-                <div className={styles.inlineErrorMessage}>
-                  Date of birth cannot be in the future
-                </div>
-              )}
             </div>
           </div>
+
           {citizenship === 'Non Indonesia' && (
-            <div className={styles.nicknameField}>
-              <label
-                className={`${styles.label} ${
-                  errors.country ? styles.errorLabel : ''
-                }`}
-                htmlFor='foreignCountry'
-              >
-                Country of origin
-              </label>
+            <div className={`${styles.nicknameField} ${errors.country ? styles.errorFieldWrapper : ''}`}>
+              <div className={styles.labelRow}>
+                <span
+                  className={`${styles.label} ${errors.country ? styles.errorLabel : ''}`}
+                >
+                  Country of origin
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
               <div className={styles.inputWithError}>
                 <input
-                  id='foreignCountry'
-                  className={`${styles.valueHighlight} ${
+                  id="foreignCountry"
+                  className={`${styles.label} ${styles.valueHighlight} ${
                     foreignCountry ? 'hasValue' : ''
                   } ${errors.country ? styles.errorInput : ''}`}
-                  type='text'
+                  type="text"
                   value={foreignCountry}
                   onChange={(e) => handleForeignCountry(e.target.value)}
-                  placeholder='Country of Origin'
+                  placeholder="Country of Origin"
                 />
                 {errors.country && (
                   <div className={styles.inlineErrorMessage}>
@@ -763,27 +744,27 @@ const StudentInformationSection = ({
             </div>
           )}
 
-          <div className={styles.row}>
+          <div className={`${styles.row} form-row`}>
             {citizenship === 'Non Indonesia' && (
-              <div className={styles.nicknameField}>
-                <label
-                  className={`${styles.label} ${
-                    kitasError ? styles.errorLabel : ''
-                  }`}
-                  htmlFor='kitas'
-                >
-                  KITAS
-                </label>
+              <div className={`${styles.nicknameField} ${kitasError ? styles.errorFieldWrapper : ''}`}>
+                <div className={styles.labelRow}>
+                  <span
+                    className={`${styles.label} ${kitasError ? styles.errorLabel : ''}`}
+                  >
+                    KITAS
+                  </span>
+                  <span className={styles.requiredMark}>*</span>
+                </div>
                 <div className={styles.inputWithError}>
                   <input
-                    id='kitas'
-                    className={`${styles.valueHighlight} ${
+                    id="kitas"
+                    className={`${styles.label} ${styles.valueHighlight} ${
                       kitas ? 'hasValue' : ''
                     } ${kitasError ? styles.errorInput : ''}`}
-                    type='text'
+                    type="text"
                     value={kitas}
                     onChange={(e) => handleKitas(e.target.value)}
-                    placeholder='KITAS is required'
+                    placeholder="KITAS is required"
                     maxLength={50}
                   />
                   {kitasError && (
@@ -794,25 +775,25 @@ const StudentInformationSection = ({
                 </div>
               </div>
             )}
-            <div className={styles.nicknameField}>
-              <label
-                className={`${styles.label} ${
-                  nisnError ? styles.errorLabel : ''
-                }`}
-                htmlFor='nisn'
-              >
-                Nomor Induk Siswa Nasional (NISN)
-              </label>
+            <div className={`${styles.nicknameField} ${nisnError ? styles.errorFieldWrapper : ''}`}>
+              <div className={styles.labelRow}>
+                <span className={`${styles.label} ${nisnError ? styles.errorLabel : ''}`}>
+                  Nomor Induk Siswa Nasional (NISN)
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
               <div className={styles.inputWithError}>
                 <input
-                  id='nisn'
-                  className={`${styles.label} ${nisn ? 'hasValue' : ''} ${
+                  id="nisn"
+                  className={`${styles.label} ${
+                    nisn ? 'hasValue' : ''
+                  } ${
                     nisnError ? styles.errorInput : ''
                   }`}
-                  type='text'
+                  type="text"
                   value={nisn}
                   onChange={(e) => handleNisn(e.target.value)}
-                  placeholder='NISN (10 digits)'
+                  placeholder="NISN (10 digits)"
                   maxLength={10}
                 />
                 {nisnError && (
@@ -823,25 +804,25 @@ const StudentInformationSection = ({
               </div>
             </div>
             {citizenship === 'Indonesia' && (
-              <div className={styles.nicknameField}>
-                <label
-                  className={`${styles.label} ${
-                    nikError ? styles.errorLabel : ''
-                  }`}
-                  htmlFor='nik'
-                >
-                  Nomor Induk Kependudukan (NIK)
-                </label>
+              <div className={`${styles.nicknameField} ${nikError ? styles.errorFieldWrapper : ''}`}>
+                <div className={styles.labelRow}>
+                  <span className={`${styles.label} ${nikError ? styles.errorLabel : ''}`}>
+                    Nomor Induk Kependudukan (NIK)
+                  </span>
+                  <span className={styles.requiredMark}>*</span>
+                </div>
                 <div className={styles.inputWithError}>
                   <input
-                    id='nik'
-                    className={`${styles.label} ${nik ? 'hasValue' : ''} ${
+                    id="nik"
+                    className={`${styles.label} ${
+                      nik ? 'hasValue' : ''
+                    } ${
                       nikError ? styles.errorInput : ''
                     }`}
-                    type='text'
+                    type="text"
                     value={nik}
                     onChange={(e) => handleNik(e.target.value)}
-                    placeholder='NIK (16 digits)'
+                    placeholder="NIK (16 digits)"
                     maxLength={16}
                   />
                   {nikError && (
@@ -853,27 +834,26 @@ const StudentInformationSection = ({
               </div>
             )}
           </div>
-          <div className={`${styles.row} ${styles.genderRow}`}>
+
+          <div className={`${styles.row} ${styles.genderRow} form-row`}>
             <div
               className={`${styles.genderField} ${
                 genderError ? styles.errorFieldWrapper : ''
               }`}
             >
-              <label
-                className={`${styles.label} ${
-                  genderError ? styles.errorLabel : ''
-                }`}
-                htmlFor='gender'
-              >
-                Gender
-              </label>
+              <div className={styles.labelRow}>
+                <span className={`${styles.label} ${genderError ? styles.errorLabel : ''}`}>
+                  Gender
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
               <Select
-                id='gender'
+                id="gender"
                 options={genderOptions.map((opt) => ({
                   value: opt,
                   label: opt,
                 }))}
-                placeholder='Select gender'
+                placeholder="Select gender"
                 value={gender ? { value: gender, label: gender } : null}
                 onChange={(opt) => {
                   handleGender(opt ? opt.value : '');
@@ -895,20 +875,18 @@ const StudentInformationSection = ({
                 rankError ? styles.errorFieldWrapper : ''
               }`}
             >
-              <label
-                className={`${styles.label} ${
-                  rankError ? styles.errorLabel : ''
-                }`}
-                htmlFor='rank'
-              >
-                Rank in the family
-              </label>
+              <div className={styles.labelRow}>
+                <span className={`${styles.label} ${rankError ? styles.errorLabel : ''}`}>
+                  Rank in the family
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
               <input
-                id='rank'
-                className={`${styles.valueSmall} ${rank ? 'hasValue' : ''} ${
+                id="rank"
+                className={`${styles.label} ${styles.valueSmall} ${rank ? 'hasValue' : ''} ${
                   rankError ? styles.errorInput : ''
                 }`}
-                type='number'
+                type="number"
                 value={rank}
                 onChange={(e) => {
                   handleFamilyRank(e.target.value);
@@ -921,125 +899,45 @@ const StudentInformationSection = ({
                     setRankError(false);
                   }
                 }}
-                placeholder='1'
-                min='1'
-                max='99'
+                placeholder="1"
+                min="1"
+                max="99"
               />
             </div>
             <div className={`${styles.genderField} ${styles.ageField}`}>
-              <label className={styles.label} htmlFor='age'>
+              <label className={styles.label} htmlFor="age">
                 Age
               </label>
               <div
                 className={`${styles.valueSmall} ${age ? 'hasValue' : ''}`}
-                id='age'
+                id="age"
               >
                 {age || <>&nbsp;</>}
               </div>
             </div>
+            
           </div>
-        </div>
-        <div className={styles.infoSection}>
-          <div className={styles.topRow}>
-            <div
-              className={`${styles.emailField} ${
-                emailError ? styles.errorFieldWrapper : ''
-              }`}
-            >
-              <label
-                className={`${styles.label} ${
-                  emailError ? styles.errorLabel : ''
-                }`}
-                htmlFor='email'
-              >
-                Email address
-              </label>
-              <div className={styles.inputWithError}>
-                <input
-                  id='email'
-                  className={`${styles.valueHighlight} ${
-                    email ? 'hasValue' : ''
-                  } ${emailError ? styles.errorInput : ''}`}
-                  type='email'
-                  value={email}
-                  onChange={(e) => {
-                    handleEmail(e.target.value);
-                    if (emailError && e.target.value.trim()) {
-                      setEmailError(false);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (emailError) {
-                      setEmailError(false);
-                    }
-                  }}
-                  placeholder='Johndoe@gmail.com'
-                />
-                {emailError && (
-                  <div className={styles.inlineErrorMessage}>
-                    Please enter a valid email address
-                  </div>
-                )}
-              </div>
-            </div>
-            <div
-              className={`${styles.previousSchoolField} ${
-                previousSchoolError ? styles.errorFieldWrapper : ''
-              }`}
-            >
-              <label
-                className={`${styles.label} ${
-                  previousSchoolError ? styles.errorLabel : ''
-                }`}
-                htmlFor='previousSchool'
-              >
-                Previous school
-              </label>
-              <input
-                id='previousSchool'
-                className={`${styles.valueHighlight} ${
-                  previousSchool ? 'hasValue' : ''
-                } ${previousSchoolError ? styles.errorInput : ''}`}
-                type='text'
-                value={previousSchool}
-                onChange={(e) => {
-                  handlePreviousSchool(e.target.value);
-                  if (previousSchoolError && e.target.value.trim()) {
-                    setPreviousSchoolError(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (previousSchoolError) {
-                    setPreviousSchoolError(false);
-                  }
-                }}
-                placeholder='Previous School'
-              />
-            </div>
-          </div>
-          <div className={styles.topRow}>
+          <div className={`${styles.topRow} ${styles.identityBottomRow} form-row`}>
             <div
               className={`${styles.phoneField} ${
                 phoneError ? styles.errorFieldWrapper : ''
               }`}
             >
-              <label
-                className={`${styles.label} ${
-                  phoneError ? styles.errorLabel : ''
-                }`}
-                htmlFor='phone'
-              >
-                Phone number
-              </label>
+              <div className={styles.labelRow}>
+                <span className={`${styles.label} ${phoneError ? styles.errorLabel : ''}`}>
+                  Phone number
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
               <div className={styles.inputWithError}>
                 <input
-                  id='phone'
-                  className={`${styles.valueHighlight} ${
+                  id="phone"
+                  className={`${styles.label} ${styles.valueHighlight} ${
                     phone ? 'hasValue' : ''
                   } ${phoneError ? styles.errorInput : ''}`}
-                  type='text'
+                  type="text"
                   value={phone}
-                  maxLength='20'
+                  maxLength="20"
                   onChange={(e) => {
                     handlePhone(e.target.value);
                     if (phoneError && e.target.value.trim()) {
@@ -1051,7 +949,7 @@ const StudentInformationSection = ({
                       setPhoneError(false);
                     }
                   }}
-                  placeholder='Phone number'
+                  placeholder="Phone number"
                 />
                 {phoneError && (
                   <div className={styles.inlineErrorMessage}>
@@ -1065,24 +963,24 @@ const StudentInformationSection = ({
                 academicStatusError ? styles.errorFieldWrapper : ''
               }`}
             >
-              <label
-                className={`${styles.label} ${
-                  academicStatusError ? styles.errorLabel : ''
-                }`}
-                htmlFor='academicStatus'
-              >
-                Academic status
-              </label>
+              <div className={styles.labelRow}>
+                <span
+                  className={`${styles.label} ${academicStatusError ? styles.errorLabel : ''}`}
+                >
+                  Academic status
+                </span>
+                <span className={styles.requiredMark}>*</span>
+              </div>
 
               <div className={styles.academicStatusWrapper}>
                 <Select
-                  id='academicStatus'
+                  id="academicStatus"
                   options={academicStatusOptions.map((opt) => ({
                     value: opt,
                     label: opt,
                   }))}
                   styles={customSelectStyles}
-                  placeholder='Select status'
+                  placeholder="Select status"
                   value={
                     academicStatus
                       ? { value: academicStatus, label: academicStatus }
@@ -1097,248 +995,225 @@ const StudentInformationSection = ({
 
                 {academicStatus === 'OTHER' && (
                   <input
-                    className={styles.otherInput}
-                    type='text'
+                    className={`${styles.label} ${styles.otherInput}`}
+                    type="text"
                     value={academicStatusOther}
                     onChange={handleAcademicStatusOtherChange}
-                    placeholder='Please specify'
+                    placeholder="Please specify"
                   />
                 )}
               </div>
             </div>
           </div>
         </div>
-        <div className={styles.infoSection}>
+
+        <div className={`${styles.infoSection} form-section`}>
+          <div className={`${styles.subsectionHeader} form-section-header`}>
+            <span className={`${styles.subsectionTitle} form-section-title`}>
+              Student&apos;s Contact
+            </span>
+          </div>
+
+          <div className={`${styles.topRow} form-row`}>
+            <StandardField
+              id="email"
+              label="Email address"
+              required
+              value={email}
+              error={emailError}
+              placeholder="Johndoe@gmail.com"
+              wrapperClass={styles.emailField}
+              inputClass={styles.valueHighlight}
+              type="email"
+              onChange={(e) => {
+                handleEmail(e.target.value);
+                if (emailError && e.target.value.trim()) {
+                  setEmailError(false);
+                }
+              }}
+              onFocus={() => {
+                if (emailError) {
+                  setEmailError(false);
+                }
+              }}
+            />
+            <StandardField
+              id="previousSchool"
+              label="Previous school"
+              required
+              value={previousSchool}
+              error={previousSchoolError}
+              placeholder="Previous School"
+              wrapperClass={styles.previousSchoolField}
+              inputClass={styles.valueHighlight}
+              onChange={(e) => {
+                handlePreviousSchool(e.target.value);
+                if (previousSchoolError && e.target.value.trim()) {
+                  setPreviousSchoolError(false);
+                }
+              }}
+              onFocus={() => {
+                if (previousSchoolError) {
+                  setPreviousSchoolError(false);
+                }
+              }}
+            />
+          </div>
+        </div>
+
+        <div className={`${styles.infoSection} form-section`}>
+          <div className={`${styles.subsectionHeader} form-section-header`}>
+            <span className={`${styles.subsectionTitle} form-section-title`}>
+              Student&apos;s Address
+            </span>
+          </div>
+
           <div className={styles.addressSection}>
-            <div className={styles.addressRow}>
-              <div
-                className={`${styles.genderField} ${
-                  streetError ? styles.errorFieldWrapper : ''
-                }`}
-              >
-                <label
-                  className={`${styles.label} ${
-                    streetError ? styles.errorLabel : ''
-                  }`}
-                  htmlFor='street'
-                >
-                  Street
-                </label>
-                <input
-                  id='street'
-                  className={`${styles.valueHighlight} ${
-                    street ? 'hasValue' : ''
-                  } ${streetError ? styles.errorInput : ''}`}
-                  type='text'
-                  value={street}
-                  onChange={(e) => {
-                    handleStreet(e.target.value);
-                    if (streetError && e.target.value.trim()) {
-                      setStreetError(false);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (streetError) {
-                      setStreetError(false);
-                    }
-                  }}
-                  placeholder='Street'
-                />
-              </div>
+            <div className={`${styles.addressRow} form-row`}>
+              <StandardField
+                id="street"
+                label="Street"
+                required
+                value={street}
+                error={streetError}
+                placeholder="Street"
+                wrapperClass={styles.genderField}
+                inputClass={styles.valueHighlight}
+                onChange={(e) => {
+                  handleStreet(e.target.value);
+                  if (streetError && e.target.value.trim()) {
+                    setStreetError(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (streetError) {
+                    setStreetError(false);
+                  }
+                }}
+              />
               <div className={styles.rtrwGroup}>
-                <div className={styles.rtField}>
-                  <label
-                    className={`${styles.label} ${
-                      rtError ? styles.errorLabel : ''
-                    }`}
-                    htmlFor='rt'
-                  >
-                    RT
-                  </label>
-                  <input
-                    id='rt'
-                    className={`${styles.label} ${rt ? 'hasValue' : ''} ${
-                      rtError ? styles.errorInput : ''
-                    }`}
-                    type='text'
-                    value={rt}
-                    onChange={(e) => handleRt(e.target.value)}
-                    placeholder='001'
-                  />
-                </div>
-                <div className={styles.rtField}>
-                  <label
-                    className={`${styles.label} ${
-                      rwError ? styles.errorLabel : ''
-                    }`}
-                    htmlFor='rw'
-                  >
-                    RW
-                  </label>
-                  <input
-                    id='rw'
-                    className={`${styles.label} ${rw ? 'hasValue' : ''} ${
-                      rwError ? styles.errorInput : ''
-                    }`}
-                    type='text'
-                    value={rw}
-                    onChange={(e) => handleRw(e.target.value)}
-                    placeholder='002'
-                  />
-                </div>
-              </div>
-            </div>
-            <div className={styles.addressRow}>
-              <div
-                className={`${styles.genderField} ${
-                  villageError ? styles.errorFieldWrapper : ''
-                }`}
-              >
-                <label
-                  className={`${styles.label} ${
-                    villageError ? styles.errorLabel : ''
-                  }`}
-                  htmlFor='village'
-                >
-                  Village
-                </label>
-                <input
-                  id='village'
-                  className={`${styles.valueHighlight} ${
-                    village ? 'hasValue' : ''
-                  } ${villageError ? styles.errorInput : ''}`}
-                  type='text'
-                  value={village}
-                  onChange={(e) => {
-                    handleVillage(e.target.value);
-                    if (villageError && e.target.value.trim()) {
-                      setVillageError(false);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (villageError) {
-                      setVillageError(false);
-                    }
-                  }}
-                  placeholder='Village'
+                <StandardField
+                  id="rt"
+                  label="RT"
+                  value={rt}
+                  error={rtError}
+                  placeholder="001"
+                  wrapperClass={styles.rtField}
+                  onChange={(e) => handleRt(e.target.value)}
                 />
-              </div>
-              <div
-                className={`${styles.districtField} ${
-                  districtError ? styles.errorFieldWrapper : ''
-                }`}
-              >
-                <label
-                  className={`${styles.label} ${
-                    districtError ? styles.errorLabel : ''
-                  }`}
-                  htmlFor='district'
-                >
-                  District
-                </label>
-                <input
-                  id='district'
-                  className={`${styles.valueHighlight} ${
-                    district ? 'hasValue' : ''
-                  } ${districtError ? styles.errorInput : ''}`}
-                  type='text'
-                  value={district}
-                  onChange={(e) => {
-                    handleDistrict(e.target.value);
-                    if (districtError && e.target.value.trim()) {
-                      setDistrictError(false);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (districtError) {
-                      setDistrictError(false);
-                    }
-                  }}
-                  placeholder='District'
+                <StandardField
+                  id="rw"
+                  label="RW"
+                  value={rw}
+                  error={rwError}
+                  placeholder="002"
+                  wrapperClass={styles.rtField}
+                  onChange={(e) => handleRw(e.target.value)}
                 />
               </div>
             </div>
-            <div className={styles.addressRow}>
-              <div
-                className={`${styles.genderField} ${
-                  cityError ? styles.errorFieldWrapper : ''
-                }`}
-              >
-                <label
-                  className={`${styles.label} ${
-                    cityError ? styles.errorLabel : ''
-                  }`}
-                  htmlFor='city'
-                >
-                  City/Regency
-                </label>
-                <input
-                  id='city'
-                  className={`${styles.valueHighlight} ${
-                    city ? 'hasValue' : ''
-                  } ${cityError ? styles.errorInput : ''}`}
-                  type='text'
-                  value={city}
-                  onChange={(e) => {
-                    handleCity(e.target.value);
-                    if (cityError && e.target.value.trim()) {
-                      setCityError(false);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (cityError) {
-                      setCityError(false);
-                    }
-                  }}
-                  placeholder='City/Regency'
-                />
-              </div>
-              <div
-                className={`${styles.genderField} ${
-                  provinceError ? styles.errorFieldWrapper : ''
-                }`}
-              >
-                <label
-                  className={`${styles.label} ${
-                    provinceError ? styles.errorLabel : ''
-                  }`}
-                  htmlFor='province'
-                >
-                  Province
-                </label>
-                <input
-                  id='province'
-                  className={`${styles.valueHighlight} ${
-                    province ? 'hasValue' : ''
-                  } ${provinceError ? styles.errorInput : ''}`}
-                  type='text'
-                  value={province}
-                  onChange={(e) => {
-                    handleProvince(e.target.value);
-                    if (provinceError && e.target.value.trim()) {
-                      setProvinceError(false);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (provinceError) {
-                      setProvinceError(false);
-                    }
-                  }}
-                  placeholder='Province'
-                />
-              </div>
+
+            <div className={`${styles.addressRow} form-row`}>
+              <StandardField
+                id="village"
+                label="Village"
+                required
+                value={village}
+                error={villageError}
+                placeholder="Village"
+                wrapperClass={styles.genderField}
+                inputClass={styles.valueHighlight}
+                onChange={(e) => {
+                  handleVillage(e.target.value);
+                  if (villageError && e.target.value.trim()) {
+                    setVillageError(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (villageError) {
+                    setVillageError(false);
+                  }
+                }}
+              />
+              <StandardField
+                id="district"
+                label="District"
+                required
+                value={district}
+                error={districtError}
+                placeholder="District"
+                wrapperClass={styles.districtField}
+                inputClass={styles.valueHighlight}
+                onChange={(e) => {
+                  handleDistrict(e.target.value);
+                  if (districtError && e.target.value.trim()) {
+                    setDistrictError(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (districtError) {
+                    setDistrictError(false);
+                  }
+                }}
+              />
             </div>
+
+            <div className={`${styles.addressRow} form-row`}>
+              <StandardField
+                id="city"
+                label="City/Regency"
+                required
+                value={city}
+                error={cityError}
+                placeholder="City/Regency"
+                wrapperClass={styles.genderField}
+                inputClass={styles.valueHighlight}
+                onChange={(e) => {
+                  handleCity(e.target.value);
+                  if (cityError && e.target.value.trim()) {
+                    setCityError(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (cityError) {
+                    setCityError(false);
+                  }
+                }}
+              />
+              <StandardField
+                id="province"
+                label="Province"
+                required
+                value={province}
+                error={provinceError}
+                placeholder="Province"
+                wrapperClass={styles.genderField}
+                inputClass={styles.valueHighlight}
+                onChange={(e) => {
+                  handleProvince(e.target.value);
+                  if (provinceError && e.target.value.trim()) {
+                    setProvinceError(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (provinceError) {
+                    setProvinceError(false);
+                  }
+                }}
+              />
+            </div>
+
             <div className={styles.otherAddressWrapper}>
               <div className={styles.otherField}>
                 <div className={styles.label}>Other</div>
                 <div className={styles.otherAddressParent}>
                   <span className={styles.bracket}>(</span>
                   <input
-                    id='otherAddress'
-                    className={`${styles.otherAddressInput} ${
+                    id="otherAddress"
+                    className={`${styles.label} ${styles.otherAddressInput} ${
                       otherAddress ? 'hasValue' : ''
                     } ${otherAddressError ? styles.errorInput : ''}`}
-                    type='text'
+                    type="text"
                     value={otherAddress}
                     onChange={(e) => handleOtherAddress(e.target.value)}
                   />
@@ -1348,6 +1223,7 @@ const StudentInformationSection = ({
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
