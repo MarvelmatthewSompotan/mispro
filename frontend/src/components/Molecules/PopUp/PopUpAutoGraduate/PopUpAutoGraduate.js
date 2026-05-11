@@ -9,6 +9,9 @@ import {
   confirmAutoGraduate,
   fetchAuthenticatedImage,
 } from "../../../../services/api";
+import placeholder from "../../../../assets/user.svg";
+import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate";
+import UpdatedNotification from "../UpdateNotification/UpdateNotification";
 
 const AuthImg = ({ src, className }) => {
   const [imgSrc, setImgSrc] = useState(placeholder);
@@ -20,9 +23,6 @@ const AuthImg = ({ src, className }) => {
   }, [src]);
   return <img src={imgSrc} alt="" className={className} />;
 };
-import placeholder from "../../../../assets/user.svg";
-import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate";
-import UpdatedNotification from "../UpdateNotification/UpdateNotification";
 
 const REFRESH_INTERVAL = 5000;
 
