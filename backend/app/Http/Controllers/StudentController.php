@@ -1292,10 +1292,13 @@ class StudentController extends Controller
         }
     }
 
-    public function getHistoryDetail($versionId)
+    public function getHistoryDetail($id, $versionId)
     {
         try {
             $version = ApplicationFormVersion::with('applicationForm.enrollment.student')
+                ->whereHas('applicationForm.enrollment', function ($q) use ($id) {
+                    $q->where('id', $id);
+                })
                 ->findOrFail($versionId);
 
             $student = $version->applicationForm->enrollment->student ?? null;

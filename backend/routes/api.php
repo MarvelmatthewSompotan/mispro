@@ -18,8 +18,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/reset-login', [AuthController::class, 'resetLogin']);
 
 Route::get('/storage-file/{path}', [StorageController::class, 'serveFile'])
-    ->where('path', '.*') 
-    ->middleware('cors');
+    ->where('path', '.*')
+    ->middleware(['auth:sanctum', 'lifetime', 'cors']);
 
 Route::middleware(['auth:sanctum', 'lifetime', 'role:admin'])->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
@@ -54,10 +54,15 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/{id}/latest-application', [StudentController::class, 'getLatestApplication']);
     Route::patch('/{id}/update', [StudentController::class, 'updateStudent']);
     Route::get('/{id}/history-dates', [StudentController::class, 'getStudentHistoryDates']);
-    Route::get('/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
     Route::post('/auto-graduate/preview', [StudentController::class, 'autoGraduatePreview']);
     Route::post('/auto-graduate/confirm', [StudentController::class, 'autoGraduateConfirm']);
     Route::post('/{id}/card-number', [StudentController::class, 'storeCardNumber']);
+  });
+});
+
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar'])->group(function () {
+  Route::prefix('students')->group(function () {
+    Route::get('/{id}/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
   });
 });
 
