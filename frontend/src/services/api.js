@@ -383,8 +383,8 @@ export const cancelRegistration = (applicationId, reasonType, payload = {}) => {
 export const getStudentHistoryDates = (id) =>
   apiFetch(`/students/${id}/history-dates`);
 
-export const getHistoryDetail = (versionId) =>
-  apiFetch(`/students/history/${versionId}`);
+export const getHistoryDetail = (id, versionId) =>
+  apiFetch(`/students/${id}/history/${versionId}`);
 
 export const getDashboard = () => {
   return apiFetch('/dashboard', { method: 'GET' });

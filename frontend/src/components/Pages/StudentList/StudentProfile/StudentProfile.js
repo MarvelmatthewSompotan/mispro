@@ -330,7 +330,7 @@ const StudentProfile = () => {
     setLoading(true);
 
     try {
-      const historyDetail = await getHistoryDetail(versionId);
+      const historyDetail = await getHistoryDetail(id, versionId);
       if (historyDetail.success) {
         const snapshotData = historyDetail.data_snapshot.request_data;
         const studentInfoSnapshot = {
