@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import styles from "./StudentList.module.css";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../../Molecules/SearchBar/SearchBar";
-import { getStudents, getRegistrationOptions } from "../../../services/api";
+import { getStudents, getRegistrationOptions, fetchAuthenticatedImage } from "../../../services/api";
 import Pagination from "../../Molecules/Pagination/Pagination";
 import ColumnHeader from "../../Molecules/ColumnHeader/ColumnHeader";
 import placeholder from "../../../assets/user.svg";
@@ -19,13 +19,22 @@ const StudentRow = ({ student, onClick }) => {
 
   const statusStyle = styles.status;
 
+  const [photoSrc, setPhotoSrc] = useState(placeholder);
+
+  useEffect(() => {
+    if (!student.photo_url) return;
+    fetchAuthenticatedImage(student.photo_url).then(url => {
+      if (url) setPhotoSrc(url);
+    });
+  }, [student.photo_url]);
+
   return (
     <div className={styles.studentDataRow} onClick={onClick}>
       <div className={styles.tableCell}>
         <img
-          src={student.photo_url || placeholder}
+          src={photoSrc}
           alt=""
-          className={student.photo_url ? styles.photo : styles.placeholderPhoto}
+          className={photoSrc !== placeholder ? styles.photo : styles.placeholderPhoto}
         />
       </div>
       <div className={styles.tableCell} title={student.student_id}>

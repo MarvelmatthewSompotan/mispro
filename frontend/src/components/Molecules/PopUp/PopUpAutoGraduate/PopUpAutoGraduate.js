@@ -7,7 +7,19 @@ import ColumnHeader from "../../ColumnHeader/ColumnHeader";
 import {
   getAutoGraduatePreview,
   confirmAutoGraduate,
+  fetchAuthenticatedImage,
 } from "../../../../services/api";
+
+const AuthImg = ({ src, className }) => {
+  const [imgSrc, setImgSrc] = useState(placeholder);
+  useEffect(() => {
+    if (!src) return;
+    fetchAuthenticatedImage(src).then(url => {
+      if (url) setImgSrc(url);
+    });
+  }, [src]);
+  return <img src={imgSrc} alt="" className={className} />;
+};
 import placeholder from "../../../../assets/user.svg";
 import ConfirmUpdatePopup from "../PopUpUpdate/PopUpConfirmUpdate";
 import UpdatedNotification from "../UpdateNotification/UpdateNotification";
@@ -211,17 +223,13 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
                           />
                         </div>
                         <div className={`${styles.cell} ${styles.alignLeft}`}>
-                          <img
-                            src={student.photo_url || placeholder}
-                            alt=""
+                          <AuthImg
+                            src={student.photo_url}
                             className={
                               student.photo_url
                                 ? styles.photo
                                 : styles.placeholderPhoto
                             }
-                            onError={(e) => {
-                              e.target.src = placeholder;
-                            }}
                           />
                         </div>
                         <div
