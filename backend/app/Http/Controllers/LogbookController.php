@@ -222,7 +222,7 @@ class LogbookController extends Controller
 
             foreach ($sorts as $sort) {
                 $field = $sort['field'] ?? null;
-                $order = $sort['order'] ?? 'asc';
+                $order = strtolower($sort['order'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
 
                 if (!$field || !in_array($field, $sortable)) continue;
 
@@ -276,7 +276,7 @@ class LogbookController extends Controller
                         break;
 
                     case 'age':
-                        $dobOrder = (strtolower($order) === 'asc') ? 'desc' : 'asc';
+                        $dobOrder = ($order === 'asc') ? 'desc' : 'asc';
                         $studentsQuery->orderBy('students.date_of_birth', $dobOrder);
                         break;
 
@@ -332,8 +332,8 @@ class LogbookController extends Controller
                 'students.updated_at',
                 'students.graduated_at',
                 'students.card_number',
-                'e_latest_join.enrollment_id', 
-                'e_join.enrollment_id', 
+                'e_latest_join.enrollment_id',
+                'e_join.enrollment_id',
                 'latest_app_version.data_snapshot',
 
                 'p_join.father_name',
@@ -667,7 +667,7 @@ class LogbookController extends Controller
 
             foreach ($sorts as $sort) {
                 $field = $sort['field'] ?? null;
-                $order = $sort['order'] ?? 'asc';
+                $order = strtolower($sort['order'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
 
                 if (!$field || !in_array($field, $sortable)) continue;
 
@@ -719,9 +719,9 @@ class LogbookController extends Controller
                         }
                         $studentsQuery->orderBy('transportations.type', $order);
                         break;
-                    
+
                     case 'age':
-                        $dobOrder = (strtolower($order) === 'asc') ? 'desc' : 'asc';
+                        $dobOrder = ($order === 'asc') ? 'desc' : 'asc';
                         $studentsQuery->orderBy('students.date_of_birth', $dobOrder);
                         break;
 

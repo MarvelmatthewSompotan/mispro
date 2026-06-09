@@ -10,6 +10,7 @@ import {
   getLogbook,
   getRegistrationOptions,
   getLogbookForExport,
+  fetchAuthenticatedImage,
 } from "../../../services/api";
 import placeholder from "../../../assets/user.svg";
 
@@ -27,6 +28,17 @@ import {
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+const AuthImg = ({ src, alt, className }) => {
+  const [imgSrc, setImgSrc] = useState(placeholder);
+  useEffect(() => {
+    if (!src) return;
+    fetchAuthenticatedImage(src).then(url => {
+      if (url) setImgSrc(url);
+    });
+  }, [src]);
+  return <img src={imgSrc} alt={alt} className={className} />;
+};
 
 const INITIAL_HEADERS = [
   "Photo",
@@ -536,8 +548,8 @@ const Logbook = () => {
                                 isSelected ? styles.selectedCell : ""
                               }`}
                             >
-                              <img
-                                src={item[dataKey] || placeholder}
+                              <AuthImg
+                                src={item[dataKey]}
                                 alt={item.full_name}
                                 className={styles.studentPhoto}
                               />
