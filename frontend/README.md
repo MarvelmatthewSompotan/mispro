@@ -1,56 +1,205 @@
-# MIS Login Page
+# MIS Project — Manado Independent School
 
-Halaman login untuk **Manado Independent School** dengan desain modern, responsif, dan struktur komponen berbasis atomic design (atoms, molecules, pages).
-
-## Fitur
-
-- Desain responsif, tampilan menarik di desktop & mobile
-- Struktur komponen terpisah (atoms, molecules, pages)
-- Gambar dan logo custom
-- Clean code dan mudah dikembangkan
-
-## Struktur Folder
-
-```
-src/
-  components/
-    atoms/        # Komponen dasar (Input, Button, Checkbox, Label)
-    molecules/    # Komponen gabungan (Logo, LoginForm)
-    pages/        # Halaman (LoginPage)
-  assets/
-    image/        # Logo dan ilustrasi
-  App.js
-  App.css
-```
-
-## Cara Menjalankan
-
-1. **Install dependencies**
-
-   ```
-   npm install
-   ```
-
-2. **Jalankan aplikasi**
-   ```
-   npm start
-   ```
-   Buka [http://localhost:3000](http://localhost:3000) di browser.
-
-## Customisasi
-
-- **Ganti logo/ilustrasi:**  
-  Ganti file di `src/assets/image/` (misal: `MIS.png`, `Group.png`).
-- **Ubah styling:**  
-  Edit file CSS di masing-masing folder komponen.
-
-## Kontributor
-
-- Desain & Frontend: [Nama Anda/Tim]
+Full-stack school Management Information System built with **Laravel 12** (backend) and **React 19** (frontend).
 
 ---
 
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Laravel 12, PHP 8.2+, Laravel Sanctum |
+| Frontend | React 19, React Router, Bootstrap 5, Recharts |
+| Database | MySQL |
+| Auth | Cookie-based session auth via Sanctum |
+
+---
+
+## Local Environment Setup
+
+### Prerequisites
+
+Make sure the following are installed before you begin:
+
+- **PHP** 8.2 or higher
+- **Composer** (latest)
+- **Node.js** 18 or higher + **npm**
+- **MySQL** 8.0 or higher
+
+---
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd MIS_Project
 ```
 
-Silakan salin dan tempel isi di atas ke file `frontend/README.md` Anda, atau konfirmasi jika ingin saya langsung melakukan update pada file tersebut!
+---
+
+### 2. Backend Setup (Laravel)
+
+```bash
+cd backend
 ```
+
+**a. Install PHP dependencies**
+
+```bash
+composer install
+```
+
+**b. Create the environment file**
+
+```bash
+cp .env.example .env
+```
+
+**c. Configure your database**
+
+Open `.env` and update the database credentials:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=db_mis
+DB_USERNAME=root
+DB_PASSWORD=your_password_here
+```
+
+**d. Create the database**
+
+In MySQL, run:
+
+```sql
+CREATE DATABASE db_mis CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+**e. Generate the application key**
+
+```bash
+php artisan key:generate
+```
+
+**f. Run database migrations**
+
+```bash
+php artisan migrate
+```
+
+**g. Seed the database**
+
+This creates the default admin account and master data:
+
+```bash
+php artisan db:seed
+```
+
+Default admin credentials (set in `.env`):
+
+| Field | Value |
+|---|---|
+| Email | `admin@mis-mdo.sch.id` |
+| Password | `admin123` |
+
+**h. Create the storage symlink**
+
+```bash
+php artisan storage:link
+```
+
+**i. Start the backend server**
+
+```bash
+php artisan serve
+```
+
+The API will be available at `http://localhost:8000`.
+
+---
+
+### 3. Frontend Setup (React)
+
+Open a new terminal tab, then:
+
+```bash
+cd frontend
+```
+
+**a. Install Node dependencies**
+
+```bash
+npm install
+```
+
+**b. Create the environment file**
+
+```bash
+cp .env.example .env
+```
+
+Or create `.env` manually with:
+
+```env
+REACT_APP_API_URL=http://localhost:8000/api
+```
+
+**c. Start the development server**
+
+```bash
+npm start
+```
+
+The app will open at [http://localhost:3000](http://localhost:3000).
+
+---
+
+### 4. Verify the Setup
+
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Log in with `admin@mis-mdo.sch.id` / `admin123`
+3. You should land on the admin dashboard
+
+---
+
+## Project Structure
+
+```
+MIS_Project/
+├── backend/          # Laravel API
+│   ├── app/
+│   │   ├── Http/Controllers/
+│   │   ├── Models/
+│   │   └── Middleware/
+│   ├── database/
+│   │   ├── migrations/
+│   │   └── seeders/
+│   ├── routes/
+│   │   └── api.php
+│   └── .env.example
+│
+└── frontend/         # React app
+    └── src/
+        ├── components/
+        │   ├── atoms/        # Base UI components
+        │   ├── molecules/    # Composite components
+        │   ├── organisms/    # Page-level sections
+        │   └── pages/        # Full pages
+        ├── assets/
+        ├── hooks/
+        ├── router/
+        └── services/         # API service layer
+```
+
+---
+
+## Common Issues
+
+**CORS errors** — Make sure `SANCTUM_STATEFUL_DOMAINS=localhost:3000` is set in `backend/.env`.
+
+**Session not persisting** — Verify `SESSION_DOMAIN=localhost` is set and the frontend is calling the API with `withCredentials: true`.
+
+**500 on first run** — Run `php artisan config:clear && php artisan cache:clear` after editing `.env`.
+
+**Storage files not loading** — Run `php artisan storage:link` if you skipped step 2h.
