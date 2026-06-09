@@ -4,6 +4,7 @@ use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudentController;
@@ -76,6 +77,12 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
 Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
     Route::get('/logbook', [LogbookController::class, 'index']);
     Route::get('/logbook/export', [LogbookController::class, 'export']);
+});
+
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
+    Route::get('/guestbook', [GuestbookController::class, 'index']);
+    Route::post('/guestbook', [GuestbookController::class, 'store']);
+    Route::put('/guestbook/{id}', [GuestbookController::class, 'update']);
 });
 
 Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar'])->group(function () {
