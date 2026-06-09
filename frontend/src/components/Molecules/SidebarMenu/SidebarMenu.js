@@ -14,9 +14,10 @@ import './SidebarMenu.css';
 const allMenus = [
   { to: '/Home', icon: homeIcon, label: 'Home' },
   { to: '/Analytics', icon: analyticsIcon, label: 'Analytics' },
+  { to: '/Guestbook', icon: logbookIcon, label: 'Guestbook' },
+  { to: '/Registration', icon: registrationIcon, label: 'Registration' },
   { to: '/students', icon: studentIcon, label: 'Student List' },
   { to: '/Logbook', icon: logbookIcon, label: 'Logbook' },
-  { to: '/Registration', icon: registrationIcon, label: 'Registration' },
   { to: '/Users', icon: usersIcon, label: 'Users' },
 ];
 

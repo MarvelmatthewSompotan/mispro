@@ -1,4 +1,4 @@
-.registrationContainer {
+.guestbookContainer {
   padding: 48px 32px 48px 32px;
   background-color: var(--secondary-background);
   margin-top: 16px;
@@ -141,23 +141,28 @@
   background: var(--secondary-background);
   border: 1px solid var(--main-grey);
   width: 100%;
+  overflow-x: auto;
 }
 
 .tableHeaderGrid,
-.registrationDataRow {
+.guestbookDataRow {
   display: grid;
   grid-template-columns:
-    minmax(200px, 1fr)
-    minmax(200px, 1fr)
-    minmax(200px, 1fr)
-    minmax(104px, 1fr)
-    minmax(120px, 1fr)
-    minmax(100px, 1fr) 
-    minmax(100px, 1fr);
+    minmax(140px, 160px)   /* ID */
+    minmax(140px, 160px)   /* Date */
+    minmax(200px, 1fr)     /* Visitor */
+    minmax(200px, 1fr)     /* Student */
+    minmax(120px, 140px)   /* Grade */
+    minmax(220px, 1fr)     /* Address */
+    minmax(180px, 1fr)     /* Contact */
+    minmax(200px, 1fr)     /* School */
+    minmax(250px, 1fr)     /* Remarks */
+    minmax(140px, 1fr);   /* Action */
+
   border-bottom: 4px solid var(--main-grey);
 }
 
-.registrationDataRow {
+.guestbookDataRow {
   box-sizing: border-box;
   border-bottom: 1px solid var(--main-grey);
   border-top: none;
@@ -166,11 +171,11 @@
   transition: background-color 0.2s ease;
 }
 
-.registrationDataRow:hover {
+.guestbookDataRow:hover {
   background-color: #f7f7f7;
 }
 
-.registrationDataRow:last-child {
+.guestbookDataRow:last-child {
   border-bottom: none;
 }
 
