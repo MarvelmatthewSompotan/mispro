@@ -187,7 +187,7 @@ const StudentProfile = () => {
   }, []);
 
   useEffect(() => {
-    getRegistrationOptions()
+    getRegistrationOptions({})
       .then((data) => {
         setAcademicStatusOptions(
           data.academic_status?.map((opt) => ({ value: opt, label: opt })) || []

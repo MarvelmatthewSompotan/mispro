@@ -96,7 +96,10 @@ export const logout = async () => {
 
 export const getMe = () => apiFetch('/me');
 
-export const getRegistrationOptions = () => apiFetch('/registration-option');
+export const getRegistrationOptions = async (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return await apiFetch(`/registration-option?${query}`);
+};
 
 export const addSchoolYear = () => {
   return apiFetch('/school-year/add', {
@@ -187,6 +190,55 @@ export const updateStudent = (id, studentData) => {
   return apiFetch(`/students/${id}/update`, {
     method: 'POST',
     body: formData,
+  });
+};
+
+export const getGuestbook = ({
+  search_name = '',
+  class_id = [],
+  start_date = '',
+  end_date = '',
+  sort = [],
+  page = 1,
+  per_page = 25,
+} = {}) => {
+  const params = new URLSearchParams();
+
+  params.append('page', page);
+  params.append('per_page', per_page);
+
+  if (search_name) params.append('search_name', search_name);
+
+  (Array.isArray(class_id) ? class_id : []).forEach((v) =>
+    params.append('class_id[]', v)
+  );
+
+  if (start_date) params.append('start_date', start_date);
+  if (end_date) params.append('end_date', end_date);
+
+  // ✅ FIX SORT
+  sort?.forEach((s, i) => {
+    const field = s.field || s.id;
+    const order = s.order || (s.desc ? 'desc' : 'asc');
+
+    params.append(`sort[${i}][field]`, field);
+    params.append(`sort[${i}][order]`, order);
+  });
+
+  return apiFetch(`/guestbook?${params.toString()}`);
+};
+
+export const createGuestbook = (payload) => {
+  return apiFetch("/guestbook", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+};
+
+export const updateGuestbook = (id, payload) => {
+  return apiFetch(`/guestbook/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
   });
 };
 
