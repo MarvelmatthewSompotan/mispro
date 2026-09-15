@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\StudentsSyncController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/reset-login', [AuthController::class, 'resetLogin']);
@@ -92,5 +93,9 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
 
 Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar'])->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'index']);
+});
+
+Route::prefix('v1/sync')->group(function () {
+    Route::get('/students', [StudentsSyncController::class, 'index']);
 });
 ?>
