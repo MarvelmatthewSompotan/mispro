@@ -52,7 +52,7 @@ class StudentsSyncController extends Controller
                 'first_name'    => $student->first_name,
                 'middle_name'   => $student->middle_name,
                 'last_name'     => $student->last_name,
-                'photo_uri'     => 'https://student_portal.manadoindependent.sch.id/storage/' . $student->photo_path,
+                'photo_uri'     => 'https://sudent_portal.manadoindependent.sch.id/storage/' . $student->photo_path,
                 'birth_date'    => $birthDateFormatted,
                 'class_id'      => 0,
                 'school_year'   => $schoolYearName,
