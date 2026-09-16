@@ -4,6 +4,7 @@ use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\StudentController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\StudentsSyncController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/reset-login', [AuthController::class, 'resetLogin']);
@@ -83,7 +85,17 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/logbook/export', [LogbookController::class, 'export']);
 });
 
+Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar,teacher'])->group(function () {
+    Route::get('/guestbook', [GuestbookController::class, 'index']);
+    Route::post('/guestbook', [GuestbookController::class, 'store']);
+    Route::put('/guestbook/{id}', [GuestbookController::class, 'update']);
+});
+
 Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar'])->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'index']);
+});
+
+Route::prefix('v1/sync')->group(function () {
+    Route::get('/students', [StudentsSyncController::class, 'index']);
 });
 ?>

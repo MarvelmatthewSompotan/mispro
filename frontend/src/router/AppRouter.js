@@ -13,6 +13,7 @@ import Print from '../components/Pages/PrintContent/Print.js';
 import MainLayout from '../components/Layout/Main';
 import StudentProfile from '../components/Pages/StudentList/StudentProfile/StudentProfile.js';
 import Logbook from '../components/Pages/Logbook/Logbook.js';
+import Guestbook from '../components/Pages/Guestbook/Guestbook.js';
 import Users from '../components/Pages/Users/Users.js';
 
 import ProtectedRoute from './ProtectedRoute';
@@ -93,6 +94,18 @@ const appRoutes = [
         <MainLayout>
           <RegistrarAccess>
             <Logbook />
+          </RegistrarAccess>
+        </MainLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/Guestbook',
+    element: (
+      <ProtectedRoute>
+        <MainLayout>
+          <RegistrarAccess>
+            <Guestbook />
           </RegistrarAccess>
         </MainLayout>
       </ProtectedRoute>

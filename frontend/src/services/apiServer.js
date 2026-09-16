@@ -8,7 +8,7 @@ const api = axios.create({
 export default api;
 
 export const login = async (email, password) => {
-  const res = await fetch('https://student_portal.manadoindependent.sch.id/api/login', {
+  const res = await fetch(`https://student_portal.manadoindependent.sch.id/api/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -27,9 +27,9 @@ export const login = async (email, password) => {
 
 export const getMe = async () => {
   const token = localStorage.getItem('token');
-  const res = await fetch('https://student_portal.manadoindependent.sch.id/api/me', {
+  const res = await fetch(`https://student_portal.manadoindependent.sch.id/api/me`, {
     headers: {
-      Authorization: Bearer ${token},
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -44,7 +44,7 @@ export const getRegistrationOptions = async () => {
   const token = localStorage.getItem('token');
   const res = await fetch('https://student_portal.manadoindependent.sch.id/api/registration-option', {
     headers: {
-      Authorization: Bearer ${token},
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -61,11 +61,11 @@ export const startRegistration = async (
   registrationDate
 ) => {
   const token = localStorage.getItem('token');
-  const res = await fetch('https://student_portal.manadoindependent.sch.id/api/registration/start', {
+  const res = await fetch(`https://student_portal.manadoindependent.sch.id/api/registration/start`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: Bearer ${token},
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       school_year_id: schoolYear,
@@ -83,10 +83,10 @@ export const startRegistration = async (
 
 export const logout = async () => {
   const token = localStorage.getItem('token');
-  await fetch('https://student_portal.manadoindependent.sch.id/api/logout', {
+  await fetch(`https://student_portal.manadoindependent.sch.id/api/logout`, {
     method: 'POST',
     headers: {
-      Authorization: Bearer ${token},
+      Authorization: `Bearer ${token}`,
     },
   });
   localStorage.removeItem('token');
@@ -95,12 +95,12 @@ export const logout = async () => {
 export const submitRegistrationForm = async (draftId, formData) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    https://student_portal.manadoindependent.sch.id/api/registration/store/${draftId},
+    `https://student_portal.manadoindependent.sch.id/api/registration/store/${draftId}`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: Bearer ${token},
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(formData),
     }
@@ -127,7 +127,7 @@ export const searchStudent = async (searchTerm) => {
     )}`,
     {
       headers: {
-        Authorization: Bearer ${token},
+        Authorization: `Bearer ${token}`,
       },
     }
   );
@@ -142,10 +142,10 @@ export const searchStudent = async (searchTerm) => {
 export const getStudentLatestApplication = async (studentId) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    https://student_portal.manadoindependent.sch.id/api/students/${studentId}/latest-application,
+    `https://student_portal.manadoindependent.sch.id/api/students/${studentId}/latest-application`,
     {
       headers: {
-        Authorization: Bearer ${token},
+        Authorization: `Bearer ${token}`,
       },
     }
   );
@@ -160,12 +160,12 @@ export const getStudentLatestApplication = async (studentId) => {
 export const getRegistrationPreview = async (applicationId, version) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    https://student_portal.manadoindependent.sch.id/api/registration/preview/${applicationId}/version/${version},
+    `https://student_portal.manadoindependent.sch.id/api/registration/preview/${applicationId}/version/${version}`,
     {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: Bearer ${token},
+        Authorization: `Bearer ${token}`,
       },
     }
   );
@@ -197,10 +197,10 @@ export const getStudents = async ({
   }
 
   const res = await fetch(
-    https://student_portal.manadoindependent.sch.id/api/students?${params.toString()},
+    `https://student_portal.manadoindependent.sch.id/api/students?${params.toString()}`,
     {
       headers: {
-        Authorization: Bearer ${token},
+        Authorization: `Bearer ${token}`,
       },
     }
   );
@@ -215,13 +215,13 @@ export const getStudents = async ({
 export const updateStudent = async (studentId, studentData) => {
   const token = localStorage.getItem('token');
   const res = await fetch(
-    https://student_portal.manadoindependent.sch.id/api/students/${studentId}/update,
+    `https://student_portal.manadoindependent.sch.id/api/students/${studentId}/update`,
     {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        Authorization: Bearer ${token},
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(studentData),
     }
@@ -260,10 +260,10 @@ export const getRegistrations = async ({
   }
 
   const res = await fetch(
-    https://student_portal.manadoindependent.sch.id/api/registration?${params.toString()},
+    `https://student_portal.manadoindependent.sch.id/api/registration?${params.toString()}`,
     {
       headers: {
-        Authorization: Bearer ${token},
+        Authorization: `Bearer ${token}`,
       },
     }
   );

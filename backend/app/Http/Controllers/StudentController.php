@@ -837,7 +837,7 @@ class StudentController extends Controller
                 'nisn' => 'sometimes|required|string',
                 'nik' => 'sometimes|nullable|required_if:citizenship,Indonesia|integer',
                 'kitas' => 'sometimes|nullable|required_if:citizenship,Non Indonesia|string',                
-                'photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,webp|max:5048',
+                'photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg|max:5048',
                 'status' => 'sometimes|required|in:Not Graduate,Graduate,Expelled,Withdraw',
                 'va_mandiri' => 'sometimes|nullable|string',
                 'va_bca' => 'sometimes|nullable|string',
