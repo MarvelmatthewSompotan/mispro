@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styles from './StudentProfileHeader.module.css';
 import Button from '../../../../Atoms/Button/Button';
 import placeholder from '../../../../../assets/user.svg';
 import IdCardPopup from '../../../../Molecules/PopUp/IdCardPopup/IdCardPopup';
+import { fetchAuthenticatedImage } from '../../../../../services/api';
 
 const getStatusVariant = (status) => {
   if (!status) return 'not-graduated';
@@ -56,6 +57,29 @@ const StudentProfileHeader = ({
       return placeholder;
   }, [isEditing, photoPreview, formData?.photo_url]);
 
+  // --- PERBAIKAN: fetch foto pakai token (Authorization), lalu tampilkan sebagai blob URL ---
+  const [imgSrc, setImgSrc] = useState(placeholder);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!displayPhotoUrl || displayPhotoUrl === placeholder) {
+      setImgSrc(placeholder);
+      return;
+    }
+
+    // Kalau sudah blob:/data: (misal preview foto baru saat edit), fetchAuthenticatedImage
+    // otomatis langsung mengembalikannya tanpa fetch ulang.
+    fetchAuthenticatedImage(displayPhotoUrl).then((url) => {
+      if (isMounted) setImgSrc(url || placeholder);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [displayPhotoUrl]);
+  // --- akhir perbaikan ---
+
   const imageUrl =
     photoPreview || (formData && formData.photo_url) || placeholder;
   const imageClass =
@@ -98,7 +122,7 @@ const StudentProfileHeader = ({
       <div className={styles.headerPhotoSection}>
         <img
           className={imageClass}
-          src={displayPhotoUrl}
+          src={imgSrc}
           alt='Student Profile'
         />
       </div>
