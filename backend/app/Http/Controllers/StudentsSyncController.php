@@ -45,9 +45,27 @@ class StudentsSyncController extends Controller
                 $student->last_name
             ])));
 
+            // ==========================================
+            // LOGIKA PENENTUAN STATUS is_active
+            // ==========================================
+            $activeField = strtoupper(trim($student->active ?? '')); 
+            $statusField = strtolower(trim($student->status ?? ''));
+
+            $isActive = false; // Default nilai
+
+            if ($activeField === 'NO' && in_array($statusField, ['graduate', 'withdraw', 'expelled'])) {
+                $isActive = false; // (0)
+            } elseif ($activeField === 'YES' && $statusField === 'not graduate') {
+                $isActive = true;  // (1)
+            } else {
+                // Fallback default jika data tidak sesuai persis dengan 2 kondisi di atas
+                $isActive = ($activeField === 'YES');
+            }
+            // ==========================================
+
             return [
                 'nis'           => $student->student_id,
-                'nisn'          => $student->nisn ?? '', // <-- Field NISN ditambahkan di sini
+                'nisn'          => $student->nisn ?? '',
                 'full_name'     => $fullName ?: ($student->full_name ?? ''),
                 'first_name'    => $student->first_name,
                 'middle_name'   => $student->middle_name,
@@ -57,7 +75,7 @@ class StudentsSyncController extends Controller
                 'class_id'      => 0,
                 'school_year'   => $schoolYearName,
                 'academic_year' => $gradeVal ? 'Grade ' . $gradeVal : '',
-                'is_active'     => (bool) ($student->active ?? $student->status),
+                'is_active'     => $isActive, // Boolean true/false, akan terbaca 1/0 atau true/false di JSON
             ];
         });
 
