@@ -30,9 +30,10 @@ return [
 
     'sync' => [
         'api_key' => env('SYNC_API_KEY'),
-        // Allow calls made directly on this server (http://localhost:8000, no proxy headers)
-        // without a key. Requests through Cloudflare or the reverse proxy always need the key.
-        'allow_local' => (bool) env('SYNC_ALLOW_LOCAL', true),
+        // Optionally allow calls made directly on this server (loopback address, no proxy
+        // headers) without a key. Off by default: in production every caller goes through
+        // Cloudflare/Nginx and must send the key.
+        'allow_local' => (bool) env('SYNC_ALLOW_LOCAL', false),
     ],
 
     'slack' => [
