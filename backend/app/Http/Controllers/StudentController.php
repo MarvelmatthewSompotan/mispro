@@ -18,6 +18,9 @@ use App\Models\GuardianAddress;
 use App\Models\FatherAddress;
 use App\Models\MotherAddress;
 use App\Models\PickupPoint;
+use App\Models\ApplicationForm;
+use App\Helpers\SchoolYearHelper;
+use App\Events\ApplicationFormStatusUpdated;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\URL;
@@ -976,41 +979,49 @@ class StudentController extends Controller
             $student->fill($studentData);
             
             $shouldClearCache = false; 
+            $cancelledForms = [];
             if ($student->isDirty('status')) {
                 $newStatus = $student->status;
                 $inactiveStatuses = ['graduate', 'expelled', 'withdraw'];
-                $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
-
-                $currentMonth = now()->month;
-                $currentYear = now()->year;
-                $schoolYearStr = ($currentMonth >= 7)
-                    ? $currentYear . '/' . ($currentYear + 1)
-                    : ($currentYear - 1) . '/' . $currentYear;
-
-                $schoolYear = SchoolYear::where('year', $schoolYearStr)->first();
-                $currentSchoolYearId = $schoolYear?->school_year_id;
+                $currentSchoolYear = SchoolYearHelper::current();
+                $currentSchoolYearId = $currentSchoolYear?->school_year_id;
 
                 if (in_array(strtolower($newStatus), $inactiveStatuses)) {
                     $student->active = 'NO';
-                    $shouldClearCache = true; 
+                    $shouldClearCache = true;
                     $student->updated_at = now();
                     if ($newStatus === 'Graduate') {
                         $student->graduated_at = now();
                     }
-                    if ($latestEnrollment) {
-                        $latestEnrollment->status = 'INACTIVE';
-                        $latestEnrollment->save();
+
+                    // Every running enrollment ends, including the one of the current year when
+                    // the student has already re-registered for next year.
+                    Enrollment::where('id', $student->id)->where('status', 'ACTIVE')->update(['status' => 'INACTIVE']);
+
+                    // A student who leaves the school does not continue next year either:
+                    // cancel the re-registrations for later school years.
+                    if (in_array($newStatus, ['Withdraw', 'Expelled'], true)) {
+                        $cancelledForms = $this->cancelFutureRegistrations($student, $currentSchoolYear, $newStatus);
+                        if ($cancelledForms) {
+                            $auditChanges['cancelled_registrations'] = collect($cancelledForms)
+                                ->map(fn ($form) => $form->enrollment->registration_id)
+                                ->values()
+                                ->all();
+                        }
                     }
                 } else {
                     $student->active = 'YES';
-                    $shouldClearCache = true; 
+                    $shouldClearCache = true;
                     $student->updated_at = now();
-                    if ($latestEnrollment) {
-                        $latestEnrollment->status =
-                            ($currentSchoolYearId && $latestEnrollment->school_year_id === $currentSchoolYearId)
-                            ? 'ACTIVE'
-                            : 'INACTIVE';
-                        $latestEnrollment->save();
+
+                    // Reactivate the confirmed enrollment of the current school year only.
+                    $currentEnrollment = $student->enrollments
+                        ->where('school_year_id', $currentSchoolYearId)
+                        ->sortByDesc('registration_date')
+                        ->first();
+                    if ($currentEnrollment && optional($currentEnrollment->applicationForm)->status === 'Confirmed') {
+                        $currentEnrollment->status = 'ACTIVE';
+                        $currentEnrollment->save();
                     }
                 }
             }
@@ -1035,11 +1046,20 @@ class StudentController extends Controller
                 $auditChanges['photo'] = 'Updated Photo';
             }
 
-            // Student address, parents and guardian belong to an enrollment. Write them to the
-            // rows of the latest enrollment (the one the new form version is created for),
-            // mapping each form field to its table and column.
-            $contactEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
-            if ($contactEnrollment) {
+            // Student address, parents and guardian belong to an enrollment. They describe the
+            // same person in every year, so write them to the latest enrollment (the one the
+            // new form version is created for) and to every enrollment of the current and
+            // later school years. Earlier years are history and are left as they were.
+            $latestForContact = $student->enrollments->sortByDesc('registration_date')->first();
+            $currentForContact = SchoolYearHelper::current();
+            $contactEnrollments = $student->enrollments->filter(function ($enrollment) use ($latestForContact, $currentForContact) {
+                return $enrollment->enrollment_id === $latestForContact?->enrollment_id
+                    || ($currentForContact && (
+                        $enrollment->school_year_id === $currentForContact->school_year_id
+                        || SchoolYearHelper::isAfter($enrollment->school_year_id, $currentForContact)
+                    ));
+            });
+            foreach ($contactEnrollments as $contactEnrollment) {
                 $auditChanges = array_merge(
                     $auditChanges,
                     $this->updateEnrollmentContactData($student, $contactEnrollment, $validated)
@@ -1155,6 +1175,8 @@ class StudentController extends Controller
             $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
             $latestEnrollment->refresh();
             $newRequestData['enrollment_status'] = $latestEnrollment->status;
+            $newRequestData['application_form_status'] = ApplicationForm::where('application_id', $latestVersion->application_id)->value('status')
+                ?? ($newRequestData['application_form_status'] ?? null);
 
             $latestEnrollment->load('semester', 'schoolYear', 'payment', 'studentDiscount' ); 
             if ($latestEnrollment->payment) {
@@ -1204,8 +1226,12 @@ class StudentController extends Controller
             DB::commit();
 
             if ($shouldClearCache) {
-                $student->refresh(); 
+                $student->refresh();
                 StudentStatusUpdated::dispatch($student);
+            }
+
+            foreach ($cancelledForms as $cancelledForm) {
+                ApplicationFormStatusUpdated::dispatch($cancelledForm, 'Confirmed', 'Cancelled');
             }
 
             if (!empty($auditChanges)) {
@@ -1246,7 +1272,43 @@ class StudentController extends Controller
         }
     }
 
-    private const ADDRESS_COLUMNS = ['street', 'rt', 'rw', 'village', 'district', 'city_regency', 'province', 'other'];
+    /**
+     * Cancels the confirmed registrations of school years after $current (the
+     * re-registration for next year) of a student who leaves the school, and returns the
+     * cancelled application forms.
+     */
+    private function cancelFutureRegistrations(Student $student, ?SchoolYear $current, string $newStatus): array
+    {
+        if (!$current) {
+            return [];
+        }
+
+        $cancelled = [];
+        foreach ($student->enrollments as $enrollment) {
+            if (!SchoolYearHelper::isAfter($enrollment->school_year_id, $current)) {
+                continue;
+            }
+
+            $form = $enrollment->applicationForm;
+            if (!$form || $form->status !== 'Confirmed') {
+                continue;
+            }
+
+            $note = "Cancelled automatically: student status changed to {$newStatus} on " . now()->format('Y-m-d') . '.';
+            $form->status = 'Cancelled';
+            $form->notes = $form->notes ? $form->notes . "\n" . $note : $note;
+            $form->save();
+
+            $enrollment->status = 'INACTIVE';
+            $enrollment->save();
+
+            $cancelled[] = $form;
+        }
+
+        return $cancelled;
+    }
+
+    private const ADDRESS_COLUMNS =['street', 'rt', 'rw', 'village', 'district', 'city_regency', 'province', 'other'];
 
     private const PARENT_COLUMNS = [
         'father_name', 'father_company', 'father_occupation', 'father_phone', 'father_email',
