@@ -30,6 +30,9 @@ return [
 
     'sync' => [
         'api_key' => env('SYNC_API_KEY'),
+        // Set to false only while a caller (the report card system) is being updated to
+        // send the key. Calls without a valid key are then allowed but logged.
+        'require_key' => (bool) env('SYNC_REQUIRE_KEY', true),
         // Optionally allow calls made directly on this server (loopback address, no proxy
         // headers) without a key. Off by default: in production every caller goes through
         // Cloudflare/Nginx and must send the key.
