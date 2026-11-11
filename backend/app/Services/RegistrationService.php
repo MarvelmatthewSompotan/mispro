@@ -27,6 +27,7 @@ use App\Models\ApplicationForm;
 use App\Models\StudentGuardian;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
+use App\Helpers\SchoolYearHelper;
 use Illuminate\Support\Facades\Log;
 use App\Events\StudentStatusUpdated;
 use App\Models\CancelledRegistration;
@@ -1160,8 +1161,44 @@ class RegistrationService
             return 'Registration and related data deleted successfully (Cancellation of Enrollment - NEW/TRANSFEREE).';
 
         } else if ($studentStatus === 'old') {
-            
-            if ($isLatest) { 
+
+            // Cancelling only next year's re-registration: the student keeps attending the
+            // current school year and is set to Withdraw when the next one starts (see the
+            // update:enrollment-status command).
+            if ($isLatest && $this->staysForCurrentYear($student, $enrollment)) {
+                $applicationForm->notes = $notes;
+                $applicationForm->status = 'Cancelled';
+                $applicationForm->save();
+
+                $enrollment->status = 'INACTIVE';
+                $enrollment->save();
+
+                $currentYear = SchoolYearHelper::current()?->year;
+                $nextYear = $enrollment->schoolYear?->year;
+
+                $this->auditTrail->log('Cancel Enrollment', [
+                    'category'          => 'Cancellation (Old Student - Next Year Only)',
+                    'application_id'    => $applicationForm->application_id,
+                    'student_name'      => "{$student->first_name} {$student->middle_name} {$student->last_name}",
+                    'student_id'        => $student->student_id,
+                    'enrollment_ver'    => $current_version,
+                    'reason'            => $cancellationReason,
+                    'notes'             => $notes,
+                    'action_detail'     => "Registration for {$nextYear} cancelled. Student stays active for {$currentYear} and is set to Withdraw when {$nextYear} starts.",
+                    'data_changes'      => [
+                        'application_status' => 'Cancelled',
+                        'enrollment'         => 'INACTIVE',
+                    ]
+                ]);
+
+                DB::commit();
+
+                ApplicationFormStatusUpdated::dispatch($applicationForm, $oldStatus, 'Cancelled (next year only)');
+
+                return "Registration for {$nextYear} cancelled. The student stays active for {$currentYear} and will be set to Withdraw when {$nextYear} starts.";
+            }
+
+            if ($isLatest) {
             $applicationForm->notes = $notes;
             $applicationForm->status = 'Cancelled';
             $applicationForm->save();
@@ -1205,6 +1242,25 @@ class RegistrationService
             throw new Exception('OLD student registration could not be cancelled (Old, not latest enrollment version).', 400);
         }
         throw new Exception('Invalid student status for cancellation.', 400);
+    }
+
+    /**
+     * True when $enrollment belongs to a later school year than the current one and the
+     * student still has a confirmed enrollment in the current school year.
+     */
+    private function staysForCurrentYear($student, $enrollment): bool
+    {
+        $current = SchoolYearHelper::current();
+
+        if (!$current || !SchoolYearHelper::isAfter($enrollment->school_year_id, $current)) {
+            return false;
+        }
+
+        return strtolower((string) $student->status) === 'not graduate'
+            && Enrollment::where('id', $student->id)
+                ->where('school_year_id', $current->school_year_id)
+                ->whereHas('applicationForm', fn ($q) => $q->where('status', 'Confirmed'))
+                ->exists();
     }
 
     private function saveToCancelledRegistration($student, $enrollment, $reason, $notes)
