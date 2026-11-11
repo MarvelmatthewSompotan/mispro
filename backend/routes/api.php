@@ -58,8 +58,6 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/{id}/latest-application', [StudentController::class, 'getLatestApplication']);
     Route::patch('/{id}/update', [StudentController::class, 'updateStudent']);
     Route::get('/{id}/history-dates', [StudentController::class, 'getStudentHistoryDates']);
-    Route::post('/auto-graduate/preview', [StudentController::class, 'autoGraduatePreview']);
-    Route::post('/auto-graduate/confirm', [StudentController::class, 'autoGraduateConfirm']);
     Route::post('/{id}/card-number', [StudentController::class, 'storeCardNumber']);
   });
 });
@@ -67,6 +65,9 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
 Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_registrar'])->group(function () {
   Route::prefix('students')->group(function () {
     Route::get('/{id}/history/{versionId}', [StudentController::class, 'getHistoryDetail']);
+    // Graduating students in bulk is not available to teachers.
+    Route::post('/auto-graduate/preview', [StudentController::class, 'autoGraduatePreview']);
+    Route::post('/auto-graduate/confirm', [StudentController::class, 'autoGraduateConfirm']);
   });
 });
 

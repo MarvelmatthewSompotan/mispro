@@ -113,7 +113,7 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
       }
     } catch (error) {
       console.error("Error confirming auto graduate:", error);
-      alert("Failed to process auto graduation.");
+      alert(error.response?.data?.message || "Failed to process auto graduation.");
     } finally {
       setIsUpdating(false);
     }
