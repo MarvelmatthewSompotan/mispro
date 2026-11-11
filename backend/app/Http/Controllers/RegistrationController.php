@@ -148,7 +148,7 @@ class RegistrationController extends Controller
             }
             
             // Pagination
-            $data = $query->paginate($request->input('per_page', 25));
+            $data = $query->paginate(min(max((int) $request->input('per_page', 25), 1), 100));
             $totalRegistered = ApplicationForm::count();
     
             return response()->json([
@@ -554,7 +554,7 @@ class RegistrationController extends Controller
                 $query->orderBy('cancelled_at', 'desc');
             }
             
-            $data = $query->paginate($request->input('per_page', 25));
+            $data = $query->paginate(min(max((int) $request->input('per_page', 25), 1), 100));
     
             return response()->json([
                 'status' => 'success',

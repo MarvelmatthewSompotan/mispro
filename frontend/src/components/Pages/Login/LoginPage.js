@@ -43,7 +43,11 @@ const LoginPage = () => {
       navigate("/Home");
     } catch (error) {
       console.error("Login failed:", error);
-      setError("Login failed. Please check your Email/Password.");
+      setError(
+        error.response?.status === 429
+          ? "Too many login attempts. Please wait a minute and try again."
+          : "Login failed. Please check your Email/Password."
+      );
     } finally {
       setIsLoading(false);
     }

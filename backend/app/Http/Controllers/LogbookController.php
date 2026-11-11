@@ -367,7 +367,7 @@ class LogbookController extends Controller
             }
 
             // pagination
-            $perPage = $request->input('per_page', 50);
+            $perPage = min(max((int) $request->input('per_page', 50), 1), 100);
             $students = $studentsQuery->paginate($perPage);
 
 
