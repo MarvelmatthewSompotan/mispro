@@ -231,40 +231,36 @@ class StudentController extends Controller
         }
     }
 
-    public function autoGraduatePreview(Request $request)
+    /** Grades whose students leave their level (ECP, ES, MS, HS) at the end of the year. */
+    private const GRADUATING_GRADES = ['K2', '6', '9', '12'];
+
+    private function currentSchoolYear(): ?SchoolYear
     {
-        try {
-            $currentMonth = now()->month;
-            $currentYear = now()->year;
-    
-            $schoolYearStr = ($currentMonth >= 7)
-                ? $currentYear . '/' . ($currentYear + 1)
-                : ($currentYear - 1) . '/' . $currentYear;
-    
-            $currentSchoolYear = SchoolYear::where('year', $schoolYearStr)->first();
-    
-            if (!$currentSchoolYear) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Current school year is not defined.'
-                ], 400);
-            }
-    
-            $currentSchoolYearId = $currentSchoolYear->school_year_id;
-    
-            $graduatingGrades = ['K2', '6', '9', '12'];
-    
-            $latestEnrollments = DB::table('enrollments as e1')
-                ->select('e1.id', 'e1.enrollment_id')
-                ->where('e1.school_year_id', $currentSchoolYearId)
-                ->whereRaw('e1.registration_date = (
-                    SELECT MAX(e2.registration_date)
-                    FROM enrollments AS e2
-                    WHERE e2.id = e1.id
-                    AND e2.school_year_id = e1.school_year_id
-                )');
-    
-            $students = Student::select(
+        $month = now()->month;
+        $year = now()->year;
+        $name = ($month >= 7) ? $year . '/' . ($year + 1) : ($year - 1) . '/' . $year;
+
+        return SchoolYear::where('year', $name)->first();
+    }
+
+    /**
+     * Students that may be graduated: active, and whose latest enrollment of the current
+     * school year is in one of GRADUATING_GRADES. Used by both preview and confirm, so the
+     * confirm step cannot graduate anyone the preview would not list.
+     */
+    private function graduationCandidatesQuery(int $schoolYearId)
+    {
+        $latestEnrollments = DB::table('enrollments as e1')
+            ->select('e1.id', 'e1.enrollment_id')
+            ->where('e1.school_year_id', $schoolYearId)
+            ->whereRaw('e1.registration_date = (
+                SELECT MAX(e2.registration_date)
+                FROM enrollments AS e2
+                WHERE e2.id = e1.id
+                AND e2.school_year_id = e1.school_year_id
+            )');
+
+        return Student::select(
                 'students.id',
                 'students.student_id',
                 DB::raw("CONCAT_WS(' ', students.first_name, students.middle_name, students.last_name) AS full_name"),
@@ -276,21 +272,36 @@ class StudentController extends Controller
                 'students.active',
                 'enrollments.status AS enrollment_status'
             )
-                ->joinSub($latestEnrollments, 'latest_enrollments', function ($join) {
-                    $join->on('latest_enrollments.id', '=', 'students.id');
-                })
-                ->join('enrollments', 'enrollments.enrollment_id', '=', 'latest_enrollments.enrollment_id')
-                ->join('school_years', 'school_years.school_year_id', '=', 'enrollments.school_year_id')
-                ->leftJoin('classes', 'classes.class_id', '=', 'enrollments.class_id')
-                ->leftJoin('sections', 'sections.section_id', '=', 'enrollments.section_id')
-                ->whereIn('classes.grade', $graduatingGrades)
-                ->where('students.active', 'YES')
-                ->where('school_years.school_year_id', $currentSchoolYearId)
-                ->orderBy('sections.section_id', 'asc') 
+            ->joinSub($latestEnrollments, 'latest_enrollments', function ($join) {
+                $join->on('latest_enrollments.id', '=', 'students.id');
+            })
+            ->join('enrollments', 'enrollments.enrollment_id', '=', 'latest_enrollments.enrollment_id')
+            ->join('school_years', 'school_years.school_year_id', '=', 'enrollments.school_year_id')
+            ->leftJoin('classes', 'classes.class_id', '=', 'enrollments.class_id')
+            ->leftJoin('sections', 'sections.section_id', '=', 'enrollments.section_id')
+            ->whereIn('classes.grade', self::GRADUATING_GRADES)
+            ->where('students.active', 'YES')
+            ->where('school_years.school_year_id', $schoolYearId);
+    }
+
+    public function autoGraduatePreview(Request $request)
+    {
+        try {
+            $currentSchoolYear = $this->currentSchoolYear();
+
+            if (!$currentSchoolYear) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current school year is not defined.'
+                ], 400);
+            }
+
+            $students = $this->graduationCandidatesQuery($currentSchoolYear->school_year_id)
+                ->orderBy('sections.section_id', 'asc')
                 ->orderBy('classes.grade', 'asc')
                 ->orderBy('students.first_name', 'asc')
                 ->get();
-    
+
             return response()->json([
                 'success' => true,
                 'current_school_year' => $currentSchoolYear->year,
@@ -321,67 +332,71 @@ class StudentController extends Controller
         ]);
 
         try {
-            $currentMonth = now()->month;
-            $currentYear = now()->year;
-            $schoolYearStr = ($currentMonth >= 7)
-                ? $currentYear . '/' . ($currentYear + 1)
-                : ($currentYear - 1) . '/' . $currentYear;
-            
-            $currentSchoolYear = SchoolYear::where('year', $schoolYearStr)->first();
-            $schoolYearLog = $currentSchoolYear ? $currentSchoolYear->year : $schoolYearStr;
-    
-            $students = Student::select(
-                    'students.id', 
-                    'students.student_id', 
-                    'students.first_name', 
-                    'students.middle_name', 
-                    'students.last_name',
-                    'students.status', 
-                    'students.active', 
-                    'classes.grade'    
-                )
-                ->join('enrollments', 'students.id', '=', 'enrollments.id')
-                ->join('classes', 'enrollments.class_id', '=', 'classes.class_id')
-                ->whereIn('students.id', $request->ids)
-                ->where('enrollments.status', 'ACTIVE') 
-                ->get();
-    
-            $studentDataList = [];
-            foreach ($students as $index => $student) {
-                $fullName = trim("{$student->first_name} {$student->middle_name} {$student->last_name}");
-                $studentDataList[] = ($index + 1) . ". {$fullName} (student id: {$student->student_id}) (grade: {$student->grade})";
+            $currentSchoolYear = $this->currentSchoolYear();
+
+            if (!$currentSchoolYear) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Current school year is not defined.'
+                ], 400);
             }
-    
-            $firstStudent = $students->first();
-            $oldStatus = $firstStudent ? $firstStudent->status : 'Active'; 
-            $oldActive = $firstStudent ? $firstStudent->active : 'YES';
-            
-            DB::transaction(function () use ($request, $studentDataList, $schoolYearLog, $oldStatus, $oldActive) {
-    
-                Student::whereIn('id', $request->ids)
+
+            $ids = array_values(array_unique(array_map('intval', $request->ids)));
+
+            // Re-check every selected student on the server; never trust the list sent by
+            // the client. If any of them is not eligible, nothing is changed.
+            $students = $this->graduationCandidatesQuery($currentSchoolYear->school_year_id)
+                ->whereIn('students.id', $ids)
+                ->get();
+
+            $eligibleIds = $students->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $notEligible = array_values(array_diff($ids, $eligibleIds));
+
+            if (!empty($notEligible)) {
+                $numbers = Student::whereIn('id', $notEligible)->pluck('student_id')->implode(', ');
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nothing was changed. These students are not active in grade '
+                        . implode(', ', self::GRADUATING_GRADES) . ' in S.Y. ' . $currentSchoolYear->year
+                        . ' and cannot be graduated: ' . $numbers,
+                    'not_eligible' => $notEligible,
+                ], 422);
+            }
+
+            $studentDataList = [];
+            foreach ($students->values() as $index => $student) {
+                $studentDataList[] = ($index + 1) . ". {$student->full_name} (student id: {$student->student_id}) (grade: {$student->grade})";
+            }
+
+            $schoolYearLog = $currentSchoolYear->year;
+
+            DB::transaction(function () use ($ids, $studentDataList, $schoolYearLog) {
+
+                Student::whereIn('id', $ids)
                     ->update([
                         'status' => 'Graduate',
                         'active' => 'NO',
                         'graduated_at' => now(),
                         'updated_at' => now(),
                 ]);
-                
-                Enrollment::whereIn('id', $request->ids) 
+
+                Enrollment::whereIn('id', $ids)
                     ->where('status', 'ACTIVE')
                     ->update([
                         'status' => 'INACTIVE'
                 ]);
-    
+
                 $this->auditTrail->log('auto_graduate', [
                     'school_year'  => $schoolYearLog,
                     'student_data' => $studentDataList,
                     'changes'      => [
                         'status' => [
-                            'from' => $oldStatus, 
+                            'from' => 'Not Graduate',
                             'to'   => 'Graduate'
                         ],
                         'active' => [
-                            'from' => $oldActive,
+                            'from' => 'YES',
                             'to'   => 'NO'
                         ],
                         'graduated_at' => now()->toDateTimeString()
@@ -389,11 +404,11 @@ class StudentController extends Controller
                     'description'  => 'Student automatically graduated via Bulk Action.'
                 ]);
             });
-    
-            foreach ($students as $student) {
+
+            foreach (Student::whereIn('id', $ids)->get() as $student) {
                 StudentStatusUpdated::dispatch($student);
             }
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Selected students have been successfully graduated.'
