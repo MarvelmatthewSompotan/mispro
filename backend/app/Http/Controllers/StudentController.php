@@ -13,6 +13,11 @@ use App\Models\StudentParent;
 use App\Models\StudentAddress;
 use App\Models\StudentDiscount;
 use App\Models\StudentGuardian;
+use App\Models\Guardian;
+use App\Models\GuardianAddress;
+use App\Models\FatherAddress;
+use App\Models\MotherAddress;
+use App\Models\PickupPoint;
 use Illuminate\Support\Facades\DB;
 use App\Services\AuditTrailService;
 use Illuminate\Support\Facades\URL;
@@ -1015,53 +1020,15 @@ class StudentController extends Controller
                 $auditChanges['photo'] = 'Updated Photo';
             }
 
-            // Update student address
-            if ($request->hasAny(['street', 'city_regency', 'province'])) {
-                $address = $student->studentAddress ?? new StudentAddress(['id' => $student->id]);
-                $address->fill($request->only(['street', 'city_regency', 'province']));
-
-                if ($address->isDirty()) {
-                    $changes = $address->getDirty();
-                    $address->save();
-                    $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at', 'id'])->toArray());
-                }
-            }
-
-            // Update parent
-            if ($request->hasAny(['father_name', 'mother_name'])) {
-                $parent = $student->studentParent ?? new StudentParent(['id' => $student->id]);
-                $parent->fill($request->only([
-                        'father_name', 'father_company', 'father_occupation', 'father_phone', 'father_email',
-                        'father_address_street', 'father_address_rt', 'father_address_rw', 'father_address_village',
-                        'father_address_district', 'father_address_city_regency', 'father_address_province', 'father_address_other',
-                        'father_company_addresses',
-                        'mother_name', 'mother_company', 'mother_occupation', 'mother_phone', 'mother_email',
-                        'mother_address_street', 'mother_address_rt', 'mother_address_rw', 'mother_address_village',
-                        'mother_address_district', 'mother_address_city_regency', 'mother_address_province', 'mother_address_other',
-                        'mother_company_addresses',
-                ]));
-
-                if ($parent->isDirty()) {
-                    $changes = $parent->getDirty();
-                    $parent->save();
-                    $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at', 'id'])->toArray());
-                }
-            }
-
-            // Update guardian
-            if ($request->hasAny(['guardian_name'])) {
-                $guardian = $student->studentGuardian ?? new StudentGuardian(['id' => $student->id]);
-                $guardian->fill($request->only([
-                        'guardian_name', 'relation_to_student', 'guardian_phone', 'guardian_email',
-                        'guardian_address_street', 'guardian_address_rt', 'guardian_address_rw', 'guardian_address_village',
-                        'guardian_address_district', 'guardian_address_city_regency', 'guardian_address_province', 'guardian_address_other',
-                ]));
-                
-                if ($guardian->isDirty()) {
-                    $changes = $guardian->getDirty();
-                    $guardian->save();
-                    $auditChanges = array_merge($auditChanges, collect($changes)->except(['updated_at', 'id'])->toArray());
-                }
+            // Student address, parents and guardian belong to an enrollment. Write them to the
+            // rows of the latest enrollment (the one the new form version is created for),
+            // mapping each form field to its table and column.
+            $contactEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
+            if ($contactEnrollment) {
+                $auditChanges = array_merge(
+                    $auditChanges,
+                    $this->updateEnrollmentContactData($student, $contactEnrollment, $validated)
+                );
             }
 
             // Update enrollment
@@ -1074,11 +1041,17 @@ class StudentController extends Controller
                 $latestEnrollment = $student->enrollments->sortByDesc('registration_date')->first();
 
                 if ($latestEnrollment) {
+                    // The column is `transport_id`; a custom pickup point is stored as a
+                    // pickup_points row, the same way the registration form does it.
+                    $pickupPointId = $request->pickup_point_id ?? $latestEnrollment->pickup_point_id;
+                    if (!$request->pickup_point_id && $request->filled('pickup_point_custom')) {
+                        $pickupPointId = PickupPoint::firstOrCreate(['name' => trim($request->pickup_point_custom)])->pickup_point_id;
+                    }
+
                     $latestEnrollment->fill([
                         'residence_id'          => $request->residence_id ?? $latestEnrollment->residence_id,
-                        'transportation_id'     => $request->transportation_id ?? $latestEnrollment->transportation_id,
-                        'pickup_point_id'       => $request->pickup_point_id ?? $latestEnrollment->pickup_point_id,
-                        'pickup_point_custom'   => $request->pickup_point_custom ?? $latestEnrollment->pickup_point_custom,
+                        'transport_id'          => $request->transportation_id ?? $latestEnrollment->transport_id,
+                        'pickup_point_id'       => $pickupPointId,
                         'residence_hall_policy' => $request->residence_hall_policy ?? $latestEnrollment->residence_hall_policy,
                         'transportation_policy' => $request->transportation_policy ?? $latestEnrollment->transportation_policy,
                         'major_id'              => $request->major_id ?? $latestEnrollment->major_id,
@@ -1094,9 +1067,8 @@ class StudentController extends Controller
                 } else {
                     $student->enrollments()->create([
                         'residence_id'          => $request->residence_id,
-                        'transportation_id'     => $request->transportation_id,
+                        'transport_id'          => $request->transportation_id,
                         'pickup_point_id'       => $request->pickup_point_id,
-                        'pickup_point_custom'   => $request->pickup_point_custom,
                         'residence_hall_policy' => $request->residence_hall_policy,
                         'transportation_policy' => $request->transportation_policy,
                         'major_id'              => $request->major_id,
@@ -1257,6 +1229,139 @@ class StudentController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    private const ADDRESS_COLUMNS = ['street', 'rt', 'rw', 'village', 'district', 'city_regency', 'province', 'other'];
+
+    private const PARENT_COLUMNS = [
+        'father_name', 'father_company', 'father_occupation', 'father_phone', 'father_email',
+        'mother_name', 'mother_company', 'mother_occupation', 'mother_phone', 'mother_email',
+    ];
+
+    /**
+     * Writes the address, parent and guardian fields of a profile edit to the rows that
+     * belong to $enrollment. The form uses prefixed names (father_address_street,
+     * guardian_phone, ...) that do not match the table columns, so each field is mapped
+     * explicitly. Only fields present in $validated are written.
+     *
+     * Returns the changed values, keyed as "<table>.<column>", for the audit log.
+     */
+    private function updateEnrollmentContactData(Student $student, Enrollment $enrollment, array $validated): array
+    {
+        $enrollmentId = $enrollment->enrollment_id;
+        $changes = [];
+
+        $pick = function (array $columnToField) use ($validated): array {
+            $values = [];
+            foreach ($columnToField as $column => $field) {
+                if (array_key_exists($field, $validated)) {
+                    $values[$column] = $validated[$field];
+                }
+            }
+            return $values;
+        };
+        $addressFields = function (string $prefix): array {
+            return array_combine(
+                self::ADDRESS_COLUMNS,
+                array_map(fn ($column) => $prefix . $column, self::ADDRESS_COLUMNS)
+            );
+        };
+
+        // Student address
+        $values = $pick($addressFields(''));
+        if ($values) {
+            $address = StudentAddress::firstOrNew(['enrollment_id' => $enrollmentId], ['id' => $student->id]);
+            $changes += $this->saveChanges($address, $values, 'student_address');
+        }
+
+        // Parents and their addresses
+        $parentValues = $pick(array_combine(self::PARENT_COLUMNS, self::PARENT_COLUMNS));
+        $fatherAddress = $pick($addressFields('father_address_'));
+        $motherAddress = $pick($addressFields('mother_address_'));
+
+        if ($parentValues || $fatherAddress || $motherAddress) {
+            $parent = StudentParent::firstOrNew(['enrollment_id' => $enrollmentId], ['id' => $student->id]);
+            $changes += $this->saveChanges($parent, $parentValues, 'parent');
+
+            foreach ([[FatherAddress::class, $fatherAddress, 'father_address'], [MotherAddress::class, $motherAddress, 'mother_address']] as [$model, $values, $label]) {
+                if ($values) {
+                    $row = $model::firstOrNew(['enrollment_id' => $enrollmentId]);
+                    $values['parent_id'] = $parent->parent_id;
+                    $changes += $this->saveChanges($row, $values, $label);
+                }
+            }
+        }
+
+        // Guardian and guardian address
+        $guardianValues = $pick([
+            'guardian_name'       => 'guardian_name',
+            'relation_to_student' => 'relation_to_student',
+            'phone_number'        => 'guardian_phone',
+            'guardian_email'      => 'guardian_email',
+        ]);
+        $guardianAddress = $pick($addressFields('guardian_address_'));
+
+        if ($guardianValues || $guardianAddress) {
+            $link = StudentGuardian::where('enrollment_id', $enrollmentId)->first();
+            $guardian = $link && $link->guardian_id ? Guardian::find($link->guardian_id) : null;
+
+            // A guardian row shared with another enrollment is copied first, so editing
+            // this enrollment does not change the other one.
+            if ($guardian && StudentGuardian::where('guardian_id', $guardian->guardian_id)->where('enrollment_id', '<>', $enrollmentId)->exists()) {
+                $copy = $guardian->replicate();
+                $copy->save();
+                if ($guardian->guardianAddress) {
+                    $addressCopy = $guardian->guardianAddress->replicate();
+                    $addressCopy->guardian_id = $copy->guardian_id;
+                    $addressCopy->save();
+                }
+                $link->guardian_id = $copy->guardian_id;
+                $link->save();
+                $guardian = $copy;
+            }
+
+            $hasAnyValue = collect($guardianValues + $guardianAddress)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty();
+
+            if (!$guardian && $hasAnyValue) {
+                $guardian = new Guardian();
+                $guardian->save();
+                if ($link) {
+                    $link->guardian_id = $guardian->guardian_id;
+                    $link->save();
+                } else {
+                    StudentGuardian::create([
+                        'id'            => $student->id,
+                        'guardian_id'   => $guardian->guardian_id,
+                        'enrollment_id' => $enrollmentId,
+                    ]);
+                }
+            }
+
+            if ($guardian) {
+                $changes += $this->saveChanges($guardian, $guardianValues, 'guardian');
+                if ($guardianAddress) {
+                    $row = GuardianAddress::firstOrNew(['guardian_id' => $guardian->guardian_id]);
+                    $changes += $this->saveChanges($row, $guardianAddress, 'guardian_address');
+                }
+            }
+        }
+
+        return $changes;
+    }
+
+    /** Fills and saves the model when something changed; returns the changed values. */
+    private function saveChanges($model, array $values, string $label): array
+    {
+        $model->fill($values);
+
+        if (!$model->exists || $model->isDirty()) {
+            $dirty = collect($model->getDirty())->only(array_keys($values))->except(['parent_id']);
+            $model->save();
+
+            return $dirty->mapWithKeys(fn ($value, $column) => ["{$label}.{$column}" => $value])->all();
+        }
+
+        return [];
     }
 
     public function getStudentHistoryDates($id)
