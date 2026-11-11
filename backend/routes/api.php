@@ -16,8 +16,10 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\StudentsSyncController;
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/reset-login', [AuthController::class, 'resetLogin']);
+Route::middleware('throttle:login')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/reset-login', [AuthController::class, 'resetLogin']);
+});
 
 Route::get('/storage-file/{path}', [StorageController::class, 'serveFile'])
     ->where('path', '.*')
@@ -95,7 +97,7 @@ Route::middleware(['auth:sanctum', 'lifetime', 'role:admin,registrar,head_regist
     Route::get('/analytics', [AnalyticsController::class, 'index']);
 });
 
-Route::prefix('v1/sync')->group(function () {
+Route::prefix('v1/sync')->middleware(['sync.key', 'throttle:60,1'])->group(function () {
     Route::get('/students', [StudentsSyncController::class, 'index']);
 });
 ?>

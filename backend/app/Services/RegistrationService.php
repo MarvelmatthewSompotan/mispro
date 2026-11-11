@@ -313,6 +313,10 @@ class RegistrationService
                         throw new Exception('Old student data not found', 404);
                     }
 
+                    if ($oldStudent->studentold_id && Student::where('student_id', $oldStudent->studentold_id)->exists()) {
+                        throw new Exception('This student already has a record in the current database. Please select the student from the current student list instead of the old database.', 422);
+                    }
+
                     $generatedId = $this->generateStudentId(
                         $draft->school_year_id,  
                         $validated['section_id'], 

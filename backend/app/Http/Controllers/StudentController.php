@@ -154,7 +154,7 @@ class StudentController extends Controller
             } else {
                 foreach ($sorts as $sort) {
                     $field = $sort['field'] ?? null;
-                    $order = strtolower($sort['order'] ?? 'asc');
+                    $order = strtolower($sort['order'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
     
                     if (!$field || !array_key_exists($field, $sortable)) continue;
     
@@ -167,7 +167,7 @@ class StudentController extends Controller
             }
     
             // Pagination
-            $perPage = $request->input('per_page', 25);
+            $perPage = min(max((int) $request->input('per_page', 25), 1), 100);
             $students= $query->paginate($perPage);
     
             // Transform data (photo_url)
@@ -454,6 +454,13 @@ class StudentController extends Controller
                         'section_id',
                         DB::raw("'old' as source")
                     )
+                    // A student who already has a record in `students` must be re-registered from
+                    // that record; offering the old-database entry again would create a second record.
+                    ->whereNotExists(function ($query) {
+                        $query->select(DB::raw(1))
+                            ->from('students')
+                            ->whereColumn('students.student_id', 'student_old_table.studentold_id');
+                    })
                     ->where(function ($query) use ($keyword) {
                         $query->where('studentold_id', 'like', "%$keyword%")
                             ->orWhere('first_name', 'like', "%$keyword%")
@@ -995,7 +1002,11 @@ class StudentController extends Controller
 
             if ($request->hasFile('photo')) {
                 $timestamp = now()->format('Y-m-d_H-i-s');
-                $extension = $request->file('photo')->getClientOriginalExtension();
+                // Extension is derived from the file content, never from the client-supplied name.
+                $extension = $request->file('photo')->extension();
+                if (!in_array($extension, ['jpg', 'jpeg', 'png'], true)) {
+                    $extension = 'jpg';
+                }
                 $fileName = "{$timestamp}.{$extension}";
                 $folder = "students/{$student->student_id}";
                 $photoPath = $request->file('photo')->storeAs($folder, $fileName, 'public');
