@@ -679,7 +679,8 @@ class RegistrationService
             ]
         );
         
-        $student->studentParent()->updateOrCreate(
+        // Keep the parent row of THIS enrollment: the parent addresses must be attached to it.
+        $studentParent = $student->studentParent()->updateOrCreate(
             [
                 'id' => $student->id,
                 'enrollment_id' => $enrollment->enrollment_id, 
@@ -698,15 +699,18 @@ class RegistrationService
             ]
         );
         
-        $this->updateParentAddresses($student, $validated, $enrollment);
+        $this->updateParentAddresses($studentParent, $validated, $enrollment);
         $this->updateGuardianData($student, $validated, $enrollment);
         $this->updatePayment($student, $validated, $enrollment);
     }
 
-    protected function updateParentAddresses($student, $validated, $enrollment)
+    /**
+     * @param StudentParent $studentParent the parent row of $enrollment. Do not use
+     *        $student->studentParent here: that relation returns the student's first parent
+     *        row, which belongs to an earlier enrollment on a re-registration.
+     */
+    protected function updateParentAddresses($studentParent, $validated, $enrollment)
     {
-        $studentParent = $student->studentParent;
-        
         if ($studentParent) {
             $studentParent->fatherAddress()->updateOrCreate(
                 [
