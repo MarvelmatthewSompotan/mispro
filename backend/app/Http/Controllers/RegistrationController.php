@@ -390,20 +390,48 @@ class RegistrationController extends Controller
             
         } catch (\Exception $e) {
             DB::rollback();
+
+            // Rejections raised on purpose by RegistrationService (duplicate student, wrong
+            // section, ...) are meant for the registrar. Return their message in `message`
+            // and in `error` (the registration popup matches on `error`) whatever APP_DEBUG is.
+            if ($status = $this->clientErrorStatus($e)) {
+                Log::warning('Registration Store Rejected: ' . $e->getMessage(), ['draft_id' => $draft_id]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'error'   => $e->getMessage(),
+                ], $status);
+            }
+
             Log::error('Registration Store Error: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            $statusCode = $e->getCode() && is_numeric($e->getCode()) && $e->getCode() >= 400 ? $e->getCode() : 500;
-            
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Registration failed due to a server error.',
                 'error' => config('app.debug') ? $e->getMessage() : null,
-            ], $statusCode);
+            ], 500);
         }
+    }
+
+    /**
+     * HTTP status for an exception thrown on purpose with a 4xx code, or null for
+     * anything else. Database exceptions carry an SQLSTATE such as "22001" as their
+     * code, which must never be used as an HTTP status.
+     */
+    private function clientErrorStatus(\Throwable $e): ?int
+    {
+        if ($e instanceof \Illuminate\Database\QueryException || $e instanceof \PDOException) {
+            return null;
+        }
+
+        $code = $e->getCode();
+
+        return (is_int($code) && $code >= 400 && $code < 500) ? $code : null;
     }
 
     // Preview
@@ -474,16 +502,17 @@ class RegistrationController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            $statusCode = $e->getCode() && is_numeric($e->getCode()) && $e->getCode() >= 400 ? $e->getCode() : 500;
-            
-            $clientMessage = ($statusCode >= 400 && $statusCode < 500) 
-            ? $e->getMessage() 
-            : 'Failed to cancel registration (Internal Server Error).';
+            $clientStatus = $this->clientErrorStatus($e);
+            $statusCode = $clientStatus ?? 500;
+
+            $clientMessage = $clientStatus
+                ? $e->getMessage()
+                : 'Failed to cancel registration (Internal Server Error).';
 
             return response()->json([
                 'success' => false,
                 'message' => $clientMessage,
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'error' => $clientStatus || config('app.debug') ? $e->getMessage() : null,
             ], $statusCode);
         }
     }
