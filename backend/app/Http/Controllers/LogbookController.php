@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Log;
 class LogbookController extends Controller
 {
     public function index (Request $request) {
+        if ($invalid = $this->invalidLogbookQuery($request)) {
+            return $invalid;
+        }
+
         try {
             $currentMonth = now()->month;
             $currentYear = now()->year;
@@ -458,6 +462,10 @@ class LogbookController extends Controller
     }
 
     public function export (Request $request) {
+        if ($invalid = $this->invalidLogbookQuery($request)) {
+            return $invalid;
+        }
+
         try {
             $currentMonth = now()->month;
             $currentYear = now()->year;
@@ -889,5 +897,16 @@ class LogbookController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    /** Same query parameters for the list and the export. */
+    private function invalidLogbookQuery(Request $request)
+    {
+        return $this->invalidListQuery(
+            $request,
+            ['search_name', 'search_family_rank', 'search_religion', 'search_country', 'search_father', 'search_mother'],
+            ['start_date', 'end_date'],
+            true
+        );
     }
 }
