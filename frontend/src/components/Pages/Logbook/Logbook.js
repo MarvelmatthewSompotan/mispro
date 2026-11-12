@@ -44,6 +44,9 @@ const INITIAL_HEADERS = [
   "Photo",
   "Student ID",
   "Full Name",
+  "First Name",
+  "Middle Name",
+  "Last Name",
   "Grade",
   "Section",
   "Major",
@@ -71,12 +74,18 @@ const INITIAL_HEADERS = [
   "KITAS",
 ];
 
+// Name parts a student does not have stay empty instead of showing "-".
+const BLANK_WHEN_EMPTY = new Set(["First Name", "Middle Name", "Last Name"]);
+
 const REFRESH_INTERVAL = 5000;
 
 const HEADER_KEY_MAP = {
   Photo: "photo_url",
   "Student ID": "student_id",
   "Full Name": "full_name",
+  "First Name": "first_name",
+  "Middle Name": "middle_name",
+  "Last Name": "last_name",
   Grade: "grade",
   Section: "section",
   Major: "major",
@@ -107,6 +116,9 @@ const HEADER_KEY_MAP = {
 const SORT_CONFIG_MAP = {
   "Student ID": "student_id",
   "Full Name": "full_name",
+  "First Name": "first_name",
+  "Middle Name": "middle_name",
+  "Last Name": "last_name",
   Grade: "grade",
   Section: "section",
   Major: "major",
@@ -591,7 +603,7 @@ const Logbook = () => {
                             key={header}
                             className={isSelected ? styles.selectedCell : ""}
                           >
-                            {item[dataKey] || "-"}
+                            {item[dataKey] || (BLANK_WHEN_EMPTY.has(header) ? "" : "-")}
                           </td>
                         );
                       })}
