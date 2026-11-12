@@ -218,6 +218,9 @@ class LogbookController extends Controller
             $sortable = [
                 'student_id',
                 'full_name',
+                'first_name',
+                'middle_name',
+                'last_name',
                 'grade',
                 'section',
                 'major',
@@ -427,7 +430,10 @@ class LogbookController extends Controller
                     'photo' => $photoPath,
                     'photo_url' => $photoUrl,
                     'student_id' => $student->student_id,
-                    'full_name' => trim("{$student->first_name} {$student->middle_name} {$student->last_name}"),
+                    'full_name' => $this->joinNameParts($student),
+                    'first_name' => $this->namePart($student->first_name),
+                    'middle_name' => $this->namePart($student->middle_name),
+                    'last_name' => $this->namePart($student->last_name),
                     'grade' => $enrollment?->schoolClass?->grade,
                     'section' => $enrollment?->section?->name,
                     'major' => $enrollment?->major?->name,
@@ -689,6 +695,9 @@ class LogbookController extends Controller
             $sortable = [
                 'student_id',
                 'full_name',
+                'first_name',
+                'middle_name',
+                'last_name',
                 'grade',
                 'section',
                 'major',
@@ -895,7 +904,10 @@ class LogbookController extends Controller
                     'photo' => $photoPath,
                     'photo_url' => $photoUrl,
                     'student_id' => $student->student_id,
-                    'full_name' => trim("{$student->first_name} {$student->middle_name} {$student->last_name}"),
+                    'full_name' => $this->joinNameParts($student),
+                    'first_name' => $this->namePart($student->first_name),
+                    'middle_name' => $this->namePart($student->middle_name),
+                    'last_name' => $this->namePart($student->last_name),
                     'grade' => $enrollment?->schoolClass?->grade,
                     'section' => $enrollment?->section?->name,
                     'major' => $enrollment?->major?->name,
@@ -941,6 +953,28 @@ class LogbookController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    /**
+     * One part of a student's name for display. Missing parts and placeholders typed
+     * into the form ("-", "NULL", "N/A") come back as an empty string, so the table and
+     * the export show an empty cell.
+     */
+    private function namePart($value): string
+    {
+        $value = trim((string) $value);
+
+        return in_array(strtoupper($value), ['-', 'NULL', 'N/A', 'NA', '.'], true) ? '' : $value;
+    }
+
+    /** Full name from the parts that are filled in, separated by single spaces. */
+    private function joinNameParts($student): string
+    {
+        return implode(' ', array_filter([
+            $this->namePart($student->first_name),
+            $this->namePart($student->middle_name),
+            $this->namePart($student->last_name),
+        ], fn ($part) => $part !== ''));
     }
 
     /** Same query parameters for the list and the export. */
