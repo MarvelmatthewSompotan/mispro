@@ -43,6 +43,10 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
+        if ($invalid = $this->invalidListQuery($request, ['search', 'search_name'], [], true)) {
+            return $invalid;
+        }
+
         try {
             $currentMonth = now()->month;
             $currentYear = now()->year;
@@ -434,6 +438,10 @@ class StudentController extends Controller
 
     public function searchStudents(Request $request)
     {
+        if ($invalid = $this->invalidListQuery($request, ['search'])) {
+            return $invalid;
+        }
+
         try {
             $keyword = $request->input('search');
             if (!$keyword) {

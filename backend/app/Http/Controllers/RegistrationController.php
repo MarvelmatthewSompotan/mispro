@@ -26,6 +26,10 @@ class RegistrationController extends Controller
 
     public function index(Request $request)
     {
+        if ($invalid = $this->invalidListQuery($request, ['search', 'search_id', 'search_name'], ['start_date', 'end_date'], true)) {
+            return $invalid;
+        }
+
         try {
             $query = Enrollment::query()
                 ->select(
@@ -451,6 +455,11 @@ class RegistrationController extends Controller
                 'data' => $snapshot
             ], 200, [], JSON_PRETTY_PRINT);
 
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration version not found.',
+            ], 404);
         } catch (\Exception $e) {
             Log::error('Preview Failed Error: ' . $e->getMessage(), [
                 'application_id' => $applicationId,
@@ -519,6 +528,15 @@ class RegistrationController extends Controller
 
     public function getCancelledRegistrations(Request $request)
     {
+        $invalid = $this->invalidListQuery(
+            $request,
+            ['search', 'filter_name', 'filter_notes', 'sort_by', 'sort_order'],
+            ['reg_start_date', 'reg_end_date', 'cancel_start_date', 'cancel_end_date']
+        );
+        if ($invalid) {
+            return $invalid;
+        }
+
         try {
             $query = CancelledRegistrationView::query();
     
@@ -573,7 +591,7 @@ class RegistrationController extends Controller
     
             // Sort
             $sortField = $request->input('sort_by', 'cancelled_at');
-            $sortOrder = $request->input('sort_order', 'desc');     
+            $sortOrder = strtolower((string) $request->input('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
     
             $allowedSorts = ['full_name', 'registration_date', 'cancelled_at', 'school_year', 'section', 'student_status', 'notes'];
     

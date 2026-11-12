@@ -76,8 +76,10 @@ class RegistrationService
     {
         \Log::info('Registration store called', [
             'draft_id' => $draft_id,
-            'request_data' => $validated,
-            'user_id' => $userId
+            'user_id' => $userId,
+            'source' => $source,
+            'student_status' => $validated['student_status'] ?? null,
+            'student_id' => $validated['student_id'] ?? null,
         ]);
 
         DB::beginTransaction();

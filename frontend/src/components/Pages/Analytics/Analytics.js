@@ -626,7 +626,6 @@ const Analytics = () => {
     const modes = ['pre_register', 'daily', 'yearly'];
     const currentIndex = modes.indexOf(regMode);
     const nextIndex = (currentIndex + 1) % modes.length;
-    console.log('Tombol Reg diklik. Mode baru:', modes[nextIndex]);
     setRegMode(modes[nextIndex]);
   };
 
@@ -635,7 +634,6 @@ const Analytics = () => {
     const levels = ['All', 'ECP', 'Elementary', 'Middle', 'High'];
     const currentIndex = levels.indexOf(servedLevel);
     const nextIndex = (currentIndex + 1) % levels.length;
-    console.log('Tombol Served diklik. Level baru:', levels[nextIndex]);
     setServedLevel(levels[nextIndex]);
   };
 
