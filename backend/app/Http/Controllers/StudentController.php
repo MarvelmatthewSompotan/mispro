@@ -974,7 +974,14 @@ class StudentController extends Controller
             ]);
             
             $auditChanges = [];
-            
+
+            // The form leaves the country empty for Indonesian students; store Indonesia.
+            $citizenship = $validated['citizenship'] ?? $student->citizenship;
+            $country = array_key_exists('country', $validated) ? $validated['country'] : $student->country;
+            if ($citizenship === 'Indonesia' && trim((string) $country) === '') {
+                $validated['country'] = 'Indonesia';
+            }
+
             // Update student
             $studentData = collect($validated)->except(['academic_status', 'academic_status_other'])->toArray();
 
@@ -1171,6 +1178,10 @@ class StudentController extends Controller
 
             $newRequestData = array_merge($oldRequestData, $validated);
             unset($newRequestData['photo']);
+
+            if (($newRequestData['citizenship'] ?? null) === 'Indonesia' && trim((string) ($newRequestData['country'] ?? '')) === '') {
+                $newRequestData['country'] = $student->country ?: 'Indonesia';
+            }
 
             $newRequestData['student_active'] = $student->active;
             unset($newRequestData['active']);

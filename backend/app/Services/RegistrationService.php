@@ -860,7 +860,13 @@ class RegistrationService
         ]);
 
         unset($newRequestData['photo']);
-        
+
+        // The form sends an empty country for Indonesian students; the students table
+        // already stores Indonesia, so the snapshot (shown on the profile) should too.
+        if (($newRequestData['citizenship'] ?? null) === 'Indonesia' && trim((string) ($newRequestData['country'] ?? '')) === '') {
+            $newRequestData['country'] = 'Indonesia';
+        }
+
         if ($student->photo_path) {
             $newRequestData['photo_path'] = $student->photo_path;
             $newRequestData['photo_url']  = asset('storage/' . $student->photo_path);
