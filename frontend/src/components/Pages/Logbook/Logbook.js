@@ -55,6 +55,7 @@ const INITIAL_HEADERS = [
   "Place DOB",
   "Age",
   "Religion",
+  "Citizenship",
   "Country",
   "Address",
   "Phone",
@@ -85,6 +86,7 @@ const HEADER_KEY_MAP = {
   "Place DOB": "place_dob",
   Age: "age",
   Religion: "religion",
+  Citizenship: "citizenship",
   Country: "country",
   Address: "address",
   Phone: "phone",
@@ -110,6 +112,7 @@ const SORT_CONFIG_MAP = {
   "Family Rank": "family_rank",
   Age: "age",
   Religion: "religion",
+  Citizenship: "citizenship",
   Country: "country",
   "Father Name": "father_name",
   "Father Occupation": "father_occupation",
@@ -122,6 +125,13 @@ const FILTER_CONFIG_MAP = {
   "Family Rank": { type: "search", apiKeys: ["search_family_rank"] },
   Religion: { type: "search", apiKeys: ["search_religion"] },
   Country: { type: "search", apiKeys: ["search_country"] },
+  Citizenship: {
+    type: "checkbox",
+    apiKeys: ["citizenships"],
+    optionsKey: "citizenships",
+    valueKey: "id",
+    labelKey: "name",
+  },
   "Father Name": { type: "search", apiKeys: ["search_father"] },
   "Mother Name": { type: "search", apiKeys: ["search_mother"] },
 
@@ -226,6 +236,10 @@ const Logbook = () => {
     genders: [
       { id: "MALE", name: "Male" },
       { id: "FEMALE", name: "Female" },
+    ],
+    citizenships: [
+      { id: "Indonesia", name: "Indonesia" },
+      { id: "Non Indonesia", name: "Non Indonesia" },
     ],
   });
   const [columns, setColumns] = useState(INITIAL_HEADERS);

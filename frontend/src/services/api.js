@@ -253,6 +253,7 @@ export const getLogbook = ({
   sections = [],
   school_years = [],
   genders = [],
+  citizenships = [],
   transportations = [],
   start_date = '',
   end_date = '',
@@ -286,6 +287,9 @@ export const getLogbook = ({
   (Array.isArray(genders) ? genders : []).forEach((v) =>
     params.append('genders[]', v)
   );
+  (Array.isArray(citizenships) ? citizenships : []).forEach((v) =>
+    params.append('citizenships[]', v)
+  );
   (Array.isArray(transportations) ? transportations : []).forEach((v) =>
     params.append('transportations[]', v)
   );
@@ -315,6 +319,7 @@ export const getLogbookForExport = ({
   sections = [],
   school_years = [],
   genders = [],
+  citizenships = [],
   transportations = [],
   start_date = '',
   end_date = '',
@@ -343,6 +348,9 @@ export const getLogbookForExport = ({
   );
   (Array.isArray(genders) ? genders : []).forEach((v) =>
     params.append('genders[]', v)
+  );
+  (Array.isArray(citizenships) ? citizenships : []).forEach((v) =>
+    params.append('citizenships[]', v)
   );
   (Array.isArray(transportations) ? transportations : []).forEach((v) =>
     params.append('transportations[]', v)

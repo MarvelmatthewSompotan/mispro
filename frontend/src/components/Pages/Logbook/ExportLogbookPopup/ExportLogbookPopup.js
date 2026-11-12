@@ -58,6 +58,7 @@ const HEADER_KEY_MAP = {
   "Place DOB": "place_dob",
   Age: "age",
   Religion: "religion",
+  Citizenship: "citizenship",
   Country: "country",
   Address: "address",
   Phone: "phone",

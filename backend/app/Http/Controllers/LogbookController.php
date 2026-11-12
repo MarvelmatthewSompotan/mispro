@@ -179,6 +179,10 @@ class LogbookController extends Controller
                 $studentsQuery->whereIn('gender', (array)$genders);
             }
 
+            if ($citizenships = $request->input('citizenships')) {
+                $studentsQuery->whereIn('students.citizenship', (array)$citizenships);
+            }
+
             if ($transportations = $request->input('transportations')) {
                 if (!$joinMap['transportations']) {
                     $studentsQuery->leftJoin('transportations', 'e_join.transport_id', '=', 'transportations.transport_id');
@@ -215,6 +219,7 @@ class LogbookController extends Controller
                 'family_rank',
                 'age',
                 'religion',
+                'citizenship',
                 'country',
                 'father_name',
                 'father_occupation',
@@ -420,6 +425,7 @@ class LogbookController extends Controller
                     'place_dob' => "{$student->place_of_birth}, {$student->date_of_birth}",
                     'age' => $student->age,
                     'religion' => $student->religion,
+                    'citizenship' => $student->citizenship,
                     'country' => $student->country,
                     'address' => $address,
                     'phone' => $student->phone_number,
@@ -628,6 +634,10 @@ class LogbookController extends Controller
                 $studentsQuery->whereIn('gender', (array)$genders);
             }
 
+            if ($citizenships = $request->input('citizenships')) {
+                $studentsQuery->whereIn('students.citizenship', (array)$citizenships);
+            }
+
             if ($transportations = $request->input('transportations')) {
                 if (!$joinMap['transportations']) {
                     $studentsQuery->leftJoin('transportations', 'e_join.transport_id', '=', 'transportations.transport_id');
@@ -664,6 +674,7 @@ class LogbookController extends Controller
                 'family_rank',
                 'age',
                 'religion',
+                'citizenship',
                 'country',
                 'father_name',
                 'father_occupation',
@@ -866,6 +877,7 @@ class LogbookController extends Controller
                     'place_dob' => "{$student->place_of_birth}, {$student->date_of_birth}",
                     'age' => $student->age,
                     'religion' => $student->religion,
+                    'citizenship' => $student->citizenship,
                     'country' => $student->country,
                     'address' => $address,
                     'phone' => $student->phone_number,
