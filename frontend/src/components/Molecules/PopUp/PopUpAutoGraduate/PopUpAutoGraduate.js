@@ -71,7 +71,6 @@ const AutoGraduatePopup = ({ onClose, onSuccess }) => {
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (!isConfirmOpen && !isSuccessOpen) {
-        console.log("Auto refreshing popup data...");
         fetchData(true);
       }
     }, REFRESH_INTERVAL);

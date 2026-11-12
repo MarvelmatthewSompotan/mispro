@@ -338,7 +338,6 @@ const Logbook = () => {
   }, [filters, sorts, fetchLogbookData]);
   useEffect(() => {
     const refreshData = () => {
-      console.log("Auto refreshing logbook data (background)...");
       fetchLogbookData(currentPage, { isBackgroundRefresh: true });
     };
 

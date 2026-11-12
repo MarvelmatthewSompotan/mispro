@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, getMe, resetLogin } from "../../../services/api";
 import Button from "../../Atoms/Button/Button";
@@ -73,10 +73,6 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log("LoginPage mounted - URL:", window.location.pathname);
-  }, []);
 
   const toggleMode = (e, mode) => {
     e.preventDefault();
